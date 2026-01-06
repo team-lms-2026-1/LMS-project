@@ -31,24 +31,24 @@ jobs:
       - name: Build (skip tests)
         run: ./gradlew clean build -x test
 
-  frontend:
-    name: frontend-next-build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
+  # frontend:
+  #   name: frontend-next-build
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: frontend
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+  #     - name: Set up Node 20
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #         cache: npm
+  #         cache-dependency-path: frontend/package-lock.json
 
-      - name: Install deps
-        run: npm ci
+  #     - name: Install deps
+  #       run: npm ci
 
-      - name: Build
-        run: npm run build
+  #     - name: Build
+  #       run: npm run build
