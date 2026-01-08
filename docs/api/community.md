@@ -1,9 +1,11 @@
 ## 1. 커뮤니티
 
-# 1) 공지사항 (Notice)
+## 공통 항목
 
-## 1-1. 카테고리 조회
-GET `/notices/categories`
+# 카테고리 ( 공지 : notice , 자료실 : resources, FAQ : faq, Q&A : qna )
+
+## 1-1. 카테고리 목록 조회
+GET `/notices/categories?page=1&size=20`
 
 Response
 {
@@ -11,44 +13,10 @@ Response
     {
       "categoryId": 1,
       "name": "일반",
+      "postCount" : 12,
       "bgColorHex": "#EEF2FF",
       "textColorHex": "#1E3A8A",
       "createdAt": "2026-01-01T09:00:00",
-      "updatedAt": "2026-01-02T09:00:00"
-    }
-  ],
-  "meta": {}
-}
-
----
-
-## 1-2. 목록
-Query
-- `categoryId?` (카테고리 필터)
-- `keyword?` (제목 검색)
-- `page?` (default 1)
-- `size?` (default 20)
-
-GET `/notices?categoryId=1&keyword=점검&page=1&size=20`
-
-Response
-{
-  "data": [
-    {
-      "noticeId": 101,
-      "category": {
-        "categoryId": 1,
-        "name": "일반",
-        "bgColorHex": "#EEF2FF",
-        "textColorHex": "#1E3A8A"
-      },
-      "title": "시스템 점검 안내",
-      "viewCount": 123,
-      "postStartAt": "2026-01-07T09:00:00",
-      "postEndAt": null,
-      "author": { "accountId": 9001, "name": "관리자A" },
-      "createdAt": "2026-01-06T12:00:00",
-      "updatedAt": "2026-01-07T08:00:00"
     }
   ],
   "meta": {
@@ -62,9 +30,79 @@ Response
   }
 }
 
----
+## 1-2. 카테고리 목록 수정
+PATCH `/notices/categories/{categoryId}`
 
-## 1-3. 상세 (+첨부)  ※ 조회수 증가
+Request
+
+{
+    "name": "카테고리명",
+    "bgColorHex": "#EEF2FF",
+    "textColorHex": "#1E3A8A",
+}
+
+Response
+
+{
+  "data": {
+    "name": "카테고리명",
+    "bgColorHex": "#EEF2FF",
+    "textColorHex": "#1E3A8A",
+   },
+  "meta": {
+  }
+}
+
+## 1-3. 카테고리 삭제
+DELETE `/notices/categories/{categoryId}`
+
+Request
+
+empty
+
+Response
+
+
+{
+  "data": {
+    "deleted": true
+   },
+  "meta": {
+  }
+}
+
+# 2. 공지사항 (Notice)
+
+## 2-1. 목록
+GET `/notices/categories?page=1&size=20`
+
+Response
+{
+  "data": {
+    "noticeId": 101,
+    "category": {
+      "categoryId": 1,
+      "name": "카테고리명",
+      "bgColorHex": "#EEF2FF",
+      "textColorHex": "#1E3A8A"
+    },
+    "title": "시스템 점검 안내",
+    "content": "<p>...</p>",
+    "viewCount": 124,
+    "createdAt": "2026-01-06T12:00:00",
+  },
+  "meta": {
+    "page": 1,
+    "size": 20,
+    "totalElements": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrev": false,
+    "sort": ["createdAt,desc"]
+  }
+}
+
+## 2-2. 상세 (+첨부)  ※ 조회수 증가
 GET `/notices/{noticeId}`
 
 Response
@@ -80,9 +118,6 @@ Response
     "title": "시스템 점검 안내",
     "content": "<p>...</p>",
     "viewCount": 124,
-    "postStartAt": "2026-01-07T09:00:00",
-    "postEndAt": null,
-    "author": { "accountId": 9001, "name": "관리자A" },
     "attachments": [
       {
         "fileId": 501,
