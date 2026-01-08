@@ -34,6 +34,7 @@ git pull origin main
 - `feature/frontend-login-ui`
 - `fix/backend-docker`
 - `chore/ci-update`
+- `docs/community`
 
 ```bash
 git checkout -b feature/your-task-name
