@@ -53,7 +53,7 @@ git diff
 ### 2-4. add / commit
 
 ```bash
-git add .
+git add -A
 git commit -m "feat: add health endpoint"
 ```
 
@@ -168,7 +168,7 @@ docker compose -f infra/docker-compose.local.yml down
 ### 6-2. Health Check
 
 ```
-GET http://localhost:8080/api/health
+GET http://localhost:8080/health
 ```
 
 ---
