@@ -1,0 +1,54 @@
+# --- [1. 공통 설정 (모든 환경 적용)] ---
+spring:
+  application:
+    name: backend
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true # 로그에 찍히는 SQL 예쁘게 정렬
+  
+  # Flyway 설정 (DB 형상 관리)
+  flyway:
+    enabled: true
+    baseline-on-migrate: true # 기존 데이터가 있어도 Flyway 적용
+
+---
+# --- [2. 로컬 개발 환경 (내 컴퓨터)] ---
+spring:
+  config:
+    activate:
+      on-profile: local # 프로필 이름: local
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/team_lms
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    # ⚠️ 중요: Flyway를 쓰면 ddl-auto는 'validate'로 바꿔야 안전합니다.
+    # 하지만 로컬에서 편하게 개발하려면 잠시 update로 둬도 됩니다.
+    # 정석은 'validate'로 두고 SQL 파일로만 테이블을 수정하는 것입니다.
+    hibernate:
+      ddl-auto: update 
+    show-sql: true
+
+---
+# --- [3. 배포 환경 (EC2 + RDS)] ---
+spring:
+  config:
+    activate:
+      on-profile: prod # 프로필 이름: prod
+  
+  datasource:
+    # GitHub Actions가 넣어줄 값들 (보안 처리)
+    url: jdbc:postgresql://${RDS_ENDPOINT}:5432/postgres  # RDS 초기 DB명
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate # 배포 환경에서는 절대 테이블을 맘대로 바꾸면 안 됨 (Flyway가 관리)
+    show-sql: false # 운영 서버 로그 절약
