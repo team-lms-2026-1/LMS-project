@@ -42,29 +42,27 @@ jobs:
         target: "/home/${{ secrets.USERNAME }}/app"
         strip_components: 3 # backend/build/libs/ 경로 떼고 파일만 전송
 
-    # EC2에 접속해서 서버 실행
-    - name: Execute Server on EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST_PROD }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        timeout: 30m
-        command_timeout: 30m
-        script: |
-           # --- [1. 메모리 부족 해결: Swap 설정] ---
-            # 1-1. Swap 파일이 없으면 생성 (지난번에 성공했으므로 이번엔 건너뜀)
-            if [ ! -f /swapfile ]; then
-              sudo dd if=/dev/zero of=/swapfile bs=128M count=16
-              sudo chmod 600 /swapfile
-              sudo mkswap /swapfile
-              echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
+    # 6. EC2에 접속해서 서버 실행
+      - name: Execute Server on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_PROD }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          timeout: 30m
+          command_timeout: 30m
+          script: |
+            # --- [1. Swap 설정 (스마트 체크)] ---
+            # 이미 Swap이 적용되어 있는지 확인 (/proc/swaps 파일 조회)
+            if grep -q "swapfile" /proc/swaps; then
+              echo "Swap is already active. Skipping..."
+            else
+              echo "Enabling Swap..."
+              sudo swapon /swapfile || true
             fi
-            
-            # 1-2. Swap 활성화 (중요: 파일이 있어도 스왑이 꺼져있을 수 있으므로 강제 활성화)
-            sudo swapon /swapfile || true
 
             # --- [2. 기존 서버 종료] ---
+            # 실행 중인 자바가 있으면 강제 종료 (없으면 에러 없이 넘어감)
             pgrep -f java | xargs -r kill -9
             sleep 5
             
@@ -72,16 +70,17 @@ jobs:
             mkdir -p /home/${{ secrets.USERNAME }}/app
             cd /home/${{ secrets.USERNAME }}/app
 
-            # --- [4. 서버 실행 (안전하게 400MB로 제한)] ---
-            # t2.micro는 램이 1GB뿐이므로, OS 여유분을 위해 400MB로 줄입니다.
-            nohup java -Xms400m -Xmx400m -jar \
+            # --- [4. 서버 실행 (t2.micro 최적화 모드)] ---
+            # -Xms256m -Xmx256m : 램을 256MB로 딱 고정 (OS 여유 공간 확보)
+            # -XX:+UseSerialGC : 복잡한 GC 대신 단순한 GC를 써서 메모리 절약
+            nohup java -Xms256m -Xmx256m -XX:+UseSerialGC -jar \
               -Dspring.profiles.active=prod \
               -DRDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
               -DDB_USER=${{ secrets.DB_USER }} \
               -DDB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               *.jar > app.log 2>&1 < /dev/null &
             
-            # 5. 확인 및 종료
-            echo "Server started successfully."
+            # 5. 종료 메시지
+            echo "Deployment Finished Successfully."
             sleep 2
             exit 0
