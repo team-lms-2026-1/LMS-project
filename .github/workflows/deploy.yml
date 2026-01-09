@@ -1,0 +1,66 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # ⚠️ 중요: gradlew 실행 권한 부여 (backend 폴더 진입)
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      working-directory: ./backend
+
+    # ⚠️ 중요: 빌드 실행 (backend 폴더에서 실행)
+    - name: Build with Gradle
+      run: ./gradlew clean build -x test
+      working-directory: ./backend
+
+    # 빌드된 Jar 파일을 EC2로 전송
+    - name: Copy Jar to EC2
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST_PROD }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        # 소스 경로도 backend/build/... 로 시작해야 함
+        source: "backend/build/libs/*.jar"
+        target: "/home/${{ secrets.USERNAME }}/app"
+        strip_components: 3 # backend/build/libs/ 경로 떼고 파일만 전송
+
+    # EC2에 접속해서 서버 실행
+    - name: Execute Server on EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST_PROD }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          # 1. 실행 중인 서버 종료 (없으면 패스)
+          pgrep -f java | xargs -r kill -15
+          sleep 5
+
+          # 2. 배포 폴더로 이동
+          cd /home/${{ secrets.USERNAME }}/app
+
+          # 3. 서버 실행 (환경변수 주입)
+          nohup java -jar \
+            -Dspring.profiles.active=prod \
+            -DRDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
+            -DDB_USER=${{ secrets.DB_USER }} \
+            -DDB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            *.jar > app.log 2>&1 &
