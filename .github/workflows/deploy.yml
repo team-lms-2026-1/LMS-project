@@ -52,28 +52,29 @@ jobs:
         timeout: 30m
         command_timeout: 30m
         script: |
-            # --- [메모리 부족 해결: Swap 파일 생성 (2GB)] ---
-            # Swap이 없을 때만 실행됨
+           # --- [1. 메모리 부족 해결: Swap 설정] ---
+            # 1-1. Swap 파일이 없으면 생성 (지난번에 성공했으므로 이번엔 건너뜀)
             if [ ! -f /swapfile ]; then
               sudo dd if=/dev/zero of=/swapfile bs=128M count=16
               sudo chmod 600 /swapfile
               sudo mkswap /swapfile
-              sudo swapon /swapfile
               echo '/swapfile swap swap defaults 0 0' | sudo tee -a /etc/fstab
             fi
             
-            # 1. 기존에 떠있는 서버 종료
+            # 1-2. Swap 활성화 (중요: 파일이 있어도 스왑이 꺼져있을 수 있으므로 강제 활성화)
+            sudo swapon /swapfile || true
+
+            # --- [2. 기존 서버 종료] ---
             pgrep -f java | xargs -r kill -9
-            sleep 5 
+            sleep 5
             
-            # 2. 배포 폴더로 이동 (없으면 생성)
+            # --- [3. 배포 폴더로 이동] ---
             mkdir -p /home/${{ secrets.USERNAME }}/app
             cd /home/${{ secrets.USERNAME }}/app
 
-            # 3. 서버 실행 (메모리 제한 옵션 추가)
-            # -Xms512m -Xmx512m : 자바한테 512MB만 쓰라고 명령함 (t2.micro 필수 설정)
-            # nohup 결과를 파일로 보내고, 입력을 차단하여 터미널과 연결 고리를 끊음
-            nohup java -Xms512m -Xmx512m -jar \
+            # --- [4. 서버 실행 (안전하게 400MB로 제한)] ---
+            # t2.micro는 램이 1GB뿐이므로, OS 여유분을 위해 400MB로 줄입니다.
+            nohup java -Xms400m -Xmx400m -jar \
               -Dspring.profiles.active=prod \
               -DRDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
               -DDB_USER=${{ secrets.DB_USER }} \
@@ -81,6 +82,6 @@ jobs:
               *.jar > app.log 2>&1 < /dev/null &
             
             # 5. 확인 및 종료
-            echo "Server started with memory limit."
+            echo "Server started successfully."
             sleep 2
             exit 0
