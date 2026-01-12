@@ -233,6 +233,9 @@ GET `/curricular-offerings/{offeringId}`
     "offeringCode": "OPEN-2026-1-TH101",
     "status": "OPEN",
 
+    "day" : "Monday",
+    "period" : 5,
+
     "curricular": {
       "curricularId": 101,
       "curricularCode": "TH101",
@@ -323,6 +326,8 @@ Request
   "professorAccountId": 5001,
   "location": "C301",
   "maxCapacity": 30,
+  "day" : "Monday",
+  "period" : 5,
 }
 
 Response
