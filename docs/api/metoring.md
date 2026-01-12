@@ -1,5 +1,24 @@
 ## 멘토링 공통 규칙
 
+## semester 필터링은 통일 할것 ( 필터링 잘못 적은거 무시점...)
+GET `/semesters`
+{
+  "data": [
+    {
+      "semeseterId": 1,
+      "year": 2026,
+      "term": "1"
+    },
+    {
+      "semeseterId": 2,
+      "year": 2025,
+      "term": "2"
+    }
+  ],
+  "meta": {}
+}
+
+
 ## 1. 멘토링 모집 관리 ( 관리자 )
 
 ## 1-1. 멘토링 모집 조회
@@ -12,6 +31,8 @@ GET `/mentoring-recruitments?keyword=카테고리명&page=1&size=20`
     {
       "recruitmentId": 101,
       "semesterId" : 12,
+      "year" : 2026,
+      "term: "1"
       "title": "2026-1학기 지도교수 멘토링 모집",
       "recruitmentStartAt": "2026-03-02T09:00:00",
       "recruitmentEndAt": "2026-03-16T23:59:59",
@@ -33,12 +54,15 @@ GET `/mentoring-recruitments?keyword=카테고리명&page=1&size=20`
 ## 1-2. 멘토링 모집 상세보기
 GET `/mentoring-recruitments/{recruitmentId}`
 
+Response
 {
-  "semesterId": 12,
-  "title": "2026-1학기 지도교수 멘토링 모집",
-  "description": "<p>학기 초 지도교수 멘토링 모집 안내</p>",
-  "recruitmentStartAt": "2026-03-02T09:00:00",
-  "recruitmentEndAt": "2026-03-16T23:59:59"
+  "data": {
+    "title": "2026-1학기 지도교수 멘토링 모집",
+    "description": "<p>학기 초 지도교수 멘토링 모집 안내</p>",
+    "recruitmentStartAt": "2026-03-02T09:00:00",
+    "recruitmentEndAt": "2026-03-16T23:59:59"
+   },
+  "meta": {}
 }
 
 ## 1-3. 멘토링 모집 등록
@@ -46,7 +70,9 @@ POST `/mentoring-recruitments`
 
 Request
 {
-  "semesterId": 12,
+  "semesterId" : 12,
+  "year" : 2026,
+  "term: "1"
   "title": "2026-1학기 지도교수 멘토링 모집",
   "description": "<p>학기 초 지도교수 멘토링 모집 안내</p>",
   "recruitmentStartAt": "2026-03-02T09:00:00",
@@ -192,8 +218,16 @@ GET `/mentoring-batch/semesters`
 Response
 {
   "data": [
-    { "semesterId": 12 },
-    { "semesterId": 13 }
+    { 
+      "semesterId" : 12,
+      "year" : 2026,
+      "term: "1"
+     },
+    { 
+      "semesterId" : 12,
+      "year" : 2026,
+      "term: "1"
+     },
   ],
   "meta": {}
 }
@@ -214,7 +248,11 @@ GET `/mentoring-batch/recruitments/{recruitmentId}`
   "data": {
     "recruitment": {
       "recruitmentId": 101,
-      "semesterId": 12,
+
+      "semesterId" : 12,
+      "year" : 2026,
+      "term: "1"
+
       "title": "2026-1학기 지도교수 멘토링 모집",
       "recruitmentStartAt": "2026-03-02T09:00:00",
       "recruitmentEndAt": "2026-03-16T23:59:59",
@@ -277,8 +315,16 @@ Response
 GET `/mentoring-qna/semesters`
 {
   "data": [
-    { "semesterId": 12 },
-    { "semesterId": 13 }
+    { 
+      "semesterId" : 12,
+      "year" : 2026,
+      "term: "1"
+     },
+    { 
+      "semesterId" : 12,
+      "year" : 2026,
+      "term: "1"
+     },
   ],
   "meta": {}
 }
