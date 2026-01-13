@@ -52,31 +52,27 @@ jobs:
         timeout: 30m
         command_timeout: 30m
         script: |
-          # --- [1. Swap 설정 (스마트 체크)] ---
-          if grep -q "swapfile" /proc/swaps; then
-            echo "Swap is already active. Skipping..."
-          else
-            echo "Enabling Swap..."
+            # 1. Swap 강제 활성화 (혹시 모르니 재시도)
             sudo swapon /swapfile || true
-          fi
+            
+            # 2. 기존 자바 프로세스 확실하게 종료
+            # 실행 중인게 있으면 죽이고, 10초 동안 메모리가 반환되길 기다림
+            sudo killall -9 java || true
+            sleep 10
 
-          # --- [2. 기존 서버 종료] ---
-          pgrep -f java | xargs -r kill -9
-          sleep 5
-          
-          # --- [3. 배포 폴더로 이동] ---
-          mkdir -p /home/${{ secrets.USERNAME }}/app
-          cd /home/${{ secrets.USERNAME }}/app
+            # 3. 배포 폴더로 이동
+            cd /home/${{ secrets.USERNAME }}/app
 
-          # --- [4. 서버 실행 (t2.micro 최적화 모드)] ---
-          nohup java -Xms256m -Xmx256m -XX:+UseSerialGC -jar \
-            -Dspring.profiles.active=prod \
-            -DRDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
-            -DDB_USER=${{ secrets.DB_USER }} \
-            -DDB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            *.jar > app.log 2>&1 < /dev/null &
-          
-          # 5. 종료 메시지
-          echo "Deployment Finished Successfully."
-          sleep 2
-          exit 0
+            # 4. 서버 실행 (초경량 128MB 모드)
+            # t2.micro에서 가장 안전한 설정입니다.
+            nohup java -Xms128m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -jar \
+              -Dspring.profiles.active=prod \
+              -DRDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
+              -DDB_USER=${{ secrets.DB_USER }} \
+              -DDB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              *.jar > app.log 2>&1 < /dev/null &
+            
+            # 5. 실행 확인 대기
+            echo "Server started with 128MB memory limit."
+            sleep 5
+            exit 0
