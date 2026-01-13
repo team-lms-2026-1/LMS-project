@@ -46,3 +46,8 @@ tasks.named('test') {
 jar {
     enabled = false
 }
+
+// 실행 가능한 jar 이름을 'app.jar'로 고정
+bootJar {
+    archiveFileName = 'app.jar'
+}
