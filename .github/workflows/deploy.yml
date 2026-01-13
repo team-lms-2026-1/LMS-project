@@ -38,7 +38,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         # 소스 경로도 backend/build/... 로 시작해야 함
-        source: "backend/build/libs/*.jar"
+        source: "backend/build/libs/app.jar"
         target: "/home/${{ secrets.USERNAME }}/app"
         strip_components: 3 # backend/build/libs/ 경로 떼고 파일만 전송
 
@@ -63,6 +63,11 @@ jobs:
             # 3. 배포 폴더로 이동
             cd /home/${{ secrets.USERNAME }}/app
            
+            # [디버깅용] 현재 폴더에 무슨 파일이 있는지 출력 (로그 확인용)
+            echo "=== 현재 폴더 파일 목록 ==="
+            ls -al
+            echo "========================="
+
             # 4. 서버 실행 (초경량 128MB 모드)
             # t2.micro에서 가장 안전한 설정입니다.
             nohup java -Xms128m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -jar \
@@ -70,7 +75,7 @@ jobs:
               -DRDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
               -DDB_USER=${{ secrets.DB_USER }} \
               -DDB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              *.jar > app.log 2>&1 < /dev/null &
+              app.jar > nohup.out 2>&1 &
             
             # 5. 실행 확인 대기
             echo "Server started with 128MB memory limit."
