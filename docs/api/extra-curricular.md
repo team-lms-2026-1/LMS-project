@@ -475,7 +475,7 @@ Response
 
 
 ## 3-4. 비교과 역량 매핑 수정
-PATCH `/curricular-mapping/{extraOfferingId}`
+PATCH `/extra-curricular-mapping/{extraOfferingId}`
 
 Request
 {

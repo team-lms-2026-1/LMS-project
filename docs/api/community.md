@@ -126,8 +126,7 @@ Response
         "originalName": "점검안내.pdf",
         "contentType": "application/pdf",
         "fileSize": 123456,
-        "sortOrder": 0,
-        "downloadUrl": "/files/501/download"
+        "downloadUrl": "/api/v1/files/501/download"
       }
     ],
     "createdAt": "2026-01-06T12:00:00"
@@ -253,7 +252,6 @@ Response
         "originalName": "휴학신청서.hwp",
         "contentType": "application/x-hwp",
         "fileSize": 99999,
-        "sortOrder": 0,
         "downloadUrl": "/files/601/download"
       }
     ],
@@ -491,6 +489,7 @@ Response
     "title": "휴학 절차가 궁금합니다",
     "content": "<p>휴학은 어떻게 하나요?</p>",
     "viewCount": 11,
+    "author": { "accountId": 1001, "name": "관리자" },
     "createdAt": "2026-01-06T10:00:00",
     "answer": {
       "answerId": 90001,
