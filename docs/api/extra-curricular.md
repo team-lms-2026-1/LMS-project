@@ -101,10 +101,11 @@ Request
 Response
 {
   "data": {
-    "extraCurricularId": 101
-  },
+    "success": true
+   },
   "meta": {}
 }
+
 
 
 ## 1-4. 비교과 수정
@@ -122,11 +123,11 @@ Request
 Response
 {
   "data": {
-    "extraCurricularId": 101,
-    "updatedAt": "2026-01-12T16:10:00"
-  },
+    "success": true
+   },
   "meta": {}
 }
+
 
 
 # 2. 비교과 운영 관리 (관리자) - 운영(Offering)
@@ -463,6 +464,15 @@ Request
     { "competencyId": 6, "weight": 2 }
   ]
 }
+
+Response
+{
+  "data": {
+    "success": true
+   },
+  "meta": {}
+}
+
 
 ## 3-4. 비교과 역량 매핑 수정
 PATCH `/curricular-mapping/{extraOfferingId}`

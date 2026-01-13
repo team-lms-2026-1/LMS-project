@@ -374,6 +374,12 @@ Response
         { "competencyId": 1, "code": "C1", "name": "의사소통", "weight": 5 },
         { "competencyId": 3, "code": "C3", "name": "비판적사고", "weight": 5 }
       ],
+      
+      "semester": {
+        "semesterId": 12,
+        "year": 2026,
+        "term": 1
+      },
 
       "status": "OPEN",
       "createdAt": "2026-02-20T10:00:00"
