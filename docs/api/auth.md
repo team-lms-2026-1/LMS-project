@@ -1,7 +1,7 @@
 ## 권한관리
 
 ## 0-1. 학과 비활성화(토글)
-PATCH /depts/{deptId}/active
+PATCH `/depts/{deptId}/active`
 
 Request
 { "isActive": false }
