@@ -23,7 +23,7 @@ CANCELED: 개설 취소(OPEN 이후라도 가능)
 각 6개의 영역에 1점부터 5점까지 int형으로 매핑
 
 ## 0-1. 학기 목록 조회
-GET `/semesters`
+GET `/semesters/options`
 {
   "data": [
     {
@@ -41,25 +41,23 @@ GET `/semesters`
 }
 
 ## 0-2. 학과 목록 조회
-GET `/depts?isActive=true`
+GET `/depts/options`
 {
   "data": [
     {
       "deptId": 1,
       "name": "신학과",
-      "isActive": true
     },
     {
       "deptId": 2,
       "name": "기독교교육과",
-      "isActive": true
     }
   ],
   "meta": {}
 }
 
 ## 0-3. 학과로 교과목록 조회
-GET `/curricular?deptId=1`
+GET `/curricular/options?deptId=1`
 {
   "data": [
     {
@@ -164,17 +162,6 @@ Request
   "description": "구약 성서의 구성과 핵심 주제를 개관한다.",
   "isActive": true
 }
-
-Response
-{
-  "data": {
-    "success": true
-   },
-  "meta": {}
-}
-
-## 1-5. 교과 삭제
-DELETE `/curricular/{curricularId}`
 
 Response
 {
