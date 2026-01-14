@@ -1,4 +1,4 @@
-package com.teamlms.backend.domain.account.repository;
+package main.java.com.teamlms.backend.domain.account.repository;
 
 import java.util.Optional;
 
@@ -10,5 +10,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByLoginId(String string);
 
-    boolean exiexistsByLoginId(String loginId);
+    boolean existsByLoginId(String loginId);
 }
