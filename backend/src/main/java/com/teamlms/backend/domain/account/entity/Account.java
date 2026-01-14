@@ -1,4 +1,4 @@
-package main.java.com.teamlms.backend.domain.account.entity;
+package com.teamlms.backend.domain.account.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

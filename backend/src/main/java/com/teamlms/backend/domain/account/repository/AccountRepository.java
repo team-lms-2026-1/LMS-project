@@ -1,4 +1,4 @@
-package main.java.com.teamlms.backend.domain.account.repository;
+package com.teamlms.backend.domain.account.repository;
 
 import java.util.Optional;
 
