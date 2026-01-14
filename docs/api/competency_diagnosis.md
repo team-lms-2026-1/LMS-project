@@ -1,4 +1,4 @@
-
+# 페이지 네이션 고치기
 ## 0. 학생 역량 통합 관리 페이지 (관리자)
 # 0-1. 학생 목록 조회 
 GET `/admin/competencies/students`
