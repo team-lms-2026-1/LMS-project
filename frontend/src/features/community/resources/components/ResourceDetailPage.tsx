@@ -1,22 +1,34 @@
 "use client";
 
-import Link from "next/link";
-import styles from "../styles/resources.module.css";
-import { MOCK_RESOURCES } from "../data/mockResources";
+import { useRouter } from "next/navigation";
+import styles from "../styles/resource-detail.module.css";
+import { mockResources } from "../data/mockResources";
+import type { ResourceCategory } from "../types";
+
+function badgeClass(category: ResourceCategory, s: Record<string, string>) {
+  switch (category) {
+    case "서비스":
+      return `${s.badge} ${s.badgeService}`;
+    case "학사":
+      return `${s.badge} ${s.badgeAcademic}`;
+    case "행사":
+      return `${s.badge} ${s.badgeEvent}`;
+    default:
+      return `${s.badge} ${s.badgeNormal}`;
+  }
+}
 
 export default function ResourceDetailPage({ resourceId }: { resourceId: string }) {
-  const item = MOCK_RESOURCES.find((r) => r.id === resourceId);
+  const router = useRouter();
+  const item = mockResources.find((n) => n.id === resourceId);
 
-  if (!item) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.breadcrumb}>커뮤니티 &gt; 자료실</div>
-        <div className={styles.card} style={{ padding: 16 }}>
-          존재하지 않는 자료입니다.
-        </div>
-      </div>
-    );
-  }
+  if (!item) return <div className={styles.wrap}>자료를 찾을 수 없습니다.</div>;
+
+  const onDelete = () => {
+    const ok = window.confirm("삭제하시겠습니까?");
+    if (!ok) return;
+    router.push("/community/resources");
+  };
 
   return (
     <div className={styles.page}>
@@ -27,46 +39,37 @@ export default function ResourceDetailPage({ resourceId }: { resourceId: string 
       </div>
 
       <div className={styles.card}>
-        <div className={styles.detailBox}>
-          {/* 상단 메타 */}
-          <div className={styles.detailHeader}>
-            <div className={`${styles.detailCell} ${styles.labelCell}`}>분류</div>
-            <div className={styles.detailCell}>{item.category}</div>
-            <div className={`${styles.detailCell} ${styles.labelCell}`}>작성일</div>
-            <div className={styles.detailCell}>{item.createdAt}</div>
-          </div>
-
-          <div className={styles.detailTitleRow}>
-            <div className={`${styles.detailCell} ${styles.labelCell}`}>작성자</div>
-            <div className={styles.detailCell} style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>{item.author}</span>
-              <span style={{ color: "#6b7280", fontSize: 12 }}>
-                조회수: {item.views.toLocaleString()}
-              </span>
-            </div>
-          </div>
-
-          <div className={styles.detailContentRow}>
-            <div className={`${styles.detailCell} ${styles.labelCell}`}>내용</div>
-            <div className={`${styles.detailCell} ${styles.contentArea}`}>{item.content}</div>
-          </div>
-
-          <div className={styles.attachRow}>
-            <div className={`${styles.detailCell} ${styles.labelCell}`}>첨부파일</div>
-            <div className={styles.detailCell}>
-              {item.attachmentName ? item.attachmentName : "-"}
-            </div>
-          </div>
-
-          <div className={styles.actions}>
-            <Link className={`${styles.btn} ${styles.btnPrimary}`} href={`/community/resources/${item.id}/edit`}>
-              수정
-            </Link>
-            <button className={styles.btn} type="button">
-              삭제
-            </button>
-          </div>
+        <div className={styles.cardHead}>
+          <span className={badgeClass(item.category, styles)}>{item.category}</span>
+          <span className={styles.headTitle}>{item.title}</span>
         </div>
+
+        <div className={styles.metaRow}>
+          <div>작성자: {item.author}</div>
+          <div style={{ textAlign: "center" }}>작성일: {item.createdAt}</div>
+          <div style={{ textAlign: "right" }}>조회수: {item.views.toLocaleString()}</div>
+        </div>
+
+        <div className={styles.body}>
+          <div className={styles.content}>{item.content}</div>
+        </div>
+
+        <div className={styles.attach}>
+          <div className={styles.attachLabel}>첨부<br />파일</div>
+          <div className={styles.attachValue}>{item.attachment?.name ?? "-"}</div>
+        </div>
+      </div>
+
+      <div className={styles.actions}>
+        <button
+          className={`${styles.btn} ${styles.btnPrimary}`}
+          onClick={() => router.push(`/community/resources/${item.id}/edit`)}
+        >
+          수정
+        </button>
+        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={onDelete}>
+          삭제
+        </button>
       </div>
     </div>
   );
