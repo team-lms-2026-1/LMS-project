@@ -13,6 +13,15 @@ spring:
     enabled: true
     baseline-on-migrate: true # 기존 데이터가 있어도 Flyway 적용
 
+  # 🔐 JWT 공통 설정
+security:
+  jwt:
+    secret: ${JWT_SECRET:THIS_IS_A_LONG_SECRET_KEY_FOR_JWT_32_CHARS_MIN}
+    access-token-seconds: 3600
+    
+logging:
+  level:
+    org.springframework.security: DEBUG
 ---
 # --- [2. 로컬 개발 환경 (내 컴퓨터)] ---
 spring:

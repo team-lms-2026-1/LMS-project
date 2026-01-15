@@ -1,8 +1,14 @@
 package com.teamlms.backend.domain.account.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Entity
 @Table(name = "admin_profile")
 public class AdminProfile {
@@ -16,22 +22,25 @@ public class AdminProfile {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    @Column(name = "email", length = 100)
     private String email;
+
+    @Column(name = "phone", length = 30)
     private String phone;
 
-    @Column(name = "memo")
+    @Column(name = "memo", length = 255)
     private String memo;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    protected AdminProfile() {
-        // JPA 기본 생성자
+    public static AdminProfile create(Account account, String name, String email, String phone, String memo, LocalDateTime now) {
+        return AdminProfile.builder()
+                .account(account)
+                .name(name)
+                .email(email)
+                .phone(phone)
+                .memo(memo)
+                .build();
     }
 }

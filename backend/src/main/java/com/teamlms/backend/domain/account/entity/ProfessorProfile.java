@@ -1,11 +1,19 @@
 package com.teamlms.backend.domain.account.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+import com.teamlms.backend.global.audit.BaseEntity;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Entity
 @Table(name = "professor_profile")
-public class ProfessorProfile {
+public class ProfessorProfile extends BaseEntity {
 
     @Id
     @Column(name = "account_id")
@@ -16,30 +24,31 @@ public class ProfessorProfile {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @Column(name = "professor_no", nullable = false, unique = true)
+    @Column(name = "professor_no", nullable = false, unique = true, length = 30)
     private String professorNo;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    @Column(name = "email", length = 100)
     private String email;
+
+    @Column(name = "phone", length = 30)
     private String phone;
 
-    /**
-     * 학과 ID
-     * - 지금 단계에서는 연관관계로 묶지 않는다
-     * - Dept 엔티티 안정화 후 @ManyToOne으로 리팩터링 가능
-     */
     @Column(name = "dept_id", nullable = false)
     private Long deptId;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    protected ProfessorProfile() {
-        // JPA 기본 생성자
+    public static ProfessorProfile create(Account account, String professorNo, String name, String email, String phone,
+                                          Long deptId, LocalDateTime now) {
+        return ProfessorProfile.builder()
+                .account(account)
+                .professorNo(professorNo)
+                .name(name)
+                .email(email)
+                .phone(phone)
+                .deptId(deptId)
+                .build();
     }
 }

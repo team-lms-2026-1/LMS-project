@@ -1,0 +1,7 @@
+ADMIN
+  'admin1234',
+  'Admin!2345',
+  'ADMIN',
+  'ACTIVE',
+
+  eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiYWNjb3VudFR5cGUiOiJBRE1JTiIsImlhdCI6MTc2ODM2NjQ5MSwiZXhwIjoxNzY4MzcwMDkxfQ.eI_28YzsD58bbpA-ofE6Mt4ceq5N6G_P2KwOD-FovMg

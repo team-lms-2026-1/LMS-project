@@ -104,12 +104,12 @@ POST `/accounts`
 
 Request  ( 학생 )
 {
-  "loginId": "s200000",
+  "loginId": "s20001111",
   "password": "Temp!2345",
   "accountType": "STUDENT",
   "status": "ACTIVE",
   "profile": {
-    "studentNo": "20240001",
+    "studentNo": "20001111",
     "name": "홍길동",
     "email": "hong@example.com",
     "phone": "010-1234-5678",
@@ -179,6 +179,10 @@ PATCH `/accounts/{accountId}`
 
 ## 1-5. 계정 상태 변경
 PATCH `/accounts/{accountId}/status`
+
+{
+  "status": "INACTIVE"
+}
 
 ## 2. 학과 관리
 
