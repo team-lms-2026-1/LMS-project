@@ -21,7 +21,7 @@ export default function LoginPage() {
       await loginViaBff({ id, password: pw });
 
       // 성공 후 이동(원하는 페이지로 바꾸세요)
-      router.replace("/(admin)");
+      router.replace("/");
       // 또는 router.replace("/admin") 등 프로젝트 라우팅에 맞게 수정
     } catch (err) {
       const message =
