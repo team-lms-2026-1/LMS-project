@@ -1,0 +1,161 @@
+.wrap { padding: 24px 28px; }
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #7a7a7a; margin-bottom: 14px;
+}
+.breadcrumb strong { color: #4a4a4a; font-weight: 800; }
+
+.titleRow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.pageTitle { font-size: 22px; font-weight: 900; color: #1e1e1e; }
+
+.formCard {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.formTable { width: 100%; border-collapse: collapse; }
+.formTable th, .formTable td {
+  border-bottom: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+.formTable th {
+  width: 70px;
+  background: #fafafa;
+  font-size: 12px;
+  font-weight: 900;
+  color: #333;
+  padding: 10px 12px;
+  border-right: 1px solid #e8e8e8;
+  text-align: left;
+}
+.formTable td { padding: 10px 12px; }
+
+.inlineRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input, .select {
+  height: 28px;
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  padding: 0 10px;
+  font-size: 12px;
+  outline: none;
+  background: #fff;
+}
+.input { width: 260px; }
+.select { width: 120px; }
+
+.editorWrap {
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e6e6e6;
+  background: #fff;
+  flex-wrap: wrap;
+}
+
+.toolBtn {
+  width: 26px;
+  height: 22px;
+  border: 1px solid #e2e2e2;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 220px;
+  border: 0;
+  padding: 10px 10px;
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+/* 첨부 */
+.attachArea {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.attachTab {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tabBtn {
+  height: 22px;
+  padding: 0 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dropzone {
+  border: 1px dashed #cfcfcf;
+  border-radius: 6px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 12px;
+  background: #fbfbfb;
+}
+
+.fileName {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #333;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: #fff;
+}
+
+.btnDanger {
+  border-color: #ef4444;
+  background: #ef4444;
+  color: #fff;
+}
