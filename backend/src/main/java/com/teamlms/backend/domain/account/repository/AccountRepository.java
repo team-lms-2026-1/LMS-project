@@ -1,14 +1,13 @@
 package com.teamlms.backend.domain.account.repository;
 
-import java.util.Optional;
-
+import com.teamlms.backend.domain.account.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.teamlms.backend.domain.account.entity.Account;
+import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByLoginId(String string);
 
-    boolean exiexistsByLoginId(String loginId);
+    boolean existsByLoginId(String loginId);
 }
