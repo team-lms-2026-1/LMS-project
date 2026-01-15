@@ -1,38 +1,39 @@
 package com.teamlms.backend.domain.account.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import java.time.LocalDateTime;
-
 import com.teamlms.backend.domain.account.enums.AccountStatus;
 import com.teamlms.backend.domain.account.enums.AccountType;
+import com.teamlms.backend.global.audit.BaseEntity;
 
+import jakarta.persistence.*;
+import lombok.*;
 
+import java.time.LocalDateTime;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Entity
 @Table(name = "account")
-public class Account {
+public class Account extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
     private Long accountId;
 
-    @Column(name = "login_id", nullable = false, unique = true)
+    @Column(name = "login_id", nullable = false, unique = true, length = 50)
     private String loginId;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "account_type", nullable = false)
+    @Column(name = "account_type", nullable = false, length = 20)
     private AccountType accountType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 20)
     private AccountStatus status;
 
     @Column(name = "last_login_at")
@@ -41,15 +42,22 @@ public class Account {
     @Column(name = "password_changed_at")
     private LocalDateTime passwordChangedAt;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    // (선택) 생성 팩토리로 필수값 통일
+    public static Account create(String loginId, String passwordHash, AccountType type, AccountStatus status,
+                                 Long actorAccountId, LocalDateTime now) {
+        return Account.builder()
+                .loginId(loginId)
+                .passwordHash(passwordHash)
+                .accountType(type)
+                .status(status)
+                .build();
+    }
 
-    @Column(name = "created_by")
-    private Long createdBy;
+    public void changeStatus(AccountStatus newStatus, Long actorAccountId, LocalDateTime now) {
+        this.status = newStatus;
+    }
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @Column(name = "updated_by")
-    private Long updatedBy;
+    public void updateLastLoginAt(LocalDateTime at) {
+        this.lastLoginAt = at;
+    }
 }

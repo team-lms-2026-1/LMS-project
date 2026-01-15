@@ -37,7 +37,9 @@ CREATE TABLE student_profile (
   academic_status VARCHAR(20) NOT NULL, -- ENROLLED | DROPPED | LEAVE | GRADUATED
 
   created_at TIMESTAMP NOT NULL DEFAULT now(),
+  created_by BIGINT,
   updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_by BIGINT,
 
   CONSTRAINT fk_student_profile_account
     FOREIGN KEY (account_id) REFERENCES account(account_id)
@@ -53,7 +55,9 @@ CREATE TABLE professor_profile (
   dept_id BIGINT NOT NULL,
 
   created_at TIMESTAMP NOT NULL DEFAULT now(),
+  created_by BIGINT,
   updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_by BIGINT,
 
   CONSTRAINT fk_professor_profile_account
     FOREIGN KEY (account_id) REFERENCES account(account_id)
@@ -67,7 +71,9 @@ CREATE TABLE admin_profile (
   memo VARCHAR(255),
 
   created_at TIMESTAMP NOT NULL DEFAULT now(),
+  created_by BIGINT,
   updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_by BIGINT,
 
   CONSTRAINT fk_admin_profile_account
     FOREIGN KEY (account_id) REFERENCES account(account_id)
@@ -82,7 +88,9 @@ CREATE TABLE auth_permission (
   description VARCHAR(255),
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP NOT NULL DEFAULT now(),
-  updated_at TIMESTAMP NOT NULL DEFAULT now()
+  created_by BIGINT,
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_by BIGINT
 );
 
 CREATE TABLE auth_role (
@@ -92,13 +100,16 @@ CREATE TABLE auth_role (
   role_scope VARCHAR(20) NOT NULL,  -- STUDENT | PROFESSOR | ADMIN
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP NOT NULL DEFAULT now(),
-  updated_at TIMESTAMP NOT NULL DEFAULT now()
+  created_by BIGINT,
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_by BIGINT
 );
 
 CREATE TABLE auth_role_permission (
   role_id BIGINT NOT NULL,
   permission_id BIGINT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT now(),
+  created_by BIGINT,
 
   CONSTRAINT pk_auth_role_permission PRIMARY KEY (role_id, permission_id),
   CONSTRAINT fk_role_permission_role
