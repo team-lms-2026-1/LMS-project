@@ -12,7 +12,6 @@ import com.teamlms.backend.global.exception.AccountNotFoundException;
 
 import java.time.LocalDateTime;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,6 @@ public class AccountCommandService {
      * - accountType별 profile insert
      * - majors는 현재 DB 없음 -> 저장하지 않음
      */
-    @PreAuthorize("hasAuthority('ACCOUNT_MANAGE')")
     public Long adminCreate(AdminAccountCreateRequest req, Long actorAccountId) {
 
         if (accountRepository.existsByLoginId(req.getLoginId())) {
@@ -62,7 +60,7 @@ public class AccountCommandService {
             case ADMIN -> createAdminProfile(account, p);
         }
 
-        //
+        // 비즈니스 행위 기록
         defaultRoleAssignerService.assignDefaultRole(
                 account.getAccountId(),
                 accountType,
@@ -117,6 +115,7 @@ public class AccountCommandService {
 
     private void createAdminProfile(Account account, AdminAccountCreateRequest.Profile p) {
         AdminProfile ap = AdminProfile.builder()
+                .account(account)
                 .name(p.getName())
                 .email(p.getEmail())
                 .phone(p.getPhone())
