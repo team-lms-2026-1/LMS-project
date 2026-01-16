@@ -68,10 +68,8 @@ Response
     "loginId": "s202400",
     "accountType": "STUDENT",
     "status": "ACTIVE",
-    "lastLoginAt": "2026-01-12T09:11:00",
     "createdAt": "2025-12-01T10:00:00",
     "profile": {
-      "studentNo": "20240001",
       "name": "홍길동",
       "email": "hong@example.com",
       "phone": "010-1234-5678",
