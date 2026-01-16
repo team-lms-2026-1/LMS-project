@@ -3,7 +3,7 @@ import { AccountStatus, AccountType } from "../types";
 import { AccountsListResponseDto, UpdateAccountRequestDto } from "./dto";
 import type { CreateAccountRequestDto } from "./dto";
 
-const BASE = "/api/v1/admin/accounts";
+const BASE = "/api/authority/accounts";
 
 type AccountsListParams = {
   accountType?: AccountType;
@@ -17,8 +17,8 @@ export const accountsApi = {
     const qs = new URLSearchParams();
     if (params?.accountType) qs.set("accountType", params.accountType);
     if (params?.keyword) qs.set("keyword", params.keyword);
-    if (params?.page) qs.set("page", String(params.page));
-    if (params?.size) qs.set("size", String(params.size));
+    if (params?.page != null) qs.set("page", String(params.page));
+    if (params?.size != null) qs.set("size", String(params.size));
 
     const url = qs.toString() ? `${BASE}?${qs.toString()}` : BASE;
     return bffRequest<AccountsListResponseDto>(url);

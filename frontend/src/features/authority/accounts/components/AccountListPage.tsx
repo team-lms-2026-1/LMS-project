@@ -113,7 +113,7 @@ export default function AccountListPage() {
         page: 1,
         size: 10,
       });
-      setRows(res.items.map(mapRow));
+      setRows((res.items ?? []).map(mapRow));
     } catch (e: any) {
       setErrorMsg(e?.message ?? "목록 조회 실패");
     } finally {
