@@ -91,8 +91,8 @@ public class AccountRepositoryImpl implements AccountRepositoryCustom {
                         .fetchOne();
 
         return new PageImpl<>(
-                content,
-                pageable,
+                content, // 실제 데이터 목록
+                pageable,  // page, size, sort 정보
                 total == null ? 0 : total
         );
     }

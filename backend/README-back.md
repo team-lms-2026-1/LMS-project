@@ -21,11 +21,22 @@
   - (차선) seed 파일 내에 주석/토글 영역으로 분리한다.
 
 
+## api 응답규칙
+
+# 일반 응답 / meta 없음
+ApiResponse.ok(data)
+
+# 페이징 / meta 있는 응답
+ApiResponse.of(data, PageMeta.from(page))
+
+
+## admin 로그인
 
 ADMIN
   'admin1234',
-  'Admin!2345',
-  'ADMIN',
-  'ACTIVE',
+  'Admin!2345'
+
+ADMIN password encoding 생성토큰
 
   eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiYWNjb3VudFR5cGUiOiJBRE1JTiIsImlhdCI6MTc2ODM2NjQ5MSwiZXhwIjoxNzY4MzcwMDkxfQ.eI_28YzsD58bbpA-ofE6Mt4ceq5N6G_P2KwOD-FovMg
+
