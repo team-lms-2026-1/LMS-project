@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import styles from "./admin-shell.module.css";
 
 type NavItem = { label: string; href: string };
@@ -14,20 +14,23 @@ const SECTIONS: NavSection[] = [
     title: "커뮤니티",
     items: [
       { label: "공지사항", href: "/community/notices" },
-      { label: "자료실", href: "/community/resources" }, 
-      { label: "FAQ", href: "/community/faq" }, 
-      { label: "Q&A", href: "/community/qna" }, 
+      { label: "자료실", href: "/community/resources" },
+      { label: "FAQ", href: "/community/faq" },
+      { label: "Q&A", href: "/community/qna" },
     ],
   },
   {
-    key: "auth",
+    key: "authority",
     title: "권한 관리",
-    items: [{ label: "권한/역할", href: "/competencies" }], // 예시
+    items: [
+      { label: "학과관리", href: "/authority/departments" },
+      { label: "계정관리", href: "/authority/accounts" },
+    ],
   },
   {
-    key: "system",
+    key: "system-status",
     title: "시스템환경 관리",
-    items: [{ label: "코드 관리", href: "/surveys" }], // 예시
+    items: [{ label: "계정로그관리", href: "/system-status/account-logs" }],
   },
   {
     key: "survey",
@@ -37,7 +40,7 @@ const SECTIONS: NavSection[] = [
   {
     key: "personal",
     title: "개인정보 조회",
-    items: [{ label: "조회", href: "/competencies" }], // 예시
+    items: [{ label: "조회", href: "/competencies" }],
   },
   {
     key: "competency",
@@ -47,42 +50,42 @@ const SECTIONS: NavSection[] = [
   {
     key: "course",
     title: "교과 관리",
-    items: [{ label: "교과 목록", href: "/surveys" }], // 예시
+    items: [{ label: "교과 목록", href: "/surveys" }],
   },
   {
     key: "mentoring",
     title: "멘토링",
-    items: [{ label: "멘토링 관리", href: "/competencies" }], // 예시
+    items: [{ label: "멘토링 관리", href: "/competencies" }],
   },
   {
     key: "extra",
     title: "비교과 관리",
-    items: [{ label: "비교과 프로그램", href: "/surveys" }], // 예시
+    items: [{ label: "비교과 프로그램", href: "/surveys" }],
   },
   {
     key: "selfextra",
     title: "자율 비교과 관리",
-    items: [{ label: "자율 비교과", href: "/competencies" }], // 예시
+    items: [{ label: "자율 비교과", href: "/competencies" }],
   },
   {
     key: "career",
     title: "진로 설계",
-    items: [{ label: "진로 설계", href: "/surveys" }], // 예시
+    items: [{ label: "진로 설계", href: "/surveys" }],
   },
   {
     key: "job",
     title: "취업 지원 서비스",
-    items: [{ label: "지원 서비스", href: "/competencies" }], // 예시
+    items: [{ label: "지원 서비스", href: "/competencies" }],
   },
   {
     key: "counsel",
     title: "상담 관리",
-    items: [{ label: "상담 이력", href: "/surveys" }], // 예시
+    items: [{ label: "상담 이력", href: "/surveys" }],
   },
   {
     key: "space",
     title: "학습 공간 대여",
-    items: [{ label: "대여 현황", href: "/competencies" }], // 예시
+    items: [{ label: "대여 현황", href: "/competencies" }],
   },
 ];
 
@@ -93,45 +96,24 @@ function isActive(pathname: string, href: string) {
 export default function AdminSidebar() {
   const pathname = usePathname();
 
-  // 열린 섹션 key 목록
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
+  /**
+   * ✅ hover로만 열리는 섹션
+   * - null이면 전부 닫힘
+   * - 어떤 섹션 위에 마우스가 올라가면 그 섹션 key로 설정
+   * - 섹션 영역 밖으로 나가면 null로 닫힘
+   */
+  const [hoverOpenKey, setHoverOpenKey] = useState<string | null>(null);
 
-  // 현재 경로가 속한 섹션은 기본으로 열리게
-  const defaultOpen = useMemo(() => {
+  /**
+   * ✅ 현재 경로가 속한 섹션(활성 표시용)
+   * - "자동 오픈"이 아니라 "헤더 active 스타일 표시" 목적
+   */
+  const activeSectionKey = useMemo(() => {
     for (const s of SECTIONS) {
       if (s.items.some((it) => isActive(pathname, it.href))) return s.key;
     }
     return null;
   }, [pathname]);
-
-  useEffect(() => {
-    const raw = window.localStorage.getItem("admin.sidebar.openKeys");
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setOpenKeys(parsed);
-      } catch {
-        // ignore
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (defaultOpen && !openKeys.includes(defaultOpen)) {
-      const next = [...openKeys, defaultOpen];
-      setOpenKeys(next);
-      window.localStorage.setItem("admin.sidebar.openKeys", JSON.stringify(next));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultOpen]);
-
-  function toggleSection(key: string) {
-    setOpenKeys((prev) => {
-      const next = prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key];
-      window.localStorage.setItem("admin.sidebar.openKeys", JSON.stringify(next));
-      return next;
-    });
-  }
 
   return (
     <div className={styles.sidebarInner}>
@@ -139,20 +121,35 @@ export default function AdminSidebar() {
 
       <div className={styles.sectionList}>
         {SECTIONS.map((section) => {
-          const open = openKeys.includes(section.key);
+          const open = hoverOpenKey === section.key;
 
           return (
-            <div key={section.key} className={styles.section}>
-              <button
-                type="button"
-                className={styles.sectionHeader}
-                onClick={() => toggleSection(section.key)}
+            /**
+             * ✅ wrapper에 enter/leave를 걸어야
+             * - 헤더 -> 서브메뉴로 이동할 때 닫히지 않습니다.
+             * - 서브메뉴 위에 있어도 "열림 상태 유지"가 됩니다.
+             */
+            <div
+              key={section.key}
+              className={styles.section}
+              data-open={open ? "true" : "false"}
+              onMouseEnter={() => setHoverOpenKey(section.key)}
+              onMouseLeave={() => setHoverOpenKey(null)}
+            >
+              {/* ✅ 버튼은 클릭 토글 용도가 아니라 "헤더 UI" 용도 */}
+              <div
+                className={[
+                  styles.sectionHeader,
+                  activeSectionKey === section.key ? styles.sectionHeaderActive : "",
+                  open ? styles.sectionHeaderOpen : "",
+                ].join(" ")}
                 aria-expanded={open}
               >
                 <span className={styles.sectionHeaderText}>{section.title}</span>
                 <span className={open ? styles.chevUp : styles.chevDown} aria-hidden="true" />
-              </button>
+              </div>
 
+              {/* ✅ hover open일 때만 렌더 */}
               {open && (
                 <div className={styles.sectionBody}>
                   {section.items.map((item) => {
