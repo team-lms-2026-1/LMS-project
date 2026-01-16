@@ -1,3 +1,5 @@
+import DepartmentListPage from "@/features/authority/departments/components/list/DepartmentListPage";
+
 export default function Page() {
-  return <div>준비중입니다</div>;
+  return <DepartmentListPage />;
 }

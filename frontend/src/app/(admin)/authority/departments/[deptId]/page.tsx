@@ -1,3 +1,9 @@
-export default function Page() {
-  return <div>준비중입니다</div>;
+import DepartmentDetailPage from "@/features/authority/departments/components/detail/DepartmentDetailPage";
+
+type Props = {
+  params: { departmentId: string };
+};
+
+export default function Page({ params }: Props) {
+  return <DepartmentDetailPage departmentId={params.departmentId} />;
 }
