@@ -14,12 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeptQueryService {
 
     private final DeptRepository deptRepository;
-
+    // 단건조회
     public Dept getOrThrow(Long deptId) {
         return deptRepository.findById(deptId)
                 .orElseThrow(() -> new DeptNotFoundException(deptId));
     }
-
+    // 목록조회
     public Page<Dept> search(String keyword, Pageable pageable) {
         if (keyword == null || keyword.isBlank()) {
             return deptRepository.findAll(pageable);
