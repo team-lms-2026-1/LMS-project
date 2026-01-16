@@ -7,9 +7,13 @@ import com.teamlms.backend.domain.account.api.dto.AdminAccountStatusUpdateRespon
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.service.AccountCommandService;
 import com.teamlms.backend.global.api.ApiResponse;
+import com.teamlms.backend.global.api.dto.SuccessResponse;
+import com.teamlms.backend.global.security.principal.AuthUser;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,28 +23,16 @@ public class AdminAccountController {
 
     private final AccountCommandService accountCommandService;
 
-    /**
-     * 관리자: 계정 생성
-    h * POST /api/v1/admin/accounts
-     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<AdminAccountCreateResponse> create(@Valid @RequestBody AdminAccountCreateRequest request) {
+    public ApiResponse<SuccessResponse> create(@Valid @RequestBody AdminAccountCreateRequest request, @AuthenticationPrincipal AuthUser authUser) {
 
-        // TODO: SecurityPrincipal 붙이면 actorAccountId로 교체
-        Long actorAccountId = 1L;
+        // 지금 로그인한 관리자 가져오기
+        Long actorAccountId = authUser.getAccountId();
+        
+        accountCommandService.adminCreate(request, actorAccountId);
 
-        // 서비스는 account_id 리턴한다고 가정 (이전 답변의 adminCreate)
-        Long accountId = accountCommandService.adminCreate(request, actorAccountId);
-
-        AdminAccountCreateResponse response = new AdminAccountCreateResponse(
-                true,
-                accountId,
-                request.getLoginId(),
-                request.getAccountType()
-        );
-
-        return ApiResponse.ok(response);
+        return ApiResponse.ok(new SuccessResponse());
     }
 
     @PatchMapping("/{accountId}/status")

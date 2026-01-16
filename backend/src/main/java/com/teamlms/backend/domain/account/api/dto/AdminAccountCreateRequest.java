@@ -43,7 +43,7 @@ public class AdminAccountCreateRequest {
         private String studentNo;
         private Integer gradeLevel;
         private String academicStatus;
-        private List<MajorMapping> majors; // TODO: DB 추가되면 저장
+        private List<MajorMapping> majors;
 
         // PROFESSOR
         private String professorNo;
