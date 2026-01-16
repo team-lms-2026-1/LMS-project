@@ -87,4 +87,18 @@ public class AdminAccountController {
                 PageMeta.from(result)
         );
     }
+    // 계정 상세조회
+    @GetMapping("/{accountId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ApiResponse<?> detail(
+            @PathVariable Long accountId,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        // actorAccountId 필요하면 사용
+        // Long actorAccountId = authUser.getAccountId();
+
+        Object response = accountService.adminDetail(accountId);
+        return ApiResponse.ok(response);
+    }
+
 }
