@@ -4,6 +4,7 @@ import com.teamlms.backend.domain.account.api.dto.AdminAccountCreateRequest;
 import com.teamlms.backend.domain.account.entity.*;
 import com.teamlms.backend.domain.account.enums.*;
 import com.teamlms.backend.domain.account.repository.*;
+import com.teamlms.backend.domain.authorization.service.DefaultRoleAssignerService;
 import com.teamlms.backend.global.exception.DuplicateLoginIdException;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +12,7 @@ import com.teamlms.backend.global.exception.AccountNotFoundException;
 
 import java.time.LocalDateTime;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class AccountCommandService {
     private final ProfessorProfileRepository professorProfileRepository;
     private final AdminProfileRepository adminProfileRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DefaultRoleAssignerService defaultRoleAssignerService;
 
     /**
      * 관리자: 계정 생성
@@ -32,6 +35,7 @@ public class AccountCommandService {
      * - accountType별 profile insert
      * - majors는 현재 DB 없음 -> 저장하지 않음
      */
+    @PreAuthorize("hasAuthority('ACCOUNT_MANAGE')")
     public Long adminCreate(AdminAccountCreateRequest req, Long actorAccountId) {
 
         if (accountRepository.existsByLoginId(req.getLoginId())) {
@@ -57,6 +61,14 @@ public class AccountCommandService {
             case PROFESSOR -> createProfessorProfile(account, p);
             case ADMIN -> createAdminProfile(account, p);
         }
+
+        //
+        defaultRoleAssignerService.assignDefaultRole(
+                account.getAccountId(),
+                accountType,
+                actorAccountId
+        );
+        
 
         return account.getAccountId();
     }

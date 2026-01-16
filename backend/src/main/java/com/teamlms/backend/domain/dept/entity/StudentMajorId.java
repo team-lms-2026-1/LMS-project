@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
+// student_major의 pk가 이렇게 생겼다 라고만 알려줌
 @Embeddable
 @Getter
 @NoArgsConstructor

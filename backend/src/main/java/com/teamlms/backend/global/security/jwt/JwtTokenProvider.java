@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Set;
 
 @Component
 public class JwtTokenProvider {
@@ -24,13 +25,14 @@ public class JwtTokenProvider {
         this.accessTokenSeconds = accessTokenSeconds;
     }
 
-    public String createAccessToken(Long accountId, String accountType) {
+    public String createAccessToken(Long accountId, String accountType, Set<String> permissionCodes) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(accessTokenSeconds);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(accountId))
                 .claim("accountType", accountType)
+                .claim("permissions", permissionCodes)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(exp))
                 .signWith(key, SignatureAlgorithm.HS256)

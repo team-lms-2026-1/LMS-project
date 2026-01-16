@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -35,13 +36,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long accountId = Long.valueOf(claims.getSubject());
                 String accountType = String.valueOf(claims.get("accountType"));
 
-                // 최소 인가: ROLE_ADMIN/ROLE_STUDENT/ROLE_PROFESSOR
-                List<GrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority("ROLE_" + accountType));
+                // ✅ 1) role(계정타입) authority
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + accountType));
+
+                // ✅ 2) permission authority (JWT claim에서 꺼냄)
+                // - JWT에 Set<String> 넣어도 꺼낼 때는 보통 List로 나옴
+                List<String> permissions = claims.get("permissions", List.class);
+                if (permissions != null) {
+                    for (String p : permissions) {
+                        if (p != null && !p.isBlank()) {
+                            authorities.add(new SimpleGrantedAuthority(p)); // 예: "DEPT_MANAGE"
+                        }
+                    }
+                }
 
                 AuthUser principal = new AuthUser(accountId, accountType);
 
-                Authentication auth = new UsernamePasswordAuthenticationToken(principal, null, authorities);
+                Authentication auth =
+                        new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
