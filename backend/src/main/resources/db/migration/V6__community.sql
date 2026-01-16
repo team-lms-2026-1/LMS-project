@@ -77,7 +77,7 @@ CREATE TABLE notice_attachment (
   updated_by BIGINT NOT NULL,
 
   CONSTRAINT fk_notice_attachment_notice 
-    FOREIGN KEY (notice_id) REFERENCES notice(notice_id)
+    FOREIGN KEY (notice_id) REFERENCES notice(notice_id),
     --  작성자(업로더) 및 수정자 외래키 연결
   CONSTRAINT fk_notice_attachment_uploaded_by FOREIGN KEY (uploaded_by) REFERENCES account(account_id),
   CONSTRAINT fk_notice_attachment_updated_by FOREIGN KEY (updated_by) REFERENCES account(account_id)
@@ -224,7 +224,7 @@ CREATE TABLE qna_category (
   
   created_at TIMESTAMP NOT NULL DEFAULT now(),
   created_by BIGINT NOT NULL,
-  updated_at TIMESTAMP NOT NULL DEFAULT now()
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
   updated_by BIGINT NOT NULL,
 
   CONSTRAINT fk_qna_category_created_by FOREIGN KEY (created_by) REFERENCES account(account_id),
@@ -250,7 +250,7 @@ CREATE TABLE qna_question (
   CONSTRAINT fk_qna_category 
     FOREIGN KEY (category_id) REFERENCES qna_category(category_id),
     
-  -- ✅ 이미 존재하는 account 테이블과 연결
+  --  이미 존재하는 account 테이블과 연결
   CONSTRAINT fk_qna_question_account 
     FOREIGN KEY (author_account_id) REFERENCES account(account_id),
 
@@ -276,7 +276,7 @@ CREATE TABLE qna_answer (
   CONSTRAINT fk_qna_answer_question 
     FOREIGN KEY (question_id) REFERENCES qna_question(question_id),
     
-  -- ✅ 이미 존재하는 account 테이블과 연결
+  --  이미 존재하는 account 테이블과 연결
   CONSTRAINT fk_qna_answer_account 
     FOREIGN KEY (author_account_id) REFERENCES account(account_id),
 
