@@ -12,11 +12,11 @@ public class ApiResponse<T> {
 
     /** meta가 필요 없는 일반 응답 */
     public static <T> ApiResponse<T> ok(T data) {
-        return new ApiResponse<>(data, new Meta());
+        return new ApiResponse<>(data, null);
     }
 
     /** meta를 직접 넣고 싶을 때(페이징 등) */
-    public static <T> ApiResponse<T> ok(T data, Object meta) {
+    public static <T> ApiResponse<T> of(T data, Object meta) {
         return new ApiResponse<>(data, meta);
     }
 

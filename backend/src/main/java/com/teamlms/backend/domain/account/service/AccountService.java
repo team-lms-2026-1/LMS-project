@@ -1,12 +1,17 @@
 package com.teamlms.backend.domain.account.service;
 
+import com.teamlms.backend.domain.account.api.dto.AdminAccountListItem;
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.enums.AccountStatus;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.global.exception.AccountInactiveException;
 import com.teamlms.backend.global.exception.AccountNotFoundException;
 import com.teamlms.backend.global.exception.AuthenticationFailedException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,5 +50,14 @@ public class AccountService {
         validateActive(account);
         validatePassword(account, rawPassword);
         return account;
+    }
+
+    // 목록 조회
+    public Page<AdminAccountListItem> adminList(
+            String keyword,
+            AccountType accountType,
+            Pageable pageable
+    ) {
+        return accountRepository.searchAccounts(keyword, accountType, pageable);
     }
 }
