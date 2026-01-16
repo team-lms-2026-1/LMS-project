@@ -4,6 +4,8 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.teamlms.backend.global.security.principal.AuthUser;
+
 import java.util.Optional;
 
 public class CurrentAuditorAware implements AuditorAware<Long> {
@@ -24,15 +26,15 @@ public class CurrentAuditorAware implements AuditorAware<Long> {
 
         Object principal = auth.getPrincipal();
 
-        // ✅ 케이스 A) principal 자체가 accountId(Long)인 경우
+        // ✅ 1) AuthUser (지금 네 프로젝트의 정답)
+        if (principal instanceof AuthUser u) {
+            return Optional.of(u.getAccountId());
+        }
+
+        // ✅ 2) 혹시 principal이 Long으로 들어오는 경우
         if (principal instanceof Long accountId) {
             return Optional.of(accountId);
         }
-
-        // // ✅ 케이스 B) 커스텀 principal(UserDetails)에서 accountId 꺼내는 경우
-        // if (principal instanceof CustomUserPrincipal p) {
-        //     return Optional.of(p.getAccountId());
-        // }
 
         // 그 외는 SYSTEM 처리
         return Optional.of(SYSTEM_AUDITOR_ID);
