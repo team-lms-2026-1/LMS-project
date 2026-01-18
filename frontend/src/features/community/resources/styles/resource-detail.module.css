@@ -1,0 +1,99 @@
+.wrap { padding: 24px 28px; }
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #7a7a7a; margin-bottom: 14px;
+}
+
+.pageTitle { font-size: 22px; font-weight: 900; color: #1e1e1e; margin-bottom: 10px; }
+
+.card {
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.cardHead {
+  background: #f3f3f3;
+  border-bottom: 1px solid #d9d9d9;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 22px; padding: 0 10px; border-radius: 6px;
+  font-size: 12px; font-weight: 900;
+}
+.badgeService { background: #e9f0ff; color: #3b5bdb; }
+.badgeAcademic { background: #e8fbf7; color: #0ca678; }
+.badgeEvent { background: #f3e8ff; color: #9c36b5; }
+.badgeNormal { background: #f1f3f5; color: #495057; }
+
+.headTitle { font-weight: 900; color: #222; font-size: 13px; }
+
+.metaRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 12px;
+  color: #444;
+}
+
+.body { padding: 12px; min-height: 260px; }
+.content { white-space: pre-wrap; line-height: 1.6; font-size: 13px; color: #222; }
+
+.attach {
+  border-top: 1px solid #d9d9d9;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+}
+
+.attachLabel {
+  border-right: 1px solid #d9d9d9;
+  padding: 10px 12px;
+  background: #fafafa;
+  font-size: 12px;
+  font-weight: 800;
+  color: #333;
+}
+
+.attachValue {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #222;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: #fff;
+}
+
+.btnDanger {
+  border-color: #ef4444;
+  background: #ef4444;
+  color: #fff;
+}
