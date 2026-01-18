@@ -1,0 +1,136 @@
+.wrap { padding: 24px 28px; }
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #7a7a7a; margin-bottom: 14px;
+}
+
+.pageTitle { font-size: 22px; font-weight: 900; color: #1e1e1e; margin-bottom: 10px; }
+
+/* 질문 카드 */
+.card {
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.cardHead {
+  background: #f3f3f3;
+  border-bottom: 1px solid #d9d9d9;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 22px; padding: 0 10px; border-radius: 6px;
+  font-size: 12px; font-weight: 900;
+}
+.badgeService { background: #e9f0ff; color: #3b5bdb; }
+.badgeStudy   { background: #e8fbf7; color: #0ca678; }
+.badgePolicy  { background: #f3e8ff; color: #9c36b5; }
+.badgeEtc     { background: #f1f3f5; color: #495057; }
+
+.headTitle { font-weight: 900; color: #222; font-size: 13px; }
+
+.metaRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 12px;
+  color: #444;
+}
+
+.body { padding: 12px; min-height: 220px; }
+.content { white-space: pre-wrap; line-height: 1.6; font-size: 13px; color: #222; }
+
+/* 답변 입력 영역(이미지 2) */
+.answerInputWrap {
+  margin-top: 16px;
+}
+
+.answerTextarea {
+  width: 100%;
+  min-height: 110px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+}
+
+.topActionsRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* 이미지처럼 우측에 빨간 '질문삭제' */
+.btnDeleteQuestion {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* 하단 버튼들 */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btnPrimary { border-color: #3b82f6; background: #3b82f6; color: #fff; }
+.btnDanger  { border-color: #ef4444; background: #ef4444; color: #fff; }
+
+/* 답변 카드(이미지 3) */
+.answerCard {
+  margin-top: 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.answerMetaRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 12px;
+  color: #444;
+}
+
+.answerBody {
+  padding: 12px;
+  min-height: 120px;
+}
+
+.answerContent {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 13px;
+  color: #222;
+}

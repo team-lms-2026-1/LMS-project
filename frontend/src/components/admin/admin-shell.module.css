@@ -1,0 +1,224 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f3f4f6;
+}
+
+.sidebar {
+  width: 280px;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  height: 56px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbarInner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
+}
+
+.topbarRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dateChip {
+  font-size: 12px;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.profileBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+
+  /* 버튼 포커스 라인/그림자 방지 */
+  outline: none;
+  box-shadow: none;
+}
+
+.profileBtn:focus,
+.profileBtn:focus-visible,
+.profileBtn:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.profileAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #d1d5db;
+}
+
+.profileText {
+  font-size: 13px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.content {
+  flex: 1;
+  padding: 18px;
+}
+
+.contentInner {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  min-height: calc(100vh - 56px - 36px);
+  padding: 18px;
+}
+
+/* Sidebar */
+.sidebarInner {
+  padding: 14px;
+}
+
+.sidebarTitle {
+  font-weight: 800;
+  font-size: 15px;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.sectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* ✅ 헤더는 hover가 아니라 기본 상태에 레이아웃/패딩을 고정 */
+.sectionHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 10px;
+  background: #ffffff;
+
+  /* ✅ "글자 옆 선" 제거 핵심: 버튼 기본 outline/border 제거 */
+  border: 0;
+  outline: none;
+  box-shadow: none;
+
+  /* 버튼일 경우 기본 스타일 제거 */
+  appearance: none;
+  -webkit-appearance: none;
+
+  cursor: default; /* hover로 열리므로 클릭 유도 X */
+  user-select: none;
+}
+
+/* 헤더 hover는 "배경만" 살짝 */
+.sectionHeader:hover {
+  background: #f9fafb;
+}
+
+/* 포커스 라인 제거(요청 사항) */
+.sectionHeader:focus,
+.sectionHeader:focus-visible,
+.sectionHeader:active {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 열려 있을 때(hover open) 강조 */
+.section[data-open="true"] .sectionHeader {
+  background: #eef2ff;
+}
+
+/* 현재 경로가 속한 섹션 표시(선택) */
+.sectionHeaderActive {
+  font-weight: 700;
+}
+
+.sectionHeaderText {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+}
+
+.chevDown,
+.chevUp {
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid #6b7280;
+  border-bottom: 2px solid #6b7280;
+}
+
+.chevDown {
+  transform: rotate(45deg);
+}
+
+.chevUp {
+  transform: rotate(-135deg);
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 6px;
+  background: #ffffff;
+}
+
+.item,
+.itemActive {
+  display: block;
+  text-decoration: none;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #374151;
+}
+
+.item:hover {
+  background: #f3f4f6;
+}
+
+.itemActive {
+  background: #eef2ff;
+  color: #111827;
+  font-weight: 800;
+  border: 1px solid #dbeafe;
+}
