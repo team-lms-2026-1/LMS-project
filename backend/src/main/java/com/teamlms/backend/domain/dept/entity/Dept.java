@@ -56,4 +56,9 @@ public class Dept extends BaseEntity {
     public void deactivate() {
         this.active = false;
     }
+
+    // 활성화 / 비활성화
+    public void activate() {
+        this.active = true;
+    }
 }

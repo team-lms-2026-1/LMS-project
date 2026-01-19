@@ -26,4 +26,18 @@ public interface StudentMajorRepository extends JpaRepository<StudentMajor, Stud
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from StudentMajor sm where sm.id.studentAccountId = :studentAccountId")
     void deleteAllByStudentAccountId(@Param("studentAccountId") Long studentAccountId);
+
+    // 재학생 + 주전공 존재여부
+
+    @Query("""
+        select (count(sm) > 0)
+        from StudentMajor sm
+        join Major m on m.majorId = sm.id.majorId
+        join StudentProfile sp on sp.accountId = sm.id.studentAccountId
+        where m.deptId = :deptId
+          and sm.majorType = 'PRIMARY'
+          and sp.academicStatus = 'ENROLLED'
+    """)
+    boolean existsEnrolledPrimaryStudentByDeptId(@Param("deptId") Long deptId);
+
 }

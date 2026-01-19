@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface DeptRepository extends JpaRepository<Dept, Long> {
+public interface DeptRepository extends JpaRepository<Dept, Long>, DeptRepositoryCustom {
 
     Optional<Dept> findByDeptCode(String deptCode);
 

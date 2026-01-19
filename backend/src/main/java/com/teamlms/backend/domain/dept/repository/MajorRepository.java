@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface MajorRepository extends JpaRepository<Major, Long> {
+public interface MajorRepository extends JpaRepository<Major, Long>, MajorRepositoryCustom {
 
     List<Major> findAllByDeptIdOrderBySortOrderAscMajorIdAsc(Long deptId);
 
@@ -17,4 +17,6 @@ public interface MajorRepository extends JpaRepository<Major, Long> {
     boolean existsByDeptIdAndMajorName(Long deptId, String majorName);
 
     boolean existsByMajorIdAndDeptId(Long majorId, Long deptId);
+
+    boolean existsByDeptId(Long deptId);
 }
