@@ -51,4 +51,23 @@ public class ProfessorProfile extends BaseEntity {
                 .deptId(deptId)
                 .build();
     }
+    /* =========================
+       domain update methods
+       ========================= */
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updatePhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void updateDeptId(Long deptId) {
+        this.deptId = deptId;
+    }
 }
