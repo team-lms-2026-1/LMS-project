@@ -1,6 +1,6 @@
 package com.teamlms.backend.domain.career;
 
-import com.teamlms.backend.domain.account.entity.Account; // 👈 import 수정됨
+import com.teamlms.backend.domain.account.entity.Account; 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,9 +18,9 @@ public class UserTestHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;
 
-    // 🔴 수정된 부분: User -> Account로 변경
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id") // Account의 PK 컬럼명과 매칭
+    @JoinColumn(name = "account_id")  
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)

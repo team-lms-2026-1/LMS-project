@@ -61,3 +61,8 @@ spring:
     hibernate:
       ddl-auto: validate # 배포 환경에서는 절대 테이블을 맘대로 바꾸면 안 됨 (Flyway가 관리)
     show-sql: false # 운영 서버 로그 절약
+  api:
+  
+  worknet:
+    key: "h3Fc15RT7IE4WhljLA0kr4FiYG7SBGdR" # 발급받은 인증키
+    base-url: "http://openapi.work.go.kr/opi"
