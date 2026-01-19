@@ -46,5 +46,33 @@ public class StudentProfile extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "academic_status", nullable = false, length = 20)
     private AcademicStatus academicStatus; // ENROLLED | DROPPED | LEAVE | GRADUATED
+    
+    /* =========================
+       domain update methods
+       ========================= */
 
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updateDeptId(Long deptId) {
+        this.deptId = deptId;
+    }
+
+
+    public void updatePhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void updateGradeLevel(Integer gradeLevel) {
+        this.gradeLevel = gradeLevel;
+    }
+
+    public void updateAcademicStatus(AcademicStatus academicStatus) {
+        this.academicStatus = academicStatus;
+    }
 }

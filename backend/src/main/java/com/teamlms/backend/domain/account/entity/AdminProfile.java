@@ -43,4 +43,24 @@ public class AdminProfile {
                 .memo(memo)
                 .build();
     }
+
+    /* =========================
+       domain update methods
+       ========================= */
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updatePhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void updateMemo(String memo) {
+        this.memo = memo;
+    }
 }
