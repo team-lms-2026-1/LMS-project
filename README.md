@@ -54,7 +54,7 @@ git diff
 ### 2-4. add / commit
 
 ```bash
-git add .
+git add -A
 git commit -m "feat: add health endpoint"
 ```
 
@@ -208,4 +208,3 @@ npm run dev
 - CI Workflow: `.github/workflows/ci.yml`
 - Local Infra: `infra/docker-compose.local.yml`
 
-test test

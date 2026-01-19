@@ -41,7 +41,7 @@ public class Account extends BaseEntity {
 
     @Column(name = "password_changed_at")
     private LocalDateTime passwordChangedAt;
-
+    
     // (선택) 생성 팩토리로 필수값 통일
     public static Account create(String loginId, String passwordHash, AccountType type, AccountStatus status,
                                  Long actorAccountId, LocalDateTime now) {

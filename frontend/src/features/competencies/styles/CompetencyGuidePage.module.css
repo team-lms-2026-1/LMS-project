@@ -1,0 +1,119 @@
+.page {
+  width: 100%;
+  padding: 18px 20px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.breadcrumb {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0;
+  max-width: 900px;
+}
+
+.guideBox {
+  width: 100%;
+  background: #e5e7eb; /* 회색 영역 */
+  border-radius: 6px;
+  padding: 22px;
+}
+
+.guideInner {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 6px;
+  padding: 18px;
+}
+
+.guideTitle {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.guideText {
+  margin: 0 0 14px 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.guideGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.cardTitle {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.note {
+  margin-top: 12px;
+  background: #f9fafb;
+  border: 1px dashed rgba(17, 24, 39, 0.18);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.noteTitle {
+  display: block;
+  font-size: 13px;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.noteText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+@media (max-width: 900px) {
+  .guideGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -52,32 +52,21 @@ jobs:
         timeout: 30m
         command_timeout: 30m
         script: |
-            # 1. Swap 강제 활성화 (혹시 모르니 재시도)
-            sudo swapon /swapfile || true
-            
-            # 2. 기존 자바 프로세스 확실하게 종료
-            # 실행 중인게 있으면 죽이고, 10초 동안 메모리가 반환되길 기다림
-            sudo killall -9 java || true
-            sleep 10
+            # 1. 기존에 떠있는 도커 컨테이너가 있다면 중지하고 삭제
+            sudo docker stop backend-server || true
+            sudo docker rm backend-server || true
 
-            # 3. 배포 폴더로 이동
-            cd /home/${{ secrets.USERNAME }}/app
-           
-            # [디버깅용] 현재 폴더에 무슨 파일이 있는지 출력 (로그 확인용)
-            echo "=== 현재 폴더 파일 목록 ==="
-            ls -al
-            echo "========================="
-
-            # 4. 서버 실행 (초경량 128MB 모드)
-            # t2.micro에서 가장 안전한 설정입니다.
-            nohup java -Xms128m -Xmx128m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -jar \
-              -Dspring.profiles.active=prod \
-              -DRDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
-              -DDB_USER=${{ secrets.DB_USER }} \
-              -DDB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              app.jar > nohup.out 2>&1 &
+            # 2. 도커로 서버 실행
+            # -v 옵션: EC2에 있는 app.jar 파일을 도커 안으로 연결(마운트)
+            sudo docker run -d --name backend-server \
+              -p 8080:8080 \
+              -v /home/${{ secrets.USERNAME }}/app/app.jar:/app.jar \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              openjdk:17-jdk-slim \
+              java -Xms128m -Xmx128m -jar /app.jar
             
-            # 5. 실행 확인 대기
-            echo "Server started with 128MB memory limit."
-            sleep 5
-            exit 0
+            # 3. 안 쓰는 찌꺼기 이미지 정리 (용량 확보)
+            sudo docker image prune -f

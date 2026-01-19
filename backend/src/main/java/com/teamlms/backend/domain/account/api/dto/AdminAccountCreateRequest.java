@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.teamlms.backend.domain.account.enums.AcademicStatus;
+import com.teamlms.backend.domain.account.enums.AccountStatus;
+import com.teamlms.backend.domain.account.enums.AccountType;
+import com.teamlms.backend.domain.dept.enums.MajorType;
+
 @Getter
 @NoArgsConstructor
 public class AdminAccountCreateRequest {
@@ -26,10 +31,10 @@ public class AdminAccountCreateRequest {
 
 
     @NotNull
-    private String accountType; // STUDENT | PROFESSOR | ADMIN
+    private AccountType accountType; // STUDENT | PROFESSOR | ADMIN
 
     @NotNull
-    private String status;      // ACTIVE | INACTIVE
+    private AccountStatus status;      // ACTIVE | INACTIVE
 
     @Valid
     @NotNull
@@ -42,15 +47,16 @@ public class AdminAccountCreateRequest {
         // STUDENT
         private String studentNo;
         private Integer gradeLevel;
-        private String academicStatus;
-        private List<MajorMapping> majors; // TODO: DB 추가되면 저장
+        private AcademicStatus academicStatus;
+
+        @Valid
+        private List<MajorMapping> majors;
 
         // PROFESSOR
         private String professorNo;
-        private Long deptId;
 
         // ADMIN
-        private String adminNo; // (요청에 있으면 검증만)
+        private String adminNo;
         private String memo;
 
         // COMMON
@@ -58,12 +64,19 @@ public class AdminAccountCreateRequest {
         private String name;
         private String email;
         private String phone;
+        
+        // STUDENT, PROFESSOR 공통
+        private Long deptId;
     }
 
     @Getter
     @NoArgsConstructor
     public static class MajorMapping {
+
+        @NotNull
         private Long majorId;
-        private String majorType; // PRIMARY | DOUBLE ...
+
+        @NotNull
+        private MajorType majorType; // PRIMARY | DOUBLE ...
     }
 }

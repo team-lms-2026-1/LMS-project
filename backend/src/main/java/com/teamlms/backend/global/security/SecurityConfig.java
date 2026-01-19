@@ -3,6 +3,7 @@ package com.teamlms.backend.global.security;
 import com.teamlms.backend.global.security.jwt.JwtAuthenticationFilter;
 import com.teamlms.backend.global.security.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.*;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -13,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true) // permission 기반 권한체크
 public class SecurityConfig {
 
     @Bean
@@ -25,8 +27,16 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/error").permitAll()
+
+                //auth
                 .requestMatchers("/api/v1/auth/login").permitAll()
+
+                //role-based
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/professor/**").hasRole("PROFESSOR")
+                .requestMatchers("/api/v1/student/**").hasRole("STUDENT")
+
+                //그 외는 인증필요
                 .anyRequest().authenticated()
         );
 

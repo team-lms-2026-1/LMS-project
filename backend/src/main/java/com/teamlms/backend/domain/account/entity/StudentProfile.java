@@ -40,20 +40,39 @@ public class StudentProfile extends BaseEntity {
     @Column(name = "grade_level", nullable = false)
     private Integer gradeLevel;
 
+    @Column(name= "dept_id", nullable = false)
+    private Long deptId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "academic_status", nullable = false, length = 20)
     private AcademicStatus academicStatus; // ENROLLED | DROPPED | LEAVE | GRADUATED
+    
+    /* =========================
+       domain update methods
+       ========================= */
 
-    public static StudentProfile create(Account account, String studentNo, String name, String email, String phone,
-                                        Integer gradeLevel, AcademicStatus academicStatus, LocalDateTime now) {
-        return StudentProfile.builder()
-                .account(account)
-                .studentNo(studentNo)
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .gradeLevel(gradeLevel)
-                .academicStatus(academicStatus)
-                .build();
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updateDeptId(Long deptId) {
+        this.deptId = deptId;
+    }
+
+
+    public void updatePhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void updateGradeLevel(Integer gradeLevel) {
+        this.gradeLevel = gradeLevel;
+    }
+
+    public void updateAcademicStatus(AcademicStatus academicStatus) {
+        this.academicStatus = academicStatus;
     }
 }
