@@ -1,5 +1,6 @@
 package com.teamlms.backend.domain.community.api;
 
+import com.teamlms.backend.domain.community.api.dto.ExternalNoticePatchRequest;
 import com.teamlms.backend.domain.community.api.dto.ExternalNoticeRequest;
 import com.teamlms.backend.domain.community.api.dto.ExternalNoticeResponse;
 import com.teamlms.backend.domain.community.service.NoticeService;
@@ -52,7 +53,7 @@ public class NoticeController {
             @AuthenticationPrincipal AuthUser user 
     ) {
         
-        Long userId = user.getAccountId(); 
+        Long userId = user.getAccountId();
 
         Long noticeId = noticeService.createNotice(request, files, userId);
         
@@ -60,27 +61,6 @@ public class NoticeController {
     }
 
 
-
-    // // =================================================================
-    // // 1. 등록 (Create) -  관리자만 가능
-    // // =================================================================
-    // @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    // @PreAuthorize("hasRole('ADMIN')") //  관리자 권한 체크
-    // public ResponseEntity<Long> createNotice(
-    //         @Valid @RequestPart("request") ExternalNoticeRequest request,
-    //         @RequestPart(value = "files", required = false) List<MultipartFile> files
-    //         //  실제 로그인한 관리자 ID를 가져오려면 아래 주석을 해제하고 사용하세요
-    //         //, @AuthenticationPrincipal UserPrincipal user 
-    // ) {
-    //     // 임시 사용자 ID (로그인 기능 연동 전 테스트용)
-    //     Long mockUserId = 1L; 
-        
-    //     // 실제 연동 시: Long userId = user.getId();
-
-    //     Long noticeId = noticeService.createNotice(request, files, mockUserId);
-        
-    //     return ResponseEntity.ok(noticeId);
-    // }
 
     // =================================================================
     // 2. 목록 조회 (Read List) - 누구나 가능 (로그인 필요 여부는 SecurityConfig에서 설정)
@@ -106,23 +86,29 @@ public class NoticeController {
         return ResponseEntity.ok(response);
     }
 
+// =================================================================
+    // 4. 공지사항 수정 (텍스트 + 파일 추가/삭제)
     // =================================================================
-    // 4. 수정 (Update) - 관리자만 가능
-    // =================================================================
-    @PutMapping("/{noticeId}")
-    @PreAuthorize("hasRole('ADMIN')") //  관리자 권한 체크
+    @PatchMapping(value = "/{noticeId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}) // 👈 중요!
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> updateNotice(
             @PathVariable Long noticeId,
-            @Valid @RequestBody ExternalNoticeRequest request
-            // , @AuthenticationPrincipal UserPrincipal user 
+            
+            // 1. JSON 데이터 (글 내용 + 삭제할 파일 ID)
+            @RequestPart(value = "request") ExternalNoticePatchRequest request,
+            
+            // 2. 새로 추가할 파일들 (선택 사항)
+            @RequestPart(value = "files", required = false) List<MultipartFile> newFiles,
+            
+            @AuthenticationPrincipal AuthUser user
     ) {
-        Long mockUserId = 1L;
-        // Long userId = user.getId();
+        Long userId = user.getAccountId();
 
-        noticeService.updateNotice(noticeId, request, mockUserId);
+        // 서비스에 새 파일 목록도 같이 넘김
+        noticeService.updateNotice(noticeId, request, newFiles, userId);
+        
         return ResponseEntity.ok().build();
     }
-
     // =================================================================
     // 5. 삭제 (Delete) - ★ 관리자만 가능
     // =================================================================

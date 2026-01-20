@@ -1,5 +1,4 @@
 package com.teamlms.backend.domain.community.service;
-
 // 1. 타 도메인
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
@@ -115,31 +114,58 @@ public class NoticeService {
         // 3. 변환하여 반환
         return notices.map(this::convertToExternalResponse);
     }
-
     // =================================================================
-    // 4. 수정 (Update)
+    // 4. 수정 (PATCH: 텍스트 수정 + 파일 추가/삭제)
     // =================================================================
     @Transactional
-    public void updateNotice(Long noticeId, ExternalNoticeRequest request, Long requesterId) {
+    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles, Long requesterId) {
         
+        // 1. 게시글 찾기
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
 
-        // (권한 체크 로직이 필요하다면 여기에 추가)
+        // === 1. 텍스트 데이터 수정 (값이 있는 경우에만 변경) ===
+        if (request.getCategoryId() != null) {
+            NoticeCategory category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+            notice.changeCategory(category);
+        }
+
+        if (request.getTitle() != null) {
+            notice.changeTitle(request.getTitle());
+        }
+
+        if (request.getContent() != null) {
+            notice.changeContent(request.getContent());
+        }
+
+        if (request.getDisplayStartAt() != null) {
+            notice.changeDisplayStartAt(parseDateTime(request.getDisplayStartAt()));
+        }
+
+        if (request.getDisplayEndAt() != null) {
+            notice.changeDisplayEndAt(parseDateTime(request.getDisplayEndAt()));
+        }
+
+        // === 2. 기존 파일 삭제 (요청된 ID 목록이 있는 경우) ===
+        if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
+            List<NoticeAttachment> targets = attachmentRepository.findAllById(request.getDeleteFileIds());
+            
+            for (NoticeAttachment target : targets) {
+                // TODO: 실제 로컬 디스크나 S3에서 파일 삭제하는 코드 추가 권장
+                // fileStore.deleteFile(target.getStorageKey()); 
+                
+                attachmentRepository.delete(target); // DB에서 메타데이터 삭제
+            }
+        }
+
+        // === 3. 새 파일 추가 (파일이 넘어온 경우) ===
+        if (newFiles != null && !newFiles.isEmpty()) {
+            saveAttachments(newFiles, notice); // 하단에 이미 만들어둔 헬퍼 메서드 재사용
+        }
         
-        NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("카테고리 오류"));
-
-        // Entity의 update 메서드 호출 (Dirty Checking으로 자동 저장)
-        notice.update(
-            request.getTitle(),
-            request.getContent(),
-            category,
-            parseDateTime(request.getDisplayStartAt()),
-            parseDateTime(request.getDisplayEndAt())
-        );
+        // (참고) Auditing이 없다면 수정자 수동 기록: notice.setUpdatedBy(requesterId);
     }
-
     // =================================================================
     // 5. 삭제 (Delete)
     // =================================================================
