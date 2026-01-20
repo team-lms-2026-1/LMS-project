@@ -9,7 +9,7 @@ import AccountCreateModal from "./AccountCreateModal";
 import AccountEditModal from "./AccountEditModal";
 
 import { accountsApi } from "../api/accountsApi";
-import { AccountRowDto } from "../api/dto";
+import type { AccountRowDto } from "../api/dto";
 
 type RoleFilter = "ALL" | AccountType;
 
@@ -20,7 +20,7 @@ function mapRow(dto: AccountRowDto): AccountRowView {
     accountType: dto.accountType,
     status: dto.status,
     createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
+    updatedAt: dto.updatedAt ?? dto.createdAt,
     lastLoginAt: null,
     passwordChangedAt: null,
   };
@@ -37,15 +37,12 @@ function mapRow(dto: AccountRowDto): AccountRowView {
             name: p.name,
             email: p.email ?? null,
             phone: p.phone ?? null,
-
-            // ✅ 새 규칙 필드명으로 매핑
             deptId: p.deptId ?? 0,
             gradeLevel: p.gradeLevel ?? 1,
             academicStatus: (p.academicStatus as any) ?? "ENROLLED",
             majors: (p.majors as any) ?? [],
-
             createdAt: dto.createdAt,
-            updatedAt: dto.updatedAt,
+            updatedAt: dto.updatedAt ?? dto.createdAt,
           }
         : undefined,
     };
@@ -61,37 +58,34 @@ function mapRow(dto: AccountRowDto): AccountRowView {
             name: p.name,
             email: p.email ?? null,
             phone: p.phone ?? null,
-
-            // ✅ deptId로 통일
             deptId: p.deptId ?? 0,
-
             createdAt: dto.createdAt,
-            updatedAt: dto.updatedAt,
+            updatedAt: dto.updatedAt ?? dto.createdAt,
           }
         : undefined,
     };
   }
 
+  const ap = dto.adminProfile ?? (dto.profile as any);
+
   return {
     account: base,
-    adminProfile: p
+    adminProfile: ap
       ? {
           accountId: dto.accountId,
-          name: p.name,
-          email: p.email ?? null,
-          phone: p.phone ?? null,
-          memo: p.memo ?? null,
+          name: ap.name,
+          email: ap.email ?? null,
+          phone: ap.phone ?? null,
+          memo: ap.memo ?? null,
           createdAt: dto.createdAt,
-          updatedAt: dto.updatedAt,
+          updatedAt: dto.updatedAt ?? dto.createdAt,
         }
       : undefined,
   };
 }
 
-
 export default function AccountListPage() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
-
   const [keywordDraft, setKeywordDraft] = useState("");
   const [keywordApplied, setKeywordApplied] = useState("");
 
@@ -103,6 +97,8 @@ export default function AccountListPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editingAccountId, setEditingAccountId] = useState<number | null>(null);
 
+  const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
+
   async function fetchList() {
     setLoading(true);
     setErrorMsg(null);
@@ -111,9 +107,11 @@ export default function AccountListPage() {
         accountType: roleFilter === "ALL" ? undefined : roleFilter,
         keyword: keywordApplied || undefined,
         page: 1,
-        size: 10,
+        size: 50,
       });
-      setRows((res.items ?? []).map(mapRow));
+
+      const list = res?.items ?? [];
+      setRows(list.map(mapRow));
     } catch (e: any) {
       setErrorMsg(e?.message ?? "목록 조회 실패");
     } finally {
@@ -122,33 +120,50 @@ export default function AccountListPage() {
   }
 
   useEffect(() => {
-    // 최초 진입 시 1회
     fetchList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // 카테고리 버튼 변경 시 즉시 반영(스크린샷 요구사항)
     fetchList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roleFilter]);
 
-  const editingRow = useMemo(() => {
-    if (!editingAccountId) return null;
-    return rows.find((r) => r.account.accountId === editingAccountId) ?? null;
-  }, [rows, editingAccountId]);
+  const filteredRows = useMemo(() => {
+    if (roleFilter === "ALL") return rows;
+    return rows.filter((r) => r.account.accountType === roleFilter);
+  }, [rows, roleFilter]);
 
-  const onToggleStatus = async (accountId: number, next: AccountStatus) => {
+  const onToggleStatus = async (accountId: number, current: AccountStatus, next: AccountStatus) => {
+    if (current === next) return;
+
+    // in-flight 가드
+    if (pendingIds.has(accountId)) return;
+
+    // optimistic update
+    setRows((prev) =>
+      prev.map((r) =>
+        r.account.accountId === accountId ? { ...r, account: { ...r.account, status: next } } : r
+      )
+    );
+    setPendingIds((prev) => new Set(prev).add(accountId));
+
     try {
       await accountsApi.updateStatus(accountId, next);
-      // 낙관적 업데이트
+    } catch (e: any) {
+      // 실패 시 원복
       setRows((prev) =>
         prev.map((r) =>
-          r.account.accountId === accountId ? { ...r, account: { ...r.account, status: next } } : r
+          r.account.accountId === accountId ? { ...r, account: { ...r.account, status: current } } : r
         )
       );
-    } catch (e: any) {
       alert(e?.message ?? "상태 변경 실패");
+    } finally {
+      setPendingIds((prev) => {
+        const n = new Set(prev);
+        n.delete(accountId);
+        return n;
+      });
     }
   };
 
@@ -174,7 +189,6 @@ export default function AccountListPage() {
           onChangeKeyword={setKeywordDraft}
           onApply={() => {
             setKeywordApplied(keywordDraft);
-            // “검색 버튼 눌렀을 때”만 적용
             setTimeout(fetchList, 0);
           }}
         />
@@ -184,7 +198,8 @@ export default function AccountListPage() {
           <div style={{ padding: 12 }}>로딩중...</div>
         ) : (
           <AccountTable
-            rows={rows}
+            rows={filteredRows}
+            pendingIds={pendingIds}
             onToggleStatus={onToggleStatus}
             onClickEdit={(accountId) => {
               setEditingAccountId(accountId);
@@ -205,7 +220,7 @@ export default function AccountListPage() {
 
       <AccountEditModal
         open={editOpen}
-        row={editingRow}
+        accountId={editingAccountId}
         onClose={() => setEditOpen(false)}
         onSaved={async () => {
           setEditOpen(false);

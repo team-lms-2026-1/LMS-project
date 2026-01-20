@@ -5,7 +5,8 @@ import { AccountRowView, AccountStatus } from "../types";
 
 type Props = {
   rows: AccountRowView[];
-  onToggleStatus: (accountId: number, next: AccountStatus) => void;
+  pendingIds: Set<number>;
+  onToggleStatus: (accountId: number, current: AccountStatus, next: AccountStatus) => void;
   onClickEdit: (accountId: number) => void;
 };
 
@@ -19,7 +20,7 @@ function pickProfile(row: AccountRowView) {
   return row.studentProfile ?? row.professorProfile ?? row.adminProfile;
 }
 
-export default function AccountTable({ rows, onToggleStatus, onClickEdit }: Props) {
+export default function AccountTable({ rows, pendingIds, onToggleStatus, onClickEdit }: Props) {
   return (
     <div className={styles.tableWrap}>
       <table className={styles.table}>
@@ -44,6 +45,9 @@ export default function AccountTable({ rows, onToggleStatus, onClickEdit }: Prop
           ) : (
             rows.map((row) => {
               const p = pickProfile(row);
+              const isPending = pendingIds.has(row.account.accountId);
+              const checked = row.account.status === "ACTIVE";
+
               return (
                 <tr key={row.account.accountId}>
                   <td>{row.account.loginId}</td>
@@ -52,12 +56,17 @@ export default function AccountTable({ rows, onToggleStatus, onClickEdit }: Prop
                   <td>{p?.email ?? "-"}</td>
                   <td>{row.account.createdAt.slice(0, 10)}</td>
                   <td>
-                    <label className={styles.switch}>
+                    <label className={styles.switch} aria-disabled={isPending}>
                       <input
                         type="checkbox"
-                        checked={row.account.status === "ACTIVE"}
+                        checked={checked}
+                        disabled={isPending}
                         onChange={(e) =>
-                          onToggleStatus(row.account.accountId, e.target.checked ? "ACTIVE" : "INACTIVE")
+                          onToggleStatus(
+                            row.account.accountId,
+                            row.account.status,
+                            e.target.checked ? "ACTIVE" : "INACTIVE"
+                          )
                         }
                       />
                       <span className={styles.slider} />
@@ -68,6 +77,7 @@ export default function AccountTable({ rows, onToggleStatus, onClickEdit }: Prop
                       type="button"
                       className={styles.smallBtn}
                       onClick={() => onClickEdit(row.account.accountId)}
+                      disabled={isPending}
                     >
                       수정
                     </button>

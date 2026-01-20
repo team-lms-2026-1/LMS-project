@@ -19,12 +19,22 @@ function getBaseUrl() {
 }
 
 function buildHeaders() {
-  const token = cookies().get("access_token")?.value;
+  let token = cookies().get("access_token")?.value;
   console.log("[BFF] has access_token cookie?", Boolean(token)); 
+
+    if (token) {
+      token = decodeURIComponent(token)
+        .replace(/^"|"$/g, "")        // "..." 제거
+        .replace(/^Bearer\s+/i, "")   // 이미 Bearer가 있으면 제거
+        .trim();
+    }
 
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const auth = headers.get("Authorization");
+  console.log("[BFF] outbound Authorization=", auth ? auth.slice(0, 30) + "..." : null);  
 
   return headers;
 }
