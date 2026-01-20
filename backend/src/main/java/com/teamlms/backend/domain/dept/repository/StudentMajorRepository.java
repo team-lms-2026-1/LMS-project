@@ -23,6 +23,8 @@ public interface StudentMajorRepository extends JpaRepository<StudentMajor, Stud
 
     void deleteByIdStudentAccountId(Long studentAccountId);
 
+    boolean existsByIdMajorId(Long majorId);
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from StudentMajor sm where sm.id.studentAccountId = :studentAccountId")
     void deleteAllByStudentAccountId(@Param("studentAccountId") Long studentAccountId);
@@ -39,5 +41,4 @@ public interface StudentMajorRepository extends JpaRepository<StudentMajor, Stud
           and sp.academicStatus = 'ENROLLED'
     """)
     boolean existsEnrolledPrimaryStudentByDeptId(@Param("deptId") Long deptId);
-
 }

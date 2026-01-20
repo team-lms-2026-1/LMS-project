@@ -26,6 +26,7 @@ public enum ErrorCode {
     INVALID_HEAD_PROFESSOR(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "담당 교수는 해당 학과 소속 교수만 지정할 수 있습니다.", "dept.headProfessor.invalid"),
 
 
+
     // =========================
     // Domain: Dept&Major
     // =========================
@@ -33,8 +34,9 @@ public enum ErrorCode {
     DEPT_NOT_FOUND(HttpStatus.NOT_FOUND, "DEPT_NOT_FOUND", "학과를 찾을 수 없습니다.", "dept.notFound"),
     DUPLICATE_MAJOR_CODE(HttpStatus.CONFLICT, "DUPLICATE_MAJOR_CODE", "이미 사용 중인 전공 코드입니다.", "major.code.duplicate"),
     DUPLICATE_MAJOR_NAME(HttpStatus.CONFLICT, "DUPLICATE_MAJOR_NAME", "이미 사용 중인 전공 이름입니다.", "major.name.duplicate"),
-    Major_NOT_FOUND(HttpStatus.NOT_FOUND, "MAJOR_NOT_FOUND", "전공을 찾을 수 없습니다..", "dept.notFound"),
-
+    MAJOR_NOT_FOUND(HttpStatus.NOT_FOUND, "MAJOR_NOT_FOUND", "전공을 찾을 수 없습니다..", "dept.notFound"),
+    MAJOR_NOT_IN_DEPT(HttpStatus.CONFLICT, "MAJOR_NOT_IN_DEPT", "전공이 해당 학과 소속이 아닙니다.", "major.notInDept"),
+    MAJOR_IN_USE(HttpStatus.CONFLICT, "MAJOR_IN_USE", "연관 데이터가 존재하여 전공을 삭제할 수 없습니다.", "major.inUse"),
     // =========================
     // Domain: Notice
     // =========================

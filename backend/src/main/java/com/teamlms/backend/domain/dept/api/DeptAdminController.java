@@ -14,6 +14,8 @@ import com.teamlms.backend.domain.dept.api.dto.DeptSummaryResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptUpdateFormResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptUpdateRequest;
 import com.teamlms.backend.domain.dept.api.dto.MajorCreateRequest;
+import com.teamlms.backend.domain.dept.api.dto.MajorEditResponse;
+import com.teamlms.backend.domain.dept.api.dto.MajorUpdateRequest;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.service.DeptCommandService;
 import com.teamlms.backend.domain.dept.service.DeptQueryService;
@@ -33,8 +35,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequiredArgsConstructor
@@ -196,7 +196,7 @@ public class DeptAdminController {
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 전공 
+    // 학과 전공 목록
     @GetMapping("/{deptId}/majors")
     public ApiResponse<List<DeptMajorListItem>> listDeptMajors(
         @PathVariable Long deptId,
@@ -219,7 +219,7 @@ public class DeptAdminController {
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 전공 등록
+    // 학과 - 전공 등록
     @PostMapping("/{deptId}/majors")
     public ApiResponse<SuccessResponse> createMajor(
         @PathVariable Long deptId,
@@ -230,4 +230,33 @@ public class DeptAdminController {
         return ApiResponse.ok(new SuccessResponse());
     }
     
+    // 학과 - 전공 수정( 조회 )
+    @GetMapping("/{deptId}/majors/{majorId}/edit")
+    public ApiResponse<MajorEditResponse> getMajorForUpdate(
+            @PathVariable Long deptId,
+            @PathVariable Long majorId
+    ) {
+        return ApiResponse.ok(deptQueryService.getMajorEditForm(deptId, majorId));
+    }
+
+    // 학과 - 전공 수정
+    @PatchMapping("/{deptId}/majors/{majorId}/edit")
+    public ApiResponse<SuccessResponse> updateMajor(
+        @PathVariable Long deptId,
+        @PathVariable Long majorId,
+        @Valid @RequestBody MajorUpdateRequest request
+    ) {
+        majorCommandService.updateMajor(deptId, majorId, request);
+        return ApiResponse.ok(new SuccessResponse());
+    }
+
+    // 학과 - 전공 삭제
+    @DeleteMapping("/{deptId}/majors/{majorId}")
+    public ApiResponse<SuccessResponse> deleteMajor(
+        @PathVariable Long deptId,
+        @PathVariable Long majorId
+    ) {
+        majorCommandService.deleteMajor(deptId, majorId);
+        return ApiResponse.ok(new SuccessResponse());
+    }
 }

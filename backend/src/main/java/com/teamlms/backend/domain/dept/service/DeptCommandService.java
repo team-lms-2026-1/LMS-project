@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.dept.service;
 
 import com.teamlms.backend.domain.account.repository.ProfessorProfileRepository;
+import com.teamlms.backend.domain.dept.api.dto.MajorUpdateRequest;
 import com.teamlms.backend.domain.dept.api.dto.ProfessorDropdownItem;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
@@ -50,7 +51,6 @@ public class DeptCommandService {
 
 
     // 학과 수정
-    @Transactional
     public void update(Long deptId, String deptName, Long headProfessorAccountId, String description, Long actorAccountId) {
 
         Dept dept = deptRepository.findById(deptId)
@@ -71,7 +71,6 @@ public class DeptCommandService {
 
 
     // 활성화 비활성화
-    @Transactional
     public void updateActive(Long deptId, boolean isActive, Long actorAccountId) {
 
         Dept dept = deptRepository.findById(deptId)
@@ -100,5 +99,4 @@ public class DeptCommandService {
             dept.deactivate();
         }
     }
-
 }
