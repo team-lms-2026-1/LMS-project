@@ -25,7 +25,7 @@ public class MajorQueryService {
 
     public Major getOrThrow(Long majorId) {
         return majorRepository.findById(majorId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.Major_NOT_FOUND, majorId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MAJOR_NOT_FOUND, majorId));
     }
 
     public List<Major> listByDept(Long deptId) {

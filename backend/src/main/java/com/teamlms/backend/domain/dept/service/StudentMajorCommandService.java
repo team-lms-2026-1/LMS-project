@@ -23,7 +23,7 @@ public class StudentMajorCommandService {
 
     public void assign(Long studentAccountId, Long majorId, MajorType majorType) {
         if (!majorRepository.existsById(majorId)) {
-            throw  new BusinessException(ErrorCode.Major_NOT_FOUND, majorId);
+            throw  new BusinessException(ErrorCode.MAJOR_NOT_FOUND, majorId);
         }
         if (studentMajorRepository.existsByIdStudentAccountIdAndIdMajorId(studentAccountId, majorId)) {
             throw new IllegalStateException("이미 등록된 전공입니다.");

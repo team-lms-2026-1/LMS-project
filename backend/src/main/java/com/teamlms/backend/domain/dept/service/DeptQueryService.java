@@ -9,6 +9,7 @@ import com.teamlms.backend.domain.dept.api.dto.DeptMajorListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptProfessorListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptStudentListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptSummaryResponse;
+import com.teamlms.backend.domain.dept.api.dto.MajorEditResponse;
 import com.teamlms.backend.domain.dept.api.dto.ProfessorDropdownItem;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
@@ -113,5 +114,11 @@ public class DeptQueryService {
         return majorRepository.searchDeptMajors(deptId, keyword, pageable);
     }
 
+    // 학과 - 전공 수정 ( 조회 )
+    public MajorEditResponse getMajorEditForm(Long deptId, Long majorId) {
+        return majorRepository.findByMajorIdAndDeptIdAndActiveTrue(majorId, deptId)
+                .map(MajorEditResponse::from)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MAJOR_NOT_FOUND, majorId));
+    }
 
 }
