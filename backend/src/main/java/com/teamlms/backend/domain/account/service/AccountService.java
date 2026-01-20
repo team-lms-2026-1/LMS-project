@@ -9,9 +9,9 @@ import com.teamlms.backend.domain.account.enums.AccountStatus;
 import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.dept.enums.MajorType;
-import com.teamlms.backend.global.exception.AccountInactiveException;
-import com.teamlms.backend.global.exception.AccountNotFoundException;
-import com.teamlms.backend.global.exception.AuthenticationFailedException;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -33,18 +33,18 @@ public class AccountService {
 
     public Account getByLoginIdOrThrow(String loginId) {
         return accountRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new AccountNotFoundException(loginId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, loginId));
     }
 
     public void validateActive(Account account) {
         if (account.getStatus() != AccountStatus.ACTIVE) {
-            throw new AccountInactiveException(account.getAccountId());
+            throw new BusinessException(ErrorCode.ACCOUNT_INACTIVE, account.getAccountId());
         }
     }
 
     public void validatePassword(Account account, String rawPassword) {
         if (!passwordEncoder.matches(rawPassword, account.getPasswordHash())) {
-            throw new AuthenticationFailedException();
+            throw new BusinessException(ErrorCode.AUTH_FAILED);
         }
     }
 
@@ -70,18 +70,18 @@ public class AccountService {
     // 상세 조회
     public Object adminDetail(Long accountId) {
         AccountType type = accountRepository.findAccountTypeById(accountId);
-        if (type == null) throw new AccountNotFoundException(accountId);
+        if (type == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
 
         return switch (type) {
             case STUDENT -> buildStudentDetail(accountId);
             case PROFESSOR -> {
                 AdminProfessorDetailResponse dto = accountRepository.findProfessorDetail(accountId);
-                if (dto == null) throw new AccountNotFoundException(accountId);
+                if (dto == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
                 yield dto;
             }
             case ADMIN -> {
                 AdminAdminAccountDetailResponse dto = accountRepository.findAdminDetail(accountId);
-                if (dto == null) throw new AccountNotFoundException(accountId);
+                if (dto == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
                 yield dto;
             }
         };
@@ -89,7 +89,7 @@ public class AccountService {
 
     private AdminStudentDetailResponse buildStudentDetail(Long accountId) {
         AdminStudentDetailResponse base = accountRepository.findStudentBaseDetail(accountId);
-        if (base == null) throw new AccountNotFoundException(accountId);
+        if (base == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
 
         List<AdminStudentDetailResponse.MajorItem> majors =
                 accountRepository.findStudentMajors(accountId);
@@ -121,7 +121,7 @@ public class AccountService {
                 .build();
 
         return AdminStudentDetailResponse.builder()
-                .accountId(base.getAccountId()) // ✅ DTO 오타 수정돼있어야 함
+                .accountId(base.getAccountId())
                 .loginId(base.getLoginId())
                 .accountType(base.getAccountType())
                 .status(base.getStatus())
