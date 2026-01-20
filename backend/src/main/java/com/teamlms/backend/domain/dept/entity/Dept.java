@@ -40,10 +40,17 @@ public class Dept extends BaseEntity {
 
     /* ========= domain method ========= */
 
-    public void updateInfo(String deptName, String description) {
+    public void updateInfo(
+            String deptName,
+            Long headProfessorAccountId,
+            String description,
+            Long actorAccountId
+    ) {
         this.deptName = deptName;
+        this.headProfessorAccountId = headProfessorAccountId;
         this.description = description;
     }
+
 
     public void assignHeadProfessor(Long professorAccountId) {
         this.headProfessorAccountId = professorAccountId;
