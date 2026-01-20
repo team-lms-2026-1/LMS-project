@@ -4,7 +4,6 @@ import com.teamlms.backend.domain.dept.api.dto.MajorCreateRequest;
 import com.teamlms.backend.domain.dept.entity.Major;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
 import com.teamlms.backend.domain.dept.repository.MajorRepository;
-import com.teamlms.backend.global.exception.MajorNotFoundException;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 
@@ -52,19 +51,5 @@ public class MajorCommandService {
                 .build();
 
         majorRepository.save(major);
-    }
-
-    public void updateInfo(Long majorId, String majorName, String description, int sortOrder) {
-        Major major = majorRepository.findById(majorId)
-                .orElseThrow(() -> new MajorNotFoundException(majorId));
-
-        major.updateInfo(majorName, description, sortOrder);
-    }
-
-    public void deactivate(Long majorId) {
-        Major major = majorRepository.findById(majorId)
-                .orElseThrow(() -> new MajorNotFoundException(majorId));
-
-        major.deactivate();
     }
 }

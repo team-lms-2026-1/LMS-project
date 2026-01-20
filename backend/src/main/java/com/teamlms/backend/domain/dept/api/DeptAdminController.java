@@ -6,6 +6,7 @@ import com.teamlms.backend.domain.dept.api.dto.DeptActiveUpdateRequest;
 import com.teamlms.backend.domain.dept.api.dto.DeptCreateRequest;
 import com.teamlms.backend.domain.dept.api.dto.DeptEditResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptListItem;
+import com.teamlms.backend.domain.dept.api.dto.DeptMajorDropdownItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptMajorListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptProfessorListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptStudentListItem;
@@ -13,7 +14,6 @@ import com.teamlms.backend.domain.dept.api.dto.DeptSummaryResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptUpdateFormResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptUpdateRequest;
 import com.teamlms.backend.domain.dept.api.dto.MajorCreateRequest;
-import com.teamlms.backend.domain.dept.api.dto.MajorDropdownItem;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.service.DeptCommandService;
 import com.teamlms.backend.domain.dept.service.DeptQueryService;
@@ -35,10 +35,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-
-
-
 
 @RestController
 @RequiredArgsConstructor
@@ -139,12 +135,12 @@ public class DeptAdminController {
         return ApiResponse.ok(deptQueryService.getDeptDropdown());
     }
     
-    // 전공 목록 드롭다운
+    // 학과의 전공 목록 드롭다운
     @GetMapping("/{deptId}/majors/dropdown")
-    public ApiResponse<List<MajorDropdownItem>> majordropdown(
+    public ApiResponse<List<DeptMajorDropdownItem>> deptMajorDropdown(
         @PathVariable Long deptId
     ) {
-        return ApiResponse.ok(majorQueryService.getMajorDropdown(deptId));
+        return ApiResponse.ok(majorQueryService.getDeptMajorDropdown(deptId));
     }
 
     // 학과 상세 (summary)
