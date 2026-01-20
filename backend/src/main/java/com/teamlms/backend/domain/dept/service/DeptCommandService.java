@@ -6,7 +6,6 @@ import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
 import com.teamlms.backend.domain.dept.repository.MajorRepository;
 import com.teamlms.backend.domain.dept.repository.StudentMajorRepository;
-import com.teamlms.backend.global.exception.InvalidHeadProfessorException;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 
@@ -61,7 +60,7 @@ public class DeptCommandService {
             // 1) 교수 소속 검증 (최소)
             boolean ok = professorProfileRepository.existsByAccountIdAndDeptId(headProfessorAccountId, deptId);
             if (!ok) {
-                throw new InvalidHeadProfessorException(headProfessorAccountId, deptId);
+                throw new BusinessException(ErrorCode.INVALID_HEAD_PROFESSOR, headProfessorAccountId, deptId);
             }
 
             // (선택) 2) accountType/ACTIVE까지 검증하려면 AccountRepository/Querydsl로 추가 검증
