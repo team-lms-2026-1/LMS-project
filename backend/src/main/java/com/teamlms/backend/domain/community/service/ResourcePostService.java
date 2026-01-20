@@ -6,6 +6,10 @@ import com.teamlms.backend.domain.community.api.dto.*;
 import com.teamlms.backend.domain.community.dto.InternalResourceSearchRequest;
 import com.teamlms.backend.domain.community.entity.*;
 import com.teamlms.backend.domain.community.repository.*;
+//에러코드 임포트
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,7 +54,7 @@ public class ResourcePostService {
     @Transactional
     public ExternalResourceResponse getDetail(Long resourceId) {
         ResourcePost post = postRepository.findById(resourceId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 자료가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         // 조회수 증가
         post.increaseViewCount();
@@ -62,10 +66,10 @@ public class ResourcePostService {
     @Transactional
     public Long create(ExternalResourceRequest request, List<MultipartFile> files, Long authorId) {
         Account author = accountRepository.findById(authorId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
 
         ResourceCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_CATEGORY));
 
         // 게시글 저장
         ResourcePost post = ResourcePost.builder()
@@ -89,12 +93,12 @@ public class ResourcePostService {
     @Transactional
     public void update(Long resourceId, ExternalResourcePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
         ResourcePost post = postRepository.findById(resourceId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 자료가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
         // 4-1. 텍스트 정보 수정 (값이 있는 경우에만)
         if (request.getCategoryId() != null) {
             ResourceCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("카테고리 오류"));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_CATEGORY));
             post.changeCategory(category);
         }
         if (request.getTitle() != null) post.changeTitle(request.getTitle());

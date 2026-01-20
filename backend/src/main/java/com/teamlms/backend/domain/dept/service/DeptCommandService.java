@@ -1,13 +1,19 @@
 package com.teamlms.backend.domain.dept.service;
 
 import com.teamlms.backend.domain.account.repository.ProfessorProfileRepository;
+import com.teamlms.backend.domain.dept.api.dto.ProfessorDropdownItem;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
 import com.teamlms.backend.domain.dept.repository.MajorRepository;
 import com.teamlms.backend.domain.dept.repository.StudentMajorRepository;
-import com.teamlms.backend.global.exception.DeptDeactivateNotAllowedException;
-import com.teamlms.backend.global.exception.DeptNotFoundException;
+import com.teamlms.backend.global.exception.InvalidHeadProfessorException;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,45 +49,34 @@ public class DeptCommandService {
         return saved.getDeptId();
     }
 
-    public void updateInfo(Long deptId, String deptName, String description) {
-        Dept dept = deptRepository.findById(deptId)
-                .orElseThrow(() -> new DeptNotFoundException(deptId));
 
-        dept.updateInfo(deptName, description);
+    // 학과 수정
+    @Transactional
+    public void update(Long deptId, String deptName, Long headProfessorAccountId, String description, Long actorAccountId) {
+
+        Dept dept = deptRepository.findById(deptId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.DEPT_NOT_FOUND, deptId));
+
+        if (headProfessorAccountId != null) {
+            // 1) 교수 소속 검증 (최소)
+            boolean ok = professorProfileRepository.existsByAccountIdAndDeptId(headProfessorAccountId, deptId);
+            if (!ok) {
+                throw new InvalidHeadProfessorException(headProfessorAccountId, deptId);
+            }
+
+            // (선택) 2) accountType/ACTIVE까지 검증하려면 AccountRepository/Querydsl로 추가 검증
+        }
+
+        dept.updateInfo(deptName, headProfessorAccountId, description, actorAccountId);
     }
 
-    /**
-     * 학과장 지정/변경
-     * - 여기서 "교수인지", "해당 학과 소속인지" 검증은
-     *   account/professor_profile 쿼리가 필요하므로, 추후 AccountService 연동 때 추가하면 됨.
-     */
-    public void assignHeadProfessor(Long deptId, Long headProfessorAccountId) {
-        Dept dept = deptRepository.findById(deptId)
-                .orElseThrow(() -> new DeptNotFoundException(deptId));
-
-        dept.assignHeadProfessor(headProfessorAccountId);
-    }
-
-    public void clearHeadProfessor(Long deptId) {
-        Dept dept = deptRepository.findById(deptId)
-                .orElseThrow(() -> new DeptNotFoundException(deptId));
-
-        dept.clearHeadProfessor();
-    }
-
-    public void deactivate(Long deptId) {
-        Dept dept = deptRepository.findById(deptId)
-                .orElseThrow(() -> new DeptNotFoundException(deptId));
-
-        dept.deactivate();
-    }
 
     // 활성화 비활성화
     @Transactional
     public void updateActive(Long deptId, boolean isActive, Long actorAccountId) {
 
         Dept dept = deptRepository.findById(deptId)
-                .orElseThrow(() -> new DeptNotFoundException(deptId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.DEPT_NOT_FOUND, deptId));
 
         // 이미 같은 상태면 그냥 종료(멱등)
         if (dept.isActive() == isActive) {
@@ -95,7 +90,7 @@ public class DeptCommandService {
             boolean hasEnrolledPrimaryStudent = studentMajorRepository.existsEnrolledPrimaryStudentByDeptId(deptId);
 
             if (hasMajor || hasActiveProfessor || hasEnrolledPrimaryStudent) {
-                throw new DeptDeactivateNotAllowedException(deptId);
+                throw new BusinessException(ErrorCode.DEPT_DEACTIVATE_NOT_ALLOWED, deptId);
             }
         }
 

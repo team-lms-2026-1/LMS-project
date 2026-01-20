@@ -10,6 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+// 에러 코드 임포트
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
+
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +47,7 @@ public class ResourceCategoryService {
     public Long create(ExternalCategoryRequest request) {
         // 이름 중복 검사
         if (categoryRepository.findByName(request.getName()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 카테고리 이름입니다.");
+            throw new BusinessException(ErrorCode.DUPLICATE_CATEGORY_NAME);
         }
 
         ResourceCategory category = ResourceCategory.builder()
@@ -59,12 +63,12 @@ public class ResourceCategoryService {
     @Transactional
     public void update(Long categoryId, ExternalCategoryRequest request) {
         ResourceCategory category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // 이름 변경 시 중복 검사 (자기 자신은 제외)
         if (!category.getName().equals(request.getName()) 
              && categoryRepository.findByName(request.getName()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 카테고리 이름입니다.");
+            throw new BusinessException(ErrorCode.DUPLICATE_CATEGORY_NAME);
         }
 
         category.update(request.getName(), request.getBgColorHex(), request.getTextColorHex());
@@ -75,7 +79,7 @@ public class ResourceCategoryService {
     public void delete(Long categoryId) {
         // 해당 카테고리를 사용하는 게시글이 있는지 확인
         if (postRepository.existsByCategory_Id(categoryId)) {
-            throw new IllegalStateException("이 카테고리에 속한 자료가 있어 삭제할 수 없습니다.");
+            throw new BusinessException(ErrorCode.CATEGORY_DELETE_NOT_ALLOWED);
         }
 
         categoryRepository.deleteById(categoryId);

@@ -19,6 +19,9 @@ import com.teamlms.backend.domain.community.enums.NoticeStatus;
 
 // 6. Repository
 import com.teamlms.backend.domain.community.repository.*;
+// 에러코드 임포트
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,10 +55,10 @@ public class NoticeService {
     public Long createNotice(ExternalNoticeRequest request, List<MultipartFile> files, Long authorId) {
         
         Account author = accountRepository.findById(authorId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_AUTHOR_NOT_FOUND));
 
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("카테고리가 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
 
         // DTO -> Entity 변환
         Notice notice = Notice.builder()
@@ -84,7 +87,7 @@ public class NoticeService {
     public ExternalNoticeResponse getNoticeDetail(Long noticeId) {
         
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
 
         // 조회수 증가
         notice.increaseViewCount();
@@ -122,12 +125,12 @@ public class NoticeService {
         
         // 1. 게시글 찾기
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
 
         // === 1. 텍스트 데이터 수정 (값이 있는 경우에만 변경) ===
         if (request.getCategoryId() != null) {
             NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
             notice.changeCategory(category);
         }
 
@@ -172,7 +175,7 @@ public class NoticeService {
     @Transactional
     public void deleteNotice(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
         
         // (파일 삭제 로직은 추후 추가)
 
