@@ -115,6 +115,7 @@ console.log("[BFF] upstreamUrl=", loginApi);
     {
       account: data.account,
       expiresInSeconds: data.expiresInSeconds,
+      expiresAt: Date.now() + data.expiresInSeconds * 1000,
     },
     { status: 200 }
   );

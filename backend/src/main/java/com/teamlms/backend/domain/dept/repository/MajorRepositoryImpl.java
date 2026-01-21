@@ -18,6 +18,15 @@ public class MajorRepositoryImpl implements MajorRepositoryCustom {
     }
 
     @Override
+    public List<Major> findActiveForDropdown() {
+        return queryFactory
+                .selectFrom(major)
+                .where(major.active.isTrue())
+                .orderBy(major.majorName.asc())
+                .fetch();
+    }
+
+    @Override
     public List<Major> findActiveForDropdownByDeptId(Long deptId) {
         return queryFactory
                 .selectFrom(major)
@@ -28,4 +37,5 @@ public class MajorRepositoryImpl implements MajorRepositoryCustom {
                 .orderBy(major.majorName.asc())
                 .fetch();
     }
+
 }

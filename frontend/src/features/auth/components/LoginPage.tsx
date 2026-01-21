@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "@/features/auth/styles/auth.module.css";
-import { loginViaBff } from "@/features/auth/lib/auth.client";
+import { loginViaBff,logoutViaBff,scheduleAutoLogout } from "@/features/auth/lib/auth.client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,6 +20,12 @@ export default function LoginPage() {
     try {
       await loginViaBff({ id, password: pw });
 
+       const { expiresAt } = await loginViaBff({ id, password: pw });
+
+      scheduleAutoLogout(expiresAt, async () => {
+        await logoutViaBff();
+        router.replace("/login");
+      });
       // 성공 후 이동(원하는 페이지로 바꾸세요)
       router.replace("/admin");
       // 또는 router.replace("/admin") 등 프로젝트 라우팅에 맞게 수정
@@ -59,12 +65,6 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <div className={styles.rowBetween}>
-                <div className={styles.label}>Password</div>
-                <Link className={styles.link} href="/forgot-password">
-                  forgot password
-                </Link>
-              </div>
               <input
                 className={styles.input}
                 value={pw}
@@ -73,6 +73,12 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
               />
+              <div className={styles.rowBetween}>
+                <div className={styles.label}>Password</div>
+                <Link className={styles.link} href="/forgot-password">
+                  forgot password
+                </Link>
+              </div>
             </div>
 
             <button
