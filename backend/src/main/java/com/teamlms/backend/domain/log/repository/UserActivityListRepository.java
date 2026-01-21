@@ -2,6 +2,7 @@ package com.teamlms.backend.domain.log.repository;
 
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.log.repository.projection.UserActivityRow;
+import com.teamlms.backend.domain.log.repository.projection.UserActivitySummaryRow;
 import com.teamlms.backend.domain.log.repository.projection.UserHeaderRow;
 
 import java.util.Optional;
@@ -112,4 +113,42 @@ public interface UserActivityListRepository extends JpaRepository<Account, Long>
         WHERE a.account_id = :accountId
         """, nativeQuery = true)
     Optional<UserHeaderRow> findHeaderByAccountId(@Param("accountId") Long accountId);
+
+    // 요약정보 조회
+    @Query(
+        value = """
+            SELECT
+            COUNT(*) AS totalAccounts,
+            COUNT(*) FILTER (
+                WHERE ua.last_activity_at IS NOT NULL
+                AND ua.last_activity_at >= (now() - interval '5 minutes')
+            ) AS onlineAccounts
+            FROM account a
+            LEFT JOIN user_activity ua
+            ON ua.account_id = a.account_id
+
+            LEFT JOIN student_profile sp
+            ON sp.account_id = a.account_id
+            AND a.account_type = 'STUDENT'
+
+            LEFT JOIN professor_profile pp
+            ON pp.account_id = a.account_id
+            AND a.account_type = 'PROFESSOR'
+
+            LEFT JOIN admin_profile ap
+            ON ap.account_id = a.account_id
+            AND a.account_type = 'ADMIN'
+
+            WHERE (:keyword IS NULL OR :keyword = ''
+            OR a.login_id ILIKE CONCAT('%', :keyword, '%')
+            OR (CASE a.account_type
+                    WHEN 'STUDENT' THEN sp.name
+                    WHEN 'PROFESSOR' THEN pp.name
+                    WHEN 'ADMIN' THEN ap.name
+                END) ILIKE CONCAT('%', :keyword, '%')
+            )
+            """,
+        nativeQuery = true
+    )
+    UserActivitySummaryRow findSummary(@Param("keyword") String keyword);
 }

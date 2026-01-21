@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 type ApiResponse<T> = { success?: boolean; message?: string; data?: T };
 
 function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.AUTH_API_BASE_URL;
+  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL;
 }
 
 function buildHeaders() {
@@ -45,7 +45,7 @@ export async function POST(_req: Request, ctx: { params: { accountId: string } }
   const base = getBaseUrl();
   if (!base) {
     return NextResponse.json(
-      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 AUTH_API_BASE_URL 누락" },
+      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 API_BASE_URL 누락" },
       { status: 500 }
     );
   }

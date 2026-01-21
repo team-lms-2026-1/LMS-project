@@ -1,5 +1,6 @@
 "use client";
 
+import Deptmodal from "./Deptmodal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DEPT_MOCK_LIST, Department } from "./DeptMock";
@@ -8,7 +9,7 @@ import styles from "./DeptsPage.module.css";
 export default function DeptsPage() {
   const [departments, setDepartments] =
     useState<Department[]>(DEPT_MOCK_LIST);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className={styles.page}>
       <div className={styles.card}>
@@ -61,13 +62,23 @@ export default function DeptsPage() {
         {/* 하단: 페이지네이션 + 등록 버튼 */}
         <div className={styles.footerRow}>
           <Pagination />
-          <button className={styles.primaryButton}>학과등록</button>
+          <button
+  className={styles.primaryButton}
+  onClick={() => setIsModalOpen(true)}
+>
+  학과등록
+</button>
+
         </div>
+        {isModalOpen && (
+          <Deptmodal onClose={() => setIsModalOpen(false)} />
+        )}
       </div>
     </div>
   );
 }
 
+// 📄 depts/page.tsx
 function DepartmentRow({
   dept,
   onToggle,
@@ -77,12 +88,11 @@ function DepartmentRow({
 }) {
   const router = useRouter();
 
-  const handleEdit = () => {
-    router.push(`/admin/depts/${dept.id}`);
-  };
-
   return (
-    <tr>
+    <tr
+      className={styles.clickableRow}
+      onClick={() => router.push(`/admin/depts/${dept.id}`)}
+    >
       <td>{dept.code}</td>
       <td>{dept.name}</td>
       <td>{dept.headProfessor}</td>
@@ -90,20 +100,21 @@ function DepartmentRow({
       <td className={styles.textRight}>{dept.professorCount}명</td>
 
       {/* 사용여부 + 수정 버튼 한 칸에 */}
-      <td className={styles.usageCell}>
+      <td
+        className={styles.usageCell}
+        onClick={(e) => e.stopPropagation()} // ← 행 클릭 막기
+      >
         <button
           type="button"
           onClick={onToggle}
-          className={
-            dept.isActive ? styles.usageOn : styles.usageOff
-          }
+          className={dept.isActive ? styles.usageOn : styles.usageOff}
         >
           {dept.isActive ? "on" : "off"}
         </button>
 
         <button
           type="button"
-          onClick={handleEdit}
+          onClick={() => router.push(`/admin/depts/${dept.id}`)}
           className={styles.editButton}
         >
           수정
@@ -112,6 +123,7 @@ function DepartmentRow({
     </tr>
   );
 }
+
 
 function Pagination() {
   return (

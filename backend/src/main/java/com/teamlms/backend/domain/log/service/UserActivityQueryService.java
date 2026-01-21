@@ -1,11 +1,13 @@
 package com.teamlms.backend.domain.log.service;
 
 import com.teamlms.backend.domain.log.api.dto.UserActivityListItem;
+import com.teamlms.backend.domain.log.api.dto.UserActivitySummary;
 import com.teamlms.backend.domain.log.api.dto.UserAccessLogDetailResponse;
 import com.teamlms.backend.domain.log.repository.AccountAccessLogRepository;
 import com.teamlms.backend.domain.log.repository.UserActivityListRepository;
 import com.teamlms.backend.domain.log.repository.projection.AccountAccessLogRow;
 import com.teamlms.backend.domain.log.repository.projection.UserActivityRow;
+import com.teamlms.backend.domain.log.repository.projection.UserActivitySummaryRow;
 import com.teamlms.backend.domain.log.repository.projection.UserHeaderRow;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
@@ -40,6 +42,14 @@ public class UserActivityQueryService {
         ));
     }
 
+    public UserActivitySummary summary(String keyword) {
+        UserActivitySummaryRow row = userActivityListRepository.findSummary(keyword);
+
+        long total = (row == null || row.getTotalAccounts() == null) ? 0L : row.getTotalAccounts();
+        long online = (row == null || row.getOnlineAccounts() == null) ? 0L : row.getOnlineAccounts();
+
+        return new UserActivitySummary(total, online);
+    }
     /**
      * 접근 로그 상세 (헤더 + 아이템 + meta용 page)
      * - 사용 레포: UserActivityListRepository + AccountAccessLogRepository (2개)

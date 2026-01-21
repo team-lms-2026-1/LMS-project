@@ -102,11 +102,27 @@ export type CreateAccountRequestDto =
   | CreateAdminAccountRequestDto;
 
 /** 수정 요청 */
-export interface UpdateAccountRequestDto {
-  status?: AccountStatus;
-  profile?: Partial<CommonProfileDto>;
-  adminProfile?: Partial<AdminProfileDto>;
+export type UpdateAccountRequestDto = {
+  // 공통
+  status?: "ACTIVE" | "INACTIVE";
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
 
-  /** 선택: 비밀번호 변경이 백엔드에서 허용되면 사용 */
+  // STUDENT 전용
+  gradeLevel?: number | null;
+  academicStatus?: "ENROLLED" | "LEAVE" | "DROPPED" | "GRADUATED" | null;
+  majors?: Array<{
+    majorId: number;
+    majorType: "PRIMARY" | "MINOR" | "DOUBLE";
+  }>;
+
+  // PROFESSOR 전용
+  deptId?: number | null;
+
+  // ADMIN 전용
+  memo?: string | null;
+
+  // (백엔드에 password 필드가 있다면 유지, 없으면 제거)
   password?: string;
-}
+};

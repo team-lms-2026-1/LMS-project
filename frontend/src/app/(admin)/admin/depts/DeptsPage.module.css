@@ -200,3 +200,11 @@
 .primaryButton:hover {
   background-color: #1d4ed8;
 }
+/* 📄 DeptsPage.module.css */
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background-color: #f8fafc;
+}
