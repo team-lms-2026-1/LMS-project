@@ -34,16 +34,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('DEPT_MANAGE')")
 @RequestMapping("/api/v1/admin/depts")
 public class DeptAdminController {
 
     private final DeptCommandService deptCommandService;
     private final DeptQueryService deptQueryService;
-    private final MajorQueryService majorQueryService;
     private final MajorCommandService majorCommandService;
 
     // 학과 등록
@@ -127,20 +128,6 @@ public class DeptAdminController {
     ) {
         deptCommandService.updateActive(deptId, req.isActive(), null);
         return ApiResponse.ok(new SuccessResponse());
-    }
-
-    // 학과 목록 드롭다운
-    @GetMapping("/dropdown")
-    public ApiResponse<List<DepartmentDropdownItem>> dropdown() {
-        return ApiResponse.ok(deptQueryService.getDeptDropdown());
-    }
-    
-    // 학과의 전공 목록 드롭다운
-    @GetMapping("/{deptId}/majors/dropdown")
-    public ApiResponse<List<DeptMajorDropdownItem>> deptMajorDropdown(
-        @PathVariable Long deptId
-    ) {
-        return ApiResponse.ok(majorQueryService.getDeptMajorDropdown(deptId));
     }
 
     // 학과 상세 (summary)
