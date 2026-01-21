@@ -130,7 +130,7 @@ GET /mentoring-applications?
   &status=APPLIED
   &keyword=홍길동
   &page=1
-  &size=20
+  &size=20  
 
 Response
 {
