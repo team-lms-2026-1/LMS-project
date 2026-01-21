@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import styles from "../styles/AccountListPage.module.css";
 import { AccountRowView, AccountStatus, AccountType } from "../types";
 import AccountFilters from "./AccountFilters";
@@ -99,48 +99,49 @@ export default function AccountListPage() {
 
   const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
 
-  async function fetchList() {
+  // ✅ 서버 호출 파라미터를 여기서 확정
+  const listParams = useMemo(() => {
+    const keyword = keywordApplied.trim();
+    return {
+      accountType: roleFilter === "ALL" ? undefined : roleFilter,
+      keyword: keyword.length ? keyword : undefined,
+      page: 0,   // ✅ 0-based 안전
+      size: 50,
+    };
+  }, [roleFilter, keywordApplied]);
+
+  const fetchList = useCallback(async () => {
     setLoading(true);
     setErrorMsg(null);
-    try {
-      const res = await accountsApi.list({
-        accountType: roleFilter === "ALL" ? undefined : roleFilter,
-        keyword: keywordApplied || undefined,
-        page: 1,
-        size: 50,
-      });
 
+    try {
+      const res = await accountsApi.list(listParams);
       const list = res?.items ?? [];
       setRows(list.map(mapRow));
     } catch (e: any) {
       setErrorMsg(e?.message ?? "목록 조회 실패");
+      setRows([]);
     } finally {
       setLoading(false);
     }
-  }
+  }, [listParams]);
 
+  // ✅ roleFilter/keywordApplied가 바뀌면 자동으로 재조회
   useEffect(() => {
     fetchList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchList]);
 
-  useEffect(() => {
-    fetchList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roleFilter]);
-
-  const filteredRows = useMemo(() => {
+  // ✅ 서버가 이미 accountType으로 필터링하므로 기본적으로 rows 그대로 사용
+  // (혹시 백엔드가 accountType을 무시하는 경우를 대비해 “보조 필터”는 남겨둘 수 있음)
+  const displayRows = useMemo(() => {
     if (roleFilter === "ALL") return rows;
     return rows.filter((r) => r.account.accountType === roleFilter);
   }, [rows, roleFilter]);
 
   const onToggleStatus = async (accountId: number, current: AccountStatus, next: AccountStatus) => {
     if (current === next) return;
-
-    // in-flight 가드
     if (pendingIds.has(accountId)) return;
 
-    // optimistic update
     setRows((prev) =>
       prev.map((r) =>
         r.account.accountId === accountId ? { ...r, account: { ...r.account, status: next } } : r
@@ -151,7 +152,6 @@ export default function AccountListPage() {
     try {
       await accountsApi.updateStatus(accountId, next);
     } catch (e: any) {
-      // 실패 시 원복
       setRows((prev) =>
         prev.map((r) =>
           r.account.accountId === accountId ? { ...r, account: { ...r.account, status: current } } : r
@@ -185,11 +185,16 @@ export default function AccountListPage() {
         <AccountFilters
           role={roleFilter}
           keyword={keywordDraft}
-          onChangeRole={setRoleFilter}
+          onChangeRole={(v) => {
+            setRoleFilter(v);
+            // ✅ 탭 바꾸면 첫 조회 상태로(원하면 유지해도 됨)
+            // setKeywordDraft("");
+            // setKeywordApplied("");
+          }}
           onChangeKeyword={setKeywordDraft}
           onApply={() => {
-            setKeywordApplied(keywordDraft);
-            setTimeout(fetchList, 0);
+            // ✅ setTimeout 제거: 적용값만 바꾸면 useEffect가 fetchList 실행
+            setKeywordApplied(keywordDraft.trim());
           }}
         />
 
@@ -198,7 +203,7 @@ export default function AccountListPage() {
           <div style={{ padding: 12 }}>로딩중...</div>
         ) : (
           <AccountTable
-            rows={filteredRows}
+            rows={displayRows}
             pendingIds={pendingIds}
             onToggleStatus={onToggleStatus}
             onClickEdit={(accountId) => {

@@ -24,10 +24,10 @@ type BackendAuthLoginResponse = {
 };
 
 export async function POST(req: Request) {
-  const base = process.env.AUTH_API_BASE_URL; // 예: http://localhost:8080
+  const base = process.env.API_BASE_URL; // 예: http://localhost:8080
   if (!base) {
     return NextResponse.json(
-      { message: "서버 설정 오류: AUTH_API_BASE_URL 누락" },
+      { message: "서버 설정 오류: API_BASE_URL 누락" },
       { status: 500 }
     );
   }
@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "아이디/비밀번호를 입력하세요." }, { status: 400 });
   }
 
-  console.log("[BFF] base=", process.env.AUTH_API_BASE_URL);
-console.log("[BFF] upstreamUrl=", loginApi);
+  console.log("[BFF] base=", process.env.API_BASE_URL);
+  console.log("[BFF] upstreamUrl=", loginApi);
 
   let upstreamRes: Response;
 
