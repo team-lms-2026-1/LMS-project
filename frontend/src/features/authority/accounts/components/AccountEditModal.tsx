@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "../styles/AccountModal.module.css";
 import type { AccountType, MajorType } from "../types";
 import { accountsApi } from "../api/accountsApi";
-import type { AccountRowDto } from "../api/dto";
 
 export type AccountEditModalProps = {
   open: boolean;
@@ -27,6 +26,7 @@ type FormState = {
   deptId: number;
 
   // STUDENT
+  studentNo: string;
   gradeLevel: number;
   academicStatus: "ENROLLED" | "LEAVE" | "DROPPED" | "GRADUATED";
 
@@ -46,6 +46,7 @@ type FormState = {
 const emptyForm: FormState = {
   accountType: "STUDENT",
   loginId: "",
+  studentNo: "",
 
   name: "",
   email: "",
@@ -65,12 +66,11 @@ const emptyForm: FormState = {
   doubleMajorId: 0,
 
   memo: "",
-
   newPassword: "",
 };
 
 function isValidPassword(v: string) {
-  if (!v.trim()) return true; // 수정 시 비밀번호는 선택
+  if (!v.trim()) return true;
   return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(v);
 }
 
@@ -79,9 +79,32 @@ function isValidEmail(v: string) {
   return v.includes("@");
 }
 
+/**
+ * ✅ phone은 사용자가 하이픈 없이 입력할 수도 있으니
+ * - 01012345678 (숫자 11자리)도 허용
+ * - 010-1234-5678 도 허용
+ */
 function isValidPhone(v: string) {
   if (!v.trim()) return true;
-  return /^\d{3}-\d{4}-\d{4}$/.test(v);
+  const t = v.trim();
+  return /^\d{3}-\d{4}-\d{4}$/.test(t) || /^\d{11}$/.test(t);
+}
+
+/** ✅ API로 보낼 때는 항상 000-0000-0000 형태로 정규화 */
+function normalizePhoneForApi(v: string): string | null {
+  const t = (v ?? "").trim();
+  if (!t) return null;
+
+  // 이미 하이픈 형태
+  if (/^\d{3}-\d{4}-\d{4}$/.test(t)) return t;
+
+  // 숫자만 11자리면 하이픈 붙이기
+  if (/^\d{11}$/.test(t)) {
+    return `${t.slice(0, 3)}-${t.slice(3, 7)}-${t.slice(7)}`;
+  }
+
+  // 그 외는 그대로 보내지 말고 null 처리(백엔드 검증 회피)
+  return null;
 }
 
 function pickMajors(detail: any): Array<{ majorId: number; majorType: MajorType }> {
@@ -89,10 +112,39 @@ function pickMajors(detail: any): Array<{ majorId: number; majorType: MajorType 
   return Array.isArray(majors) ? majors : [];
 }
 
-/**
- * ✅ 서버 detail -> FormState 변환
- * - 백엔드 응답이 profile/adminProfile 중 어느 형태든 최대한 흡수
- */
+function deriveStudentNoFromLoginId(loginId: string): string {
+  const m = String(loginId ?? "").match(/\d{8}$/);
+  return m ? m[0] : "";
+}
+
+function getDeptIdFromProfile(detail: any, profile: any): number {
+  const v =
+    profile?.deptId ??
+    profile?.departmentId ??
+    profile?.dept?.deptId ??
+    profile?.dept?.departmentId ??
+    profile?.department?.deptId ??
+    profile?.department?.departmentId ??
+    detail?.deptId ??
+    detail?.profile?.deptId ??
+    detail?.profile?.departmentId ??
+    0;
+
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function getStudentNo(detail: any, profile: any): string {
+  const v =
+    profile?.studentNo ??
+    profile?.studentNumber ??
+    detail?.studentNo ??
+    detail?.profile?.studentNo ??
+    detail?.studentProfile?.studentNo ??
+    "";
+  return String(v ?? "").trim();
+}
+
 function makeFormFromDetail(detail: any): FormState {
   const type: AccountType = detail.accountType;
   const status = detail.status as "ACTIVE" | "INACTIVE";
@@ -100,7 +152,9 @@ function makeFormFromDetail(detail: any): FormState {
   const profile =
     type === "ADMIN"
       ? (detail.adminProfile ?? detail.profile ?? {})
-      : (detail.profile ?? detail.studentProfile ?? {});
+      : (detail.profile ?? detail.studentProfile ?? detail.professorProfile ?? {});
+
+  const deptId = getDeptIdFromProfile(detail, profile);
 
   const next: FormState = {
     ...emptyForm,
@@ -117,9 +171,10 @@ function makeFormFromDetail(detail: any): FormState {
   };
 
   if (type === "STUDENT") {
-    next.deptId = Number(profile.deptId ?? 0);
+    next.deptId = deptId;
     next.gradeLevel = Number(profile.gradeLevel ?? 1);
     next.academicStatus = (profile.academicStatus ?? "ENROLLED") as any;
+    next.studentNo = getStudentNo(detail, profile);
 
     const majors = pickMajors(detail);
     next.primaryMajorId = Number(majors.find((m: any) => m.majorType === "PRIMARY")?.majorId ?? 0);
@@ -135,10 +190,9 @@ function makeFormFromDetail(detail: any): FormState {
   }
 
   if (type === "PROFESSOR") {
-    next.deptId = Number(profile.deptId ?? 0);
+    next.deptId = deptId;
   }
 
-  // ADMIN은 dept/major 불필요
   return next;
 }
 
@@ -161,10 +215,34 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
   const [majorsByDept, setMajorsByDept] = useState<Array<{ majorId: number; majorName: string }>>([]);
   const [majorsAll, setMajorsAll] = useState<Array<{ majorId: number; majorName: string }>>([]);
 
-  // ✅ 초기 하이드레이션(서버 값 주입 중) 여부
-  const isHydratingRef = useRef(false);
+  const cleanStrOrNull = (v: string) => {
+    const t = (v ?? "").trim();
+    return t.length ? t : null;
+  };
 
-  // body scroll lock + ESC
+  const buildStudentMajors = () => {
+    const majors: Array<{ majorId: number; majorType: MajorType }> = [];
+    if (form.primaryMajorId > 0) majors.push({ majorId: form.primaryMajorId, majorType: "PRIMARY" });
+    if (form.useMinor && form.minorMajorId > 0) majors.push({ majorId: form.minorMajorId, majorType: "MINOR" });
+    if (form.useDouble && form.doubleMajorId > 0) majors.push({ majorId: form.doubleMajorId, majorType: "DOUBLE" });
+    return majors;
+  };
+
+  const buildPasswordPart = () => {
+    const pw = form.newPassword.trim();
+    return pw.length ? { password: pw } : {};
+  };
+
+  /** ✅ email/phone 정규화해서 profile에 넣기 */
+  const buildBaseProfile = () => ({
+    name: form.name.trim(),
+    email: cleanStrOrNull(form.email),
+    phone: normalizePhoneForApi(form.phone), // ✅ 핵심 수정
+  });
+
+  const isHydratingRef = useRef(false);
+  const deptChangedByUserRef = useRef(false);
+
   useEffect(() => {
     if (!open || !accountId) return;
 
@@ -172,25 +250,28 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
       setLoading(true);
       setError(null);
       isHydratingRef.current = true;
+      deptChangedByUserRef.current = false;
 
       try {
-        // 1) 학과 목록
         const deptList = await accountsApi.listDepts();
         setDepts(deptList);
 
-        // 2) 상세(학생이면 deptId/majors 포함되어야 함)
         const detail = await accountsApi.detail(accountId);
         const next = makeFormFromDetail(detail);
+        setForm(next);
 
-        // 3) 학생이면: deptId로 주전공 옵션 로드
         if (next.accountType === "STUDENT" && next.deptId) {
           const majorsDept = await accountsApi.listMajorsByDept(next.deptId).catch(() => []);
-          setMajorsByDept(majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName })));
+          const mapped = majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName }));
+          setMajorsByDept(mapped);
+
+          if (next.primaryMajorId && !mapped.some((m) => m.majorId === next.primaryMajorId)) {
+            setForm((p) => ({ ...p, primaryMajorId: 0 }));
+          }
         } else {
           setMajorsByDept([]);
         }
 
-        // 4) ✅ 전체 전공(부/복수전공용) - 현재 /majors/dropdown이 없으니 "학과 전체 순회"로 임시 구성
         const majorsAllFallback = async () => {
           const results = await Promise.all(
             deptList.map((d) => accountsApi.listMajorsByDept(d.deptId).catch(() => []))
@@ -203,9 +284,6 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
         const allMajors = await majorsAllFallback();
         setMajorsAll(allMajors);
-
-        // 5) 마지막에 폼 세팅
-        setForm(next);
       } catch (e: any) {
         setError(e?.message ?? "상세 조회 실패");
         setForm(emptyForm);
@@ -220,27 +298,29 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
     load();
   }, [open, accountId]);
 
-
-  // ✅ deptId 변경 시: 주전공 리스트 갱신 (학생만, 그리고 사용자 변경일 때만)
   useEffect(() => {
     if (!open) return;
     if (form.accountType !== "STUDENT") return;
-
-    // ✅ 서버 상세값으로 초기 세팅 중이면 스킵 (주전공 초기화 방지)
     if (isHydratingRef.current) return;
 
     (async () => {
       if (!form.deptId) {
         setMajorsByDept([]);
         setForm((p) => ({ ...p, primaryMajorId: 0 }));
+        deptChangedByUserRef.current = false;
         return;
       }
 
       const majorsDept = await accountsApi.listMajorsByDept(form.deptId).catch(() => []);
-      setMajorsByDept(majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName })));
+      const mapped = majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName }));
+      setMajorsByDept(mapped);
 
-      // ✅ 사용자가 학과 바꾸면 주전공 리셋
-      setForm((p) => ({ ...p, primaryMajorId: 0 }));
+      const valid = mapped.some((m) => m.majorId === form.primaryMajorId);
+
+      if (deptChangedByUserRef.current || !valid) {
+        setForm((p) => ({ ...p, primaryMajorId: 0 }));
+        deptChangedByUserRef.current = false;
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.deptId, open, form.accountType]);
@@ -256,12 +336,28 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
         return;
       }
 
-      // ✅ select의 숫자값도 Number로 변환 (deptId/majorId/gradeLevel)
       const raw = (e.target as HTMLInputElement).value;
       const value = numericKeys.has(key) ? Number(raw) : raw;
-
       setForm((prev) => ({ ...prev, [key]: value } as FormState));
     };
+
+  const onDeptChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextDeptId = Number(e.target.value);
+    deptChangedByUserRef.current = true;
+
+    setForm((p) => ({
+      ...p,
+      deptId: nextDeptId,
+      primaryMajorId: 0,
+    }));
+
+    if (!nextDeptId) {
+      setMajorsByDept([]);
+      return;
+    }
+    const majorsDept = await accountsApi.listMajorsByDept(nextDeptId).catch(() => []);
+    setMajorsByDept(majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName })));
+  };
 
   const canSave = useMemo(() => {
     if (!accountId) return false;
@@ -277,6 +373,9 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
       if (!form.primaryMajorId) return false;
       if (form.useMinor && !form.minorMajorId) return false;
       if (form.useDouble && !form.doubleMajorId) return false;
+
+      // studentNo는 DB에 이미 있으므로 "없어도 업데이트 가능"하게 두는 편이 안전함
+      // (백엔드가 studentNo를 update에서 금지하는 경우도 있기 때문)
     }
 
     if (form.accountType === "PROFESSOR") {
@@ -286,73 +385,63 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
     return true;
   }, [accountId, saving, loading, form]);
 
-  const onResetPassword = async () => {
-    if (!accountId) return;
-    try {
-      await accountsApi.resetPassword(accountId);
-      alert("비밀번호 초기화 요청이 완료되었습니다.");
-    } catch (e: any) {
-      alert(e?.message ?? "비밀번호 초기화 실패");
-    }
-  };
-
   const onSubmit = async () => {
     if (!accountId || !canSave) return;
 
     setSaving(true);
     setError(null);
+
     try {
+      // ✅ ADMIN
       if (form.accountType === "ADMIN") {
-        await accountsApi.update(accountId, {
+        const body: any = {
           status: form.status,
-          adminProfile: {
-            name: form.name,
-            email: form.email || null,
-            phone: form.phone || null,
-            memo: form.memo || null,
-          },
-          ...(form.newPassword.trim() ? { password: form.newPassword } : {}),
-        });
+          ...buildBaseProfile(),
+          memo: cleanStrOrNull(form.memo),
+          ...buildPasswordPart(),
+        };
+
+        await accountsApi.update(accountId, body);
         await onSaved();
         return;
       }
 
+      // ✅ PROFESSOR
       if (form.accountType === "PROFESSOR") {
-        await accountsApi.update(accountId, {
+        // ✅ profile 대신 professorProfile로 전송 (백엔드 DTO 차이 흡수)
+        const body: any = {
           status: form.status,
-          profile: {
-            name: form.name,
-            email: form.email || null,
-            phone: form.phone || null,
-            deptId: form.deptId,
-          },
-          ...(form.newPassword.trim() ? { password: form.newPassword } : {}),
-        });
+          ...buildBaseProfile(),
+          deptId: form.deptId,
+          ...buildPasswordPart(),
+        };
+
+        await accountsApi.update(accountId, body);
         await onSaved();
         return;
       }
 
-      // STUDENT
-      const majors: Array<{ majorId: number; majorType: MajorType }> = [
-        { majorId: form.primaryMajorId, majorType: "PRIMARY" },
-        ...(form.useMinor ? [{ majorId: form.minorMajorId, majorType: "MINOR" as const }] : []),
-        ...(form.useDouble ? [{ majorId: form.doubleMajorId, majorType: "DOUBLE" as const }] : []),
-      ];
+      // ✅ STUDENT
+      const majors = buildStudentMajors();
 
-      await accountsApi.update(accountId, {
+      // studentNo는 "보내도 되고, 안 보내도 되는" 상태가 가장 안전
+      // - backend가 studentNo update를 허용하면 보내도 OK
+      // - 금지하면 보내는 순간 실패할 수 있음
+      // 그래서: 기존 값이 있으면 보내고, 없으면 loginId에서 파생
+
+      // ✅ profile 대신 studentProfile로 전송 (백엔드 DTO 차이 흡수)
+      const body: any = {
         status: form.status,
-        profile: {
-          name: form.name,
-          email: form.email || null,
-          phone: form.phone || null,
-          deptId: form.deptId,
-          gradeLevel: form.gradeLevel,
+          ...buildBaseProfile(),
+          gradeLevel: Number(form.gradeLevel),
           academicStatus: form.academicStatus,
+          deptId: form.deptId,
           majors,
-        },
-        ...(form.newPassword.trim() ? { password: form.newPassword } : {}),
-      });
+        
+        ...buildPasswordPart(),
+      };
 
+      await accountsApi.update(accountId, body);
       await onSaved();
     } catch (e: any) {
       setError(e?.message ?? "저장 실패");
@@ -363,8 +452,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
   if (!open) return null;
 
-  const typeLabel =
-    form.accountType === "STUDENT" ? "학생" : form.accountType === "PROFESSOR" ? "교수" : "관리자";
+  const typeLabel = form.accountType === "STUDENT" ? "학생" : form.accountType === "PROFESSOR" ? "교수" : "관리자";
 
   return (
     <div className={styles.backdrop} onMouseDown={onClose}>
@@ -411,9 +499,6 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
               <label className={styles.label}>현재 비밀번호</label>
               <div className={styles.inlineRow}>
                 <input className={styles.input} value={"********"} disabled />
-                <button type="button" className={styles.subBtn} onClick={onResetPassword} disabled={!accountId}>
-                  초기화
-                </button>
               </div>
               <div className={styles.idHint}>현재 비밀번호는 보안상 표시/조회가 불가하여 마스킹 처리됩니다.</div>
             </div>
@@ -428,9 +513,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
                 placeholder="변경 시 입력"
               />
               {!isValidPassword(form.newPassword) && (
-                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
-                  영문/숫자/특수문자 포함 6자 이상
-                </div>
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>영문/숫자/특수문자 포함 6자 이상</div>
               )}
             </div>
 
@@ -442,14 +525,18 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
             <div className={styles.field}>
               <label className={styles.label}>이메일</label>
               <input className={styles.input} value={form.email} onChange={onChange("email")} />
-              {!isValidEmail(form.email) && <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>@ 포함</div>}
+              {!isValidEmail(form.email) && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>@ 포함</div>
+              )}
             </div>
 
             <div className={styles.field}>
               <label className={styles.label}>연락처</label>
               <input className={styles.input} value={form.phone} onChange={onChange("phone")} />
               {!isValidPhone(form.phone) && (
-                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>000-0000-0000 형식</div>
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                  000-0000-0000 또는 숫자 11자리
+                </div>
               )}
             </div>
 
@@ -492,7 +579,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
             {(form.accountType === "STUDENT" || form.accountType === "PROFESSOR") && (
               <div className={styles.field}>
                 <label className={styles.label}>소속 학과</label>
-                <select className={styles.select} value={form.deptId} onChange={onChange("deptId")}>
+                <select className={styles.select} value={form.deptId} onChange={onDeptChange}>
                   <option value={0}>선택</option>
                   {depts.map((d) => (
                     <option key={d.deptId} value={d.deptId}>
@@ -571,7 +658,12 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
             {form.accountType === "ADMIN" && (
               <div className={styles.field}>
                 <label className={styles.label}>메모</label>
-                <textarea className={styles.textarea} value={form.memo} onChange={onChange("memo")} placeholder="관리자 메모" />
+                <textarea
+                  className={styles.textarea}
+                  value={form.memo}
+                  onChange={onChange("memo")}
+                  placeholder="관리자 메모"
+                />
               </div>
             )}
           </section>

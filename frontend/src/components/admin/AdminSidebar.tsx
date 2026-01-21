@@ -13,18 +13,18 @@ const SECTIONS: NavSection[] = [
     key: "community",
     title: "커뮤니티",
     items: [
-      { label: "공지사항", href: "/community/notices" },
-      { label: "자료실", href: "/community/resources" },
-      { label: "FAQ", href: "/community/faq" },
-      { label: "Q&A", href: "/community/qna" },
+      { label: "공지사항", href: "/admin/community/notices" },
+      { label: "자료실", href: "/admin/community/resources" },
+      { label: "FAQ", href: "/admin/community/faq" },
+      { label: "Q&A", href: "/admin/community/qna" },
     ],
   },
   {
     key: "authority",
     title: "권한 관리",
     items: [
-      { label: "학과관리", href: "/authority/departments" },
-      { label: "계정관리", href: "/authority/accounts" },
+      { label: "학과관리", href: "/admin/authority/departments" },
+      { label: "계정관리", href: "/admin/authority/accounts" },
     ],
   },
   {

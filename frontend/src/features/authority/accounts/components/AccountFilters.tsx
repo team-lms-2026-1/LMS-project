@@ -59,6 +59,12 @@ export default function AccountFilters({
           placeholder="ID/이름/이메일 검색"
           value={keyword}
           onChange={(e) => onChangeKeyword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              onApply();
+            }
+          }}
         />
         <button className={styles.searchBtn} type="button" onClick={onApply}>
           검색
