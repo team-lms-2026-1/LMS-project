@@ -6,6 +6,7 @@ import com.teamlms.backend.domain.dept.api.dto.DeptActiveUpdateRequest;
 import com.teamlms.backend.domain.dept.api.dto.DeptCreateRequest;
 import com.teamlms.backend.domain.dept.api.dto.DeptEditResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptListItem;
+import com.teamlms.backend.domain.dept.api.dto.DeptMajorDropdownItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptMajorListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptProfessorListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptStudentListItem;
@@ -13,7 +14,8 @@ import com.teamlms.backend.domain.dept.api.dto.DeptSummaryResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptUpdateFormResponse;
 import com.teamlms.backend.domain.dept.api.dto.DeptUpdateRequest;
 import com.teamlms.backend.domain.dept.api.dto.MajorCreateRequest;
-import com.teamlms.backend.domain.dept.api.dto.MajorDropdownItem;
+import com.teamlms.backend.domain.dept.api.dto.MajorEditResponse;
+import com.teamlms.backend.domain.dept.api.dto.MajorUpdateRequest;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.service.DeptCommandService;
 import com.teamlms.backend.domain.dept.service.DeptQueryService;
@@ -32,22 +34,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-
-
-
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('DEPT_MANAGE')")
 @RequestMapping("/api/v1/admin/depts")
 public class DeptAdminController {
 
     private final DeptCommandService deptCommandService;
     private final DeptQueryService deptQueryService;
-    private final MajorQueryService majorQueryService;
     private final MajorCommandService majorCommandService;
 
     // 학과 등록
@@ -133,20 +130,6 @@ public class DeptAdminController {
         return ApiResponse.ok(new SuccessResponse());
     }
 
-    // 학과 목록 드롭다운
-    @GetMapping("/dropdown")
-    public ApiResponse<List<DepartmentDropdownItem>> dropdown() {
-        return ApiResponse.ok(deptQueryService.getDeptDropdown());
-    }
-    
-    // 전공 목록 드롭다운
-    @GetMapping("/{deptId}/majors/dropdown")
-    public ApiResponse<List<MajorDropdownItem>> majordropdown(
-        @PathVariable Long deptId
-    ) {
-        return ApiResponse.ok(majorQueryService.getMajorDropdown(deptId));
-    }
-
     // 학과 상세 (summary)
     @GetMapping("/{deptId}/summary")
     public ApiResponse<DeptSummaryResponse> summary(@PathVariable Long deptId) {
@@ -200,7 +183,7 @@ public class DeptAdminController {
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 전공 
+    // 학과 전공 목록
     @GetMapping("/{deptId}/majors")
     public ApiResponse<List<DeptMajorListItem>> listDeptMajors(
         @PathVariable Long deptId,
@@ -223,7 +206,7 @@ public class DeptAdminController {
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 전공 등록
+    // 학과 - 전공 등록
     @PostMapping("/{deptId}/majors")
     public ApiResponse<SuccessResponse> createMajor(
         @PathVariable Long deptId,
@@ -234,4 +217,33 @@ public class DeptAdminController {
         return ApiResponse.ok(new SuccessResponse());
     }
     
+    // 학과 - 전공 수정( 조회 )
+    @GetMapping("/{deptId}/majors/{majorId}/edit")
+    public ApiResponse<MajorEditResponse> getMajorForUpdate(
+            @PathVariable Long deptId,
+            @PathVariable Long majorId
+    ) {
+        return ApiResponse.ok(deptQueryService.getMajorEditForm(deptId, majorId));
+    }
+
+    // 학과 - 전공 수정
+    @PatchMapping("/{deptId}/majors/{majorId}/edit")
+    public ApiResponse<SuccessResponse> updateMajor(
+        @PathVariable Long deptId,
+        @PathVariable Long majorId,
+        @Valid @RequestBody MajorUpdateRequest request
+    ) {
+        majorCommandService.updateMajor(deptId, majorId, request);
+        return ApiResponse.ok(new SuccessResponse());
+    }
+
+    // 학과 - 전공 삭제
+    @DeleteMapping("/{deptId}/majors/{majorId}")
+    public ApiResponse<SuccessResponse> deleteMajor(
+        @PathVariable Long deptId,
+        @PathVariable Long majorId
+    ) {
+        majorCommandService.deleteMajor(deptId, majorId);
+        return ApiResponse.ok(new SuccessResponse());
+    }
 }

@@ -44,15 +44,11 @@ public class Major extends BaseEntity {
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
+    
     /* ========= domain method ========= */
-
-    public void updateInfo(String majorName, String description, int sortOrder) {
+    public void update(String majorName, String description) {
         this.majorName = majorName;
         this.description = description;
-        this.sortOrder = sortOrder;
     }
 
-    public void deactivate() {
-        this.active = false;
-    }
 }

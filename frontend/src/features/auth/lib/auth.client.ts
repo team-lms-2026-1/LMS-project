@@ -1,24 +1,59 @@
 import type { LoginRequest, LoginSuccess, ApiErrorShape } from "../types";
 
-export async function loginViaBff(payload: LoginRequest): Promise<LoginSuccess> {
+type LoginBffResponse = {
+  account: { accountId: number; loginId: string; accountType: string };
+  expiresInSeconds: number;
+  expiresAt: number; // 추가
+};
+
+const EXP_KEY = "auth_expires_at";
+
+export async function logoutViaBff(): Promise<void> {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+  // 로컬 만료정보도 제거
+  localStorage.removeItem(EXP_KEY);
+}
+
+export function scheduleAutoLogout(expiresAt: number, onExpire: () => void) {
+  const ms = expiresAt - Date.now();
+  if (ms <= 0) {
+    onExpire();
+    return () => {};
+  }
+  const id = window.setTimeout(onExpire, ms);
+  return () => window.clearTimeout(id);
+}
+
+export async function loginViaBff(payload: LoginRequest): Promise<LoginBffResponse> {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    // 쿠키 기반 세션/토큰 저장을 위해 포함(동일 오리진이면 필수는 아니지만 안전)
     credentials: "include",
     body: JSON.stringify(payload),
   });
 
-  // BFF에서 에러를 JSON으로 내려주는 전제
   if (!res.ok) {
     let err: ApiErrorShape = { message: "로그인에 실패했습니다." };
     try {
       err = (await res.json()) as ApiErrorShape;
-    } catch {
-      // ignore
-    }
+    } catch {}
     throw new Error(err.message || "로그인에 실패했습니다.");
   }
 
-  return (await res.json()) as LoginSuccess;
+  const data = (await res.json()) as LoginBffResponse;
+
+  // 만료시각 저장(토큰이 아니라 '시각'만 저장)
+  localStorage.setItem(EXP_KEY, String(data.expiresAt));
+
+  return data;
+}
+
+export function getStoredExpiresAt(): number | null {
+  const v = localStorage.getItem(EXP_KEY);
+  if (!v) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
 }

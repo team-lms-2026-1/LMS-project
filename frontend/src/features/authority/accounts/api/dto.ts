@@ -1,6 +1,7 @@
-import { AccountStatus, AccountType, StudentEnrollmentStatus } from "../types";
+import { AccountStatus, AccountType, StudentEnrollmentStatus, MajorType } from "../types";
 
-export type MajorType = "PRIMARY" | "MINOR";
+export type DeptDto = { deptId: number; deptName: string };
+export type MajorDto = { majorId: number; majorName: string; deptId?: number };
 
 /** 공통 프로필(학생/교수 공용 + 일부 공통) */
 export interface CommonProfileDto {
@@ -29,7 +30,7 @@ export interface AdminProfileDto {
   memo?: string | null;
 }
 
-/** 목록 Row */
+/** 목록/상세 공용 Row */
 export interface AccountRowDto {
   accountId: number;
   loginId: string;
@@ -38,11 +39,6 @@ export interface AccountRowDto {
   createdAt: string;
   updatedAt: string;
 
-  /**
-   * 서버가 ADMIN도 profile로 내려주면 profile 사용
-   * 서버가 ADMIN만 adminProfile로 내려주면 adminProfile 사용
-   * (현재 생성 DTO가 adminProfile을 쓰고 있어서 둘 다 열어둠)
-   */
   profile?: CommonProfileDto;
   adminProfile?: AdminProfileDto;
 }
@@ -51,14 +47,6 @@ export interface AccountRowDto {
 export interface AccountsListResponseDto {
   items: AccountRowDto[];
   total: number;
-}
-
-/** 목록/검색 요청 (BFF가 POST로 요구하면 이 형태로 body 보내기 좋음) */
-export interface AccountsListRequestDto {
-  page: number;
-  size: number;
-  accountType?: AccountType;
-  keyword?: string;
 }
 
 /** 생성 요청 */
@@ -99,7 +87,7 @@ export interface CreateProfessorAccountRequestDto {
   };
 }
 
-/** 관리자(기존 유지) */
+/** 관리자(프로젝트 기존 유지: adminProfile) */
 export interface CreateAdminAccountRequestDto {
   loginId: string;
   password: string;
@@ -113,11 +101,12 @@ export type CreateAccountRequestDto =
   | CreateProfessorAccountRequestDto
   | CreateAdminAccountRequestDto;
 
-/** 수정 요청: PATCH/PUT 모두 대응하도록 전부 optional 권장 */
+/** 수정 요청 */
 export interface UpdateAccountRequestDto {
   status?: AccountStatus;
-
   profile?: Partial<CommonProfileDto>;
-
   adminProfile?: Partial<AdminProfileDto>;
+
+  /** 선택: 비밀번호 변경이 백엔드에서 허용되면 사용 */
+  password?: string;
 }

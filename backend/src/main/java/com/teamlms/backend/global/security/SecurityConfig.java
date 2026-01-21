@@ -3,6 +3,7 @@ package com.teamlms.backend.global.security;
 import com.teamlms.backend.global.security.jwt.JwtAuthenticationFilter;
 import com.teamlms.backend.global.security.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.*;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,6 +31,8 @@ public class SecurityConfig {
 
                 //auth
                 .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
+                .requestMatchers(HttpMethod.GET,  "/api/v1/auth/me").authenticated()
 
                 //role-based
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
