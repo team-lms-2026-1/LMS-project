@@ -30,7 +30,7 @@ const SECTIONS: NavSection[] = [
   {
     key: "system-status",
     title: "시스템환경 관리",
-    items: [{ label: "계정로그관리", href: "/system-status/account-logs" }],
+    items: [{ label: "계정로그관리", href: "/system-status" }],
   },
   {
     key: "survey",

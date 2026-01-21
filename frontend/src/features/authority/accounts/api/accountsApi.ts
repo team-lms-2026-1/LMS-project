@@ -1,4 +1,4 @@
-import { bffRequest } from "@/lib/bffClient";
+import { bffRequest } from "@/features/systemStatus/lib/bffClient";
 import { AccountStatus, AccountType } from "../types";
 import type {
   AccountsListResponseDto,

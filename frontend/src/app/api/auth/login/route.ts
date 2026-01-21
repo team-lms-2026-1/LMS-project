@@ -24,7 +24,7 @@ type BackendAuthLoginResponse = {
 };
 
 export async function POST(req: Request) {
-  const base = process.env.AUTH_API_BASE_URL; // 예: http://localhost:8080
+  const base = process.env.API_BASE_URL; // 예: http://localhost:8080
   if (!base) {
     return NextResponse.json(
       { message: "서버 설정 오류: AUTH_API_BASE_URL 누락" },
