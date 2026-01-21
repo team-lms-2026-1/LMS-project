@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/majors")
-public class MajorAdminController {
+@RequestMapping("/api/v1/majors")
+public class MajorController {
     
     private final MajorQueryService majorQueryService;
 
