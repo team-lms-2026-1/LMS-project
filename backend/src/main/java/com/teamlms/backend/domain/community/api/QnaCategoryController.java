@@ -2,7 +2,7 @@ package com.teamlms.backend.domain.community.api;
 
 import com.teamlms.backend.domain.community.api.dto.ExternalCategoryRequest;
 import com.teamlms.backend.domain.community.api.dto.ExternalCategoryResponse;
-import com.teamlms.backend.domain.community.service.FaqCategoryService;
+import com.teamlms.backend.domain.community.service.QnaCategoryService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
 import jakarta.validation.Valid;
@@ -13,17 +13,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/community/faq/categories") // 정책서 경로: /faq/categories
+@RequestMapping("/api/v1/community/qna/categories")
 @RequiredArgsConstructor
-public class FaqCategoryController {
+public class QnaCategoryController {
 
-    private final FaqCategoryService service;
+    private final QnaCategoryService service;
     // =================================================================
-    // 1. FAQ 카테고리 목록 조회 - 전부가능
+    // 1. Q&A 카테고리 목록 조회 - 전부가능
     // =================================================================
     @GetMapping
     public ApiResponse<?> getList(
@@ -32,9 +31,9 @@ public class FaqCategoryController {
         Page<ExternalCategoryResponse> result = service.getList(pageable, keyword);
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
-
+    
     // =================================================================
-    // 2. FAQ 카테고리 등록 - 어드민만 가능
+    // 2. Q&A 카테고리 등록 - 어드민만 가능
     // =================================================================
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -42,26 +41,24 @@ public class FaqCategoryController {
         Long id = service.create(request);
         return ApiResponse.ok(Map.of("categoryId", id));
     }
-    //수정
+
     // =================================================================
-    // 3. FAQ 카테고리 수정 - 어드민만 가능
+    // 3. Q&A 카테고리 수정 - 어드민만 가능
     // =================================================================
-    
-    @PatchMapping("/{id}")
+    @PatchMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<?> update(@PathVariable Long id, @Valid @RequestBody ExternalCategoryRequest request) {
-        service.update(id, request);
+    public ApiResponse<?> update(@PathVariable Long categoryId, @Valid @RequestBody ExternalCategoryRequest request) {
+        service.update(categoryId, request);
         return ApiResponse.ok(Map.of("success", true));
     }
-    //삭제
+
     // =================================================================
-    // 4. FAQ 카테고리 수정 - 어드민만 가능
+    // 4. Q&A 카테고리 삭제 - 어드민만 가능
     // =================================================================
-    
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<?> delete(@PathVariable Long id) {
-        service.delete(id);
+    public ApiResponse<?> delete(@PathVariable Long categoryId) {
+        service.delete(categoryId);
         return ApiResponse.ok(Map.of("success", true));
     }
 }

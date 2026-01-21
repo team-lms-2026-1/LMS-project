@@ -23,7 +23,9 @@ import java.util.Map;
 public class FaqController {
 
     private final FaqService service;
-    // 목록 조회
+    // =================================================================
+    // 1. FAQ 목록 조회 - 전부가능
+    // =================================================================
     @GetMapping
     public ApiResponse<?> getList(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -32,13 +34,19 @@ public class FaqController {
         Page<ExternalFaqResponse> result = service.getList(pageable, categoryId, keyword);
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
-    // 상세 조회
+    
+    // =================================================================
+    // 2. FAQ 상세 조회 - 전부가능
+    // =================================================================
     @GetMapping("/{faqId}")
     public ApiResponse<?> getDetail(@PathVariable Long faqId) {
         return ApiResponse.ok(service.getDetail(faqId));
     }
-    //등록
+
+    // =================================================================
+    // 3. FAQ 등록 - 어드민만 가능
     // FAQ는 파일이 없으므로 순수 JSON (@RequestBody) 사용
+    // =================================================================
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> create(
@@ -47,7 +55,10 @@ public class FaqController {
         Long id = service.create(request, user.getAccountId());
         return ApiResponse.ok(Map.of("success", true, "faqId", id));
     }
-    // 수정
+
+    // =================================================================
+    // 4. FAQ 수정 - 어드민만 가능
+    // =================================================================
     @PatchMapping("/{faqId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> update(
@@ -56,7 +67,10 @@ public class FaqController {
         service.update(faqId, request);
         return ApiResponse.ok(Map.of("success", true));
     }
-    // 삭제
+
+    // =================================================================
+    // 5. FAQ 삭제 - 어드민만 가능
+    // =================================================================
     @DeleteMapping("/{faqId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> delete(@PathVariable Long faqId) {

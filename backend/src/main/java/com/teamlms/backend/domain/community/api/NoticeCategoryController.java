@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 //관리자 부분 페이지 네이션 앞에 (/api/v1/admin/) 넣기
 
 @RestController
-// 요청하신 URL 구조 반영: /notices/categories (앞에 /api/community 등은 프로젝트 규칙에 따름)
+// URL 구조 반영: /notices/categories (앞에 /api/community 등은 프로젝트 규칙에 따름)
 @RequestMapping("/api/v1/admin/community/notices/categories") 
 @RequiredArgsConstructor
 public class NoticeCategoryController {
@@ -25,7 +25,7 @@ public class NoticeCategoryController {
     private final NoticeCategoryService categoryService;
 
     // =================================================================
-    // 1-1. 카테고리 목록 조회 (페이징 + 검색)
+    // 1-1. 카테고리 목록 조회 
     // URL: GET /api/community/notices/categories?page=1&size=20&keyword=...
     // =================================================================
     @GetMapping

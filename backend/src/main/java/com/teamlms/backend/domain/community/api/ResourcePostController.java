@@ -27,7 +27,10 @@ public class ResourcePostController {
 
     private final ResourcePostService postService;
 
-    // 1. 목록 조회 (누구나)
+    
+    // =================================================================
+    // 1. 자료실 목록 조회 - 전부가능
+    // =================================================================
     @GetMapping
     public ApiResponse<?> getList(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -38,14 +41,20 @@ public class ResourcePostController {
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 2. 상세 조회 (누구나)
+    
+    // =================================================================
+    // 2. 자료실 상세 조회 - 전부가능
+    // =================================================================
     @GetMapping("/{resourceId}")
     public ApiResponse<?> getDetail(@PathVariable Long resourceId) {
         ExternalResourceResponse response = postService.getDetail(resourceId);
         return ApiResponse.ok(response);
     }
 
-    // 3. 등록 (관리자) - Multipart/form-data
+    
+    // =================================================================
+    // 3. 자료실 등록 - 어드민만 가능
+    // =================================================================
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> create(
@@ -59,7 +68,10 @@ public class ResourcePostController {
         return ApiResponse.ok(Map.of("success", true, "resourceId", resourceId));
     }
 
-    // 4. 수정 (관리자) - PATCH
+    
+    // =================================================================
+    // 4. 자료실 수정 - 어드민만 가능
+    // =================================================================
     @PatchMapping(value = "/{resourceId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> update(
@@ -74,7 +86,10 @@ public class ResourcePostController {
         return ApiResponse.ok(Map.of("success", true));
     }
 
-    // 5. 삭제 (관리자)
+    
+    // =================================================================
+    // 5. 자료실 삭제 - 어드민만 가능
+    // =================================================================
     @DeleteMapping("/{resourceId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> delete(@PathVariable Long resourceId) {

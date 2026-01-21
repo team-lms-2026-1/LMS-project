@@ -24,7 +24,10 @@ public class ResourceCategoryController {
 
     private final ResourceCategoryService categoryService;
 
-    // 1. 목록 조회
+    
+    // =================================================================
+    // 1. 자료실 카테고로 목록 조회 - 전부가능
+    // =================================================================
     @GetMapping
     public ApiResponse<?> getList(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -34,7 +37,10 @@ public class ResourceCategoryController {
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 2. 등록 (관리자)
+    
+    // =================================================================
+    // 2. 자료실 카테고로 목록 조회 - 어드민만 가능
+    // =================================================================
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> create(@Valid @RequestBody ExternalCategoryRequest request) {
@@ -42,7 +48,9 @@ public class ResourceCategoryController {
         return ApiResponse.ok(Map.of("categoryId", id));
     }
 
-    // 3. 수정 (관리자)
+    // =================================================================
+    // 3. 자료실 카테고로 수정 - 어드민만 가능
+    // =================================================================
     @PatchMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> update(
@@ -53,7 +61,10 @@ public class ResourceCategoryController {
         return ApiResponse.ok(Map.of("success", true));
     }
 
-    // 4. 삭제 (관리자)
+    
+    // =================================================================
+    // 4. 자료실 카테고로 삭제 - 어드민만 가능
+    // =================================================================
     @DeleteMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<?> delete(@PathVariable Long categoryId) {

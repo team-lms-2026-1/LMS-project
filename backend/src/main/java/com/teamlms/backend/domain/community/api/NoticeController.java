@@ -110,7 +110,7 @@ public class NoticeController {
         return ResponseEntity.ok().build();
     }
     // =================================================================
-    // 5. 삭제 (Delete) - ★ 관리자만 가능
+    // 5. 삭제 (Delete) -  관리자만 가능
     // =================================================================
     @DeleteMapping("/{noticeId}")
     @PreAuthorize("hasRole('ADMIN')") //  관리자 권한 체크

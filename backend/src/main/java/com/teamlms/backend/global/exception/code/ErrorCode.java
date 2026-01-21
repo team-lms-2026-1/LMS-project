@@ -44,15 +44,11 @@ public enum ErrorCode {
     
 
     // =========================
-    // Domain: Community Notice (공지사항)
+    // Domain: Community (공통)
     // =========================
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_NOT_FOUND", "게시글을 찾을 수 없습니다.", "notice.notFound"),
     NOTICE_AUTHOR_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_AUTHOR_NOT_FOUND", "작성자 정보를 찾을 수 없습니다.", "notice.author.notFound"),
     NOTICE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "NOTICE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "notice.category.notFound"),
-
-    // =========================
-    // Domain: Community Resource (자료실)
-    // =========================
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "해당 자료가 없습니다.", "resource.notFound"),
     RESOURCE_AUTHOR_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_AUTHOR_NOT_FOUND", "작성자 정보를 찾을 수 없습니다.", "resource.author.notFound"),
     RESOURCE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "RESOURCE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "resource.category.notFound");

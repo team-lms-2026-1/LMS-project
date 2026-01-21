@@ -9,7 +9,7 @@ public class ExternalResourceResponse {
 
     private Long resourceId;
     
-    // ✅ 공통 DTO 재사용 (중첩 객체로 반환)
+    // 공통 DTO 재사용 (중첩 객체로 반환)
     private ExternalCategoryResponse category;
 
     private String title;
@@ -18,6 +18,6 @@ public class ExternalResourceResponse {
     private int viewCount;
     private String createdAt;  // yyyy-MM-dd HH:mm 포맷
 
-    // ✅ 공통 DTO 재사용 (첨부파일 목록)
+    // 공통 DTO 재사용 (첨부파일 목록)
     private List<ExternalAttachmentResponse> files;
 }

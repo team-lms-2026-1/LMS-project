@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter @NoArgsConstructor
 public class ExternalNoticePatchRequest {
-    // ⚠️ PATCH용이므로 @NotNull, @NotBlank를 모두 제거합니다.
+    // PATCH용이므로 @NotNull, @NotBlank를 모두 제거합니다.
     // 값이 있으면 수정하고, null이면 기존 값을 유지하는 방식입니다.
     
     private Long categoryId;
@@ -16,6 +16,6 @@ public class ExternalNoticePatchRequest {
     private String displayStartAt;
     private String displayEndAt;
 
-    // ✅ 추가: 삭제할 첨부파일 ID 목록 (선택 사항)
+    //삭제할 첨부파일 ID 목록 (선택 사항)
     private List<Long> deleteFileIds;
 }
