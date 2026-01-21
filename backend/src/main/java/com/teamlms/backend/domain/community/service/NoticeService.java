@@ -93,8 +93,6 @@ public class NoticeService {
                 .contentKeyword(keyword)
                 .build();
         
-        // 검색 로직은 Repository 구현에 따라 다름 (여기서는 findAll로 가정하거나 커스텀 메서드 사용)
-        // 만약 searchNoticeList 같은 커스텀 메서드가 없다면 기본 findAll 사용
         Page<Notice> notices = noticeRepository.findAll(pageable); 
         return notices.map(this::convertToExternalResponse);
     }
@@ -112,6 +110,7 @@ public class NoticeService {
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("카테고리 오류"));
 
+        // 1. 텍스트 정보 업데이트
         notice.update(
             request.getTitle(),
             request.getContent(),
@@ -120,6 +119,21 @@ public class NoticeService {
             parseDateTime(request.getDisplayEndAt())
         );
 
+        // 2. [추가] 삭제할 파일이 있다면 S3와 DB에서 삭제
+        // (ExternalNoticePatchRequest에 deleteFileIds 필드가 있어야 함)
+        if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
+            List<NoticeAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
+            
+            for (NoticeAttachment att : attachmentsToDelete) {
+                // S3에서 실제 파일 삭제
+                String s3Key = extractKeyFromUrl(att.getStorageKey());
+                s3Service.delete(s3Key);
+            }
+            // DB에서 메타데이터 삭제
+            attachmentRepository.deleteAllById(request.getDeleteFileIds());
+        }
+
+        // 3. 새 파일 업로드
         if (files != null && !files.isEmpty()) {
             Account uploader = accountRepository.findById(requesterId)
                  .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
@@ -137,7 +151,11 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
         
-        // TODO: S3 파일 삭제 로직 (필요 시 구현)
+        // [추가] S3에 있는 파일들을 먼저 삭제
+        for (NoticeAttachment attachment : notice.getAttachments()) {
+            String s3Key = extractKeyFromUrl(attachment.getStorageKey());
+            s3Service.delete(s3Key);
+        }
         
         noticeRepository.delete(notice);
     }
@@ -160,7 +178,7 @@ public class NoticeService {
                         .originalName(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .fileSize(file.getSize())
-                        .uploadedBy(author.getAccountId()) // ID만 저장
+                        .uploadedBy(author.getAccountId())
                         .updatedBy(author.getAccountId())
                         .build();
                 attachmentRepository.save(attachment);
@@ -214,5 +232,13 @@ public class NoticeService {
     private String formatDateTime(LocalDateTime dateTime) {
         if (dateTime == null) return "";
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
+
+    private String extractKeyFromUrl(String url) {
+        // 예: "https://my-bucket.../notices/abc.jpg" -> "notices/abc.jpg"
+        if (url == null || !url.contains("notices/")) {
+            return url;
+        }
+        return url.substring(url.indexOf("notices/"));
     }
 }
