@@ -6,14 +6,25 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true # 로그에 찍히는 SQL 예쁘게 정렬
+        format_sql: true
   
-  # Flyway 설정 (DB 형상 관리)
+  # Flyway 설정
   flyway:
     enabled: true
-    baseline-on-migrate: true # 기존 데이터가 있어도 Flyway 적용
+    baseline-on-migrate: true
 
-  # 🔐 JWT 공통 설정
+  # ★★★ [이동됨] AWS S3 설정 (모든 환경에서 사용) ★★★
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY} 
+        secret-key: ${AWS_SECRET_KEY} 
+      region:
+        static: ap-northeast-2
+      s3:
+        bucket: teamlms-bucket # 본인 버킷명 확인 필수
+
+# 🔐 JWT 공통 설정
 security:
   jwt:
     secret: ${JWT_SECRET:THIS_IS_A_LONG_SECRET_KEY_FOR_JWT_32_CHARS_MIN}
@@ -22,12 +33,13 @@ security:
 logging:
   level:
     org.springframework.security: DEBUG
+
 ---
 # --- [2. 로컬 개발 환경 (내 컴퓨터)] ---
 spring:
   config:
     activate:
-      on-profile: local # 프로필 이름: local
+      on-profile: local
   
   datasource:
     url: jdbc:postgresql://localhost:5432/team_lms
@@ -36,9 +48,6 @@ spring:
     driver-class-name: org.postgresql.Driver
   
   jpa:
-    # ⚠️ 중요: Flyway를 쓰면 ddl-auto는 'validate'로 바꿔야 안전합니다.
-    # 하지만 로컬에서 편하게 개발하려면 잠시 update로 둬도 됩니다.
-    # 정석은 'validate'로 두고 SQL 파일로만 테이블을 수정하는 것입니다.
     hibernate:
       ddl-auto: validate 
     show-sql: true
@@ -48,32 +57,21 @@ spring:
 spring:
   config:
     activate:
-      on-profile: prod # 프로필 이름: prod
+      on-profile: prod
   
   datasource:
-    # GitHub Actions가 넣어줄 값들 (보안 처리)
-    url: jdbc:postgresql://${RDS_ENDPOINT}:5432/postgres  # RDS 초기 DB명
+    url: jdbc:postgresql://${RDS_ENDPOINT}:5432/postgres
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   
   jpa:
     hibernate:
-      ddl-auto: validate # 배포 환경에서는 절대 테이블을 맘대로 바꾸면 안 됨 (Flyway가 관리)
-    show-sql: false # 운영 서버 로그 절약
-  api:
-  
-  worknet:
-    key: "h3Fc15RT7IE4WhljLA0kr4FiYG7SBGdR" # 발급받은 인증키
-    base-url: "http://openapi.work.go.kr/opi"
+      ddl-auto: validate
+    show-sql: false
 
-spring:
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_ACCESS_KEY} 
-        secret-key: ${AWS_SECRET_KEY} 
-      region:
-        static: ap-northeast-2 # 서울 리전
-      s3:
-        bucket: teamlms-bucket # 버킷 이름 (직접 만든 설정 키 아님, 공식 키 아님. 아래 코드에서 @Value로 쓸 변수명)
+# [기타 설정]
+api:
+worknet:
+  key: "h3Fc15RT7IE4WhljLA0kr4FiYG7SBGdR"
+  base-url: "http://openapi.work.go.kr/opi"

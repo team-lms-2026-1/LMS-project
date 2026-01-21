@@ -98,11 +98,12 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 4. 수정 (Update) - 관리자만 가능
+    // 4. 수정 (Update) 
     // =================================================================
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    public void updateNotice(Long noticeId, ExternalNoticeRequest request, Long requesterId) {
+    
+    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> files, Long requesterId) {
         
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
@@ -117,6 +118,13 @@ public class NoticeService {
             parseDateTime(request.getDisplayStartAt()),
             parseDateTime(request.getDisplayEndAt())
         );
+
+        if (files != null && !files.isEmpty()) {
+            Account uploader = accountRepository.findById(requesterId)
+                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+            
+            saveAttachments(files, notice, uploader);
+        }
     }
 
     // =================================================================
@@ -133,6 +141,7 @@ public class NoticeService {
         noticeRepository.delete(notice);
     }
 
+
     // =================================================================
     //  내부 헬퍼 메서드
     // =================================================================
@@ -141,19 +150,18 @@ public class NoticeService {
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
             try {
-                // S3 업로드
                 String s3Url = s3Service.upload(file, "notices");
                 
-                // DB 저장
                 NoticeAttachment attachment = NoticeAttachment.builder()
                         .notice(notice)
                         .storageKey(s3Url)
                         .originalName(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .fileSize(file.getSize())
-                        .uploadedBy(author)
-                        .updatedBy(author)
+                        .uploadedBy(author.getAccountId()) 
+                        .updatedBy(author.getAccountId())
                         .build();
+                        
                 attachmentRepository.save(attachment);
                 
             } catch (IOException e) {

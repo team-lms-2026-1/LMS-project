@@ -31,6 +31,6 @@ public class S3Service {
     
     public void delete(String key) {
         // key는 전체 URL이 아니라 "notices/파일명.jpg" 형태여야 함
-        s3Template.delete(bucket, key);
+        s3Template.deleteObject(bucket, key);
     }
 }
