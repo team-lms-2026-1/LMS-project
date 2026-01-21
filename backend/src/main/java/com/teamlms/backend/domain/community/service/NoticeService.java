@@ -1,27 +1,14 @@
 package com.teamlms.backend.domain.community.service;
 
-// 1. 타 도메인
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
-
-// 2. External DTO
 import com.teamlms.backend.domain.community.api.dto.*;
-
-// 3. Internal DTO
 import com.teamlms.backend.domain.community.dto.*;
-
-// 4. Entity
 import com.teamlms.backend.domain.community.entity.Notice;
 import com.teamlms.backend.domain.community.entity.NoticeAttachment;
 import com.teamlms.backend.domain.community.entity.NoticeCategory;
-
-// 5. Enums
 import com.teamlms.backend.domain.community.enums.NoticeStatus;
-
-// 6. Repository
 import com.teamlms.backend.domain.community.repository.*;
-
-// ★ 7. S3 Service 및 예외 처리 추가
 import com.teamlms.backend.global.s3.S3Service;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
@@ -30,11 +17,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+// ★ Security 권한 체크 어노테이션 추가
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException; // IO 예외 추가
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -50,23 +39,24 @@ public class NoticeService {
     private final NoticeCategoryRepository categoryRepository;
     private final NoticeAttachmentRepository attachmentRepository;
     private final AccountRepository accountRepository;
-    
-    // ★ S3Service 주입
     private final S3Service s3Service;
 
     // =================================================================
-    // 1. 등록 (Create)
+    // 1. 등록 (Create) - ★ 관리자만 가능
     // =================================================================
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')") 
     public Long createNotice(ExternalNoticeRequest request, List<MultipartFile> files, Long authorId) {
         
         Account author = accountRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
+        // (선택 사항) 로직 내부에서도 더블 체크하고 싶다면:
+        // if (!author.getRole().equals(UserRole.ADMIN)) { throw new AccessDeniedException("..."); }
+
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("카테고리가 존재하지 않습니다."));
 
-        // DTO -> Entity 변환
         Notice notice = Notice.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
@@ -78,9 +68,7 @@ public class NoticeService {
 
         Notice savedNotice = noticeRepository.save(notice);
 
-        // 첨부파일 저장 (S3 업로드 포함)
         if (files != null && !files.isEmpty()) {
-            // ★ author 정보를 같이 넘겨야 uploaded_by를 채울 수 있습니다.
             saveAttachments(files, savedNotice, author);
         }
 
@@ -88,7 +76,7 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 2. 상세 조회 (Read Detail)
+    // 2. 상세 조회 (Read Detail) - 누구나 가능 (로그인 필요 여부는 Config에서 설정)
     // =================================================================
     @Transactional
     public ExternalNoticeResponse getNoticeDetail(Long noticeId) {
@@ -100,7 +88,7 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 3. 목록 조회 (Read List)
+    // 3. 목록 조회 (Read List) - 누구나 가능
     // =================================================================
     public Page<ExternalNoticeResponse> getNoticeList(Pageable pageable, Long categoryId, String keyword) {
         InternalNoticeRequest searchCondition = InternalNoticeRequest.builder()
@@ -114,10 +102,12 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 4. 수정 (Update)
+    // 4. 수정 (Update) - ★ 관리자만 가능
     // =================================================================
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateNotice(Long noticeId, ExternalNoticeRequest request, Long requesterId) {
+        
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
 
@@ -134,14 +124,18 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 5. 삭제 (Delete)
+    // 5. 삭제 (Delete) - ★ 관리자만 가능
     // =================================================================
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteNotice(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
         
-        // TODO: S3에 있는 실제 파일들도 삭제하려면 여기서 s3Service.delete()를 호출해야 함
+        // S3 파일 삭제 로직 (필요 시 구현)
+        // for (NoticeAttachment att : notice.getAttachments()) {
+        //      s3Service.delete(att.getStorageKey());
+        // }
         
         noticeRepository.delete(notice);
     }
