@@ -12,10 +12,11 @@ import com.teamlms.backend.domain.dept.enums.MajorType;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
 import com.teamlms.backend.domain.dept.repository.MajorRepository;
 import com.teamlms.backend.domain.dept.repository.StudentMajorRepository;
-import com.teamlms.backend.global.exception.DuplicateLoginIdException;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 
-import com.teamlms.backend.global.exception.AccountNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,7 +44,7 @@ public class AccountCommandService {
     public Long adminCreate(AdminAccountCreateRequest req, Long actorAccountId) {
 
         if (accountRepository.existsByLoginId(req.getLoginId())) {
-            throw new DuplicateLoginIdException(req.getLoginId());
+            throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID, req.getLoginId());
         }
 
         AccountType accountType = req.getAccountType();
@@ -88,7 +89,7 @@ public class AccountCommandService {
 
     public Account updateStatus(Long accountId, AccountStatus status, Long actorAccountId ) {
         
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
         AccountStatus newStatus = status; // 문자열에서 enum변환
 
@@ -209,7 +210,7 @@ public class AccountCommandService {
     public void adminUpdate(Long accountId, AdminAccountUpdateRequest req, Long actorAccountId) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFoundException(accountId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
         // 1) Account 공통 업데이트(상태)
         if (req.getStatus() != null) {
@@ -226,7 +227,7 @@ public class AccountCommandService {
 
     private void updateStudentProfile(Long accountId, AdminAccountUpdateRequest req, Long actorAccountId) {
         StudentProfile sp = studentProfileRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFoundException(accountId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
         boolean deptChanged = req.getDeptId() != null;
         boolean majorsChanged = req.getMajors() != null;
@@ -286,7 +287,7 @@ public class AccountCommandService {
 
     private void updateProfessorProfile(Long accountId, AdminAccountUpdateRequest req, Long actorAccountId) {
         ProfessorProfile pp = professorProfileRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFoundException(accountId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
         if (req.getName() != null) pp.updateName(req.getName());
         if (req.getEmail() != null) pp.updateEmail(req.getEmail());
@@ -297,7 +298,7 @@ public class AccountCommandService {
 
     private void updateAdminProfile(Long accountId, AdminAccountUpdateRequest req, Long actorAccountId) {
         AdminProfile ap = adminProfileRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFoundException(accountId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
         if (req.getName() != null) ap.updateName(req.getName());
         if (req.getEmail() != null) ap.updateEmail(req.getEmail());

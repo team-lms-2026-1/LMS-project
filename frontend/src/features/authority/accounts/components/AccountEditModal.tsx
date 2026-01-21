@@ -1,343 +1,680 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "../styles/AccountModal.module.css";
-import type { AccountRowView, AccountStatus, AccountType, StudentEnrollmentStatus } from "../types";
-import type { UpdateAccountRequestDto, MajorType } from "../api/dto";
+import type { AccountType, MajorType } from "../types";
 import { accountsApi } from "../api/accountsApi";
 
-export type AccountEditPayload = {
-  accountId: number;
-  accountType: AccountType;
-  body: UpdateAccountRequestDto;
-};
-
-type Props = {
+export type AccountEditModalProps = {
   open: boolean;
-  row: AccountRowView | null;
+  accountId: number | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: () => Promise<void>;
 };
 
-function pickName(row: AccountRowView) {
-  return row.studentProfile?.name ?? row.professorProfile?.name ?? row.adminProfile?.name ?? "";
-}
-function pickEmail(row: AccountRowView) {
-  return row.studentProfile?.email ?? row.professorProfile?.email ?? row.adminProfile?.email ?? "";
-}
-function pickPhone(row: AccountRowView) {
-  return row.studentProfile?.phone ?? row.professorProfile?.phone ?? row.adminProfile?.phone ?? "";
-}
+type FormState = {
+  accountType: AccountType;
+  loginId: string;
 
-export default function AccountEditModal({ open, row, onClose, onSaved }: Props) {
-  const account = row?.account;
-  const accountType = account?.accountType ?? "STUDENT";
+  name: string;
+  email: string;
+  phone: string;
 
-  // 공통(프로필 공통 필드: name/email/phone)
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
+  status: "ACTIVE" | "INACTIVE";
+
+  // STUDENT/PROFESSOR
+  deptId: number;
 
   // STUDENT
-  const [deptId, setDeptId] = useState<number>(1);
-  const [studentNo, setStudentNo] = useState<string>("");
-  const [gradeLevel, setGradeLevel] = useState<number>(1);
-  const [academicStatus, setAcademicStatus] = useState<StudentEnrollmentStatus>("ENROLLED");
-  const [primaryMajorId, setPrimaryMajorId] = useState<number>(1);
-  const [useMinor, setUseMinor] = useState(false);
-  const [minorMajorId, setMinorMajorId] = useState<number>(2);
+  studentNo: string;
+  gradeLevel: number;
+  academicStatus: "ENROLLED" | "LEAVE" | "DROPPED" | "GRADUATED";
 
-  // PROFESSOR
-  const [professorNo, setProfessorNo] = useState<string>("");
+  primaryMajorId: number;
+  useMinor: boolean;
+  minorMajorId: number;
+  useDouble: boolean;
+  doubleMajorId: number;
 
   // ADMIN
-  const [memo, setMemo] = useState<string>("");
+  memo: string;
+
+  // 비밀번호 변경(선택)
+  newPassword: string;
+};
+
+const emptyForm: FormState = {
+  accountType: "STUDENT",
+  loginId: "",
+  studentNo: "",
+
+  name: "",
+  email: "",
+  phone: "",
+
+  status: "ACTIVE",
+
+  deptId: 0,
+
+  gradeLevel: 1,
+  academicStatus: "ENROLLED",
+
+  primaryMajorId: 0,
+  useMinor: false,
+  minorMajorId: 0,
+  useDouble: false,
+  doubleMajorId: 0,
+
+  memo: "",
+  newPassword: "",
+};
+
+function isValidPassword(v: string) {
+  if (!v.trim()) return true;
+  return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(v);
+}
+
+function isValidEmail(v: string) {
+  if (!v.trim()) return true;
+  return v.includes("@");
+}
+
+/**
+ * ✅ phone은 사용자가 하이픈 없이 입력할 수도 있으니
+ * - 01012345678 (숫자 11자리)도 허용
+ * - 010-1234-5678 도 허용
+ */
+function isValidPhone(v: string) {
+  if (!v.trim()) return true;
+  const t = v.trim();
+  return /^\d{3}-\d{4}-\d{4}$/.test(t) || /^\d{11}$/.test(t);
+}
+
+/** ✅ API로 보낼 때는 항상 000-0000-0000 형태로 정규화 */
+function normalizePhoneForApi(v: string): string | null {
+  const t = (v ?? "").trim();
+  if (!t) return null;
+
+  // 이미 하이픈 형태
+  if (/^\d{3}-\d{4}-\d{4}$/.test(t)) return t;
+
+  // 숫자만 11자리면 하이픈 붙이기
+  if (/^\d{11}$/.test(t)) {
+    return `${t.slice(0, 3)}-${t.slice(3, 7)}-${t.slice(7)}`;
+  }
+
+  // 그 외는 그대로 보내지 말고 null 처리(백엔드 검증 회피)
+  return null;
+}
+
+function pickMajors(detail: any): Array<{ majorId: number; majorType: MajorType }> {
+  const majors = detail?.profile?.majors ?? detail?.studentProfile?.majors ?? [];
+  return Array.isArray(majors) ? majors : [];
+}
+
+function deriveStudentNoFromLoginId(loginId: string): string {
+  const m = String(loginId ?? "").match(/\d{8}$/);
+  return m ? m[0] : "";
+}
+
+function getDeptIdFromProfile(detail: any, profile: any): number {
+  const v =
+    profile?.deptId ??
+    profile?.departmentId ??
+    profile?.dept?.deptId ??
+    profile?.dept?.departmentId ??
+    profile?.department?.deptId ??
+    profile?.department?.departmentId ??
+    detail?.deptId ??
+    detail?.profile?.deptId ??
+    detail?.profile?.departmentId ??
+    0;
+
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function getStudentNo(detail: any, profile: any): string {
+  const v =
+    profile?.studentNo ??
+    profile?.studentNumber ??
+    detail?.studentNo ??
+    detail?.profile?.studentNo ??
+    detail?.studentProfile?.studentNo ??
+    "";
+  return String(v ?? "").trim();
+}
+
+function makeFormFromDetail(detail: any): FormState {
+  const type: AccountType = detail.accountType;
+  const status = detail.status as "ACTIVE" | "INACTIVE";
+
+  const profile =
+    type === "ADMIN"
+      ? (detail.adminProfile ?? detail.profile ?? {})
+      : (detail.profile ?? detail.studentProfile ?? detail.professorProfile ?? {});
+
+  const deptId = getDeptIdFromProfile(detail, profile);
+
+  const next: FormState = {
+    ...emptyForm,
+    accountType: type,
+    loginId: detail.loginId ?? "",
+    status: status ?? "ACTIVE",
+
+    name: profile.name ?? "",
+    email: profile.email ?? "",
+    phone: profile.phone ?? "",
+
+    memo: profile.memo ?? "",
+    newPassword: "",
+  };
+
+  if (type === "STUDENT") {
+    next.deptId = deptId;
+    next.gradeLevel = Number(profile.gradeLevel ?? 1);
+    next.academicStatus = (profile.academicStatus ?? "ENROLLED") as any;
+    next.studentNo = getStudentNo(detail, profile);
+
+    const majors = pickMajors(detail);
+    next.primaryMajorId = Number(majors.find((m: any) => m.majorType === "PRIMARY")?.majorId ?? 0);
+
+    const minor = Number(majors.find((m: any) => m.majorType === "MINOR")?.majorId ?? 0);
+    const dbl = Number(majors.find((m: any) => m.majorType === "DOUBLE")?.majorId ?? 0);
+
+    next.useMinor = minor > 0;
+    next.minorMajorId = minor;
+
+    next.useDouble = dbl > 0;
+    next.doubleMajorId = dbl;
+  }
+
+  if (type === "PROFESSOR") {
+    next.deptId = deptId;
+  }
+
+  return next;
+}
+
+const numericKeys = new Set<keyof FormState>([
+  "deptId",
+  "gradeLevel",
+  "primaryMajorId",
+  "minorMajorId",
+  "doubleMajorId",
+]);
+
+export default function AccountEditModal({ open, accountId, onClose, onSaved }: AccountEditModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [form, setForm] = useState<FormState>(emptyForm);
+  const [error, setError] = useState<string | null>(null);
+
+  const [depts, setDepts] = useState<Array<{ deptId: number; deptName: string }>>([]);
+  const [majorsByDept, setMajorsByDept] = useState<Array<{ majorId: number; majorName: string }>>([]);
+  const [majorsAll, setMajorsAll] = useState<Array<{ majorId: number; majorName: string }>>([]);
+
+  const cleanStrOrNull = (v: string) => {
+    const t = (v ?? "").trim();
+    return t.length ? t : null;
+  };
+
+  const buildStudentMajors = () => {
+    const majors: Array<{ majorId: number; majorType: MajorType }> = [];
+    if (form.primaryMajorId > 0) majors.push({ majorId: form.primaryMajorId, majorType: "PRIMARY" });
+    if (form.useMinor && form.minorMajorId > 0) majors.push({ majorId: form.minorMajorId, majorType: "MINOR" });
+    if (form.useDouble && form.doubleMajorId > 0) majors.push({ majorId: form.doubleMajorId, majorType: "DOUBLE" });
+    return majors;
+  };
+
+  const buildPasswordPart = () => {
+    const pw = form.newPassword.trim();
+    return pw.length ? { password: pw } : {};
+  };
+
+  /** ✅ email/phone 정규화해서 profile에 넣기 */
+  const buildBaseProfile = () => ({
+    name: form.name.trim(),
+    email: cleanStrOrNull(form.email),
+    phone: normalizePhoneForApi(form.phone), // ✅ 핵심 수정
+  });
+
+  const isHydratingRef = useRef(false);
+  const deptChangedByUserRef = useRef(false);
 
   useEffect(() => {
-    if (!open || !row || !account) return;
+    if (!open || !accountId) return;
 
-    setName(pickName(row));
-    setEmail(pickEmail(row) ?? "");
-    setPhone(pickPhone(row) ?? "");
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      isHydratingRef.current = true;
+      deptChangedByUserRef.current = false;
 
-    if (account.accountType === "STUDENT") {
-      const p = row.studentProfile;
-      // 학생프로필 ERD에는 deptId/majors가 없었지만, 요청 규칙에 deptId/majors가 있으므로
-      // 목록 응답 profile에 deptId/majors가 포함된다는 전제로, 없으면 기본값 유지
-      // (백엔드 응답에 넣어주면 UI가 자동 반영됩니다)
-      setDeptId((p as any)?.deptId ?? 1);
-      setStudentNo(p?.studentNo ?? "");
-      setGradeLevel(p?.gradeLevel ?? 1);
-      setAcademicStatus(p?.academicStatus ?? "ENROLLED");
+      try {
+        const deptList = await accountsApi.listDepts();
+        setDepts(deptList);
 
-      const majors = ((row as any)?.studentProfile as any)?.majors as
-        | Array<{ majorId: number; majorType: MajorType }>
-        | undefined;
+        const detail = await accountsApi.detail(accountId);
+        const next = makeFormFromDetail(detail);
+        setForm(next);
 
-      const primary = majors?.find((m) => m.majorType === "PRIMARY")?.majorId ?? 1;
-      const minor = majors?.find((m) => m.majorType === "MINOR")?.majorId;
+        if (next.accountType === "STUDENT" && next.deptId) {
+          const majorsDept = await accountsApi.listMajorsByDept(next.deptId).catch(() => []);
+          const mapped = majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName }));
+          setMajorsByDept(mapped);
 
-      setPrimaryMajorId(primary);
-      setUseMinor(typeof minor === "number");
-      setMinorMajorId(minor ?? 2);
-    }
+          if (next.primaryMajorId && !mapped.some((m) => m.majorId === next.primaryMajorId)) {
+            setForm((p) => ({ ...p, primaryMajorId: 0 }));
+          }
+        } else {
+          setMajorsByDept([]);
+        }
 
-    if (account.accountType === "PROFESSOR") {
-      const p = row.professorProfile as any;
-      setDeptId(p?.deptId ?? p?.departmentId ?? 1);
-      setProfessorNo(p?.professorNo ?? "");
-    }
-
-    if (account.accountType === "ADMIN") {
-      const p = row.adminProfile;
-      setMemo(p?.memo ?? "");
-    }
-  }, [open, row, account]);
-
-  const canSubmit = useMemo(() => {
-    if (!account) return false;
-    if (!name.trim()) return false;
-
-    if (accountType === "STUDENT") return !!studentNo.trim();
-    if (accountType === "PROFESSOR") return !!professorNo.trim();
-    return true;
-  }, [account, accountType, name, studentNo, professorNo]);
-
-  async function resetPassword() {
-    if (!account) return;
-    try {
-      await accountsApi.resetPassword(account.accountId);
-      alert("비밀번호 초기화 요청이 완료되었습니다.");
-    } catch (e: any) {
-      alert(e?.message ?? "비밀번호 초기화 실패");
-    }
-  }
-
-  async function submit() {
-    if (!account) return;
-
-    try {
-      if (accountType === "STUDENT") {
-        const majors: Array<{ majorId: number; majorType: MajorType }> = [
-          { majorId: primaryMajorId, majorType: "PRIMARY" },
-        ];
-        if (useMinor) majors.push({ majorId: minorMajorId, majorType: "MINOR" });
-
-        const body: UpdateAccountRequestDto = {
-          profile: {
-            name: name.trim(),
-            email: email.trim() ? email.trim() : null,
-            phone: phone.trim() ? phone.trim() : null,
-
-            deptId,
-            studentNo: studentNo.trim(),
-            gradeLevel,
-            academicStatus,
-            majors,
-          },
+        const majorsAllFallback = async () => {
+          const results = await Promise.all(
+            deptList.map((d) => accountsApi.listMajorsByDept(d.deptId).catch(() => []))
+          );
+          const flat = results.flat();
+          const map = new Map<number, { majorId: number; majorName: string }>();
+          flat.forEach((m: any) => map.set(m.majorId, { majorId: m.majorId, majorName: m.majorName }));
+          return Array.from(map.values());
         };
 
-        await accountsApi.update(account.accountId, body);
-      } else if (accountType === "PROFESSOR") {
-        const body: UpdateAccountRequestDto = {
-          profile: {
-            name: name.trim(),
-            email: email.trim() ? email.trim() : null,
-            phone: phone.trim() ? phone.trim() : null,
+        const allMajors = await majorsAllFallback();
+        setMajorsAll(allMajors);
+      } catch (e: any) {
+        setError(e?.message ?? "상세 조회 실패");
+        setForm(emptyForm);
+        setMajorsByDept([]);
+        setMajorsAll([]);
+      } finally {
+        isHydratingRef.current = false;
+        setLoading(false);
+      }
+    };
 
-            deptId,
-            professorNo: professorNo.trim(),
-          },
-        };
+    load();
+  }, [open, accountId]);
 
-        await accountsApi.update(account.accountId, body);
-      } else {
-        // 관리자: 기존 adminProfile 유지
-        const body: UpdateAccountRequestDto = {
-          adminProfile: {
-            name: name.trim(),
-            email: email.trim() ? email.trim() : null,
-            phone: phone.trim() ? phone.trim() : null,
-            memo: memo.trim() ? memo.trim() : null,
-          },
-        };
+  useEffect(() => {
+    if (!open) return;
+    if (form.accountType !== "STUDENT") return;
+    if (isHydratingRef.current) return;
 
-        await accountsApi.update(account.accountId, body);
+    (async () => {
+      if (!form.deptId) {
+        setMajorsByDept([]);
+        setForm((p) => ({ ...p, primaryMajorId: 0 }));
+        deptChangedByUserRef.current = false;
+        return;
       }
 
-      onSaved();
-    } catch (e: any) {
-      alert(e?.message ?? "수정 실패");
-    }
-  }
+      const majorsDept = await accountsApi.listMajorsByDept(form.deptId).catch(() => []);
+      const mapped = majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName }));
+      setMajorsByDept(mapped);
 
-  if (!open || !row || !account) return null;
+      const valid = mapped.some((m) => m.majorId === form.primaryMajorId);
+
+      if (deptChangedByUserRef.current || !valid) {
+        setForm((p) => ({ ...p, primaryMajorId: 0 }));
+        deptChangedByUserRef.current = false;
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.deptId, open, form.accountType]);
+
+  const onChange =
+    (key: keyof FormState) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const t = e.target as HTMLInputElement;
+
+      if (t.type === "checkbox") {
+        const checked = (t as HTMLInputElement).checked;
+        setForm((prev) => ({ ...prev, [key]: checked } as FormState));
+        return;
+      }
+
+      const raw = (e.target as HTMLInputElement).value;
+      const value = numericKeys.has(key) ? Number(raw) : raw;
+      setForm((prev) => ({ ...prev, [key]: value } as FormState));
+    };
+
+  const onDeptChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextDeptId = Number(e.target.value);
+    deptChangedByUserRef.current = true;
+
+    setForm((p) => ({
+      ...p,
+      deptId: nextDeptId,
+      primaryMajorId: 0,
+    }));
+
+    if (!nextDeptId) {
+      setMajorsByDept([]);
+      return;
+    }
+    const majorsDept = await accountsApi.listMajorsByDept(nextDeptId).catch(() => []);
+    setMajorsByDept(majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName })));
+  };
+
+  const canSave = useMemo(() => {
+    if (!accountId) return false;
+    if (saving || loading) return false;
+
+    if (!form.name.trim()) return false;
+    if (!isValidEmail(form.email)) return false;
+    if (!isValidPhone(form.phone)) return false;
+    if (!isValidPassword(form.newPassword)) return false;
+
+    if (form.accountType === "STUDENT") {
+      if (!form.deptId) return false;
+      if (!form.primaryMajorId) return false;
+      if (form.useMinor && !form.minorMajorId) return false;
+      if (form.useDouble && !form.doubleMajorId) return false;
+
+      // studentNo는 DB에 이미 있으므로 "없어도 업데이트 가능"하게 두는 편이 안전함
+      // (백엔드가 studentNo를 update에서 금지하는 경우도 있기 때문)
+    }
+
+    if (form.accountType === "PROFESSOR") {
+      if (!form.deptId) return false;
+    }
+
+    return true;
+  }, [accountId, saving, loading, form]);
+
+  const onSubmit = async () => {
+    if (!accountId || !canSave) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      // ✅ ADMIN
+      if (form.accountType === "ADMIN") {
+        const body: any = {
+          status: form.status,
+          ...buildBaseProfile(),
+          memo: cleanStrOrNull(form.memo),
+          ...buildPasswordPart(),
+        };
+
+        await accountsApi.update(accountId, body);
+        await onSaved();
+        return;
+      }
+
+      // ✅ PROFESSOR
+      if (form.accountType === "PROFESSOR") {
+        // ✅ profile 대신 professorProfile로 전송 (백엔드 DTO 차이 흡수)
+        const body: any = {
+          status: form.status,
+          ...buildBaseProfile(),
+          deptId: form.deptId,
+          ...buildPasswordPart(),
+        };
+
+        await accountsApi.update(accountId, body);
+        await onSaved();
+        return;
+      }
+
+      // ✅ STUDENT
+      const majors = buildStudentMajors();
+
+      // studentNo는 "보내도 되고, 안 보내도 되는" 상태가 가장 안전
+      // - backend가 studentNo update를 허용하면 보내도 OK
+      // - 금지하면 보내는 순간 실패할 수 있음
+      // 그래서: 기존 값이 있으면 보내고, 없으면 loginId에서 파생
+
+      // ✅ profile 대신 studentProfile로 전송 (백엔드 DTO 차이 흡수)
+      const body: any = {
+        status: form.status,
+          ...buildBaseProfile(),
+          gradeLevel: Number(form.gradeLevel),
+          academicStatus: form.academicStatus,
+          deptId: form.deptId,
+          majors,
+        
+        ...buildPasswordPart(),
+      };
+
+      await accountsApi.update(accountId, body);
+      await onSaved();
+    } catch (e: any) {
+      setError(e?.message ?? "저장 실패");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!open) return null;
+
+  const typeLabel = form.accountType === "STUDENT" ? "학생" : form.accountType === "PROFESSOR" ? "교수" : "관리자";
 
   return (
-    <div className={styles.backdrop} role="dialog" aria-modal="true">
-      <div className={styles.modal}>
-        <div className={styles.title}>계정 수정</div>
-
-        <div className={styles.roleRow}>
-          <span className={styles.readonlyRole}>{accountType}</span>
-          <span className={styles.readonlyHint}>로그인 아이디 및 유형은 수정할 수 없습니다.</span>
+    <div className={styles.backdrop} onMouseDown={onClose}>
+      <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <div>
+            <h2 className={styles.title}>계정 수정</h2>
+          </div>
+          <div className={styles.headerRight}>
+            <span className={styles.headerLabel}>유형</span>
+            <span className={styles.headerLabel} style={{ color: "#111827" }}>
+              {typeLabel}
+            </span>
+          </div>
         </div>
 
+        <div className={styles.tabs}>
+          {(["STUDENT", "PROFESSOR", "ADMIN"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              className={`${styles.tab} ${form.accountType === t ? styles.active : ""}`}
+              disabled
+              style={{ cursor: "default", opacity: form.accountType === t ? 1 : 0.55 }}
+              aria-disabled="true"
+            >
+              {t === "STUDENT" ? "학생" : t === "PROFESSOR" ? "교수" : "관리자"}
+            </button>
+          ))}
+        </div>
+
+        {error && <div style={{ marginBottom: 12, color: "#b91c1c", fontSize: 13 }}>{error}</div>}
+        {loading ? <div style={{ padding: 12 }}>불러오는 중...</div> : null}
+
         <div className={styles.grid}>
-          <div className={styles.field}>
-            <label className={styles.label}>로그인 아이디</label>
-            <input className={styles.input} value={account.loginId} readOnly />
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>비밀번호</label>
-            <div className={styles.inline}>
-              <input className={styles.input} value="********" readOnly />
-              <button type="button" className={styles.smallBtn} onClick={resetPassword}>
-                초기화
-              </button>
+          {/* 좌측 */}
+          <section className={styles.col}>
+            <div className={styles.field}>
+              <label className={styles.label}>ID</label>
+              <input className={styles.input} value={form.loginId} disabled />
             </div>
-          </div>
 
-          <div className={styles.field}>
-            <label className={styles.label}>이름</label>
-            <input className={styles.input} value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>이메일</label>
-            <input className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-
-          <div className={styles.field}>
-            <label className={styles.label}>전화번호</label>
-            <input className={styles.input} value={phone} onChange={(e) => setPhone(e.target.value)} />
-          </div>
-
-          {/* 타입별 추가 영역 */}
-          {accountType === "STUDENT" && (
-            <div className={styles.roleBox}>
-              <div className={styles.field}>
-                <label className={styles.label}>deptId</label>
-                <input
-                  className={styles.input}
-                  type="number"
-                  value={deptId}
-                  onChange={(e) => setDeptId(Number(e.target.value))}
-                />
+            <div className={styles.field}>
+              <label className={styles.label}>현재 비밀번호</label>
+              <div className={styles.inlineRow}>
+                <input className={styles.input} value={"********"} disabled />
               </div>
+              <div className={styles.idHint}>현재 비밀번호는 보안상 표시/조회가 불가하여 마스킹 처리됩니다.</div>
+            </div>
 
-              <div className={styles.field}>
-                <label className={styles.label}>학번(studentNo)</label>
-                <input className={styles.input} value={studentNo} onChange={(e) => setStudentNo(e.target.value)} />
-              </div>
+            <div className={styles.field}>
+              <label className={styles.label}>새 비밀번호(선택)</label>
+              <input
+                className={styles.input}
+                value={form.newPassword}
+                type="password"
+                onChange={onChange("newPassword")}
+                placeholder="변경 시 입력"
+              />
+              {!isValidPassword(form.newPassword) && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>영문/숫자/특수문자 포함 6자 이상</div>
+              )}
+            </div>
 
-              <div className={styles.row3}>
+            <div className={styles.field}>
+              <label className={styles.label}>이름</label>
+              <input className={styles.input} value={form.name} onChange={onChange("name")} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>이메일</label>
+              <input className={styles.input} value={form.email} onChange={onChange("email")} />
+              {!isValidEmail(form.email) && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>@ 포함</div>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>연락처</label>
+              <input className={styles.input} value={form.phone} onChange={onChange("phone")} />
+              {!isValidPhone(form.phone) && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                  000-0000-0000 또는 숫자 11자리
+                </div>
+              )}
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>상태</label>
+              <select className={styles.select} value={form.status} onChange={onChange("status")}>
+                <option value="ACTIVE">활성</option>
+                <option value="INACTIVE">비활성</option>
+              </select>
+            </div>
+
+            {form.accountType === "STUDENT" && (
+              <div className={styles.row2}>
                 <div className={styles.field}>
-                  <label className={styles.label}>학년(gradeLevel)</label>
-                  <select
-                    className={styles.select}
-                    value={gradeLevel}
-                    onChange={(e) => setGradeLevel(Number(e.target.value))}
-                  >
-                    {[1, 2, 3, 4].map((n) => (
-                      <option key={n} value={n}>
-                        {n}
+                  <label className={styles.label}>학년</label>
+                  <select className={styles.select} value={form.gradeLevel} onChange={onChange("gradeLevel")}>
+                    {[1, 2, 3, 4].map((v) => (
+                      <option key={v} value={v}>
+                        {v}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <div className={styles.field} style={{ gridColumn: "span 2" }}>
-                  <label className={styles.label}>재학상태(academicStatus)</label>
-                  <select
-                    className={styles.select}
-                    value={academicStatus}
-                    onChange={(e) => setAcademicStatus(e.target.value as StudentEnrollmentStatus)}
-                  >
-                    <option value="ENROLLED">ENROLLED</option>
-                    <option value="LEAVE">LEAVE</option>
-                    <option value="DROPPED">DROPPED</option>
-                    <option value="GRADUATED">GRADUATED</option>
+                <div className={styles.field}>
+                  <label className={styles.label}>재학 상태</label>
+                  <select className={styles.select} value={form.academicStatus} onChange={onChange("academicStatus")}>
+                    <option value="ENROLLED">재학</option>
+                    <option value="LEAVE">휴학</option>
+                    <option value="DROPPED">퇴학</option>
+                    <option value="GRADUATED">졸업</option>
                   </select>
                 </div>
               </div>
+            )}
+          </section>
 
+          {/* 우측 */}
+          <section className={styles.col}>
+            {(form.accountType === "STUDENT" || form.accountType === "PROFESSOR") && (
               <div className={styles.field}>
-                <label className={styles.label}>주전공 majorId (PRIMARY)</label>
-                <input
-                  className={styles.input}
-                  type="number"
-                  value={primaryMajorId}
-                  onChange={(e) => setPrimaryMajorId(Number(e.target.value))}
-                />
+                <label className={styles.label}>소속 학과</label>
+                <select className={styles.select} value={form.deptId} onChange={onDeptChange}>
+                  <option value={0}>선택</option>
+                  {depts.map((d) => (
+                    <option key={d.deptId} value={d.deptId}>
+                      {d.deptName}
+                    </option>
+                  ))}
+                </select>
               </div>
+            )}
 
-              <div className={styles.field} style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <input
-                  id="useMinorEdit"
-                  type="checkbox"
-                  checked={useMinor}
-                  onChange={(e) => setUseMinor(e.target.checked)}
-                />
-                <label htmlFor="useMinorEdit" style={{ fontSize: 13 }}>
-                  부전공(MINOR) 사용
-                </label>
-              </div>
-
-              {useMinor && (
+            {form.accountType === "STUDENT" && (
+              <>
                 <div className={styles.field}>
-                  <label className={styles.label}>부전공 majorId (MINOR)</label>
-                  <input
-                    className={styles.input}
-                    type="number"
-                    value={minorMajorId}
-                    onChange={(e) => setMinorMajorId(Number(e.target.value))}
-                  />
+                  <label className={styles.label}>주전공</label>
+                  <select className={styles.select} value={form.primaryMajorId} onChange={onChange("primaryMajorId")}>
+                    <option value={0}>선택</option>
+                    {majorsByDept.map((m) => (
+                      <option key={m.majorId} value={m.majorId}>
+                        {m.majorName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              )}
-            </div>
-          )}
 
-          {accountType === "PROFESSOR" && (
-            <div className={styles.roleBox}>
-              <div className={styles.field}>
-                <label className={styles.label}>deptId</label>
-                <input
-                  className={styles.input}
-                  type="number"
-                  value={deptId}
-                  onChange={(e) => setDeptId(Number(e.target.value))}
-                />
+                <div className={styles.checkRow}>
+                  <input type="checkbox" checked={form.useMinor} onChange={onChange("useMinor")} />
+                  <span className={styles.checkText}>부전공(MINOR) 사용</span>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>부전공</label>
+                  <select
+                    className={styles.select}
+                    value={form.minorMajorId}
+                    onChange={onChange("minorMajorId")}
+                    disabled={!form.useMinor}
+                  >
+                    <option value={0}>선택</option>
+                    {majorsAll.map((m) => (
+                      <option key={m.majorId} value={m.majorId}>
+                        {m.majorName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.checkRow}>
+                  <input type="checkbox" checked={form.useDouble} onChange={onChange("useDouble")} />
+                  <span className={styles.checkText}>복수전공(DOUBLE) 사용</span>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>복수전공</label>
+                  <select
+                    className={styles.select}
+                    value={form.doubleMajorId}
+                    onChange={onChange("doubleMajorId")}
+                    disabled={!form.useDouble}
+                  >
+                    <option value={0}>선택</option>
+                    {majorsAll.map((m) => (
+                      <option key={m.majorId} value={m.majorId}>
+                        {m.majorName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {form.accountType === "PROFESSOR" && (
+              <div className={styles.noticeBox}>
+                <div className={styles.noticeTitle}>안내</div>
+                <div className={styles.noticeText}>교수 계정은 소속 학과 및 기본 정보만 수정합니다.</div>
               </div>
+            )}
 
-              <div className={styles.field}>
-                <label className={styles.label}>교번(professorNo)</label>
-                <input
-                  className={styles.input}
-                  value={professorNo}
-                  onChange={(e) => setProfessorNo(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-
-          {accountType === "ADMIN" && (
-            <div className={styles.roleBox}>
+            {form.accountType === "ADMIN" && (
               <div className={styles.field}>
                 <label className={styles.label}>메모</label>
-                <textarea className={styles.textarea} value={memo} onChange={(e) => setMemo(e.target.value)} />
+                <textarea
+                  className={styles.textarea}
+                  value={form.memo}
+                  onChange={onChange("memo")}
+                  placeholder="관리자 메모"
+                />
               </div>
-            </div>
-          )}
+            )}
+          </section>
         </div>
 
-        <div className={styles.actions}>
-          <button type="button" className={styles.ghostBtn} onClick={onClose}>
+        <div className={styles.footer}>
+          <button type="button" className={styles.ghostBtn} onClick={onClose} disabled={saving || loading}>
             취소
           </button>
-          <button type="button" className={styles.primaryBtn} disabled={!canSubmit} onClick={submit}>
-            계정 수정
+          <button type="button" className={styles.primaryBtn} onClick={onSubmit} disabled={!canSave}>
+            {saving ? "저장 중..." : "계정 수정"}
           </button>
         </div>
       </div>

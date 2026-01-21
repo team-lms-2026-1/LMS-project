@@ -5,7 +5,9 @@ import com.teamlms.backend.domain.dept.entity.StudentMajorId;
 import com.teamlms.backend.domain.dept.enums.MajorType;
 import com.teamlms.backend.domain.dept.repository.MajorRepository;
 import com.teamlms.backend.domain.dept.repository.StudentMajorRepository;
-import com.teamlms.backend.global.exception.MajorNotFoundException;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class StudentMajorCommandService {
 
     public void assign(Long studentAccountId, Long majorId, MajorType majorType) {
         if (!majorRepository.existsById(majorId)) {
-            throw new MajorNotFoundException(majorId);
+            throw  new BusinessException(ErrorCode.MAJOR_NOT_FOUND, majorId);
         }
         if (studentMajorRepository.existsByIdStudentAccountIdAndIdMajorId(studentAccountId, majorId)) {
             throw new IllegalStateException("이미 등록된 전공입니다.");
