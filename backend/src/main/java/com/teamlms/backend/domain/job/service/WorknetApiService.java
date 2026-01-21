@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.teamlms.backend.domain.job.repository.JobDictionaryRepository;
 
 @Slf4j
 @Service

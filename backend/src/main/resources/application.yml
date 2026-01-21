@@ -66,3 +66,14 @@ spring:
   worknet:
     key: "h3Fc15RT7IE4WhljLA0kr4FiYG7SBGdR" # 발급받은 인증키
     base-url: "http://openapi.work.go.kr/opi"
+
+spring:
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY} 
+        secret-key: ${AWS_SECRET_KEY} 
+      region:
+        static: ap-northeast-2 # 서울 리전
+      s3:
+        bucket: teamlms-bucket # 버킷 이름 (직접 만든 설정 키 아님, 공식 키 아님. 아래 코드에서 @Value로 쓸 변수명)

@@ -4,10 +4,10 @@ package com.teamlms.backend.domain.community.service;
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 
-// 2. External DTO (API 통신용 - api/dto 패키지)
+// 2. External DTO
 import com.teamlms.backend.domain.community.api.dto.*;
 
-// 3. Internal DTO (내부 로직용 - dto 패키지)
+// 3. Internal DTO
 import com.teamlms.backend.domain.community.dto.*;
 
 // 4. Entity
@@ -15,11 +15,16 @@ import com.teamlms.backend.domain.community.entity.Notice;
 import com.teamlms.backend.domain.community.entity.NoticeAttachment;
 import com.teamlms.backend.domain.community.entity.NoticeCategory;
 
-// 5. Enums (상태 및 검색 타입)
+// 5. Enums
 import com.teamlms.backend.domain.community.enums.NoticeStatus;
 
 // 6. Repository
 import com.teamlms.backend.domain.community.repository.*;
+
+// ★ 7. S3 Service 및 예외 처리 추가
+import com.teamlms.backend.global.s3.S3Service;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +34,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException; // IO 예외 추가
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,6 +50,9 @@ public class NoticeService {
     private final NoticeCategoryRepository categoryRepository;
     private final NoticeAttachmentRepository attachmentRepository;
     private final AccountRepository accountRepository;
+    
+    // ★ S3Service 주입
+    private final S3Service s3Service;
 
     // =================================================================
     // 1. 등록 (Create)
@@ -70,9 +78,10 @@ public class NoticeService {
 
         Notice savedNotice = noticeRepository.save(notice);
 
-        // 첨부파일 저장
+        // 첨부파일 저장 (S3 업로드 포함)
         if (files != null && !files.isEmpty()) {
-            saveAttachments(files, savedNotice);
+            // ★ author 정보를 같이 넘겨야 uploaded_by를 채울 수 있습니다.
+            saveAttachments(files, savedNotice, author);
         }
 
         return savedNotice.getId();
@@ -81,16 +90,12 @@ public class NoticeService {
     // =================================================================
     // 2. 상세 조회 (Read Detail)
     // =================================================================
-    @Transactional // 조회수 증가를 위해 트랜잭션 필요
+    @Transactional
     public ExternalNoticeResponse getNoticeDetail(Long noticeId) {
-        
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
-        // 조회수 증가
         notice.increaseViewCount();
-
-        // 변환 (상태 계산 포함)
         return convertToExternalResponse(notice);
     }
 
@@ -98,21 +103,13 @@ public class NoticeService {
     // 3. 목록 조회 (Read List)
     // =================================================================
     public Page<ExternalNoticeResponse> getNoticeList(Pageable pageable, Long categoryId, String keyword) {
-        
-        // 1. 검색 조건을 Internal DTO에 담기
         InternalNoticeRequest searchCondition = InternalNoticeRequest.builder()
                 .categoryId(categoryId)
                 .titleKeyword(keyword)
                 .contentKeyword(keyword)
                 .build();
         
-        // (참고) 아직 QueryDSL이 없으므로 로그로 확인만 하고 넘어갑니다.
-        log.info("목록 조회 요청 - 검색 조건: {}", searchCondition);
-
-        // 2. Repository 호출
         Page<Notice> notices = noticeRepository.findAll(pageable); 
-
-        // 3. 변환하여 반환
         return notices.map(this::convertToExternalResponse);
     }
 
@@ -121,16 +118,12 @@ public class NoticeService {
     // =================================================================
     @Transactional
     public void updateNotice(Long noticeId, ExternalNoticeRequest request, Long requesterId) {
-        
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
 
-        // (권한 체크 로직이 필요하다면 여기에 추가)
-        
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("카테고리 오류"));
 
-        // Entity의 update 메서드 호출 (Dirty Checking으로 자동 저장)
         notice.update(
             request.getTitle(),
             request.getContent(),
@@ -148,8 +141,8 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
         
-        // (파일 삭제 로직은 추후 추가)
-
+        // TODO: S3에 있는 실제 파일들도 삭제하려면 여기서 s3Service.delete()를 호출해야 함
+        
         noticeRepository.delete(notice);
     }
 
@@ -157,40 +150,48 @@ public class NoticeService {
     //  내부 헬퍼 메서드
     // =================================================================
 
-    // 파일 저장
-    private void saveAttachments(List<MultipartFile> files, Notice notice) {
+    // ★ 파일 저장 (S3 적용 버전)
+    private void saveAttachments(List<MultipartFile> files, Notice notice, Account author) {
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
 
-            String originalName = file.getOriginalFilename();
-            String storageKey = UUID.randomUUID().toString() + "_" + originalName; // 임시 키
+            try {
+                // 1. S3에 업로드하고 URL 받기 (폴더명: notices)
+                String s3Url = s3Service.upload(file, "notices");
 
-            NoticeAttachment attachment = NoticeAttachment.builder()
-                    .notice(notice)
-                    .storageKey(storageKey)
-                    .originalName(originalName)
-                    .contentType(file.getContentType())
-                    .fileSize(file.getSize())
-                    .build();
+                // 2. DB에 저장 (storageKey에 s3Url 저장)
+                NoticeAttachment attachment = NoticeAttachment.builder()
+                        .notice(notice)
+                        .storageKey(s3Url)             // S3 URL 저장
+                        .originalName(file.getOriginalFilename())
+                        .contentType(file.getContentType())
+                        .fileSize(file.getSize())
+                        // ★ DB 스키마에 필수(NOT NULL)인 업로더 정보 설정
+                        .uploadedBy(author)  
+                        .updatedBy(author)
+                        .build();
 
-            attachmentRepository.save(attachment);
+                attachmentRepository.save(attachment);
+
+            } catch (IOException e) {
+                // 업로드 실패 시 비즈니스 예외로 감싸서 던짐 (트랜잭션 롤백 유도)
+                log.error("파일 업로드 실패: {}", file.getOriginalFilename(), e);
+                throw new BusinessException(ErrorCode.FILE_UPLOAD_ERROR);
+            }
         }
     }
 
-    // Entity -> Response DTO 변환 (상태 계산 로직 포함 ★)
+    // Entity -> Response DTO 변환
     private ExternalNoticeResponse convertToExternalResponse(Notice notice) {
-        
-        // 1. 상태 계산 (Enum 활용)
         LocalDateTime now = LocalDateTime.now();
-        NoticeStatus status = NoticeStatus.ONGOING; // 기본값
+        NoticeStatus status = NoticeStatus.ONGOING;
 
         if (notice.getDisplayStartAt() != null && now.isBefore(notice.getDisplayStartAt())) {
-            status = NoticeStatus.SCHEDULED; // 시작일 전이면 예약
+            status = NoticeStatus.SCHEDULED;
         } else if (notice.getDisplayEndAt() != null && now.isAfter(notice.getDisplayEndAt())) {
-            status = NoticeStatus.ENDED;     // 종료일 지났으면 종료
+            status = NoticeStatus.ENDED;
         }
 
-        // 2. 파일 목록 변환
         List<ExternalAttachmentResponse> fileResponses = notice.getAttachments().stream()
                 .map(file -> ExternalAttachmentResponse.builder()
                         .attachmentId(file.getId())
@@ -198,35 +199,29 @@ public class NoticeService {
                         .contentType(file.getContentType())
                         .fileSize(file.getFileSize())
                         .uploadedAt(formatDateTime(file.getUploadedAt()))
-                        .downloadUrl("/api/community/files/" + file.getStorageKey())
+                        // storageKey가 이미 S3 Full URL이므로 그대로 내려주거나, 필요 시 가공
+                        .downloadUrl(file.getStorageKey()) 
                         .build())
                 .collect(Collectors.toList());
 
-        // 3. 최종 매핑
         return ExternalNoticeResponse.builder()
                 .noticeId(notice.getId())
                 .categoryName(notice.getCategory().getName())
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .authorName(notice.getAuthor().getAccountId().toString()) // 임시 (이름 getter 필요)
+                .authorName(notice.getAuthor().getLoginId()) // getAccountId() -> getLoginId() 권장
                 .viewCount(notice.getViewCount())
                 .createdAt(formatDateTime(notice.getCreatedAt()))
-                .status(status.getDescription()) // "예약 게시", "게시 중" 등 문자열 입력
+                .status(status.getDescription())
                 .files(fileResponses)
                 .build();
     }
 
-    // 날짜 파싱 (String -> LocalDateTime)
     private LocalDateTime parseDateTime(String dateTimeStr) {
         if (dateTimeStr == null || dateTimeStr.isBlank()) return null;
-        try {
-            return LocalDateTime.parse(dateTimeStr);
-        } catch (Exception e) {
-            return null;
-        }
+        try { return LocalDateTime.parse(dateTimeStr); } catch (Exception e) { return null; }
     }
 
-    // 날짜 포맷팅 (LocalDateTime -> String)
     private String formatDateTime(LocalDateTime dateTime) {
         if (dateTime == null) return "";
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
