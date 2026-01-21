@@ -1,6 +1,8 @@
 package com.teamlms.backend.domain.log.api;
 
 import com.teamlms.backend.domain.log.api.dto.UserActivityListItem;
+import com.teamlms.backend.domain.log.api.dto.UserActivityListResponse;
+import com.teamlms.backend.domain.log.api.dto.UserActivitySummary;
 import com.teamlms.backend.domain.log.service.UserActivityQueryService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
@@ -32,13 +34,12 @@ public class UserActivityAdminController {
                 Sort.by(Sort.Direction.DESC, "lastActivityAt")
         );
 
-        Page<UserActivityListItem> result =
-                userActivityQueryService.list(keyword, pageable);
+        Page<UserActivityListItem> result = userActivityQueryService.list(keyword, pageable);
+        UserActivitySummary summary = userActivityQueryService.summary(keyword);
 
-        return ApiResponse.of(
-                result.getContent(),
-                PageMeta.from(result)
-        );
+        UserActivityListResponse data = new UserActivityListResponse(result.getContent(), summary);
+
+        return ApiResponse.of(data, PageMeta.from(result));
     }
 
     @GetMapping("/{accountId}/access-logs")
