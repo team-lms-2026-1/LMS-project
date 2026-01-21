@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import styles from "../styles/accountLogDetail.module.css";
 import { getAccountDetail } from "../data/mockAccountLogs";
 import PrivacyExcelDownloadModal from "./PrivacyExcelDownloadModal";
-import type { AccountLogRow } from "../types";
+import type { AccountLogListItem } from "../types";
 
 type Props = { accountId: string };
 

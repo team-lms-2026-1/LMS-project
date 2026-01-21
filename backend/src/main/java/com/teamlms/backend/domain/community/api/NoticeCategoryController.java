@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.*;
 //관리자 부분 페이지 네이션 앞에 (/api/v1/admin/) 넣기
 
 @RestController
-// 요청하신 URL 구조 반영: /notices/categories (앞에 /api/community 등은 프로젝트 규칙에 따름)
-@RequestMapping("/api/community/notices/categories") 
+// URL 구조 반영: /notices/categories (앞에 /api/community 등은 프로젝트 규칙에 따름)
+@RequestMapping("/api/v1/admin/community/notices/categories") 
 @RequiredArgsConstructor
 public class NoticeCategoryController {
 
     private final NoticeCategoryService categoryService;
 
     // =================================================================
-    // 1-1. 카테고리 목록 조회 (페이징 + 검색)
+    // 1-1. 카테고리 목록 조회 
     // URL: GET /api/community/notices/categories?page=1&size=20&keyword=...
     // =================================================================
     @GetMapping
@@ -64,10 +64,15 @@ public class NoticeCategoryController {
         return ResponseEntity.ok().build();
     }
     
-    // (참고) 등록 API도 필요하다면 여기에 추가
+// =================================================================
+    // 1-0. 카테고리 등록 (관리자)
+    // URL: POST /api/v1/admin/community/notices/categories
+    // =================================================================
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')") // 관리자만 가능
     public ResponseEntity<Long> createCategory(@Valid @RequestBody ExternalCategoryRequest request) {
-        return ResponseEntity.ok(categoryService.createCategory(request));
+        // 서비스에서 등록 후 생성된 ID를 반환받음
+        Long categoryId = categoryService.createCategory(request);
+        return ResponseEntity.ok(categoryId);
     }
 }

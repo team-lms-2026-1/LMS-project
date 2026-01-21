@@ -5,11 +5,16 @@ import com.teamlms.backend.domain.community.api.dto.ExternalCategoryResponse;
 import com.teamlms.backend.domain.community.entity.NoticeCategory;
 import com.teamlms.backend.domain.community.repository.NoticeCategoryRepository;
 import com.teamlms.backend.domain.community.repository.NoticeRepository;
+
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+// 에러 코드 임포트
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -40,14 +45,14 @@ public class NoticeCategoryService {
     // 1-2. 카테고리 수정 (PATCH)
     // =================================================================
     @Transactional
-    public void updateCategory(Long categoryId, ExternalCategoryRequest request) {
+    public void updateCategory(Long categoryId, ExternalCategoryRequest request ) {
         NoticeCategory category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // 이름이 변경되었다면 중복 검사
         if (!category.getName().equals(request.getName()) 
              && categoryRepository.findByName(request.getName()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 카테고리 이름입니다.");
+            throw new BusinessException(ErrorCode.DUPLICATE_CATEGORY_NAME);
         }
 
         // 데이터 수정
@@ -64,11 +69,11 @@ public class NoticeCategoryService {
     @Transactional
     public void deleteCategory(Long categoryId) {
         NoticeCategory category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // 데이터 무결성 검사: 사용 중인 카테고리는 삭제 불가
         if (noticeRepository.existsByCategory_Id(categoryId)) {
-            throw new IllegalStateException("이 카테고리를 사용하는 공지사항이 있어 삭제할 수 없습니다.");
+            throw new BusinessException(ErrorCode.CATEGORY_DELETE_NOT_ALLOWED);
         }
 
         categoryRepository.delete(category);
@@ -78,7 +83,7 @@ public class NoticeCategoryService {
     @Transactional
     public Long createCategory(ExternalCategoryRequest request) {
         if (categoryRepository.findByName(request.getName()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 카테고리 이름입니다.");
+            throw new BusinessException(ErrorCode. DUPLICATE_CATEGORY_NAME);
         }
         NoticeCategory category = NoticeCategory.builder()
                 .name(request.getName())

@@ -1,25 +1,66 @@
-export type AccountRole = "학생" | "교수" | "관리자";
+// types/accountLog.ts
 
-export type AccountLoginStatus = "LOGGED_IN" | "LOGGED_OUT";
+export type AccountType = "ADMIN" | "PROFESSOR" | "STUDENT" | "STAFF";
 
-export type AccountSummary = {
-  accountId: string;        // 로그인ID(예: A1800001, S201064)
-  role: AccountRole;
+export type AccountLogListItem = {
+  accountId: number;
+  loginId: string;
+  accountType: AccountType | string; // 혹시 확장될 수 있으면 string 유지
   name: string;
-  department?: string;      // 소속학과
-  lastAccessAt: string;     // "YYYY.MM.DD HH:mm:ss"
-  status: AccountLoginStatus;
+  lastActivityAt: string | null;
+  isOnline: boolean;
 };
 
-export type AccountLogRow = {
-  seq: number;              // 번호(예: 5555555)
-  at: string;               // "YYYY.MM.DD HH:mm:ss"
-  url: string;              // "/student/login"
-  ip: string;               // "200.001.43.435"
-  userAgent: string;        // "Android 13 (Chrome)" 등
+export type AccountLogSummary = {
+  totalAccounts: number;
+  onlineAccounts: number;
 };
 
-export type AccountLogDetail = {
-  account: AccountSummary;
-  logs: AccountLogRow[];
+export type PageMeta = {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  sort: string[];
+};
+
+export type AccountLogListResponse = {
+  data: {
+    items: AccountLogListItem[];
+    summary: AccountLogSummary;
+  };
+  meta: PageMeta;
+};
+
+/* =========================
+   ✅ 상세 화면용 타입 추가
+========================= */
+
+export type AccountLogDetailAccount = {
+  accountId: number;
+  loginId: string;
+  accountType: AccountType | string;
+  name: string;
+  departmentName?: string | null; // "소속학과"
+};
+
+export type AccountAccessLogRow = {
+  seq: number;            // 또는 logId(백엔드에 맞게)
+  accessedAt: string;     // ISO string
+  accessUrl: string;
+  ip: string;
+  userAgent: string;
+};
+
+export type AccountLogDetailResponse = {
+  data: {
+    account: AccountLogDetailAccount;
+    logs: AccountAccessLogRow[];
+  };
+  meta: {
+    from?: string;
+    to?: string;
+  };
 };

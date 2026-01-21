@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-// ★ Security 권한 체크 어노테이션 추가
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,17 +41,14 @@ public class NoticeService {
     private final S3Service s3Service;
 
     // =================================================================
-    // 1. 등록 (Create) - ★ 관리자만 가능
+    // 1. 등록 (Create) - 관리자만 가능
     // =================================================================
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')") 
+    @PreAuthorize("hasRole('ADMIN')")
     public Long createNotice(ExternalNoticeRequest request, List<MultipartFile> files, Long authorId) {
         
         Account author = accountRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-
-        // (선택 사항) 로직 내부에서도 더블 체크하고 싶다면:
-        // if (!author.getRole().equals(UserRole.ADMIN)) { throw new AccessDeniedException("..."); }
 
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("카테고리가 존재하지 않습니다."));
@@ -76,7 +72,7 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 2. 상세 조회 (Read Detail) - 누구나 가능 (로그인 필요 여부는 Config에서 설정)
+    // 2. 상세 조회 (Read Detail)
     // =================================================================
     @Transactional
     public ExternalNoticeResponse getNoticeDetail(Long noticeId) {
@@ -88,7 +84,7 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 3. 목록 조회 (Read List) - 누구나 가능
+    // 3. 목록 조회 (Read List)
     // =================================================================
     public Page<ExternalNoticeResponse> getNoticeList(Pageable pageable, Long categoryId, String keyword) {
         InternalNoticeRequest searchCondition = InternalNoticeRequest.builder()
@@ -102,7 +98,7 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 4. 수정 (Update) - ★ 관리자만 가능
+    // 4. 수정 (Update) - 관리자만 가능
     // =================================================================
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
@@ -124,7 +120,7 @@ public class NoticeService {
     }
 
     // =================================================================
-    // 5. 삭제 (Delete) - ★ 관리자만 가능
+    // 5. 삭제 (Delete) - 관리자만 가능
     // =================================================================
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
@@ -132,10 +128,7 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
         
-        // S3 파일 삭제 로직 (필요 시 구현)
-        // for (NoticeAttachment att : notice.getAttachments()) {
-        //      s3Service.delete(att.getStorageKey());
-        // }
+        // TODO: S3 파일 삭제 로직 (추후 구현)
         
         noticeRepository.delete(notice);
     }
@@ -144,38 +137,32 @@ public class NoticeService {
     //  내부 헬퍼 메서드
     // =================================================================
 
-    // ★ 파일 저장 (S3 적용 버전)
     private void saveAttachments(List<MultipartFile> files, Notice notice, Account author) {
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
-
             try {
-                // 1. S3에 업로드하고 URL 받기 (폴더명: notices)
+                // S3 업로드
                 String s3Url = s3Service.upload(file, "notices");
-
-                // 2. DB에 저장 (storageKey에 s3Url 저장)
+                
+                // DB 저장
                 NoticeAttachment attachment = NoticeAttachment.builder()
                         .notice(notice)
-                        .storageKey(s3Url)             // S3 URL 저장
+                        .storageKey(s3Url)
                         .originalName(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .fileSize(file.getSize())
-                        // ★ DB 스키마에 필수(NOT NULL)인 업로더 정보 설정
-                        .uploadedBy(author)  
+                        .uploadedBy(author)
                         .updatedBy(author)
                         .build();
-
                 attachmentRepository.save(attachment);
-
+                
             } catch (IOException e) {
-                // 업로드 실패 시 비즈니스 예외로 감싸서 던짐 (트랜잭션 롤백 유도)
                 log.error("파일 업로드 실패: {}", file.getOriginalFilename(), e);
                 throw new BusinessException(ErrorCode.FILE_UPLOAD_ERROR);
             }
         }
     }
 
-    // Entity -> Response DTO 변환
     private ExternalNoticeResponse convertToExternalResponse(Notice notice) {
         LocalDateTime now = LocalDateTime.now();
         NoticeStatus status = NoticeStatus.ONGOING;
@@ -193,7 +180,6 @@ public class NoticeService {
                         .contentType(file.getContentType())
                         .fileSize(file.getFileSize())
                         .uploadedAt(formatDateTime(file.getUploadedAt()))
-                        // storageKey가 이미 S3 Full URL이므로 그대로 내려주거나, 필요 시 가공
                         .downloadUrl(file.getStorageKey()) 
                         .build())
                 .collect(Collectors.toList());
@@ -203,7 +189,7 @@ public class NoticeService {
                 .categoryName(notice.getCategory().getName())
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .authorName(notice.getAuthor().getLoginId()) // getAccountId() -> getLoginId() 권장
+                .authorName(notice.getAuthor().getLoginId())
                 .viewCount(notice.getViewCount())
                 .createdAt(formatDateTime(notice.getCreatedAt()))
                 .status(status.getDescription())
