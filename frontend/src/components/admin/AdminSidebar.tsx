@@ -23,7 +23,7 @@ const SECTIONS: NavSection[] = [
     key: "authority",
     title: "권한 관리",
     items: [
-      { label: "학과관리", href: "/authority/departments" },
+      { label: "학과관리", href: "/admin/depts" },
       { label: "계정관리", href: "/authority/accounts" },
     ],
   },
@@ -50,7 +50,9 @@ const SECTIONS: NavSection[] = [
   {
     key: "course",
     title: "교과 관리",
+
     items: [{ label: "교과 목록", href: "/surveys" }],
+
   },
   {
     key: "mentoring",

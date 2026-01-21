@@ -1,3 +1,6 @@
+
+import CourseListPage from "@/features/courses/components/CourseListPage";
+
 export default function Page() {
-  return <div>준비중입니다</div>;
+  return <CourseListPage />;
 }
