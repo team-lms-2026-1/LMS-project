@@ -70,4 +70,23 @@ public class Notice extends BaseEntity {
         this.displayStartAt = displayStartAt;
         this.displayEndAt = displayEndAt;
     }
+    public void changeCategory(NoticeCategory category) {
+        this.category = category;
+    }
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeContent(String content) {
+        this.content = content;
+    }
+
+    public void changeDisplayStartAt(LocalDateTime displayStartAt) {
+        this.displayStartAt = displayStartAt;
+    }
+
+    public void changeDisplayEndAt(LocalDateTime displayEndAt) {
+        this.displayEndAt = displayEndAt;
+    }
 }

@@ -37,10 +37,26 @@ public enum ErrorCode {
     MAJOR_NOT_FOUND(HttpStatus.NOT_FOUND, "MAJOR_NOT_FOUND", "전공을 찾을 수 없습니다..", "dept.notFound"),
     MAJOR_NOT_IN_DEPT(HttpStatus.CONFLICT, "MAJOR_NOT_IN_DEPT", "전공이 해당 학과 소속이 아닙니다.", "major.notInDept"),
     MAJOR_IN_USE(HttpStatus.CONFLICT, "MAJOR_IN_USE", "연관 데이터가 존재하여 전공을 삭제할 수 없습니다.", "major.inUse"),
+
+
+
     // =========================
-    // Domain: Notice
+    // Domain: Community Category (카테고리 공통 에러)
     // =========================
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_NOT_FOUND", "공지를 찾을 수 없습니다.", "notice.notFound");
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", "카테고리를 찾을 수 없습니다.", "category.notFound"),
+    DUPLICATE_CATEGORY_NAME(HttpStatus.CONFLICT, "DUPLICATE_CATEGORY_NAME", "이미 사용 중인 카테고리 이름입니다.", "category.name.duplicate"),
+    CATEGORY_DELETE_NOT_ALLOWED(HttpStatus.CONFLICT, "CATEGORY_DELETE_NOT_ALLOWED", "연관된 게시글이 존재하여 카테고리를 삭제할 수 없습니다.", "category.delete.notAllowed"),
+   
+
+    // =========================
+    // Domain: Community (공통)
+    // =========================
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_NOT_FOUND", "게시글을 찾을 수 없습니다.", "notice.notFound"),
+    NOTICE_AUTHOR_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTICE_AUTHOR_NOT_FOUND", "작성자 정보를 찾을 수 없습니다.", "notice.author.notFound"),
+    NOTICE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "NOTICE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "notice.category.notFound"),
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "해당 자료가 없습니다.", "resource.notFound"),
+    RESOURCE_AUTHOR_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_AUTHOR_NOT_FOUND", "작성자 정보를 찾을 수 없습니다.", "resource.author.notFound"),
+    RESOURCE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "RESOURCE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "resource.category.notFound");
 
     private final HttpStatus httpStatus;
     private final String code;
@@ -52,5 +68,5 @@ public enum ErrorCode {
         this.code = code;
         this.defaultMessage = defaultMessage;
         this.messageKey = messageKey;
-    }
+    } 
 }

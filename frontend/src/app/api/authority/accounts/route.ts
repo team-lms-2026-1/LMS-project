@@ -1,59 +1,42 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-type ApiResponse<T> = {
-  success?: boolean;
-  message?: string;
-  data?: T;
-};
-
-// 백엔드 리스트/등록 응답 타입을 정확히 알고 있으면 교체하세요.
-type AdminAccountsListResponse = unknown;
-type AdminAccountCreateResponse = unknown;
-
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+type ApiResponse<T> = { success?: boolean; message?: string; data?: T };
 
 function getBaseUrl() {
-  // 프로젝트에서 로그인 BFF가 AUTH_API_BASE_URL을 쓰고 있으니 우선 재사용
-  return process.env.ADMIN_API_BASE_URL ?? process.env.AUTH_API_BASE_URL;
+  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL;
 }
 
 function buildHeaders() {
   let token = cookies().get("access_token")?.value;
-  console.log("[BFF] has access_token cookie?", Boolean(token)); 
 
-    if (token) {
-      token = decodeURIComponent(token)
-        .replace(/^"|"$/g, "")        // "..." 제거
-        .replace(/^Bearer\s+/i, "")   // 이미 Bearer가 있으면 제거
-        .trim();
-    }
+  if (token) {
+    token = decodeURIComponent(token)
+      .replace(/^"|"$/g, "")
+      .replace(/^Bearer\s+/i, "")
+      .trim();
+  }
 
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
-
-  const auth = headers.get("Authorization");
-  console.log("[BFF] outbound Authorization=", auth ? auth.slice(0, 30) + "..." : null);  
-
   return headers;
 }
 
 async function parseErrorMessage(res: Response, fallback: string) {
   try {
-    const err = (await res.json()) as ApiResponse<unknown>;
-    if (typeof err?.message === "string" && err.message.trim().length > 0) {
-      return err.message;
-    }
+    const err = (await res.json()) as ApiResponse<unknown> & { error?: { message?: string } };
+    return (
+      (typeof err?.message === "string" && err.message.trim()) ||
+      (typeof err?.error?.message === "string" && err.error.message.trim()) ||
+      fallback
+    );
   } catch {
-    // ignore
+    return fallback;
   }
-  return fallback;
 }
 
-/**
- * 백엔드 호출 유틸: text로 받아서 그대로 반환 (content-type 유지)
- */
+/** upstream 응답을 그대로 내려줌 (성공/실패 모두) */
 async function passthroughResponse(upstreamRes: Response) {
   const text = await upstreamRes.text();
   return new Response(text, {
@@ -64,29 +47,40 @@ async function passthroughResponse(upstreamRes: Response) {
   });
 }
 
-/**
- * GET 목록: 백엔드 GET이 405면 POST 검색 엔드포인트로 폴백
- */
+/** keyword/search/query/q 중 하나라도 있으면 keyword로 통일 */
+function pickKeyword(sp: URLSearchParams): string | undefined {
+  const candidates = ["keyword", "search", "query", "q"];
+  for (const k of candidates) {
+    const v = (sp.get(k) ?? "").trim();
+    if (v) return v;
+  }
+  return undefined;
+}
+
 export async function GET(req: Request) {
   const base = getBaseUrl();
   if (!base) {
     return NextResponse.json(
-      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 AUTH_API_BASE_URL 누락" },
+      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 API_BASE_URL 누락" },
       { status: 500 }
     );
   }
 
-  const url = new URL(req.url);
-  const page = Number(url.searchParams.get("page") ?? "1");
-  const size = Number(url.searchParams.get("size") ?? "10");
+  const inbound = new URL(req.url);
+  const sp = inbound.searchParams;
 
-  // 1) 우선: 백엔드 GET /api/v1/admin/accounts?page=&size=
+  const page = Number(sp.get("page") ?? "0");
+  const size = Number(sp.get("size") ?? "10");
+  const accountType = (sp.get("accountType") ?? "").trim() || undefined;
+
+  const keywordRaw = pickKeyword(sp);
+  const keyword = (keywordRaw ?? "").trim() || undefined;
+
   const upstreamGet = new URL(`${base}/api/v1/admin/accounts`);
   upstreamGet.searchParams.set("page", String(page));
   upstreamGet.searchParams.set("size", String(size));
-
-  console.log("[BFF] base=", base);
-  console.log("[BFF] upstreamUrl(GET)=", upstreamGet.toString());
+  if (accountType) upstreamGet.searchParams.set("accountType", accountType);
+  if (keyword) upstreamGet.searchParams.set("keyword", keyword);
 
   let resGet: Response;
   try {
@@ -108,67 +102,51 @@ export async function GET(req: Request) {
     );
   }
 
-  // 405면: GET 미지원 → 폴백 POST 검색
-    if (resGet.status === 405) {
-    const upstreamPostSame = new URL(`${base}/api/v1/admin/accounts`);
-    // upstreamPostSame.search = url.search; // 필요 없으면 제거 가능
+  if (resGet.status === 405) {
+    const upstreamPost = `${base}/api/v1/admin/accounts`;
 
-    console.log("[BFF] GET not allowed. fallback to POST(same):", upstreamPostSame.toString());
-
-    const accountType = url.searchParams.get("accountType") ?? undefined;
-    const keyword = url.searchParams.get("keyword") ?? undefined;
-
-    let resPostSame: Response;
+    let resPost: Response;
     try {
-        resPostSame = await fetch(upstreamPostSame.toString(), {
+      resPost = await fetch(upstreamPost, {
         method: "POST",
         headers: buildHeaders(),
         body: JSON.stringify({
-            page,
-            size,
-            ...(accountType ? { accountType } : {}),
-            ...(keyword ? { keyword } : {}),
+          page,
+          size,
+          ...(accountType ? { accountType } : {}),
+          ...(keyword ? { keyword } : {}),
         }),
         credentials: "include",
         cache: "no-store",
-        });
+      });
     } catch (e) {
-        const detail = e instanceof Error ? e.message : String(e);
-        return NextResponse.json(
+      const detail = e instanceof Error ? e.message : String(e);
+      return NextResponse.json(
         {
-            message: "관리자 계정 목록(POST 동일경로 폴백) 서버 연결에 실패했습니다.",
-            detail,
-            upstreamUrl: upstreamPostSame.toString(),
+          message: "관리자 계정 목록(POST 폴백) 서버 연결에 실패했습니다.",
+          detail,
+          upstreamUrl: upstreamPost,
         },
         { status: 502 }
-        );
+      );
     }
 
-    if (!resPostSame.ok) {
-        return passthroughResponse(resPostSame); // 400이면 백엔드 메시지 확인용
-    }
+    return passthroughResponse(resPost);
+  }
 
-    return passthroughResponse(resPostSame);
-    }
-
-  // 405가 아니면: GET 결과 처리
   if (!resGet.ok) {
     const msg = await parseErrorMessage(resGet, "계정 목록 조회에 실패했습니다.");
     return NextResponse.json({ message: msg }, { status: resGet.status });
   }
 
-  // 성공은 그대로 패스스루
   return passthroughResponse(resGet);
 }
 
-/**
- * POST 등록: 백엔드 POST /api/v1/admin/accounts 로 그대로 프록시
- */
 export async function POST(req: Request) {
   const base = getBaseUrl();
   if (!base) {
     return NextResponse.json(
-      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 AUTH_API_BASE_URL 누락" },
+      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 API_BASE_URL 누락" },
       { status: 500 }
     );
   }
@@ -181,9 +159,6 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ message: "요청 형식이 올바르지 않습니다." }, { status: 400 });
   }
-
-  console.log("[BFF] base=", base);
-  console.log("[BFF] upstreamUrl(POST)=", upstreamUrl);
 
   let upstreamRes: Response;
   try {
@@ -202,10 +177,6 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!upstreamRes.ok) {
-    const msg = await parseErrorMessage(upstreamRes, "계정 등록에 실패했습니다.");
-    return NextResponse.json({ message: msg }, { status: upstreamRes.status });
-  }
-
+  // 성공/실패 모두 그대로 내려주면 프론트에서 메시지 확인이 쉬움
   return passthroughResponse(upstreamRes);
 }

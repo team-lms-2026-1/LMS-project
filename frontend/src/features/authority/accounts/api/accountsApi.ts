@@ -1,4 +1,4 @@
-import { bffRequest } from "@/lib/bffClient";
+import { bffRequest } from "@/features/systemStatus/lib/bffClient";
 import { AccountStatus, AccountType } from "../types";
 import type {
   AccountsListResponseDto,
@@ -96,15 +96,74 @@ function unwrapArray(json: any): any[] {
   return [];
 }
 
+/**
+ * ✅ update 요청에서 wrapper(profile/studentProfile/...)가 들어오면 강제로 평탄화
+ * - { profile: { ... } } -> { ... }
+ * - { studentProfile: { ... } } -> { ... }
+ * - 나머지 필드(status 등)는 유지
+ */
+function flattenUpdateBody(input: any): any {
+  if (!input || typeof input !== "object") return input;
+
+  const wrapperKeys = ["profile", "studentProfile", "professorProfile", "adminProfile"] as const;
+
+  for (const k of wrapperKeys) {
+    const wrapped = (input as any)[k];
+    if (wrapped && typeof wrapped === "object" && !Array.isArray(wrapped)) {
+      const { [k]: _removed, ...rest } = input as any;
+      return { ...rest, ...wrapped };
+    }
+  }
+
+  return input;
+}
+
+/**
+ * ✅ update 요청에서 응답전용 객체/불필요 필드를 제거하고 majors를 정규화
+ */
+function sanitizeUpdateBody(body: any): any {
+  const b = flattenUpdateBody(body);
+  if (!b || typeof b !== "object") return b;
+
+  const out: any = { ...b };
+
+  // 응답전용 객체가 섞여 들어오면 제거
+  delete out.dept;
+  delete out.primaryMajor;
+  delete out.department;
+  delete out.major;
+
+  // majors가 "응답 객체 배열"로 들어오면 {majorId, majorType}만 남김
+  if (Array.isArray(out.majors)) {
+    out.majors = out.majors
+      .map((m: any) => ({
+        majorId: Number(m?.majorId),
+        majorType: m?.majorType,
+      }))
+      .filter((m: any) => Number.isFinite(m.majorId) && typeof m.majorType === "string");
+  }
+
+  // deptId가 dept 객체에만 있을 때 보정
+  if ((out.deptId == null || out.deptId === 0) && out.dept?.deptId != null) {
+    out.deptId = Number(out.dept.deptId);
+  }
+
+  return out;
+}
+
 export const accountsApi = {
   async list(params?: AccountsListParams): Promise<AccountsListResponseDto> {
     const qs = new URLSearchParams();
-    if (params?.accountType) qs.set("accountType", params.accountType);
-    if (params?.keyword) qs.set("keyword", params.keyword);
-    if (params?.page != null) qs.set("page", String(params.page));
-    if (params?.size != null) qs.set("size", String(params.size));
 
-    const url = qs.toString() ? `${BASE}?${qs.toString()}` : BASE;
+    if (params?.accountType) qs.set("accountType", params.accountType);
+
+    const kw = (params?.keyword ?? "").trim();
+    if (kw) qs.set("keyword", kw);
+
+    qs.set("page", String(params?.page ?? 0));
+    qs.set("size", String(params?.size ?? 50));
+
+    const url = `${BASE}?${qs.toString()}`;
     const raw = await bffRequest<any>(url);
     return normalizeListResponse(raw);
   },
@@ -121,8 +180,14 @@ export const accountsApi = {
     return bffRequest<{ accountId: number }>(BASE, { method: "POST", body });
   },
 
+  /**
+   * ✅ 핵심: update 요청은 body를 절대 profile로 감싸지 않도록
+   * - wrapper가 들어오면 flatten
+   * - majors 등 응답전용 구조 제거/정규화
+   */
   update(accountId: number, body: UpdateAccountRequestDto) {
-    return bffRequest<void>(`${BASE}/${accountId}`, { method: "PUT", body });
+    const payload = sanitizeUpdateBody(body);
+    return bffRequest<void>(`${BASE}/${accountId}`, { method: "PATCH", body: payload });
   },
 
   updateStatus(accountId: number, status: AccountStatus) {
