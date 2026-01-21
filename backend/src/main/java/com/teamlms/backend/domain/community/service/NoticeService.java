@@ -93,16 +93,17 @@ public class NoticeService {
                 .contentKeyword(keyword)
                 .build();
         
+        // 검색 로직은 Repository 구현에 따라 다름 (여기서는 findAll로 가정하거나 커스텀 메서드 사용)
+        // 만약 searchNoticeList 같은 커스텀 메서드가 없다면 기본 findAll 사용
         Page<Notice> notices = noticeRepository.findAll(pageable); 
         return notices.map(this::convertToExternalResponse);
     }
 
     // =================================================================
-    // 4. 수정 (Update) 
+    // 4. 수정 (Update) - 관리자만 가능
     // =================================================================
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
-    
     public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> files, Long requesterId) {
         
         Notice notice = noticeRepository.findById(noticeId)
@@ -136,11 +137,10 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
         
-        // TODO: S3 파일 삭제 로직 (추후 구현)
+        // TODO: S3 파일 삭제 로직 (필요 시 구현)
         
         noticeRepository.delete(notice);
     }
-
 
     // =================================================================
     //  내부 헬퍼 메서드
@@ -150,18 +150,19 @@ public class NoticeService {
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
             try {
+                // S3 업로드
                 String s3Url = s3Service.upload(file, "notices");
                 
+                // DB 저장
                 NoticeAttachment attachment = NoticeAttachment.builder()
                         .notice(notice)
                         .storageKey(s3Url)
                         .originalName(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .fileSize(file.getSize())
-                        .uploadedBy(author.getAccountId()) 
+                        .uploadedBy(author.getAccountId()) // ID만 저장
                         .updatedBy(author.getAccountId())
                         .build();
-                        
                 attachmentRepository.save(attachment);
                 
             } catch (IOException e) {
