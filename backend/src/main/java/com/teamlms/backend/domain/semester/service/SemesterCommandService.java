@@ -21,6 +21,7 @@ public class SemesterCommandService {
 
     private final SemesterRepository semesterRepository;
     
+    // 학기 생성
     public void create(int year, Term term, LocalDate startDate, LocalDate endDate) {
         
         validateDateRange(startDate, endDate);

@@ -18,6 +18,7 @@ public interface AccountRepositoryCustom {
         Pageable pageable
     );
 
+    // 상세 조회
     AccountType findAccountTypeById(Long accountId);
 
     AdminStudentDetailResponse findStudentBaseDetail(Long accountId);
