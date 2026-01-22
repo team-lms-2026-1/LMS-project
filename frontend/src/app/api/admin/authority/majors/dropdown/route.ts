@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 type ApiResponse<T> = { success?: boolean; message?: string; data?: T };
 
 function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.AUTH_API_BASE_URL ?? "http://localhost:8080";
+  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
 }
 
 function buildHeaders() {
@@ -33,10 +33,7 @@ async function parseErrorMessage(res: Response, fallback: string) {
 
 export async function GET() {
   const base = getBaseUrl();
-  // ✅ 백엔드에 "전체 전공 드롭다운" 엔드포인트가 있어야 합니다.
-  // 예시1) /api/v1/admin/majors/dropdown
-  // 예시2) /api/v1/admin/majors  (드롭다운용으로 응답 간소화)
-  const upstreamUrl = `${base}/api/v1/admin/majors/dropdown`;
+  const upstreamUrl = `${base}/api/v1/majors/dropdown`;
 
   const res = await fetch(upstreamUrl, {
     method: "GET",

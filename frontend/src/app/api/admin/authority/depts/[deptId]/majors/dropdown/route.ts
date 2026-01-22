@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.AUTH_API_BASE_URL ?? "http://localhost:8080";
+  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
 }
 
 function buildHeaders() {
@@ -22,8 +22,18 @@ async function parseErrorMessage(res: Response, fallback: string) {
   return fallback;
 }
 
-export async function GET() {
-  const upstreamUrl = `${getBaseUrl()}/api/v1/admin/depts/dropdown`;
+export async function GET(
+  _req: Request,
+  ctx: { params: { deptId: string } }
+) {
+  const deptId = ctx.params?.deptId;
+
+  if (!deptId) {
+    return NextResponse.json({ message: "deptId가 필요합니다." }, { status: 400 });
+  }
+
+  // ✅ 백엔드: /api/v1/admin/depts/{deptId}/majors/dropdown
+  const upstreamUrl = `${getBaseUrl()}/api/v1/depts/${encodeURIComponent(deptId)}/majors/dropdown`;
 
   const res = await fetch(upstreamUrl, {
     method: "GET",
@@ -32,7 +42,7 @@ export async function GET() {
   });
 
   if (!res.ok) {
-    const msg = await parseErrorMessage(res, "학과 드롭다운 조회 실패");
+    const msg = await parseErrorMessage(res, "전공 드롭다운 조회 실패");
     return NextResponse.json({ message: msg }, { status: res.status });
   }
 

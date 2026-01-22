@@ -7,7 +7,7 @@ import type {
   UpdateFaqRequestDto,
 } from "./dto";
 
-const BASE = "/api/community/faq";
+const BASE = "/api/admin/community/faq";
 
 function toQuery(params: FaqListParams) {
   const sp = new URLSearchParams();

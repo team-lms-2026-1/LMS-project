@@ -7,7 +7,7 @@ import type {
   UpdateResourceRequestDto,
 } from "./dto";
 
-const BASE = "/api/community/resources";
+const BASE = "/api/admin/community/resources";
 
 function toQuery(params: ResourcesListParams) {
   const sp = new URLSearchParams();

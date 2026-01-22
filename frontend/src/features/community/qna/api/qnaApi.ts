@@ -7,7 +7,7 @@ import type {
   UpdateQnaRequestDto,
 } from "./dto";
 
-const BASE = "/api/community/qna";
+const BASE = "/api/admin/community/qna";
 
 function toQuery(params: QnaListParams) {
   const sp = new URLSearchParams();

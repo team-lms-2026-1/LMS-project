@@ -30,7 +30,7 @@ const SECTIONS: NavSection[] = [
   {
     key: "system-status",
     title: "시스템환경 관리",
-    items: [{ label: "계정로그관리", href: "/system-status" }],
+    items: [{ label: "계정로그관리", href: "/asmin/system-status" }],
   },
   {
     key: "survey",
@@ -63,21 +63,6 @@ const SECTIONS: NavSection[] = [
     key: "extra",
     title: "비교과 관리",
     items: [{ label: "비교과 프로그램", href: "/surveys" }],
-  },
-  {
-    key: "selfextra",
-    title: "자율 비교과 관리",
-    items: [{ label: "자율 비교과", href: "/competencies" }],
-  },
-  {
-    key: "career",
-    title: "진로 설계",
-    items: [{ label: "진로 설계", href: "/surveys" }],
-  },
-  {
-    key: "job",
-    title: "취업 지원 서비스",
-    items: [{ label: "지원 서비스", href: "/competencies" }],
   },
   {
     key: "counsel",
@@ -151,7 +136,7 @@ export default function AdminSidebar() {
                 <span className={open ? styles.chevUp : styles.chevDown} aria-hidden="true" />
               </div>
 
-              {/* ✅ hover open일 때만 렌더 */}
+
               {open && (
                 <div className={styles.sectionBody}>
                   {section.items.map((item) => {

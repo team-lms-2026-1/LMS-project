@@ -1,7 +1,7 @@
 import { getJson } from "@/lib/http";
 import type { CategoryRow, CategoryListParams } from "@/features/community/types/category";
 
-const BASE = "/api/community/community/qna/categories";
+const BASE = "/api/admin/community/qna-categories";
 
 function toQuery(params: CategoryListParams) {
   const sp = new URLSearchParams();

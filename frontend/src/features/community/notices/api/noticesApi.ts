@@ -7,7 +7,7 @@ import type {
   UpdateNoticeRequestDto,
 } from "./dto";
 
-const BASE = "/api/community/notices";
+const BASE = "/api/admin/community/notices";
 
 function toQuery(params: NoticeListParams) {
   const sp = new URLSearchParams();
