@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/admin/community/resources/categories")
+@RequestMapping  //("/api/v1/admin/community/resources/categories")
 @RequiredArgsConstructor
 public class ResourceCategoryController {
 
@@ -28,7 +28,11 @@ public class ResourceCategoryController {
     // =================================================================
     // 1. 자료실 카테고로 목록 조회 - 전부가능
     // =================================================================
-    @GetMapping
+    @GetMapping({"/api/v1/student/community/resources/categories",
+                 "/api/v1/professor/community/resources/categories",
+                 "/api/v1/admin/community/resources/categories"
+    })
+    @PreAuthorize("hasAuthority('RESOURCE_READ')")
     public ApiResponse<?> getList(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String keyword
@@ -39,10 +43,10 @@ public class ResourceCategoryController {
 
     
     // =================================================================
-    // 2. 자료실 카테고로 목록 조회 - 어드민만 가능
+    // 2. 자료실 카테고리 등록 - 어드민만 가능
     // =================================================================
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/api/v1/admin/community/resources/categories")
+    @PreAuthorize("hasAuthority('RESOURCE_MANAGE')")
     public ApiResponse<?> create(@Valid @RequestBody ExternalCategoryRequest request) {
         Long id = categoryService.create(request);
         return ApiResponse.ok(Map.of("categoryId", id));
@@ -51,8 +55,8 @@ public class ResourceCategoryController {
     // =================================================================
     // 3. 자료실 카테고로 수정 - 어드민만 가능
     // =================================================================
-    @PatchMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/api/v1/admin/community/resources/categories/{categoryId}")
+    @PreAuthorize("hasAuthority('RESOURCE_MANAGE')")
     public ApiResponse<?> update(
             @PathVariable Long categoryId,
             @Valid @RequestBody ExternalCategoryRequest request
@@ -65,8 +69,8 @@ public class ResourceCategoryController {
     // =================================================================
     // 4. 자료실 카테고로 삭제 - 어드민만 가능
     // =================================================================
-    @DeleteMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/api/v1/admin/community/resources/categories/{categoryId}")
+    @PreAuthorize("hasAuthority('RESOURCE_MANAGE')")
     public ApiResponse<?> delete(@PathVariable Long categoryId) {
         categoryService.delete(categoryId);
         return ApiResponse.ok(Map.of("success", true));

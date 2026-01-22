@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/community/faqs") // 정책서 경로: /faqs
+@RequestMapping //("/api/v1/community/faqs") // 정책서 경로: /faqs
 @RequiredArgsConstructor
 public class FaqController {
 
@@ -26,7 +26,11 @@ public class FaqController {
     // =================================================================
     // 1. FAQ 목록 조회 - 전부가능
     // =================================================================
-    @GetMapping
+    @GetMapping({"/api/v1/student/community/faqs",
+                 "/api/v1/professor/community/faqs",
+                 "/api/v1/admin/community/faqs" 
+    })
+    @PreAuthorize("hasAuthority('FAQ_READ')")
     public ApiResponse<?> getList(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) Long categoryId,
@@ -38,7 +42,11 @@ public class FaqController {
     // =================================================================
     // 2. FAQ 상세 조회 - 전부가능
     // =================================================================
-    @GetMapping("/{faqId}")
+    @GetMapping({"/api/v1/student/community/faqs/{id}",
+                 "/api/v1/professor/community/faqs/{id}",
+                 "/api/v1/admin/community/faqs/{id}" 
+    })
+    @PreAuthorize("hasAuthority('FAQ_READ')")
     public ApiResponse<?> getDetail(@PathVariable Long faqId) {
         return ApiResponse.ok(service.getDetail(faqId));
     }
@@ -47,8 +55,8 @@ public class FaqController {
     // 3. FAQ 등록 - 어드민만 가능
     // FAQ는 파일이 없으므로 순수 JSON (@RequestBody) 사용
     // =================================================================
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/api/v1/admin/community/faqs")
+    @PreAuthorize("hasAuthority('FAQ_MANAGE')")
     public ApiResponse<?> create(
             @Valid @RequestBody ExternalFaqRequest request,
             @AuthenticationPrincipal AuthUser user) {
@@ -59,8 +67,8 @@ public class FaqController {
     // =================================================================
     // 4. FAQ 수정 - 어드민만 가능
     // =================================================================
-    @PatchMapping("/{faqId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/api/v1/admin/community/faqs/{faqId}")
+    @PreAuthorize("hasAuthority('FAQ_MANAGE')")
     public ApiResponse<?> update(
             @PathVariable Long faqId,
             @RequestBody ExternalFaqPatchRequest request) {
@@ -71,8 +79,8 @@ public class FaqController {
     // =================================================================
     // 5. FAQ 삭제 - 어드민만 가능
     // =================================================================
-    @DeleteMapping("/{faqId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/api/v1/admin/community/faqs/{faqId}")
+    @PreAuthorize("hasAuthority('FAQ_MANAGE')")
     public ApiResponse<?> delete(@PathVariable Long faqId) {
         service.delete(faqId);
         return ApiResponse.ok(Map.of("success", true));

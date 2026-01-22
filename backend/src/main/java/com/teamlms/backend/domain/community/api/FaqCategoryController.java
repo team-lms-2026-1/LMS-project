@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/community/faq/categories") // 정책서 경로: /faq/categories
+@RequestMapping //("/api/v1/community/faq/categories") // 정책서 경로: /faq/categories
 @RequiredArgsConstructor
 public class FaqCategoryController {
 
@@ -25,7 +25,11 @@ public class FaqCategoryController {
     // =================================================================
     // 1. FAQ 카테고리 목록 조회 - 전부가능
     // =================================================================
-    @GetMapping
+    @GetMapping({"/api/v1/student/community/faq/categories",
+                 "/api/v1/professor/community/faq/categories",
+                 "/api/v1/admin/community/faq/categories"
+    })
+    @PreAuthorize("hasAuthority('FAQ_READ')")
     public ApiResponse<?> getList(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String keyword) {
@@ -36,8 +40,8 @@ public class FaqCategoryController {
     // =================================================================
     // 2. FAQ 카테고리 등록 - 어드민만 가능
     // =================================================================
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/api/v1/admin/community/faq/categories")
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<?> create(@Valid @RequestBody ExternalCategoryRequest request) {
         Long id = service.create(request);
         return ApiResponse.ok(Map.of("categoryId", id));
@@ -46,9 +50,9 @@ public class FaqCategoryController {
     // =================================================================
     // 3. FAQ 카테고리 수정 - 어드민만 가능
     // =================================================================
-    
-    @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+
+    @PatchMapping("/api/v1/admin/community/faq/categories/{id}")
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<?> update(@PathVariable Long id, @Valid @RequestBody ExternalCategoryRequest request) {
         service.update(id, request);
         return ApiResponse.ok(Map.of("success", true));
@@ -58,8 +62,8 @@ public class FaqCategoryController {
     // 4. FAQ 카테고리 수정 - 어드민만 가능
     // =================================================================
     
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/api/v1/admin/community/faq/categories/{id}")
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<?> delete(@PathVariable Long id) {
         service.delete(id);
         return ApiResponse.ok(Map.of("success", true));
