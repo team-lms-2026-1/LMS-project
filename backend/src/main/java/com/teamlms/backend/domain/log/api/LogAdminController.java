@@ -7,6 +7,7 @@ import com.teamlms.backend.global.security.principal.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/logs")
+@PreAuthorize("hasAuthority('LOG_MANAGE')")
 public class LogAdminController {
 
     private final ExcelDownloadService excelDownloadService;
@@ -41,6 +43,4 @@ public class LogAdminController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(bytes);
     }
-
-
 }
