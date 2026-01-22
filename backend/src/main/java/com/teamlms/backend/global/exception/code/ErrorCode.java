@@ -66,6 +66,9 @@ public enum ErrorCode {
     SEMESTER_NOT_FOUND(HttpStatus.NOT_FOUND, "SEMESTER_NOT_FOUND", "학기를 찾을 수 없습니다.", "semester.notFound"),
 
     // =========================
+    // Common fields
+    // =========================
+    // =========================
     // Global: File & S3 (★ 여기 추가됨!)
     // =========================
     FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_UPLOAD_ERROR", "파일 업로드 중 오류가 발생했습니다.", "error.fileUpload");
