@@ -56,8 +56,18 @@ public enum ErrorCode {
     NOTICE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "NOTICE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "notice.category.notFound"),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "해당 자료가 없습니다.", "resource.notFound"),
     RESOURCE_AUTHOR_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_AUTHOR_NOT_FOUND", "작성자 정보를 찾을 수 없습니다.", "resource.author.notFound"),
-    RESOURCE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "RESOURCE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "resource.category.notFound");
+    RESOURCE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "RESOURCE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "resource.category.notFound"),
 
+
+    // =========================
+    // Domain: Semester
+    // =========================
+    SEMESTER_ALREADY_EXISTS(HttpStatus.CONFLICT, "SEMESTER_ALREADY_EXISTS", "해당 연도와 학기의 학기가 이미 존재합니다.", "semester.alreadyExists"),
+    SEMESTER_NOT_FOUND(HttpStatus.NOT_FOUND, "SEMESTER_NOT_FOUND", "학기를 찾을 수 없습니다.", "semester.notFound");
+
+    // =========================
+    // Common fields
+    // =========================
     private final HttpStatus httpStatus;
     private final String code;
     private final String defaultMessage;
