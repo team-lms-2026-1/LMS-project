@@ -68,6 +68,12 @@ public enum ErrorCode {
     // =========================
     // Common fields
     // =========================
+    // =========================
+    // Global: File & S3 (★ 여기 추가됨!)
+    // =========================
+    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_UPLOAD_ERROR", "파일 업로드 중 오류가 발생했습니다.", "error.fileUpload");
+
+    
     private final HttpStatus httpStatus;
     private final String code;
     private final String defaultMessage;

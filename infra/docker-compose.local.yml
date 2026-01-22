@@ -16,6 +16,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/team_lms
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      AWS_ACCESS_KEY: ${MY_AWS_ACCESS_KEY}
+      AWS_SECRET_KEY: ${MY_AWS_SECRET_KEY}
     ports:
       - "8080:8080"
     depends_on:

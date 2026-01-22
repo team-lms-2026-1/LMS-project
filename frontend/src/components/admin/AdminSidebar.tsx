@@ -50,7 +50,9 @@ const SECTIONS: NavSection[] = [
   {
     key: "course",
     title: "교과 관리",
+
     items: [{ label: "교과 목록", href: "/surveys" }],
+
   },
   {
     key: "mentoring",

@@ -1,0 +1,228 @@
+/* 전체 래퍼 */
+.wrap {
+  padding: 24px 32px;
+}
+
+/* 브레드크럼 */
+.breadcrumb {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+/* 상단 제목 + 필터 줄 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* "교과 목록" 제목 */
+.title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* 필터 + 검색 줄 */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 학과 셀렉트 */
+.select {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+}
+
+/* 검색 인풋 */
+.input {
+  height: 32px;
+  width: 180px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+}
+
+/* 검색 버튼 */
+.searchBtn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 4px;
+  border: none;
+  background-color: #4f4f4f;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.searchBtn:hover {
+  background-color: #333;
+}
+
+/* ───────────────── 카드 + 테이블 ───────────────── */
+
+.tableCard {
+  background-color: #fff;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead {
+  background-color: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.table th {
+  font-weight: 600;
+  color: #555;
+}
+
+/* 컬럼 폭 조금씩 조정 */
+.colCategory {
+  width: 160px;
+}
+
+.colViews {
+  width: 60px;
+  text-align: center;
+}
+
+.colDate {
+  width: 120px;
+  text-align: center;
+}
+
+/* 행 hover 효과 */
+.row:hover {
+  background-color: #f9fafb;
+}
+
+/* ───────────────── on/off 상태 버튼 ───────────────── */
+
+.statusOn,
+.statusOff {
+  min-width: 72px;
+  height: 30px;
+  padding: 0px 16px;
+  border-radius: 17px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusOn {
+  background: #2f80ed;
+  border-color: #2f80ed;
+  color: #fff;
+}
+
+.statusOff {
+  background: #ffe3ea;
+  border-color: #ff6b9b;
+  color: #ff2d55;
+}
+
+/* 수정 버튼 */
+.editBtn {
+  min-width: 52px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid #2f80ed;
+  background: #2f80ed;
+  color: #fff;
+  cursor: pointer;
+}
+
+.editBtn:hover {
+  background: #1b63c9;
+  border-color: #1b63c9;
+}
+
+/* ───────────────── 하단 영역: 페이지네이션 + 등록 ───────────────── */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 왼쪽은 지금 비워놔도 되고 나중에 총 건수 같은 거 넣어도 됨 */
+.leftPlaceholder {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageBtn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pageBtnActive {
+  background: #2f80ed;
+  border-color: #2f80ed;
+  color: #fff;
+}
+
+.pageBtnDisabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* 우측 하단 등록 버튼 */
+.rightBtn {
+  height: 34px;
+  padding: 0 18px;
+  border-radius: 6px;
+  border: none;
+  background: #2f80ed;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.rightBtn:hover {
+  background: #1b63c9;
+}
