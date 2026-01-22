@@ -1,21 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/faq-list.module.css";
-import { mockFaqs } from "../data/mockFaqs";
 import type { FaqCategory } from "../types";
+import { faqApi } from "../api/faqApi";
+import type { FaqListItemDto } from "../api/dto";
 
 function badgeClass(category: FaqCategory) {
   switch (category) {
     case "서비스":
       return `${styles.badge} ${styles.badgeService}`;
-    case "학습":
-      return `${styles.badge} ${styles.badgeStudy}`;
-    case "정책":
-      return `${styles.badge} ${styles.badgePolicy}`;
     default:
-      return `${styles.badge} ${styles.badgeEtc}`;
+      return `${styles.badge} ${styles.badgeNormal}`;
   }
 }
 
@@ -25,15 +22,37 @@ export default function FaqListPage() {
   const [category, setCategory] = useState<"전체" | FaqCategory>("전체");
   const [keyword, setKeyword] = useState("");
 
-  const rows = useMemo(() => {
+  const [rows, setRows] = useState<FaqListItemDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchList = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await faqApi.list({ category, keyword, page: 0, size: 20 });
+      setRows(data);
+    } catch (e: any) {
+      setError(e?.message ?? "FAQ 목록 조회 실패");
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const filteredRows = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
-    return mockFaqs.filter((f) => {
-      const categoryOk = category === "전체" ? true : f.category === category;
-      const keywordOk =
-        kw.length === 0 ? true : f.title.toLowerCase().includes(kw) || f.content.toLowerCase().includes(kw);
+    return rows.filter((n) => {
+      const categoryOk = category === "전체" ? true : n.category === category;
+      const keywordOk = kw.length === 0 ? true : (n.title ?? "").toLowerCase().includes(kw);
       return categoryOk && keywordOk;
     });
-  }, [category, keyword]);
+  }, [rows, category, keyword]);
 
   return (
     <div className={styles.wrap}>
@@ -54,9 +73,9 @@ export default function FaqListPage() {
           >
             <option value="전체">전체</option>
             <option value="서비스">서비스</option>
-            <option value="학습">학습</option>
-            <option value="정책">정책</option>
-            <option value="기타">기타</option>
+            <option value="학사">학사</option>
+            <option value="행사">행사</option>
+            <option value="일반">일반</option>
           </select>
 
           <input
@@ -66,7 +85,7 @@ export default function FaqListPage() {
             placeholder="검색어 입력..."
           />
 
-          <button className={styles.searchBtn} onClick={() => {}}>
+          <button className={styles.searchBtn} onClick={fetchList} disabled={loading}>
             검색
           </button>
         </div>
@@ -83,27 +102,37 @@ export default function FaqListPage() {
               <th className={styles.colDate}>작성일</th>
             </tr>
           </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr
-                key={row.id}
-                className={styles.row}
-                onClick={() => router.push(`/community/faq/${row.id}`)}
-              >
-                <td className={styles.colNo}>{row.no}</td>
-                <td className={styles.colCategory}>
-                  <span className={badgeClass(row.category)}>{row.category}</span>
-                </td>
-                <td>{row.title}</td>
-                <td className={styles.colViews}>{row.views.toLocaleString()}</td>
-                <td className={styles.colDate}>{row.createdAt}</td>
-              </tr>
-            ))}
 
-            {rows.length === 0 && (
+          <tbody>
+            {loading && (
               <tr>
                 <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
-                  검색 결과가 없습니다.
+                  불러오는 중...
+                </td>
+              </tr>
+            )}
+
+            {!loading &&
+              filteredRows.map((row, idx) => (
+                <tr
+                  key={String(row.id)}
+                  className={styles.row}
+                  onClick={() => router.push(`/admin/community/faq/${row.id}`)}
+                >
+                  <td className={styles.colNo}>{String(idx + 1).padStart(5, "0")}</td>
+                  <td className={styles.colCategory}>
+                    <span className={badgeClass(row.category)}>{row.category}</span>
+                  </td>
+                  <td>{row.title}</td>
+                  <td className={styles.colViews}>{Number(row.views ?? 0).toLocaleString()}</td>
+                  <td className={styles.colDate}>{row.createdAt ?? "-"}</td>
+                </tr>
+              ))}
+
+            {!loading && filteredRows.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
+                  {error ? error : "검색 결과가 없습니다."}
                 </td>
               </tr>
             )}
@@ -112,7 +141,7 @@ export default function FaqListPage() {
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.leftBtn} onClick={() => alert("카테고리 관리(추후 연결)")}>
+        <button className={styles.leftBtn} onClick={() => router.push("/admin/community/faq/categories")}>
           카테고리 관리
         </button>
 
@@ -128,7 +157,7 @@ export default function FaqListPage() {
           <button className={styles.pageBtn}>›</button>
         </div>
 
-        <button className={styles.rightBtn} onClick={() => router.push("/community/faq/new")}>
+        <button className={styles.rightBtn} onClick={() => router.push("/admin/community/faq/new")}>
           등록
         </button>
       </div>

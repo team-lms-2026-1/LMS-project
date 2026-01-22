@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-list.module.css";
-import { mockNotices } from "../data/mockNotices";
 import type { NoticeCategory } from "../types";
+import { noticesApi } from "../api/noticesApi";
+import type { NoticeListItemDto } from "../api/dto";
 
 function badgeClass(category: NoticeCategory) {
   switch (category) {
@@ -25,14 +26,39 @@ export default function NoticeListPage() {
   const [category, setCategory] = useState<"전체" | NoticeCategory>("전체");
   const [keyword, setKeyword] = useState("");
 
-  const rows = useMemo(() => {
+  const [rows, setRows] = useState<NoticeListItemDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchList = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await noticesApi.list({ category, keyword, page: 0, size: 20 });
+      setRows(data);
+    } catch (e: any) {
+      setError(e?.message ?? "공지사항 목록 조회 실패");
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // 최초 로딩
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const filteredRows = useMemo(() => {
+    // 서버에서 필터를 하더라도, 화면 상태 일관성을 위해 프론트에서도 한 번 더 적용
     const kw = keyword.trim().toLowerCase();
-    return mockNotices.filter((n) => {
+    return rows.filter((n) => {
       const categoryOk = category === "전체" ? true : n.category === category;
       const keywordOk = kw.length === 0 ? true : n.title.toLowerCase().includes(kw);
       return categoryOk && keywordOk;
     });
-  }, [category, keyword]);
+  }, [rows, category, keyword]);
 
   return (
     <div className={styles.wrap}>
@@ -65,7 +91,7 @@ export default function NoticeListPage() {
             placeholder="검색어 입력..."
           />
 
-          <button className={styles.searchBtn} onClick={() => { /* 상태값으로 필터링 */ }}>
+          <button className={styles.searchBtn} onClick={fetchList} disabled={loading}>
             검색
           </button>
         </div>
@@ -83,26 +109,35 @@ export default function NoticeListPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr
-                key={row.id}
-                className={styles.row}
-                onClick={() => router.push(`/community/notices/${row.id}`)}
-              >
-                <td className={styles.colNo}>{row.no}</td>
-                <td className={styles.colCategory}>
-                  <span className={badgeClass(row.category)}>{row.category}</span>
-                </td>
-                <td>{row.title}</td>
-                <td className={styles.colViews}>{row.views.toLocaleString()}</td>
-                <td className={styles.colDate}>{row.createdAt}</td>
-              </tr>
-            ))}
-
-            {rows.length === 0 && (
+            {loading && (
               <tr>
                 <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
-                  검색 결과가 없습니다.
+                  불러오는 중...
+                </td>
+              </tr>
+            )}
+
+            {!loading &&
+              filteredRows.map((row, idx) => (
+                <tr
+                  key={String(row.id)}
+                  className={styles.row}
+                  onClick={() => router.push(`/community/notices/${row.id}`)}
+                >
+                  <td className={styles.colNo}>{row.no ?? String(idx + 1).padStart(5, "0")}</td>
+                  <td className={styles.colCategory}>
+                    <span className={badgeClass(row.category)}>{row.category}</span>
+                  </td>
+                  <td>{row.title}</td>
+                  <td className={styles.colViews}>{Number(row.views ?? 0).toLocaleString()}</td>
+                  <td className={styles.colDate}>{row.createdAt}</td>
+                </tr>
+              ))}
+
+            {!loading && filteredRows.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
+                  {error ? error : "검색 결과가 없습니다."}
                 </td>
               </tr>
             )}
@@ -111,11 +146,12 @@ export default function NoticeListPage() {
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.leftBtn} onClick={() => alert("카테고리 관리(추후 연결)")}>
+        <button className={styles.leftBtn} onClick={() => router.push("/admin/community/notices/categories")}>
           카테고리 관리
         </button>
 
         <div className={styles.pagination}>
+          {/* 실제 page/size 적용은 백엔드 스펙 확정 후 연결 */}
           <button className={`${styles.pageBtn} ${styles.pageBtnDisabled}`} disabled>
             ‹
           </button>

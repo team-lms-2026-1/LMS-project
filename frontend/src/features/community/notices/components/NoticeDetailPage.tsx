@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-detail.module.css";
-import { mockNotices } from "../data/mockNotices";
 import type { NoticeCategory } from "../types";
+import { noticesApi } from "../api/noticesApi";
+import type { NoticeDetailDto } from "../api/dto";
 
 function badgeClass(category: NoticeCategory, stylesObj: Record<string, string>) {
   switch (category) {
@@ -20,15 +22,41 @@ function badgeClass(category: NoticeCategory, stylesObj: Record<string, string>)
 
 export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
   const router = useRouter();
-  const notice = mockNotices.find((n) => n.id === noticeId);
 
+  const [notice, setNotice] = useState<NoticeDetailDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await noticesApi.detail(noticeId);
+        setNotice(data);
+      } catch (e: any) {
+        setError(e?.message ?? "공지사항 조회 실패");
+        setNotice(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [noticeId]);
+
+  if (loading) return <div className={styles.wrap}>불러오는 중...</div>;
+  if (error) return <div className={styles.wrap}>{error}</div>;
   if (!notice) return <div className={styles.wrap}>공지사항을 찾을 수 없습니다.</div>;
 
-  const onDelete = () => {
-    // mock 환경: 실제 삭제 API 없음
+  const onDelete = async () => {
     const ok = window.confirm("삭제하시겠습니까?");
     if (!ok) return;
-    router.push("/community/notices");
+
+    try {
+      await noticesApi.remove(String(notice.id));
+      router.push("/community/notices");
+    } catch (e: any) {
+      alert(e?.message ?? "삭제 실패");
+    }
   };
 
   return (
@@ -52,9 +80,9 @@ export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
         </div>
 
         <div className={styles.metaRow}>
-          <div>작성자: {notice.author}</div>
+          <div>작성자: {notice.author ?? "-"}</div>
           <div style={{ textAlign: "center" }}>작성일: {notice.createdAt}</div>
-          <div style={{ textAlign: "right" }}>조회수: {notice.views.toLocaleString()}</div>
+          <div style={{ textAlign: "right" }}>조회수: {Number(notice.views ?? 0).toLocaleString()}</div>
         </div>
 
         <div className={styles.body}>
@@ -63,14 +91,15 @@ export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
 
         <div className={styles.attach}>
           <div className={styles.attachLabel}>첨부<br />파일</div>
-          <div className={styles.attachValue}>
-            {notice.attachment?.name ?? "-"}
-          </div>
+          <div className={styles.attachValue}>{notice.attachment?.name ?? "-"}</div>
         </div>
       </div>
 
       <div className={styles.actions}>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => router.push(`/community/notices/${notice.id}/edit`)}>
+        <button
+          className={`${styles.btn} ${styles.btnPrimary}`}
+          onClick={() => router.push(`/community/notices/${notice.id}/edit`)}
+        >
           수정
         </button>
         <button className={`${styles.btn} ${styles.btnDanger}`} onClick={onDelete}>

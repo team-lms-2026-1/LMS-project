@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/resource-form.module.css";
 import type { ResourceCategory } from "../types";
+import { resourcesApi } from "../api/resourcesApi";
 
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
@@ -15,8 +16,28 @@ export default function ResourceCreatePage() {
   const [content, setContent] = useState("");
   const [fileName, setFileName] = useState<string>("");
 
-  const onSave = () => {
-    router.push("/community/resources");
+  const [saving, setSaving] = useState(false);
+
+  const onSave = async () => {
+    if (!title.trim()) return alert("제목을 입력하세요.");
+    if (!content.trim()) return alert("내용을 입력하세요.");
+
+    setSaving(true);
+    try {
+      await resourcesApi.create({
+        title: title.trim(),
+        category,
+        content: content.trim(),
+        // 첨부파일은 백엔드 스펙 확정 전이라 전송하지 않음(현재는 UI만 유지)
+      });
+
+      // ✅ 현재 app 라우트가 /admin/community/resoures 기준
+      router.push("/admin/community/resoures");
+    } catch (e: any) {
+      alert(e?.message ?? "자료 등록 실패");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -26,7 +47,7 @@ export default function ResourceCreatePage() {
         <span>-</span>
         <span>자료실</span>
         <span>-</span>
-        <span>상세페이지(수정)</span>
+        <span>등록</span>
       </div>
 
       <div className={styles.pageTitle}>자료실</div>
@@ -79,11 +100,16 @@ export default function ResourceCreatePage() {
             </tr>
 
             <tr>
-              <th>첨부<br />파일</th>
+              <th>
+                첨부<br />
+                파일
+              </th>
               <td>
                 <div className={styles.attachArea}>
                   <div className={styles.attachTab}>
-                    <button type="button" className={styles.tabBtn}>내 PC</button>
+                    <button type="button" className={styles.tabBtn}>
+                      내 PC
+                    </button>
                   </div>
 
                   <div>
@@ -109,10 +135,10 @@ export default function ResourceCreatePage() {
       </div>
 
       <div className={styles.actions}>
-        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()}>
+        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()} disabled={saving}>
           취소
         </button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave}>
+        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
           등록
         </button>
       </div>

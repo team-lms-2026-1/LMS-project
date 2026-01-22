@@ -1,27 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/resource-form.module.css";
-import { mockResources } from "../data/mockResources";
-import type { ResourceCategory } from "../types";
+import type { ResourceCategory, ResourceItem } from "../types";
+import { resourcesApi } from "../api/resourcesApi";
 
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
 export default function ResourceEditPage({ resourceId }: { resourceId: string }) {
   const router = useRouter();
-  const item = mockResources.find((n) => n.id === resourceId);
 
-  const [title, setTitle] = useState(item?.title ?? "");
-  const [category, setCategory] = useState<ResourceCategory>(item?.category ?? "서비스");
-  const [content, setContent] = useState(item?.content ?? "");
-  const [fileName, setFileName] = useState<string>(item?.attachment?.name ?? "");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!item) return <div className={styles.wrap}>자료를 찾을 수 없습니다.</div>;
+  const [item, setItem] = useState<ResourceItem | null>(null);
 
-  const onSave = () => {
-    router.push(`/community/resources/${resourceId}`);
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<ResourceCategory>("서비스");
+  const [content, setContent] = useState("");
+  const [fileName, setFileName] = useState<string>("");
+
+  const fetchDetail = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await resourcesApi.get(resourceId);
+      setItem(data);
+
+      setTitle(data.title ?? "");
+      setCategory((data.category ?? "서비스") as ResourceCategory);
+      setContent(data.content ?? "");
+      setFileName(data.attachment?.name ?? "");
+    } catch (e: any) {
+      setError(e?.message ?? "자료 조회 실패");
+      setItem(null);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resourceId]);
+
+  const onSave = async () => {
+    if (!title.trim()) return alert("제목을 입력하세요.");
+    if (!content.trim()) return alert("내용을 입력하세요.");
+
+    setSaving(true);
+    try {
+      await resourcesApi.update(resourceId, {
+        title: title.trim(),
+        category,
+        content: content.trim(),
+      });
+
+      // ✅ 현재 app 라우트가 /admin/community/resoures 기준
+      router.push(`/admin/community/resoures/${resourceId}`);
+    } catch (e: any) {
+      alert(e?.message ?? "수정 실패");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className={styles.wrap}>불러오는 중...</div>;
+  if (!item) return <div className={styles.wrap}>{error ?? "자료를 찾을 수 없습니다."}</div>;
 
   return (
     <div className={styles.wrap}>
@@ -83,11 +130,15 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
             </tr>
 
             <tr>
-              <th>첨부<br />파일</th>
+              <th>
+                첨부<br />파일
+              </th>
               <td>
                 <div className={styles.attachArea}>
                   <div className={styles.attachTab}>
-                    <button type="button" className={styles.tabBtn}>내 PC</button>
+                    <button type="button" className={styles.tabBtn}>
+                      내 PC
+                    </button>
                   </div>
 
                   <div>
@@ -113,10 +164,10 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
       </div>
 
       <div className={styles.actions}>
-        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()}>
+        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()} disabled={saving}>
           취소
         </button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave}>
+        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
           수정
         </button>
       </div>

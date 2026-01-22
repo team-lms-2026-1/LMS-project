@@ -1,0 +1,11 @@
+import { proxyToBackend } from "@/lib/bff";
+
+const BACKEND_PATH = "/api/v1/admin/resource-categories"; // TODO 실제 경로로 수정
+
+export async function GET(req: Request) {
+  return proxyToBackend(req, BACKEND_PATH, { method: "GET", forwardQuery: true });
+}
+export async function POST(req: Request) {
+  const body = await req.json().catch(() => null);
+  return proxyToBackend(req, BACKEND_PATH, { method: "POST", body, forwardQuery: false });
+}

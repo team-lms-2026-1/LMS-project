@@ -1,27 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-form.module.css";
-import { mockNotices } from "../data/mockNotices";
 import type { NoticeCategory } from "../types";
+import { noticesApi } from "../api/noticesApi";
+import type { NoticeDetailDto } from "../api/dto";
 
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
 export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
   const router = useRouter();
-  const notice = mockNotices.find((n) => n.id === noticeId);
 
-  const [title, setTitle] = useState(notice?.title ?? "");
-  const [category, setCategory] = useState<NoticeCategory>(notice?.category ?? "서비스");
-  const [content, setContent] = useState(notice?.content ?? "");
-  const [fileName, setFileName] = useState<string>(notice?.attachment?.name ?? "");
+  const [origin, setOrigin] = useState<NoticeDetailDto | null>(null);
 
-  if (!notice) return <div className={styles.wrap}>공지사항을 찾을 수 없습니다.</div>;
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<NoticeCategory>("서비스");
+  const [content, setContent] = useState("");
+  const [fileName, setFileName] = useState<string>("");
 
-  const onSave = () => {
-    // mock: 실제 PUT/PATCH 없음
-    router.push(`/community/notices/${noticeId}`);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await noticesApi.detail(noticeId);
+        setOrigin(data);
+        setTitle(data.title ?? "");
+        setCategory(data.category ?? "서비스");
+        setContent(data.content ?? "");
+        setFileName(data.attachment?.name ?? "");
+      } catch (e: any) {
+        alert(e?.message ?? "공지사항 조회 실패");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [noticeId]);
+
+  if (loading) return <div className={styles.wrap}>불러오는 중...</div>;
+  if (!origin) return <div className={styles.wrap}>공지사항을 찾을 수 없습니다.</div>;
+
+  const onSave = async () => {
+    if (!title.trim()) return alert("제목을 입력하세요.");
+    setSaving(true);
+    try {
+      await noticesApi.update(noticeId, {
+        title: title.trim(),
+        category,
+        content,
+        attachmentName: fileName || null,
+      });
+      router.push(`/community/notices/${noticeId}`);
+    } catch (e: any) {
+      alert(e?.message ?? "수정 실패");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -86,11 +123,13 @@ export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
             </tr>
 
             <tr>
-              <th>첨부<br/>파일</th>
+              <th>첨부<br />파일</th>
               <td>
                 <div className={styles.attachArea}>
                   <div className={styles.attachTab}>
-                    <button type="button" className={styles.tabBtn}>내 PC</button>
+                    <button type="button" className={styles.tabBtn}>
+                      내 PC
+                    </button>
                   </div>
 
                   <div>
@@ -116,10 +155,10 @@ export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
       </div>
 
       <div className={styles.actions}>
-        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()}>
+        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()} disabled={saving}>
           취소
         </button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave}>
+        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
           수정
         </button>
       </div>

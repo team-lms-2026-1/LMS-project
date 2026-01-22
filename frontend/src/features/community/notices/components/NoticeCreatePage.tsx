@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-form.module.css";
 import type { NoticeCategory } from "../types";
+import { noticesApi } from "../api/noticesApi";
 
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
@@ -15,9 +16,24 @@ export default function NoticeCreatePage() {
   const [content, setContent] = useState("");
   const [fileName, setFileName] = useState<string>("");
 
-  const onSave = () => {
-    // mock: 실제 POST 없음
-    router.push("/community/notices");
+  const [saving, setSaving] = useState(false);
+
+  const onSave = async () => {
+    if (!title.trim()) return alert("제목을 입력하세요.");
+    setSaving(true);
+    try {
+      await noticesApi.create({
+        title: title.trim(),
+        category,
+        content,
+        attachmentName: fileName || null,
+      });
+      router.push("/community/notices");
+    } catch (e: any) {
+      alert(e?.message ?? "등록 실패");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -82,11 +98,13 @@ export default function NoticeCreatePage() {
             </tr>
 
             <tr>
-              <th>첨부<br/>파일</th>
+              <th>첨부<br />파일</th>
               <td>
                 <div className={styles.attachArea}>
                   <div className={styles.attachTab}>
-                    <button type="button" className={styles.tabBtn}>내 PC</button>
+                    <button type="button" className={styles.tabBtn}>
+                      내 PC
+                    </button>
                   </div>
 
                   <div>
@@ -112,8 +130,12 @@ export default function NoticeCreatePage() {
       </div>
 
       <div className={styles.actions}>
-        <button className={styles.btn} onClick={() => router.back()}>취소</button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave}>등록</button>
+        <button className={styles.btn} onClick={() => router.back()} disabled={saving}>
+          취소
+        </button>
+        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
+          등록
+        </button>
       </div>
     </div>
   );
