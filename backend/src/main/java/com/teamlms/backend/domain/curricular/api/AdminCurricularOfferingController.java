@@ -38,4 +38,5 @@ public class AdminCurricularOfferingController {
 
         return ApiResponse.ok(new SuccessResponse());
     }
+
 }

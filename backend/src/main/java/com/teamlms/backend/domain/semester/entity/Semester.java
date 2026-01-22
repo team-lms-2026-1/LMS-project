@@ -35,18 +35,22 @@ public class Semester extends BaseEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "display_name", length = 20, nullable = false)
+    private String displayName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private SemesterStatus status;
 
     /* ========= domain method ========= */
 
-    public static Semester planned (int year, Term term, LocalDate startDate, LocalDate endDate) {
+    public static Semester planned (int year, Term term, String displayName, LocalDate startDate, LocalDate endDate) {
         return Semester.builder()
                 .year(year)
                 .term(term)
                 .startDate(startDate)
                 .endDate(endDate)
+                .displayName(displayName)
                 .status(SemesterStatus.PLANNED)
                 .build();
     }

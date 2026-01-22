@@ -3,6 +3,10 @@ package com.teamlms.backend.domain.curricular.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
+import com.teamlms.backend.domain.account.repository.AccountRepository;
+import com.teamlms.backend.domain.account.repository.ProfessorProfileRepository;
 import com.teamlms.backend.domain.curricular.entity.Curricular;
 import com.teamlms.backend.domain.curricular.entity.CurricularOffering;
 import com.teamlms.backend.domain.curricular.enums.DayOfWeekType;
@@ -23,7 +27,10 @@ public class CurricularOfferingCommandService {
     private final CurricularRepository curricularRepository;
     private final CurricularOfferingRepository curricularOfferingRepository;
     private final SemesterRepository semesterRepository;
+    private final AccountRepository accountRepository;
+    private final ProfessorProfileRepository professorProfileRepository;
 
+    // 개설 생성
     public void create(
         String offeringCode,
         Long curricularId,
@@ -34,6 +41,18 @@ public class CurricularOfferingCommandService {
         String location,
         Long professorAccountId
     ) {
+        // 교수검증
+        Account acc = accountRepository.findById(professorAccountId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, professorAccountId));
+
+        if (acc.getAccountType() != AccountType.PROFESSOR) {
+            throw new BusinessException(ErrorCode.INVALID_PROFESSOR_ACCOUNT, professorAccountId);
+        }
+
+        if (!professorProfileRepository.existsById(professorAccountId)) {
+            throw new BusinessException(ErrorCode.PROFESSOR_PROFILE_NOT_FOUND, professorAccountId);
+        }
+
 
         // 1) 교과목 존재 검증
         if(!curricularRepository.existsById(curricularId)) {

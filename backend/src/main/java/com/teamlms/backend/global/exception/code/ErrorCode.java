@@ -24,8 +24,8 @@ public enum ErrorCode {
     AUTH_FAILED(HttpStatus.UNAUTHORIZED, "AUTH_FAILED", "아이디 또는 비밀번호가 올바르지 않습니다.", "auth.failed"),
     DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "DUPLICATE_LOGIN_ID", "이미 사용 중인 로그인 아이디입니다.", "account.loginId.duplicate"),
     INVALID_HEAD_PROFESSOR(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "담당 교수는 해당 학과 소속 교수만 지정할 수 있습니다.", "dept.headProfessor.invalid"),
-
-
+    INVALID_PROFESSOR_ACCOUNT(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "유효하지않은 교수아이디입니다.", "dept.headProfessor.invalid"),
+    PROFESSOR_PROFILE_NOT_FOUND(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "유효하지않은 교수아이디를 찾을 수 없습니다.", "dept.headProfessor.invalid"),
 
     // =========================
     // Domain: Dept&Major
