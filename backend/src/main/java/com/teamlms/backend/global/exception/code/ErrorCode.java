@@ -68,8 +68,12 @@ public enum ErrorCode {
 
     
     // =========================
-    // Common fields
+    // Domain: Curricular
     // =========================
+    CURRICULAR_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_CODE_ALREADY_EXISTS", "이미 사용 중인 교과목 코드입니다.", "curricular.code.alreadyExists"),
+    CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_NOT_FOUND", "교과목을 찾을 수 없습니다.", "curricular.notFound"),
+    CURRICULAR_OFFERING_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_CODE_ALREADY_EXISTS", "이미 사용 중인 개설코드입니다.", "curricular.offering.code.alreadyExists"),
+
     // =========================
     // Global: File & S3 (★ 여기 추가됨!)
     // =========================
