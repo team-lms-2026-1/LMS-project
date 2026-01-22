@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/community/resources")
+@RequestMapping // ("/api/v1/community/resources")
 @RequiredArgsConstructor
 public class ResourcePostController {
 
@@ -31,7 +31,11 @@ public class ResourcePostController {
     // =================================================================
     // 1. 자료실 목록 조회 - 전부가능
     // =================================================================
-    @GetMapping
+    @GetMapping({"/api/v1/student/community/resources",
+                 "/api/v1/professor/community/resources",
+                 "/api/v1/admin/community/resources" 
+    })
+    @PreAuthorize("hasAuthority('RESOURCE_READ')")
     public ApiResponse<?> getList(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) Long categoryId,
@@ -45,7 +49,11 @@ public class ResourcePostController {
     // =================================================================
     // 2. 자료실 상세 조회 - 전부가능
     // =================================================================
-    @GetMapping("/{resourceId}")
+    @GetMapping({"/api/v1/student/community/resources/{resourceId}",
+                 "/api/v1/professor/community/resources/{resourceId}",
+                 "/api/v1/admin/community/resources/{resourceId}" 
+    })
+    @PreAuthorize("hasAuthority('RESOURCE_READ')")
     public ApiResponse<?> getDetail(@PathVariable Long resourceId) {
         ExternalResourceResponse response = postService.getDetail(resourceId);
         return ApiResponse.ok(response);
@@ -55,8 +63,8 @@ public class ResourcePostController {
     // =================================================================
     // 3. 자료실 등록 - 어드민만 가능
     // =================================================================
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(value = "/api/v1/admin/community/resources", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PreAuthorize("hasAuthority('RESOURCE_MANAGE')")
     public ApiResponse<?> create(
             // JSON 데이터는 @RequestPart로 받음
             @Valid @RequestPart("request") ExternalResourceRequest request,
@@ -72,8 +80,8 @@ public class ResourcePostController {
     // =================================================================
     // 4. 자료실 수정 - 어드민만 가능
     // =================================================================
-    @PatchMapping(value = "/{resourceId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping(value = "/api/v1/admin/community/resources/{resourceId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PreAuthorize("hasAuthority('RESOURCE_MANAGE')")
     public ApiResponse<?> update(
             @PathVariable Long resourceId,
             // 수정용 DTO (Validation 없음)
@@ -90,8 +98,8 @@ public class ResourcePostController {
     // =================================================================
     // 5. 자료실 삭제 - 어드민만 가능
     // =================================================================
-    @DeleteMapping("/{resourceId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/api/v1/admin/community/resources/{resourceId}")
+    @PreAuthorize("hasAuthority('RESOURCE_MANAGE')")
     public ApiResponse<?> delete(@PathVariable Long resourceId) {
         postService.delete(resourceId);
         return ApiResponse.ok(Map.of("success", true));

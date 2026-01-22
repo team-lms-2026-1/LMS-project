@@ -92,15 +92,15 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/community/notices/categories")
+@RequestMapping
 @RequiredArgsConstructor
 public class NoticeCategoryController {
 
     private final NoticeCategoryService categoryService;
 
     // 1-0. 카테고리 등록 (관리자) - [추가된 부분]
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/api/v1/admin/community/notices/categories")
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<Map<String, Object>> createCategory(
             @RequestBody ExternalCategoryRequest request
     ) {
@@ -110,7 +110,11 @@ public class NoticeCategoryController {
     }
 
     // 1-1. 카테고리 목록 조회
-    @GetMapping
+    @GetMapping({"/api/v1/student/community/notices/categories",
+                 "/api/v1/professor/community/notices/categories",
+                 "/api/v1/admin/community/notices/categories"
+    })
+    @PreAuthorize("hasAuthority('NOTICE_READ')")
     public ApiResponse<List<Map<String, Object>>> getCategories(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(required = false) String keyword
@@ -120,8 +124,8 @@ public class NoticeCategoryController {
     }
 
     // 1-2. 카테고리 수정 (관리자)
-    @PatchMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/api/v1/admin/community/notices/categories/{categoryId}")
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<Map<String, Boolean>> updateCategory(
             @PathVariable Long categoryId,
             @RequestBody ExternalCategoryRequest request
@@ -131,8 +135,8 @@ public class NoticeCategoryController {
     }
 
     // 1-3. 카테고리 삭제 (관리자)
-    @DeleteMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/api/v1/admin/community/notices/categories/{categoryId}")
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<Map<String, Boolean>> deleteCategory(
             @PathVariable Long categoryId
     ) {

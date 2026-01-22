@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +43,6 @@ public class NoticeService {
     // 1. 등록 (Create) - 관리자만 가능
     // =================================================================
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public Long createNotice(ExternalNoticeRequest request, List<MultipartFile> files, Long authorId) {
         
         Account author = accountRepository.findById(authorId)
@@ -86,6 +84,7 @@ public class NoticeService {
     // =================================================================
     // 3. 목록 조회 (Read List)
     // =================================================================
+    
     public Page<ExternalNoticeResponse> getNoticeList(Pageable pageable, Long categoryId, String keyword) {
         InternalNoticeRequest searchCondition = InternalNoticeRequest.builder()
                 .categoryId(categoryId)
@@ -101,7 +100,6 @@ public class NoticeService {
     // 4. 수정 (Update) - 관리자만 가능
     // =================================================================
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> files, Long requesterId) {
         
         Notice notice = noticeRepository.findById(noticeId)
@@ -146,7 +144,7 @@ public class NoticeService {
     // 5. 삭제 (Delete) - 관리자만 가능
     // =================================================================
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+   
     public void deleteNotice(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
