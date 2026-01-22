@@ -22,14 +22,18 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/community/notices")
+@RequestMapping
 @RequiredArgsConstructor
 public class NoticeController {
 
     private final NoticeService noticeService;
 
     // 2-1. 공지사항 목록 조회
-    @GetMapping
+    @GetMapping({"/api/v1/student/community/notices",
+                 "/api/v1/professor/community/notices",
+                 "/api/v1/admin/community/notices" 
+    })
+    @PreAuthorize("hasAuthority('NOTICE_READ')")
     // ★ Map -> ExternalNoticeResponse 로 변경
     public ApiResponse<List<ExternalNoticeResponse>> getNotices(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
@@ -42,7 +46,11 @@ public class NoticeController {
     }
 
     // 2-2. 상세 조회
-    @GetMapping("/{noticeId}")
+    @GetMapping({"/api/v1/student/community/notices/{noticeId}",
+                 "/api/v1/professor/community/notices/{noticeId}",
+                 "/api/v1/admin/community/notices/{noticeId}"
+    })
+    @PreAuthorize("hasAuthority('NOTICE_READ')")
     // ★ Map -> ExternalNoticeResponse 로 변경
     public ApiResponse<ExternalNoticeResponse> getNoticeDetail(@PathVariable Long noticeId) {
         // ★ Service가 DTO를 반환하므로 타입을 맞춰줌
@@ -51,8 +59,8 @@ public class NoticeController {
     }
 
     // 2-3. 등록 (관리자)
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(value = "/api/v1/admin/community/notices", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<Map<String, Boolean>> createNotice(
             @RequestPart("request") ExternalNoticeRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
@@ -64,8 +72,8 @@ public class NoticeController {
     }
 
     // 2-4. 수정 (관리자)
-    @PatchMapping(value = "/{noticeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping(value = "/api/v1/admin/community/notices/{noticeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<Map<String, Boolean>> updateNotice(
             @PathVariable Long noticeId,
             @RequestPart("request") ExternalNoticePatchRequest request,
@@ -78,8 +86,8 @@ public class NoticeController {
     }
 
     // 2-5. 삭제 (관리자)
-    @DeleteMapping("/{noticeId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/api/v1/admin/community/notices/{noticeId}")
+    @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<Map<String, Boolean>> deleteNotice(@PathVariable Long noticeId) {
         noticeService.deleteNotice(noticeId);
         return ApiResponse.ok(Map.of("success", true));
