@@ -57,8 +57,7 @@ public enum ErrorCode {
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "해당 자료가 없습니다.", "resource.notFound"),
     RESOURCE_AUTHOR_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE_AUTHOR_NOT_FOUND", "작성자 정보를 찾을 수 없습니다.", "resource.author.notFound"),
     RESOURCE_NOT_CATEGORY(HttpStatus.NOT_FOUND, "RESOURCE_NOT_CATEGORY", "카테고리가 존재하지 않습니다.", "resource.category.notFound"),
-
-
+    ENROLLMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "ENROLLMENT_NOT_FOUND", "수강 신청 내역이 존재하지 않습니다.", "enrollment.notFound"),
 
     // =========================
     // Domain: Semester
@@ -73,6 +72,25 @@ public enum ErrorCode {
     CURRICULAR_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_CODE_ALREADY_EXISTS", "이미 사용 중인 교과목 코드입니다.", "curricular.code.alreadyExists"),
     CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_NOT_FOUND", "교과목을 찾을 수 없습니다.", "curricular.notFound"),
     CURRICULAR_OFFERING_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_CODE_ALREADY_EXISTS", "이미 사용 중인 개설코드입니다.", "curricular.offering.code.alreadyExists"),
+    CURRICULAR_OFFERING_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_OFFERING_NOT_FOUND", "이미 사용 중인 운영교과입니다.", "curricular.offering.notFound"),
+    OFFERING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_NOT_EDITABLE", "Draft가 아닌 운영교과입니다.", "curricular.offering.notEditable"),
+    INVALID_OFFERING_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "INVALID_OFFERING_STATUS_TRANSITION", "올바르지 않은 상태변경입니다.", "error.validation"),
+    GRADE_NOT_INPUTTED(HttpStatus.BAD_REQUEST, "GRADE_NOT_INPUTTED", "입력되지 않은 성적이있습니다.", "error.validation"),
+    OFFERING_COMPETENCY_MAPPING_INCOMPLETE(HttpStatus.NOT_FOUND, "OFFERING_COMPETENCY_MAPPING_INCOMPLETE", "역량 매핑이 완료되지 않았습니다.", "offering.competency.mapping.incomplete"),
+    OFFERING_NOT_ENROLLABLE(HttpStatus.BAD_REQUEST, "OFFERING_NOT_ENROLLABLE", "현재 상태에서는 수강 신청이 불가능한 교과입니다.", "offering.not.enrollable"),
+    ENROLLMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "ENROLLMENT_ALREADY_EXISTS", "이미 수강 신청된 교과입니다.", "enrollment.already.exists"),
+    OFFERING_CAPACITY_FULL(HttpStatus.CONFLICT, "OFFERING_CAPACITY_FULL", "수강 정원이 초과되었습니다.", "offering.capacity.full"),
+    OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE", "완료된 교과 운영의 역량 맵핑은 수정할 수 없습니다.", "offering.competency.mapping.notEditable"),
+    OFFERING_COMPETENCY_WEIGHT_DUPLICATED(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_WEIGHT_DUPLICATED", "해당 교과 운영에서 이미 사용 중인 가중치입니다.", "offering.competency.weight.duplicated"),
+
+    ENROLLMENT_OFFERING_MISMATCH(HttpStatus.CONFLICT, "ENROLLMENT_OFFERING_MISMATCH", "해당 수강정보는 요청한 교과 운영에 속하지 않습니다.", "enrollment.offering.mismatch"),
+    ENROLLMENT_NOT_GRADEABLE(HttpStatus.CONFLICT, "ENROLLMENT_NOT_GRADEABLE", "취소된 수강 정보에는 성적을 입력할 수 없습니다.", "enrollment.not.gradeable"),
+    GRADE_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "GRADE_ALREADY_CONFIRMED", "이미 성적이 확정된 수강 정보는 수정할 수 없습니다.", "grade.already.confirmed"),
+
+    // =========================
+    // Domain: Competency
+    // =========================
+    COMPETENCY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPETENCY_NOT_FOUND", "역량 정보가 존재하지 않습니다.", "competency.notFound"),
 
     // =========================
     // Global: File & S3 (★ 여기 추가됨!)

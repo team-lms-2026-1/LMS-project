@@ -29,7 +29,6 @@ public class CurricularQueryService {
         return CurricularEditResponse.from(curricular);
     }
 
-    // 교과 목록 조회
     public Page<CurricularListItem> list(String keyword, Pageable pageable) {
         return curricularRepository.findList(keyword, pageable);
     }
