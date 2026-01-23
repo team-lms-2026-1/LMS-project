@@ -55,4 +55,27 @@ public class CurricularOffering extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 30, nullable = false)
     private OfferingStatus status; // DRAFT, OPEN, ENROLLMENT_CLOSED, IN_PROGRESS, COMPLETED, CANCELED
+
+    // domain method
+    public void patchForDraft(
+        String offeringCode,
+        Long semesterId,
+        DayOfWeekType dayOfWeek,
+        Integer period,
+        Integer capacity,
+        String location,
+        Long professorAccountId
+    ) {
+        if (offeringCode != null) this.offeringCode = offeringCode;
+        if (semesterId != null) this.semesterId = semesterId;
+        if (dayOfWeek != null) this.dayOfWeek = dayOfWeek;
+        if (period != null) this.period = period;
+        if (capacity != null) this.capacity = capacity;
+        if (location != null) this.location = location;
+        if (professorAccountId != null) this.professorAccountId = professorAccountId;
+    }
+
+    public void changeStatus(OfferingStatus status) {
+        this.status = status;
+    }
 }

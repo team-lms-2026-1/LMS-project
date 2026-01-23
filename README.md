@@ -166,7 +166,7 @@ docker compose -f infra/docker-compose.local.yml down
 
 ---
 
-### 6-2. Health Check
+### 6-2. Health Check ( No valid )
 
 ```
 GET http://localhost:8080/health

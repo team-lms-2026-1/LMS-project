@@ -62,4 +62,51 @@ public class Enrollment extends BaseEntity {
 
     @Column(name = "applied_at", nullable = false)
     private LocalDateTime appliedAt;
+
+    // domain method
+    public void confirmGrade(
+            String grade,
+            CompletionStatus completionStatus,
+            Long actorAccountId,
+            LocalDateTime confirmedAt
+    ) {
+        if (Boolean.TRUE.equals(this.isGradeConfirmed)) {
+            throw new IllegalStateException(
+                "Grade already confirmed. enrollmentId=" + this.enrollmentId
+            );
+        }
+
+        this.grade = grade;
+        this.completionStatus = completionStatus;
+        this.isGradeConfirmed = true;
+        this.gradeConfirmedBy = actorAccountId;
+        this.gradeConfirmedAt = confirmedAt;
+    }
+    
+    // 수강취소
+    public void cancel() {
+        if (this.enrollmentStatus != EnrollmentStatus.ENROLLED) {
+            return; // 멱등
+        }
+        this.enrollmentStatus = EnrollmentStatus.CANCELED;
+    }
+
+    // 재신청 (CANCELED → ENROLLED)
+    public void reEnroll(LocalDateTime appliedAt) {
+        this.enrollmentStatus = EnrollmentStatus.ENROLLED;
+        this.appliedAt = appliedAt;
+
+        // 성적 관련 초기화 (정책적으로 안전)
+        this.rawScore = null;
+        this.grade = null;
+        this.completionStatus = CompletionStatus.IN_PROGRESS;
+        this.isGradeConfirmed = false;
+        this.gradeConfirmedAt = null;
+        this.gradeConfirmedBy = null;
+    }
+
+    // 점수 반영
+    public void updateRawScore(Integer rawScore){
+        this.rawScore = rawScore;
+    }
 }
