@@ -3,57 +3,40 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-category.module.css";
-import type { NoticeCategoryRow } from "../types";
+import type { NoticeCategoryId, NoticeCategoryRow } from "../types";
 import { noticeCategoriesApi } from "../api/noticeCategoriesApi";
 
-const BG_PRESETS = ["#3b82f6", "#10b981", "#a855f7", "#f97316", "#ef4444", "#111827", "#64748b", "#fde047"];
+const PALETTE = ["#EEF2FF", "#FFF7ED", "#FEE2E2", "#ECFDF3", "#F5F3FF", "#F3F4F6"] as const;
+const TEXT_PALETTE = ["#1E3A8A", "#9A3412", "#991B1B", "#166534", "#5B21B6", "#111827"] as const;
 
-function Badge({ name, bgColor, textColor }: { name: string; bgColor: string; textColor: string }) {
-  return (
-    <span className={styles.badge} style={{ backgroundColor: bgColor, color: textColor }}>
-      {name || "미리보기"}
-    </span>
-  );
+function isHex6(v: string) {
+  return /^#[0-9A-Fa-f]{6}$/.test(v);
+}
+
+function toId(id: NoticeCategoryId) {
+  return String(id);
 }
 
 export default function NoticeCategoryPage() {
   const router = useRouter();
 
-  const [keyword, setKeyword] = useState("");
   const [rows, setRows] = useState<NoticeCategoryRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [keyword, setKeyword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // create state
-  const [createOpen, setCreateOpen] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newBg, setNewBg] = useState("#3b82f6");
-  const [newText, setNewText] = useState("#ffffff");
+  // create/edit box
+  const [openBox, setOpenBox] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [editingId, setEditingId] = useState<NoticeCategoryId | null>(null);
 
-  // edit state
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editBg, setEditBg] = useState("#3b82f6");
-  const [editText, setEditText] = useState("#ffffff");
+  const [name, setName] = useState("");
+  const [bgColor, setBgColor] = useState("#EEF2FF");
+  const [textColor, setTextColor] = useState("#1E3A8A");
 
-  const fetchList = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await noticeCategoriesApi.list({ page: 0, size: 50, keyword });
-      setRows(data);
-    } catch (e: any) {
-      setError(e?.message ?? "카테고리 조회 실패");
-      setRows([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const canSubmit = useMemo(() => {
+    return name.trim().length > 0 && isHex6(bgColor) && isHex6(textColor);
+  }, [name, bgColor, textColor]);
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
@@ -61,66 +44,100 @@ export default function NoticeCategoryPage() {
     return rows.filter((r) => (r.name ?? "").toLowerCase().includes(kw));
   }, [rows, keyword]);
 
-  const startEdit = (row: NoticeCategoryRow) => {
-    setEditId(String(row.categoryId));
-    setEditName(row.name ?? "");
-    setEditBg(row.bgColor ?? "#3b82f6");
-    setEditText(row.textColor ?? "#ffffff");
-  };
-
-  const cancelEdit = () => {
-    setEditId(null);
-    setEditName("");
-    setEditBg("#3b82f6");
-    setEditText("#ffffff");
-  };
-
-  const saveEdit = async () => {
-    if (!editId) return;
-    if (!editName.trim()) return alert("카테고리 제목을 입력하세요.");
+  async function fetchList() {
+    setLoading(true);
+    setError(null);
     try {
-      await noticeCategoriesApi.update(editId, {
-        name: editName.trim(),
-        bgColor: editBg,
-        textColor: editText,
+      const data = await noticeCategoriesApi.list({
+        page: 0,
+        size: 50,
+        keyword: keyword.trim() || undefined,
       });
-      cancelEdit();
+      setRows(Array.isArray(data) ? data : []);
+    } catch (e: any) {
+      setRows([]);
+      setError(e?.message ?? "카테고리 목록 조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function resetForm() {
+    setName("");
+    setBgColor("#EEF2FF");
+    setTextColor("#1E3A8A");
+    setEditingId(null);
+    setMode("create");
+  }
+
+  function openCreate() {
+    resetForm();
+    setMode("create");
+    setOpenBox(true);
+  }
+
+  function openEdit(row: NoticeCategoryRow) {
+    setMode("edit");
+    setEditingId(row.categoryId);
+    setName(row.name ?? "");
+    setBgColor(row.bgColor ?? "#EEF2FF");
+    setTextColor(row.textColor ?? "#1E3A8A");
+    setOpenBox(true);
+  }
+
+  function cancelBox() {
+    setOpenBox(false);
+    resetForm();
+  }
+
+  async function submit() {
+    if (!canSubmit) return;
+
+    try {
+      if (mode === "create") {
+        await noticeCategoriesApi.create({
+          name: name.trim(),
+          bgColorHex: bgColor,
+          textColorHex: textColor,
+        });
+      } else {
+        if (editingId == null) return;
+        await noticeCategoriesApi.update(toId(editingId), {
+          name: name.trim(),
+          bgColorHex: bgColor,
+          textColorHex: textColor,
+        });
+      }
+
+      cancelBox();
       await fetchList();
     } catch (e: any) {
-      alert(e?.message ?? "수정 실패");
+      alert(e?.message ?? (mode === "create" ? "카테고리 생성 실패" : "카테고리 수정 실패"));
     }
-  };
+  }
 
-  const remove = async (row: NoticeCategoryRow) => {
-    const ok = window.confirm(`"${row.name}" 카테고리를 삭제하시겠습니까?`);
+  async function remove(row: NoticeCategoryRow) {
+    const ok = window.confirm(`카테고리 "${row.name}"을(를) 삭제하시겠습니까?`);
     if (!ok) return;
+
     try {
-      await noticeCategoriesApi.remove(String(row.categoryId));
+      await noticeCategoriesApi.remove(toId(row.categoryId));
       await fetchList();
     } catch (e: any) {
       alert(e?.message ?? "삭제 실패");
     }
-  };
+  }
 
-  const create = async () => {
-    if (!newName.trim()) return alert("카테고리 제목을 입력하세요.");
-    try {
-      await noticeCategoriesApi.create({
-        name: newName.trim(),
-        bgColor: newBg,
-        textColor: newText,
-      });
-      setCreateOpen(false);
-      setNewName("");
-      setNewBg("#3b82f6");
-      setNewText("#ffffff");
-      await fetchList();
-    } catch (e: any) {
-      alert(e?.message ?? "등록 실패");
-    }
-  };
+  function goNoticeList() {
+    router.push("/admin/community/notices");
+  }
 
-  return (
+    return (
     <div className={styles.wrap}>
       <div className={styles.breadcrumb}>커뮤니티 - 공지사항 카테고리 관리</div>
 
@@ -130,9 +147,9 @@ export default function NoticeCategoryPage() {
         <div className={styles.search}>
           <input
             className={styles.searchInput}
-            placeholder="검색어 입력..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
+            placeholder="카테고리 검색"
           />
           <button className={styles.searchBtn} onClick={fetchList} disabled={loading}>
             검색
@@ -140,182 +157,205 @@ export default function NoticeCategoryPage() {
         </div>
       </div>
 
+      {/* ✅ (2) 페이지 영역 */}
       <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.colCategory}>분류</th>
-              <th className={styles.colCount}>게시물 횟수</th>
-              <th className={styles.colDate}>최근 생성일</th>
-              <th className={styles.colActions}></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading && (
+        {/* ✅ (3) 목록 틀(파란 박스): table + "카테고리 추가하기"만 */}
+        <div className={styles.listFrame}>
+          <table className={styles.table}>
+            <thead>
               <tr>
-                <td colSpan={4} className={styles.empty}>
-                  불러오는 중...
-                </td>
+                <th className={styles.colCategory}>분류</th>
+                <th className={styles.colCount}>게시물 횟수</th>
+                <th className={styles.colDate}>생성일</th>
+                <th className={styles.colActions}></th>
               </tr>
-            )}
+            </thead>
 
-            {!loading &&
-              filtered.map((row) => {
-                const isEdit = editId === String(row.categoryId);
-                return (
-                  <tr key={String(row.categoryId)}>
+            <tbody>
+              {loading && (
+                <tr>
+                  <td colSpan={4} className={styles.empty}>
+                    불러오는 중...
+                  </td>
+                </tr>
+              )}
+
+              {!loading && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={4} className={styles.empty}>
+                    {error ? error : "카테고리가 없습니다."}
+                  </td>
+                </tr>
+              )}
+
+              {!loading &&
+                filtered.map((row) => (
+                  <tr key={toId(row.categoryId)}>
                     <td>
                       <div className={styles.categoryCell}>
-                        <Badge
-                          name={isEdit ? editName : row.name}
-                          bgColor={isEdit ? editBg : row.bgColor}
-                          textColor={isEdit ? editText : row.textColor}
-                        />
+                        <span
+                          className={styles.badge}
+                          style={{ backgroundColor: row.bgColor, color: row.textColor }}
+                          title={`bg: ${row.bgColor}, text: ${row.textColor}`}
+                        >
+                          {row.name}
+                        </span>
 
-                        {isEdit && (
-                          <div className={styles.editor}>
-                            <input
-                              className={styles.nameInput}
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              placeholder="카테고리 제목..."
-                            />
-
-                            <div className={styles.colorRow}>
-                              <div className={styles.colorBlock}>
-                                <div className={styles.colorLabel}>배경</div>
-                                <input type="color" className={styles.colorPicker} value={editBg} onChange={(e) => setEditBg(e.target.value)} />
-                              </div>
-                              <div className={styles.colorBlock}>
-                                <div className={styles.colorLabel}>글자</div>
-                                <input type="color" className={styles.colorPicker} value={editText} onChange={(e) => setEditText(e.target.value)} />
-                              </div>
-
-                              <div className={styles.palette}>
-                                {BG_PRESETS.map((c) => (
-                                  <button
-                                    key={c}
-                                    type="button"
-                                    className={styles.swatch}
-                                    style={{ backgroundColor: c }}
-                                    onClick={() => setEditBg(c)}
-                                    aria-label={`bg ${c}`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
+                        <div className={styles.editor}>
+                          <div className={styles.muted}>
+                            {row.lastCreatedAt ? `최근 생성: ${row.lastCreatedAt}` : ""}
                           </div>
-                        )}
+                        </div>
                       </div>
                     </td>
 
-                    <td className={styles.center}>{row.postCount ?? "-"}</td>
+                    <td className={styles.center}>{Number(row.postCount ?? 0).toLocaleString()}</td>
                     <td className={styles.center}>{row.lastCreatedAt ?? "-"}</td>
 
-                    <td className={styles.actions}>
-                      {isEdit ? (
-                        <>
-                          <button className={styles.btnPrimary} onClick={saveEdit}>
-                            완료
-                          </button>
-                          <button className={styles.btnDanger} onClick={cancelEdit}>
-                            취소
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button className={styles.btnPrimary} onClick={() => startEdit(row)}>
-                            수정
-                          </button>
-                          <button className={styles.btnDanger} onClick={() => remove(row)}>
-                            삭제
-                          </button>
-                        </>
-                      )}
+                    <td>
+                      <div className={styles.actions}>
+                        <button className={styles.btnPrimary} onClick={() => openEdit(row)}>
+                          수정
+                        </button>
+                        <button className={styles.btnDanger} onClick={() => remove(row)}>
+                          삭제
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                );
-              })}
+                ))}
+            </tbody>
+          </table>
 
-            {!loading && filtered.length === 0 && (
-              <tr>
-                <td colSpan={4} className={styles.empty}>
-                  {error ? error : "카테고리가 없습니다."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        <div className={styles.addArea}>
-          {!createOpen ? (
-            <button className={styles.addBtn} onClick={() => setCreateOpen(true)}>
-              <span className={styles.plus}>+</span>
-              <span>카테고리 추가하기</span>
-            </button>
-          ) : (
-            <div className={styles.createBox}>
-              <div className={styles.createLeft}>
-                <Badge name={newName} bgColor={newBg} textColor={newText} />
-
-                <input
-                  className={styles.nameInput}
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="카테고리 제목..."
-                />
-
-                <div className={styles.colorRow}>
-                  <div className={styles.colorBlock}>
-                    <div className={styles.colorLabel}>배경</div>
-                    <input type="color" className={styles.colorPicker} value={newBg} onChange={(e) => setNewBg(e.target.value)} />
-                  </div>
-                  <div className={styles.colorBlock}>
-                    <div className={styles.colorLabel}>글자</div>
-                    <input type="color" className={styles.colorPicker} value={newText} onChange={(e) => setNewText(e.target.value)} />
-                  </div>
-
-                  <div className={styles.palette}>
-                    {BG_PRESETS.map((c) => (
-                      <button
-                        key={c}
-                        type="button"
-                        className={styles.swatch}
-                        style={{ backgroundColor: c }}
-                        onClick={() => setNewBg(c)}
-                        aria-label={`bg ${c}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.createActions}>
-                <button className={styles.btnPrimary} onClick={create}>
-                  완료
-                </button>
-                <button
-                  className={styles.btnDanger}
-                  onClick={() => {
-                    setCreateOpen(false);
-                    setNewName("");
-                    setNewBg("#3b82f6");
-                    setNewText("#ffffff");
-                  }}
-                >
-                  취소
-                </button>
-              </div>
+          {/* ✅ "카테고리 추가하기"는 목록 틀 안에 유지 */}
+          {!loading && (
+            <div className={styles.addArea}>
+              <button className={styles.addBtn} onClick={openCreate}>
+                <div className={styles.plus}>+</div>
+                <div>카테고리 추가하기</div>
+              </button>
             </div>
           )}
         </div>
-      </div>
 
-      <div className={styles.bottomRow}>
-        <button className={styles.confirmBtn} onClick={() => router.push("/admin/community/notices")}>
-          확인
-        </button>
+        {/* ✅ (그림처럼) 목록 틀 밖: 추가창 + 확인 버튼 */}
+        {!loading && (
+          <div className={styles.panelArea}>
+            {/* ✅ 확인 버튼은 panelArea 우하단에 고정 */}
+            <div className={styles.confirmFixed}>
+              <button className={styles.confirmBtn} onClick={goNoticeList}>
+                확인
+              </button>
+            </div>
+
+            {/* ✅ 왼쪽: 추가/수정 창만 렌더링(열리면 이쪽만 커짐) */}
+            <div className={styles.bottomRowInline}>
+              {openBox && (
+                <div className={styles.createBox}>
+                  <div className={styles.createLeft}>
+                    <div style={{ fontWeight: 800, marginBottom: 10 }}>
+                      {mode === "create" ? "카테고리 추가" : "카테고리 수정"}
+                    </div>
+
+                    <div className={styles.colorRow}>
+                      <div style={{ flex: 1, minWidth: 240 }}>
+                        <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>이름</div>
+                        <input
+                          className={styles.nameInput}
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="예: 학사"
+                        />
+                      </div>
+
+                      <div className={styles.colorBlock}>
+                        <div className={styles.colorLabel}>배경색</div>
+                        <input
+                          className={styles.colorPicker}
+                          type="color"
+                          value={isHex6(bgColor) ? bgColor : "#EEF2FF"}
+                          onChange={(e) => setBgColor(e.target.value)}
+                          title="배경색 선택"
+                        />
+                        <input
+                          className={styles.nameInput}
+                          style={{ width: 120, marginBottom: 0 }}
+                          value={bgColor}
+                          onChange={(e) => setBgColor(e.target.value)}
+                          placeholder="#RRGGBB"
+                        />
+                        <div className={styles.palette}>
+                          {PALETTE.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              className={styles.swatch}
+                              style={{ backgroundColor: c }}
+                              onClick={() => setBgColor(c)}
+                              title={c}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className={styles.colorBlock}>
+                        <div className={styles.colorLabel}>글자색</div>
+                        <input
+                          className={styles.colorPicker}
+                          type="color"
+                          value={isHex6(textColor) ? textColor : "#1E3A8A"}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          title="글자색 선택"
+                        />
+                        <input
+                          className={styles.nameInput}
+                          style={{ width: 120, marginBottom: 0 }}
+                          value={textColor}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          placeholder="#RRGGBB"
+                        />
+                        <div className={styles.palette}>
+                          {TEXT_PALETTE.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              className={styles.swatch}
+                              style={{ backgroundColor: c }}
+                              onClick={() => setTextColor(c)}
+                              title={c}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: 10 }}>
+                      <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>미리보기</div>
+                      <span
+                        className={styles.badge}
+                        style={{
+                          backgroundColor: isHex6(bgColor) ? bgColor : "#EEF2FF",
+                          color: isHex6(textColor) ? textColor : "#1E3A8A",
+                        }}
+                      >
+                        {name.trim() ? name.trim() : "카테고리"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={styles.createActions}>
+                    <button className={styles.btnGhost} onClick={cancelBox}>
+                      취소
+                    </button>
+                    <button className={styles.confirmBtn} onClick={submit} disabled={!canSubmit}>
+                      {mode === "create" ? "추가" : "저장"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

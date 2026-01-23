@@ -4,10 +4,11 @@ import type {
   NoticeCategoryListResponseDto,
   CreateNoticeCategoryRequestDto,
   UpdateNoticeCategoryRequestDto,
+  NoticeCategoryBackendRow,
 } from "./dto";
 import type { NoticeCategoryRow } from "../types";
 
-const BASE = "/api/community/notice-categories";
+const BASE = "/api/admin/community/notice-categories";
 
 function toQuery(params: NoticeCategoryListParams) {
   const sp = new URLSearchParams();
@@ -18,13 +19,28 @@ function toQuery(params: NoticeCategoryListParams) {
   return qs ? `?${qs}` : "";
 }
 
-// ✅ 백엔드 응답 형태가 (배열) or ({items,total}) 둘 다 지원하도록 정규화
+function normalizeRow(b: NoticeCategoryBackendRow): NoticeCategoryRow {
+  return {
+    categoryId: b.categoryId,
+    name: b.name,
+    postCount: b.postCount,
+    bgColor: b.bgColorHex,
+    textColor: b.textColorHex,
+    lastCreatedAt: b.createdAt,
+  };
+}
+
 function normalizeList(payload: NoticeCategoryListResponseDto): NoticeCategoryRow[] {
-  if (Array.isArray(payload)) return payload;
-  if (payload && typeof payload === "object" && Array.isArray((payload as any).items)) {
-    return (payload as any).items;
+  let arr: NoticeCategoryBackendRow[] = [];
+
+  if (Array.isArray(payload)) {
+    arr = payload;
+  } else if (payload && typeof payload === "object") {
+    if (Array.isArray((payload as any).items)) arr = (payload as any).items;
+    else if (Array.isArray((payload as any).data)) arr = (payload as any).data; // ✅ 현재 너의 응답 형태
   }
-  return [];
+
+  return arr.map(normalizeRow);
 }
 
 export const noticeCategoriesApi = {

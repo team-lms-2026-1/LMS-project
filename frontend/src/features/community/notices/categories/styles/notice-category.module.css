@@ -1,4 +1,10 @@
-.wrap { padding: 24px; }
+.wrap {
+  padding: 24px;
+
+  /* ✅ CSS Modules에서 :root 사용 불가 → 로컬 컨테이너에 변수 선언 */
+  --admin-sidebar-width: 280px; /* 사이드바 실제 폭에 맞춰 조정 (280/300 등) */
+  --admin-gutter: 24px;
+}
 
 .breadcrumb { font-size: 12px; color: #6b7280; margin-bottom: 14px; }
 
@@ -20,7 +26,19 @@
   border-radius: 6px; cursor: pointer;
 }
 
-.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 10px 0; }
+.card {
+  background: #fff;
+  border: 0;                 
+  border-radius: 10px;
+  padding: 0;                
+}
+
+.listFrame {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px 10px 0;
+}
 
 .table { width: 100%; border-collapse: collapse; }
 
@@ -114,12 +132,18 @@
   font-size: 20px;
 }
 
+/* ✅ createBox 중복 정의 제거: 1개로 통합 */
 .createBox {
-  width: min(820px, 100%);
-  border: 1px solid #e5e7eb; border-radius: 10px;
+  width: min(800px, 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
   padding: 14px;
-  display: flex; justify-content: space-between; gap: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
   align-items: flex-start;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 .createLeft { flex: 1; }
@@ -131,4 +155,74 @@
   height: 32px; padding: 0 14px;
   border: 0; border-radius: 6px;
   background: #2563eb; color: #fff; cursor: pointer;
+}
+
+/* ✅ table(3) 아래: table 밖 영역(추가버튼/추가창/확인)을 담는 구역 */
+.panelArea {
+  margin-top: 14px;
+  padding: 0 10px 10px;
+
+  position: relative;     
+  padding-right: 90px;    
+  min-height: 56px;       
+}
+
+/* ✅ (좌) 추가/수정창  (우) 확인 버튼 라인 */
+.bottomRowInline {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.bottomLeft {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.bottomRight {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.confirmRow {
+  display: flex;
+  justify-content: flex-start; /* 확인 버튼을 좌측에 둘 거면 */
+  margin-top: 14px;
+}
+
+.confirmFixed {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 5;
+}
+
+.formArea {
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 (스크린샷처럼 우측 배치) */
+  margin-top: 14px;
+}
+
+.bottomRowInline {
+  display: block;          
+  margin-top: 12px;
+}
+
+/* ✅ 반응형: 화면이 좁으면 튀는 것 방지 */
+@media (max-width: 1024px) {
+  .bottomRowInline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bottomRight {
+    justify-content: flex-end;
+  }
+
+  .createBox {
+    width: 100%;
+  }
 }

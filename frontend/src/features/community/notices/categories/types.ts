@@ -1,4 +1,4 @@
-export type NoticeCategoryId = string | number;
+export type NoticeCategoryId = number;
 
 export type NoticeCategoryRow = {
   categoryId: NoticeCategoryId;

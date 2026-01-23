@@ -1,36 +1,42 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-type ApiResponse<T> = {
-  success?: boolean;
-  message?: string;
-  data?: T;
-};
-
 function getBaseUrl() {
   return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
 }
 
-// 여기만 백엔드 라우팅에 맞게 수정
-const BASE_UPSTREAM = "/api/v1/admin/notices";
+const BASE_UPSTREAM = "/api/v1/admin/community/notices";
 
-function buildHeaders() {
+function buildAuthHeadersOnly() {
   const token = cookies().get("access_token")?.value;
-
   const headers = new Headers();
-  headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
   return headers;
 }
 
-async function parseErrorMessage(res: Response, fallback: string) {
+function buildJsonHeaders() {
+  const headers = buildAuthHeadersOnly();
+  headers.set("Content-Type", "application/json");
+  return headers;
+}
+
+async function safeJson(res: Response) {
   try {
-    const err = (await res.json()) as ApiResponse<unknown>;
-    if (typeof err?.message === "string" && err.message.trim().length > 0) return err.message;
+    if (res.status === 204 || res.status === 205) return null;
+    return await res.json();
   } catch {
-    // ignore
+    return null;
   }
-  return fallback;
+}
+
+async function parseErrorMessage(res: Response, fallback: string) {
+  const t = await res.text().catch(() => "");
+  try {
+    const j = t ? JSON.parse(t) : null;
+    const m = j?.message || j?.error?.message;
+    if (typeof m === "string" && m.trim()) return m;
+  } catch {}
+  return t?.trim() ? t : fallback;
 }
 
 export async function GET(_req: Request, ctx: { params: { noticeId: string } }) {
@@ -38,7 +44,7 @@ export async function GET(_req: Request, ctx: { params: { noticeId: string } }) 
 
   const res = await fetch(upstreamUrl, {
     method: "GET",
-    headers: buildHeaders(),
+    headers: buildJsonHeaders(),
     cache: "no-store",
   });
 
@@ -47,47 +53,35 @@ export async function GET(_req: Request, ctx: { params: { noticeId: string } }) 
     return NextResponse.json({ message }, { status: res.status });
   }
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: 200 });
+  const data = await safeJson(res);
+  return NextResponse.json(data ?? {}, { status: res.status });
 }
 
-// PUT / PATCH 둘 중 백엔드 스펙에 맞춰 하나만 써도 됩니다.
-export async function PUT(req: Request, ctx: { params: { noticeId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}/${encodeURIComponent(ctx.params.noticeId)}`;
-  const body = await req.json().catch(() => null);
-
-  const res = await fetch(upstreamUrl, {
-    method: "PUT",
-    headers: buildHeaders(),
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const message = await parseErrorMessage(res, `Upstream error (${res.status})`);
-    return NextResponse.json({ message }, { status: res.status });
-  }
-
-  const data = await res.json();
-  return NextResponse.json(data, { status: 200 });
-}
-
+/** ✅ 백엔드 스펙: PATCH + multipart(form-data: request, files) */
 export async function PATCH(req: Request, ctx: { params: { noticeId: string } }) {
   const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}/${encodeURIComponent(ctx.params.noticeId)}`;
-  const body = await req.json().catch(() => null);
+
+  const form = await req.formData();
 
   const res = await fetch(upstreamUrl, {
     method: "PATCH",
-    headers: buildHeaders(),
-    body: JSON.stringify(body),
+    headers: buildAuthHeadersOnly(), // ✅ boundary 자동 설정
+    body: form as any,
   });
 
+  const text = await res.text().catch(() => "");
   if (!res.ok) {
-    const message = await parseErrorMessage(res, `Upstream error (${res.status})`);
-    return NextResponse.json({ message }, { status: res.status });
+    const message = await parseErrorMessage(
+      new Response(text, { status: res.status, headers: res.headers }),
+      `Upstream error (${res.status})`
+    );
+    return NextResponse.json({ message, upstream: text }, { status: res.status });
   }
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: 200 });
+  return new NextResponse(text || "{}", {
+    status: res.status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 export async function DELETE(_req: Request, ctx: { params: { noticeId: string } }) {
@@ -95,7 +89,7 @@ export async function DELETE(_req: Request, ctx: { params: { noticeId: string } 
 
   const res = await fetch(upstreamUrl, {
     method: "DELETE",
-    headers: buildHeaders(),
+    headers: buildJsonHeaders(),
   });
 
   if (!res.ok) {
@@ -103,6 +97,6 @@ export async function DELETE(_req: Request, ctx: { params: { noticeId: string } 
     return NextResponse.json({ message }, { status: res.status });
   }
 
-  const data = await res.json().catch(() => ({}));
-  return NextResponse.json(data, { status: 200 });
+  const data = await safeJson(res);
+  return NextResponse.json(data ?? {}, { status: res.status });
 }

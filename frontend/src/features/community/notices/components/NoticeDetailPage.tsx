@@ -1,24 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-detail.module.css";
-import type { NoticeCategory } from "../types";
 import { noticesApi } from "../api/noticesApi";
 import type { NoticeDetailDto } from "../api/dto";
-
-function badgeClass(category: NoticeCategory, stylesObj: Record<string, string>) {
-  switch (category) {
-    case "서비스":
-      return `${stylesObj.badge} ${stylesObj.badgeService}`;
-    case "학사":
-      return `${stylesObj.badge} ${stylesObj.badgeAcademic}`;
-    case "행사":
-      return `${stylesObj.badge} ${stylesObj.badgeEvent}`;
-    default:
-      return `${stylesObj.badge} ${stylesObj.badgeNormal}`;
-  }
-}
+import { noticeCategoriesApi } from "../categories/api/noticeCategoriesApi";
+import type { NoticeCategoryRow } from "../categories/types";
 
 export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
   const router = useRouter();
@@ -26,6 +14,25 @@ export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
   const [notice, setNotice] = useState<NoticeDetailDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [categories, setCategories] = useState<NoticeCategoryRow[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const list = await noticeCategoriesApi.list({ page: 0, size: 50 });
+        setCategories(Array.isArray(list) ? list : []);
+      } catch {
+        setCategories([]);
+      }
+    })();
+  }, []);
+
+  const categoryMap = useMemo(() => {
+    const m = new Map<number, NoticeCategoryRow>();
+    for (const c of categories) m.set(Number(c.categoryId), c);
+    return m;
+  }, [categories]);
 
   useEffect(() => {
     (async () => {
@@ -47,13 +54,15 @@ export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
   if (error) return <div className={styles.wrap}>{error}</div>;
   if (!notice) return <div className={styles.wrap}>공지사항을 찾을 수 없습니다.</div>;
 
+  const cat = categoryMap.get(Number(notice.categoryName));
+
   const onDelete = async () => {
     const ok = window.confirm("삭제하시겠습니까?");
     if (!ok) return;
 
     try {
       await noticesApi.remove(String(notice.id));
-      router.push("/community/notices");
+      router.push("/admin/community/notices");
     } catch (e: any) {
       alert(e?.message ?? "삭제 실패");
     }
@@ -75,12 +84,21 @@ export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={badgeClass(notice.category, styles)}>{notice.category}</span>
+          <span
+            className={styles.badge}
+            style={{
+              backgroundColor: cat?.bgColor ?? "#F3F4F6",
+              color: cat?.textColor ?? "#111827",
+            }}
+            title={cat ? `bg: ${cat.bgColor}, text: ${cat.textColor}` : ""}
+          >
+            {cat?.name ?? notice.categoryName ?? "미분류"}
+          </span>
           <span className={styles.headTitle}>{notice.title}</span>
         </div>
 
         <div className={styles.metaRow}>
-          <div>작성자: {notice.author ?? "-"}</div>
+          <div>작성자: {notice.authorName || "-"}</div>
           <div style={{ textAlign: "center" }}>작성일: {notice.createdAt}</div>
           <div style={{ textAlign: "right" }}>조회수: {Number(notice.views ?? 0).toLocaleString()}</div>
         </div>
@@ -90,15 +108,19 @@ export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
         </div>
 
         <div className={styles.attach}>
-          <div className={styles.attachLabel}>첨부<br />파일</div>
-          <div className={styles.attachValue}>{notice.attachment?.name ?? "-"}</div>
+          <div className={styles.attachLabel}>
+            첨부
+            <br />
+            파일
+          </div>
+          <div className={styles.attachValue}>{notice.files?.length ? `${notice.files.length}개` : "-"}</div>
         </div>
       </div>
 
       <div className={styles.actions}>
         <button
           className={`${styles.btn} ${styles.btnPrimary}`}
-          onClick={() => router.push(`/community/notices/${notice.id}/edit`)}
+          onClick={() => router.push(`/admin/community/notices/${notice.id}/edit`)}
         >
           수정
         </button>
