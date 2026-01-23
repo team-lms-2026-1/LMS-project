@@ -1,6 +1,10 @@
+// FROM: frontend/src/app/(admin)/admin/depts/modal/page.tsx
+// TO:   frontend/src/features/authority/depts/components/modal/DeptCreatePage.tsx
+
 "use client";
+
 import { useState } from "react";
-import styles from "./DeptCreate.module.css";
+import styles from "@/features/authority/depts/styles/DeptCreate.module.css";
 
 export default function DeptCreatePage() {
   const [deptCode, setDeptCode] = useState("");
@@ -48,7 +52,7 @@ export default function DeptCreatePage() {
           console.log({ deptCode, deptName, description });
 
           // 일단은 목록으로만 돌려보내기
-          window.location.href = "/admin/depts";
+          window.location.href = "/admin/authority/depts";
         }}
       >
         학과 생성

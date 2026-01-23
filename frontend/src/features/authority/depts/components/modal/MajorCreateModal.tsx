@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import styles from "./MajorCreateModal.module.css";
+import styles from "../../styles/MajorCreateModal.module.css";
+
 
 type MajorCreateModalProps = {
   onClose: () => void;

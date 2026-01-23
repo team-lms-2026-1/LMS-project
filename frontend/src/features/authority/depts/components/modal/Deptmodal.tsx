@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import styles from "./DeptCreate.module.css";
+import styles from "@/features/authority/depts/styles/DeptCreate.module.css";
+
 
 type DeptmodalProps = {
   onClose: () => void;

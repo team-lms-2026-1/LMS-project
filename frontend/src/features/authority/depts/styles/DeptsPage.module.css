@@ -208,3 +208,28 @@
 .clickableRow:hover {
   background-color: #f8fafc;
 }
+/* ✅ 위치: frontend/src/app/(admin)/admin/depts/DeptsPage.module.css */
+
+.errorMessage {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #b00020;           /* 에러 글자색 */
+  background-color: #fdecec; /* 연한 빨강 배경 */
+}
+
+.loading {
+  margin-top: 16px;
+  font-size: 0.95rem;
+  text-align: center;
+  color: #666;
+}
+
+/* 테이블에 데이터 없을 때 */
+.emptyRow {
+  padding: 24px 0;
+  text-align: center;
+  color: #888;
+  font-size: 0.95rem;
+}

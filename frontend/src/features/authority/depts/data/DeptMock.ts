@@ -19,6 +19,7 @@ export type Student = {
 
 export type Major = {
   id: string;
+  code: string;
   name: string;         // 전공명
   studentCount: number; // 재학생 수
 };
@@ -31,6 +32,8 @@ export type Department = {
   studentCount: number;    // 전체 학생 수
   professorCount: number;  // 교수 수
   isActive: boolean;       // 사용 여부
+
+  description?:string;
 
   professors?: Professor[];
   students?: Student[];
@@ -46,6 +49,9 @@ export const DEPT_MOCK_LIST: Department[] = [
     studentCount: 391,
     professorCount: 10,
     isActive: true,
+    description: `신학과는 기독교 신앙을 중심으로 성경, 교리, 역사, 윤리 등을 학문적으로 연구하는 학과이다.
+    성경의 내용과 의미를 탐구하고, 기독교 사상이 사회와 인간 삶에 어떤 영향을 미치는지 이해하는 것을 목표로 한다.
+    이를 통해 신앙적 성찰뿐 아니라 인문학적 사고력과 윤리적 판단 능력을 기를 수 있다.`,
     professors: [
       {
         id: "p1",
@@ -96,9 +102,9 @@ export const DEPT_MOCK_LIST: Department[] = [
       },
     ],
     majors: [
-      { id: "m1", name: "신학", studentCount: 150 },
-      { id: "m2", name: "상담학", studentCount: 170 },
-      { id: "m3", name: "교육학", studentCount: 203 },
+      { id: "m1", code: "TH001", name: "신학", studentCount: 150 },
+      { id: "m2", code: "TH002", name: "상담학", studentCount: 170 },
+      { id: "m3", code: "TH003", name: "교육학", studentCount: 203 },
     ],
   },
 
