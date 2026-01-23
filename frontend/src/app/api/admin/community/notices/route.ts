@@ -1,84 +1,74 @@
+// src/app/api/admin/community/notices/route.ts
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+
+export const runtime = "nodejs"; // 스트리밍 프록시 안정화
+
+const BASE_UPSTREAM = "/api/v1/admin/community/notices";
 
 function getBaseUrl() {
   return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
 }
 
-const BASE_UPSTREAM = "/api/v1/admin/community/notices";
+function getAccessToken() {
+  return cookies().get("access_token")?.value;
+}
 
-function buildAuthHeadersOnly() {
-  const token = cookies().get("access_token")?.value;
-  const headers = new Headers();
+function buildUpstreamHeaders(req: Request) {
+  // 들어온 헤더를 최대한 보존하되, 업스트림에서 혼동될 것들은 제거
+  const headers = new Headers(req.headers);
+
+  headers.delete("host");
+  headers.delete("connection");
+  headers.delete("content-length");
+  headers.delete("cookie"); // 토큰은 Authorization으로 전달할 것이므로 쿠키는 제거(권장)
+  headers.delete("accept-encoding"); // 압축 관련 이슈 회피(선택)
+
+  const token = getAccessToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
+
   return headers;
 }
 
-function buildJsonHeaders() {
-  const headers = buildAuthHeadersOnly();
-  headers.set("Content-Type", "application/json");
-  return headers;
-}
+async function proxy(req: Request, upstreamUrl: string, method: string, withBody: boolean) {
+  const headers = buildUpstreamHeaders(req);
 
-async function safeJson(res: Response) {
-  try {
-    if (res.status === 204 || res.status === 205) return null;
-    return await res.json();
-  } catch {
-    return null;
+  // 중요: multipart는 Content-Type을 건드리면 boundary가 깨질 수 있으니 그대로 둡니다.
+  // (단, JSON 요청만 강제하고 싶으면 JSON용 라우트를 따로 두는 게 안전)
+  const init: any = {
+    method,
+    headers,
+    cache: "no-store",
+  };
+
+  if (withBody) {
+    // ✅ formData()로 읽지 말고 스트림 그대로 전달
+    init.body = req.body;
+    // ✅ Node(undici)에서 ReadableStream 바디 사용 시 필요
+    init.duplex = "half";
   }
-}
 
-async function parseErrorMessage(res: Response, fallback: string) {
-  const t = await res.text().catch(() => "");
-  try {
-    const j = t ? JSON.parse(t) : null;
-    const m = j?.message || j?.error?.message;
-    if (typeof m === "string" && m.trim()) return m;
-  } catch {}
-  return t?.trim() ? t : fallback;
+  const res = await fetch(upstreamUrl, init);
+
+  // 업스트림 응답을 거의 그대로 반환
+  const outHeaders = new Headers(res.headers);
+  outHeaders.delete("transfer-encoding"); // NextResponse가 알아서 처리
+  // outHeaders.delete("content-encoding"); // 필요시 주석 해제
+
+  return new NextResponse(res.body, {
+    status: res.status,
+    headers: outHeaders,
+  });
 }
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}${url.search}`;
-
-  const res = await fetch(upstreamUrl, {
-    method: "GET",
-    headers: buildJsonHeaders(),
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    const message = await parseErrorMessage(res, `Upstream error (${res.status})`);
-    return NextResponse.json({ message }, { status: res.status });
-  }
-
-  const data = await safeJson(res);
-  return NextResponse.json(data ?? {}, { status: res.status });
+  return proxy(req, upstreamUrl, "GET", false);
 }
 
 export async function POST(req: Request) {
   const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}`;
-
-  const form = await req.formData();
-  const res = await fetch(upstreamUrl, {
-    method: "POST",
-    headers: buildAuthHeadersOnly(), // ✅ Content-Type 직접 세팅 금지
-    body: form as any,
-  });
-
-  const text = await res.text().catch(() => "");
-  if (!res.ok) {
-    const message = await parseErrorMessage(
-      new Response(text, { status: res.status, headers: res.headers }),
-      `Upstream error (${res.status})`
-    );
-    return NextResponse.json({ message, upstream: text }, { status: res.status });
-  }
-
-  return new NextResponse(text || "{}", {
-    status: res.status,
-    headers: { "Content-Type": "application/json" },
-  });
+  // ✅ multipart 스트리밍 전달
+  return proxy(req, upstreamUrl, "POST", true);
 }
