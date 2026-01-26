@@ -26,7 +26,7 @@ public class ExtraCurricularOffering extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "offering_id")
+    @Column(name = "extra_offering_id")
     private Long extraOfferingId;
 
     @Column(name = "extra_curricular_id", nullable = false)
@@ -38,13 +38,13 @@ public class ExtraCurricularOffering extends BaseEntity {
     @Column(name = "extra_offering_name", length = 200, nullable = false)
     private String extraOfferingName;
 
-    @Column(name = "host_contact_name", length = 100, nullable = false)
+    @Column(name="host_contact_name", length=100)   // nullable 기본 true
     private String hostContactName;
 
-    @Column(name = "host_contact_phone", length = 50, nullable = false)
+    @Column(name="host_contact_phone", length=50)
     private String hostContactPhone;
 
-    @Column(name = "host_contact_email", length = 150, nullable = false)
+    @Column(name="host_contact_email", length=150)
     private String hostContactEmail;
 
     @Column(name = "reward_point_default", nullable = false)
@@ -53,7 +53,7 @@ public class ExtraCurricularOffering extends BaseEntity {
     @Column(name = "recognized_hours_default", nullable = false)
     private Long recognizedHoursDefault;
 
-    @Column(name = "semester_id", nullable = false)
+    @Column(name = "semester_id")
     private Long semesterId;
 
     @Column(name = "operation_start_at", nullable = false)
