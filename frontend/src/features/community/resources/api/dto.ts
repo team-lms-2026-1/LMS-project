@@ -1,4 +1,4 @@
-import type { ResourceItem, ResourceAttachment } from "../types";
+import type { ResourceAttachment } from "../types";
 
 export type ResourcesListParams = {
   categoryId?: number;
@@ -7,9 +7,20 @@ export type ResourcesListParams = {
   size?: number;
 };
 
-// ✅ 리스트 응답에서는 content/attachment가 없을 수 있으니 optional로 재정의
-export type ResourceListItemDto = Omit<ResourceItem, "content" | "attachment"> & {
+export type ResourceListItemDto = {
+  id: string;                // resourceId string으로 통일
+  no?: number;
+
+  categoryId: number;
+  categoryName?: string;
+
+  title: string;
   content?: string;
+
+  author?: string;
+  createdAt?: string;
+  views?: number;
+
   attachment?: ResourceAttachment;
 };
 
@@ -21,7 +32,7 @@ export type ResourcesListResponseDto =
 
 export type CreateResourceRequestDto = {
   title: string;
-  categoryId: number; // ✅ DB 카테고리 PK
+  categoryId: number;   // ✅ number
   content: string;
 };
 
