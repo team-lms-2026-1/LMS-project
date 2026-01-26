@@ -1,9 +1,11 @@
 "use client";
 
-import { Table, type TableColumn } from "@/components/ui/table";
+import { Table, type TableColumn } from "@/components/table";
 import type { SemesterItem } from "@/features/authority/semesters/api/types";
 import { termToLabel } from "../../utils/semesterLabel";
-import styles from "./SemestersTable.module.css"; // ✅ 필요(버튼/관리셀만 쓰면 됨)
+import styles from "./SemestersTable.module.css";
+import { Button } from "@/components/button";
+import { StatusPill } from "@/components/status/StatusPill";
 
 type Props = {
   items: SemesterItem[];
@@ -12,17 +14,23 @@ type Props = {
   onEditClick: (id: string) => void;
 };
 
-function StatusPill({ status }: { status: SemesterItem["status"] }) {
-  // 일단 텍스트만. (원하면 다음에 공용 badge로 빼자)
-  return <span>{status}</span>;
+function mapSemesterStatus(status: SemesterItem["status"]): {
+  pillStatus:
+    | "PLANNED"
+    | "DRAFT"
+    | "OPEN"
+    | "ENROLL_CLOSED"
+    | "PROGRESS"
+    | "COMPLETED"
+    | "CLOSED"
+    | "CANCELED";
+  label: string;
+} {
+  const s = String(status);
+  return { pillStatus: "DRAFT", label: s };
 }
 
-export function SemestersTable({
-  items,
-  loading,
-  onRowClick,
-  onEditClick,
-}: Props) {
+export function SemestersTable({ items, loading, onRowClick, onEditClick }: Props) {
   const columns: Array<TableColumn<SemesterItem>> = [
     { header: "연도", align: "center", render: (r) => r.year },
     { header: "학기", align: "center", render: (r) => termToLabel(r.term) },
@@ -30,7 +38,10 @@ export function SemestersTable({
     {
       header: "상태",
       align: "center",
-      render: (r) => <StatusPill status={r.status} />,
+      render: (r) => {
+        const { pillStatus, label } = mapSemesterStatus(r.status);
+        return <StatusPill status={pillStatus} label={label}/>;
+      },
     },
     {
       header: "관리",
@@ -39,13 +50,12 @@ export function SemestersTable({
       stopRowClick: true,
       render: (r) => (
         <div className={styles.manageCell}>
-          <button
-            type="button"
-            className={styles.editButton}
+          <Button
+            variant="secondary"
             onClick={() => onEditClick(r.id)}
           >
             수정
-          </button>
+          </Button>
         </div>
       ),
     },

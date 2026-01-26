@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Modal.module.css";
-import { cn } from "@/components/ui/table"; // 이미 cn을 table utils에서 export 중이면 사용
+import { cn } from "@/components/table"; // 이미 cn을 table utils에서 export 중이면 사용
 
 type ModalSize = "sm" | "md" | "lg";
 

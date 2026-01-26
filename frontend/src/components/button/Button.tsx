@@ -1,16 +1,11 @@
 import * as React from "react";
 import styles from "./Button.module.css";
 
-export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "blue";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonVariant = "primary" | "secondary" | "danger";
 
-export type ButtonProps = Omit<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  "className"
-> & {
+export type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "className"> & {
   className?: string;
   variant?: ButtonVariant;
-  size?: ButtonSize;
   loading?: boolean;
   leftIcon?: React.ReactNode;
 };
@@ -21,17 +16,7 @@ function cx(...parts: Array<string | undefined | false | null>) {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(
-    {
-      variant = "primary",
-      size = "md",
-      loading = false,
-      disabled,
-      leftIcon,
-      children,
-      type,
-      className,
-      ...rest
-    },
+    { variant = "primary", loading = false, disabled, leftIcon, children, type, className, ...rest },
     ref
   ) {
     const isDisabled = Boolean(disabled || loading);
@@ -43,7 +28,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cx(
           styles.btn,
           styles[`variant_${variant}`],
-          styles[`size_${size}`],
           isDisabled && styles.disabled,
           loading && styles.loading,
           className

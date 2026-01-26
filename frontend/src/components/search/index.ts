@@ -1,4 +1,5 @@
-export { SearchBar } from "./SearchBar";
-export type { SearchBarProps, SearchFilterOption } from "./SearchBar";
+export { Pagination } from "./Pagination";
+export type { PaginationProps } from "./Pagination";
 
-export { useSearchQuery } from "./useSearchQuery";
+export { usePaginationQuery } from "./usePaginationQuery";
+export type { UsePaginationQueryOptions } from "./usePaginationQuery";
