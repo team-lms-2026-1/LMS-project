@@ -1,29 +1,31 @@
-import { proxyStreamToBackend } from "@/lib/bff";
+import { proxyToBackend } from "@/lib/bff";
 
-export const runtime = "nodejs";
+const BACKEND_BASE = "/api/v1/admin/community/resources/categories";
 
-const UPSTREAM = "/api/v1/admin/community/resources/categories";
+type Ctx = { params: { categoryId: string } };
 
-export async function PUT(req: Request, ctx: { params: { categoryId: string } }) {
-  return proxyStreamToBackend(req, {
-    upstreamPath: `${UPSTREAM}/${encodeURIComponent(ctx.params.categoryId)}`,
-    method: "PUT",
-    forwardQuery: false,
-  });
+function withId(ctx: Ctx) {
+  return `${BACKEND_BASE}/${encodeURIComponent(ctx.params.categoryId)}`;
 }
 
-export async function PATCH(req: Request, ctx: { params: { categoryId: string } }) {
-  return proxyStreamToBackend(req, {
-    upstreamPath: `${UPSTREAM}/${encodeURIComponent(ctx.params.categoryId)}`,
-    method: "PATCH",
-    forwardQuery: false,
-  });
+/** 단건 조회 */
+export async function GET(req: Request, ctx: Ctx) {
+  return proxyToBackend(req, withId(ctx), { method: "GET", forwardQuery: true });
 }
 
-export async function DELETE(req: Request, ctx: { params: { categoryId: string } }) {
-  return proxyStreamToBackend(req, {
-    upstreamPath: `${UPSTREAM}/${encodeURIComponent(ctx.params.categoryId)}`,
-    method: "DELETE",
-    forwardQuery: false,
-  });
+/** 단건 수정 - 백엔드가 PUT이면 PUT만 사용 */
+export async function PUT(req: Request, ctx: Ctx) {
+  const body = await req.json().catch(() => null);
+  return proxyToBackend(req, withId(ctx), { method: "PUT", body, forwardQuery: false });
+}
+
+/** 단건 부분 수정 - 백엔드가 PATCH를 지원하면 사용 */
+export async function PATCH(req: Request, ctx: Ctx) {
+  const body = await req.json().catch(() => null);
+  return proxyToBackend(req, withId(ctx), { method: "PATCH", body, forwardQuery: false });
+}
+
+/** ✅ 단건 삭제 */
+export async function DELETE(req: Request, ctx: Ctx) {
+  return proxyToBackend(req, withId(ctx), { method: "DELETE", forwardQuery: false });
 }

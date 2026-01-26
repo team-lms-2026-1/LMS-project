@@ -1,21 +1,13 @@
-import { proxyStreamToBackend } from "@/lib/bff";
+import { proxyToBackend } from "@/lib/bff";
 
-export const runtime = "nodejs";
-
-const UPSTREAM = "/api/v1/admin/community/resources/categories";
+const BACKEND_PATH = "/api/v1/admin/community/resources/categories";
 
 export async function GET(req: Request) {
-  return proxyStreamToBackend(req, {
-    upstreamPath: UPSTREAM,
-    method: "GET",
-    forwardQuery: true,
-  });
+  // querystring(page, size, keyword 등) 그대로 forward
+  return proxyToBackend(req, BACKEND_PATH, { method: "GET", forwardQuery: true });
 }
 
 export async function POST(req: Request) {
-  return proxyStreamToBackend(req, {
-    upstreamPath: UPSTREAM,
-    method: "POST",
-    forwardQuery: false,
-  });
+  const body = await req.json().catch(() => null);
+  return proxyToBackend(req, BACKEND_PATH, { method: "POST", body, forwardQuery: false });
 }

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/resource-detail.module.css";
-import type { ResourceItem } from "../types";
+import type { ResourceListItemDto } from "../api/dto";
 import { resourcesApi } from "../api/resourcesApi";
 import { resourceCategoriesApi } from "../categories/api/resourceCategoriesApi";
 import type { ResourceCategoryDto } from "../categories/api/dto";
@@ -19,8 +19,8 @@ function CategoryBadge({ name, bgColor, textColor }: { name: string; bgColor: st
 export default function ResourceDetailPage({ resourceId }: { resourceId: string }) {
   const router = useRouter();
 
-  const [item, setItem] = useState<ResourceItem | null>(null);
-const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
+  const [item, setItem] = useState<ResourceListItemDto | null>(null);
+  const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
   const categoryMap = useMemo(() => {
     const m = new Map<string, ResourceCategoryDto>();
     categories.forEach((c) => m.set(String(c.categoryId), c));
@@ -44,7 +44,7 @@ const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
     setError(null);
     try {
       const data = await resourcesApi.get(resourceId);
-      setItem(data); // ✅ ResourceItem(content optional)로 안전하게 들어감
+      setItem(data);
     } catch (e: any) {
       setError(e?.message ?? "자료 상세 조회 실패");
       setItem(null);
@@ -74,7 +74,6 @@ const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
   if (loading) return <div className={styles.wrap}>불러오는 중...</div>;
   if (!item) return <div className={styles.wrap}>{error ?? "자료를 찾을 수 없습니다."}</div>;
 
-  // ✅ number/string 비교 경고 방지: String으로 통일
   const c = categoryMap.get(String(item.categoryId));
   const badgeName = item.categoryName ?? c?.name ?? "-";
   const bg = c?.bgColorHex ?? "#64748b";
@@ -105,7 +104,6 @@ const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
         </div>
 
         <div className={styles.body}>
-          {/* ✅ content가 없을 수 있으므로 안전 처리 */}
           <div className={styles.content}>{item.content ?? ""}</div>
         </div>
 
@@ -118,10 +116,7 @@ const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
       </div>
 
       <div className={styles.actions}>
-        <button
-          className={`${styles.btn} ${styles.btnPrimary}`}
-          onClick={() => router.push(`/admin/community/resources/${resourceId}/edit`)}
-        >
+        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => router.push(`/admin/community/resources/${resourceId}/edit`)}>
           수정
         </button>
         <button className={`${styles.btn} ${styles.btnDanger}`} onClick={onDelete}>

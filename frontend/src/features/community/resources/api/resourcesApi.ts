@@ -21,10 +21,18 @@ function toQuery(params: ResourcesListParams) {
   return qs ? `?${qs}` : "";
 }
 
-function normalizeOne(raw: any): ResourceListItemDto {
+function unwrap<T>(payload: any): T {
+  if (payload && typeof payload === "object") {
+    if ("data" in payload) return payload.data as T;
+  }
+  return payload as T;
+}
+
+function normalizeOne(rawAny: any): ResourceListItemDto {
+  const raw = unwrap<any>(rawAny);
+
   const id = raw?.id ?? raw?.resourceId ?? raw?.noticeId ?? "";
 
-  // categoryId가 string/number 어떤 형태로 오든 number로 정규화
   const cidRaw = raw?.categoryId ?? raw?.category?.categoryId;
   const cidNum = Number(cidRaw);
 
@@ -37,14 +45,12 @@ function normalizeOne(raw: any): ResourceListItemDto {
 
     title: raw?.title ?? "",
 
-    // ✅ 리스트에 없을 수 있음
     content: typeof raw?.content === "string" ? raw.content : undefined,
 
     author: raw?.author ?? raw?.authorName,
     createdAt: raw?.createdAt,
     views: raw?.views ?? raw?.viewCount,
 
-    // ✅ 첨부 정규화 (files[] 또는 attachment 단일 모두 대응)
     attachment:
       raw?.attachment ??
       (Array.isArray(raw?.files) && raw.files.length > 0
@@ -56,14 +62,14 @@ function normalizeOne(raw: any): ResourceListItemDto {
   };
 }
 
-function normalizeList(payload: ResourcesListResponseDto): ResourceListItemDto[] {
-  const anyP: any = payload as any;
+function normalizeList(payloadAny: ResourcesListResponseDto): ResourceListItemDto[] {
+  const payload = unwrap<any>(payloadAny);
 
   const arr =
     Array.isArray(payload) ? payload :
-    Array.isArray(anyP?.items) ? anyP.items :
-    Array.isArray(anyP?.data) ? anyP.data :
-    Array.isArray(anyP?.data?.items) ? anyP.data.items :
+    Array.isArray(payload?.items) ? payload.items :
+    Array.isArray(payload?.data) ? payload.data :
+    Array.isArray(payload?.data?.items) ? payload.data.items :
     [];
 
   return arr.map(normalizeOne);
@@ -81,7 +87,7 @@ export const resourcesApi = {
   },
 
   async create(body: CreateResourceRequestDto) {
-    return getJson(`${BASE}`, {
+    return getJson<any>(`${BASE}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -89,7 +95,7 @@ export const resourcesApi = {
   },
 
   async update(resourceId: string, body: UpdateResourceRequestDto) {
-    return getJson(`${BASE}/${encodeURIComponent(resourceId)}`, {
+    return getJson<any>(`${BASE}/${encodeURIComponent(resourceId)}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -97,8 +103,13 @@ export const resourcesApi = {
   },
 
   async remove(resourceId: string) {
-    return getJson(`${BASE}/${encodeURIComponent(resourceId)}`, {
-      method: "DELETE",
-    });
+    return getJson<any>(`${BASE}/${encodeURIComponent(resourceId)}`, { method: "DELETE" });
+  },
+
+  // 등록 후 이동을 위해 “생성 응답에서 id를 최대한 뽑아내는” 헬퍼
+  extractCreatedId(resp: any): string | null {
+    const r = unwrap<any>(resp);
+    const id = r?.id ?? r?.resourceId ?? r?.noticeId ?? r?.data?.id ?? r?.data?.resourceId;
+    return id != null ? String(id) : null;
   },
 };

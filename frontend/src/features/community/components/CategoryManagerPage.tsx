@@ -3,16 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "@/features/community/styles/category-manager.module.css";
-import type { CategoryRow, CategoryListParams, CategoryId } from "@/features/community/types/category";
+import type { CategoryApi, CategoryRow } from "@/features/community/types/category";
 
 const BG_PRESETS = ["#3b82f6", "#10b981", "#a855f7", "#f97316", "#ef4444", "#111827", "#64748b", "#fde047"];
-
-type CategoryApi = {
-  list: (params: CategoryListParams) => Promise<CategoryRow[]>;
-  create: (body: { categoryId: CategoryId; name: string; bgColor: string; textColor: string }) => Promise<any>;
-  update: (id: string, body: { name: string; bgColor: string; textColor: string }) => Promise<any>;
-  remove: (id: string) => Promise<any>;
-};
 
 function Badge({ name, bgColor, textColor }: { name: string; bgColor: string; textColor: string }) {
   return (
@@ -37,12 +30,11 @@ export default function CategoryManagerPage(props: {
   const [error, setError] = useState<string | null>(null);
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [newId, setNewId] = useState<string>(""); // ✅ ID 입력 추가
   const [newName, setNewName] = useState("");
   const [newBg, setNewBg] = useState("#3b82f6");
   const [newText, setNewText] = useState("#ffffff");
 
-  const [editId, setEditId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [editBg, setEditBg] = useState("#3b82f6");
   const [editText, setEditText] = useState("#ffffff");
@@ -51,7 +43,7 @@ export default function CategoryManagerPage(props: {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.list({ page: 0, size: 50, keyword });
+      const data = await api.list({ page: 0, size: 200, keyword });
       setRows(data);
     } catch (e: any) {
       setError(e?.message ?? "카테고리 조회 실패");
@@ -73,7 +65,7 @@ export default function CategoryManagerPage(props: {
   }, [rows, keyword]);
 
   const startEdit = (row: CategoryRow) => {
-    setEditId(String(row.categoryId));
+    setEditId(row.categoryId);
     setEditName(row.name ?? "");
     setEditBg(row.bgColor ?? "#3b82f6");
     setEditText(row.textColor ?? "#ffffff");
@@ -87,7 +79,7 @@ export default function CategoryManagerPage(props: {
   };
 
   const saveEdit = async () => {
-    if (!editId) return;
+    if (editId == null) return;
     if (!editName.trim()) return alert("카테고리 제목을 입력하세요.");
     try {
       await api.update(editId, { name: editName.trim(), bgColor: editBg, textColor: editText });
@@ -102,7 +94,7 @@ export default function CategoryManagerPage(props: {
     const ok = window.confirm(`"${row.name}" 카테고리를 삭제하시겠습니까?`);
     if (!ok) return;
     try {
-      await api.remove(String(row.categoryId));
+      await api.remove(row.categoryId);
       await fetchList();
     } catch (e: any) {
       alert(e?.message ?? "삭제 실패");
@@ -110,19 +102,10 @@ export default function CategoryManagerPage(props: {
   };
 
   const create = async () => {
-    if (!newId.trim()) return alert("카테고리 ID를 입력하세요.");
     if (!newName.trim()) return alert("카테고리 제목을 입력하세요.");
-
     try {
-      await api.create({
-        categoryId: newId.trim(), // ✅ 요구사항: ID도 전송
-        name: newName.trim(),
-        bgColor: newBg,
-        textColor: newText,
-      });
-
+      await api.create({ name: newName.trim(), bgColor: newBg, textColor: newText });
       setCreateOpen(false);
-      setNewId("");
       setNewName("");
       setNewBg("#3b82f6");
       setNewText("#ffffff");
@@ -174,9 +157,9 @@ export default function CategoryManagerPage(props: {
 
             {!loading &&
               filtered.map((row) => {
-                const isEdit = editId === String(row.categoryId);
+                const isEdit = editId === row.categoryId;
                 return (
-                  <tr key={String(row.categoryId)}>
+                  <tr key={row.categoryId}>
                     <td>
                       <div className={styles.categoryCell}>
                         <Badge
@@ -232,7 +215,7 @@ export default function CategoryManagerPage(props: {
                     </td>
 
                     <td className={styles.center}>{row.postCount ?? "-"}</td>
-                    <td className={styles.center}>{row.lastCreatedAt ?? "-"}</td>
+                    <td className={styles.center}>{row.latestCreatedAt ?? "-"}</td>
 
                     <td className={styles.actions}>
                       {isEdit ? (
@@ -280,14 +263,6 @@ export default function CategoryManagerPage(props: {
               <div className={styles.createLeft}>
                 <Badge name={newName} bgColor={newBg} textColor={newText} />
 
-                {/* ✅ ID 입력 추가 */}
-                <input
-                  className={styles.nameInput}
-                  value={newId}
-                  onChange={(e) => setNewId(e.target.value)}
-                  placeholder="카테고리 ID..."
-                />
-
                 <input
                   className={styles.nameInput}
                   value={newName}
@@ -321,7 +296,6 @@ export default function CategoryManagerPage(props: {
                   className={styles.btnDanger}
                   onClick={() => {
                     setCreateOpen(false);
-                    setNewId("");
                     setNewName("");
                     setNewBg("#3b82f6");
                     setNewText("#ffffff");

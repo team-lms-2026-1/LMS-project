@@ -17,19 +17,27 @@ function toQuery(params: ResourceCategoriesListParams) {
   return qs ? `?${qs}` : "";
 }
 
+function unwrap<T>(payload: any): T {
+  if (payload && typeof payload === "object") {
+    if ("data" in payload) return payload.data as T;
+  }
+  return payload as T;
+}
+
 function normalizeList(payload: ResourceCategoriesListResponseDto): ResourceCategoryDto[] {
-  const anyP: any = payload as any;
+  const p: any = unwrap<any>(payload);
 
   const arr =
-    Array.isArray(payload) ? payload :
-    Array.isArray(anyP?.items) ? anyP.items :
-    Array.isArray(anyP?.data) ? anyP.data :
-    Array.isArray(anyP?.data?.items) ? anyP.data.items :
+    Array.isArray(p) ? p :
+    Array.isArray(p?.items) ? p.items :
+    Array.isArray(p?.data) ? p.data :
+    Array.isArray(p?.data?.items) ? p.data.items :
     [];
 
   return arr.map((r: any) => ({
     categoryId: Number(r.categoryId),
     name: String(r.name ?? ""),
+    // 백엔드가 bgColor/textColor 로 주거나 bgColorHex/textColorHex 로 주는 것 모두 대응
     bgColorHex: String(r.bgColorHex ?? r.bgColor ?? "#64748b"),
     textColorHex: String(r.textColorHex ?? r.textColor ?? "#ffffff"),
     postCount: r.postCount != null ? Number(r.postCount) : undefined,
@@ -37,10 +45,19 @@ function normalizeList(payload: ResourceCategoriesListResponseDto): ResourceCate
   }));
 }
 
+async function readError(res: Response, fallback: string) {
+  try {
+    const json = await res.json();
+    return json?.message ?? json?.error ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const resourceCategoriesApi = {
   async list(params: ResourceCategoriesListParams): Promise<ResourceCategoryDto[]> {
     const res = await fetch(`${BASE}${toQuery(params)}`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`카테고리 목록 조회 실패 (${res.status})`);
+    if (!res.ok) throw new Error(await readError(res, `카테고리 목록 조회 실패 (${res.status})`));
     const json = (await res.json()) as ResourceCategoriesListResponseDto;
     return normalizeList(json);
   },
@@ -49,11 +66,11 @@ export const resourceCategoriesApi = {
     const res = await fetch(BASE, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body), // ✅ categoryId 절대 보내지 않음
+      body: JSON.stringify(body), // categoryId 보내지 않음
       cache: "no-store",
     });
-    if (!res.ok) throw new Error(`카테고리 생성 실패 (${res.status})`);
-    return (await res.json()) as ResourceCategoryDto;
+    if (!res.ok) throw new Error(await readError(res, `카테고리 생성 실패 (${res.status})`));
+    return unwrap<ResourceCategoryDto>(await res.json());
   },
 
   async update(categoryId: number, body: UpdateResourceCategoryRequestDto) {
@@ -63,16 +80,13 @@ export const resourceCategoriesApi = {
       body: JSON.stringify(body),
       cache: "no-store",
     });
-    if (!res.ok) throw new Error(`카테고리 수정 실패 (${res.status})`);
-    return (await res.json()) as ResourceCategoryDto;
+    if (!res.ok) throw new Error(await readError(res, `카테고리 수정 실패 (${res.status})`));
+    return unwrap<ResourceCategoryDto>(await res.json());
   },
 
   async remove(categoryId: number) {
-    const res = await fetch(`${BASE}/${categoryId}`, {
-      method: "DELETE",
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error(`카테고리 삭제 실패 (${res.status})`);
+    const res = await fetch(`${BASE}/${categoryId}`, { method: "DELETE", cache: "no-store" });
+    if (!res.ok) throw new Error(await readError(res, `카테고리 삭제 실패 (${res.status})`));
     return true;
   },
 };
