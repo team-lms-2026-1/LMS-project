@@ -1,28 +1,32 @@
 package com.teamlms.backend.domain.study_rental.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-// import com.teamlms.backend.domain.study_rental.enums.RentalStatus; // Enum 필요
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
-// 1. 예약 신청
+// 3. 예약 신청 요청
 @Getter
 @NoArgsConstructor
 public class RentalApplyRequest {
-    @NotNull(message = "룸 ID는 필수입니다.")
+    @NotNull
     private Long roomId;
 
     @NotNull
-    @FutureOrPresent
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime startAt;
+    @FutureOrPresent(message = "예약 날짜는 과거일 수 없습니다.")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate rentalDate;
 
     @NotNull
-    @FutureOrPresent
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime endAt;
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime startTime;
+
+    @NotNull
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime endTime;
 }
+
+

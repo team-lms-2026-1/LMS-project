@@ -1,10 +1,11 @@
 package com.teamlms.backend.domain.study_rental.entity;
 
+import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.study_rental.enums.RentalStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import com.teamlms.backend.domain.study_rental.enums.RentalStatus;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +14,15 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class) // applied_at 자동 주입을 위해 필요시 사용
-@Table(name = "study_room_rental")
+@EntityListeners(AuditingEntityListener.class)
+@Table(
+    name = "study_room_rental",
+    indexes = {
+        @Index(name = "idx_rental_room_start", columnList = "room_id, start_at"),
+        @Index(name = "idx_rental_applicant_applied", columnList = "applicant_account_id, applied_at"),
+        @Index(name = "idx_rental_status_applied", columnList = "status, applied_at")
+    }
+)
 public class StudyRoomRental {
 
     @Id
@@ -22,12 +30,14 @@ public class StudyRoomRental {
     @Column(name = "rental_id")
     private Long id;
 
-    // ID-only Strategy
-    @Column(name = "room_id", nullable = false)
-    private Long roomId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private StudyRoom studyRoom;
 
-    @Column(name = "applicant_account_id", nullable = false)
-    private Long applicantAccountId;
+    // 신청자 (Account Entity 연결)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "applicant_account_id", nullable = false)
+    private Account applicant;
 
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt;
@@ -43,12 +53,21 @@ public class StudyRoomRental {
     @Column(name = "applied_at", nullable = false, updatable = false)
     private LocalDateTime appliedAt;
 
-    @Column(name = "processed_by")
-    private Long processedBy;
+    // 처리자 (Account Entity 연결)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "processed_by")
+    private Account processor;
 
     @Column(name = "processed_at")
     private LocalDateTime processedAt;
 
     @Column(name = "rejection_reason")
     private String rejectionReason;
+    
+    public void process(RentalStatus newStatus, Account processor, String rejectionReason) {
+        this.status = newStatus;
+        this.processor = processor;     // 처리자(관리자) 기록
+        this.processedAt = LocalDateTime.now(); // 처리 시간 기록
+        this.rejectionReason = rejectionReason; // 반려 사유 기록 (승인 시 null)
+    }
 }

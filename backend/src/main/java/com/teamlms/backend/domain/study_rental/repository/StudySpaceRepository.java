@@ -1,16 +1,20 @@
 package com.teamlms.backend.domain.study_rental.repository;
 
+import com.teamlms.backend.domain.study_rental.dto.SpaceSearchCondition;
 import com.teamlms.backend.domain.study_rental.entity.StudySpace;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface StudySpaceRepository extends JpaRepository<StudySpace, Long> {
-    
-    // 기본 활성 상태 조회
-    List<StudySpace> findAllByIsActiveTrue();
-    // 키워드 검색 (이름 포함 + 활성 상태)
-    List<StudySpace> findBySpaceNameContainingAndIsActiveTrue(String spaceName);
-    // 위치 검색 (위치 포함 + 활성 상태)
-    List<StudySpace> findByLocationContainingAndIsActiveTrue(String location);
+
+    /**
+     * 학습공간 검색
+     */
+    @Query("SELECT s FROM StudySpace s " +
+           "WHERE (:#{#cond.keyword} IS NULL OR s.spaceName LIKE %:#{#cond.keyword}% OR s.location LIKE %:#{#cond.keyword}%) " +
+           "AND (:#{#cond.isActiveOnly} = true AND s.isActive = true OR :#{#cond.isActiveOnly} IS NULL OR :#{#cond.isActiveOnly} = false)")
+    Page<StudySpace> search(@Param("cond") SpaceSearchCondition cond, Pageable pageable);
 }

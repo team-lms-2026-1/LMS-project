@@ -8,20 +8,26 @@ import lombok.*;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "study_room_image")
-public class StudyRoomImage {
+@Table(
+    name = "study_space_image",
+    indexes = @Index(name = "idx_space_image_order", columnList = "space_id, sort_order")
+)
+public class StudySpaceImage {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "image_id")
     private Long id;
 
-    // ID-only Strategy
-    @Column(name = "room_id", nullable = false)
-    private Long roomId;
+    // Room이 아닌 Space와 연관관계
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "space_id", nullable = false)
+    private StudySpace studySpace;
 
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
+    @Builder.Default
     @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
+    private Integer sortOrder = 0;
 }

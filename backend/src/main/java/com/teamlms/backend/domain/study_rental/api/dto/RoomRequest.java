@@ -12,15 +12,12 @@ import java.time.LocalTime;
 @Getter
 @NoArgsConstructor
 public class RoomRequest {
-    @NotNull(message = "공간 ID는 필수입니다.")
-    private Long spaceId;
-
     @NotBlank(message = "룸 이름은 필수입니다.")
     private String roomName;
 
     @Min(1)
     private Integer minPeople;
-
+    
     @NotNull
     private Integer maxPeople;
 
@@ -36,11 +33,9 @@ public class RoomRequest {
 
     @NotNull
     @JsonFormat(pattern = "HH:mm")
-    private LocalTime rentableStartTime;
+    private LocalTime availableStartTime;
 
     @NotNull
     @JsonFormat(pattern = "HH:mm")
-    private LocalTime rentableEndTime;
-
-    private Boolean isActive = true;
+    private LocalTime availableEndTime;
 }

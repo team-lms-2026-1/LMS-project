@@ -1,13 +1,12 @@
 package com.teamlms.backend.domain.study_rental.service;
 
 import com.teamlms.backend.domain.study_rental.api.dto.RentalResponse;
+import com.teamlms.backend.domain.study_rental.dto.RentalSearchCondition;
 import com.teamlms.backend.domain.study_rental.entity.StudyRoomRental;
 import com.teamlms.backend.domain.study_rental.repository.StudyRoomRentalRepository;
-import com.teamlms.backend.domain.study_rental.entity.*;
-import com.teamlms.backend.domain.study_rental.repository.*;
-import com.teamlms.backend.global.exception.base.BusinessException;
-import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,41 +16,36 @@ import org.springframework.transaction.annotation.Transactional;
 public class StudyRentalQueryService {
 
     private final StudyRoomRentalRepository rentalRepository;
-    private final StudyRoomRepository roomRepository;
-    private final StudySpaceRepository spaceRepository;
-    // private final AccountRepository accountRepository; // 계정 조회용 리포지토리 가정
 
-    public RentalResponse getRentalDetail(Long rentalId) {
-        // 1. 예약 정보 조회
-        StudyRoomRental rental = rentalRepository.findById(rentalId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+    public Page<RentalResponse> getRentalList(RentalSearchCondition condition, Pageable pageable) {
+        Page<StudyRoomRental> rentals = rentalRepository.search(condition, pageable);
 
-        // 2. 연관된 룸 조회
-        StudyRoom room = roomRepository.findById(rental.getRoomId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        return rentals.map(this::toRentalResponse);
+    }
 
-        // 3. 연관된 공간 조회
-        StudySpace space = spaceRepository.findById(room.getSpaceId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
-
-        // 4. 신청자 조회 (Account 모듈이 있다고 가정)
-        // Account applicant = accountRepository.findById(rental.getApplicantAccountId())...;
-        String applicantName = "임시 사용자"; // Mock Data
-
-        // 5. DTO 조립 (BFF)
+    private RentalResponse toRentalResponse(StudyRoomRental rental) {
         return RentalResponse.builder()
                 .rentalId(rental.getId())
-                .roomId(room.getId())
-                .roomName(room.getRoomName())   // 외부 테이블 정보 주입
-                .spaceId(space.getId())
-                .spaceName(space.getSpaceName()) // 외부 테이블 정보 주입
-                .applicantId(rental.getApplicantAccountId())
-                .applicantName(applicantName)
-                .startAt(rental.getStartAt())
-                .endAt(rental.getEndAt())
+                .rentalDate(rental.getStartAt().toLocalDate())
+                .startTime(rental.getStartAt().toLocalTime())
+                .endTime(rental.getEndAt().toLocalTime())
                 .status(rental.getStatus())
-                .appliedAt(rental.getAppliedAt())
+                .requestedAt(rental.getAppliedAt())
                 .rejectionReason(rental.getRejectionReason())
+                
+                .space(RentalResponse.SpaceSummary.builder()
+                        .spaceId(rental.getStudyRoom().getStudySpace().getId())
+                        .spaceName(rental.getStudyRoom().getStudySpace().getSpaceName())
+                        .build())
+                .room(RentalResponse.RoomSummary.builder()
+                        .roomId(rental.getStudyRoom().getId())
+                        .roomName(rental.getStudyRoom().getRoomName())
+                        .build())
+                .applicant(RentalResponse.AccountSummary.builder()
+                        .accountId(rental.getApplicant().getAccountId())
+                        // Account 엔티티에 getName() 등이 있다고 가정
+                        // .name(rental.getApplicant().getName()) 
+                        .build())
                 .build();
     }
 }

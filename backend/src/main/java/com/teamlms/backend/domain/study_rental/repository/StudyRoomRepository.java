@@ -2,28 +2,20 @@ package com.teamlms.backend.domain.study_rental.repository;
 
 import com.teamlms.backend.domain.study_rental.entity.StudyRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface StudyRoomRepository extends JpaRepository<StudyRoom, Long> {
 
-    // 특정 공간의 모든 룸 조회
-    List<StudyRoom> findBySpaceId(Long spaceId);
+    // 1. 관리자용: 활성 여부 상관없이 특정 공간의 모든 룸 조회
+    List<StudyRoom> findByStudySpaceId(Long spaceId);
 
-    // 특정 공간의 '활성화된' 룸만 조회
-    List<StudyRoom> findBySpaceIdAndIsActiveTrue(Long spaceId);
+    // 2. 학생용: 특정 공간의 '활성화된(Active)' 룸만 조회
+    List<StudyRoom> findByStudySpaceIdAndIsActiveTrue(Long spaceId);
 
-    /**
-     * [검색 조건 지원]
-     * 인원수(min <= N <= max) 조건에 맞는 룸 조회
-     */
-    @Query("SELECT r FROM StudyRoom r " +
-           "WHERE r.spaceId = :spaceId " +
-           "AND r.isActive = true " +
-           "AND r.minPeople <= :peopleCount " +
-           "AND r.maxPeople >= :peopleCount")
-    List<StudyRoom> findAvailableRoomsByPeople(@Param("spaceId") Long spaceId, 
-                                               @Param("peopleCount") Integer peopleCount);
+    // // 3. 공간 삭제 시 연관된 룸 일괄 삭제
+    void deleteByStudySpaceId(Long spaceId);
+    
+
+
 }

@@ -3,11 +3,10 @@ package com.teamlms.backend.domain.study_rental.dto;
 import lombok.Builder;
 import lombok.Getter;
 
-// 2. 공간 검색 조건
+// 1. 학습공간 검색 조건 (Repository 전달용)
 @Getter
 @Builder
 public class SpaceSearchCondition {
-    private String keyword;  // 이름 검색
-    private String location; // 지역 검색
-    private Boolean isActiveOnly;
+    private String keyword;       // 공간명 or 위치
+    private Boolean isActiveOnly; // 학생: true, 관리자: false(전체)
 }

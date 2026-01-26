@@ -14,7 +14,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "study_space_rule")
+@Table(
+    name = "study_space_rule",
+    indexes = @Index(name = "idx_space_rule_order", columnList = "space_id, sort_order")
+)
 public class StudySpaceRule {
 
     @Id
@@ -22,15 +25,16 @@ public class StudySpaceRule {
     @Column(name = "rule_id")
     private Long id;
 
-    // ID-only Strategy
-    @Column(name = "space_id", nullable = false)
-    private Long spaceId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "space_id", nullable = false)
+    private StudySpace studySpace;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Builder.Default
     @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
+    private Integer sortOrder = 0;
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, updatable = false)

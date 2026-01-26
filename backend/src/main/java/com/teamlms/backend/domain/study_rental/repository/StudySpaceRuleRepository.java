@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface StudySpaceRuleRepository extends JpaRepository<StudySpaceRule, Long> {
-    
-    // 공간 ID로 조회하되, 순서(sortOrder) 오름차순 정렬
-    List<StudySpaceRule> findBySpaceIdOrderBySortOrderAsc(Long spaceId);
-    
-    // 특정 공간의 규칙 전체 삭제 (공간 삭제 시 사용)
-    void deleteBySpaceId(Long spaceId);
+
+    // 공간별 규칙 조회 (순서 오름차순 정렬)
+    List<StudySpaceRule> findByStudySpaceIdOrderBySortOrderAsc(Long spaceId);
+
+    // 공간 삭제 시 규칙 일괄 삭제
+    void deleteByStudySpaceId(Long spaceId);
 }

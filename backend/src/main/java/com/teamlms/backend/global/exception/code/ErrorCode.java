@@ -77,9 +77,24 @@ public enum ErrorCode {
     // =========================
     // Global: File & S3 (★ 여기 추가됨!)
     // =========================
-    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_UPLOAD_ERROR", "파일 업로드 중 오류가 발생했습니다.", "error.fileUpload");
+    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_UPLOAD_ERROR", "파일 업로드 중 오류가 발생했습니다.", "error.fileUpload"),
 
+
+
+    // =========================
+    // Domain: study_rental
+    // =========================
+    STUDY_RENTAL_NOT_TIME(HttpStatus.CONFLICT, "STUDY_RENTAL_NOT_TIME", "해당 시간에는 예약 할 수 없습니다.", "study.rental.not.time"),
+    STUDY_RENTAL_NOT_ST_TIME(HttpStatus.CONFLICT, "STUDY_RENTAL_NOT_ST_TIME", "종료 시간이 시작 시간보다 빠를 수 없습니다.", "study.rental.not.st.time"),
+    STUDY_RENTAL_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDY_RENTAL_NOT_FOUND", "예약을 찾지 못했습니다.", "study.rental.not.found"),
+    STUDY_RENTAL_NOT_FOUND_A(HttpStatus.NOT_FOUND, "STUDY_RENTAL_NOT_FOUND_A", "학습공간을 찾지 못했습니다.", "study.rental.not.found_a"),
+    STUDY_RENTAL_NOT_UPDATE(HttpStatus.CONFLICT, "STUDY_RENTAL_NOT_UPDATE", "업데이트를 하지 못했습니다.", "study.rental.not.update"),
+    STUDY_RENTAL_NOT_DELETE(HttpStatus.NOT_FOUND, "STUDY_RENTAL_NOT_DELETE", "삭제를 하지 못했습니다.", "study.rental.not.delete"),
+    STUDY_RENTAL_NOT_CREATE(HttpStatus.CONFLICT, "STUDY_RENTAL_NOT_CREATE", "생성을 하지 못했습니다.", "study.rental.not.create"),
+    STUDY_RENTAL_MIN_MAX(HttpStatus.CONFLICT, "STUDY_RENTAL_MIN_MAX", "최대 인원은 최소 인원보다 커야 합니다.", "study.rent.min.max"),
+    STUDY_RENTAL_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDY_RENTAL_USER_NOT_FOUND", "사용자를 찾지 못했습니다.", "user.notFound");
     
+
     private final HttpStatus httpStatus;
     private final String code;
     private final String defaultMessage;

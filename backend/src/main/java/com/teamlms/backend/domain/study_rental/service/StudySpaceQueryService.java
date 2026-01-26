@@ -1,117 +1,124 @@
 package com.teamlms.backend.domain.study_rental.service;
 
-import com.teamlms.backend.domain.study_rental.api.dto.*;
-import com.teamlms.backend.domain.study_rental.dto.RoomSearchCondition;
+import com.teamlms.backend.domain.study_rental.api.dto.RoomDetailResponse;
+import com.teamlms.backend.domain.study_rental.api.dto.SpaceDetailResponse;
+import com.teamlms.backend.domain.study_rental.api.dto.SpaceListResponse;
+import com.teamlms.backend.domain.study_rental.dto.SpaceSearchCondition;
 import com.teamlms.backend.domain.study_rental.entity.*;
 import com.teamlms.backend.domain.study_rental.repository.*;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true) // 조회 전용 트랜잭션
+@Transactional(readOnly = true)
 public class StudySpaceQueryService {
 
     private final StudySpaceRepository spaceRepository;
     private final StudyRoomRepository roomRepository;
+    private final StudySpaceImageRepository imageRepository;
     private final StudySpaceRuleRepository ruleRepository;
-    private final StudyRoomImageRepository imageRepository;
 
-    // 1. 공간 상세 조회 (BFF: 공간 + 룸 목록 + 규칙)
+    // 1. 학습공간 목록 조회
+    public Page<SpaceListResponse> getSpaceList(SpaceSearchCondition condition, Pageable pageable) {
+        Page<StudySpace> spaces = spaceRepository.search(condition, pageable);
+
+        return spaces.map(space -> {
+            // 해당 공간의 "활성 룸" 정보를 가져와서 통계 계산
+            List<StudyRoom> rooms = roomRepository.findByStudySpaceIdAndIsActiveTrue(space.getId());
+            
+            // 이미지 조회 (첫번째 이미지를 썸네일로 사용)
+            List<StudySpaceImage> images = imageRepository.findByStudySpaceIdOrderBySortOrderAsc(space.getId());
+            String mainImageUrl = images.isEmpty() ? null : images.get(0).getImageUrl();
+
+            boolean isRentable = checkRentable(rooms);
+            int minPeople = rooms.stream().mapToInt(StudyRoom::getMinPeople).min().orElse(0);
+            int maxPeople = rooms.stream().mapToInt(StudyRoom::getMaxPeople).max().orElse(0);
+
+            return SpaceListResponse.builder()
+                    .spaceId(space.getId())
+                    .spaceName(space.getSpaceName())
+                    .location(space.getLocation())
+                    .isActive(space.getIsActive())
+                    .mainImageUrl(mainImageUrl)
+                    .isRentable(isRentable)
+                    .minPeople(minPeople)
+                    .maxPeople(maxPeople)
+                    .build();
+        });
+    }
+
+    // 2. 학습공간 상세 조회
     public SpaceDetailResponse getSpaceDetail(Long spaceId) {
         StudySpace space = spaceRepository.findById(spaceId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_NOT_FOUND_A));
 
-        // 하위 데이터 조회 (별도 쿼리 실행)
-        List<StudyRoom> rooms = roomRepository.findBySpaceIdAndIsActiveTrue(spaceId);
-        List<StudySpaceRule> rules = ruleRepository.findBySpaceIdOrderBySortOrderAsc(spaceId);
+        List<StudySpaceImage> images = imageRepository.findByStudySpaceIdOrderBySortOrderAsc(spaceId);
+        List<StudySpaceRule> rules = ruleRepository.findByStudySpaceIdOrderBySortOrderAsc(spaceId);
+        List<StudyRoom> rooms = roomRepository.findByStudySpaceIdAndIsActiveTrue(spaceId);
 
-        // Response 조립
         return SpaceDetailResponse.builder()
                 .spaceId(space.getId())
                 .spaceName(space.getSpaceName())
                 .location(space.getLocation())
                 .description(space.getDescription())
-                .isActive(space.getIsActive())
-                .rooms(rooms.stream().map(this::mapToRoomSimple).collect(Collectors.toList()))
-                .rules(rules.stream().map(this::mapToRuleResponse).collect(Collectors.toList()))
+                .isRentable(checkRentable(rooms))
+                .images(images.stream().map(img -> SpaceDetailResponse.ImageResponse.builder()
+                        .imageId(img.getId())
+                        .imageUrl(img.getImageUrl())
+                        .sortOrder(img.getSortOrder())
+                        .build()).collect(Collectors.toList()))
+                .rules(rules.stream().map(rule -> SpaceDetailResponse.RuleResponse.builder()
+                        .ruleId(rule.getId())
+                        .content(rule.getContent())
+                        .sortOrder(rule.getSortOrder())
+                        .build()).collect(Collectors.toList()))
                 .build();
     }
 
-    // 2. 룸 상세 조회 (룸 + 이미지)
-    public RoomDetailResponse getRoomDetail(Long roomId) {
-        StudyRoom room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+    // 3. 룸 목록 조회 (관리자용 - 전체)
+    public List<RoomDetailResponse> getAdminRooms(Long spaceId) {
+        return roomRepository.findByStudySpaceId(spaceId).stream()
+                .map(this::toRoomResponse)
+                .collect(Collectors.toList());
+    }
 
-        // 공간 이름 조회를 위한 추가 쿼리 (Join 대체)
-        StudySpace space = spaceRepository.findById(room.getSpaceId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+    // 4. 룸 목록 조회 (학생용 - Active Only)
+    public List<RoomDetailResponse> getAvailableRooms(Long spaceId) {
+        return roomRepository.findByStudySpaceIdAndIsActiveTrue(spaceId).stream()
+                .map(this::toRoomResponse)
+                .collect(Collectors.toList());
+    }
 
-        List<StudyRoomImage> images = imageRepository.findByRoomIdOrderBySortOrderAsc(roomId);
+    // Helper: 오늘 날짜 기준 예약 가능 여부 계산
+    private boolean checkRentable(List<StudyRoom> rooms) {
+        LocalDate today = LocalDate.now();
+        return rooms.stream().anyMatch(room -> 
+            !today.isBefore(room.getOperationStartDate()) && 
+            !today.isAfter(room.getOperationEndDate())
+        );
+    }
 
+    private RoomDetailResponse toRoomResponse(StudyRoom room) {
         return RoomDetailResponse.builder()
                 .roomId(room.getId())
-                .spaceId(space.getId())
-                .spaceName(space.getSpaceName()) // 화면 표시용 이름
                 .roomName(room.getRoomName())
                 .minPeople(room.getMinPeople())
                 .maxPeople(room.getMaxPeople())
                 .description(room.getDescription())
                 .operationStartDate(room.getOperationStartDate())
                 .operationEndDate(room.getOperationEndDate())
-                .rentableStartTime(room.getRentableStartTime())
-                .rentableEndTime(room.getRentableEndTime())
-                .isActive(room.getIsActive())
-                .images(images.stream().map(this::mapToImageResponse).collect(Collectors.toList()))
-                .build();
-    }
-
-    // 3. 조건에 맞는 룸 검색
-    public List<RoomSimpleResponse> searchAvailableRooms(RoomSearchCondition condition) {
-        // Repository의 @Query 메서드 활용
-        List<StudyRoom> rooms = roomRepository.findAvailableRoomsByPeople(condition.getSpaceId(), condition.getPeopleCount());
-        
-        // 추가 로직: 날짜/시간 검증이 필요하다면 여기서 필터링 (Repository에서 해결 못 한 경우)
-        
-        return rooms.stream()
-                .map(this::mapToRoomSimple)
-                .collect(Collectors.toList());
-    }
-
-    // --- Private Mappers (Entity -> DTO 변환) ---
-    private RoomSimpleResponse mapToRoomSimple(StudyRoom room) {
-        // 대표 이미지 1장 조회 (성능상 Batch Size 적용 권장)
-        StudyRoomImage thumbnail = imageRepository.findFirstByRoomIdOrderBySortOrderAsc(room.getId());
-        
-        return RoomSimpleResponse.builder()
-                .roomId(room.getId())
-                .roomName(room.getRoomName())
-                .minPeople(room.getMinPeople())
-                .maxPeople(room.getMaxPeople())
-                .isActive(room.getIsActive())
-                .mainImageUrl(thumbnail != null ? thumbnail.getImageUrl() : null)
-                .build();
-    }
-
-    private RuleResponse mapToRuleResponse(StudySpaceRule rule) {
-        return RuleResponse.builder()
-                .ruleId(rule.getId())
-                .content(rule.getContent())
-                .sortOrder(rule.getSortOrder())
-                .build();
-    }
-
-    private ImageResponse mapToImageResponse(StudyRoomImage image) {
-        return ImageResponse.builder()
-                .imageId(image.getId())
-                .imageUrl(image.getImageUrl())
-                .sortOrder(image.getSortOrder())
+                .availableStartTime(room.getRentableStartTime())
+                .availableEndTime(room.getRentableEndTime())
                 .build();
     }
 }
