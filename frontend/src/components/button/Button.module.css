@@ -1,0 +1,133 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease, opacity 120ms ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.size_sm {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.size_md {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.size_lg {
+  height: 40px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+/* Variants */
+.variant_primary {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+.variant_primary:hover {
+  background: #0b1220;
+  border-color: #0b1220;
+}
+
+.variant_secondary {
+  background: #ffffff;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.variant_secondary:hover {
+  background: #f9fafb;
+  border-color: #cbd5e1;
+}
+
+.variant_danger {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+.variant_danger:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.variant_ghost {
+  background: transparent;
+  color: #111827;
+  border-color: transparent;
+}
+
+.variant_ghost:hover {
+  background: #f3f4f6;
+}
+
+/* Loading */
+.loading {
+  pointer-events: none;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  animation: spin 0.8s linear infinite;
+}
+
+.variant_secondary .spinner,
+.variant_ghost .spinner {
+  border: 2px solid rgba(17, 24, 39, 0.25);
+  border-top-color: rgba(17, 24, 39, 0.85);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.leftIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.variant_blue {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.variant_blue:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}

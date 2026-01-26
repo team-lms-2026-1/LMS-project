@@ -11,45 +11,40 @@ const BASE = "/api/admin/community/resources";
 
 function toQuery(params: ResourcesListParams) {
   const sp = new URLSearchParams();
-
   if (typeof params.categoryId === "number") sp.set("categoryId", String(params.categoryId));
   if (params.keyword?.trim()) sp.set("keyword", params.keyword.trim());
   if (typeof params.page === "number") sp.set("page", String(params.page));
   if (typeof params.size === "number") sp.set("size", String(params.size));
-
   const qs = sp.toString();
   return qs ? `?${qs}` : "";
 }
 
-function unwrap<T>(payload: any): T {
-  if (payload && typeof payload === "object") {
-    if ("data" in payload) return payload.data as T;
-  }
-  return payload as T;
+function unwrapList(payload: ResourcesListResponseDto): any[] {
+  const p: any = payload as any;
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(p?.items)) return p.items;
+  if (Array.isArray(p?.data)) return p.data;
+  if (Array.isArray(p?.data?.items)) return p.data.items;
+  return [];
 }
 
-function normalizeOne(rawAny: any): ResourceListItemDto {
-  const raw = unwrap<any>(rawAny);
-
-  const id = raw?.id ?? raw?.resourceId ?? raw?.noticeId ?? "";
-
-  const cidRaw = raw?.categoryId ?? raw?.category?.categoryId;
-  const cidNum = Number(cidRaw);
+function normalizeOne(raw: any): ResourceListItemDto {
+  const rid = raw?.resourceId ?? raw?.id ?? raw?.noticeId ?? raw?.data?.resourceId ?? raw?.data?.id ?? "";
+  const cidRaw = raw?.categoryId ?? raw?.category?.categoryId ?? raw?.data?.categoryId;
+  const cid = Number(cidRaw);
 
   return {
-    id: String(id),
-    no: raw?.no,
+    id: String(rid),
+    no: raw?.no ?? raw?.data?.no,
+    categoryId: Number.isFinite(cid) ? cid : 0,
+    categoryName: raw?.categoryName ?? raw?.category?.name ?? raw?.data?.categoryName,
 
-    categoryId: Number.isFinite(cidNum) ? cidNum : 0,
-    categoryName: raw?.categoryName ?? raw?.category?.name,
+    title: String(raw?.title ?? raw?.data?.title ?? ""),
+    content: typeof (raw?.content ?? raw?.data?.content) === "string" ? (raw?.content ?? raw?.data?.content) : undefined,
 
-    title: raw?.title ?? "",
-
-    content: typeof raw?.content === "string" ? raw.content : undefined,
-
-    author: raw?.author ?? raw?.authorName,
-    createdAt: raw?.createdAt,
-    views: raw?.views ?? raw?.viewCount,
+    author: raw?.authorName ?? raw?.author ?? raw?.data?.authorName,
+    createdAt: raw?.createdAt ?? raw?.data?.createdAt,
+    views: raw?.viewCount ?? raw?.views ?? raw?.data?.viewCount,
 
     attachment:
       raw?.attachment ??
@@ -62,17 +57,8 @@ function normalizeOne(rawAny: any): ResourceListItemDto {
   };
 }
 
-function normalizeList(payloadAny: ResourcesListResponseDto): ResourceListItemDto[] {
-  const payload = unwrap<any>(payloadAny);
-
-  const arr =
-    Array.isArray(payload) ? payload :
-    Array.isArray(payload?.items) ? payload.items :
-    Array.isArray(payload?.data) ? payload.data :
-    Array.isArray(payload?.data?.items) ? payload.data.items :
-    [];
-
-  return arr.map(normalizeOne);
+function normalizeList(payload: ResourcesListResponseDto): ResourceListItemDto[] {
+  return unwrapList(payload).map(normalizeOne);
 }
 
 export const resourcesApi = {
@@ -83,7 +69,8 @@ export const resourcesApi = {
 
   async get(resourceId: string): Promise<ResourceListItemDto> {
     const raw = await getJson<any>(`${BASE}/${encodeURIComponent(resourceId)}`);
-    return normalizeOne(raw);
+    // 백엔드가 {data:{...}}로 줄 수도 있으니 normalizeOne으로 통일
+    return normalizeOne(raw?.data ?? raw);
   },
 
   async create(body: CreateResourceRequestDto) {
@@ -106,10 +93,10 @@ export const resourcesApi = {
     return getJson<any>(`${BASE}/${encodeURIComponent(resourceId)}`, { method: "DELETE" });
   },
 
-  // 등록 후 이동을 위해 “생성 응답에서 id를 최대한 뽑아내는” 헬퍼
+  // ✅ CreatePage에서 쓰는 함수 추가 (TS 오류 해결)
   extractCreatedId(resp: any): string | null {
-    const r = unwrap<any>(resp);
-    const id = r?.id ?? r?.resourceId ?? r?.noticeId ?? r?.data?.id ?? r?.data?.resourceId;
+    const r = resp?.data ?? resp;
+    const id = r?.resourceId ?? r?.id ?? r?.noticeId;
     return id != null ? String(id) : null;
   },
 };
