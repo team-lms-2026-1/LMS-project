@@ -2,6 +2,7 @@ import * as React from "react";
 import styles from "./StatusPill.module.css";
 
 export type StatusType =
+  | "PLANNED"
   | "DRAFT"
   | "OPEN"
   | "ENROLL_CLOSED"

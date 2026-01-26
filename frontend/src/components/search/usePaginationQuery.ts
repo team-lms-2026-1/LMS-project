@@ -1,9 +1,10 @@
+
 "use client";
 
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-type Options = {
+export type UsePaginationQueryOptions = {
   pageKey?: string; // default "page"
   sizeKey?: string; // default "size"
   defaultPage?: number; // default 1
@@ -12,7 +13,7 @@ type Options = {
   /** history 기록 방식 (페이지네이션은 보통 replace가 UX 좋음) */
   history?: "push" | "replace"; // default "replace"
 
-  /** 페이지 이동 시 스크롤 이동 여부 (목록은 보통 false가 좋음) */
+  /** 페이지 이동 시 스크롤 이동 여부 (목록은 보통 false 추천) */
   scroll?: boolean; // default false
 };
 
@@ -21,7 +22,7 @@ type Options = {
  * - page/size를 읽고, setPage/setSize로 URL 갱신
  * - keyword 등 다른 쿼리는 유지
  */
-export function usePagenationQuery(options?: Options) {
+export function usePaginationQuery(options?: UsePaginationQueryOptions) {
   const {
     pageKey = "page",
     sizeKey = "size",
@@ -61,7 +62,7 @@ export function usePagenationQuery(options?: Options) {
     });
 
     const qs = nextSp.toString();
-    navigate(qs ? `${pathname}?${qs}` : pathname); // ✅ '?' 꼬리 방지
+    navigate(qs ? `${pathname}?${qs}` : pathname); // '?' 꼬리 방지
   };
 
   const setPage = (nextPage: number) => {
