@@ -25,6 +25,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { label: "학과관리", href: "/admin/depts" },
       { label: "계정관리", href: "/admin/authority/accounts" },
+      { label: "학기관리", href: "/admin/authority/semesters" },
     ],
   },
   {
