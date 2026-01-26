@@ -26,6 +26,7 @@ public enum ErrorCode {
     INVALID_HEAD_PROFESSOR(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "담당 교수는 해당 학과 소속 교수만 지정할 수 있습니다.", "dept.headProfessor.invalid"),
     INVALID_PROFESSOR_ACCOUNT(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "유효하지않은 교수아이디입니다.", "dept.headProfessor.invalid"),
     PROFESSOR_PROFILE_NOT_FOUND(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "유효하지않은 교수아이디를 찾을 수 없습니다.", "dept.headProfessor.invalid"),
+    STUDENT_PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDENT_PROFILE_NOT_FOUND", "학생 계정을 찾을 수 없습니다.", "student.account.notFound"),
 
     // =========================
     // Domain: Dept&Major
