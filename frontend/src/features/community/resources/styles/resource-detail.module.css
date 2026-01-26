@@ -1,8 +1,12 @@
 .wrap { padding: 24px 28px; }
 
 .breadcrumb {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: #7a7a7a; margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #7a7a7a;
+  margin-bottom: 14px;
 }
 
 .pageTitle { font-size: 22px; font-weight: 900; color: #1e1e1e; margin-bottom: 10px; }
@@ -23,15 +27,18 @@
   gap: 10px;
 }
 
+/* Detail 페이지 배지: 색상은 inline style로 주고, 형태만 CSS로 */
 .badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  height: 22px; padding: 0 10px; border-radius: 6px;
-  font-size: 12px; font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
 }
-.badgeService { background: #e9f0ff; color: #3b5bdb; }
-.badgeAcademic { background: #e8fbf7; color: #0ca678; }
-.badgeEvent { background: #f3e8ff; color: #9c36b5; }
-.badgeNormal { background: #f1f3f5; color: #495057; }
 
 .headTitle { font-weight: 900; color: #222; font-size: 13px; }
 
@@ -86,14 +93,5 @@
   cursor: pointer;
 }
 
-.btnPrimary {
-  border-color: #3b82f6;
-  background: #3b82f6;
-  color: #fff;
-}
-
-.btnDanger {
-  border-color: #ef4444;
-  background: #ef4444;
-  color: #fff;
-}
+.btnPrimary { border-color: #3b82f6; background: #3b82f6; color: #fff; }
+.btnDanger  { border-color: #ef4444; background: #ef4444; color: #fff; }

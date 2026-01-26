@@ -1,4 +1,4 @@
-import { bffRequest } from "@/features/systemStatus/lib/bffClient";
+import { bffRequest } from "@/lib/bffClient";
 import { AccountStatus, AccountType } from "../types";
 import type {
   AccountsListResponseDto,
@@ -9,7 +9,7 @@ import type {
   MajorDto,
 } from "./dto";
 
-const BASE = "/api/authority/accounts";
+const BASE = "/api/admin/authority/accounts";
 
 type AccountsListParams = {
   accountType?: AccountType;

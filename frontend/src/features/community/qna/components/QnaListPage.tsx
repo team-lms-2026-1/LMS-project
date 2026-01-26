@@ -1,21 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/qna-list.module.css";
-import { mockQna } from "../data/mockQna";
 import type { QnaCategory } from "../types";
+import { qnaApi } from "../api/qnaApi";
+import type { QnaListItemDto } from "../api/dto";
 
 function badgeClass(category: QnaCategory) {
   switch (category) {
     case "서비스":
       return `${styles.badge} ${styles.badgeService}`;
-    case "학습":
-      return `${styles.badge} ${styles.badgeStudy}`;
-    case "정책":
-      return `${styles.badge} ${styles.badgePolicy}`;
     default:
-      return `${styles.badge} ${styles.badgeEtc}`;
+      return `${styles.badge} ${styles.badgeNormal}`;
   }
 }
 
@@ -25,50 +22,61 @@ export default function QnaListPage() {
   const [category, setCategory] = useState<"전체" | QnaCategory>("전체");
   const [keyword, setKeyword] = useState("");
 
-  const rows = useMemo(() => {
+  const [rows, setRows] = useState<QnaListItemDto[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchList = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await qnaApi.list({ category, keyword, page: 0, size: 20 });
+      setRows(data);
+    } catch (e: any) {
+      setError(e?.message ?? "Q&A 목록 조회 실패");
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const filteredRows = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
-    return mockQna.filter((q) => {
-      const categoryOk = category === "전체" ? true : q.category === category;
-      const keywordOk =
-        kw.length === 0
-          ? true
-          : q.title.toLowerCase().includes(kw) || q.content.toLowerCase().includes(kw);
+    return rows.filter((n) => {
+      const categoryOk = category === "전체" ? true : n.category === category;
+      const keywordOk = kw.length === 0 ? true : (n.title ?? "").toLowerCase().includes(kw);
       return categoryOk && keywordOk;
     });
-  }, [category, keyword]);
+  }, [rows, category, keyword]);
 
   return (
     <div className={styles.wrap}>
       <div className={styles.breadcrumb}>
         <span>커뮤니티</span>
         <span>&gt;</span>
-        <strong>Q&amp;A</strong>
+        <strong>Q&amp;A 관리</strong>
       </div>
 
       <div className={styles.header}>
         <div className={styles.title}>Q&amp;A</div>
 
         <div className={styles.filters}>
-          <select
-            className={styles.select}
-            value={category}
-            onChange={(e) => setCategory(e.target.value as "전체" | QnaCategory)}
-          >
+          <select className={styles.select} value={category} onChange={(e) => setCategory(e.target.value as any)}>
             <option value="전체">전체</option>
             <option value="서비스">서비스</option>
-            <option value="학습">학습</option>
-            <option value="정책">정책</option>
-            <option value="기타">기타</option>
+            <option value="학사">학사</option>
+            <option value="행사">행사</option>
+            <option value="일반">일반</option>
           </select>
 
-          <input
-            className={styles.input}
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="검색어 입력..."
-          />
+          <input className={styles.input} value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="검색어 입력..." />
 
-          <button className={styles.searchBtn} onClick={() => {}}>
+          <button className={styles.searchBtn} onClick={fetchList} disabled={loading}>
             검색
           </button>
         </div>
@@ -81,35 +89,37 @@ export default function QnaListPage() {
               <th className={styles.colNo}>번호</th>
               <th className={styles.colCategory}>분류</th>
               <th>제목</th>
-              <th className={styles.colAnswer}></th>
               <th className={styles.colViews}>조회수</th>
               <th className={styles.colDate}>작성일</th>
             </tr>
           </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr
-                key={row.id}
-                className={styles.row}
-                onClick={() => router.push(`/community/qna/${row.id}`)}
-              >
-                <td className={styles.colNo}>{row.no}</td>
-                <td className={styles.colCategory}>
-                  <span className={badgeClass(row.category)}>{row.category}</span>
-                </td>
-                <td>{row.title}</td>
-                <td className={styles.colAnswer}>
-                  <span className={styles.answerDot}>{row.answer ? "✓" : ""}</span>
-                </td>
-                <td className={styles.colViews}>{row.views.toLocaleString()}</td>
-                <td className={styles.colDate}>{row.createdAt}</td>
-              </tr>
-            ))}
 
-            {rows.length === 0 && (
+          <tbody>
+            {loading && (
               <tr>
-                <td colSpan={6} style={{ padding: 18, textAlign: "center", color: "#777" }}>
-                  검색 결과가 없습니다.
+                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
+                  불러오는 중...
+                </td>
+              </tr>
+            )}
+
+            {!loading &&
+              filteredRows.map((row, idx) => (
+                <tr key={String(row.id)} className={styles.row} onClick={() => router.push(`/admin/community/qna/${row.id}`)}>
+                  <td className={styles.colNo}>{String(idx + 1).padStart(5, "0")}</td>
+                  <td className={styles.colCategory}>
+                    <span className={badgeClass(row.category)}>{row.category}</span>
+                  </td>
+                  <td>{row.title}</td>
+                  <td className={styles.colViews}>{Number(row.views ?? 0).toLocaleString()}</td>
+                  <td className={styles.colDate}>{row.createdAt ?? "-"}</td>
+                </tr>
+              ))}
+
+            {!loading && filteredRows.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
+                  {error ? error : "검색 결과가 없습니다."}
                 </td>
               </tr>
             )}
@@ -118,7 +128,7 @@ export default function QnaListPage() {
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.leftBtn} onClick={() => alert("카테고리 관리(추후 연결)")}>
+        <button className={styles.leftBtn} onClick={() => router.push("/admin/community/qna/categories")}>
           카테고리 관리
         </button>
 
@@ -134,7 +144,7 @@ export default function QnaListPage() {
           <button className={styles.pageBtn}>›</button>
         </div>
 
-        <button className={styles.rightBtn} onClick={() => router.push("/community/qna/new")}>
+        <button className={styles.rightBtn} onClick={() => router.push("/admin/community/qna/new")}>
           등록
         </button>
       </div>

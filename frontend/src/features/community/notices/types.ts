@@ -1,18 +1,39 @@
-export type NoticeCategory = "서비스" | "학사" | "행사" | "일반";
+export type NoticeStatus = "게시 중" | "임시저장" | "비공개" | "삭제됨";
 
-export interface NoticeAttachment {
-  name: string;
-  url?: string; // 추후 다운로드 링크용
+export interface NoticeFile {
+  fileId?: number;        // 백엔드가 attachment_id 등을 내려주면 여기에 매핑
+  fileName?: string;
+  originalName?: string;
+  contentType?: string;
+  size?: number;
+  url?: string;
 }
 
-export interface Notice {
-  id: string;            // 라우팅용
-  no: string;            // 화면 표시 번호(00001)
-  category: NoticeCategory;
+/** 백엔드 원본 상세(현재 스펙: categoryName으로 내려옴) */
+export interface NoticeDetail {
+  noticeId: number;
+  categoryName: string; // ✅ 백엔드는 name
   title: string;
-  content: string;       // 상세/에디터 본문(현재는 텍스트)
-  author: string;
-  createdAt: string;     // YYYY.MM.DD
-  views: number;
-  attachment?: NoticeAttachment;
+  content: string;
+  authorName: string;
+  viewCount: number;
+  createdAt: string;
+  status: NoticeStatus;
+  files: NoticeFile[];
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  meta: unknown | null;
+}
+
+export type NoticeDetailResponse = ApiResponse<NoticeDetail>;
+
+export interface NoticeListItemBackend {
+  noticeId: number;
+  categoryName: string;
+  title: string;
+  viewCount: number;
+  createdAt: string;
+  status?: NoticeStatus;
 }
