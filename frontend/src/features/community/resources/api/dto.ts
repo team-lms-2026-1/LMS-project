@@ -1,15 +1,18 @@
-import type { ResourceItem, ResourceCategory } from "../types";
+import type { ResourceItem, ResourceAttachment } from "../types";
 
 export type ResourcesListParams = {
-  category?: "전체" | ResourceCategory;
+  categoryId?: number;
   keyword?: string;
   page?: number;
   size?: number;
 };
 
-export type ResourceListItemDto = ResourceItem;
+// ✅ 리스트 응답에서는 content/attachment가 없을 수 있으니 optional로 재정의
+export type ResourceListItemDto = Omit<ResourceItem, "content" | "attachment"> & {
+  content?: string;
+  attachment?: ResourceAttachment;
+};
 
-// 응답이 배열 or {items,total} 섞여도 대응
 export type ResourcesListResponseDto =
   | ResourceListItemDto[]
   | { items: ResourceListItemDto[]; total?: number }
@@ -18,9 +21,8 @@ export type ResourcesListResponseDto =
 
 export type CreateResourceRequestDto = {
   title: string;
-  category: ResourceCategory;
+  categoryId: number; // ✅ DB 카테고리 PK
   content: string;
-  // 첨부는 일단 제외(백엔드 스펙 나오면 multipart로 확장)
 };
 
 export type UpdateResourceRequestDto = CreateResourceRequestDto;

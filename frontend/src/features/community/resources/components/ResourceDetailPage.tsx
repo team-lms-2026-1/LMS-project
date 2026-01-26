@@ -1,37 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/resource-detail.module.css";
-import type { ResourceCategory, ResourceItem } from "../types";
+import type { ResourceItem } from "../types";
 import { resourcesApi } from "../api/resourcesApi";
+import { resourceCategoriesApi } from "../categories/api/resourceCategoriesApi";
+import type { ResourceCategoryDto } from "../categories/api/dto";
 
-function badgeClass(category: ResourceCategory, s: Record<string, string>) {
-  switch (category) {
-    case "서비스":
-      return `${s.badge} ${s.badgeService}`;
-    case "학사":
-      return `${s.badge} ${s.badgeAcademic}`;
-    case "행사":
-      return `${s.badge} ${s.badgeEvent}`;
-    default:
-      return `${s.badge} ${s.badgeNormal}`;
-  }
+function CategoryBadge({ name, bgColor, textColor }: { name: string; bgColor: string; textColor: string }) {
+  return (
+    <span className={styles.badge} style={{ backgroundColor: bgColor, color: textColor }}>
+      {name}
+    </span>
+  );
 }
 
 export default function ResourceDetailPage({ resourceId }: { resourceId: string }) {
   const router = useRouter();
 
   const [item, setItem] = useState<ResourceItem | null>(null);
+const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
+  const categoryMap = useMemo(() => {
+    const m = new Map<string, ResourceCategoryDto>();
+    categories.forEach((c) => m.set(String(c.categoryId), c));
+    return m;
+  }, [categories]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await resourceCategoriesApi.list({ page: 0, size: 200 });
+      setCategories(data);
+    } catch {
+      setCategories([]);
+    }
+  };
 
   const fetchDetail = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await resourcesApi.get(resourceId);
-      setItem(data);
+      setItem(data); // ✅ ResourceItem(content optional)로 안전하게 들어감
     } catch (e: any) {
       setError(e?.message ?? "자료 상세 조회 실패");
       setItem(null);
@@ -41,6 +54,7 @@ export default function ResourceDetailPage({ resourceId }: { resourceId: string 
   };
 
   useEffect(() => {
+    fetchCategories();
     fetchDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resourceId]);
@@ -51,8 +65,7 @@ export default function ResourceDetailPage({ resourceId }: { resourceId: string 
 
     try {
       await resourcesApi.remove(resourceId);
-      // ✅ 현재 app 라우트가 /admin/community/resoures 기준
-      router.push("/admin/community/resoures");
+      router.push("/admin/community/resources");
     } catch (e: any) {
       alert(e?.message ?? "삭제 실패");
     }
@@ -60,6 +73,12 @@ export default function ResourceDetailPage({ resourceId }: { resourceId: string 
 
   if (loading) return <div className={styles.wrap}>불러오는 중...</div>;
   if (!item) return <div className={styles.wrap}>{error ?? "자료를 찾을 수 없습니다."}</div>;
+
+  // ✅ number/string 비교 경고 방지: String으로 통일
+  const c = categoryMap.get(String(item.categoryId));
+  const badgeName = item.categoryName ?? c?.name ?? "-";
+  const bg = c?.bgColorHex ?? "#64748b";
+  const tc = c?.textColorHex ?? "#ffffff";
 
   return (
     <div className={styles.wrap}>
@@ -75,18 +94,19 @@ export default function ResourceDetailPage({ resourceId }: { resourceId: string 
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <span className={badgeClass(item.category, styles)}>{item.category}</span>
+          <CategoryBadge name={badgeName} bgColor={bg} textColor={tc} />
           <span className={styles.headTitle}>{item.title}</span>
         </div>
 
         <div className={styles.metaRow}>
-          <div>작성자: {item.author}</div>
-          <div style={{ textAlign: "center" }}>작성일: {item.createdAt}</div>
+          <div>작성자: {item.author ?? "-"}</div>
+          <div style={{ textAlign: "center" }}>작성일: {item.createdAt ?? "-"}</div>
           <div style={{ textAlign: "right" }}>조회수: {Number(item.views ?? 0).toLocaleString()}</div>
         </div>
 
         <div className={styles.body}>
-          <div className={styles.content}>{item.content}</div>
+          {/* ✅ content가 없을 수 있으므로 안전 처리 */}
+          <div className={styles.content}>{item.content ?? ""}</div>
         </div>
 
         <div className={styles.attach}>
@@ -100,7 +120,7 @@ export default function ResourceDetailPage({ resourceId }: { resourceId: string 
       <div className={styles.actions}>
         <button
           className={`${styles.btn} ${styles.btnPrimary}`}
-          onClick={() => router.push(`/admin/community/resoures/${resourceId}/edit`)}
+          onClick={() => router.push(`/admin/community/resources/${resourceId}/edit`)}
         >
           수정
         </button>

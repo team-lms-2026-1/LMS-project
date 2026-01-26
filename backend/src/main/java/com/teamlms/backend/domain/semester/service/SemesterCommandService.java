@@ -23,16 +23,35 @@ public class SemesterCommandService {
     
     // 학기 생성
     public void create(int year, Term term, LocalDate startDate, LocalDate endDate) {
-        
+
         validateDateRange(startDate, endDate);
 
         if (semesterRepository.existsByYearAndTerm(year, term)) {
             throw new BusinessException(ErrorCode.SEMESTER_ALREADY_EXISTS, year, term);
         }
 
-        Semester semester = Semester.planned(year, term, startDate, endDate);
+        String displayName = generateDisplayName(year, term);
+
+        Semester semester = Semester.planned(
+                year, term, displayName, startDate, endDate
+        );
+
         semesterRepository.save(semester);
     }
+
+    private String generateDisplayName(int year, Term term) {
+        return year + "-" + termSuffix(term);
+    }
+
+    private String termSuffix(Term term) {
+        return switch (term) {
+            case FIRST -> "1";
+            case SECOND -> "2";
+            case SUMMER -> "s";
+            case WINTER -> "w";
+        };
+    }
+
 
     // 학기 수정
     public void patchSemester(Long semesterId, LocalDate startDate, LocalDate endDate,  SemesterStatus status) {

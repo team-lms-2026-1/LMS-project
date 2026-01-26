@@ -1,0 +1,136 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.modal {
+  width: 480px;
+  max-width: 90%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 28px 28px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.close {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.body {
+  margin-bottom: 20px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #d0d7e2;
+  padding: 0 12px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 140px;
+  border-radius: 8px;
+  border: 1px solid #d0d7e2;
+  padding: 10px 12px;
+  font-size: 13px;
+  resize: none;
+  box-sizing: border-box;
+}
+
+/* 토글 */
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.toggleCircle {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+}
+
+.toggleLabel {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.toggleOff {
+  background-color: #f97373; /* 연한 빨강 */
+  color: #7f1d1d;
+}
+
+.toggleOn {
+  background-color: #60a5fa; /* 연한 파랑 */
+  color: #1d4ed8;
+}
+
+/* 푸터 버튼 */
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.secondaryButton {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #d0d7e2;
+  background-color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+}

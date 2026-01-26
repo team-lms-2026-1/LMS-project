@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "@/features/community/styles/category-manager.module.css";
-import type { CategoryRow, CategoryListParams } from "@/features/community/types/category";
+import type { CategoryRow, CategoryListParams, CategoryId } from "@/features/community/types/category";
 
 const BG_PRESETS = ["#3b82f6", "#10b981", "#a855f7", "#f97316", "#ef4444", "#111827", "#64748b", "#fde047"];
 
 type CategoryApi = {
   list: (params: CategoryListParams) => Promise<CategoryRow[]>;
-  create: (body: { name: string; bgColor: string; textColor: string }) => Promise<any>;
+  create: (body: { categoryId: CategoryId; name: string; bgColor: string; textColor: string }) => Promise<any>;
   update: (id: string, body: { name: string; bgColor: string; textColor: string }) => Promise<any>;
   remove: (id: string) => Promise<any>;
 };
@@ -23,9 +23,9 @@ function Badge({ name, bgColor, textColor }: { name: string; bgColor: string; te
 }
 
 export default function CategoryManagerPage(props: {
-  breadcrumb: string;     // 예: "커뮤니티 - 자료실 카테고리 관리"
-  title: string;          // 예: "자료실"
-  backTo: string;         // 예: "/admin/community/resources"
+  breadcrumb: string;
+  title: string;
+  backTo: string;
   api: CategoryApi;
 }) {
   const router = useRouter();
@@ -37,6 +37,7 @@ export default function CategoryManagerPage(props: {
   const [error, setError] = useState<string | null>(null);
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [newId, setNewId] = useState<string>(""); // ✅ ID 입력 추가
   const [newName, setNewName] = useState("");
   const [newBg, setNewBg] = useState("#3b82f6");
   const [newText, setNewText] = useState("#ffffff");
@@ -109,10 +110,19 @@ export default function CategoryManagerPage(props: {
   };
 
   const create = async () => {
+    if (!newId.trim()) return alert("카테고리 ID를 입력하세요.");
     if (!newName.trim()) return alert("카테고리 제목을 입력하세요.");
+
     try {
-      await api.create({ name: newName.trim(), bgColor: newBg, textColor: newText });
+      await api.create({
+        categoryId: newId.trim(), // ✅ 요구사항: ID도 전송
+        name: newName.trim(),
+        bgColor: newBg,
+        textColor: newText,
+      });
+
       setCreateOpen(false);
+      setNewId("");
       setNewName("");
       setNewBg("#3b82f6");
       setNewText("#ffffff");
@@ -187,16 +197,32 @@ export default function CategoryManagerPage(props: {
                             <div className={styles.colorRow}>
                               <div className={styles.colorBlock}>
                                 <div className={styles.colorLabel}>배경</div>
-                                <input type="color" className={styles.colorPicker} value={editBg} onChange={(e) => setEditBg(e.target.value)} />
+                                <input
+                                  type="color"
+                                  className={styles.colorPicker}
+                                  value={editBg}
+                                  onChange={(e) => setEditBg(e.target.value)}
+                                />
                               </div>
                               <div className={styles.colorBlock}>
                                 <div className={styles.colorLabel}>글자</div>
-                                <input type="color" className={styles.colorPicker} value={editText} onChange={(e) => setEditText(e.target.value)} />
+                                <input
+                                  type="color"
+                                  className={styles.colorPicker}
+                                  value={editText}
+                                  onChange={(e) => setEditText(e.target.value)}
+                                />
                               </div>
 
                               <div className={styles.palette}>
                                 {BG_PRESETS.map((c) => (
-                                  <button key={c} type="button" className={styles.swatch} style={{ backgroundColor: c }} onClick={() => setEditBg(c)} />
+                                  <button
+                                    key={c}
+                                    type="button"
+                                    className={styles.swatch}
+                                    style={{ backgroundColor: c }}
+                                    onClick={() => setEditBg(c)}
+                                  />
                                 ))}
                               </div>
                             </div>
@@ -254,7 +280,20 @@ export default function CategoryManagerPage(props: {
               <div className={styles.createLeft}>
                 <Badge name={newName} bgColor={newBg} textColor={newText} />
 
-                <input className={styles.nameInput} value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="카테고리 제목..." />
+                {/* ✅ ID 입력 추가 */}
+                <input
+                  className={styles.nameInput}
+                  value={newId}
+                  onChange={(e) => setNewId(e.target.value)}
+                  placeholder="카테고리 ID..."
+                />
+
+                <input
+                  className={styles.nameInput}
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="카테고리 제목..."
+                />
 
                 <div className={styles.colorRow}>
                   <div className={styles.colorBlock}>
@@ -282,6 +321,7 @@ export default function CategoryManagerPage(props: {
                   className={styles.btnDanger}
                   onClick={() => {
                     setCreateOpen(false);
+                    setNewId("");
                     setNewName("");
                     setNewBg("#3b82f6");
                     setNewText("#ffffff");

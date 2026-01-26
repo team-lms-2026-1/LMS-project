@@ -1,19 +1,30 @@
-import { proxyToBackend } from "@/lib/bff";
+import { proxyStreamToBackend } from "@/lib/bff";
 
-const BACKEND_PATH = "/api/v1/admin/community/resources";
+export const runtime = "nodejs";
+
+const UPSTREAM = "/api/v1/admin/community/resources";
 
 export async function GET(req: Request) {
-  return proxyToBackend(req, BACKEND_PATH, {
+  return proxyStreamToBackend(req, {
+    upstreamPath: UPSTREAM,
     method: "GET",
     forwardQuery: true,
   });
 }
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => null);
-  return proxyToBackend(req, BACKEND_PATH, {
+  return proxyStreamToBackend(req, {
+    upstreamPath: UPSTREAM,
     method: "POST",
-    body,
+    forwardQuery: false,
+  });
+}
+
+// 필요 시(부분 수정)
+export async function PATCH(req: Request) {
+  return proxyStreamToBackend(req, {
+    upstreamPath: UPSTREAM,
+    method: "PATCH",
     forwardQuery: false,
   });
 }

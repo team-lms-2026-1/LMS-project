@@ -1,28 +1,21 @@
+// 위치: frontend/src/app/(admin)/admin/depts/[deptId]/page.tsx
+
 "use client";
 
-import { useEffect, useState } from "react";
+import DeptDetailPage from "@/features/authority/depts/components/detail/DeptDetailPage";
 
-export default function DeptDetailPage({
-  params,
-}: {
-  params: { deptId: string };
-}) {
-  const [dept, setDept] = useState<any>(null);
+type PageProps = {
+  params: {
+    deptId: string;
+  };
+};
 
-  useEffect(() => {
-    fetch(`/api/bff/admin/depts/${params.deptId}`)
-      .then((res) => res.json())
-      .then(setDept);
-  }, [params.deptId]);
+/**
+ * 학과 상세 페이지 라우트
+ * URL: /admin/depts/[deptId]
+ */
+export default function Page({ params }: PageProps) {
+  const { deptId } = params;
 
-  if (!dept) return <div>로딩 중...</div>;
-
-  return (
-    <div>
-      <h1 className="text-xl font-bold">학과 상세</h1>
-      <p>학과명: {dept.deptName}</p>
-      <p>학과코드: {dept.deptCode}</p>
-      <p>사용여부: {dept.isActive ? "사용" : "미사용"}</p>
-    </div>
-  );
+  return <DeptDetailPage deptId={deptId} />;
 }

@@ -1,42 +1,120 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "../styles/resource-form.module.css";
-import type { ResourceCategory } from "../types";
-import { resourcesApi } from "../api/resourcesApi";
+import styles from "../styles/resource-list.module.css"; 
+import { resourceCategoriesApi } from "../categories/api/resourceCategoriesApi";
+import type { ResourceCategoryDto } from "../categories/api/dto";
 
-const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
+const BG_PRESETS = ["#E6F4FF", "#DCFCE7", "#F3F4F6", "#DDD6FE", "#FCE7F3", "#FDE68A", "#FED7AA", "#E5E7EB", "#111827"];
+const TX_PRESETS = ["#1D4ED8", "#047857", "#111827", "#6D28D9", "#BE185D", "#92400E", "#9A3412", "#111827", "#FFFFFF"];
 
-export default function ResourceCreatePage() {
+function Chip({ name, bg, color }: { name: string; bg: string; color: string }) {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "6px 14px",
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 700,
+        background: bg,
+        color,
+        minWidth: 70,
+        textAlign: "center",
+      }}
+    >
+      {name}
+    </span>
+  );
+}
+
+export default function ResourceCategoryPage() {
   const router = useRouter();
 
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<ResourceCategory>("서비스");
-  const [content, setContent] = useState("");
-  const [fileName, setFileName] = useState<string>("");
+  const [keyword, setKeyword] = useState("");
+  const [rows, setRows] = useState<ResourceCategoryDto[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const [saving, setSaving] = useState(false);
+  // 폼(생성/수정 공용) — ✅ ID 없음
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [name, setName] = useState("");
+  const [bgColorHex, setBgColorHex] = useState("#E6F4FF");
+  const [textColorHex, setTextColorHex] = useState("#1D4ED8");
+
+  const isEditing = editingId != null;
+
+  const filteredRows = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
+    if (!kw) return rows;
+    return rows.filter((r) => (r.name ?? "").toLowerCase().includes(kw));
+  }, [rows, keyword]);
+
+  const fetchList = async () => {
+    setLoading(true);
+    try {
+      const data = await resourceCategoriesApi.list({ page: 0, size: 200 });
+      setRows(data);
+    } catch {
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchList();
+  }, []);
+
+  const resetForm = () => {
+    setEditingId(null);
+    setName("");
+    setBgColorHex("#E6F4FF");
+    setTextColorHex("#1D4ED8");
+  };
+
+  const onStartEdit = (row: ResourceCategoryDto) => {
+    setEditingId(row.categoryId);
+    setName(row.name ?? "");
+    setBgColorHex(row.bgColorHex ?? "#E6F4FF");
+    setTextColorHex(row.textColorHex ?? "#1D4ED8");
+  };
 
   const onSave = async () => {
-    if (!title.trim()) return alert("제목을 입력하세요.");
-    if (!content.trim()) return alert("내용을 입력하세요.");
+    if (!name.trim()) return alert("카테고리 이름을 입력하세요.");
 
-    setSaving(true);
     try {
-      await resourcesApi.create({
-        title: title.trim(),
-        category,
-        content: content.trim(),
-        // 첨부파일은 백엔드 스펙 확정 전이라 전송하지 않음(현재는 UI만 유지)
-      });
+      if (isEditing) {
+        await resourceCategoriesApi.update(editingId!, {
+          name: name.trim(),
+          bgColorHex,
+          textColorHex,
+        });
+      } else {
+        await resourceCategoriesApi.create({
+          name: name.trim(),
+          bgColorHex,
+          textColorHex,
+        });
+      }
 
-      // ✅ 현재 app 라우트가 /admin/community/resoures 기준
-      router.push("/admin/community/resoures");
+      await fetchList();
+      resetForm();
     } catch (e: any) {
-      alert(e?.message ?? "자료 등록 실패");
-    } finally {
-      setSaving(false);
+      alert(e?.message ?? "저장 실패");
+    }
+  };
+
+  const onDelete = async (row: ResourceCategoryDto) => {
+    const ok = window.confirm(`"${row.name}" 카테고리를 삭제하시겠습니까?`);
+    if (!ok) return;
+
+    try {
+      await resourceCategoriesApi.remove(row.categoryId);
+      await fetchList();
+      if (editingId === row.categoryId) resetForm();
+    } catch (e: any) {
+      alert(e?.message ?? "삭제 실패");
     }
   };
 
@@ -45,101 +123,197 @@ export default function ResourceCreatePage() {
       <div className={styles.breadcrumb}>
         <span>커뮤니티</span>
         <span>-</span>
-        <span>자료실</span>
-        <span>-</span>
-        <span>등록</span>
+        <span>자료실 카테고리 관리</span>
       </div>
 
-      <div className={styles.pageTitle}>자료실</div>
+      <div className={styles.header}>
+        <div className={styles.title}>자료실</div>
 
-      <div className={styles.formCard}>
-        <table className={styles.formTable}>
+        <div className={styles.filters}>
+          <input
+            className={styles.input}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="검색어 입력..."
+          />
+          <button className={styles.searchBtn} onClick={fetchList} disabled={loading}>
+            검색
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.tableCard}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th style={{ width: 240, textAlign: "left" }}>분류</th>
+              <th style={{ width: 160, textAlign: "center" }}>게시물 횟수</th>
+              <th style={{ width: 180, textAlign: "center" }}>최근 생성일</th>
+              <th style={{ width: 170 }} />
+            </tr>
+          </thead>
+
           <tbody>
-            <tr>
-              <th>제목</th>
-              <td>
-                <div className={styles.inlineRow}>
-                  <input
-                    className={styles.input}
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="제목"
-                  />
-                  <select
-                    className={styles.select}
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as ResourceCategory)}
-                  >
-                    <option value="서비스">서비스</option>
-                    <option value="학사">학사</option>
-                    <option value="행사">행사</option>
-                    <option value="일반">일반</option>
-                  </select>
-                </div>
-              </td>
-            </tr>
+            {loading && (
+              <tr>
+                <td colSpan={4} style={{ padding: 18, textAlign: "center", color: "#777" }}>
+                  불러오는 중...
+                </td>
+              </tr>
+            )}
 
-            <tr>
-              <th>내용</th>
-              <td>
-                <div className={styles.editorWrap}>
-                  <div className={styles.toolbar}>
-                    {TOOLBAR.map((t) => (
-                      <button key={t} type="button" className={styles.toolBtn} title={t}>
-                        {t}
-                      </button>
-                    ))}
-                  </div>
-                  <textarea
-                    className={styles.textarea}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <th>
-                첨부<br />
-                파일
-              </th>
-              <td>
-                <div className={styles.attachArea}>
-                  <div className={styles.attachTab}>
-                    <button type="button" className={styles.tabBtn}>
-                      내 PC
+            {!loading &&
+              filteredRows.map((r) => (
+                <tr key={String(r.categoryId)}>
+                  <td>
+                    <Chip name={r.name} bg={r.bgColorHex} color={r.textColorHex} />
+                  </td>
+                  <td style={{ textAlign: "center", color: "#6b7280" }}>{r.postCount ?? "-"}</td>
+                  <td style={{ textAlign: "center", color: "#6b7280" }}>{r.latestCreatedAt ?? "-"}</td>
+                  <td style={{ textAlign: "right" }}>
+                    <button
+                      type="button"
+                      className={styles.pageBtn}
+                      style={{ marginRight: 8, background: "#2563eb", color: "#fff" }}
+                      onClick={() => onStartEdit(r)}
+                    >
+                      수정
                     </button>
-                  </div>
+                    <button
+                      type="button"
+                      className={styles.pageBtn}
+                      style={{ background: "#ef4444", color: "#fff" }}
+                      onClick={() => onDelete(r)}
+                    >
+                      삭제
+                    </button>
+                  </td>
+                </tr>
+              ))}
 
-                  <div>
-                    <div className={styles.dropzone}>
-                      Drop here to attach or{" "}
-                      <label style={{ color: "#3b82f6", cursor: "pointer" }}>
-                        upload
-                        <input
-                          type="file"
-                          style={{ display: "none" }}
-                          onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
+            {/* 하단 추가/수정 폼 */}
+            {!loading && (
+              <tr>
+                <td colSpan={4} style={{ padding: 18 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 18,
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 10,
+                      padding: 18,
+                      background: "#fff",
+                    }}
+                  >
+                    <Chip name={name.trim() || "test"} bg={bgColorHex} color={textColorHex} />
+
+                    {/* ✅ ID 입력 제거: 이름만 받음 */}
+                    <input
+                      className={styles.input}
+                      style={{ width: 260 }}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="카테고리 이름..."
+                    />
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 12, color: "#6b7280" }}>배경</div>
+                      <input
+                        type="color"
+                        value={bgColorHex}
+                        onChange={(e) => setBgColorHex(e.target.value)}
+                        style={{ width: 36, height: 28, padding: 0, border: "1px solid #d1d5db", borderRadius: 6 }}
+                        title="배경색"
+                      />
+                      {BG_PRESETS.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setBgColorHex(c)}
+                          style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: 4,
+                            border: "1px solid #d1d5db",
+                            background: c,
+                            cursor: "pointer",
+                          }}
+                          title={c}
                         />
-                      </label>
+                      ))}
                     </div>
 
-                    {fileName && <div className={styles.fileName}>{fileName}</div>}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 12, color: "#6b7280" }}>글자</div>
+                      <input
+                        type="color"
+                        value={textColorHex}
+                        onChange={(e) => setTextColorHex(e.target.value)}
+                        style={{ width: 36, height: 28, padding: 0, border: "1px solid #d1d5db", borderRadius: 6 }}
+                        title="글자색"
+                      />
+                      {TX_PRESETS.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setTextColorHex(c)}
+                          style={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: 4,
+                            border: "1px solid #d1d5db",
+                            background: c,
+                            cursor: "pointer",
+                          }}
+                          title={c}
+                        />
+                      ))}
+                    </div>
+
+                    <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
+                      <button
+                        type="button"
+                        className={styles.pageBtn}
+                        style={{ background: "#2563eb", color: "#fff" }}
+                        onClick={onSave}
+                      >
+                        완료
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.pageBtn}
+                        style={{ background: "#ef4444", color: "#fff" }}
+                        onClick={resetForm}
+                      >
+                        취소
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            )}
+
+            {!loading && filteredRows.length === 0 && (
+              <tr>
+                <td colSpan={4} style={{ padding: 18, textAlign: "center", color: "#777" }}>
+                  카테고리가 없습니다.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className={styles.actions}>
-        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()} disabled={saving}>
-          취소
-        </button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
-          등록
+      {/* ✅ 하단 확인 버튼: 자료실 목록으로 복귀 */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+        <button
+          type="button"
+          className={styles.rightBtn}
+          onClick={() => router.push("/admin/community/resources")}
+        >
+          확인
         </button>
       </div>
     </div>

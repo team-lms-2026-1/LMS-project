@@ -356,6 +356,7 @@ export default function NoticeCategoryPage() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

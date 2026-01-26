@@ -1,20 +1,24 @@
-export type ResourceCategory = "서비스" | "학사" | "행사" | "일반";
-
 export interface ResourceAttachment {
   name: string;
   url?: string;
 }
 
 export interface ResourceItem {
-  id: string;            // 라우팅용
-  no: string;            // 00001
-  category: ResourceCategory;
+  id: string;
+  no?: string;
+
+  categoryId: number;
+  categoryName?: string;
+
   title: string;
-  content: string;
 
-  author: string;
-  createdAt: string;     // YYYY.MM.DD
-  views: number;
+  // ✅ 리스트 응답에는 content가 없을 수 있으므로 optional
+  content?: string;
 
+  author?: string;
+  createdAt?: string;
+  views?: number;
+
+  // ✅ attachment optional
   attachment?: ResourceAttachment;
 }

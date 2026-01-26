@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/resource-form.module.css";
-import type { ResourceCategory, ResourceItem } from "../types";
+import type { ResourceListItemDto } from "../api/dto";
 import { resourcesApi } from "../api/resourcesApi";
+import { resourceCategoriesApi } from "../categories/api/resourceCategoriesApi";
+import type { ResourceCategoryDto } from "../categories/api/dto";
 
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
@@ -15,12 +17,28 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [item, setItem] = useState<ResourceItem | null>(null);
+  const [item, setItem] = useState<ResourceListItemDto | null>(null);
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<ResourceCategory>("서비스");
+  const [categoryId, setCategoryId] = useState<string>(""); // ✅ string
   const [content, setContent] = useState("");
   const [fileName, setFileName] = useState<string>("");
+
+  const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
+  const categoryMap = useMemo(() => {
+    const m = new Map<string, ResourceCategoryDto>();
+    categories.forEach((c) => m.set(String(c.categoryId), c));
+    return m;
+  }, [categories]);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await resourceCategoriesApi.list({ page: 0, size: 200 });
+      setCategories(data);
+    } catch {
+      setCategories([]);
+    }
+  };
 
   const fetchDetail = async () => {
     setLoading(true);
@@ -30,9 +48,9 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
       setItem(data);
 
       setTitle(data.title ?? "");
-      setCategory((data.category ?? "서비스") as ResourceCategory);
-      setContent(data.content ?? "");
-      setFileName(data.attachment?.name ?? "");
+      setCategoryId(String(data.categoryId ?? "")); // ✅ string으로 세팅
+      setContent((data as any).content ?? ""); // 상세 응답에 content 있으면 사용
+      setFileName((data as any).attachment?.name ?? "");
     } catch (e: any) {
       setError(e?.message ?? "자료 조회 실패");
       setItem(null);
@@ -42,6 +60,7 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
   };
 
   useEffect(() => {
+    fetchCategories();
     fetchDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resourceId]);
@@ -50,16 +69,18 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
     if (!title.trim()) return alert("제목을 입력하세요.");
     if (!content.trim()) return alert("내용을 입력하세요.");
 
+    const cid = Number(categoryId);
+    if (!Number.isFinite(cid) || cid <= 0) return alert("카테고리를 선택하세요.");
+
     setSaving(true);
     try {
       await resourcesApi.update(resourceId, {
         title: title.trim(),
-        category,
+        categoryId: cid, // ✅ number 변환
         content: content.trim(),
       });
 
-      // ✅ 현재 app 라우트가 /admin/community/resoures 기준
-      router.push(`/admin/community/resoures/${resourceId}`);
+      router.push(`/admin/community/resources/${resourceId}`);
     } catch (e: any) {
       alert(e?.message ?? "수정 실패");
     } finally {
@@ -69,6 +90,8 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
 
   if (loading) return <div className={styles.wrap}>불러오는 중...</div>;
   if (!item) return <div className={styles.wrap}>{error ?? "자료를 찾을 수 없습니다."}</div>;
+
+  const selectedCategory = categoryId ? categoryMap.get(categoryId) : null;
 
   return (
     <div className={styles.wrap}>
@@ -95,17 +118,39 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="제목"
                   />
+
                   <select
                     className={styles.select}
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as ResourceCategory)}
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
                   >
-                    <option value="서비스">서비스</option>
-                    <option value="학사">학사</option>
-                    <option value="행사">행사</option>
-                    <option value="일반">일반</option>
+                    {categories.length === 0 ? (
+                      <option value="">카테고리가 없습니다</option>
+                    ) : (
+                      categories.map((c) => (
+                        <option key={String(c.categoryId)} value={String(c.categoryId)}>
+                          {c.name}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </div>
+
+                {selectedCategory && (
+                  <div style={{ marginTop: 8, fontSize: 12, color: "#6b7280" }}>
+                    선택됨:{" "}
+                    <span
+                      style={{
+                        background: selectedCategory.bgColorHex ,
+                        color: selectedCategory.textColorHex ,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                      }}
+                    >
+                      {selectedCategory.name}
+                    </span>
+                  </div>
+                )}
               </td>
             </tr>
 
