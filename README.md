@@ -135,7 +135,7 @@ PR 페이지에서 아래 항목이 **성공(✅)** 상태여야 함:
 
 ## 5. PR 머지 후 정리
 
-```bash
+```bashz
 git checkout main
 git pull origin main
 git branch -d feature/your-task-name
@@ -166,7 +166,7 @@ docker compose -f infra/docker-compose.local.yml down
 
 ---
 
-### 6-2. Health Check
+### 6-2. Health Check ( No valid )
 
 ```
 GET http://localhost:8080/health
