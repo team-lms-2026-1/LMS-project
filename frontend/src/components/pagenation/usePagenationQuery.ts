@@ -1,0 +1,62 @@
+"use client";
+
+import * as React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+type Options = {
+  pageKey?: string; // default "page"
+  sizeKey?: string; // default "size"
+  defaultPage?: number; // default 1
+  defaultSize?: number; // default 10
+};
+
+/**
+ * URL 쿼리스트링 기반 페이지네이션 상태 관리
+ * - page/size를 읽고, setPage/setSize로 URL 갱신
+ * - keyword 등 다른 쿼리는 유지
+ */
+export function usePagenationQuery(options?: Options) {
+  const {
+    pageKey = "page",
+    sizeKey = "size",
+    defaultPage = 1,
+    defaultSize = 10,
+  } = options ?? {};
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const sp = useSearchParams();
+
+  const page = React.useMemo(() => {
+    const v = Number(sp.get(pageKey));
+    return Number.isFinite(v) && v >= 1 ? v : defaultPage;
+  }, [sp, pageKey, defaultPage]);
+
+  const size = React.useMemo(() => {
+    const v = Number(sp.get(sizeKey));
+    return Number.isFinite(v) && v >= 1 ? v : defaultSize;
+  }, [sp, sizeKey, defaultSize]);
+
+  const setQuery = (next: Record<string, string | number | null | undefined>) => {
+    const nextSp = new URLSearchParams(sp.toString());
+
+    Object.entries(next).forEach(([k, v]) => {
+      if (v === null || v === undefined || String(v).trim() === "") nextSp.delete(k);
+      else nextSp.set(k, String(v));
+    });
+
+    router.push(`${pathname}?${nextSp.toString()}`);
+  };
+
+  const setPage = (nextPage: number) => {
+    setQuery({ [pageKey]: Math.max(1, Math.floor(nextPage)) });
+  };
+
+  const setSize = (nextSize: number) => {
+    const s = Math.max(1, Math.floor(nextSize));
+    // size가 바뀌면 보통 page는 1로 리셋
+    setQuery({ [sizeKey]: s, [pageKey]: 1 });
+  };
+
+  return { page, size, setPage, setSize };
+}

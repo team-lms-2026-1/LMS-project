@@ -17,11 +17,7 @@ function toCategoryRow(r: ResourceCategoryDto): CategoryRow {
 }
 
 function toCreateBody(row: Omit<CategoryRow, "categoryId" | "postCount" | "latestCreatedAt">) {
-  return {
-    name: row.name,
-    bgColorHex: row.bgColor,
-    textColorHex: row.textColor,
-  };
+  return { name: row.name, bgColorHex: row.bgColor, textColorHex: row.textColor };
 }
 
 const apiAdapter: CategoryApi = {

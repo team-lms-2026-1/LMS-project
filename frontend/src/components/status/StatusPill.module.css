@@ -1,0 +1,67 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 34px;
+  min-width: 110px;
+  padding: 0 14px;
+
+  border-radius: 10px;
+  border: 0;
+
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+
+  color: #ffffff;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: transform 80ms ease, filter 120ms ease;
+}
+
+.clickable:hover {
+  filter: brightness(0.98);
+}
+
+.clickable:active {
+  transform: translateY(1px);
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Status colors (스크린샷 톤에 맞춘 값) */
+.status_DRAFT {
+  background: #9ca3af; /* gray */
+}
+
+.status_OPEN {
+  background: #22c55e; /* green */
+}
+
+.status_ENROLL_CLOSED {
+  background: #64748b; /* slate */
+}
+
+.status_PROGRESS {
+  background: #f59e0b; /* amber */
+}
+
+.status_COMPLETED {
+  background: #1d4ed8; /* blue */
+}
+
+.status_CLOSED {
+  background: #6b7280; /* gray-dark */
+}
+
+.status_CANCELED {
+  background: #ef4444; /* red */
+}
