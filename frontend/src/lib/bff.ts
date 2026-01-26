@@ -8,6 +8,10 @@ type ProxyOptions = {
   forwardQuery?: boolean;
   body?: unknown;
   headers?: Record<string, string>;
+
+  // ✅ 추가됨!!!!
+  cache?: RequestCache; // "force-cache" | "no-store" 등
+  next?: { revalidate?: number; tags?: string[] };
 };
 
 type StreamProxyOptions = {
@@ -91,7 +95,12 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
     method,
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
-    cache: "no-store",
+
+
+    // 여기 수정!! revalidate 쓰기 위해서
+
+    cache: options.cache ?? "force-cache",
+    next: options.next,
   });
 
   const contentType = res.headers.get("content-type") ?? "";
