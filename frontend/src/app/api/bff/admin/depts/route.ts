@@ -8,12 +8,14 @@ import type { NextRequest } from "next/server";
  * 프론트: GET /api/bff/admin/depts
  * 백엔드: GET /api/v1/admin/depts
  */
-export async function GET(req: NextRequest) {
+
+export async function GET(req: Request) {
+  // Postman에서 쓰는 백엔드 경로가 /api/v1/admin/depts 인 경우
   return proxyToBackend(req, "/api/v1/admin/depts", {
     method: "GET",
-    // 쿼리(page, size, keyword 등)는 proxyToBackend가 req에서 그대로 넘겨준다고 가정
   });
 }
+
 
 /**
  * 학과 생성 BFF

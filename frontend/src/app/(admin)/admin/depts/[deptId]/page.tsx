@@ -1,7 +1,3 @@
-// 위치: frontend/src/app/(admin)/admin/depts/[deptId]/page.tsx
-
-"use client";
-
 import DeptDetailPage from "@/features/authority/depts/components/detail/DeptDetailPage";
 
 type PageProps = {
