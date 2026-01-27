@@ -56,4 +56,4 @@ public class SurveyTarget {
         this.status = SurveyTargetStatus.SUBMITTED;
         this.submittedAt = LocalDateTime.now();
     }
-}
+}                                                                                                              
