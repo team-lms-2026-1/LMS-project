@@ -1,0 +1,72 @@
+.tableWrapper {
+  border-radius: 12px;
+  border: 1px solid #e1e7f0;
+  overflow: hidden;
+  background: #fff;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed; /* ✅ 추가 */
+}
+
+.thead {
+  background-color: #f8fafc;
+}
+
+.td,
+.th {
+  padding: 10px 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+  height: 44px;          /* ✅ 추가: 행 높이 고정 */
+  box-sizing: border-box; /* ✅ 안전 */
+}
+
+
+.th {
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 1px solid #e1e7f0;
+}
+
+.trLast td {
+  border-bottom: none;
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background-color: #f4f7ff;
+}
+
+/* td 내부에서 버튼 그룹 같은 것 */
+.cellFlexCenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 에러/메시지 */
+.messageRow {
+  padding: 18px;
+  text-align: center;
+  color: #777;
+}

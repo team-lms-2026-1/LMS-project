@@ -1,0 +1,81 @@
+/* StatusPill.module.css */
+/* Button.module.css 톤/사이즈/인터랙션과 통일 */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* ✅ Button sm과 동일 */
+  height: 32px;
+  padding: 0 12px;
+
+  /* ✅ 글자 길이에 맞게 자동 */
+  min-width: unset;
+
+  border-radius: 10px;
+  border: 1px solid transparent;
+
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+
+  color: #ffffff;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ===== interaction ===== */
+
+.clickable {
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease, transform 0.03s ease;
+}
+
+.clickable:hover {
+  filter: brightness(0.97);
+}
+
+.clickable:active {
+  transform: translateY(1px);
+}
+
+.disabled {
+  opacity: 0.55; /* Button disabled와 동일 */
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== status colors (Button 팔레트 기반 통일) ===== */
+
+.status_PLANNED {
+  background: #64748b; /* slate-500 (예정/대기) */
+}
+
+.status_DRAFT {
+  background: #6b7280; /* gray-500 */
+}
+
+.status_OPEN {
+  background: #2563eb; /* blue-600 (primary 느낌) */
+}
+
+.status_ENROLL_CLOSED {
+  background: #475569; /* slate-600 */
+}
+
+.status_PROGRESS {
+  background: #f59e0b; /* amber-500 */
+}
+
+.status_COMPLETED {
+  background: #16a34a; /* green-600 */
+}
+
+.status_CLOSED {
+  background: #374151; /* gray-700 */
+}
+
+.status_CANCELED {
+  background: #dc2626; /* red-600 (danger 느낌) */
+}

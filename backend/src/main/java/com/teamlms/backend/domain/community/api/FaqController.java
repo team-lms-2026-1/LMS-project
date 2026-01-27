@@ -47,7 +47,7 @@ public class FaqController {
                  "/api/v1/admin/community/faqs/{id}" 
     })
     @PreAuthorize("hasAuthority('FAQ_READ')")
-    public ApiResponse<?> getDetail(@PathVariable Long faqId) {
+    public ApiResponse<?> getDetail(@PathVariable("id") Long faqId) {
         return ApiResponse.ok(service.getDetail(faqId));
     }
 

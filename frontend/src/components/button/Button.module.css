@@ -1,0 +1,102 @@
+/* Button.module.css */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border-radius: 10px;
+  border: 1px solid transparent;
+
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+
+  /* ✅ 기본 크기(md)를 btn에 박아버림 */
+  height: 40px;
+  padding: 0 14px;
+  font-size: 14px;
+
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease,
+    transform 0.03s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* variants */
+.variant_primary {
+  background: #2563eb; /* blue-600 */
+  color: #fff;
+}
+
+.variant_primary:hover {
+  background: #1d4ed8; /* blue-700 */
+}
+
+.variant_secondary {
+  background: #fff;
+  color: #111827; /* gray-900 */
+  border-color: #d1d5db; /* gray-300 */
+}
+
+.variant_secondary:hover {
+  background: #f9fafb; /* gray-50 */
+}
+
+.variant_danger {
+  background: #dc2626; /* red-600 */
+  color: #fff;
+}
+
+.variant_danger:hover {
+  background: #b91c1c; /* red-700 */
+}
+
+/* disabled */
+.disabled,
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* loading */
+.loading {
+  cursor: wait;
+}
+
+/* icon/label */
+.leftIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* spinner */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: rgba(255, 255, 255, 0.95);
+  animation: spin 0.8s linear infinite;
+}
+
+/* spinner on secondary (dark text) */
+.variant_secondary .spinner {
+  border-color: rgba(17, 24, 39, 0.25);
+  border-top-color: rgba(17, 24, 39, 0.85);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

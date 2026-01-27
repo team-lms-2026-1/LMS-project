@@ -1,0 +1,13 @@
+.emptyRow {
+  padding: 24px 0;
+  text-align: center;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed; /* ✅ 추가: 컬럼 폭 튐 방지 */
+}

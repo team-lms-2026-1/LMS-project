@@ -1,27 +1,93 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-form.module.css";
-import { mockNotices } from "../data/mockNotices";
-import type { NoticeCategory } from "../types";
+import { noticesApi } from "../api/noticesApi";
+import { noticeCategoriesApi } from "../categories/api/noticeCategoriesApi";
+import type { NoticeDetailDto } from "../api/dto";
+import type { NoticeCategoryRow } from "../categories/types";
+import type { NoticeFile } from "../types";
 
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
 export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
   const router = useRouter();
-  const notice = mockNotices.find((n) => n.id === noticeId);
 
-  const [title, setTitle] = useState(notice?.title ?? "");
-  const [category, setCategory] = useState<NoticeCategory>(notice?.category ?? "서비스");
-  const [content, setContent] = useState(notice?.content ?? "");
-  const [fileName, setFileName] = useState<string>(notice?.attachment?.name ?? "");
+  const [origin, setOrigin] = useState<NoticeDetailDto | null>(null);
 
-  if (!notice) return <div className={styles.wrap}>공지사항을 찾을 수 없습니다.</div>;
+  const [title, setTitle] = useState("");
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [content, setContent] = useState("");
 
-  const onSave = () => {
-    // mock: 실제 PUT/PATCH 없음
-    router.push(`/community/notices/${noticeId}`);
+  const [categories, setCategories] = useState<NoticeCategoryRow[]>([]);
+  const [existingFiles, setExistingFiles] = useState<NoticeFile[]>([]);
+  const [deleteFileIds, setDeleteFileIds] = useState<number[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const categoryValue = useMemo(() => (categoryId == null ? "" : String(categoryId)), [categoryId]);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const cats = await noticeCategoriesApi.list({ page: 0, size: 50 });
+        const catList = Array.isArray(cats) ? cats : [];
+        setCategories(catList);
+
+        const data = await noticesApi.detail(noticeId);
+        setOrigin(data);
+
+        setTitle(data.title ?? "");
+        setContent(data.content ?? "");
+        setExistingFiles(Array.isArray(data.files) ? data.files : []);
+        setDeleteFileIds([]);
+        setNewFiles([]);
+
+        // ✅ name -> id 매핑(백엔드 상세가 categoryName만 내려오므로)
+        const found = catList.find((c) => c.name === data.categoryName);
+        setCategoryId(found ? Number(found.categoryId) : (catList[0] ? Number(catList[0].categoryId) : null));
+      } catch (e: any) {
+        alert(e?.message ?? "공지사항 조회 실패");
+        setOrigin(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [noticeId]);
+
+  if (loading) return <div className={styles.wrap}>불러오는 중...</div>;
+  if (!origin) return <div className={styles.wrap}>공지사항을 찾을 수 없습니다.</div>;
+
+  const toggleDelete = (fileId: number) => {
+    setDeleteFileIds((prev) => (prev.includes(fileId) ? prev.filter((x) => x !== fileId) : [...prev, fileId]));
+  };
+
+  const onSave = async () => {
+    if (!title.trim()) return alert("제목을 입력하세요.");
+    if (categoryId == null) return alert("카테고리를 선택하세요.");
+
+    setSaving(true);
+    try {
+      await noticesApi.update(noticeId, {
+        request: {
+          title: title.trim(),
+          content,
+          categoryId,
+          deleteFileIds,
+        },
+        files: newFiles,
+      });
+
+      router.push(`/admin/community/notices/${noticeId}`);
+    } catch (e: any) {
+      alert(e?.message ?? "수정 실패");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -31,7 +97,7 @@ export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
         <span>-</span>
         <strong>공지사항</strong>
         <span>-</span>
-        <span>상세페이지(수정)</span>
+        <span>수정</span>
       </div>
 
       <div className={styles.titleRow}>
@@ -51,15 +117,17 @@ export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="제목"
                   />
+
                   <select
                     className={styles.select}
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as NoticeCategory)}
+                    value={categoryValue}
+                    onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
                   >
-                    <option value="서비스">서비스</option>
-                    <option value="학사">학사</option>
-                    <option value="행사">행사</option>
-                    <option value="일반">일반</option>
+                    {categories.map((c) => (
+                      <option key={String(c.categoryId)} value={String(c.categoryId)}>
+                        {c.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </td>
@@ -76,21 +144,58 @@ export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
                       </button>
                     ))}
                   </div>
-                  <textarea
-                    className={styles.textarea}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
+                  <textarea className={styles.textarea} value={content} onChange={(e) => setContent(e.target.value)} />
                 </div>
               </td>
             </tr>
 
             <tr>
-              <th>첨부<br/>파일</th>
+              <th>
+                첨부
+                <br />
+                파일
+              </th>
               <td>
+                {/* 기존 첨부 */}
+                {existingFiles.length > 0 && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 6 }}>기존 파일</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {existingFiles.map((f, idx) => {
+                        const fid = Number(f.fileId ?? -1);
+                        const deletable = Number.isFinite(fid) && fid > 0;
+                        const marked = deletable && deleteFileIds.includes(fid);
+
+                        return (
+                          <div key={`${fid}-${idx}`} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ flex: 1 }}>
+                              {f.originalName ?? f.fileName ?? `파일 ${idx + 1}`}
+                            </div>
+                            {deletable ? (
+                              <button
+                                type="button"
+                                className={styles.btn}
+                                onClick={() => toggleDelete(fid)}
+                                disabled={saving}
+                              >
+                                {marked ? "삭제취소" : "삭제"}
+                              </button>
+                            ) : (
+                              <span style={{ fontSize: 12, color: "#9ca3af" }}>fileId 없음</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 신규 첨부 */}
                 <div className={styles.attachArea}>
                   <div className={styles.attachTab}>
-                    <button type="button" className={styles.tabBtn}>내 PC</button>
+                    <button type="button" className={styles.tabBtn}>
+                      내 PC
+                    </button>
                   </div>
 
                   <div>
@@ -100,13 +205,18 @@ export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
                         upload
                         <input
                           type="file"
+                          multiple
                           style={{ display: "none" }}
-                          onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
+                          onChange={(e) => setNewFiles(Array.from(e.target.files ?? []))}
                         />
                       </label>
                     </div>
 
-                    {fileName && <div className={styles.fileName}>{fileName}</div>}
+                    {newFiles.length > 0 && (
+                      <div className={styles.fileName}>
+                        {newFiles.map((f) => f.name).join(", ")}
+                      </div>
+                    )}
                   </div>
                 </div>
               </td>
@@ -116,10 +226,10 @@ export default function NoticeEditPage({ noticeId }: { noticeId: string }) {
       </div>
 
       <div className={styles.actions}>
-        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()}>
+        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={() => router.back()} disabled={saving}>
           취소
         </button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave}>
+        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
           수정
         </button>
       </div>

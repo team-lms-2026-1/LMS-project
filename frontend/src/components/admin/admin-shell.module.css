@@ -5,7 +5,7 @@
 }
 
 .sidebar {
-  width: 280px;
+  width: 250px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
   position: sticky;
@@ -126,35 +126,31 @@
   background: #ffffff;
 }
 
-/* ✅ 헤더는 hover가 아니라 기본 상태에 레이아웃/패딩을 고정 */
 .sectionHeader {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 10px 10px;
+  padding: 10px 14px;
+  box-sizing: border-box;
   background: #ffffff;
 
-  /* ✅ "글자 옆 선" 제거 핵심: 버튼 기본 outline/border 제거 */
   border: 0;
   outline: none;
   box-shadow: none;
 
-  /* 버튼일 경우 기본 스타일 제거 */
   appearance: none;
   -webkit-appearance: none;
 
-  cursor: default; /* hover로 열리므로 클릭 유도 X */
+  cursor: default; 
   user-select: none;
 }
 
-/* 헤더 hover는 "배경만" 살짝 */
 .sectionHeader:hover {
   background: #f9fafb;
 }
 
-/* 포커스 라인 제거(요청 사항) */
 .sectionHeader:focus,
 .sectionHeader:focus-visible,
 .sectionHeader:active {
@@ -162,12 +158,10 @@
   box-shadow: none;
 }
 
-/* 열려 있을 때(hover open) 강조 */
 .section[data-open="true"] .sectionHeader {
   background: #eef2ff;
 }
 
-/* 현재 경로가 속한 섹션 표시(선택) */
 .sectionHeaderActive {
   font-weight: 700;
 }

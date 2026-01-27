@@ -1,0 +1,37 @@
+.page {
+  padding: 0;
+  min-height: 100vh;
+  background-color: transparent;
+}
+
+.card {
+  background: transparent;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.footerRow {
+  position: relative;
+  margin-top: 20px;
+  height: 40px;
+}
+
+.primaryButton {
+  float: right;
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: none;
+  background-color: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+}
+
+.primaryButton:hover {
+  background-color: #1d4ed8;
+}

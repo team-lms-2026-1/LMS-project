@@ -3,13 +3,13 @@ import type { LoginRequest, LoginSuccess, ApiErrorShape } from "../types";
 type LoginBffResponse = {
   account: { accountId: number; loginId: string; accountType: string };
   expiresInSeconds: number;
-  expiresAt: number; // 추가
+  expiresAt: number;
 };
 
 const EXP_KEY = "auth_expires_at";
 
 export async function logoutViaBff(): Promise<void> {
-  await fetch("/api/auth/logout", {
+  await fetch("/api/admin/auth/logout", {
     method: "POST",
     credentials: "include",
   });
@@ -28,7 +28,7 @@ export function scheduleAutoLogout(expiresAt: number, onExpire: () => void) {
 }
 
 export async function loginViaBff(payload: LoginRequest): Promise<LoginBffResponse> {
-  const res = await fetch("/api/auth/login", {
+  const res = await fetch("/api/admin/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/notice-form.module.css";
-import type { NoticeCategory } from "../types";
+import { noticesApi } from "../api/noticesApi";
+import { noticeCategoriesApi } from "../categories/api/noticeCategoriesApi";
+import type { NoticeCategoryRow } from "../categories/types";
 
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
@@ -11,13 +13,51 @@ export default function NoticeCreatePage() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<NoticeCategory>("서비스");
+  const [categoryId, setCategoryId] = useState<number | null>(null);
   const [content, setContent] = useState("");
-  const [fileName, setFileName] = useState<string>("");
 
-  const onSave = () => {
-    // mock: 실제 POST 없음
-    router.push("/community/notices");
+  const [categories, setCategories] = useState<NoticeCategoryRow[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+
+  const [loadingCats, setLoadingCats] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const categoryValue = useMemo(() => (categoryId == null ? "" : String(categoryId)), [categoryId]);
+
+  useEffect(() => {
+    (async () => {
+      setLoadingCats(true);
+      try {
+        const cats = await noticeCategoriesApi.list({ page: 0, size: 50 });
+        const list = Array.isArray(cats) ? cats : [];
+        setCategories(list);
+        if (list.length > 0) setCategoryId(Number(list[0].categoryId));
+      } finally {
+        setLoadingCats(false);
+      }
+    })();
+  }, []);
+
+  const onSave = async () => {
+    if (!title.trim()) return alert("제목을 입력하세요.");
+    if (categoryId == null) return alert("카테고리를 선택하세요.");
+
+    setSaving(true);
+    try {
+      await noticesApi.create({
+        request: {
+          title: title.trim(),
+          content,
+          categoryId,
+        },
+        files,
+      });
+      router.push("/admin/community/notices");
+    } catch (e: any) {
+      alert(e?.message ?? "등록 실패");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -27,7 +67,7 @@ export default function NoticeCreatePage() {
         <span>-</span>
         <strong>공지사항</strong>
         <span>-</span>
-        <span>상세페이지(수정)</span>
+        <span>등록</span>
       </div>
 
       <div className={styles.titleRow}>
@@ -49,13 +89,15 @@ export default function NoticeCreatePage() {
                   />
                   <select
                     className={styles.select}
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as NoticeCategory)}
+                    value={categoryValue}
+                    onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
+                    disabled={loadingCats}
                   >
-                    <option value="서비스">서비스</option>
-                    <option value="학사">학사</option>
-                    <option value="행사">행사</option>
-                    <option value="일반">일반</option>
+                    {categories.map((c) => (
+                      <option key={String(c.categoryId)} value={String(c.categoryId)}>
+                        {c.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </td>
@@ -72,21 +114,23 @@ export default function NoticeCreatePage() {
                       </button>
                     ))}
                   </div>
-                  <textarea
-                    className={styles.textarea}
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                  />
+                  <textarea className={styles.textarea} value={content} onChange={(e) => setContent(e.target.value)} />
                 </div>
               </td>
             </tr>
 
             <tr>
-              <th>첨부<br/>파일</th>
+              <th>
+                첨부
+                <br />
+                파일
+              </th>
               <td>
                 <div className={styles.attachArea}>
                   <div className={styles.attachTab}>
-                    <button type="button" className={styles.tabBtn}>내 PC</button>
+                    <button type="button" className={styles.tabBtn}>
+                      내 PC
+                    </button>
                   </div>
 
                   <div>
@@ -96,13 +140,18 @@ export default function NoticeCreatePage() {
                         upload
                         <input
                           type="file"
+                          multiple
                           style={{ display: "none" }}
-                          onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
+                          onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
                         />
                       </label>
                     </div>
 
-                    {fileName && <div className={styles.fileName}>{fileName}</div>}
+                    {files.length > 0 && (
+                      <div className={styles.fileName}>
+                        {files.map((f) => f.name).join(", ")}
+                      </div>
+                    )}
                   </div>
                 </div>
               </td>
@@ -112,8 +161,12 @@ export default function NoticeCreatePage() {
       </div>
 
       <div className={styles.actions}>
-        <button className={styles.btn} onClick={() => router.back()}>취소</button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave}>등록</button>
+        <button className={styles.btn} onClick={() => router.back()} disabled={saving}>
+          취소
+        </button>
+        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
+          등록
+        </button>
       </div>
     </div>
   );
