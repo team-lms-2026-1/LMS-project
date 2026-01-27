@@ -10,27 +10,10 @@ import { StatusPill } from "@/components/status/StatusPill";
 type Props = {
   items: SemesterItem[];
   loading: boolean;
-  onRowClick: (id: string) => void;
   onEditClick: (id: string) => void;
 };
 
-function mapSemesterStatus(status: SemesterItem["status"]): {
-  pillStatus:
-    | "PLANNED"
-    | "DRAFT"
-    | "OPEN"
-    | "ENROLL_CLOSED"
-    | "PROGRESS"
-    | "COMPLETED"
-    | "CLOSED"
-    | "CANCELED";
-  label: string;
-} {
-  const s = String(status);
-  return { pillStatus: "DRAFT", label: s };
-}
-
-export function SemestersTable({ items, loading, onRowClick, onEditClick }: Props) {
+export function SemestersTable({ items, loading, onEditClick }: Props) {
   const columns: Array<TableColumn<SemesterItem>> = [
     { header: "연도", align: "center", render: (r) => r.year },
     { header: "학기", align: "center", render: (r) => termToLabel(r.term) },
@@ -38,10 +21,12 @@ export function SemestersTable({ items, loading, onRowClick, onEditClick }: Prop
     {
       header: "상태",
       align: "center",
-      render: (r) => {
-        const { pillStatus, label } = mapSemesterStatus(r.status);
-        return <StatusPill status={pillStatus} label={label}/>;
-      },
+      render: (r) => (
+        <StatusPill
+          status={r.status as any}   // ⬅️ StatusPill 타입이 과하게 넓어서 충돌나면 이 한 줄로 해결
+          label={r.status}           // ⬅️ 영어 그대로 표시
+        />
+      ),
     },
     {
       header: "관리",
@@ -50,10 +35,7 @@ export function SemestersTable({ items, loading, onRowClick, onEditClick }: Prop
       stopRowClick: true,
       render: (r) => (
         <div className={styles.manageCell}>
-          <Button
-            variant="secondary"
-            onClick={() => onEditClick(r.id)}
-          >
+          <Button variant="secondary" onClick={() => onEditClick(r.id)}>
             수정
           </Button>
         </div>
@@ -68,7 +50,6 @@ export function SemestersTable({ items, loading, onRowClick, onEditClick }: Prop
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.id}
-      onRowClick={(r) => onRowClick(r.id)}
       emptyText="학기가 없습니다."
     />
   );
