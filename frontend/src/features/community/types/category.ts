@@ -1,8 +1,8 @@
 export type CategoryRow = {
   categoryId: number;
   name: string;
-  bgColor: string;
-  textColor: string;
+  bgColorHex: string;
+  textColorHex: string;
   postCount?: number;
   latestCreatedAt?: string;
 };

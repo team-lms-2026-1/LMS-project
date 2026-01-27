@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 export const runtime = "nodejs";
 
-const BASE_UPSTREAM = "/api/v1/admin/community/resources";
+const BACKEND_PATH = "/api/v1/admin/community/faqs";
 
 function getBaseUrl() {
   return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
@@ -38,7 +38,7 @@ async function proxy(req: Request, upstreamUrl: string, method: string, withBody
   };
 
   if (withBody) {
-    // ✅ multipart든 JSON이든 "그대로" 스트림 전달
+    // ✅ JSON/멀티파트 모두 그대로 전달
     init.body = req.body;
     init.duplex = "half";
   }
@@ -48,19 +48,16 @@ async function proxy(req: Request, upstreamUrl: string, method: string, withBody
   const outHeaders = new Headers(res.headers);
   outHeaders.delete("transfer-encoding");
 
-  return new NextResponse(res.body, {
-    status: res.status,
-    headers: outHeaders,
-  });
+  return new NextResponse(res.body, { status: res.status, headers: outHeaders });
 }
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}${url.search}`;
+  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}${url.search}`;
   return proxy(req, upstreamUrl, "GET", false);
 }
 
 export async function POST(req: Request) {
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}`;
+  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}`;
   return proxy(req, upstreamUrl, "POST", true);
 }

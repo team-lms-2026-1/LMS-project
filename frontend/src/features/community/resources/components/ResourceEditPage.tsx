@@ -75,9 +75,12 @@ export default function ResourceEditPage({ resourceId }: { resourceId: string })
     setSaving(true);
     try {
       await resourcesApi.update(resourceId, {
-        title: title.trim(),
-        categoryId: cid, // ✅ number 변환
-        content: content.trim(),
+        request: {
+          title: title.trim(),
+          content: content.trim(),
+          categoryId: Number(categoryId),
+          // deleteFileIds: [...] 
+        },
       });
 
       router.push(`/admin/community/resources/${resourceId}`);

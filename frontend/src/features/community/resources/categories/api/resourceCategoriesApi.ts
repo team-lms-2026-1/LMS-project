@@ -71,7 +71,7 @@ export const resourceCategoriesApi = {
 
   async update(categoryId: number, body: UpdateResourceCategoryRequestDto): Promise<ResourceCategoryDto> {
     const res = await fetch(`${BASE}/${categoryId}`, {
-      method: "PUT",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       cache: "no-store",

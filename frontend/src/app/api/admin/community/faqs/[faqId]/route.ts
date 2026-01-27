@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 export const runtime = "nodejs";
 
-const BASE_UPSTREAM = "/api/v1/admin/community/resources";
+const BACKEND_PATH = "/api/v1/admin/community/faqs";
 
 function getBaseUrl() {
   return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
@@ -38,7 +38,6 @@ async function proxy(req: Request, upstreamUrl: string, method: string, withBody
   };
 
   if (withBody) {
-    // ✅ multipart든 JSON이든 "그대로" 스트림 전달
     init.body = req.body;
     init.duplex = "half";
   }
@@ -48,19 +47,26 @@ async function proxy(req: Request, upstreamUrl: string, method: string, withBody
   const outHeaders = new Headers(res.headers);
   outHeaders.delete("transfer-encoding");
 
-  return new NextResponse(res.body, {
-    status: res.status,
-    headers: outHeaders,
-  });
+  return new NextResponse(res.body, { status: res.status, headers: outHeaders });
 }
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}${url.search}`;
+export async function GET(req: Request, ctx: { params: { faqId: string } }) {
+  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
   return proxy(req, upstreamUrl, "GET", false);
 }
 
-export async function POST(req: Request) {
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}`;
-  return proxy(req, upstreamUrl, "POST", true);
+// ✅ 수정은 PATCH 우선(백엔드가 PUT이면 PUT도 같이 열어둠)
+export async function PATCH(req: Request, ctx: { params: { faqId: string } }) {
+  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
+  return proxy(req, upstreamUrl, "PATCH", true);
+}
+
+export async function PUT(req: Request, ctx: { params: { faqId: string } }) {
+  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
+  return proxy(req, upstreamUrl, "PUT", true);
+}
+
+export async function DELETE(req: Request, ctx: { params: { faqId: string } }) {
+  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
+  return proxy(req, upstreamUrl, "DELETE", false);
 }

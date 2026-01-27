@@ -17,7 +17,9 @@ export default function ResourceCreatePage() {
   const [title, setTitle] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [content, setContent] = useState("");
-  const [fileName, setFileName] = useState<string>("");
+
+  // ✅ 실제 파일 배열
+  const [files, setFiles] = useState<File[]>([]);
 
   const [categories, setCategories] = useState<ResourceCategoryDto[]>([]);
   const categoryMap = useMemo(() => {
@@ -31,6 +33,8 @@ export default function ResourceCreatePage() {
       try {
         const data = await resourceCategoriesApi.list({ page: 0, size: 200 });
         setCategories(data);
+        // 선택값 기본 세팅(원하면)
+        if (data.length > 0) setCategoryId(String(data[0].categoryId));
       } catch {
         setCategories([]);
       }
@@ -47,17 +51,17 @@ export default function ResourceCreatePage() {
     setSaving(true);
     try {
       const resp = await resourcesApi.create({
-        title: title.trim(),
-        categoryId: cid,
-        content: content.trim(),
+        request: {
+          title: title.trim(),
+          content: content.trim(),
+          categoryId: cid,
+        },
+        files,
       });
 
       const createdId = resourcesApi.extractCreatedId(resp);
-      if (createdId) {
-        router.push(`/admin/community/resources/${createdId}`);
-      } else {
-        router.push(`/admin/community/resources`);
-      }
+      if (createdId) router.push(`/admin/community/resources/${createdId}`);
+      else router.push(`/admin/community/resources`);
     } catch (e: any) {
       alert(e?.message ?? "등록 실패");
     } finally {
@@ -86,7 +90,12 @@ export default function ResourceCreatePage() {
               <th>제목</th>
               <td>
                 <div className={styles.inlineRow}>
-                  <input className={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목" />
+                  <input
+                    className={styles.input}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="제목"
+                  />
 
                   <select className={styles.select} value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
                     <option value="">카테고리 선택</option>
@@ -149,10 +158,16 @@ export default function ResourceCreatePage() {
                       Drop here to attach or{" "}
                       <label style={{ color: "#3b82f6", cursor: "pointer" }}>
                         upload
-                        <input type="file" style={{ display: "none" }} onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")} />
+                        <input
+                          type="file"
+                          multiple
+                          style={{ display: "none" }}
+                          onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+                        />
                       </label>
                     </div>
-                    {fileName && <div className={styles.fileName}>{fileName}</div>}
+
+                    {files.length > 0 && <div className={styles.fileName}>{files.map((f) => f.name).join(", ")}</div>}
                   </div>
                 </div>
               </td>

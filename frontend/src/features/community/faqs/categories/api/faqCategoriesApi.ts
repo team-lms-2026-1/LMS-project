@@ -1,16 +1,16 @@
 import { getJson } from "@/lib/http";
 import type { CategoryApi, CategoryRow } from "@/features/community/components/categoryManager/types";
 import type {
-  NoticeCategoryListParams,
-  NoticeCategoryListResponseDto,
-  CreateNoticeCategoryRequestDto,
-  UpdateNoticeCategoryRequestDto,
-  NoticeCategoryBackendRow,
+  FaqCategoryListParams,
+  FaqCategoryListResponseDto,
+  CreateFaqCategoryRequestDto,
+  UpdateFaqCategoryRequestDto,
+  FaqCategoryBackendRow,
 } from "./dto";
 
-const BASE = "/api/admin/community/notices/categories";
+const BASE = "/api/admin/community/faqs/categories";
 
-function toQuery(params: NoticeCategoryListParams) {
+function toQuery(params: FaqCategoryListParams) {
   const sp = new URLSearchParams();
   if (typeof params.page === "number") sp.set("page", String(params.page));
   if (typeof params.size === "number") sp.set("size", String(params.size));
@@ -19,7 +19,7 @@ function toQuery(params: NoticeCategoryListParams) {
   return qs ? `?${qs}` : "";
 }
 
-function normalizeRow(b: NoticeCategoryBackendRow): CategoryRow {
+function normalizeRow(b: FaqCategoryBackendRow): CategoryRow {
   return {
     categoryId: b.categoryId,
     name: b.name,
@@ -30,8 +30,8 @@ function normalizeRow(b: NoticeCategoryBackendRow): CategoryRow {
   };
 }
 
-function normalizeList(payload: NoticeCategoryListResponseDto): CategoryRow[] {
-  let arr: NoticeCategoryBackendRow[] = [];
+function normalizeList(payload: FaqCategoryListResponseDto): CategoryRow[] {
+  let arr: FaqCategoryBackendRow[] = [];
 
   if (Array.isArray(payload)) {
     arr = payload;
@@ -43,14 +43,14 @@ function normalizeList(payload: NoticeCategoryListResponseDto): CategoryRow[] {
   return arr.map(normalizeRow);
 }
 
-export const noticeCategoriesApi: CategoryApi = {
+export const faqCategoriesApi: CategoryApi = {
   async list(params) {
-    const payload = await getJson<NoticeCategoryListResponseDto>(`${BASE}${toQuery(params)}`);
+    const payload = await getJson<FaqCategoryListResponseDto>(`${BASE}${toQuery(params)}`);
     return normalizeList(payload);
   },
 
   async create(body) {
-    const req = body as CreateNoticeCategoryRequestDto;
+    const req = body as CreateFaqCategoryRequestDto;
     return getJson(`${BASE}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -59,7 +59,7 @@ export const noticeCategoriesApi: CategoryApi = {
   },
 
   async update(categoryId, body) {
-    const req = body as UpdateNoticeCategoryRequestDto;
+    const req = body as UpdateFaqCategoryRequestDto;
     return getJson(`${BASE}/${encodeURIComponent(categoryId)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -68,8 +68,6 @@ export const noticeCategoriesApi: CategoryApi = {
   },
 
   async remove(categoryId) {
-    return getJson(`${BASE}/${encodeURIComponent(categoryId)}`, {
-      method: "DELETE",
-    });
+    return getJson(`${BASE}/${encodeURIComponent(categoryId)}`, { method: "DELETE" });
   },
 };

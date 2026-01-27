@@ -1,0 +1,202 @@
+/* 전체 페이지 배경 */
+/* 1. page는 여백/배경 최대한 빼기 */
+.page {
+  padding: 0;                   /* ⬅️ 이거 핵심 */
+  min-height: 100vh;
+  background-color: transparent; /* 또는 없애도 됨 */
+}
+
+/* 제목 */
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* 검색 영역 (우측 상단) */
+.searchRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  width: 260px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d7e2;
+  font-size: 13px;
+}
+
+.searchInput::placeholder {
+  color: #9aa5b5;
+}
+
+.searchButton {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid #d0d7e2;
+  background-color: #f9fafb;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.searchButton:hover {
+  background-color: #eef2ff;
+}
+
+/* 테이블 전체 래퍼 */
+.tableWrapper {
+  border-radius: 12px;
+  border: 1px solid #e1e7f0;
+  overflow: hidden;
+}
+
+/* 테이블 */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead {
+  background-color: #f8fafc;
+}
+
+.table th,
+.table td {
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.table th {
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 1px solid #e1e7f0;
+}
+
+.table td {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: #f4f7ff;
+}
+
+/* 오른쪽 정렬 숫자 */
+.textRight {
+  text-align: right;
+}
+
+.usageHeader {
+  text-align: left;
+}
+
+/* 사용여부 셀: 왼쪽으로 붙여주기 */
+.usageCell {
+  display: flex;
+  justify-content: flex-start;  /* ⬅️ center → flex-start */
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;             /* 필요하면 100~110 정도로 줄여도 됨 */
+}
+
+
+/* 이미 있던 토글/버튼 스타일은 그대로 써도 됨 */
+
+
+/* 토글 pill */
+.usageOn,
+.usageOff {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.usageOn {
+  background-color: #e0ecff;
+  color: #1d4ed8;
+}
+
+.usageOff {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* 수정 버튼 (토글 옆) */
+.editButton {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid #d0d7e2;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.editButton:hover {
+  background-color: #eef2ff;
+}
+
+/* 하단 영역 전체 */
+.footerRow {
+  position: relative;      /* ⬅️ 기준 잡기 */
+  margin-top: 20px;
+  height: 40px;            /* 원하는 높이만큼 */
+}
+
+/* 페이지네이션을 가운데로 */
+.pagination {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.pageButton,
+.pageButtonActive {
+  min-width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #d0d7e2;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.pageButtonActive {
+  border-color: #6366f1;
+  background-color: #eef2ff;
+  color: #4f46e5;
+  font-weight: 500;
+}
+
+/* 학과등록 버튼 */
+.primaryButton {
+  float: right;            /* 또는 flex 쓰고 있으면 margin-left: auto; */
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: none;
+  background-color: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+}
+
+.primaryButton:hover {
+  background-color: #1d4ed8;
+}
