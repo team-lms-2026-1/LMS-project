@@ -1,0 +1,24 @@
+.outButton {
+  padding: 8px 18px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: none;
+  background-color: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+  transition: all 0.15s ease;
+}
+
+.outButton:hover {
+  background-color: #1d4ed8;
+}
+
+.outButton:active {
+  transform: translateY(1px);
+}
+
+.outButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

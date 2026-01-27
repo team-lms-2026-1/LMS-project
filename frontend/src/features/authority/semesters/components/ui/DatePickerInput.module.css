@@ -1,0 +1,65 @@
+.inputButton {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 14px;
+  color: #111827;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.inputButton:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.inputButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.placeholder {
+  color: #9ca3af;
+}
+
+.text {
+  color: #111827;
+}
+
+.chev {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.popover {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.18);
+}
+
+/* compact day-picker */
+.popover :global(.rdp) {
+  --rdp-accent-color: #2563eb;
+  --rdp-background-color: #eff6ff;
+  font-size: 12px;
+}
+
+.popover :global(.rdp-month) {
+  width: 260px;
+}
+
+.popover :global(.rdp-day_button) {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+  border-radius: 8px;
+}

@@ -79,3 +79,8 @@
 .status_CANCELED {
   background: #dc2626; /* red-600 (danger 느낌) */
 }
+
+.status_ACTIVE {
+  background: #16a34a; /* green-600 (운영중/활성) */
+}
+

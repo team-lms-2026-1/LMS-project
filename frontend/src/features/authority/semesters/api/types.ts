@@ -1,3 +1,8 @@
+export type ApiResponse<T, M = null> = {
+  data: T;
+  meta: M;
+};
+
 export type PageMeta = {
   page: number;
   size: number;
@@ -11,6 +16,7 @@ export type PageMeta = {
 export type SemesterStatus = "PLANNED" | "ACTIVE" | "CLOSED" | string;
 export type SemesterTerm = "FIRST" | "SECOND" | "SUMMER" | "WINTER" | string;
 
+/** DTO */
 export type SemesterListItemDto = {
   semesterId: number;
   year: number;
@@ -20,10 +26,33 @@ export type SemesterListItemDto = {
   status: SemesterStatus;
 };
 
-export type SemesterListResponse = {
-  data: SemesterListItemDto[];
-  meta: PageMeta;
+export type SemesterDetailDto = {
+  semesterId: number;
+  year: number;
+  term: SemesterTerm;
+  startDate: string;
+  endDate: string;
+  status: SemesterStatus;
 };
+
+/** Response */
+export type SemesterListResponse = ApiResponse<SemesterListItemDto[], PageMeta>;
+export type SemesterDetailResponse = ApiResponse<SemesterDetailDto, null>;
+export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
+
+/** Request */
+export type SemesterCreateRequest = {
+  year: number;
+  term: SemesterTerm;
+  startDate: string;
+  endDate: string;
+};
+
+export type SemesterPatchRequest = {
+  status: SemesterStatus;
+  startDate: string;
+  endDate: string;  
+}
 
 /** 화면용 */
 export type SemesterItem = {
@@ -35,16 +64,3 @@ export type SemesterItem = {
   period: string;
   status: SemesterStatus;
 };
-
-export type SemesterCreateRequest = {
-  year: number;
-  term: "FIRST" | "SECOND" | "SUMMER" | "WINTER" | string;
-  startDate: string; // "2026-03-02"
-  endDate: string;   // "2026-06-20"
-  status: "PLANNED" | "ACTIVE" | "CLOSED" | string;
-};
-
-export type SuccessResponse = {
-    data: { success: boolean};
-    meta: null;
-}

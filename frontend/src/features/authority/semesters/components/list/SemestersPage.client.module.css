@@ -14,24 +14,19 @@
   margin-bottom: 20px;
 }
 
+
 .footerRow {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 버튼은 오른쪽 */
   margin-top: 20px;
   height: 40px;
 }
 
-.primaryButton {
-  float: right;
-  padding: 8px 18px;
-  font-size: 13px;
-  border-radius: 999px;
-  border: none;
-  background-color: #2563eb;
-  color: #ffffff;
-  cursor: pointer;
-  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
-}
-
-.primaryButton:hover {
-  background-color: #1d4ed8;
+/* PaginationSimple을 가운데 고정 */
+.footerRow > :first-child {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }

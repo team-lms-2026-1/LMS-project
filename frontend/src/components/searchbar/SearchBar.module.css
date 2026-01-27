@@ -1,0 +1,80 @@
+.wrap {
+  width: 280px;          /* ✅ 딱 적당한 관리자 검색 폭 */
+  margin-left: auto;     /* 오른쪽 끝 */
+  margin-bottom: 16px;
+}
+
+
+.inputRow {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  height: 36px;           /* ⬇ 살짝 컴팩트 */
+  padding: 0 36px 0 12px; /* clear 버튼 공간 약간 줄임 */
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+}
+
+.input:focus {
+  border-color: #98a2b3;
+}
+
+.searchBtn {
+  height: 36px;           /* ⬇ 인풋과 높이 맞춤 */
+  padding: 0 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.searchBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clearBtn {
+  position: absolute;
+  right: 80px;            /* 버튼 폭 줄인 만큼 당김 */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;            /* ⬇ */
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.clearBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #667085;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

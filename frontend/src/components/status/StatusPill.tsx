@@ -3,6 +3,7 @@ import styles from "./StatusPill.module.css";
 
 export type StatusType =
   | "PLANNED"
+  | "ACTIVE"
   | "DRAFT"
   | "OPEN"
   | "ENROLL_CLOSED"

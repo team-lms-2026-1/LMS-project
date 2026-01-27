@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { SemesterCreateRequest, SuccessResponse, type SemesterListResponse } from "./types";
+import { SemesterCreateRequest, SemesterDetailResponse, SemesterPatchRequest, SuccessResponse, type SemesterListResponse } from "./types";
 
 export type SemestersListQuery = {
   page?: number;
@@ -26,4 +26,23 @@ export async function createSemester(body: SemesterCreateRequest) {
         body: JSON.stringify(body),
         cache: "no-store"
     })
+}
+
+export async function fetchSemesterDetail(id: string) {
+  const url = `/api/admin/authority/semesters/${id}`
+  return getJson<SemesterDetailResponse>( url, {
+      cache: "no-store"
+  });
+}
+
+export async function patchSemester(
+  id: string,
+  body: SemesterPatchRequest
+) {
+  return getJson<SuccessResponse>(`/api/admin/authority/semesters/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store"
+  })
 }

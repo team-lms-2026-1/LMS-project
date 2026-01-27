@@ -1,27 +1,16 @@
 "use client";
 
 import * as React from "react";
-import styles from "./Pagenation.module.css";
+import styles from "./PaginationSimple.module.css";
 
-type Props = {
-  /** 현재 페이지(1-base) */
-  page: number;
-  /** 총 페이지 수(1 이상) */
-  totalPages: number;
-
-  /** 페이지 변경 */
+export type PaginationSimpleProps = {
+  page: number; // 1-base
+  totalPages: number; // 1 이상
   onChange: (nextPage: number) => void;
 
-  /** 옵션: 보여줄 주변 페이지 수 (기본 2) */
-  siblingCount?: number;
-
-  /** 옵션: 가장자리 고정 페이지 개수 (기본 1) */
-  boundaryCount?: number;
-
-  /** 옵션: disabled */
+  siblingCount?: number; // 기본 2
+  boundaryCount?: number; // 기본 1 (처음/끝 근처 고정 표시)
   disabled?: boolean;
-
-  /** 옵션: className */
   className?: string;
 };
 
@@ -33,18 +22,12 @@ type Item =
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
-
 function range(start: number, end: number) {
   const out: number[] = [];
   for (let i = start; i <= end; i++) out.push(i);
   return out;
 }
 
-/**
- * 숫자/… 조합 생성 로직
- * - boundaryCount: 앞/뒤 고정 표시 개수
- * - siblingCount: 현재 페이지 주변 표시 개수
- */
 function buildItems(page: number, totalPages: number, siblingCount: number, boundaryCount: number): Item[] {
   const p = clamp(page, 1, totalPages);
 
@@ -52,23 +35,18 @@ function buildItems(page: number, totalPages: number, siblingCount: number, boun
   const endPages = range(Math.max(totalPages - boundaryCount + 1, boundaryCount + 1), totalPages);
 
   const siblingsStart = Math.max(
-    Math.min(
-      p - siblingCount,
-      totalPages - boundaryCount - siblingCount * 2 - 1
-    ),
+    Math.min(p - siblingCount, totalPages - boundaryCount - siblingCount * 2 - 1),
     boundaryCount + 2
   );
 
   const siblingsEnd = Math.min(
-    Math.max(
-      p + siblingCount,
-      boundaryCount + siblingCount * 2 + 2
-    ),
+    Math.max(p + siblingCount, boundaryCount + siblingCount * 2 + 2),
     endPages.length > 0 ? endPages[0] - 2 : totalPages - 1
   );
 
   const items: Item[] = [];
 
+  // 컨트롤 (원하는 텍스트 그대로)
   items.push({ type: "control", key: "first", disabled: p === 1 });
   items.push({ type: "control", key: "prev", disabled: p === 1 });
 
@@ -76,14 +54,10 @@ function buildItems(page: number, totalPages: number, siblingCount: number, boun
   for (const sp of startPages) items.push({ type: "page", value: sp });
 
   // start ellipsis
-  if (siblingsStart > boundaryCount + 2) {
-    items.push({ type: "ellipsis", key: "start-ellipsis" });
-  } else if (boundaryCount + 1 < totalPages - boundaryCount) {
-    // boundary 끝과 siblings 시작이 붙어있으면 중간 페이지 하나 채움
+  if (siblingsStart > boundaryCount + 2) items.push({ type: "ellipsis", key: "start-ellipsis" });
+  else if (boundaryCount + 1 < totalPages - boundaryCount) {
     const v = boundaryCount + 1;
-    if (!startPages.includes(v) && (endPages.length === 0 || v < endPages[0])) {
-      items.push({ type: "page", value: v });
-    }
+    if (!startPages.includes(v) && (endPages.length === 0 || v < endPages[0])) items.push({ type: "page", value: v });
   }
 
   // siblings
@@ -92,19 +66,14 @@ function buildItems(page: number, totalPages: number, siblingCount: number, boun
   }
 
   // end ellipsis
-  if (siblingsEnd < (endPages.length > 0 ? endPages[0] - 2 : totalPages - 1)) {
-    items.push({ type: "ellipsis", key: "end-ellipsis" });
-  } else if (totalPages - boundaryCount > boundaryCount) {
+  if (siblingsEnd < (endPages.length > 0 ? endPages[0] - 2 : totalPages - 1)) items.push({ type: "ellipsis", key: "end-ellipsis" });
+  else if (totalPages - boundaryCount > boundaryCount) {
     const v = totalPages - boundaryCount;
-    if (!endPages.includes(v) && v > 0) {
-      items.push({ type: "page", value: v });
-    }
+    if (!endPages.includes(v) && v > 0) items.push({ type: "page", value: v });
   }
 
   // end
-  for (const ep of endPages) {
-    if (!startPages.includes(ep)) items.push({ type: "page", value: ep });
-  }
+  for (const ep of endPages) if (!startPages.includes(ep)) items.push({ type: "page", value: ep });
 
   items.push({ type: "control", key: "next", disabled: p === totalPages });
   items.push({ type: "control", key: "last", disabled: p === totalPages });
@@ -112,20 +81,16 @@ function buildItems(page: number, totalPages: number, siblingCount: number, boun
   return items;
 }
 
-function labelForControl(k: "prev" | "next" | "first" | "last") {
+function label(k: "prev" | "next" | "first" | "last") {
   switch (k) {
-    case "first":
-      return "처음";
-    case "prev":
-      return "이전";
-    case "next":
-      return "다음";
-    case "last":
-      return "끝";
+    case "first": return "처음";
+    case "prev": return "이전";
+    case "next": return "다음";
+    case "last": return "끝";
   }
 }
 
-export function Pagenation({
+export function PaginationSimple({
   page,
   totalPages,
   onChange,
@@ -133,7 +98,7 @@ export function Pagenation({
   boundaryCount = 1,
   disabled = false,
   className,
-}: Props) {
+}: PaginationSimpleProps) {
   const safeTotal = Math.max(1, Number.isFinite(totalPages) ? totalPages : 1);
   const current = clamp(Number(page) || 1, 1, safeTotal);
 
@@ -157,7 +122,7 @@ export function Pagenation({
   };
 
   return (
-    <nav className={`${styles.wrap} ${className ?? ""}`} aria-label="Pagenation">
+    <nav className={`${styles.wrap} ${className ?? ""}`} aria-label="Pagination">
       <div className={styles.inner}>
         {items.map((it) => {
           if (it.type === "ellipsis") {
@@ -178,7 +143,7 @@ export function Pagenation({
                 onClick={() => onControl(it.key)}
                 disabled={isDisabled}
               >
-                {labelForControl(it.key)}
+                {label(it.key)}
               </button>
             );
           }
@@ -190,19 +155,13 @@ export function Pagenation({
               type="button"
               className={`${styles.page} ${active ? styles.active : ""}`}
               onClick={() => !disabled && go(it.value)}
-              disabled={disabled}
+              disabled={disabled || active}
               aria-current={active ? "page" : undefined}
             >
               {it.value}
             </button>
           );
         })}
-      </div>
-
-      <div className={styles.meta}>
-        <span className={styles.metaText}>
-          {current} / {safeTotal}
-        </span>
       </div>
     </nav>
   );
