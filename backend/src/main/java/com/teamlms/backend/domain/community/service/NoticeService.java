@@ -3,16 +3,13 @@ package com.teamlms.backend.domain.community.service;
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.community.api.dto.*;
-import com.teamlms.backend.domain.community.dto.*;
-import com.teamlms.backend.domain.community.entity.Notice;
-import com.teamlms.backend.domain.community.entity.NoticeAttachment;
-import com.teamlms.backend.domain.community.entity.NoticeCategory;
+import com.teamlms.backend.domain.community.dto.InternalNoticeRequest; // 명칭 확인 필요
+import com.teamlms.backend.domain.community.entity.*;
 import com.teamlms.backend.domain.community.enums.NoticeStatus;
 import com.teamlms.backend.domain.community.repository.*;
-import com.teamlms.backend.global.s3.S3Service;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
-
+import com.teamlms.backend.global.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -39,17 +36,42 @@ public class NoticeService {
     private final AccountRepository accountRepository;
     private final S3Service s3Service;
 
-    // =================================================================
-    // 1. 등록 (Create) - 관리자만 가능
-    // =================================================================
+    // 1. 목록 조회 (자료실 스타일: Condition 객체 활용)
+    public Page<ExternalNoticeResponse> getNoticeList(Pageable pageable, Long categoryId, String keyword) {
+        InternalNoticeRequest condition = InternalNoticeRequest.builder()
+                .categoryId(categoryId)
+                .titleKeyword(keyword) // 리포지토리 쿼리에 맞춰 필드 사용
+                .contentKeyword(keyword)
+                .build();
+
+        // 리포지토리에 새로 만든 findNotices 메서드 호출
+        Page<Notice> notices = noticeRepository.findNotices(
+                condition.getCategoryId(), 
+                condition.getTitleKeyword(), 
+                pageable
+        );
+        
+        return notices.map(this::convertToExternalResponse);
+    }
+
+    // 2. 상세 조회
+    @Transactional
+    public ExternalNoticeResponse getNoticeDetail(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
+
+        notice.increaseViewCount();
+        return convertToExternalResponse(notice);
+    }
+
+    // 3. 등록
     @Transactional
     public Long createNotice(ExternalNoticeRequest request, List<MultipartFile> files, Long authorId) {
-        
         Account author = accountRepository.findById(authorId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
 
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("카테고리가 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
 
         Notice notice = Notice.builder()
                 .title(request.getTitle())
@@ -60,132 +82,93 @@ public class NoticeService {
                 .displayEndAt(parseDateTime(request.getDisplayEndAt()))
                 .build();
 
-        Notice savedNotice = noticeRepository.save(notice);
+        noticeRepository.save(notice);
 
         if (files != null && !files.isEmpty()) {
-            saveAttachments(files, savedNotice, author);
+            saveAttachments(files, notice, author);
         }
 
-        return savedNotice.getId();
+        return notice.getId();
     }
 
-    // =================================================================
-    // 2. 상세 조회 (Read Detail)
-    // =================================================================
+    // 4. 수정
     @Transactional
-    public ExternalNoticeResponse getNoticeDetail(Long noticeId) {
+    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
 
-        notice.increaseViewCount();
-        return convertToExternalResponse(notice);
-    }
-
-    // =================================================================
-    // 3. 목록 조회 (Read List)
-    // =================================================================
-    
-    public Page<ExternalNoticeResponse> getNoticeList(Pageable pageable, Long categoryId, String keyword) {
-        InternalNoticeRequest searchCondition = InternalNoticeRequest.builder()
-                .categoryId(categoryId)
-                .titleKeyword(keyword)
-                .contentKeyword(keyword)
-                .build();
+        // 4-1. 정보 수정
+        if (request.getCategoryId() != null) {
+            NoticeCategory category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+            notice.changeCategory(category); // 엔티티에 changeCategory 메서드 필요
+        }
         
-        Page<Notice> notices = noticeRepository.findAll(pageable); 
-        return notices.map(this::convertToExternalResponse);
-    }
+        // 자료실 스타일의 필드별 수정
+        if (request.getTitle() != null) notice.changeTitle(request.getTitle());
+        if (request.getContent() != null) notice.changeContent(request.getContent());
+        if (request.getDisplayStartAt() != null) notice.changeDisplayStartAt(parseDateTime(request.getDisplayStartAt()));
+        if (request.getDisplayEndAt() != null) notice.changeDisplayEndAt(parseDateTime(request.getDisplayEndAt()));
 
-    // =================================================================
-    // 4. 수정 (Update) - 관리자만 가능
-    // =================================================================
-    @Transactional
-    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> files, Long requesterId) {
-        
-        Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
-
-        NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("카테고리 오류"));
-
-        // 1. 텍스트 정보 업데이트
-        notice.update(
-            request.getTitle(),
-            request.getContent(),
-            category,
-            parseDateTime(request.getDisplayStartAt()),
-            parseDateTime(request.getDisplayEndAt())
-        );
-
-        // 2. [추가] 삭제할 파일이 있다면 S3와 DB에서 삭제
-        // (ExternalNoticePatchRequest에 deleteFileIds 필드가 있어야 함)
+        // 4-2. 파일 삭제
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
             List<NoticeAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
-            
             for (NoticeAttachment att : attachmentsToDelete) {
-                // S3에서 실제 파일 삭제
-                String s3Key = extractKeyFromUrl(att.getStorageKey());
-                s3Service.delete(s3Key);
+                s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
             }
-            // DB에서 메타데이터 삭제
             attachmentRepository.deleteAllById(request.getDeleteFileIds());
         }
 
-        // 3. 새 파일 업로드
-        if (files != null && !files.isEmpty()) {
-            Account uploader = accountRepository.findById(requesterId)
-                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-            
-            saveAttachments(files, notice, uploader);
+        // 4-3. 새 파일 추가
+        if (newFiles != null && !newFiles.isEmpty()) {
+            Account modifier = accountRepository.findById(modifierId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
+            saveAttachments(newFiles, notice, modifier);
         }
     }
 
-    // =================================================================
-    // 5. 삭제 (Delete) - 관리자만 가능
-    // =================================================================
+    // 5. 삭제
     @Transactional
-   
     public void deleteNotice(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
         
-        // [추가] S3에 있는 파일들을 먼저 삭제
-        for (NoticeAttachment attachment : notice.getAttachments()) {
-            String s3Key = extractKeyFromUrl(attachment.getStorageKey());
-            s3Service.delete(s3Key);
+        for (NoticeAttachment att : notice.getAttachments()) {
+            s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
         }
-        
+
         noticeRepository.delete(notice);
     }
 
     // =================================================================
-    //  내부 헬퍼 메서드
+    // Helper Methods
     // =================================================================
 
     private void saveAttachments(List<MultipartFile> files, Notice notice, Account author) {
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
             try {
-                // S3 업로드
                 String s3Url = s3Service.upload(file, "notices");
-                
-                // DB 저장
                 NoticeAttachment attachment = NoticeAttachment.builder()
                         .notice(notice)
                         .storageKey(s3Url)
                         .originalName(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .fileSize(file.getSize())
-                        .uploadedBy(author.getAccountId())
+                        .uploadedBy(author.getAccountId()) 
                         .updatedBy(author.getAccountId())
                         .build();
                 attachmentRepository.save(attachment);
-                
             } catch (IOException e) {
-                log.error("파일 업로드 실패: {}", file.getOriginalFilename(), e);
+                log.error("공지사항 파일 업로드 실패: {}", file.getOriginalFilename(), e);
                 throw new BusinessException(ErrorCode.FILE_UPLOAD_ERROR);
             }
         }
+    }
+
+    private String extractKeyFromUrl(String url) {
+        if (url == null || !url.contains("notices/")) return url;
+        return url.substring(url.indexOf("notices/"));
     }
 
     private ExternalNoticeResponse convertToExternalResponse(Notice notice) {
@@ -198,45 +181,41 @@ public class NoticeService {
             status = NoticeStatus.ENDED;
         }
 
-        List<ExternalAttachmentResponse> fileResponses = notice.getAttachments().stream()
-                .map(file -> ExternalAttachmentResponse.builder()
-                        .attachmentId(file.getId())
-                        .originalName(file.getOriginalName())
-                        .contentType(file.getContentType())
-                        .fileSize(file.getFileSize())
-                        .uploadedAt(formatDateTime(file.getUploadedAt()))
-                        .downloadUrl(file.getStorageKey()) 
+        // 1. 카테고리 정보 객체 생성 (배경색, 글자색 포함)
+        ExternalNoticeResponse.CategoryInfo categoryDto = ExternalNoticeResponse.CategoryInfo.builder()
+                .categoryId(notice.getCategory().getId())
+                .name(notice.getCategory().getName())
+                .bgColorHex(notice.getCategory().getBgColorHex())
+                .textColorHex(notice.getCategory().getTextColorHex())
+                .build();
+
+        // 2. 파일 정보 변환
+        List<ExternalAttachmentResponse> filesDto = notice.getAttachments().stream()
+                .map(f -> ExternalAttachmentResponse.builder()
+                        .attachmentId(f.getId())
+                        .originalName(f.getOriginalName())
+                        .contentType(f.getContentType())
+                        .fileSize(f.getFileSize())
+                        .downloadUrl(f.getStorageKey()) 
                         .build())
                 .collect(Collectors.toList());
 
+        // 3. 최종 Response 조립
         return ExternalNoticeResponse.builder()
                 .noticeId(notice.getId())
-                .categoryName(notice.getCategory().getName())
+                .category(categoryDto) 
                 .title(notice.getTitle())
                 .content(notice.getContent())
                 .authorName(notice.getAuthor().getLoginId())
                 .viewCount(notice.getViewCount())
-                .createdAt(formatDateTime(notice.getCreatedAt()))
+                .createdAt(notice.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .status(status.getDescription())
-                .files(fileResponses)
+                .files(filesDto)
                 .build();
     }
 
     private LocalDateTime parseDateTime(String dateTimeStr) {
         if (dateTimeStr == null || dateTimeStr.isBlank()) return null;
         try { return LocalDateTime.parse(dateTimeStr); } catch (Exception e) { return null; }
-    }
-
-    private String formatDateTime(LocalDateTime dateTime) {
-        if (dateTime == null) return "";
-        return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-    }
-
-    private String extractKeyFromUrl(String url) {
-        // 예: "https://my-bucket.../notices/abc.jpg" -> "notices/abc.jpg"
-        if (url == null || !url.contains("notices/")) {
-            return url;
-        }
-        return url.substring(url.indexOf("notices/"));
     }
 }

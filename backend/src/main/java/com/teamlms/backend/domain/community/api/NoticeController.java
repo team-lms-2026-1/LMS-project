@@ -9,9 +9,9 @@ import com.teamlms.backend.global.api.PageMeta;
 import com.teamlms.backend.global.security.principal.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,15 +34,31 @@ public class NoticeController {
                  "/api/v1/admin/community/notices" 
     })
     @PreAuthorize("hasAuthority('NOTICE_READ')")
-    // ★ Map -> ExternalNoticeResponse 로 변경
     public ApiResponse<List<ExternalNoticeResponse>> getNotices(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "1") int page,       // @PageableDefault 대신 사용
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String keyword
     ) {
-        // ★ Service가 DTO를 반환하므로 타입을 맞춰줌
-        Page<ExternalNoticeResponse> page = noticeService.getNoticeList(pageable, categoryId, keyword);
-        return ApiResponse.of(page.getContent(), PageMeta.from(page));
+        // 1. 페이지 및 사이즈 유효성 검사 (안전장치)
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+
+        // 2. PageRequest 생성 (프론트의 1페이지를 JPA의 0페이지로 변환)
+        Pageable pageable = PageRequest.of(
+                safePage - 1,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        // 3. 서비스 호출 (이미 DTO로 반환하도록 설계됨)
+        Page<ExternalNoticeResponse> pageResult = noticeService.getNoticeList(pageable, categoryId, keyword);
+        
+        // 4. 공통 규격으로 응답
+        return ApiResponse.of(
+                pageResult.getContent(), 
+                PageMeta.from(pageResult)
+        );
     }
 
     // 2-2. 상세 조회
