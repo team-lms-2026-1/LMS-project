@@ -61,7 +61,7 @@ public class AdmincCurricularController {
     }
 
     // 수정
-    @PatchMapping("/{curricularId}")
+    @PatchMapping("/{curricularId}/edit")
     public ApiResponse<SuccessResponse> patch(
         @PathVariable Long curricularId,
         @Valid @RequestBody CurricularPatchRequest req

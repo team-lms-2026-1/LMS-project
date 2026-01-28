@@ -51,9 +51,10 @@ const SECTIONS: NavSection[] = [
   {
     key: "course",
     title: "교과 관리",
-
-    items: [{ label: "교과 목록", href: "/admin/curricular/curriculars" }],
-
+    items: [
+      { label: "교과 목록", href: "/admin/curricular/curriculars" },
+      { label: "교과운영 목록", href: "/admin/curricular/curricular-offerings" },
+    ],
   },
   {
     key: "mentoring",

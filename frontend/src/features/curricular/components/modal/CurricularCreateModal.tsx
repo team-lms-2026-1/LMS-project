@@ -84,11 +84,11 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
       size="md"
       footer={
         <>
-          <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
-          </Button>
           <Button onClick={handleSubmit} loading={loading}>
             등록
+          </Button>
+          <Button variant="secondary" onClick={handleClose} disabled={loading}>
+            취소
           </Button>
         </>
       }

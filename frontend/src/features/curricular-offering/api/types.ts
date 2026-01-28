@@ -1,0 +1,44 @@
+export type ApiResponse<T, M = null> = {
+  data: T;
+  meta: M;
+};
+
+export type PageMeta = {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  sort: string[];
+};
+
+export type CompletionStatus = "IN_PROGRESS" | "PASSED" | "FAILED" | string;
+
+export type DayOfWeekType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY" | string;
+
+export type EnrollmentStatus = "ENROLLED" |  "CANCELED" | string;
+
+export type OfferingStatus = "DRAFT" | "OPEN" | "ENROLLMENT_CLOSED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | string;
+
+/** DTO */
+export type CurricularOfferingListItemDto = {
+  offeringId: number ;
+  offeringCode: string;
+  curricularName: string;
+  capacity: number;
+  professorName: string;
+  semesterName: string;
+  location: string;
+  credit: number;
+  status: OfferingStatus;
+}
+
+/** Response */
+export type CurricularOfferingListResponse = ApiResponse<CurricularOfferingListItemDto[], PageMeta>;
+
+
+/** Request */
+
+
+/** 화면용 */

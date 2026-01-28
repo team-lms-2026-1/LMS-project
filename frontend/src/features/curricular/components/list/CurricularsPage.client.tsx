@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/searchbar";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { CurricularCreateModal } from "../modal/CurricularCreateModal";
+import { CurricularEditModal } from "../modal/CurricularEditModal";
 
 export default function CurricularPageClient() {
   const { state, actions } = useCurricularsList();
@@ -25,7 +26,7 @@ export default function CurricularPageClient() {
   const { get } = useFilterQuery(["deptId"])
   const deptId = get("deptId")
 
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 2 });
 
   const [inputKeyword, setInputKeyword] = useState("");
 
@@ -87,6 +88,15 @@ export default function CurricularPageClient() {
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onCreated={handleCreated}
+        />
+        <CurricularEditModal
+          open={Boolean(editId)}
+          curricularId = {editId ?? undefined}
+          onClose={() => setEditId(null)}
+          onUpdated={ async () => {
+            await actions.reload();
+            setEditId(null)
+          }}
         />
       </div>
 
