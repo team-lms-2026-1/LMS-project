@@ -9,10 +9,16 @@ import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
+import { CurricularCreateModal } from "../modal/CurricularCreateModal";
 
 export default function CurricularPageClient() {
   const { state, actions } = useCurricularsList();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+
+  const handleCreated = async () => {
+    await actions.reload();
+  };
 
   // pagination + search
 
@@ -73,11 +79,15 @@ export default function CurricularPageClient() {
             onChange={setPage}
             disabled={state.loading}
           />
-          <OutButton>
+          <OutButton onClick={() => setIsModalOpen(true)}>
             교과등록
           </OutButton>
         </div>
-        
+        <CurricularCreateModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onCreated={handleCreated}
+        />
       </div>
 
     </div>

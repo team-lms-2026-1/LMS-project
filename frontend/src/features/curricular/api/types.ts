@@ -35,8 +35,16 @@ export type CurricularListItemDto = {
 
 /** Response */
 export type CurricularListResponse = ApiResponse<CurricularListItemDto[], PageMeta>;
+export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
 
 /** Request */
 
+export type CurricularCreateRequest = {
+  curricularCode: string;
+  curricularName: string;
+  deptId: number;
+  credits: number;
+  description: string;
+}
 
 /** 화면용 */
