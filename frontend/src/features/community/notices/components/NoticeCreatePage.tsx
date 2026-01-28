@@ -7,6 +7,8 @@ import { noticesApi } from "../api/noticesApi";
 import { noticeCategoriesApi } from "../categories/api/noticeCategoriesApi";
 import type { NoticeCategoryRow } from "../categories/types";
 
+import { Button } from "@/components/button";
+
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻"];
 
 export default function NoticeCreatePage() {
@@ -147,11 +149,7 @@ export default function NoticeCreatePage() {
                       </label>
                     </div>
 
-                    {files.length > 0 && (
-                      <div className={styles.fileName}>
-                        {files.map((f) => f.name).join(", ")}
-                      </div>
-                    )}
+                    {files.length > 0 && <div className={styles.fileName}>{files.map((f) => f.name).join(", ")}</div>}
                   </div>
                 </div>
               </td>
@@ -161,12 +159,12 @@ export default function NoticeCreatePage() {
       </div>
 
       <div className={styles.actions}>
-        <button className={styles.btn} onClick={() => router.back()} disabled={saving}>
+        <Button variant="secondary" onClick={() => router.back()} disabled={saving}>
           취소
-        </button>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={onSave} disabled={saving}>
+        </Button>
+        <Button variant="primary" onClick={onSave} disabled={saving}>
           등록
-        </button>
+        </Button>
       </div>
     </div>
   );

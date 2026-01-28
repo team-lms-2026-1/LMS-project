@@ -1,12 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/resource-list.module.css";
 import { resourcesApi } from "../api/resourcesApi";
 import type { ResourceListItemDto } from "../api/dto";
 import { resourceCategoriesApi } from "../categories/api/resourceCategoriesApi";
 import type { ResourceCategoryDto } from "../categories/api/dto";
+
+import { Button } from "@/components/button";
+import { PaginationSimple } from "@/components/pagination/PaginationSimple";
+import { SearchBar } from "@/components/searchbar/SearchBar";
+import { Table } from "@/components/table/Table";
+import type { TableColumn } from "@/components/table/types";
 
 type CategoryFilterValue = "ALL" | string; // ✅ select는 string 기반
 
@@ -20,6 +26,8 @@ function CategoryBadge({ name, bgColor, textColor }: { name: string; bgColor: st
 
 export default function ResourceListPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [categoryId, setCategoryId] = useState<CategoryFilterValue>("ALL");
   const [keyword, setKeyword] = useState("");
@@ -34,6 +42,25 @@ export default function ResourceListPage() {
     categories.forEach((c) => m.set(String(c.categoryId), c));
     return m;
   }, [categories]);
+
+  // ✅ PaginationSimple은 1-base
+  const initialPage = useMemo(() => {
+    const v = Number(searchParams.get("page") ?? "1");
+    return Number.isFinite(v) && v >= 1 ? v : 1;
+  }, [searchParams]);
+
+  const [page, setPage] = useState<number>(initialPage);
+
+  useEffect(() => {
+    setPage(initialPage);
+  }, [initialPage]);
+
+  // ✅ API는 0-base
+  const apiPage = Math.max(0, page - 1);
+  const size = 20;
+
+  // ✅ (임시) totalPages: API 응답 meta 붙으면 교체
+  const totalPages = 10;
 
   const fetchCategories = async () => {
     try {
@@ -50,7 +77,9 @@ export default function ResourceListPage() {
     try {
       const cid = categoryId === "ALL" ? undefined : Number(categoryId);
       const params =
-        cid && Number.isFinite(cid) ? { categoryId: cid, keyword, page: 0, size: 20 } : { keyword, page: 0, size: 20 };
+        cid && Number.isFinite(cid)
+          ? { categoryId: cid, keyword, page: apiPage, size }
+          : { keyword, page: apiPage, size };
 
       const data = await resourcesApi.list(params);
       setRows(data);
@@ -68,17 +97,74 @@ export default function ResourceListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ✅ page 바뀌면 재조회
+  useEffect(() => {
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiPage]);
+
   const filteredRows = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
 
     return rows.filter((r) => {
-      const cOk =
-        categoryId === "ALL" ? true : String(r.categoryId) === String(categoryId);
-      const kOk =
-        kw.length === 0 ? true : (r.title ?? "").toLowerCase().includes(kw);
+      const cOk = categoryId === "ALL" ? true : String(r.categoryId) === String(categoryId);
+      const kOk = kw.length === 0 ? true : (r.title ?? "").toLowerCase().includes(kw);
       return cOk && kOk;
     });
   }, [rows, categoryId, keyword]);
+
+  // ✅ PaginationSimple onChange: state + URL 동기화
+  const onChangePage = (nextPage: number) => {
+    const safe = Math.max(1, Math.min(nextPage, totalPages));
+    setPage(safe);
+
+    const sp = new URLSearchParams(searchParams.toString());
+    sp.set("page", String(safe));
+    router.replace(`${pathname}?${sp.toString()}`);
+  };
+
+  // ✅ Table columns
+  const columns: Array<TableColumn<ResourceListItemDto>> = useMemo(
+    () => [
+      {
+        header: "번호",
+        width: 90,
+        align: "center",
+        render: (row, idx) => row.no ?? String(apiPage * size + idx + 1).padStart(5, "0"),
+      },
+      {
+        header: "분류",
+        width: 140,
+        align: "center",
+        render: (row) => {
+          const c = categoryMap.get(String(row.categoryId));
+          const badgeName = row.categoryName ?? c?.name ?? "-";
+          const bg = c?.bgColorHex ?? "#64748b";
+          const tc = c?.textColorHex ?? "#ffffff";
+
+          return <CategoryBadge name={badgeName} bgColor={bg} textColor={tc} />;
+        },
+      },
+      {
+        header: "제목",
+        align: "left",
+        render: (row) => <span title={row.title}>{row.title}</span>,
+      },
+      {
+        header: "조회수",
+        width: 110,
+        align: "center",
+        render: (row) => Number(row.views ?? 0).toLocaleString(),
+      },
+      {
+        header: "작성일",
+        width: 140,
+        align: "center",
+        render: (row) => row.createdAt ?? "-",
+      },
+    ],
+    [apiPage, size, categoryMap]
+  );
 
   return (
     <div className={styles.wrap}>
@@ -92,7 +178,12 @@ export default function ResourceListPage() {
         <div className={styles.title}>자료실</div>
 
         <div className={styles.filters}>
-          <select className={styles.select} value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+          <select
+            className={styles.select}
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            disabled={loading}
+          >
             <option value="ALL">전체</option>
             {categories.map((c) => (
               <option key={String(c.categoryId)} value={String(c.categoryId)}>
@@ -101,95 +192,44 @@ export default function ResourceListPage() {
             ))}
           </select>
 
-          <input
-            className={styles.input}
+          <SearchBar
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={setKeyword}
+            onSearch={fetchList}
             placeholder="검색어 입력..."
+            loading={loading}
+            allowEmptySearch={true}
+            searchOnEnter={true}
+            showClear={true}
           />
-
-          <button className={styles.searchBtn} onClick={fetchList} disabled={loading}>
-            검색
-          </button>
         </div>
       </div>
 
       <div className={styles.tableCard}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.colNo}>번호</th>
-              <th className={styles.colCategory}>분류</th>
-              <th>제목</th>
-              <th className={styles.colViews}>조회수</th>
-              <th className={styles.colDate}>작성일</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading && (
-              <tr>
-                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
-                  불러오는 중...
-                </td>
-              </tr>
-            )}
-
-            {!loading &&
-              filteredRows.map((row, idx) => {
-                const c = categoryMap.get(String(row.categoryId));
-                const badgeName = row.categoryName ?? c?.name ?? "-";
-                const bg = c?.bgColorHex ?? "#64748b";
-                const tc = c?.textColorHex ?? "#ffffff";
-
-                return (
-                  <tr
-                    key={String(row.id)}
-                    className={styles.row}
-                    onClick={() => router.push(`/admin/community/resources/${row.id}`)}
-                  >
-                    <td className={styles.colNo}>{row.no ?? String(idx + 1).padStart(5, "0")}</td>
-                    <td className={styles.colCategory}>
-                      <CategoryBadge name={badgeName} bgColor={bg} textColor={tc} />
-                    </td>
-                    <td>{row.title}</td>
-                    <td className={styles.colViews}>{Number(row.views ?? 0).toLocaleString()}</td>
-                    <td className={styles.colDate}>{row.createdAt ?? "-"}</td>
-                  </tr>
-                );
-              })}
-
-            {!loading && filteredRows.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
-                  {error ? error : "검색 결과가 없습니다."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <Table<ResourceListItemDto>
+          columns={columns}
+          items={filteredRows}
+          rowKey={(row) => String(row.id)}
+          onRowClick={(row) => router.push(`/admin/community/resources/${row.id}`)}
+          loading={loading}
+          skeletonRowCount={8}
+          emptyText={error ? error : "검색 결과가 없습니다."}
+          ariaLabel="자료실 목록"
+        />
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.leftBtn} onClick={() => router.push("/admin/community/resources/categories")}>
+        <Button variant="secondary" onClick={() => router.push("/admin/community/resources/categories")}>
           카테고리 관리
-        </button>
+        </Button>
 
         <div className={styles.pagination}>
-          <button className={`${styles.pageBtn} ${styles.pageBtnDisabled}`} disabled>
-            ‹
-          </button>
-          <button className={`${styles.pageBtn} ${styles.pageBtnActive}`}>1</button>
-          <button className={styles.pageBtn}>2</button>
-          <span style={{ color: "#aaa", fontSize: 12 }}>…</span>
-          <button className={styles.pageBtn}>9</button>
-          <button className={styles.pageBtn}>10</button>
-          <button className={styles.pageBtn}>›</button>
+          <PaginationSimple page={page} totalPages={totalPages} onChange={onChangePage} disabled={loading} />
         </div>
 
-        <button className={styles.rightBtn} onClick={() => router.push("/admin/community/resources/new")}>
+        <Button variant="primary" onClick={() => router.push("/admin/community/resources/new")}>
           등록
-        </button>
+        </Button>
       </div>
     </div>
   );

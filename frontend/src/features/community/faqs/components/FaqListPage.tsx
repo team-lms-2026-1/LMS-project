@@ -1,15 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/faq-list.module.css";
 import { faqsApi } from "../api/faqApi";
 import type { FaqListItemDto } from "../api/dto";
 import { faqCategoriesApi } from "../categories/api/faqCategoriesApi";
 import type { FaqCategoryRow } from "../categories/types";
 
+import { Button } from "@/components/button";
+import { PaginationSimple } from "@/components/pagination/PaginationSimple";
+import { SearchBar } from "@/components/searchbar/SearchBar";
+import { Table } from "@/components/table/Table";
+import type { TableColumn } from "@/components/table/types";
+
 export default function FaqListPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [categories, setCategories] = useState<FaqCategoryRow[]>([]);
   const [categoryId, setCategoryId] = useState<number | "ALL">("ALL");
@@ -19,8 +27,24 @@ export default function FaqListPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const page = 0;
+  // ✅ PaginationSimple은 1-base
+  const initialPage = useMemo(() => {
+    const v = Number(searchParams.get("page") ?? "1");
+    return Number.isFinite(v) && v >= 1 ? v : 1;
+  }, [searchParams]);
+
+  const [page, setPage] = useState<number>(initialPage);
+
+  useEffect(() => {
+    setPage(initialPage);
+  }, [initialPage]);
+
+  // ✅ API는 0-base
+  const apiPage = Math.max(0, page - 1);
   const size = 20;
+
+  // ✅ (임시) totalPages: API 응답 meta 붙으면 교체
+  const totalPages = 10;
 
   const categoryById = useMemo(() => {
     const m = new Map<number, FaqCategoryRow>();
@@ -58,7 +82,7 @@ export default function FaqListPage() {
       const data = await faqsApi.list({
         categoryId: categoryId === "ALL" ? undefined : categoryId,
         keyword,
-        page,
+        page: apiPage,
         size,
       });
       setRows(data);
@@ -78,6 +102,12 @@ export default function FaqListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ✅ page 바뀌면 재조회
+  useEffect(() => {
+    fetchList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiPage]);
+
   const filteredRows = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
 
@@ -95,6 +125,70 @@ export default function FaqListPage() {
     });
   }, [rows, categoryId, keyword, selectedCategoryName]);
 
+  // ✅ PaginationSimple onChange: state + URL 동기화
+  const onChangePage = (nextPage: number) => {
+    const safe = Math.max(1, Math.min(nextPage, totalPages));
+    setPage(safe);
+
+    const sp = new URLSearchParams(searchParams.toString());
+    sp.set("page", String(safe));
+    router.replace(`${pathname}?${sp.toString()}`);
+  };
+
+  // ✅ Table columns
+  const columns: Array<TableColumn<FaqListItemDto>> = useMemo(
+    () => [
+      {
+        header: "번호",
+        width: 90,
+        align: "center",
+        render: (_row, idx) => String(apiPage * size + idx + 1).padStart(5, "0"),
+      },
+      {
+        header: "분류",
+        width: 140,
+        align: "center",
+        render: (row) => {
+          const cat = categoryByName.get(String(row.categoryName ?? ""));
+          return (
+            <span
+              className={styles.badge}
+              style={{
+                backgroundColor: cat?.bgColor ?? "#F3F4F6",
+                color: cat?.textColor ?? "#111827",
+              }}
+              title={cat ? `bg: ${cat.bgColor}, text: ${cat.textColor}` : ""}
+            >
+              {cat?.name ?? row.categoryName ?? "미분류"}
+            </span>
+          );
+        },
+      },
+      {
+        header: "제목",
+        align: "left",
+        render: (row) => (
+          <span className={styles.titleCell} title={row.title}>
+            {row.title}
+          </span>
+        ),
+      },
+      {
+        header: "조회수",
+        width: 110,
+        align: "center",
+        render: (row) => Number(row.views ?? 0).toLocaleString(),
+      },
+      {
+        header: "작성일",
+        width: 140,
+        align: "center",
+        field: "createdAt",
+      },
+    ],
+    [apiPage, size, categoryByName]
+  );
+
   return (
     <div className={styles.wrap}>
       <div className={styles.breadcrumb}>
@@ -111,6 +205,7 @@ export default function FaqListPage() {
             className={styles.select}
             value={categoryId === "ALL" ? "ALL" : String(categoryId)}
             onChange={(e) => setCategoryId(e.target.value === "ALL" ? "ALL" : Number(e.target.value))}
+            disabled={loading}
           >
             <option value="ALL">전체</option>
             {categories.map((c) => (
@@ -120,115 +215,44 @@ export default function FaqListPage() {
             ))}
           </select>
 
-          <input
-            className={styles.input}
+          <SearchBar
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={setKeyword}
+            onSearch={fetchList}
             placeholder="검색어 입력..."
+            loading={loading}
+            allowEmptySearch={true}
+            searchOnEnter={true}
+            showClear={true}
           />
-
-          <button className={styles.searchBtn} onClick={fetchList} disabled={loading}>
-            검색
-          </button>
         </div>
       </div>
 
       <div className={styles.tableCard}>
-        <table className={styles.table}>
-          <colgroup>
-            <col className={styles.colNoCol} />
-            <col className={styles.colCategoryCol} />
-            <col className={styles.colTitleCol} />
-            <col className={styles.colViewsCol} />
-            <col className={styles.colDateCol} />
-          </colgroup>
-
-          <thead>
-            <tr>
-              <th className={styles.colNo}>번호</th>
-              <th className={styles.colCategory}>분류</th>
-              <th className={styles.colTitle}>제목</th>
-              <th className={styles.colViews}>조회수</th>
-              <th className={styles.colDate}>작성일</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading && (
-              <tr>
-                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
-                  불러오는 중...
-                </td>
-              </tr>
-            )}
-
-            {!loading &&
-              filteredRows.map((row, idx) => {
-                const no = String(page * size + idx + 1).padStart(5, "0");
-                const cat = categoryByName.get(String(row.categoryName ?? ""));
-
-                return (
-                  <tr
-                    key={String(row.id)}
-                    className={styles.row}
-                    onClick={() => router.push(`/admin/community/faqs/${row.id}`)}
-                  >
-                    <td className={styles.colNo}>{no}</td>
-
-                    <td className={styles.colCategory}>
-                      <span
-                        className={styles.badge}
-                        style={{
-                          backgroundColor: cat?.bgColor ?? "#F3F4F6",
-                          color: cat?.textColor ?? "#111827",
-                        }}
-                        title={cat ? `bg: ${cat.bgColor}, text: ${cat.textColor}` : ""}
-                      >
-                        {cat?.name ?? row.categoryName ?? "미분류"}
-                      </span>
-                    </td>
-
-                    <td className={`${styles.colTitle} ${styles.titleCell}`} title={row.title}>
-                      {row.title}
-                    </td>
-
-                    <td className={styles.colViews}>{Number(row.views ?? 0).toLocaleString()}</td>
-                    <td className={styles.colDate}>{row.createdAt}</td>
-                  </tr>
-                );
-              })}
-
-            {!loading && filteredRows.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ padding: 18, textAlign: "center", color: "#777" }}>
-                  {error ? error : "검색 결과가 없습니다."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <Table<FaqListItemDto>
+          columns={columns}
+          items={filteredRows}
+          rowKey={(row) => String(row.id)}
+          onRowClick={(row) => router.push(`/admin/community/faqs/${row.id}`)}
+          loading={loading}
+          skeletonRowCount={8}
+          emptyText={error ? error : "검색 결과가 없습니다."}
+          ariaLabel="FAQ 목록"
+        />
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.leftBtn} onClick={() => router.push("/admin/community/faqs/categories")}>
+        <Button variant="secondary" onClick={() => router.push("/admin/community/faqs/categories")}>
           카테고리 관리
-        </button>
+        </Button>
 
         <div className={styles.pagination}>
-          <button className={`${styles.pageBtn} ${styles.pageBtnDisabled}`} disabled>
-            ‹
-          </button>
-          <button className={`${styles.pageBtn} ${styles.pageBtnActive}`}>1</button>
-          <button className={styles.pageBtn}>2</button>
-          <span style={{ color: "#aaa", fontSize: 12 }}>…</span>
-          <button className={styles.pageBtn}>9</button>
-          <button className={styles.pageBtn}>10</button>
-          <button className={styles.pageBtn}>›</button>
+          <PaginationSimple page={page} totalPages={totalPages} onChange={onChangePage} disabled={loading} />
         </div>
 
-        <button className={styles.rightBtn} onClick={() => router.push("/admin/community/faqs/new")}>
+        <Button variant="primary" onClick={() => router.push("/admin/community/faqs/new")}>
           등록
-        </button>
+        </Button>
       </div>
     </div>
   );

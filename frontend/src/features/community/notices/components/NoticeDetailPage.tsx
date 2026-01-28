@@ -8,6 +8,8 @@ import type { NoticeDetailDto } from "../api/dto";
 import { noticeCategoriesApi } from "../categories/api/noticeCategoriesApi";
 import type { NoticeCategoryRow } from "../categories/types";
 
+import { Button, DeleteActionButton } from "@/components/button";
+
 export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
   const router = useRouter();
 
@@ -118,15 +120,11 @@ export default function NoticeDetailPage({ noticeId }: { noticeId: string }) {
       </div>
 
       <div className={styles.actions}>
-        <button
-          className={`${styles.btn} ${styles.btnPrimary}`}
-          onClick={() => router.push(`/admin/community/notices/${notice.id}/edit`)}
-        >
+        <Button variant="secondary" onClick={() => router.push(`/admin/community/notices/${notice.id}/edit`)}>
           수정
-        </button>
-        <button className={`${styles.btn} ${styles.btnDanger}`} onClick={onDelete}>
-          삭제
-        </button>
+        </Button>
+
+        <DeleteActionButton onDelete={onDelete} />
       </div>
     </div>
   );
