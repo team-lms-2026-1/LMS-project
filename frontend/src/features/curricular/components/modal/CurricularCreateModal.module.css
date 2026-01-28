@@ -55,3 +55,12 @@ textarea.control {
   line-height: 1.4;      /* ✅ 텍스트 가독성 */
 }
 
+.controlWrap {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.controlWrap > * {
+  width: 100%;
+}
