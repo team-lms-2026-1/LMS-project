@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import styles from "./Modal.module.css";
 
 export function ModalFooter({
@@ -10,7 +11,13 @@ export function ModalFooter({
   align?: "right" | "space-between";
 }) {
   return (
-    <div className={align === "space-between" ? `${styles.footer} ${styles.footerLeft}` : styles.footer}>
+    <div
+      className={
+        align === "space-between"
+          ? `${styles.footer} ${styles.footerLeft}`
+          : styles.footer
+      }
+    >
       {children}
     </div>
   );
