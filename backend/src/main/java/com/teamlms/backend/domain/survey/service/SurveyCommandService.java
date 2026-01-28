@@ -66,7 +66,7 @@ public class SurveyCommandService {
         if ("ALL".equals(filter.getGenType())) {
             targets = accountRepository.findAll();
         } else if ("DEPT".equals(filter.getGenType())) {
-            targets = accountRepository.findAllByDeptIdsIn(filter.getDeptIds());
+            targets = accountRepository.findAllByDeptIdIn(filter.getDeptIds());
         } else {
             targets = accountRepository.findAllById(filter.getUserIds());
         }
@@ -74,7 +74,7 @@ public class SurveyCommandService {
         List<SurveyTarget> surveyTargets = targets.stream()
                 .map(account -> SurveyTarget.builder()
                         .surveyId(survey.getId())
-                        .targetAccountId(account.getId())
+                        .targetAccountId(account.getAccountId())
                         .status(SurveyTargetStatus.PENDING)
                         .invitedAt(LocalDateTime.now())
                         .build())

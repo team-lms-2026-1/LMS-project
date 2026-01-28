@@ -47,7 +47,7 @@ public class SurveyTarget {
     // ✅ 응답 데이터: Map<문항ID(String), 점수(Integer)>
     // DB에는 JSONB(PostgreSQL) 또는 JSON(MySQL) 타입으로 저장됨
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "response_json", columnDefinition = "json")
+    @Column(name = "response_json", columnDefinition = "jsonb")
     private Map<String, Integer> responseJson;
 
     // 응답 제출 처리 메서드

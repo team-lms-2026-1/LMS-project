@@ -2,7 +2,7 @@ package com.teamlms.backend.domain.survey.entity;
 
 import com.teamlms.backend.domain.survey.enums.SurveyStatus;
 import com.teamlms.backend.domain.survey.enums.SurveyType;
-import com.teamlms.backend.global.entity.BaseEntity; // BaseEntity 경로 확인 필요
+import com.teamlms.backend.global.audit.BaseEntity; 
 import jakarta.persistence.*;
 import lombok.*;
 

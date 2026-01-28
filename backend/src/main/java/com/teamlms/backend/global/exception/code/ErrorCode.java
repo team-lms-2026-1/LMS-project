@@ -116,7 +116,14 @@ public enum ErrorCode {
     STUDY_RENTAL_NOT_DELETE(HttpStatus.NOT_FOUND, "STUDY_RENTAL_NOT_DELETE", "삭제를 하지 못했습니다.", "study.rental.not.delete"),
     STUDY_RENTAL_NOT_CREATE(HttpStatus.CONFLICT, "STUDY_RENTAL_NOT_CREATE", "생성을 하지 못했습니다.", "study.rental.not.create"),
     STUDY_RENTAL_MIN_MAX(HttpStatus.CONFLICT, "STUDY_RENTAL_MIN_MAX", "최대 인원은 최소 인원보다 커야 합니다.", "study.rent.min.max"),
-    STUDY_RENTAL_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDY_RENTAL_USER_NOT_FOUND", "사용자를 찾지 못했습니다.", "user.notFound");
+    STUDY_RENTAL_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDY_RENTAL_USER_NOT_FOUND", "사용자를 찾지 못했습니다.", "user.notFound"),
+
+    // =========================
+    // Domain: survey
+    // =========================
+    SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "SURVEY_NOT_FOUND", "설문 정보를 찾을 수 없습니다.", "survey.notFound"),
+    SURVEY_NOT_TARGET(HttpStatus.FORBIDDEN, "SURVEY_NOT_TARGET", "해당 설문의 대상자가 아닙니다.", "survey.notTarget"),
+    SURVEY_ALREADY_SUBMITTED(HttpStatus.CONFLICT, "SURVEY_ALREADY_SUBMITTED", "이미 응답을 제출한 설문입니다.", "survey.alreadySubmitted");
     
 
     private final HttpStatus httpStatus;

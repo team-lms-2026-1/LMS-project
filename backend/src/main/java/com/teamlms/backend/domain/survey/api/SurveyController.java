@@ -7,7 +7,7 @@ import com.teamlms.backend.domain.survey.enums.SurveyType;
 import com.teamlms.backend.domain.survey.service.SurveyCommandService;
 import com.teamlms.backend.domain.survey.service.SurveyQueryService;
 import com.teamlms.backend.domain.survey.service.SurveyResponseService;
-import com.teamlms.backend.global.security.CustomUserDetails; // Security User 객체 (예시)
+import com.teamlms.backend.global.security.principal.AuthUser;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class SurveyController {
 
@@ -64,9 +64,9 @@ public class SurveyController {
     // 3. 내가 참여해야 할 설문 목록 조회
     @GetMapping("/surveys/available")
     public ResponseEntity<List<SurveyListResponse>> getAvailableSurveys(
-            @AuthenticationPrincipal CustomUserDetails user
+            @AuthenticationPrincipal AuthUser user
     ) {
-        return ResponseEntity.ok(queryService.getAvailableSurveys(user.getId()));
+        return ResponseEntity.ok(queryService.getAvailableSurveys(user.getAccountId()));
     }
 
     // 4. 설문 상세 조회 (참여 화면용 - 문항 포함)
@@ -78,10 +78,10 @@ public class SurveyController {
     // 5. 설문 응답 제출
     @PostMapping("/surveys/submit")
     public ResponseEntity<Void> submitResponse(
-            @AuthenticationPrincipal CustomUserDetails user,
+            @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid SurveySubmitRequest request
     ) {
-        responseService.submitResponse(user.getId(), request);
+        responseService.submitResponse(user.getAccountId(), request);
         return ResponseEntity.ok().build();
     }
 }
