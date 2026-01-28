@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { CurricularListResponse } from "./types";
+import { CurricularCreateRequest, CurricularListResponse, SuccessResponse } from "./types";
 
 export type CurricularsListQuery = {
   page?: number;
@@ -21,4 +21,13 @@ export async function fetchCurricularsList(query: CurricularsListQuery) {
   const url = qs ? `/api/admin/curricular/curriculars?${qs}` : `/api/admin/curricular/curriculars`;
 
   return getJson<CurricularListResponse>(url);
+}
+
+export async function createCurricular(body: CurricularCreateRequest) {
+    return getJson<SuccessResponse>(`/api/admin/curricular/curriculars`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        cache: "no-store"
+    })
 }

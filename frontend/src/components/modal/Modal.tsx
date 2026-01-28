@@ -1,11 +1,24 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Modal.module.css";
-import { cn } from "@/components/table"; // 이미 cn을 table utils에서 export 중이면 사용
+import { cn } from "@/components/table";
 
 type ModalSize = "sm" | "md" | "lg";
+
+type ModalProps = {
+  open: boolean;
+  title?: string;
+  children: React.ReactNode;
+  onClose: () => void;
+  closeOnBackdrop?: boolean;
+  closeOnEsc?: boolean;
+  lockScroll?: boolean;
+  size?: ModalSize;
+  footer?: React.ReactNode;
+  headerRight?: React.ReactNode;
+};
 
 export function Modal({
   open,
@@ -18,23 +31,18 @@ export function Modal({
   size = "md",
   footer,
   headerRight,
-}: {
-  open: boolean;
-  title?: string;
-  children: React.ReactNode;
-  onClose: () => void;
-  closeOnBackdrop?: boolean;
-  closeOnEsc?: boolean;
-  lockScroll?: boolean;
-  size?: ModalSize;
-  footer?: React.ReactNode;       // 하단 버튼 영역
-  headerRight?: React.ReactNode;  // 헤더 우측 커스텀(선택)
-}) {
+}: ModalProps) {
   const labelId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const prevActiveRef = useRef<HTMLElement | null>(null);
 
-  // ✅ ESC 닫기 + 포커스 관리
+  // ✅ onClose 참조를 안정화 (deps로 넣지 않아도 최신 함수 호출 가능)
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  // ✅ ESC 닫기 + 포커스 관리 (열릴 때 1회만 포커스 잡기)
   useEffect(() => {
     if (!open) return;
 
@@ -42,22 +50,30 @@ export function Modal({
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (!closeOnEsc) return;
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
 
     window.addEventListener("keydown", onKeyDown);
 
-    // ✅ 모달 열리면 패널에 포커스
-    setTimeout(() => {
-      panelRef.current?.focus();
-    }, 0);
+    // ✅ 열릴 때: data-autofocus > 첫 폼컨트롤 > panel 순서로 포커스
+    requestAnimationFrame(() => {
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      const autofocusEl =
+        panel.querySelector<HTMLElement>("[data-autofocus]") ??
+        panel.querySelector<HTMLElement>(
+          'input, textarea, select, button, [tabindex]:not([tabindex="-1"])'
+        );
+
+      (autofocusEl ?? panel).focus();
+    });
 
     return () => {
       window.removeEventListener("keydown", onKeyDown);
-      // ✅ 닫히면 원래 포커스로 복귀
       prevActiveRef.current?.focus?.();
     };
-  }, [open, closeOnEsc, onClose]);
+  }, [open, closeOnEsc]);
 
   // ✅ body scroll lock
   useEffect(() => {
@@ -79,8 +95,7 @@ export function Modal({
       className={styles.backdrop}
       onMouseDown={(e) => {
         if (!closeOnBackdrop) return;
-        // ✅ backdrop 자체 클릭만 닫기 (패널 내부 클릭은 무시)
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) onCloseRef.current();
       }}
       role="presentation"
     >
@@ -103,7 +118,7 @@ export function Modal({
               <button
                 type="button"
                 className={styles.closeBtn}
-                onClick={onClose}
+                onClick={() => onCloseRef.current()}
                 aria-label="close"
               >
                 ✕
@@ -119,6 +134,5 @@ export function Modal({
     </div>
   );
 
-  // ✅ Portal (Next.js에서 레이어/overflow 문제 방지)
   return createPortal(content, document.body);
 }
