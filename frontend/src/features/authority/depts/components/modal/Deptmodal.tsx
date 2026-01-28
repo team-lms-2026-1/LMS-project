@@ -1,9 +1,12 @@
 // 위치: frontend/src/features/authority/depts/components/modal/Deptmodal.tsx
-
 "use client";
 
 import { useState } from "react";
 import styles from "@/features/authority/depts/styles/DeptCreate.module.css";
+
+// 버튼 공용 컴포넌트 (상대 경로 기준)
+import { Button } from "@/components/button";
+import { OutButton } from "@/components/button/OutButton";
 
 type DeptmodalProps = {
   onClose: () => void;
@@ -13,75 +16,73 @@ export default function Deptmodal({ onClose }: DeptmodalProps) {
   const [deptCode, setDeptCode] = useState("");
   const [deptName, setDeptName] = useState("");
   const [description, setDescription] = useState("");
-
   const [submitting, setSubmitting] = useState(false);
 
-  // Deptmodal.tsx 안 handleCreate
-
-const handleCreate = async () => {
-  if (!deptCode.trim() || !deptName.trim()) {
-    alert("학과코드와 학과이름은 필수입니다.");
-    return;
-  }
-
-  try {
-    setSubmitting(true);
-
-    const payload = {
-      deptCode: deptCode.trim(),
-      deptName: deptName.trim(),
-      description: description.trim() || null,
-      isActive: true, // ✅ 이거 꼭 넣기
-    };
-
-    const res = await fetch("/api/bff/admin/depts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.error("[Deptmodal] 학과 생성 실패 raw body:", text);
-
-      // JSON이면 message 뽑아보기
-      try {
-        const parsed = text ? JSON.parse(text) : null;
-        const msg =
-          parsed?.error?.message ||
-          parsed?.message ||
-          text ||
-          `학과 생성 실패 (status: ${res.status})`;
-
-        alert(msg); // 👈 이제 여기서 자세한 에러 메시지 뜰 거야
-      } catch {
-        alert(`학과 생성 실패 (status: ${res.status})\n${text}`);
-      }
-
+  const handleCreate = async () => {
+    if (!deptCode.trim() || !deptName.trim()) {
+      alert("학과코드와 학과이름은 필수입니다.");
       return;
     }
 
-    onClose();
-  } catch (e) {
-    console.error("[Deptmodal] 학과 생성 중 예외:", e);
-    alert("학과 생성 중 알 수 없는 오류가 발생했습니다.");
-  } finally {
-    setSubmitting(false);
-  }
-};
+    if (submitting) return;
 
+    try {
+      setSubmitting(true);
+
+      const payload = {
+        deptCode: deptCode.trim(),
+        deptName: deptName.trim(),
+        description: description.trim() || null,
+        isActive: true, // 기본 활성화
+      };
+
+      const res = await fetch("/api/bff/admin/depts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("[Deptmodal] 학과 생성 실패 raw body:", text);
+
+        try {
+          const parsed = text ? JSON.parse(text) : null;
+          const msg =
+            parsed?.error?.message ||
+            parsed?.message ||
+            text ||
+            `학과 생성 실패 (status: ${res.status})`;
+
+          alert(msg);
+        } catch {
+          alert(`학과 생성 실패 (status: ${res.status})`);
+        }
+
+        return;
+      }
+
+      // ✅ 정상 생성되면 모달 닫기
+      onClose();
+    } catch (e) {
+      console.error("[Deptmodal] 학과 생성 중 예외:", e);
+      alert("학과 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div
       className={styles.modalOverlay}
-      onClick={onClose}
+      onClick={submitting ? undefined : onClose} // 처리 중에는 바깥 클릭 무시
     >
       <div
         className={styles.modal}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()} // 안쪽 클릭은 전파 막기
       >
         {/* 헤더 */}
         <div className={styles.modalHeader}>
@@ -90,6 +91,7 @@ const handleCreate = async () => {
             type="button"
             className={styles.modalClose}
             onClick={onClose}
+            disabled={submitting}
           >
             ✕
           </button>
@@ -105,6 +107,7 @@ const handleCreate = async () => {
               value={deptCode}
               onChange={(e) => setDeptCode(e.target.value)}
               className={styles.input}
+              disabled={submitting}
             />
           </div>
 
@@ -115,6 +118,7 @@ const handleCreate = async () => {
               value={deptName}
               onChange={(e) => setDeptName(e.target.value)}
               className={styles.input}
+              disabled={submitting}
             />
           </div>
 
@@ -124,28 +128,32 @@ const handleCreate = async () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className={styles.textarea}
+              disabled={submitting}
             />
           </div>
         </div>
 
         {/* 푸터 */}
         <div className={styles.modalFooter}>
-          <button
+          <OutButton
             type="button"
             className={styles.secondaryButton}
             onClick={onClose}
             disabled={submitting}
           >
             취소
-          </button>
-          <button
+          </OutButton>
+
+          <Button
             type="button"
+            variant="primary"
             className={styles.secondaryButton}
-            onClick={handleCreate}   // ✅ 여기!
+            onClick={handleCreate}
+            loading={submitting}
             disabled={submitting}
           >
-            {submitting ? "생성 중..." : "학과 생성"}
-          </button>
+            학과 생성
+          </Button>
         </div>
       </div>
     </div>

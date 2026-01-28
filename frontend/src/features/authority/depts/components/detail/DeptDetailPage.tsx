@@ -1,4 +1,3 @@
-// 위치: frontend/src/features/authority/depts/components/detail/DeptDetailPage.tsx
 
 "use client";
 
@@ -24,6 +23,10 @@ type Props = {
  *  백엔드 응답 타입들
  * ========================= */
 
+/**
+ * 학과 요약 상세 응답 타입
+ * (GET /api/v1/admin/depts/{id}/summary)
+ */
 type DeptDetailResponse = {
   data: {
     departmentId: number;
@@ -42,6 +45,7 @@ type DeptDetailResponse = {
   meta: unknown;
 };
 
+// 페이지네이션 메타
 type PageMeta = {
   page: number;
   size: number;
@@ -52,121 +56,75 @@ type PageMeta = {
   sort: string[];
 };
 
+/**
+ * 교수 목록 응답 타입
+ * (필드명은 백엔드 DTO에 맞게 필요하면 수정)
+ */
 type DeptProfessorsResponse = {
   data: {
-    accountId: number;
-    professorNo: string;
-    name: string;
+    professorId: number;
+    professorCode: string;
+    professorName: string;
     email: string;
     phone: string;
   }[];
   meta: PageMeta;
 };
 
+/**
+ * 학생 목록 응답 타입
+ * (필드명은 백엔드 DTO에 맞게 필요하면 수정)
+ */
 type DeptStudentsResponse = {
   data: {
     studentId: number;
     studentNo: string;
-    studentName?: string | null;
-    name?: string | null;
-    grade?: number | null;
-    gradeLevel?: number | null;
-    status?: string | null;
-    academicStatus?: string | null;
-    enrollmentStatus?: string | null;
-    majorName?: string | null;
+    studentName: string;
+    grade: number;
+    status: string;
+    majorName: string;
   }[];
   meta: PageMeta;
 };
 
 /**
  * 전공 목록 응답 타입
+ * (GET /api/v1/admin/depts/{id}/majors)
  *
- * 실제 백엔드 JSON 구조와 최대한 유연하게 맞춤
+ * 예시:
+ * {
+ *   "majorId": 2,
+ *   "majorCode": "CS_AI",
+ *   "majorName": "인공지능",
+ *   "enrolledStudentCount": 0
+ * }
  */
-type DeptMajorsItem = {
-  // id 종류
-  majorId?: number | null;
-  id?: number | null;
-  major_id?: number | null;
-
-  // 코드 종류
-  majorCode?: string | null;
-  code?: string | null;
-  major_code?: string | null;
-
-  // 이름 종류
-  majorName?: string | null;
-  name?: string | null;
-  major_name?: string | null;
-
-  // 재학생 수 종류
-  enrolledStudentCount?: number | null;
-  studentCount?: number | null;
-  enrolledCount?: number | null;
-  student_count?: number | null;
-};
-
 type DeptMajorsResponse = {
-  data: DeptMajorsItem[];
+  data: {
+    majorId: number;
+    majorCode: string;
+    majorName: string;
+    enrolledStudentCount: number;
+  }[];
   meta: PageMeta;
 };
 
-/** 백엔드 전공 DTO → 화면용 Major 로 매핑하는 공통 함수 */
-function mapMajorFromBackend(m: DeptMajorsItem | any): Major {
-  const id =
-    m.majorId ??
-    m.id ??
-    m.major_id ??
-    m.majorID ??
-    Date.now(); // fallback
-
-  const code =
-    m.majorCode ??
-    m.code ??
-    m.major_code ??
-    m.codeValue ??
-    "";
-
-  const name =
-    m.majorName ??
-    m.name ??
-    m.major_name ??
-    m.nameKo ??
-    "";
-
-  const studentCount =
-    m.enrolledStudentCount ??
-    m.studentCount ??
-    m.enrolledCount ??
-    m.student_count ??
-    0;
-
-  return {
-    id: String(id),
-    code,
-    name,
-    studentCount,
-  };
-}
-
 export default function DeptDetailPage({ deptId }: Props) {
   const [dept, setDept] = useState<Department | null>(null);
-
-  const [professors, setProfessors] = useState<Professor[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [majors, setMajors] = useState<Major[]>([]);
-
   const [activeTab, setActiveTab] = useState<TabKey>("professors");
   const [isMajorModalOpen, setIsMajorModalOpen] = useState(false);
-
   const [loading, setLoading] = useState(true);
-  const [listLoading, setListLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /* ========== 1) 학과 요약 ========== */
+  // ✅ 전공 목록을 다시 불러오고 싶을 때 사용할 트리거
+  const [reloadMajorsKey, setReloadMajorsKey] = useState(0);
+  const reloadMajors = () => setReloadMajorsKey((k) => k + 1);
+
+  /**
+   * 1) 학과 요약 정보(/summary) 불러오기
+   */
   useEffect(() => {
-    async function loadSummary() {
+    async function load() {
       try {
         setLoading(true);
         setError(null);
@@ -191,9 +149,9 @@ export default function DeptDetailPage({ deptId }: Props) {
           studentCount: totalStudentCount,
           professorCount: d.professorCount,
           isActive: true,
-          professors: [],
-          students: [],
-          majors: [],
+          professors: [] as Professor[],
+          students: [] as Student[],
+          majors: [] as Major[],
         };
 
         setDept(mapped);
@@ -224,111 +182,53 @@ export default function DeptDetailPage({ deptId }: Props) {
       }
     }
 
-    loadSummary();
+    load();
   }, [deptId]);
 
-  /* ========== 2) 교수 / 학생 / 전공 목록 ========== */
-  useEffect(() => {
-    if (!deptId) return;
-    let cancelled = false;
+  /**
+   * 2) 전공 목록 불러오기
+   *    - dept가 준비된 후에 호출
+   *    - reloadMajorsKey가 바뀔 때마다 다시 호출
+   */
+ useEffect(() => {
+  // dept 없으면 아무 것도 안 함
+  if (!dept) return;
 
-    async function loadLists() {
-      try {
-        setListLoading(true);
+  let cancelled = false;
 
-        // 교수 목록
-        try {
-          const profRes = await getJson<DeptProfessorsResponse>(
-            `/api/bff/admin/depts/${deptId}/professors?page=1&size=20`
-          );
+  // ✅ 여기서 이미 string 확정
+  const deptIdForMajors = dept.id;
 
-          if (!cancelled) {
-            const mapped: Professor[] = profRes.data.map((p) => ({
-              id: String(p.accountId),
-              code: p.professorNo,
-              name: p.name,
-              email: p.email,
-              phone: p.phone,
-            }));
-            setProfessors(mapped);
-          }
-        } catch (e) {
-          console.error("[DeptDetailPage] 교수 목록 불러오기 실패:", e);
-          if (!cancelled) setProfessors([]);
-        }
+  async function loadMajors() {
+    try {
+      const res = await getJson<DeptMajorsResponse>(
+        `/api/bff/admin/depts/${deptIdForMajors}/majors`
+      );
 
-        // 학생 목록
-        try {
-          const stdRes = await getJson<DeptStudentsResponse>(
-            `/api/bff/admin/depts/${deptId}/students?page=1&size=20`
-          );
+      if (cancelled) return;
 
-          if (!cancelled) {
-            const mapped: Student[] = stdRes.data.map((s) => ({
-              id: String(s.studentId),
-              studentNo: s.studentNo ?? "",
-              name: s.studentName ?? s.name ?? "",
-              grade: s.grade ?? s.gradeLevel ?? 0,
-              status:
-                s.status ?? s.academicStatus ?? s.enrollmentStatus ?? "",
-              majorName: s.majorName ?? "",
-            }));
-
-            setStudents(mapped);
-          }
-        } catch (e) {
-          console.error("[DeptDetailPage] 학생 목록 불러오기 실패:", e);
-          if (!cancelled) setStudents([]);
-        }
-
-        // 전공 목록
-        try {
-          const majorRes = await getJson<DeptMajorsResponse>(
-            `/api/bff/admin/depts/${deptId}/majors?page=1&size=20`
-          );
-
-          console.log("[DeptDetailPage] majors raw:", majorRes.data);
-
-          if (!cancelled) {
-            const mapped: Major[] = majorRes.data.map(mapMajorFromBackend);
-            setMajors(mapped);
-          }
-        } catch (e) {
-          console.error("[DeptDetailPage] 전공 목록 불러오기 실패:", e);
-          if (!cancelled) setMajors([]);
-        }
-      } finally {
-        if (!cancelled) setListLoading(false);
-      }
+      const mappedMajors: Major[] = res.data.map((m) => ({
+        id: String(m.majorId),
+        code: m.majorCode,
+        name: m.majorName,
+        studentCount: m.enrolledStudentCount,
+      }));
+    } catch (e) {
+      console.error("[DeptDetailPage] 전공 목록 불러오기 실패:", e);
     }
+  }
 
-    loadLists();
+  loadMajors();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [deptId]);
-
-  /** ✅ 새 전공이 생성됐을 때 (모달에서 onCreated 호출했을 때) */
-  // DeptDetailPage.tsx 안
-
-// ✅ 이미 Major 타입을 받는다고 가정
-const handleMajorCreated = (created: Major) => {
-  console.log("[DeptDetailPage] onCreated param:", created);
-  setMajors((prev) => [...prev, created]);
-};
-
-// 아래는 그대로 유지
-{isMajorModalOpen && (
-  <MajorCreateModal
-    deptId={deptId}
-    onClose={() => setIsMajorModalOpen(false)}
-    onCreated={handleMajorCreated}
-  />
-)}
+  return () => {
+    cancelled = true;
+  };
+}, [dept?.id, reloadMajorsKey]);  // ✅ dept 전체가 아니라 dept?.id 만!
 
 
-  /* ========== 렌더링 ========== */
+  /* =========================
+   *  렌더링
+   * ========================= */
 
   if (loading) {
     return <div className={styles.page}>불러오는 중...</div>;
@@ -365,7 +265,7 @@ const handleMajorCreated = (created: Major) => {
 
       {error && <div className={styles.errorMessage}>{error}</div>}
 
-      {/* 탭 */}
+      {/* 탭 바 */}
       <div className={styles.tabBar}>
         <button
           className={
@@ -401,24 +301,11 @@ const handleMajorCreated = (created: Major) => {
 
       {/* 탭 내용 */}
       <div className={styles.tabContent}>
-        {listLoading && (
-          <div className={styles.loading}>목록 불러오는 중...</div>
-        )}
-
-        {!listLoading && activeTab === "professors" && (
-          <ProfessorsSection
-            list={professors}
-            totalCount={dept.professorCount}
-          />
-        )}
-
-        {!listLoading && activeTab === "students" && (
-          <StudentsSection list={students} />
-        )}
-
-        {!listLoading && activeTab === "majors" && (
+        {activeTab === "professors" && <ProfessorsSection dept={dept} />}
+        {activeTab === "students" && <StudentsSection dept={dept} />}
+        {activeTab === "majors" && (
           <MajorsSection
-            list={majors}
+            dept={dept}
             onClickAdd={() => setIsMajorModalOpen(true)}
           />
         )}
@@ -427,24 +314,22 @@ const handleMajorCreated = (created: Major) => {
       {/* 전공 추가 모달 */}
       {isMajorModalOpen && (
         <MajorCreateModal
-          deptId={deptId}
+          deptId={dept.id}
           onClose={() => setIsMajorModalOpen(false)}
-          onCreated={handleMajorCreated}
+          onCreated={reloadMajors}
         />
       )}
     </div>
   );
 }
 
-/* ----- 밑의 섹션/테이블 렌더 함수들은 그대로 사용 ----- */
+/* ------------------------------------------------------------------ */
+/*                           소속 교수 섹션                            */
+/* ------------------------------------------------------------------ */
 
-function ProfessorsSection({
-  list,
-  totalCount,
-}: {
-  list: Professor[];
-  totalCount: number;
-}) {
+function ProfessorsSection({ dept }: { dept: Department }) {
+  const list = (dept.professors ?? []) as Professor[];
+
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
@@ -454,7 +339,9 @@ function ProfessorsSection({
             placeholder="이름 / 교번 검색"
           />
         </div>
-        <div className={styles.sectionMeta}>교수수: {totalCount}명</div>
+        <div className={styles.sectionMeta}>
+          교수수: {dept.professorCount}명
+        </div>
       </div>
 
       <table className={styles.table}>
@@ -490,7 +377,13 @@ function ProfessorsSection({
   );
 }
 
-function StudentsSection({ list }: { list: Student[] }) {
+/* ------------------------------------------------------------------ */
+/*                           소속 학생 섹션                            */
+/* ------------------------------------------------------------------ */
+
+function StudentsSection({ dept }: { dept: Department }) {
+  const list = (dept.students ?? []) as Student[];
+
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionHeader}>
@@ -502,6 +395,7 @@ function StudentsSection({ list }: { list: Student[] }) {
         </div>
         <div className={styles.sectionMeta}>
           재학생: 0명 휴학생: 0명 졸업생: 0명
+          {/* TODO: 백엔드에서 상태별 인원까지 내려주면 Department 타입 확장해서 표시 */}
         </div>
       </div>
 
@@ -519,10 +413,10 @@ function StudentsSection({ list }: { list: Student[] }) {
           {list.map((s) => (
             <tr key={s.id}>
               <td>{s.studentNo}</td>
-              <td>{s.name || ""}</td>
-              <td>{s.grade ? s.grade : ""}</td>
-              <td>{s.status || ""}</td>
-              <td>{s.majorName || ""}</td>
+              <td>{s.name}</td>
+              <td>{s.grade}</td>
+              <td>{s.status}</td>
+              <td>{s.majorName}</td>
             </tr>
           ))}
           {list.length === 0 && (
@@ -540,13 +434,19 @@ function StudentsSection({ list }: { list: Student[] }) {
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*                           전공 관리 섹션                            */
+/* ------------------------------------------------------------------ */
+
 function MajorsSection({
-  list,
+  dept,
   onClickAdd,
 }: {
-  list: Major[];
+  dept: Department;
   onClickAdd: () => void;
 }) {
+  const list = (dept.majors ?? []) as Major[];
+
   return (
     <div className={styles.sectionCard}>
       <div className={styles.majorsHeader}>
@@ -595,6 +495,10 @@ function MajorsSection({
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*                        공통 페이지네이션 행                         */
+/* ------------------------------------------------------------------ */
 
 function PaginationRow() {
   return (

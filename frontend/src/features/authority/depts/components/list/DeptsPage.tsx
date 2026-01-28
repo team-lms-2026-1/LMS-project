@@ -12,6 +12,13 @@ import {
 import { getJson } from "@/lib/http";
 import styles from "@/features/authority/depts/styles/DeptsPage.module.css";
 
+import { SearchBar } from "@/components/searchbar";
+import { Button } from "@/components/button";
+import { Table } from "@/components/table";
+import { TableColumn } from "@/components/table";
+import { PaginationSimple } from "@/components/pagination";
+import { StatusPill } from "@/components/status";
+
 // ✅ 백엔드 /api/v1/admin/depts 응답 형태에 맞춘 타입
 type DeptListResponse = {
   data: {
@@ -24,35 +31,70 @@ type DeptListResponse = {
     isActive: boolean;
   }[];
   meta: {
-    page: number;
+    page: number; // 1-base라고 가정
     size: number;
     totalElements: number;
     totalPages: number;
     hasNext: boolean;
     hasPrev: boolean;
     sort: string[];
-  };
+  } | null;
 };
 
+// ✅ 👉 여기! 컴포넌트 바깥(위)에 고정 상수로 빼두기
+const DEPT_COLUMNS: TableColumn<Department>[] = [
+  { header: "학과코드", field: "code", align: "center", width: 120 },
+  { header: "학과명", field: "name", align: "left" },
+  { header: "담당교수", field: "headProfessor", align: "left", width: 150 },
+  { header: "학생수", field: "studentCount", align: "right", width: 100 },
+  { header: "교수수", field: "professorCount", align: "right", width: 100 },
+  {
+    header: "사용여부",
+    align: "center",
+    width: 130,
+    render: (row) => (
+      <StatusPill
+        status={row.isActive ? "ACTIVE" : "INACTIVE"}
+        label={row.isActive ? "on" : "off"}
+      />
+    ),
+    stopRowClick: true,
+  },
+];
+
 export default function DeptsPage() {
+  const router = useRouter();
+
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ 학과 목록 로딩 함수 (재사용 가능)
-  async function loadDepartments() {
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // ✅ 학과 목록 로딩 함수 (페이지 인자 추가)
+  async function loadDepartments(nextPage: number = 1) {
     try {
       setLoading(true);
       setError(null);
 
-      // BFF 경로 호출 → 내부에서 /api/v1/admin/depts로 프록시
-      const res = await getJson<DeptListResponse>("/api/bff/admin/depts");
+      const searchParams = new URLSearchParams();
+      if (nextPage > 0) searchParams.set("page", String(nextPage));
+      if (keyword.trim()) {
+        searchParams.set("keyword", keyword.trim());
+      }
 
-      // 백엔드 응답(data)을 화면에서 쓰는 Department 타입으로 매핑
+      const qs = searchParams.toString();
+      const url = qs
+        ? `/api/bff/admin/depts?${qs}`
+        : `/api/bff/admin/depts`;
+
+      const res = await getJson<DeptListResponse>(url);
+
       const mapped: Department[] = res.data.map((item) => ({
-        id: String(item.deptId), // number → string
+        id: String(item.deptId),
         code: item.deptCode,
         name: item.deptName,
         headProfessor: item.headProfessorName ?? "",
@@ -62,14 +104,24 @@ export default function DeptsPage() {
       }));
 
       setDepartments(mapped);
+
+      const meta = res.meta;
+      if (meta) {
+        setPage(meta.page || nextPage);
+        setTotalPages(meta.totalPages || 1);
+      } else {
+        setPage(1);
+        setTotalPages(1);
+      }
     } catch (e) {
       console.error("[DeptsPage] 학과 목록 불러오기 실패:", e);
       setError(
         "학과 목록을 불러오는 데 실패했습니다. (임시로 목업 데이터를 표시합니다)"
       );
 
-      // 백엔드가 죽어 있어도 화면은 보이게 목업 사용
       setDepartments(DEPT_MOCK_LIST);
+      setPage(1);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -77,18 +129,19 @@ export default function DeptsPage() {
 
   // ✅ 최초 렌더링 시 학과 목록 불러오기
   useEffect(() => {
-    loadDepartments();
+    loadDepartments(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = () => {
-    console.log("검색어:", keyword);
-    // TODO: 나중에 ?keyword= 붙여서 /api/bff/admin/depts 호출하도록 확장
+    setPage(1);
+    loadDepartments(1);
   };
 
-  // ✅ 모달 닫힐 때 목록도 새로고침
+  // ✅ 모달 닫힐 때 목록도 새로고침 (현재 페이지 유지)
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    loadDepartments();
+    loadDepartments(page);
   };
 
   return (
@@ -98,22 +151,15 @@ export default function DeptsPage() {
         <h1 className={styles.title}>학과 관리</h1>
 
         {/* 검색 영역 */}
-        <div className={styles.searchRow}>
-          <input
-            type="text"
-            placeholder="검색어 입력..."
-            className={styles.searchInput}
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-          />
-          <button
-            className={styles.searchButton}
-            type="button"
-            onClick={handleSearch}
-          >
-            검색
-          </button>
-        </div>
+        <SearchBar
+          value={keyword}
+          onChange={setKeyword}
+          onSearch={handleSearch}
+          placeholder="검색어 입력..."
+          disabled={loading}
+          loading={loading}
+          className={styles.searchRow}
+        />
 
         {/* 에러 메시지 */}
         {error && <div className={styles.errorMessage}>{error}</div>}
@@ -123,128 +169,47 @@ export default function DeptsPage() {
           <div className={styles.loading}>불러오는 중...</div>
         ) : (
           <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>학과코드</th>
-                  <th>학과명</th>
-                  <th>담당교수</th>
-                  <th>학생수</th>
-                  <th>교수수</th>
-                  <th className={styles.usageHeader}>사용여부</th>
-                </tr>
-              </thead>
-              <tbody>
-                {departments.map((dept) => (
-                  <DepartmentRow
-                    key={dept.id}
-                    dept={dept}
-                    onToggle={() => {
-                      setDepartments((prev) =>
-                        prev.map((d) =>
-                          d.id === dept.id
-                            ? { ...d, isActive: !d.isActive }
-                            : d
-                        )
-                      );
-                    }}
-                  />
-                ))}
-
-                {departments.length === 0 && !error && (
-                  <tr>
-                    <td colSpan={6} className={styles.emptyRow}>
-                      학과가 없습니다.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <Table
+              columns={DEPT_COLUMNS} // ← 여기!
+              items={departments}
+              rowKey={(row) => row.id}
+              onRowClick={(row) => router.push(`/admin/depts/${row.id}`)}
+              loading={loading}
+              emptyText="학과가 없습니다."
+            />
           </div>
         )}
 
         {/* 하단: 페이지네이션 + 등록 버튼 */}
         <div className={styles.footerRow}>
-          <Pagination />
-          <button
-            className={styles.primaryButton}
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-          >
-            학과등록
-          </button>
+          {/* 왼쪽 공간 */}
+          <div></div>
+
+          {/* 가운데 페이지네이션 */}
+          <PaginationSimple
+            page={page}
+            totalPages={totalPages}
+            onChange={(nextPage) => loadDepartments(nextPage)}
+            disabled={loading}
+            className={styles.paginationCenter}
+          />
+
+          {/* 오른쪽 버튼 */}
+          <div className={styles.rightButton}>
+            <Button
+              variant="primary"
+              className={styles.primaryButton}
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+            >
+              학과등록
+            </Button>
+          </div>
         </div>
 
         {/* 학과 등록 모달 */}
         {isModalOpen && <Deptmodal onClose={handleCloseModal} />}
       </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*                          학과 한 줄 컴포넌트                        */
-/* ------------------------------------------------------------------ */
-
-function DepartmentRow({
-  dept,
-  onToggle,
-}: {
-  dept: Department;
-  onToggle: () => void;
-}) {
-  const router = useRouter();
-
-  const goDetail = () => {
-    // ✅ 실제 라우트 구조에 맞게 수정
-    router.push(`/admin/depts/${dept.id}`);
-  };
-
-  return (
-    <tr className={styles.clickableRow} onClick={goDetail}>
-      <td>{dept.code}</td>
-      <td>{dept.name}</td>
-      <td>{dept.headProfessor}</td>
-      <td className={styles.textRight}>{dept.studentCount}명</td>
-      <td className={styles.textRight}>{dept.professorCount}명</td>
-
-      {/* 사용여부 + 수정 버튼 */}
-      <td
-        className={styles.usageCell}
-        onClick={(e) => e.stopPropagation()} // 행 전체 클릭 막기
-      >
-        <button
-          type="button"
-          onClick={onToggle}
-          className={dept.isActive ? styles.usageOn : styles.usageOff}
-        >
-          {dept.isActive ? "on" : "off"}
-        </button>
-
-        <button
-          type="button"
-          onClick={goDetail} // ✅ 수정 버튼도 동일하게 /admin/depts/[id] 로
-          className={styles.editButton}
-        >
-          수정
-        </button>
-      </td>
-    </tr>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*                        페이지네이션 컴포넌트                        */
-/* ------------------------------------------------------------------ */
-
-function Pagination() {
-  return (
-    <div className={styles.pagination}>
-      <button className={styles.pageButton}>&lt;</button>
-      <button className={styles.pageButtonActive}>1</button>
-      <button className={styles.pageButton}>2</button>
-      <button className={styles.pageButton}>3</button>
-      <button className={styles.pageButton}>&gt;</button>
     </div>
   );
 }

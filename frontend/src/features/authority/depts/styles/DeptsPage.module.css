@@ -151,11 +151,21 @@
 
 /* 하단 영역 전체 */
 .footerRow {
-  position: relative;      /* ⬅️ 기준 잡기 */
-  margin-top: 20px;
-  height: 40px;            /* 원하는 높이만큼 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+.paginationCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
+.rightButton {
+  display: flex;
+  justify-content: flex-end;
+}
 /* 페이지네이션을 가운데로 */
 .pagination {
   position: absolute;

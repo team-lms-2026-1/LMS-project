@@ -1,5 +1,5 @@
-import DepartmentListPage from "@/features/authority/departments/components/list/DepartmentListPage";
+import DeptPageClient from "@/features/authority/depts/components/list/DeptPage.client";
 
 export default function Page() {
-  return <DepartmentListPage />;
+  return <DeptPageClient />;
 }

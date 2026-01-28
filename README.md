@@ -135,7 +135,7 @@ PR 페이지에서 아래 항목이 **성공(✅)** 상태여야 함:
 
 ## 5. PR 머지 후 정리
 
-```bashz
+```bash
 git checkout main
 git pull origin main
 git branch -d feature/your-task-name

@@ -47,7 +47,11 @@ public class FaqController {
                  "/api/v1/admin/community/faqs/{id}" 
     })
     @PreAuthorize("hasAuthority('FAQ_READ')")
+<<<<<<< Updated upstream
     public ApiResponse<?> getDetail(@PathVariable("id") Long faqId) {
+=======
+    public ApiResponse<?> getDetail(@PathVariable Long faqId) {
+>>>>>>> Stashed changes
         return ApiResponse.ok(service.getDetail(faqId));
     }
 
