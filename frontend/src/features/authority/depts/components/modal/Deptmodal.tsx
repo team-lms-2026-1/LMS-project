@@ -1,8 +1,9 @@
+// 위치: frontend/src/features/authority/depts/components/modal/Deptmodal.tsx
+
 "use client";
 
 import { useState } from "react";
 import styles from "@/features/authority/depts/styles/DeptCreate.module.css";
-
 
 type DeptmodalProps = {
   onClose: () => void;
@@ -13,14 +14,74 @@ export default function Deptmodal({ onClose }: DeptmodalProps) {
   const [deptName, setDeptName] = useState("");
   const [description, setDescription] = useState("");
 
+  const [submitting, setSubmitting] = useState(false);
+
+  // Deptmodal.tsx 안 handleCreate
+
+const handleCreate = async () => {
+  if (!deptCode.trim() || !deptName.trim()) {
+    alert("학과코드와 학과이름은 필수입니다.");
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+
+    const payload = {
+      deptCode: deptCode.trim(),
+      deptName: deptName.trim(),
+      description: description.trim() || null,
+      isActive: true, // ✅ 이거 꼭 넣기
+    };
+
+    const res = await fetch("/api/bff/admin/depts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error("[Deptmodal] 학과 생성 실패 raw body:", text);
+
+      // JSON이면 message 뽑아보기
+      try {
+        const parsed = text ? JSON.parse(text) : null;
+        const msg =
+          parsed?.error?.message ||
+          parsed?.message ||
+          text ||
+          `학과 생성 실패 (status: ${res.status})`;
+
+        alert(msg); // 👈 이제 여기서 자세한 에러 메시지 뜰 거야
+      } catch {
+        alert(`학과 생성 실패 (status: ${res.status})\n${text}`);
+      }
+
+      return;
+    }
+
+    onClose();
+  } catch (e) {
+    console.error("[Deptmodal] 학과 생성 중 예외:", e);
+    alert("학과 생성 중 알 수 없는 오류가 발생했습니다.");
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+
   return (
     <div
       className={styles.modalOverlay}
-      onClick={onClose} // 바깥 클릭 시 닫기
+      onClick={onClose}
     >
       <div
         className={styles.modal}
-        onClick={(e) => e.stopPropagation()} // 안쪽 클릭은 전파 막기
+        onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
         <div className={styles.modalHeader}>
@@ -73,19 +134,17 @@ export default function Deptmodal({ onClose }: DeptmodalProps) {
             type="button"
             className={styles.secondaryButton}
             onClick={onClose}
+            disabled={submitting}
           >
             취소
           </button>
           <button
             type="button"
             className={styles.secondaryButton}
-            onClick={() => {
-              // TODO: 나중에 API 붙이기
-              console.log({ deptCode, deptName, description });
-              onClose();
-            }}
+            onClick={handleCreate}   // ✅ 여기!
+            disabled={submitting}
           >
-            학과 생성
+            {submitting ? "생성 중..." : "학과 생성"}
           </button>
         </div>
       </div>

@@ -41,47 +41,54 @@ export default function DeptsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ 학과 목록 로딩 함수 (재사용 가능)
+  async function loadDepartments() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // BFF 경로 호출 → 내부에서 /api/v1/admin/depts로 프록시
+      const res = await getJson<DeptListResponse>("/api/bff/admin/depts");
+
+      // 백엔드 응답(data)을 화면에서 쓰는 Department 타입으로 매핑
+      const mapped: Department[] = res.data.map((item) => ({
+        id: String(item.deptId), // number → string
+        code: item.deptCode,
+        name: item.deptName,
+        headProfessor: item.headProfessorName ?? "",
+        studentCount: item.studentCount,
+        professorCount: item.professorCount,
+        isActive: item.isActive,
+      }));
+
+      setDepartments(mapped);
+    } catch (e) {
+      console.error("[DeptsPage] 학과 목록 불러오기 실패:", e);
+      setError(
+        "학과 목록을 불러오는 데 실패했습니다. (임시로 목업 데이터를 표시합니다)"
+      );
+
+      // 백엔드가 죽어 있어도 화면은 보이게 목업 사용
+      setDepartments(DEPT_MOCK_LIST);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // ✅ 최초 렌더링 시 학과 목록 불러오기
   useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // BFF 경로 호출 → 내부에서 /api/v1/admin/depts로 프록시
-        const res = await getJson<DeptListResponse>("/api/bff/admin/depts");
-
-        // 백엔드 응답(data)을 화면에서 쓰는 Department 타입으로 매핑
-        const mapped: Department[] = res.data.map((item) => ({
-          id: String(item.deptId), // number → string
-          code: item.deptCode,
-          name: item.deptName,
-          headProfessor: item.headProfessorName ?? "",
-          studentCount: item.studentCount,
-          professorCount: item.professorCount,
-          isActive: item.isActive,
-        }));
-
-        setDepartments(mapped);
-      } catch (e) {
-        console.error("[DeptsPage] 학과 목록 불러오기 실패:", e);
-        setError(
-          "학과 목록을 불러오는 데 실패했습니다. (임시로 목업 데이터를 표시합니다)"
-        );
-
-        // 백엔드가 죽어 있어도 화면은 보이게 목업 사용
-        setDepartments(DEPT_MOCK_LIST);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
+    loadDepartments();
   }, []);
 
   const handleSearch = () => {
     console.log("검색어:", keyword);
     // TODO: 나중에 ?keyword= 붙여서 /api/bff/admin/depts 호출하도록 확장
+  };
+
+  // ✅ 모달 닫힐 때 목록도 새로고침
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    loadDepartments();
   };
 
   return (
@@ -168,11 +175,16 @@ export default function DeptsPage() {
           </button>
         </div>
 
-        {isModalOpen && <Deptmodal onClose={() => setIsModalOpen(false)} />}
+        {/* 학과 등록 모달 */}
+        {isModalOpen && <Deptmodal onClose={handleCloseModal} />}
       </div>
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*                          학과 한 줄 컴포넌트                        */
+/* ------------------------------------------------------------------ */
 
 function DepartmentRow({
   dept,
@@ -220,6 +232,10 @@ function DepartmentRow({
     </tr>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*                        페이지네이션 컴포넌트                        */
+/* ------------------------------------------------------------------ */
 
 function Pagination() {
   return (

@@ -75,6 +75,7 @@ public class AdmincCurricularController {
     public ApiResponse<List<CurricularListItem>> getList(
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "20") int size,
+        @RequestParam(required = false) Long deptId,
         @RequestParam(required = false) String keyword
     ){
         int safePage = Math.max(page, 1);
@@ -87,7 +88,7 @@ public class AdmincCurricularController {
         );
 
         Page<CurricularListItem> result =
-                curricularQueryService.list(keyword, pageable);
+                curricularQueryService.list(deptId, keyword, pageable);
         
         return ApiResponse.of(
                 result.getContent(),

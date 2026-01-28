@@ -103,7 +103,7 @@ export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
             취소
           </Button>
           <Button onClick={handleSubmit} loading={loading}>
-            저장
+            등록
           </Button>
         </>
       }
