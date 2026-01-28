@@ -1,4 +1,6 @@
-export function termToLabel(term: string): string {
+import { SemesterTerm } from "../api/types";
+
+export function termToLabel(term: SemesterTerm): string {
   switch (term) {
     case "FIRST":
       return "1학기";

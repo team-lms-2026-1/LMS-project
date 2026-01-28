@@ -21,11 +21,7 @@ export async function POST(req: Request) {
     cache: "no-store"
   });
 
-  // ✅ POST 성공 시: GET 캐시 무효화
-  if (res.status >= 200 && res.status < 300) {
-    revalidateTag(TAG);
-  }
+  if (res.ok) revalidateTag(TAG);
 
   return res;
-  
 }

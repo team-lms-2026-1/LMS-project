@@ -27,12 +27,15 @@ public interface CurricularRepository extends JpaRepository<Curricular, Long> {
         )
         from Curricular c
         join Dept d on d.deptId = c.deptId
-        where (:keyword is null or :keyword = ''
+        where
+              (:deptId is null or c.deptId = :deptId)
+        and   (:keyword is null or :keyword = ''
               or c.curricularCode like concat('%', :keyword, '%')
               or c.curricularName like concat('%', :keyword, '%')
               or d.deptName like concat('%', :keyword, '%'))
         """)
     Page<CurricularListItem> findList(
+        @Param("deptId") Long deptId,
         @Param("keyword") String keyword,
         Pageable pageable
     );

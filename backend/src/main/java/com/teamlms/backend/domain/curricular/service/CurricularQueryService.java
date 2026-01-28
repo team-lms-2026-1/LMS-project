@@ -29,8 +29,8 @@ public class CurricularQueryService {
         return CurricularEditResponse.from(curricular);
     }
 
-    public Page<CurricularListItem> list(String keyword, Pageable pageable) {
-        return curricularRepository.findList(keyword, pageable);
+    public Page<CurricularListItem> list(Long deptId, String keyword, Pageable pageable) {
+        return curricularRepository.findList(deptId, keyword, pageable);
     }
 
 }
