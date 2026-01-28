@@ -7,7 +7,7 @@
 
 .skeleton {
   width: 100%; /* ✅ 추가 */
-  height: 14px;
+  height: 40px;
   border-radius: 8px;
   background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 45%, #f1f5f9 100%);
   background-size: 200% 100%;
