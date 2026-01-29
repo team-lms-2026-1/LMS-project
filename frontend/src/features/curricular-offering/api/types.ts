@@ -39,6 +39,16 @@ export type CurricularOfferingListResponse = ApiResponse<CurricularOfferingListI
 
 
 /** Request */
+export type CurricularOfferingCreateRequest = {
+  offeringCode: string;
+  curricularId: number;
+  semesterId: number;
+  dayOfWeek: DayOfWeekType;
+  period: number;
+  capacity: number;
+  location: string;
+  professorAccountId: number;
+}
 
 
 /** 화면용 */

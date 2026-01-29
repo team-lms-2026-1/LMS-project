@@ -3,9 +3,12 @@ package com.teamlms.backend.domain.dept.service;
 import com.teamlms.backend.domain.account.entity.ProfessorProfile;
 import com.teamlms.backend.domain.account.repository.ProfessorProfileRepository;
 import com.teamlms.backend.domain.account.repository.StudentProfileRepository;
+import com.teamlms.backend.domain.curricular.repository.CurricularRepository;
 import com.teamlms.backend.domain.dept.api.dto.DepartmentDropdownItem;
+import com.teamlms.backend.domain.dept.api.dto.DeptCurricularDropdownItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptMajorListItem;
+import com.teamlms.backend.domain.dept.api.dto.DeptProfessorDropdownItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptProfessorListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptStudentListItem;
 import com.teamlms.backend.domain.dept.api.dto.DeptSummaryResponse;
@@ -34,6 +37,7 @@ public class DeptQueryService {
     private final ProfessorProfileRepository professorProfileRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final MajorRepository majorRepository;
+    private final CurricularRepository curricularRepository;
 
     // 단건조회
     public Dept getOrThrow(Long deptId) {
@@ -121,4 +125,13 @@ public class DeptQueryService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.MAJOR_NOT_FOUND, majorId));
     }
 
+    public List<DeptCurricularDropdownItem> getDeptCurricularDropdown(Long deptId) {
+        getOrThrow(deptId);
+
+        return curricularRepository.findActiveByDeptIdForDropdown(deptId)
+            .stream()
+            .map(DeptCurricularDropdownItem::from)
+            .toList();
+    }
+    
 }
