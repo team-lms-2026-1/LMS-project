@@ -9,9 +9,10 @@ import org.springframework.data.repository.query.Param;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularListItem;
 import com.teamlms.backend.domain.curricular.entity.Curricular;
 
-public interface CurricularRepository extends JpaRepository<Curricular, Long> {
+public interface CurricularRepository extends JpaRepository<Curricular, Long>, CurricularRepositoryCustom {
 
     boolean existsByCurricularCode(String curricularCode);
+
 
     // 교과 목록 조회
     @Query("""

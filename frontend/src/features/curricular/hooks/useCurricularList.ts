@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CurricularListItemDto, PageMeta } from "../api/types";
-import { fetchCurricularsList } from "../api/curricularsApi";
+import { CurricularEditFormDto, CurricularListItemDto, PageMeta } from "../api/types";
+import { fetchCurricularEditForm, fetchCurricularsList } from "../api/curricularsApi";
 
 
 const defaultMeta: PageMeta = {
@@ -79,12 +79,46 @@ export function useCurricularsList() {
       },
 
       setDeptId: (id: number | null) => {
-        setPage(1);
-        setDeptId(id);
-      },
+        setDeptId((prev) => {
+          // 값이 같으면 아무 것도 하지 않음 (page 리셋도 방지)
+          if (prev === id) return prev;
 
+          // 값이 바뀌는 순간에만 page 1로 리셋
+          setPage(1);
+          return id;
+        });
+      },
       reload: load,
     },
   };
+}
 
+// 모달 수정조회
+export function useCurricularEdit(curricularId?: number, enabled: boolean = true) {
+  const [data, setData] = useState<CurricularEditFormDto | null>(null);
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchCurricularEditForm(id);
+      setData(res.data);
+    } catch (e) {
+      console.error("[useCurricularEdit]", e);
+      setError("조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (!curricularId) return;
+    void load(curricularId);
+  }, [curricularId, enabled]);
+
+  return { state : { data, loading, error }, actions: { load }};
 }
