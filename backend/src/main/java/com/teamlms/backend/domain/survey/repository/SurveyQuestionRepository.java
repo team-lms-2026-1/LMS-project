@@ -9,4 +9,6 @@ public interface SurveyQuestionRepository extends JpaRepository<SurveyQuestion, 
     
     // 설문 ID로 문항 조회 (정렬 순서 보장)
     List<SurveyQuestion> findBySurveyIdOrderBySortOrderAsc(Long surveyId);
+    // 설문 ID로 딸린 질문 모두 삭제
+    void deleteAllBySurveyId(Long surveyId);
 }

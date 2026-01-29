@@ -56,4 +56,10 @@ public class Survey extends BaseEntity {
     public void close() {
         this.status = SurveyStatus.CLOSED;
     }
+    public void update(String title, String description, LocalDateTime startAt, LocalDateTime endAt) {
+        this.title = title;
+        this.description = description;
+        this.startAt = startAt;
+        this.endAt = endAt;
+    }
 }

@@ -8,6 +8,12 @@ import com.teamlms.backend.domain.survey.repository.*;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import com.teamlms.backend.domain.survey.api.dto.SurveyParticipantResponse;
+import com.teamlms.backend.domain.survey.api.dto.SurveyStatsResponse;
+
+import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.repository.AccountRepository;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,15 +30,32 @@ public class SurveyQueryService {
     private final SurveyRepository surveyRepository;
     private final SurveyQuestionRepository questionRepository;
     private final SurveyTargetRepository targetRepository;
+    private final AccountRepository accountRepository;
 
     // 관리자 목록 조회
-    public Page<SurveyListResponse> getSurveyList(InternalSurveySearchRequest request, Pageable pageable) {
-        Page<Survey> surveys = surveyRepository.findAll(pageable); // 실제 구현 시 Specification 사용
+    public Page<SurveyListResponse> getSurveyList(Long adminId, InternalSurveySearchRequest request, Pageable pageable) {
+        Account admin = accountRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (!"ADMIN".equals(admin.getAccountType().name())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        Page<Survey> surveys = surveyRepository.findAll(pageable); 
         return surveys.map(this::toSurveyListResponse);
     }
 
     // 사용자 참여 가능 목록
-    public List<SurveyListResponse> getAvailableSurveys(Long userId) {
+   public List<SurveyListResponse> getAvailableSurveys(Long userId) {
+        Account user = accountRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        // [추가] 교수는 설문 참여 불가
+        if ("PROFESSOR".equals(user.getAccountType().name())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED); // "접근 권한이 없습니다."
+        }
+
+        // 학생은 본인이 Target에 있는지 확인 (기존 로직 활용)
         List<SurveyTarget> targets = targetRepository.findByTargetAccountIdAndStatus(userId, SurveyTargetStatus.PENDING);
         List<Long> surveyIds = targets.stream().map(SurveyTarget::getSurveyId).toList();
         
@@ -41,13 +64,99 @@ public class SurveyQueryService {
     }
 
     // 상세 조회
-    public SurveyDetailResponse getSurveyDetail(Long surveyId) {
+   public SurveyDetailResponse getSurveyDetail(Long surveyId, Long userId) {
+        Account user = accountRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+        String role = user.getAccountType().name();
+
+        //  권한별 접근 제어
+        if ("PROFESSOR".equals(role)) {
+            // 교수는 접근 불가
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        } 
+        
+        if ("STUDENT".equals(role)) {
+            // 학생은 '자신이 대상자'인 경우에만 볼 수 있음
+            boolean isTarget = targetRepository.findBySurveyIdAndTargetAccountId(surveyId, userId).isPresent();
+            if (!isTarget) {
+                throw new BusinessException(ErrorCode.SURVEY_NOT_TARGET); // "대상자가 아닙니다" 에러
+            }
+        }
+        
+        // 관리자는 검사 없이 통과 (Admin은 모든 설문 내용 볼 수 있음)
+
         Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
 
         List<SurveyQuestion> questions = questionRepository.findBySurveyIdOrderBySortOrderAsc(surveyId);
 
         return toSurveyDetailResponse(survey, questions);
+    }
+
+    // 
+    
+    //  설문 통계 조회 (응답률)
+    public SurveyStatsResponse getSurveyStats(Long adminId, Long surveyId) {
+        // 관리자 권한 체크
+        validateAdmin(adminId);
+
+        // 설문 존재 확인
+        if (!surveyRepository.existsById(surveyId)) {
+            throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND);
+        }
+
+        long total = targetRepository.countBySurveyId(surveyId);
+        long submitted = targetRepository.countBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED);
+        
+        // 0으로 나누기 방지
+        double rate = (total == 0) ? 0.0 : (double) submitted / total * 100.0;
+        // 소수점 둘째자리 반올림 (선택사항)
+        rate = Math.round(rate * 100.0) / 100.0;
+
+        return SurveyStatsResponse.builder()
+                .surveyId(surveyId)
+                .totalTargets(total)
+                .submittedCount(submitted)
+                .responseRate(rate)
+                .build();
+    }
+
+    //  설문 참여자 목록 조회 (실시간 현황)
+    public Page<SurveyParticipantResponse> getSurveyParticipants(Long adminId, Long surveyId, Pageable pageable) {
+        // 관리자 권한 체크
+        validateAdmin(adminId);
+
+        if (!surveyRepository.existsById(surveyId)) {
+            throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND);
+        }
+
+        // 대상자 목록 조회 (Account 정보가 필요하므로 Fetch Join을 쓰면 좋지만, 일단 기본 조회)
+        Page<SurveyTarget> targets = targetRepository.findBySurveyId(surveyId, pageable);
+
+        // Account 정보를 가져오기 위해 target.getTargetAccountId()를 사용
+        // 실무에서는 성능을 위해 AccountRepository.findAllById 로 한 번에 가져와서 매핑하는 것이 좋습니다.
+        // 여기서는 간단하게 구현합니다.
+        return targets.map(target -> {
+            Account user = accountRepository.findById(target.getTargetAccountId())
+                    .orElse(null); // 혹시 유저가 삭제되었을 경우 대비
+
+            return SurveyParticipantResponse.builder()
+                    .targetId(target.getId())
+                    .accountId(target.getTargetAccountId())
+                    .loginId(user != null ? user.getLoginId() : "Unknown")
+                    .status(target.getStatus())
+                    .submittedAt(target.getSubmittedAt())
+                    .build();
+        });
+    }
+
+    // [내부 헬퍼] 관리자 체크 
+    private void validateAdmin(Long adminId) {
+        Account admin = accountRepository.findById(adminId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+        if (!"ADMIN".equals(admin.getAccountType().name())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
     }
 
     // --- Mappers ---

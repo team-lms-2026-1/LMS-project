@@ -11,6 +11,9 @@ import com.teamlms.backend.global.security.principal.AuthUser;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import com.teamlms.backend.domain.survey.api.dto.SurveyParticipantResponse;
+import com.teamlms.backend.domain.survey.api.dto.SurveyStatsResponse;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -28,54 +31,54 @@ public class SurveyController {
     private final SurveyQueryService queryService;
     private final SurveyResponseService responseService;
 
-    // =================================================================
-    // [Admin] 관리자 기능
-    // =================================================================
-
-    // 1. 설문 생성 및 배포 (대상자 스냅샷 생성 포함)
+    // [Admin] 설문 생성
     @PostMapping("/admin/surveys")
-    public ResponseEntity<Long> createSurvey(@RequestBody @Valid SurveyCreateRequest request) {
-        Long surveyId = commandService.createAndPublishSurvey(request);
+    public ResponseEntity<Long> createSurvey(
+            @AuthenticationPrincipal AuthUser user, // 관리자 ID 확인용
+            @RequestBody @Valid SurveyCreateRequest request
+    ) {
+        // user.getAccountId()를 넘겨서 관리자 권한 체크 수행
+        Long surveyId = commandService.createAndPublishSurvey(user.getAccountId(), request);
         return ResponseEntity.ok(surveyId);
     }
 
-    // 2. 설문 목록 조회 (검색 필터 적용)
+    // [Admin] 설문 목록 조회
     @GetMapping("/admin/surveys")
     public ResponseEntity<Page<SurveyListResponse>> getSurveyListForAdmin(
+            @AuthenticationPrincipal AuthUser user, // 관리자 ID 확인용
             @RequestParam(required = false) SurveyType type,
             @RequestParam(required = false) SurveyStatus status,
             @RequestParam(required = false) String keyword,
             Pageable pageable
     ) {
-        // 검색 조건을 내부 DTO로 변환하여 Service로 전달
+       
         InternalSurveySearchRequest searchRequest = InternalSurveySearchRequest.builder()
-                .type(type)
-                .status(status)
-                .keyword(keyword)
-                .build();
+                .type(type).status(status).keyword(keyword).build();
         
-        return ResponseEntity.ok(queryService.getSurveyList(searchRequest, pageable));
+        // user.getAccountId() 전달
+        return ResponseEntity.ok(queryService.getSurveyList(user.getAccountId(), searchRequest, pageable));
     }
 
-    // =================================================================
-    // [User] 사용자 기능
-    // =================================================================
-
-    // 3. 내가 참여해야 할 설문 목록 조회
+    // [User] 참여 가능 설문 조회
     @GetMapping("/surveys/available")
     public ResponseEntity<List<SurveyListResponse>> getAvailableSurveys(
             @AuthenticationPrincipal AuthUser user
     ) {
+        
         return ResponseEntity.ok(queryService.getAvailableSurveys(user.getAccountId()));
     }
 
-    // 4. 설문 상세 조회 (참여 화면용 - 문항 포함)
+    // [User] 설문 상세 조회
     @GetMapping("/surveys/{surveyId}")
-    public ResponseEntity<SurveyDetailResponse> getSurveyDetail(@PathVariable Long surveyId) {
-        return ResponseEntity.ok(queryService.getSurveyDetail(surveyId));
+    public ResponseEntity<SurveyDetailResponse> getSurveyDetail(
+            @AuthenticationPrincipal AuthUser user, // 사용자 ID 확인용
+            @PathVariable Long surveyId
+    ) {
+        // user.getAccountId()를 전달하여 권한 체크(학생은 대상자 여부, 교수는 차단)
+        return ResponseEntity.ok(queryService.getSurveyDetail(surveyId, user.getAccountId()));
     }
 
-    // 5. 설문 응답 제출
+    // [User] 응답 제출
     @PostMapping("/surveys/submit")
     public ResponseEntity<Void> submitResponse(
             @AuthenticationPrincipal AuthUser user,
@@ -83,5 +86,45 @@ public class SurveyController {
     ) {
         responseService.submitResponse(user.getAccountId(), request);
         return ResponseEntity.ok().build();
+    }
+
+    // [Admin] 설문 수정
+    @PutMapping("/admin/surveys/{surveyId}")
+    public ResponseEntity<Void> updateSurvey(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long surveyId,
+            @RequestBody @Valid SurveyUpdateRequest request
+    ) {
+        commandService.updateSurvey(user.getAccountId(), surveyId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    // [Admin] 설문 삭제
+    @DeleteMapping("/admin/surveys/{surveyId}")
+    public ResponseEntity<Void> deleteSurvey(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long surveyId
+    ) {
+        commandService.deleteSurvey(user.getAccountId(), surveyId);
+        return ResponseEntity.ok().build();
+    }
+
+    //  설문 통계 조회 (응답률)
+    @GetMapping("/admin/surveys/{surveyId}/stats")
+    public ResponseEntity<SurveyStatsResponse> getSurveyStats(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long surveyId
+    ) {
+        return ResponseEntity.ok(queryService.getSurveyStats(user.getAccountId(), surveyId));
+    }
+
+    // 설문 참여자 목록 조회
+    @GetMapping("/admin/surveys/{surveyId}/participants")
+    public ResponseEntity<Page<SurveyParticipantResponse>> getSurveyParticipants(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long surveyId,
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(queryService.getSurveyParticipants(user.getAccountId(), surveyId, pageable));
     }
 }

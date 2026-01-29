@@ -6,6 +6,9 @@ import com.teamlms.backend.domain.survey.enums.SurveyTargetStatus;
 import com.teamlms.backend.domain.survey.repository.SurveyTargetRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
+import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.repository.AccountRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +19,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class SurveyResponseService {
 
     private final SurveyTargetRepository targetRepository;
+    private final AccountRepository accountRepository; 
 
     public void submitResponse(Long userId, SurveySubmitRequest request) {
+        //  학생 권한 체크
+        Account user = accountRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        if (!"STUDENT".equals(user.getAccountType().name())) {
+             throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        //  대상자인지 확인
         SurveyTarget target = targetRepository.findBySurveyIdAndTargetAccountId(request.getSurveyId(), userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_TARGET));
 
