@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { CurricularOfferingCreateRequest, CurricularOfferingListResponse } from "./types";
+import { CurricularDetailFormResponse, CurricularOfferingCreateRequest, CurricularOfferingListResponse } from "./types";
 import { SuccessResponse } from "@/features/curricular/api/types";
 
 
@@ -33,4 +33,11 @@ export async function createCurricularOffering(body: CurricularOfferingCreateReq
         body: JSON.stringify(body),
         cache: "no-store"
     })
+}
+
+export async function fetchCurricularDetailForm(id: number) {
+  const url = `/api/admin/curricular/offerings/${id}`
+  return getJson<CurricularDetailFormResponse>( url, {
+      cache: "no-store"
+  });
 }

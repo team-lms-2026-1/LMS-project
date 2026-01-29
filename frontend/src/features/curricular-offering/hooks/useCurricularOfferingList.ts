@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CurricularOfferingListItemDto, PageMeta } from "../api/types";
-import { fetchCurricularOfferingsList } from "../api/curricularOfferingsApi";
+import { CurricularOfferingDetailDto, CurricularOfferingListItemDto, PageMeta } from "../api/types";
+import { fetchCurricularDetailForm, fetchCurricularOfferingsList } from "../api/curricularOfferingsApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -89,4 +89,35 @@ export function useCurricularOfferingsList() {
       reload: load,
     },
   };
+}
+
+
+// 모달 수정조회
+export function useCurricularDetail(offeingId?: number, enabled: boolean = true) {
+  const [data, setData] = useState<CurricularOfferingDetailDto | null>(null);
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchCurricularDetailForm(id);
+      setData(res.data);
+    } catch (e) {
+      console.error("[useCurricularDetail]", e);
+      setError("조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (!offeingId) return;
+    void load(offeingId);
+  }, [offeingId, enabled]);
+
+  return { state : { data, loading, error }, actions: { load }};
 }

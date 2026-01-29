@@ -34,9 +34,39 @@ export type CurricularOfferingListItemDto = {
   status: OfferingStatus;
 }
 
+export type CurricularOfferingDetailDto = {
+  offeringId: number;
+  offeringCode: string;
+
+  curricularId: number;
+  curricularName: string;
+  credits: number;
+  description: string;
+
+  deptId: number;
+  deptName: string;
+
+  semesterId: number;
+  semesterName: string;
+
+  professorAccountId: number;
+  professorName: string;
+  email: string;
+  phone: string;
+
+  dayOfWeek: DayOfWeekType;
+  period: number;
+
+  capacity: number;
+  enrolledCount: number;
+
+  location: string;
+  status: OfferingStatus;
+}
+
 /** Response */
 export type CurricularOfferingListResponse = ApiResponse<CurricularOfferingListItemDto[], PageMeta>;
-
+export type CurricularDetailFormResponse =ApiResponse<CurricularOfferingDetailDto, null>;
 
 /** Request */
 export type CurricularOfferingCreateRequest = {
@@ -49,6 +79,5 @@ export type CurricularOfferingCreateRequest = {
   location: string;
   professorAccountId: number;
 }
-
 
 /** 화면용 */

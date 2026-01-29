@@ -10,9 +10,10 @@ type Props = {
   items: CurricularOfferingListItemDto[];
   loading: boolean;
 //   onEditClick: (id: number) => void;
+  onRowClick?: (row: CurricularOfferingListItemDto) => void;
 };
 
-export function CurricularOfferingsTable({ items, loading }: Props) {
+export function CurricularOfferingsTable({ items, loading, onRowClick }: Props) {
   const columns: Array<TableColumn<CurricularOfferingListItemDto>> = [
     { header: "개설코드", align: "center", render: (r) => r.offeringCode },
     { header: "교과목명", align: "center", render: (r) => r.curricularName },
@@ -38,8 +39,13 @@ export function CurricularOfferingsTable({ items, loading }: Props) {
       stopRowClick: true,
       render: (r) => (
         <div className={styles.manageCell}>
-          <Button variant="secondary" >
-            수정
+          <Button variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRowClick?.(r);
+            }} 
+          >
+            상세
           </Button>
         </div>
       ),
@@ -54,6 +60,7 @@ export function CurricularOfferingsTable({ items, loading }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.offeringId}
       emptyText="교과운영이 없습니다."
+      onRowClick={onRowClick ? (row) => onRowClick(row) : undefined}
     />
   );
 }

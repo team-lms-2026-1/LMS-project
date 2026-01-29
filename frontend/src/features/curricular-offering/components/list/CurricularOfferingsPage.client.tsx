@@ -10,8 +10,10 @@ import { SearchBar } from "@/components/searchbar";
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { CurricularOfferingCreateModal } from "../modal/CurricularOfferingCreateModal";
+import { useRouter } from "next/navigation";
 
 export default function CurricularOfferingPageClient() {
+  const router = useRouter();
   const { state, actions } = useCurricularOfferingsList();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -69,6 +71,7 @@ export default function CurricularOfferingPageClient() {
           items={state.items}
           loading={state.loading}
         //   onEditClick={(id) => setEditId(id)}
+          onRowClick={(row) => router.push(`/admin/curricular/offerings/${row.offeringId}`)}
         />
 
         <div className={styles.footerRow}>
