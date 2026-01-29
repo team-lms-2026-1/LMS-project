@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { CurricularCreateRequest, CurricularListResponse, SuccessResponse } from "./types";
+import { CurricularCreateRequest, CurricularEditFormResponse, CurricularListResponse, CurricularPatchRequest, SuccessResponse } from "./types";
 
 export type CurricularsListQuery = {
   page?: number;
@@ -30,4 +30,23 @@ export async function createCurricular(body: CurricularCreateRequest) {
         body: JSON.stringify(body),
         cache: "no-store"
     })
+}
+
+export async function fetchCurricularEditForm(id: number) {
+  const url = `/api/admin/curricular/curriculars/${id}`
+  return getJson<CurricularEditFormResponse>( url, {
+      cache: "no-store"
+  });
+}
+
+export async function patchCurricular(
+  id: number,
+  body: CurricularPatchRequest
+) {
+  return getJson<SuccessResponse>(`/api/admin/curricular/curriculars/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store"
+  })
 }

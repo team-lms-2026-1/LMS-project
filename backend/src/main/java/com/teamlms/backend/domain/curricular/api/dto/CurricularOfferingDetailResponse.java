@@ -11,6 +11,10 @@ public record CurricularOfferingDetailResponse(
     Long curricularId,
     String curricularName,
     Integer credits,
+    String description,
+
+    Long deptId,
+    String deptName,
 
     Long semesterId,
     String semesterName,   // 2026-1, 2026-s

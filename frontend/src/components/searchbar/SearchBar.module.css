@@ -1,7 +1,6 @@
 .wrap {
   width: 280px;          /* ✅ 딱 적당한 관리자 검색 폭 */
   margin-left: auto;     /* 오른쪽 끝 */
-  margin-bottom: 16px;
 }
 
 
@@ -13,8 +12,9 @@
 }
 
 .input {
+  box-sizing: border-box;
   flex: 1;
-  height: 36px;           /* ⬇ 살짝 컴팩트 */
+  height: 42px;           /* ⬇ 살짝 컴팩트 */
   padding: 0 36px 0 12px; /* clear 버튼 공간 약간 줄임 */
   border: 1px solid #d0d5dd;
   border-radius: 10px;
@@ -27,7 +27,7 @@
 }
 
 .searchBtn {
-  height: 36px;           /* ⬇ 인풋과 높이 맞춤 */
+  height: 42px;           /* ⬇ 인풋과 높이 맞춤 */
   padding: 0 12px;
   border: 1px solid #d0d5dd;
   border-radius: 10px;
