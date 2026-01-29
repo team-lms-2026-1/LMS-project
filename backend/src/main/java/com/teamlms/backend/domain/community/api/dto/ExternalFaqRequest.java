@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter @NoArgsConstructor
+@Getter 
+@NoArgsConstructor
 public class ExternalFaqRequest {
     @NotNull(message = "카테고리는 필수입니다.")
     private Long categoryId;
