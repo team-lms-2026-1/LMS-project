@@ -35,8 +35,15 @@ public class SurveyController {
     @PostMapping("/admin/surveys")
     public ResponseEntity<Long> createSurvey(
             @AuthenticationPrincipal AuthUser user, // 관리자 ID 확인용
-            @RequestBody @Valid SurveyCreateRequest request
-    ) {
+            @RequestBody @Valid SurveyCreateRequest request) {
+        System.out.println("DEBUG: Controller createSurvey reached.");
+        if (user != null) {
+            System.out.println("DEBUG: User ID: " + user.getAccountId());
+        } else {
+            System.out.println("DEBUG: User is NULL");
+        }
+        System.out.println("DEBUG: Request Payload: " + request);
+
         // user.getAccountId()를 넘겨서 관리자 권한 체크 수행
         Long surveyId = commandService.createAndPublishSurvey(user.getAccountId(), request);
         return ResponseEntity.ok(surveyId);
@@ -49,12 +56,11 @@ public class SurveyController {
             @RequestParam(required = false) SurveyType type,
             @RequestParam(required = false) SurveyStatus status,
             @RequestParam(required = false) String keyword,
-            Pageable pageable
-    ) {
-       
+            Pageable pageable) {
+
         InternalSurveySearchRequest searchRequest = InternalSurveySearchRequest.builder()
                 .type(type).status(status).keyword(keyword).build();
-        
+
         // user.getAccountId() 전달
         return ResponseEntity.ok(queryService.getSurveyList(user.getAccountId(), searchRequest, pageable));
     }
@@ -62,9 +68,8 @@ public class SurveyController {
     // [User] 참여 가능 설문 조회
     @GetMapping("/surveys/available")
     public ResponseEntity<List<SurveyListResponse>> getAvailableSurveys(
-            @AuthenticationPrincipal AuthUser user
-    ) {
-        
+            @AuthenticationPrincipal AuthUser user) {
+
         return ResponseEntity.ok(queryService.getAvailableSurveys(user.getAccountId()));
     }
 
@@ -72,8 +77,7 @@ public class SurveyController {
     @GetMapping("/surveys/{surveyId}")
     public ResponseEntity<SurveyDetailResponse> getSurveyDetail(
             @AuthenticationPrincipal AuthUser user, // 사용자 ID 확인용
-            @PathVariable Long surveyId
-    ) {
+            @PathVariable Long surveyId) {
         // user.getAccountId()를 전달하여 권한 체크(학생은 대상자 여부, 교수는 차단)
         return ResponseEntity.ok(queryService.getSurveyDetail(surveyId, user.getAccountId()));
     }
@@ -82,8 +86,7 @@ public class SurveyController {
     @PostMapping("/surveys/submit")
     public ResponseEntity<Void> submitResponse(
             @AuthenticationPrincipal AuthUser user,
-            @RequestBody @Valid SurveySubmitRequest request
-    ) {
+            @RequestBody @Valid SurveySubmitRequest request) {
         responseService.submitResponse(user.getAccountId(), request);
         return ResponseEntity.ok().build();
     }
@@ -93,8 +96,7 @@ public class SurveyController {
     public ResponseEntity<Void> updateSurvey(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId,
-            @RequestBody @Valid SurveyUpdateRequest request
-    ) {
+            @RequestBody @Valid SurveyUpdateRequest request) {
         commandService.updateSurvey(user.getAccountId(), surveyId, request);
         return ResponseEntity.ok().build();
     }
@@ -103,18 +105,16 @@ public class SurveyController {
     @DeleteMapping("/admin/surveys/{surveyId}")
     public ResponseEntity<Void> deleteSurvey(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long surveyId
-    ) {
+            @PathVariable Long surveyId) {
         commandService.deleteSurvey(user.getAccountId(), surveyId);
         return ResponseEntity.ok().build();
     }
 
-    //  설문 통계 조회 (응답률)
+    // 설문 통계 조회 (응답률)
     @GetMapping("/admin/surveys/{surveyId}/stats")
     public ResponseEntity<SurveyStatsResponse> getSurveyStats(
             @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long surveyId
-    ) {
+            @PathVariable Long surveyId) {
         return ResponseEntity.ok(queryService.getSurveyStats(user.getAccountId(), surveyId));
     }
 
@@ -123,8 +123,7 @@ public class SurveyController {
     public ResponseEntity<Page<SurveyParticipantResponse>> getSurveyParticipants(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId,
-            Pageable pageable
-    ) {
+            Pageable pageable) {
         return ResponseEntity.ok(queryService.getSurveyParticipants(user.getAccountId(), surveyId, pageable));
     }
 }

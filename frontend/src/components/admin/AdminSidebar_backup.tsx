@@ -36,10 +36,7 @@ const SECTIONS: NavSection[] = [
   {
     key: "survey",
     title: "설문 통합 관리",
-    items: [
-      { label: "설문 목록", href: "/admin/surveys" },
-      { label: "설문 통계", href: "/admin/survey-results" },
-    ],
+    items: [{ label: "설문 목록", href: "/surveys" }],
   },
   {
     key: "personal",

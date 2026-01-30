@@ -14,7 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList; // [추가]
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,37 +31,51 @@ public class SurveyCommandService {
 
     // 1. 설문 생성
     public Long createAndPublishSurvey(Long adminId, SurveyCreateRequest request) {
-        validateAdmin(adminId);
+        try {
+            System.out.println("DEBUG: createAndPublishSurvey called. Request: " + request);
+            if (request.getTargetFilter() != null) {
+                System.out.println("DEBUG: TargetFilter: " + request.getTargetFilter());
+            }
 
-        Survey survey = Survey.builder()
-                .type(request.getType())
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .startAt(request.getStartAt())
-                .endAt(request.getEndAt())
-                .status(SurveyStatus.OPEN)
-                .targetGenType(request.getTargetFilter().getGenType())
-                .build();
-        
-        Survey savedSurvey = surveyRepository.save(survey);
+            validateAdmin(adminId);
 
-        List<SurveyQuestion> questions = request.getQuestions().stream()
-                .map(q -> SurveyQuestion.builder()
-                        .surveyId(savedSurvey.getId())
-                        .questionText(q.getQuestionText())
-                        .sortOrder(q.getSortOrder())
-                        .minVal(q.getMinVal())
-                        .maxVal(q.getMaxVal())
-                        .minLabel(q.getMinLabel())
-                        .maxLabel(q.getMaxLabel())
-                        .isRequired(q.getIsRequired())
-                        .build())
-                .collect(Collectors.toList());
-        
-        questionRepository.saveAll(questions);
-        createTargetSnapshot(savedSurvey, request.getTargetFilter());
+            Survey survey = Survey.builder()
+                    .type(request.getType())
+                    .title(request.getTitle())
+                    .description(request.getDescription())
+                    .startAt(request.getStartAt())
+                    .endAt(request.getEndAt())
+                    .status(SurveyStatus.OPEN)
+                    .targetGenType(request.getTargetFilter().getGenType())
+                    .build();
 
-        return savedSurvey.getId();
+            Survey savedSurvey = surveyRepository.save(survey);
+
+            List<SurveyQuestion> questions = request.getQuestions().stream()
+                    .map(q -> SurveyQuestion.builder()
+                            .surveyId(savedSurvey.getId())
+                            .questionText(q.getQuestionText())
+                            .sortOrder(q.getSortOrder())
+                            .minVal(q.getMinVal())
+                            .maxVal(q.getMaxVal())
+                            .minLabel(q.getMinLabel())
+                            .maxLabel(q.getMaxLabel())
+                            .isRequired(q.getIsRequired())
+                            .build())
+                    .collect(Collectors.toList());
+
+            questionRepository.saveAll(questions);
+            createTargetSnapshot(savedSurvey, request.getTargetFilter());
+
+            return savedSurvey.getId();
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the full stack trace
+            // Re-throw if it's already a BusinessException, or wrap
+            if (e instanceof BusinessException) {
+                throw e;
+            }
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     // 2. 설문 수정
@@ -74,14 +89,12 @@ public class SurveyCommandService {
                 request.getTitle(),
                 request.getDescription(),
                 request.getStartAt(),
-                request.getEndAt()
-        );
+                request.getEndAt());
 
         // 기존 질문 삭제
         questionRepository.deleteAllBySurveyId(surveyId);
         questionRepository.flush();
 
-        
         if (request.getQuestions() != null && !request.getQuestions().isEmpty()) {
             List<SurveyQuestion> newQuestions = new ArrayList<>();
             int order = 1;
@@ -90,7 +103,7 @@ public class SurveyCommandService {
                 newQuestions.add(SurveyQuestion.builder()
                         .surveyId(survey.getId())
                         .questionText(q.getQuestionText())
-                        .sortOrder(order++) 
+                        .sortOrder(order++)
                         .minVal(q.getMinVal()).maxVal(q.getMaxVal())
                         .minLabel(q.getMinLabel()).maxLabel(q.getMaxLabel())
                         .isRequired(q.getIsRequired())
@@ -114,14 +127,34 @@ public class SurveyCommandService {
 
     private void createTargetSnapshot(Survey survey, SurveyCreateRequest.TargetFilterDto filter) {
         List<Account> targets;
-        
-        if ("ALL".equals(filter.getGenType())) {
+        String type = filter.getGenType(); // ALL, DEPT, GRADE, DEPT_GRADE
+
+        System.out.println("DEBUG: GenType: " + type);
+
+        if ("ALL".equals(type)) {
             targets = accountRepository.findAll();
-        } else if ("DEPT".equals(filter.getGenType())) {
-            targets = accountRepository.findAllByDeptIdIn(filter.getDeptIds());
+        } else if ("DEPT".equals(type)) {
+            // 학과별
+            targets = selectByDepts(filter.getDeptIds());
+        } else if ("GRADE".equals(type)) {
+            // 학년별
+            targets = selectByGrades(filter.getGradeLevels());
+        } else if ("DEPT_GRADE".equals(type)) {
+            // [추가] 복합 조건 (학과 AND 학년)
+            targets = selectByDeptAndGrades(filter.getDeptIds(), filter.getGradeLevels());
         } else {
-            targets = accountRepository.findAllById(filter.getUserIds());
+            // USER (직접 개별 선택)
+            if (filter.getUserIds() != null && !filter.getUserIds().isEmpty()) {
+                targets = accountRepository.findAllById(filter.getUserIds());
+            } else {
+                targets = Collections.emptyList();
+            }
         }
+
+        System.out.println("DEBUG: Found targets count: " + targets.size());
+
+        if (targets.isEmpty())
+            return;
 
         List<SurveyTarget> surveyTargets = targets.stream()
                 .map(account -> SurveyTarget.builder()
@@ -132,7 +165,30 @@ public class SurveyCommandService {
                         .build())
                 .collect(Collectors.toList());
 
+        System.out.println("DEBUG: Saving targets...");
         targetRepository.saveAll(surveyTargets);
+        System.out.println("DEBUG: Targets saved.");
+    }
+
+    private List<Account> selectByDepts(List<Long> deptIds) {
+        if (deptIds == null || deptIds.isEmpty())
+            return Collections.emptyList();
+        return accountRepository.findAllByDeptIdIn(deptIds);
+    }
+
+    private List<Account> selectByGrades(List<Integer> grades) {
+        if (grades == null || grades.isEmpty())
+            return Collections.emptyList();
+        return accountRepository.findAllByGradeLevelIn(grades);
+    }
+
+    private List<Account> selectByDeptAndGrades(List<Long> deptIds, List<Integer> grades) {
+        if (deptIds == null || deptIds.isEmpty())
+            return Collections.emptyList();
+        if (grades == null || grades.isEmpty())
+            return Collections.emptyList();
+        System.out.println("DEBUG: Querying depts=" + deptIds + ", grades=" + grades);
+        return accountRepository.findAllByDeptIdInAndGradeLevelIn(deptIds, grades);
     }
 
     private void validateAdmin(Long adminId) {
