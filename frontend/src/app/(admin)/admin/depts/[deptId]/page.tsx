@@ -1,17 +1,5 @@
-import DeptDetailPage from "@/features/authority/depts/components/detail/DeptDetailPage";
+import DeptDetailPageClient from "@/features/authority/depts/components/detail/DeptDetailPage.client";
 
-type PageProps = {
-  params: {
-    deptId: string;
-  };
-};
-
-/**
- * 학과 상세 페이지 라우트
- * URL: /admin/depts/[deptId]
- */
-export default function Page({ params }: PageProps) {
-  const { deptId } = params;
-
-  return <DeptDetailPage deptId={deptId} />;
+export default function Page({ params }: { params: { deptId: string } }) {
+  return <DeptDetailPageClient deptId={params.deptId} />;
 }

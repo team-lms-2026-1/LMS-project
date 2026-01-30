@@ -28,7 +28,7 @@ export default function MajorCreateModal({ deptId, onClose, onCreated }: Props) 
         active: isActive,
       };
 
-      await getJson(`/api/bff/admin/depts/${deptId}/majors`, {
+      await getJson(`/api/admin/authority/depts/${deptId}/majors`, {
         method: "POST",
         body: JSON.stringify(body),
       });

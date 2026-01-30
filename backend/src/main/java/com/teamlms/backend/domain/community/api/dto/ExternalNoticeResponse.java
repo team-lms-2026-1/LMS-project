@@ -4,18 +4,27 @@ import lombok.Builder;
 import lombok.Getter;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 @Getter @Builder
+@AllArgsConstructor @NoArgsConstructor
 public class ExternalNoticeResponse {
     private Long noticeId;
-    private String categoryName;
+    private CategoryInfo category; // String categoryName 대신 객체로 변경
     private String title;
     private String content;
-    private String authorName; 
-    private int viewCount;
+    private String authorName;
+    private Integer viewCount;
     private String createdAt;
-    
-    // 여기! 이 필드를 추가해야 .status()를 쓸 수 있습니다.
-    private String status; 
-
+    private String status;
     private List<ExternalAttachmentResponse> files;
+
+    @Getter @Builder
+    public static class CategoryInfo {
+        private Long categoryId;
+        private String name;
+        private String bgColorHex;
+        private String textColorHex;
+    }
 }
