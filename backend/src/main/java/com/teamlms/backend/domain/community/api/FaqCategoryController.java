@@ -8,16 +8,17 @@ import com.teamlms.backend.global.api.PageMeta;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
-@RequestMapping //("/api/v1/community/faq/categories") // 정책서 경로: /faq/categories
+@RequestMapping 
 @RequiredArgsConstructor
 public class FaqCategoryController {
 
@@ -26,15 +27,31 @@ public class FaqCategoryController {
     // 1. FAQ 카테고리 목록 조회 - 전부가능
     // =================================================================
     @GetMapping({"/api/v1/student/community/faq/categories",
-                 "/api/v1/professor/community/faq/categories",
-                 "/api/v1/admin/community/faq/categories"
-    })
+                "/api/v1/admin/community/faq/categories",
+                "/api/v1/professor/community/faq/categories"})
     @PreAuthorize("hasAuthority('FAQ_READ')")
-    public ApiResponse<?> getList(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+    public ApiResponse<List<ExternalCategoryResponse>> getStudentFaqCategories(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String keyword) {
-        Page<ExternalCategoryResponse> result = service.getList(pageable, keyword);
-        return ApiResponse.of(result.getContent(), PageMeta.from(result));
+        return getFaqCategoryListInternal(page, size, keyword);
+    }
+    private ApiResponse<List<ExternalCategoryResponse>> getFaqCategoryListInternal(int page, int size, String keyword) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+
+        Pageable pageable = PageRequest.of(
+                safePage - 1,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+   
+        Page<ExternalCategoryResponse> pageResult = service.getList(pageable, keyword);
+        
+        return ApiResponse.of(
+                pageResult.getContent(), 
+                PageMeta.from(pageResult)
+        );
     }
 
     // =================================================================
