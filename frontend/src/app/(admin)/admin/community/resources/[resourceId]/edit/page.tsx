@@ -1,5 +1,5 @@
-import ResourceEditPage from "@/features/community/resources/components/ResourceEditPage";
+import ResourceEditPageClient from "@/features/community/resources/components/edit/ResourceEditPage.client";
 
-export default function Page({ params }: { params: { resourceId: string } }) {
-  return <ResourceEditPage resourceId={params.resourceId} />;
+export default function Page() {
+  return <ResourceEditPageClient />;
 }

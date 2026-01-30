@@ -1,5 +1,5 @@
-import NoticeListPage from "@/features/community/notices/components/NoticeListPage";
+import NoticePageClient from "@/features/community/notices/components/list/NoticePage.client";
 
 export default function Page() {
-  return <NoticeListPage />;
+  return <NoticePageClient />;
 }

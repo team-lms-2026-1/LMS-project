@@ -1,5 +1,5 @@
-import NoticeEditPage from "@/features/community/notices/components/NoticeEditPage";
+import NoticeEditPageClient from "@/features/community/notices/components/edit/NoticeEditPage.client";
 
-export default function Page({ params }: { params: { noticeId: string } }) {
-  return <NoticeEditPage noticeId={params.noticeId} />;
+export default function Page() {
+  return <NoticeEditPageClient />;
 }

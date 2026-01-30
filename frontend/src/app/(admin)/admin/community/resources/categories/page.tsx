@@ -1,4 +1,4 @@
-import ResourceCategoryPage from "@/features/community/resources/categories/components/ResourceCategoryPage";
+import CategoryPageClient from "@/features/community/categories/components/list/CategoryPage.client";
 export default function Page() {
-  return <ResourceCategoryPage />;
+  return <CategoryPageClient scope="resources" />;
 }

@@ -1,5 +1,4 @@
-import NoticeCategoryPage from "@/features/community/notices/categories/components/NoticeCategoryPage";
-
+import CategoryPageClient from "@/features/community/categories/components/list/CategoryPage.client";
 export default function Page() {
-  return <NoticeCategoryPage />;
+  return <CategoryPageClient scope="notices" />;
 }
