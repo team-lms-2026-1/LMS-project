@@ -23,6 +23,8 @@ export type OfferingStatus = "DRAFT" | "OPEN" | "ENROLLMENT_CLOSED" | "IN_PROGRE
 
 export type CompetencyCode = "C1" | "C2" | "C3" | "C4" | "C5" | "C6" | string;
 
+export type Grade = "A" | "B" | "C" | "D" | "E" | "F" | string;
+
 /** DTO */
 export type CurricularOfferingListItemDto = {
   offeringId: number ;
@@ -74,10 +76,25 @@ export type CurricularOfferingCompetencyDto = {
   weight: number | null;
 }
 
+export type CurricularOfferingStudentListItemDto = {
+  enrollmentId: number;
+  studentAccountId: number;
+  studentName: string;
+  studentNo: string;
+  gradeLevel: number;  // 학년
+  deptName: string;
+  rawScore: number;
+  grade: Grade;  //A B C D E F
+  enrollmentStatus: EnrollmentStatus;
+  completionStatus: CompletionStatus;
+}
+
+
 /** Response */
 export type CurricularOfferingListResponse = ApiResponse<CurricularOfferingListItemDto[], PageMeta>;
 export type CurricularDetailFormResponse =ApiResponse<CurricularOfferingDetailDto, null>;
 export type CurricularOfferingCompetencyResponse = ApiResponse<CurricularOfferingCompetencyDto[], null>;
+export type CurricularOfferingStudentResponse = ApiResponse<CurricularOfferingStudentListItemDto[], PageMeta>
 
 /** Request */
 export type CurricularOfferingCreateRequest = {
