@@ -63,13 +63,16 @@ public class CurricularOfferingQueryService {
     // 상세 ( 역량매핑)
     public List<OfferingCompetencyMappingItem> getMapping(Long offeringId) {
 
+        if (!curricularOfferingRepository.existsById(offeringId)) {
+            throw new BusinessException(
+                ErrorCode.CURRICULAR_OFFERING_NOT_FOUND,
+                offeringId
+            );
+        }
+
         List<OfferingCompetencyMappingItem> result =
                 curricularOfferingCompetencyMapRepository.findOfferingCompetencyMapping(offeringId);
-
-        // competency는 항상 6개여야 함 (시드 전제)
-        if (result.isEmpty()) {
-            throw new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND,offeringId);
-        }
+                
         return result;
     }
 }

@@ -46,7 +46,7 @@ export function CurricularOfferingDetailPageClient() {
       <div className={styles.body}>
         {tab === "detail" && <OfferingDetailSection offeringId={offeringId} data={data} onReload={() => actions.reload?.()}/>}
         {tab === "students" && <OfferingStudentsSection offeringId={offeringId} />}
-        {tab === "competencies" && <OfferingCompetenciesSection offeringId={offeringId} />}
+        {tab === "competencies" && <OfferingCompetenciesSection offeringId={offeringId} data={data} />}
       </div>
     </div>
   );

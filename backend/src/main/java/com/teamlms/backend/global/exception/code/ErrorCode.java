@@ -73,7 +73,7 @@ public enum ErrorCode {
     CURRICULAR_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_CODE_ALREADY_EXISTS", "이미 사용 중인 교과목 코드입니다.", "curricular.code.alreadyExists"),
     CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_NOT_FOUND", "교과목을 찾을 수 없습니다.", "curricular.notFound"),
     CURRICULAR_OFFERING_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_CODE_ALREADY_EXISTS", "이미 사용 중인 개설코드입니다.", "curricular.offering.code.alreadyExists"),
-    CURRICULAR_OFFERING_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_OFFERING_NOT_FOUND", "이미 사용 중인 운영교과입니다.", "curricular.offering.notFound"),
+    CURRICULAR_OFFERING_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_OFFERING_NOT_FOUND", "해당 교과운영을 찾을 수 없습니다.", "curricular.offering.notFound"),
     OFFERING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_NOT_EDITABLE", "Draft가 아닌 운영교과입니다.", "curricular.offering.notEditable"),
     INVALID_OFFERING_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "INVALID_OFFERING_STATUS_TRANSITION", "올바르지 않은 상태변경입니다.", "error.validation"),
     GRADE_NOT_INPUTTED(HttpStatus.BAD_REQUEST, "GRADE_NOT_INPUTTED", "입력되지 않은 성적이있습니다.", "error.validation"),
@@ -82,7 +82,7 @@ public enum ErrorCode {
     ENROLLMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "ENROLLMENT_ALREADY_EXISTS", "이미 수강 신청된 교과입니다.", "enrollment.already.exists"),
     OFFERING_CAPACITY_FULL(HttpStatus.CONFLICT, "OFFERING_CAPACITY_FULL", "수강 정원이 초과되었습니다.", "offering.capacity.full"),
     OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE", "완료된 교과 운영의 역량 맵핑은 수정할 수 없습니다.", "offering.competency.mapping.notEditable"),
-    OFFERING_COMPETENCY_WEIGHT_DUPLICATED(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_WEIGHT_DUPLICATED", "해당 교과 운영에서 이미 사용 중인 가중치입니다.", "offering.competency.weight.duplicated"),
+    OFFERING_COMPETENCY_WEIGHT_DUPLICATED(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_WEIGHT_DUPLICATED", "중복된 역량 맵핑 점수가 있습니다.", "offering.competency.weight.duplicated"),
     CURRICULAR_OFFERING_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_ALREADY_EXISTS", "이미 해당 학기에 개설된 교과입니다.", "curricular.offering.already.exists"),
 
     ENROLLMENT_OFFERING_MISMATCH(HttpStatus.CONFLICT, "ENROLLMENT_OFFERING_MISMATCH", "해당 수강정보는 요청한 교과 운영에 속하지 않습니다.", "enrollment.offering.mismatch"),

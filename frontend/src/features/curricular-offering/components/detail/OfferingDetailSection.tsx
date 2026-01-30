@@ -1,4 +1,3 @@
-// features/curricular/offerings/components/OfferingDetailSection.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -315,7 +314,7 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
 
       {/* 설명 */}
       <section className={styles.section}>
-        <Header title="설명" />
+        <Header title="비고" />
         <div className={styles.body}>
           <div className={styles.descRow}>
             <div className={styles.descLabel}>설명</div>

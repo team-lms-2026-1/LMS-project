@@ -21,6 +21,7 @@ import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingDetailRes
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingStatusChangeRequest;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUpdateRequest;
+import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingBulkUpdateRequest;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingItem;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingPatchRequest;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingScorePatchRequest;
@@ -161,14 +162,13 @@ public class AdminCurricularOfferingController {
         return ApiResponse.ok(curricularOfferingQueryService.getMapping(offeringId));
     }
 
-    // 상세 ( 역량 맵핑 )
+    // 상세 ( 역량 맵핑 ) 사용안함
     @PatchMapping("/{offeringId}/competency-mapping")
     public ApiResponse<SuccessResponse> patchMapping(
             @PathVariable Long offeringId,
-            @Valid @RequestBody OfferingCompetencyMappingPatchRequest req
+            @Valid @RequestBody OfferingCompetencyMappingBulkUpdateRequest req
     ) {
         curricularOfferingCommandService.patchMapping(offeringId, req);
         return ApiResponse.ok(new SuccessResponse());
     }
-
 }

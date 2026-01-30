@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { CurricularDetailFormResponse, CurricularOfferingCreateRequest, CurricularOfferingDetailUpdateRequest, CurricularOfferingListResponse, CurricularOfferingStatusUpdateRequest } from "./types";
+import { CurricularDetailFormResponse, CurricularOfferingCompetencyMappingBulkUpdateRequest, CurricularOfferingCompetencyResponse, CurricularOfferingCreateRequest, CurricularOfferingDetailUpdateRequest, CurricularOfferingListResponse, CurricularOfferingStatusUpdateRequest } from "./types";
 import { SuccessResponse } from "@/features/curricular/api/types";
 
 
@@ -54,11 +54,32 @@ export async function updateCurricularOfferingDetail(
   })
 }
 
+// status
 export async function updateCurricularOfferingStatus(
   id: number,
   body: CurricularOfferingStatusUpdateRequest
 ) {
   return getJson<SuccessResponse>(`/api/admin/curricular/offerings/${id}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store"
+  })
+}
+
+// compentecy
+export async function fetchCurricularOfferingCompetency(id: number) {
+  const url = `/api/admin/curricular/offerings/${id}/competency`
+  return getJson<CurricularOfferingCompetencyResponse>( url, {
+      cache: "no-store"
+  });
+}
+
+export async function updateCurricularOfferingCompetency(
+  id: number,
+  body: CurricularOfferingCompetencyMappingBulkUpdateRequest
+) {
+  return getJson<SuccessResponse>(`/api/admin/curricular/offerings/${id}/competency`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
