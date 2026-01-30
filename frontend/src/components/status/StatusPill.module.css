@@ -1,17 +1,12 @@
-/* StatusPill.module.css */
-/* Button.module.css 톤/사이즈/인터랙션과 통일 */
+/* ===== base ===== */
 
 .pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  /* ✅ Button sm과 동일 */
   height: 32px;
   padding: 0 12px;
-
-  /* ✅ 글자 길이에 맞게 자동 */
-  min-width: unset;
 
   border-radius: 10px;
   border: 1px solid transparent;
@@ -41,57 +36,54 @@
 }
 
 .disabled {
-  opacity: 0.55; /* Button disabled와 동일 */
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
 }
 
-/* ===== status colors (Button 팔레트 기반 통일) ===== */
+/* =================================================
+   status colors – 의미 기준 통일
+   ================================================= */
 
-.status_PLANNED {
-  background: #64748b; /* slate-500 (예정/대기) */
-}
-
-.status_DRAFT {
+/* --- 초기 / 비활성 / 대기 --- */
+.status_PLANNED,
+.status_DRAFT,
+.status_INACTIVE {
   background: #6b7280; /* gray-500 */
 }
 
-.status_OPEN {
-  background: #2563eb; /* blue-600 (primary 느낌) */
+/* --- 활성 / 운영 / 진행중 (행위) --- */
+.status_OPEN,
+.status_ACTIVE {
+  background: #2563eb; /* blue-600 */
 }
 
-.status_ENROLL_CLOSED {
-  background: #475569; /* slate-600 */
-}
-
-.status_PROGRESS {
+/* --- 진행중 (프로세스/이수) --- */
+.status_PROGRESS,
+.status_IN_PROGRESS {
   background: #f59e0b; /* amber-500 */
 }
 
-.status_COMPLETED {
+/* --- 완료 / 성공 --- */
+.status_COMPLETED,
+.status_PASSED {
   background: #16a34a; /* green-600 */
 }
 
+/* --- 수강중 (활성 상태지만 완료 전) --- */
+.status_ENROLLED {
+  background: #2563eb; /* blue-600 (ACTIVE 계열과 통일) */
+}
+
+/* --- 마감 / 종료(정상 종료) --- */
+.status_ENROLL_CLOSED,
+.status_ENROLLMENT_CLOSED,
 .status_CLOSED {
   background: #374151; /* gray-700 */
 }
 
-.status_CANCELED {
-  background: #dc2626; /* red-600 (danger 느낌) */
-}
-
-.status_ACTIVE {
-  background: #16a34a; /* green-600 (운영중/활성) */
-}
-
-.status_INACTIVE {
-  background: #6b7280;
-}
-
-.status_ENROLLMENT_CLOSED {
-  background: #374151;
-}
-
-.status_IN_PROGRESS {
-  background: #f59e0b;
+/* --- 취소 / 실패 / 중단 --- */
+.status_CANCELED,
+.status_FAILED {
+  background: #dc2626; /* red-600 */
 }

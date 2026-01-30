@@ -20,8 +20,8 @@ const OPTIONS = [
   { value: "OPEN", label: "등록열림" },
   { value: "ENROLLMENT_CLOSED", label: "등록마감" },
   { value: "IN_PROGRESS", label: "진행중" },
-  { value: "COMPLETED", label: "완료" },
-  { value: "CANCELED", label: "취소됨" },
+  { value: "COMPLETED", label: "완료(성적확정)" },
+  { value: "CANCELED", label: "취소" },
 ];
 
 
