@@ -148,6 +148,7 @@ public class CurricularOfferingCommandService {
             OfferingStatus targetStatus,
             Long actorAccountId
     ) {
+
         CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId));
 
@@ -169,11 +170,16 @@ public class CurricularOfferingCommandService {
     // =====================
     private void validateTransition(OfferingStatus from, OfferingStatus to) {
 
+        // ✅ COMPLETED는 잠금 상태: 어떤 상태로도 변경 불가(취소 포함)
+        if (from == OfferingStatus.COMPLETED && to != OfferingStatus.COMPLETED) {
+            throw new BusinessException(
+                ErrorCode.CURRICULAR_OFFERING_STATUS_LOCKED,
+                from, to
+            );
+        }
+
         // ✅ 허용 전이
         if (from == OfferingStatus.DRAFT && to == OfferingStatus.OPEN) return;
-
-        // OPEN 상태에서 정원 찼으면 ENROLLMENT_CLOSED로 자동 전환하는 편이 일반적이지만,
-        // 수동 전환도 허용할지 여부는 정책 선택. (여기서는 허용)
         if (from == OfferingStatus.OPEN && to == OfferingStatus.ENROLLMENT_CLOSED) return;
 
         if (from == OfferingStatus.OPEN && to == OfferingStatus.IN_PROGRESS) return;
@@ -181,12 +187,12 @@ public class CurricularOfferingCommandService {
 
         if (from == OfferingStatus.IN_PROGRESS && to == OfferingStatus.COMPLETED) return;
 
-        // 언제든 취소는 허용
+        // 언제든 취소는 허용 (단, COMPLETED는 위에서 이미 막힘)
         if (to == OfferingStatus.CANCELED) return;
 
         throw new BusinessException(
-                ErrorCode.INVALID_OFFERING_STATUS_TRANSITION,
-                from, to
+            ErrorCode.INVALID_OFFERING_STATUS_TRANSITION,
+            from, to
         );
     }
 
@@ -313,6 +319,17 @@ public class CurricularOfferingCommandService {
 
     // 학생성적 입력
     public void patchScore(Long offeringId, Long enrollmentId, Integer rawScore){
+
+        // ✅ 0) 교과운영(Offering) 상태 확인: IN_PROGRESS일 때만 성적 입력 가능
+        CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
+            .orElseThrow(() -> new BusinessException(
+                ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId
+            ));
+
+        if (offering.getStatus() != OfferingStatus.IN_PROGRESS) {
+            throw new BusinessException(ErrorCode.OFFERING_NOT_GRADEABLE_STATUS);
+        }
+
         Enrollment e = enrollmentRepository.findById(enrollmentId)
         .orElseThrow(() -> new BusinessException(
             ErrorCode.ENROLLMENT_NOT_FOUND, enrollmentId
