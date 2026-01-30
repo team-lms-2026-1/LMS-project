@@ -1,72 +1,55 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { proxyToBackend,proxyStreamToBackend } from "@/lib/bff";
+import { revalidateTag } from "next/cache";
 
-export const runtime = "nodejs";
+const TAG = "admin:faqs";
 
-const BACKEND_PATH = "/api/v1/admin/community/faqs";
+// ✅ Next route params는 string
+type Ctx = { params: { faqId: string } };
 
-function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
+export async function GET(req: Request, ctx: Ctx) {
+  const faqId = ctx.params.faqId;
+
+  return proxyToBackend(req, `/api/v1/admin/community/faqs/${encodeURIComponent(faqId)}`, {
+    method: "GET",
+    cache: "force-cache",
+    next: { revalidate: 600, tags: [TAG] },
+  });
 }
 
-function getAccessToken() {
-  return cookies().get("access_token")?.value;
-}
+/**
+ * ✅ 수정도 multipart/form-data로 들어오는 경우가 많음
+ * - 프론트에서 FormData로 (request JSON + files) 보내면 그대로 업스트림으로 전달
+ * - 파일 수정이 없는 경우에도 FormData로 보내도 문제 없음(백엔드가 request만 받아도 OK)
+ */
+export async function PATCH(req: Request, ctx: Ctx) {
+  const faqId = ctx.params.faqId;
+  const body = await req.json().catch(() => null);
 
-function buildUpstreamHeaders(req: Request) {
-  const headers = new Headers(req.headers);
-
-  headers.delete("host");
-  headers.delete("connection");
-  headers.delete("content-length");
-  headers.delete("cookie");
-  headers.delete("accept-encoding");
-
-  const token = getAccessToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
-  return headers;
-}
-
-async function proxy(req: Request, upstreamUrl: string, method: string, withBody: boolean) {
-  const headers = buildUpstreamHeaders(req);
-
-  const init: any = {
-    method,
-    headers,
+  const res = await proxyToBackend(req, `/api/v1/admin/community/faqs/${encodeURIComponent(faqId)}`, {
+    method: "PATCH",
+    body,
+    forwardQuery: false,
     cache: "no-store",
-  };
+  });
 
-  if (withBody) {
-    init.body = req.body;
-    init.duplex = "half";
-  }
-
-  const res = await fetch(upstreamUrl, init);
-
-  const outHeaders = new Headers(res.headers);
-  outHeaders.delete("transfer-encoding");
-
-  return new NextResponse(res.body, { status: res.status, headers: outHeaders });
+  if (res.ok) revalidateTag(TAG);
+  return res;
 }
 
-export async function GET(req: Request, ctx: { params: { faqId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
-  return proxy(req, upstreamUrl, "GET", false);
-}
 
-// ✅ 수정은 PATCH 우선(백엔드가 PUT이면 PUT도 같이 열어둠)
-export async function PATCH(req: Request, ctx: { params: { faqId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
-  return proxy(req, upstreamUrl, "PATCH", true);
-}
+/**
+ * ✅ 삭제 엔드포인트가 student로 되어있어서 100% 문제
+ * admin 삭제는 admin 경로로 보내야 함
+ */
+export async function DELETE(req: Request, ctx: Ctx) {
+  const faqId = ctx.params.faqId;
 
-export async function PUT(req: Request, ctx: { params: { faqId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
-  return proxy(req, upstreamUrl, "PUT", true);
-}
+  const res = await proxyToBackend(req, `/api/v1/admin/community/faqs/${encodeURIComponent(faqId)}`, {
+    method: "DELETE",
+    forwardQuery: false,
+    cache: "no-store",
+  });
 
-export async function DELETE(req: Request, ctx: { params: { faqId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BACKEND_PATH}/${encodeURIComponent(ctx.params.faqId)}`;
-  return proxy(req, upstreamUrl, "DELETE", false);
+  if (res.ok) revalidateTag(TAG);
+  return res;
 }

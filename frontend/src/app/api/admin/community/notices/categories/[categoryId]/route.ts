@@ -16,11 +16,11 @@ export async function GET(req: Request, ctx: Ctx) {
   return proxyToBackend(req, withId(ctx), { method: "GET", forwardQuery: true });
 }
 
-/** 단건 수정 - 백엔드가 PUT이면 PUT만 사용 */
-export async function PUT(req: Request, ctx: Ctx) {
-  const body = await req.json().catch(() => null);
-  return proxyToBackend(req, withId(ctx), { method: "PUT", body, forwardQuery: false });
-}
+// /** 단건 수정 - 백엔드가 PUT이면 PUT만 사용 */
+// export async function PUT(req: Request, ctx: Ctx) {
+//   const body = await req.json().catch(() => null);
+//   return proxyToBackend(req, withId(ctx), { method: "PUT", body, forwardQuery: false });
+// }
 
 /** 단건 부분 수정 - 백엔드가 PATCH를 지원하면 사용 */
 export async function PATCH(req: Request, ctx: Ctx) {

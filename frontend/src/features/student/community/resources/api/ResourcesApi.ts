@@ -18,3 +18,7 @@ export async function fetchResourcesList(query: ResourcesListQuery) {
 
   return getJson<ResourceListResponse>(url);
 }
+
+export async function fetchResourceDetail(resourceId: number) {
+  return getJson<any>(`/api/student/community/resources/${resourceId}`);
+}

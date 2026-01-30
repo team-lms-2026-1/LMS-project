@@ -1,71 +1,52 @@
-// src/app/api/admin/community/notices/[noticeId]/route.ts
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { proxyToBackend, proxyStreamToBackend } from "@/lib/bff";
+import { revalidateTag } from "next/cache";
 
-export const runtime = "nodejs";
+const TAG = "admin:notices";
 
-const BASE_UPSTREAM = "/api/v1/admin/community/notices";
+// ✅ Next route params는 string
+type Ctx = { params: { noticeId: string } };
 
-function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
-}
+export async function GET(req: Request, ctx: Ctx) {
+  const noticeId = ctx.params.noticeId;
 
-function getAccessToken() {
-  return cookies().get("access_token")?.value;
-}
-
-function buildUpstreamHeaders(req: Request) {
-  const headers = new Headers(req.headers);
-
-  headers.delete("host");
-  headers.delete("connection");
-  headers.delete("content-length");
-  headers.delete("cookie");
-  headers.delete("accept-encoding");
-
-  const token = getAccessToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
-  return headers;
-}
-
-async function proxy(req: Request, upstreamUrl: string, method: string, withBody: boolean) {
-  const headers = buildUpstreamHeaders(req);
-
-  const init: any = {
-    method,
-    headers,
-    cache: "no-store",
-  };
-
-  if (withBody) {
-    init.body = req.body;
-    init.duplex = "half";
-  }
-
-  const res = await fetch(upstreamUrl, init);
-
-  const outHeaders = new Headers(res.headers);
-  outHeaders.delete("transfer-encoding");
-
-  return new NextResponse(res.body, {
-    status: res.status,
-    headers: outHeaders,
+  return proxyToBackend(req, `/api/v1/admin/community/notices/${encodeURIComponent(noticeId)}`, {
+    method: "GET",
+    cache: "force-cache",
+    next: { revalidate: 600, tags: [TAG] },
   });
 }
 
-export async function GET(req: Request, ctx: { params: { noticeId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}/${encodeURIComponent(ctx.params.noticeId)}`;
-  return proxy(req, upstreamUrl, "GET", false);
+/**
+ * ✅ 수정도 multipart/form-data로 들어오는 경우가 많음
+ * - 프론트에서 FormData로 (request JSON + files) 보내면 그대로 업스트림으로 전달
+ * - 파일 수정이 없는 경우에도 FormData로 보내도 문제 없음(백엔드가 request만 받아도 OK)
+ */
+export async function PATCH(req: Request, ctx: Ctx) {
+  const noticeId = ctx.params.noticeId;
+
+  const res = await proxyStreamToBackend(req, {
+    method: "PATCH",
+    upstreamPath: `/api/v1/admin/community/notices/${encodeURIComponent(noticeId)}`,
+    forwardQuery: false,
+  });
+
+  if (res.ok) revalidateTag(TAG);
+  return res;
 }
 
-export async function PATCH(req: Request, ctx: { params: { noticeId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}/${encodeURIComponent(ctx.params.noticeId)}`;
-  // ✅ multipart 스트리밍 전달
-  return proxy(req, upstreamUrl, "PATCH", true);
-}
+/**
+ * ✅ 삭제 엔드포인트가 student로 되어있어서 100% 문제
+ * admin 삭제는 admin 경로로 보내야 함
+ */
+export async function DELETE(req: Request, ctx: Ctx) {
+  const noticeId = ctx.params.noticeId;
 
-export async function DELETE(req: Request, ctx: { params: { noticeId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}/${encodeURIComponent(ctx.params.noticeId)}`;
-  return proxy(req, upstreamUrl, "DELETE", false);
+  const res = await proxyToBackend(req, `/api/v1/admin/community/notices/${encodeURIComponent(noticeId)}`, {
+    method: "DELETE",
+    forwardQuery: false,
+    cache: "no-store",
+  });
+
+  if (res.ok) revalidateTag(TAG);
+  return res;
 }

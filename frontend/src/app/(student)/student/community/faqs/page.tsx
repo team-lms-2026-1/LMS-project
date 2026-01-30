@@ -1,5 +1,5 @@
-import FaqListPage from "@/features/community/faqs/components/FaqListPage";
+import FaqPageClient from "@/features/student/community/faqs/components/list/FaqPage.client";
 
 export default function Page() {
-  return <FaqListPage />;
+  return <FaqPageClient />;
 }

@@ -1,4 +1,4 @@
-import FaqCategoryPage from "@/features/community/faqs/categories/components/FaqCategoryPage";
+import CategoryPageClient from "@/features/community/categories/components/list/CategoryPage.client";
 export default function Page() {
-  return <FaqCategoryPage />;
+  return <CategoryPageClient scope="faqs" />;
 }

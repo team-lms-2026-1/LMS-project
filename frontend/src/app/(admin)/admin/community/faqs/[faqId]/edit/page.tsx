@@ -1,5 +1,5 @@
-import FaqEditPage from "@/features/community/faqs/components/FaqEditPage";
+import FaqEditPageClient from "@/features/community/faqs/components/edit/FaqEditPage.client";
 
-export default function Page({ params }: { params: { faqId: string } }) {
-  return <FaqEditPage faqId={params.faqId} />;
+export default function Page() {
+  return <FaqEditPageClient />;
 }

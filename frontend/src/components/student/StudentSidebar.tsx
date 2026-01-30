@@ -16,7 +16,7 @@
         { label: "공지사항", href: "/student/community/notices" },
         { label: "자료실", href: "/student/community/resources" },
         { label: "FAQ", href: "/student/community/faqs" },
-        { label: "Q&A", href: "/student/community/qna" },
+        { label: "Q&A", href: "/student/community/qna/questions" },
       ],
     },
     {

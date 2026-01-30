@@ -13,21 +13,28 @@ export type PageMeta = {
   sort: string[];
 };
 
-export type FilteType = "IMAGE" | "DOCUMENT" | "VIDEO" | "ETC" | string;
+export type FileType = "IMAGE" | "DOCUMENT" | "VIDEO" | "ETC" | string;
 
 export type NoticeStatus = "SCHEDULED" | "ONGOING" | "ENDED" | string;
 
 export type SearchType = "TITLE" | "CONTENT" | "TITLE_OR_CONTENT" | "WRITER" | string;
 
+export type Category = {
+  categoryId : number;
+  name : string;
+  bgColorHex : string;
+  textColorHex : string;
+}
+
 /** DTO */
 export type NoticeListItemDto={
     noticeId : number;
-    categoryName : string;
+    category : Category;
     title : string;
     content : string;
     authorName : string;
     viewCount : number;
-    createAt : string;
+    createdAt : string;
     status : string;
     files : []
 }

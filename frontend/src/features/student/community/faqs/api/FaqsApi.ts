@@ -18,3 +18,7 @@ export async function fetchFaqsList(query: FaqsListQuery) {
 
   return getJson<FaqListResponse>(url);
 }
+
+export async function fetchFaqDetail(faqId: number) {
+  return getJson<any>(`/api/student/community/faqs/${faqId}`);
+}

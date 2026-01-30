@@ -1,0 +1,43 @@
+.page {
+  padding: 0;
+  min-height: 100vh;
+  background-color: transparent;
+}
+
+.card {
+  background: transparent;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+
+.footerRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* ✅ 왼쪽/가운데/오른쪽 */
+  align-items: center;
+  margin-top: 12px; 
+}
+
+.footerLeft {
+  justify-self: start;
+}
+
+.footerCenter {
+  justify-self: center; 
+}
+
+.footerRight {
+  justify-self: end;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}

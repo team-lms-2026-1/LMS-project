@@ -3,6 +3,7 @@
 import { Table, type TableColumn } from "@/components/table";
 import { FaqListItemDto } from "../../api/types";
 import styles from "./FaqTable.module.css";
+import { useRouter } from "next/navigation";
 
 type Props = {
   items: FaqListItemDto[];
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function FaqTable({ items, loading, onEditClick }: Props) {
+  const router = useRouter();
   const columns: Array<TableColumn<FaqListItemDto>> = [
     { header: "번호", align: "center", render: (r) => r.faqId },
     { header: "분류", align: "center", render: (r) => {
@@ -24,9 +26,21 @@ export function FaqTable({ items, loading, onEditClick }: Props) {
         );
       },
     },
-    { header: "제목", align: "center", render: (r) => r.title },
+    {
+      header: "제목",
+      align: "center",
+      render: (r) => (
+        <button
+          type="button"
+          className={styles.titleLink}
+          onClick={() => router.push(`/student/community/faqs/${r.faqId}`)}
+        >
+          {r.title}
+        </button>
+      ),
+    },
     { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createAt },
+    { header: "작성일", align: "center", render: (r) => r.createdAt },
   ];
 
   return (

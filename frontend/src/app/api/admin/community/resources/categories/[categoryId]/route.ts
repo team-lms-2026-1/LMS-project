@@ -1,29 +1,34 @@
-// src/app/api/admin/community/resources/categories/[categoryId]/route.ts
 import { proxyToBackend } from "@/lib/bff";
 
-const UPSTREAM = "/api/v1/admin/community/resources/categories";
+// ✅ 백엔드 실제 엔드포인트로 맞추세요
+// 예: "/api/v1/admin/community/resource-categories" 일 수도 있고
+// 현재 사용자 코드 기준: resources/categories
+const BACKEND_BASE = "/api/v1/admin/community/resources/categories";
 
-export async function PATCH(req: Request, ctx: { params: { categoryId: string } }) {
-  const body = await req.json().catch(() => null);
-  return proxyToBackend(req, `${UPSTREAM}/${encodeURIComponent(ctx.params.categoryId)}`, {
-    method: "PATCH",
-    body,
-    forwardQuery: false,
-  });
+type Ctx = { params: { categoryId: string } };
+
+function withId(ctx: Ctx) {
+  return `${BACKEND_BASE}/${encodeURIComponent(ctx.params.categoryId)}`;
 }
 
-export async function PUT(req: Request, ctx: { params: { categoryId: string } }) {
-  const body = await req.json().catch(() => null);
-  return proxyToBackend(req, `${UPSTREAM}/${encodeURIComponent(ctx.params.categoryId)}`, {
-    method: "PUT",
-    body,
-    forwardQuery: false,
-  });
+/** 단건 조회 */
+export async function GET(req: Request, ctx: Ctx) {
+  return proxyToBackend(req, withId(ctx), { method: "GET", forwardQuery: true });
 }
 
-export async function DELETE(req: Request, ctx: { params: { categoryId: string } }) {
-  return proxyToBackend(req, `${UPSTREAM}/${encodeURIComponent(ctx.params.categoryId)}`, {
-    method: "DELETE",
-    forwardQuery: false,
-  });
+/** 단건 수정 - 백엔드가 PUT이면 PUT만 사용 */
+export async function PUT(req: Request, ctx: Ctx) {
+  const body = await req.json().catch(() => null);
+  return proxyToBackend(req, withId(ctx), { method: "PUT", body, forwardQuery: false });
+}
+
+/** 단건 부분 수정 - 백엔드가 PATCH를 지원하면 사용 */
+export async function PATCH(req: Request, ctx: Ctx) {
+  const body = await req.json().catch(() => null);
+  return proxyToBackend(req, withId(ctx), { method: "PATCH", body, forwardQuery: false });
+}
+
+/** ✅ 단건 삭제 */
+export async function DELETE(req: Request, ctx: Ctx) {
+  return proxyToBackend(req, withId(ctx), { method: "DELETE", forwardQuery: false });
 }

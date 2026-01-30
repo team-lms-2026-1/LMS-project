@@ -1,0 +1,78 @@
+.page {
+  padding: 24px 28px;
+}
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.homeIcon {
+  font-size: 14px;
+}
+
+.sep {
+  color: #9ca3af;
+}
+
+.breadcrumb strong {
+  color: #374151;
+  font-weight: 800;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #eef0f3;
+  border-radius: 10px;
+  padding: 18px 18px 16px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0;
+}
+
+.searchWrap {
+  width: 300px;
+}
+
+.errorMessage {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+.bottomRow {
+  position: relative;
+  margin-top: 14px;
+  padding-top: 6px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+}
+
+.confirmWrap {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

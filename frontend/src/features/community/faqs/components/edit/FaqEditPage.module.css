@@ -1,0 +1,276 @@
+.page {
+  padding: 24px;
+  background: #f6f7fb;
+  min-height: calc(100vh - 60px);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px 18px 16px;
+}
+
+/* 상단: breadcrumb + 우측 목록으로 */
+.breadcrumbRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.crumb {
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.crumb:hover {
+  color: #374151;
+  text-decoration: underline;
+}
+
+.sep {
+  color: #9ca3af;
+}
+
+.current {
+  color: #111827;
+  font-weight: 800;
+}
+
+.title {
+  margin: 8px 0 14px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* 로딩/에러 */
+.loadingBox {
+  padding: 18px;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  background: #fafafa;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.errorMessage {
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* 본문 박스 */
+.detailBox {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* 헤더(카테고리 배지 + 제목 입력) */
+.headRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+
+.headTitleInput {
+  flex: 1;
+  height: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  outline: none;
+  background: #fff;
+}
+
+.headTitleInput:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* 메타 + 카테고리 셀렉트 */
+.metaRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.metaLabel {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.metaValue {
+  font-size: 13px;
+  color: #111827;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categorySelect {
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  background: #fff;
+  outline: none;
+  min-width: 140px;
+}
+
+.categorySelect:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* 내용 */
+.contentBox {
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.contentTextarea {
+  width: 100%;
+  min-height: 240px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  background: #fff;
+}
+
+.contentTextarea:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* 첨부 */
+.attachBox {
+  padding: 14px;
+}
+
+.attachRow {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.attachLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.attachList {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.attachUl {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.attachLi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #111827;
+}
+
+.attachName {
+  font-weight: 600;
+}
+
+.attachEmpty {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* 하단 버튼 */
+.footerRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .metaRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .headRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headTitleInput {
+    width: 100%;
+  }
+
+  .attachRow {
+    grid-template-columns: 1fr;
+  }
+}

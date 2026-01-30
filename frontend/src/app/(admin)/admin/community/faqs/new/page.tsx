@@ -1,5 +1,5 @@
-import FaqCreatePage from "@/features/community/faqs/components/FaqCreatePage";
+import FaqCreatePageClient from "@/features/community/faqs/components/create/FaqCreatePage.client";
 
 export default function Page() {
-  return <FaqCreatePage />;
+  return <FaqCreatePageClient />;
 }

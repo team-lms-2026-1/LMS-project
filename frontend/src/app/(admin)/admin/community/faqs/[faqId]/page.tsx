@@ -1,5 +1,5 @@
-import FaqDetailPage from "@/features/community/faqs/components/FaqDetailPage";
+import FaqDetailPageClient from "@/features/community/faqs/components/detail/FaqDetailpage.client";
 
-export default function Page({ params }: { params: { faqId: string } }) {
-  return <FaqDetailPage faqId={params.faqId} />;
+export default function Page() {
+  return <FaqDetailPageClient />;
 }

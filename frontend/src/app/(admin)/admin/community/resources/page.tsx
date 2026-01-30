@@ -1,5 +1,5 @@
-import ResourceListPage from "@/features/community/resources/components/ResourceListPage";
+import ResourcePageClient from "@/features/community/resources/components/list/ResourcePage.client";
 
 export default function Page() {
-  return <ResourceListPage />;
+  return <ResourcePageClient />;
 }

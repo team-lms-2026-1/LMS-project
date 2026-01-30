@@ -1,5 +1,5 @@
-import ResourceDetailPage from "@/features/community/resources/components/ResourceDetailPage";
+import ResourceDetailPageClient from "@/features/student/community/resources/components/detail/ResourceDetailpage.client";
 
-export default function Page({ params }: { params: { resourceId: string } }) {
-  return <ResourceDetailPage resourceId={params.resourceId} />;
+export default function Page() {
+  return <ResourceDetailPageClient />;
 }

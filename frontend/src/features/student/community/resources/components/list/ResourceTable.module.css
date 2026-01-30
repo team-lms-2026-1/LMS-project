@@ -22,9 +22,21 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 8px;
-  border-radius: 999;
-  font-size: 12;
+  border-radius: 99px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.6;
 }
 
+.titleLink {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: #111827;
+  text-decoration: none;
+}
+.titleLink:hover {
+  text-decoration: underline;
+}

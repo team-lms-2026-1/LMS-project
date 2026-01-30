@@ -1,66 +1,27 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { proxyToBackend } from "@/lib/bff";
+import { revalidateTag } from "next/cache";
 
-export const runtime = "nodejs";
+const TAG = "admin:resources";
 
-const BASE_UPSTREAM = "/api/v1/admin/community/resources";
-
-function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
-}
-
-function getAccessToken() {
-  return cookies().get("access_token")?.value;
-}
-
-function buildUpstreamHeaders(req: Request) {
-  const headers = new Headers(req.headers);
-
-  headers.delete("host");
-  headers.delete("connection");
-  headers.delete("content-length");
-  headers.delete("cookie");
-  headers.delete("accept-encoding");
-
-  const token = getAccessToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
-  return headers;
-}
-
-async function proxy(req: Request, upstreamUrl: string, method: string, withBody: boolean) {
-  const headers = buildUpstreamHeaders(req);
-
-  const init: any = {
-    method,
-    headers,
-    cache: "no-store",
-  };
-
-  if (withBody) {
-    // ✅ multipart든 JSON이든 "그대로" 스트림 전달
-    init.body = req.body;
-    init.duplex = "half";
-  }
-
-  const res = await fetch(upstreamUrl, init);
-
-  const outHeaders = new Headers(res.headers);
-  outHeaders.delete("transfer-encoding");
-
-  return new NextResponse(res.body, {
-    status: res.status,
-    headers: outHeaders,
+export async function GET(req: Request) {
+  return proxyToBackend(req, "/api/v1/admin/community/resources", { 
+    method: "GET",
+    cache: "force-cache",
+    next: {revalidate: 600, tags: [TAG]}
   });
 }
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}${url.search}`;
-  return proxy(req, upstreamUrl, "GET", false);
-}
-
 export async function POST(req: Request) {
-  const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}`;
-  return proxy(req, upstreamUrl, "POST", true);
+  const body = await req.json();
+
+  const res = await proxyToBackend(req, "/api/v1/admin/community/resources", {
+    method: "POST",
+    forwardQuery: false,
+    body,
+    cache: "no-store"
+  });
+
+  if (res.ok) revalidateTag(TAG);
+
+  return res;
 }

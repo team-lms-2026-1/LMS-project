@@ -1,5 +1,5 @@
-import NoticeDetailPage from "@/features/community/notices/components/NoticeDetailPage";
+import NoticeDetailPageClient from "@/features/community/notices/components/detail/NoticeDetailpage.client";
 
-export default function Page({ params }: { params: { noticeId: string } }) {
-  return <NoticeDetailPage noticeId={params.noticeId} />;
+export default function Page() {
+  return <NoticeDetailPageClient />;
 }

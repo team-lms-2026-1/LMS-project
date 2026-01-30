@@ -3,6 +3,7 @@
 import { Table, type TableColumn } from "@/components/table";
 import { ResourceListItemDto } from "../../api/types";
 import styles from "./ResourceTable.module.css";
+import { useRouter } from "next/navigation";
 
 type Props = {
   items: ResourceListItemDto[];
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function ResourceTable({ items, loading, onEditClick }: Props) {
+  const router = useRouter();
   const columns: Array<TableColumn<ResourceListItemDto>> = [
     { header: "번호", align: "center", render: (r) => r.resourceId },
     { header: "분류", align: "center", render: (r) => {
@@ -24,9 +26,21 @@ export function ResourceTable({ items, loading, onEditClick }: Props) {
         );
       },
     },
-    { header: "제목", align: "center", render: (r) => r.title },
+    {
+      header: "제목",
+      align: "center",
+      render: (r) => (
+        <button
+          type="button"
+          className={styles.titleLink}
+          onClick={() => router.push(`/student/community/resources/${r.resourceId}`)}
+        >
+          {r.title}
+        </button>
+      ),
+    },
     { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createAt },
+    { header: "작성일", align: "center", render: (r) => r.createdAt },
   ];
 
   return (
@@ -36,7 +50,7 @@ export function ResourceTable({ items, loading, onEditClick }: Props) {
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.resourceId}
-      emptyText="공지사항이 없습니다."
+      emptyText="자료가 없습니다."
     />
   );
 }

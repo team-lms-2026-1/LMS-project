@@ -13,7 +13,7 @@ export type PageMeta = {
   sort: string[];
 };
 
-export type FilteType = "IMAGE" | "DOCUMENT" | "VIDEO" | "ETC" | string;
+export type FileType = "IMAGE" | "DOCUMENT" | "VIDEO" | "ETC" | string;
 
 export type NoticeStatus = "SCHEDULED" | "ONGOING" | "ENDED" | string;
 
@@ -34,7 +34,7 @@ export type ResourceListItemDto={
     content : string;
     authorName : string;
     viewCount : number;
-    createAt : string;
+    createdAt : string;
     files : []
 }
 

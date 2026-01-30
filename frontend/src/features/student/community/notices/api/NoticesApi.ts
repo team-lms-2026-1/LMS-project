@@ -18,3 +18,7 @@ export async function fetchNoticesList(query: NotiesListQuery) {
 
   return getJson<NoticeListResponse>(url);
 }
+
+export async function fetchNoticeDetail(noticeId: number) {
+  return getJson<any>(`/api/student/community/notices/${noticeId}`);
+}
