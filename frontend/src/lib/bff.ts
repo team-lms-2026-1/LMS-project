@@ -57,22 +57,15 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
   const token = getAccessToken();
 
   if (!token) {
-    const out = NextResponse.json(
+    return NextResponse.json(
       { error: { code: "UNAUTHORIZED", message: "access_token cookie missing" } },
       { status: 401 }
     );
-    out.headers.set("Cache-Control", "no-store");
-    return out;
   }
 
   const forwardQuery = options.forwardQuery ?? true;
   const qs = forwardQuery ? new URL(req.url).search : "";
   const url = `${base.replace(/\/+$/, "")}${upstreamPath}${qs}`;
-
-  // ✅ 기본은 무조건 no-store (리스트 갱신 문제 해결)
-  //    캐시를 쓰고 싶으면 route.ts에서 options.cache/next를 명시해라.
-  const cachePolicy: RequestCache = options.cache ?? "no-store";
-  const nextOpt = cachePolicy === "no-store" ? undefined : (options.next ?? { revalidate: 0 });
 
   const res = await fetch(url, {
     method: options.method ?? "GET",
@@ -84,15 +77,17 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
 
-    // ✅ 핵심: 서버 fetch 캐시 차단
-    cache: cachePolicy,
-    next: nextOpt,
+
+    // 여기 수정!! revalidate 쓰기 위해서
+
+    cache: options.cache ?? "force-cache",
+    next: options.next,
   });
 
   const contentType = res.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
     const text = await readTextSafe(res);
-    const out = NextResponse.json(
+    return NextResponse.json(
       {
         error: {
           code: "UPSTREAM_NOT_JSON",
@@ -103,23 +98,11 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
       },
       { status: 502 }
     );
-    out.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    out.headers.set("Pragma", "no-cache");
-    out.headers.set("Expires", "0");
-    return out;
   }
 
   const data = await parseJsonIfPossible(res);
-
-  // ✅ 응답 헤더로도 캐시 완전 차단(브라우저/프록시 포함)
-  const out = NextResponse.json(data, { status: res.status });
-  out.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-  out.headers.set("Pragma", "no-cache");
-  out.headers.set("Expires", "0");
-
-  return out;
+  return NextResponse.json(data, { status: res.status });
 }
-
 
 /**
  * 스트리밍 프록시 (multipart/form-data 포함)
