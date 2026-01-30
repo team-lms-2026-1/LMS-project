@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CurricularOfferingDetailDto, CurricularOfferingListItemDto, PageMeta } from "../api/types";
-import { fetchCurricularDetailForm, fetchCurricularOfferingsList } from "../api/curricularOfferingsApi";
+import { CurricularOfferingCompetencyDto, CurricularOfferingDetailDto, CurricularOfferingListItemDto, PageMeta } from "../api/types";
+import { fetchCurricularDetailForm, fetchCurricularOfferingCompetency, fetchCurricularOfferingsList } from "../api/curricularOfferingsApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -93,7 +93,7 @@ export function useCurricularOfferingsList() {
 
 
 // 모달 수정조회
-export function useCurricularDetail(offeingId?: number, enabled: boolean = true) {
+export function useCurricularDetail(offeringId?: number, enabled: boolean = true) {
   const [data, setData] = useState<CurricularOfferingDetailDto | null>(null);
   
   const [loading, setLoading] = useState(false);
@@ -112,12 +112,53 @@ export function useCurricularDetail(offeingId?: number, enabled: boolean = true)
       setLoading(false);
     }
   };
+  
+  const reload = useCallback(async () => {
+    if (!offeringId) return;
+    await load(offeringId);
+  }, [offeringId, load]);
 
   useEffect(() => {
     if (!enabled) return;
-    if (!offeingId) return;
-    void load(offeingId);
-  }, [offeingId, enabled]);
+    if (!offeringId) return;
+    void load(offeringId);
+  }, [offeringId, enabled]);
 
-  return { state : { data, loading, error }, actions: { load }};
+  return { state : { data, loading, error }, actions: { load, reload, setData }};
 }
+
+// competency
+export function useOfferingCompetencyMapping(offeringId?: number, enabled: boolean = true) {
+  const [data, setData] = useState<CurricularOfferingCompetencyDto[]>([]);
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchCurricularOfferingCompetency(id);
+      setData(res.data);
+    } catch (e) {
+      console.error("[useOfferingCompetencyMapping]", e);
+      setError("조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const reload = useCallback(async () => {
+    if (!offeringId) return;
+    await load(offeringId);
+  }, [offeringId, load]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    if (!offeringId) return;
+    void load(offeringId);
+  }, [offeringId, enabled]);
+
+  return { state : { data, loading, error }, actions: { load, reload, setData }};
+}
+

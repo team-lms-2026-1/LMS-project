@@ -12,6 +12,7 @@ import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.account.repository.ProfessorProfileRepository;
 import com.teamlms.backend.domain.competency.repository.CompetencyRepository;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUpdateRequest;
+import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingBulkUpdateRequest;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingPatchRequest;
 import com.teamlms.backend.domain.curricular.entity.CurricularOffering;
 import com.teamlms.backend.domain.curricular.entity.CurricularOfferingCompetencyMap;
@@ -64,6 +65,10 @@ public class CurricularOfferingCommandService {
 
         if (!curricularRepository.existsById(curricularId)) {
             throw new BusinessException(ErrorCode.CURRICULAR_NOT_FOUND, curricularId);
+        }
+
+        if (curricularOfferingRepository.existsByCurricularIdAndSemesterId(curricularId, semesterId)) {
+            throw new BusinessException(ErrorCode.CURRICULAR_OFFERING_ALREADY_EXISTS, curricularId);
         }
 
         if (curricularOfferingRepository.existsByOfferingCode(offeringCode)) {
@@ -266,34 +271,44 @@ public class CurricularOfferingCommandService {
     }
 
     // 역량 맵핑
-    public void patchMapping(Long offeringId, OfferingCompetencyMappingPatchRequest req) {
-        
-        // offering 존재
+    public void patchMapping(Long offeringId, OfferingCompetencyMappingBulkUpdateRequest req) {
+
         CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId));
 
-        // offering status 가 완료면 수정불가
         if (offering.getStatus() == OfferingStatus.COMPLETED) {
             throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE, offeringId);
         }
-        if (!competencyRepository.existsById(req.competencyId())) {
-            throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, req.competencyId());
+
+        var reqs = req.mappings();
+
+        // 요청 weight 중복 방지 (swap 포함해서 최종 중복만 막으면 됨)
+        long distinctWeight = reqs.stream()
+                .map(OfferingCompetencyMappingPatchRequest::weight)
+                .distinct()
+                .count();
+        if (distinctWeight != reqs.size()) {
+            throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_WEIGHT_DUPLICATED, offeringId);
         }
-        // weight 중복이면 409 (다른 competency가 쓰는 중)
-        competencyMapRepository.findByIdOfferingIdAndWeight(offeringId, req.weight()).ifPresent(m -> {
-            if (!m.getCompetencyId().equals(req.competencyId())) {
-                throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_WEIGHT_DUPLICATED, offeringId, req.weight());
-            }
-        });
-        // upsert (없으면 생성, 있으면 수정)
-        CurricularOfferingCompetencyMapId id = new CurricularOfferingCompetencyMapId(offeringId, req.competencyId());
 
-        CurricularOfferingCompetencyMap map = competencyMapRepository.findById(id)
-                .orElseGet(() -> CurricularOfferingCompetencyMap.builder().id(id).build());
+        // competency 존재 검증 (N번 existsById 대신 한 방에)
+        var ids = reqs.stream().map(OfferingCompetencyMappingPatchRequest::competencyId).distinct().toList();
+        long existCount = competencyRepository.countByCompetencyIdIn(ids); // 이런 메서드 하나 추가 추천
+        if (existCount != ids.size()) {
+            throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, "some competencyId not found");
+        }
 
-        map.changeWeight(req.weight());
+        // ✅ 핵심: 기존 맵핑 전부 삭제 후 재생성
+        competencyMapRepository.deleteByIdOfferingId(offeringId);
 
-        competencyMapRepository.save(map);
+        var entities = reqs.stream().map(r -> {
+            var id = new CurricularOfferingCompetencyMapId(offeringId, r.competencyId());
+            var map = CurricularOfferingCompetencyMap.builder().id(id).build();
+            map.changeWeight(r.weight());
+            return map;
+        }).toList();
+
+        competencyMapRepository.saveAll(entities);
     }
 
     // 학생성적 입력

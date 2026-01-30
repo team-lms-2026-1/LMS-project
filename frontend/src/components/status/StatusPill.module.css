@@ -85,5 +85,13 @@
 }
 
 .status_INACTIVE {
-  background: #6b7280; /* green-600 (운영중/활성) */
+  background: #6b7280;
+}
+
+.status_ENROLLMENT_CLOSED {
+  background: #374151;
+}
+
+.status_IN_PROGRESS {
+  background: #f59e0b;
 }
