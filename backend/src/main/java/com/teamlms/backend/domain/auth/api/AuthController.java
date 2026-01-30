@@ -3,13 +3,20 @@ package com.teamlms.backend.domain.auth.api;
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.auth.api.dto.AuthLoginRequest;
 import com.teamlms.backend.domain.auth.api.dto.AuthLoginResponse;
+import com.teamlms.backend.domain.auth.api.dto.AuthMeResponse;
 import com.teamlms.backend.domain.auth.dto.LoginResult;
+import com.teamlms.backend.domain.auth.service.AuthMeService;
 import com.teamlms.backend.domain.auth.service.AuthService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.security.jwt.JwtTokenProvider;
+import com.teamlms.backend.global.security.principal.AuthUser;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final AuthMeService authMeService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
@@ -43,4 +51,9 @@ public class AuthController {
 
         return ApiResponse.ok(response);
     }
+        @GetMapping("/me")
+        public ApiResponse<AuthMeResponse> me(@AuthenticationPrincipal AuthUser user) {
+        AuthMeResponse response = authMeService.me(user.getAccountId());
+        return ApiResponse.ok(response);
+        }
 }

@@ -93,7 +93,7 @@ export function useCurricularOfferingsList() {
 
 
 // 모달 수정조회
-export function useCurricularDetail(offeingId?: number, enabled: boolean = true) {
+export function useCurricularDetail(offeringId?: number, enabled: boolean = true) {
   const [data, setData] = useState<CurricularOfferingDetailDto | null>(null);
   
   const [loading, setLoading] = useState(false);
@@ -112,12 +112,17 @@ export function useCurricularDetail(offeingId?: number, enabled: boolean = true)
       setLoading(false);
     }
   };
+  
+  const reload = useCallback(async () => {
+    if (!offeringId) return;
+    await load(offeringId);
+  }, [offeringId, load]);
 
   useEffect(() => {
     if (!enabled) return;
-    if (!offeingId) return;
-    void load(offeingId);
-  }, [offeingId, enabled]);
+    if (!offeringId) return;
+    void load(offeringId);
+  }, [offeringId, enabled]);
 
-  return { state : { data, loading, error }, actions: { load }};
+  return { state : { data, loading, error }, actions: { load, reload, setData }};
 }

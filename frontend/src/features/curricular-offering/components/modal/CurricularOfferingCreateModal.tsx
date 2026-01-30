@@ -12,7 +12,7 @@ import { DeptProfessorFilterDropdown } from "@/features/dropdowns/depts_professo
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { DayOfWeekFilterDropdown } from "@/features/dropdowns/week/DayOfWeekFilterDropdown";
 
-import type { DayOfWeekType, CurricularOfferingCreateRequest } from "../../api/types";
+import type { DayOfWeekType } from "../../api/types";
 import { PeriodFilterDropdown } from "@/features/dropdowns/period/PeriodFilterDropdown";
 
 type Props = {

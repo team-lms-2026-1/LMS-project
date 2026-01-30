@@ -11,7 +11,9 @@ export type StatusType =
   | "PROGRESS"
   | "COMPLETED"
   | "CLOSED"
-  | "CANCELED";
+  | "CANCELED"
+  | "ENROLLMENT_CLOSED"
+  | "IN_PROGRESS";
 
 export type StatusPillProps = {
   status: StatusType;

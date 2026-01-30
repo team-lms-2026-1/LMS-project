@@ -66,6 +66,10 @@ public class CurricularOfferingCommandService {
             throw new BusinessException(ErrorCode.CURRICULAR_NOT_FOUND, curricularId);
         }
 
+        if (curricularOfferingRepository.existsByCurricularIdAndSemesterId(curricularId, semesterId)) {
+            throw new BusinessException(ErrorCode.CURRICULAR_OFFERING_ALREADY_EXISTS, curricularId);
+        }
+
         if (curricularOfferingRepository.existsByOfferingCode(offeringCode)) {
             throw new BusinessException(ErrorCode.CURRICULAR_OFFERING_CODE_ALREADY_EXISTS, offeringCode);
         }

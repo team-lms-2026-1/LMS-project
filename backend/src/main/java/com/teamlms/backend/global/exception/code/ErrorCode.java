@@ -83,6 +83,7 @@ public enum ErrorCode {
     OFFERING_CAPACITY_FULL(HttpStatus.CONFLICT, "OFFERING_CAPACITY_FULL", "수강 정원이 초과되었습니다.", "offering.capacity.full"),
     OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE", "완료된 교과 운영의 역량 맵핑은 수정할 수 없습니다.", "offering.competency.mapping.notEditable"),
     OFFERING_COMPETENCY_WEIGHT_DUPLICATED(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_WEIGHT_DUPLICATED", "해당 교과 운영에서 이미 사용 중인 가중치입니다.", "offering.competency.weight.duplicated"),
+    CURRICULAR_OFFERING_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_ALREADY_EXISTS", "이미 해당 학기에 개설된 교과입니다.", "curricular.offering.already.exists"),
 
     ENROLLMENT_OFFERING_MISMATCH(HttpStatus.CONFLICT, "ENROLLMENT_OFFERING_MISMATCH", "해당 수강정보는 요청한 교과 운영에 속하지 않습니다.", "enrollment.offering.mismatch"),
     ENROLLMENT_NOT_GRADEABLE(HttpStatus.CONFLICT, "ENROLLMENT_NOT_GRADEABLE", "취소된 수강 정보에는 성적을 입력할 수 없습니다.", "enrollment.not.gradeable"),

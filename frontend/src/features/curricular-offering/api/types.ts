@@ -80,4 +80,18 @@ export type CurricularOfferingCreateRequest = {
   professorAccountId: number;
 }
 
+export type CurricularOfferingDetailUpdateRequest = {
+  offeringCode: string;
+  semesterId: number;
+  dayOfWeek: DayOfWeekType;
+  period: number;
+  capacity: number;
+  location: string;
+  professorAccountId: number;
+}
+
+export type CurricularOfferingStatusUpdateRequest = {
+  status: OfferingStatus;
+}
+
 /** 화면용 */
