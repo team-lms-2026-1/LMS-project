@@ -82,9 +82,10 @@ import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta; 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
+// import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -98,30 +99,47 @@ public class NoticeCategoryController {
 
     private final NoticeCategoryService categoryService;
 
-    // 1-0. 카테고리 등록 (관리자) - [추가된 부분]
     @PostMapping("/api/v1/admin/community/notices/categories")
     @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<Map<String, Object>> createCategory(
             @RequestBody ExternalCategoryRequest request
     ) {
         Long categoryId = categoryService.createCategory(request);
-        // 성공 여부와 생성된 ID를 함께 반환
+
         return ApiResponse.ok(Map.of("success", true, "categoryId", categoryId));
     }
 
-    // 1-1. 카테고리 목록 조회
+    // 1. 공지사항 카테고리 목록 조회
     @GetMapping({"/api/v1/student/community/notices/categories",
-                 "/api/v1/professor/community/notices/categories",
-                 "/api/v1/admin/community/notices/categories"
-    })
+                 "/api/v1/admin/community/notices/categories",
+                 "/api/v1/professor/community/notices/categories"})
     @PreAuthorize("hasAuthority('NOTICE_READ')")
-    public ApiResponse<List<Map<String, Object>>> getCategories(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam(required = false) String keyword
-    ) {
-        Page<Map<String, Object>> page = categoryService.getCategoryList(pageable, keyword);
-        return ApiResponse.of(page.getContent(), PageMeta.from(page));
+    public ApiResponse<List<Map<String, Object>>> getNoticeCategories(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword) {
+        return getNoticeCategoryListInternal(page, size, keyword);
     }
+
+ 
+    private ApiResponse<List<Map<String, Object>>> getNoticeCategoryListInternal(int page, int size, String keyword) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+
+        Pageable pageable = PageRequest.of(
+                safePage - 1,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Map<String, Object>> pageResult = categoryService.getCategoryList(pageable, keyword);
+        
+        return ApiResponse.of(
+                pageResult.getContent(), 
+                PageMeta.from(pageResult)
+        );
+    }
+
 
     // 1-2. 카테고리 수정 (관리자)
     @PatchMapping("/api/v1/admin/community/notices/categories/{categoryId}")

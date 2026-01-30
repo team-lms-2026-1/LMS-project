@@ -46,7 +46,7 @@ package com.teamlms.backend.domain.study_rental.repository;
 //     Page<StudyRoomRental> search(@Param("cond") RentalSearchCondition cond, Pageable pageable);
 // }
 
-import com.teamlms.backend.domain.study_rental.dto.RentalSearchCondition;
+// import com.teamlms.backend.domain.study_rental.dto.RentalSearchCondition;
 import com.teamlms.backend.domain.study_rental.entity.StudyRoomRental;
 import com.teamlms.backend.domain.study_rental.enums.RentalStatus; // [필수] Enum 임포트 확인!
 import org.springframework.data.domain.Page;
@@ -79,15 +79,39 @@ public interface StudyRoomRentalRepository extends JpaRepository<StudyRoomRental
     /**
      * 예약 내역 검색
      */
-    @Query("SELECT r FROM StudyRoomRental r " +
-           "JOIN FETCH r.studyRoom room " +
-           "JOIN FETCH room.studySpace space " +
-           "JOIN FETCH r.applicant applicant " +
-           "WHERE (:#{#cond.spaceId} IS NULL OR space.id = :#{#cond.spaceId}) " +
-           "AND (:#{#cond.applicantId} IS NULL OR applicant.id = :#{#cond.applicantId}) " +
-           "AND (:#{#cond.status} IS NULL OR r.status = :#{#cond.status}) " +
-           "AND (:#{#cond.keyword} IS NULL OR " +
-           "    space.spaceName LIKE %:#{#cond.keyword}% OR " +
-           "    CAST(applicant.id AS string) LIKE %:#{#cond.keyword}%)")
-    Page<StudyRoomRental> search(@Param("cond") RentalSearchCondition cond, Pageable pageable);
+    // 원본코드
+//     @Query("SELECT r FROM StudyRoomRental r " +
+//            "JOIN FETCH r.studyRoom room " +
+//            "JOIN FETCH room.studySpace space " +
+//            "JOIN FETCH r.applicant applicant " +
+//            "WHERE (:#{#cond.spaceId} IS NULL OR space.id = :#{#cond.spaceId}) " +
+//            "AND (:#{#cond.applicantId} IS NULL OR applicant.id = :#{#cond.applicantId}) " +
+//            "AND (:#{#cond.status} IS NULL OR r.status = :#{#cond.status}) " +
+//            "AND (:#{#cond.keyword} IS NULL OR " +
+//            "    space.spaceName LIKE %:#{#cond.keyword}% OR " +
+//            "    CAST(applicant.id AS string) LIKE %:#{#cond.keyword}%)")
+//     Page<StudyRoomRental> search(@Param("cond") RentalSearchCondition cond, Pageable pageable);
+
+@Query(value = "SELECT r FROM StudyRoomRental r " +
+            "LEFT JOIN r.studyRoom room " +
+            "LEFT JOIN room.studySpace space " +
+            "LEFT JOIN r.applicant applicant " +
+            "WHERE (:spaceId IS NULL OR space.id = :spaceId) " +
+            "AND (:applicantId IS NULL OR applicant.accountId = :applicantId) " +
+            "AND (:status IS NULL OR r.status = :status) " +
+            "AND (:keyword IS NULL OR :keyword = '' OR space.spaceName LIKE %:keyword%)",
+            countQuery = "SELECT count(r) FROM StudyRoomRental r " +
+                    "LEFT JOIN r.applicant applicant " +
+                    "WHERE (:applicantId IS NULL OR applicant.accountId = :applicantId) " +
+                    "AND (:status IS NULL OR r.status = :status)")
+    Page<StudyRoomRental> search(
+            @Param("spaceId") Long spaceId,        
+            @Param("applicantId") Long applicantId, 
+            @Param("status") RentalStatus status,   
+            @Param("keyword") String keyword,       
+            Pageable pageable                      
+    );
+              // 리포지토리에 추가
+              Page<StudyRoomRental> findByApplicant_AccountId(Long accountId, Pageable pageable);
 }
+

@@ -32,10 +32,20 @@ export type CurricularListItemDto = {
     deptName: string;
 }
 
+export type CurricularEditFormDto = {
+  curricularId: number;
+  curricularCode: string;
+  curricularName: string;
+  deptId: number;
+  credits: number;
+  description: string;
+  isActive: boolean;
+}
 
 /** Response */
 export type CurricularListResponse = ApiResponse<CurricularListItemDto[], PageMeta>;
 export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
+export type CurricularEditFormResponse =ApiResponse<CurricularEditFormDto, null>;
 
 /** Request */
 
@@ -46,5 +56,14 @@ export type CurricularCreateRequest = {
   credits: number;
   description: string;
 }
+
+export type CurricularPatchRequest = {
+  curricularName: string;
+  deptId: number;
+  credits: number;
+  description: string;
+  isActive: boolean;
+}
+
 
 /** 화면용 */

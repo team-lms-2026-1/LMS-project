@@ -6,6 +6,8 @@ import { Button } from "@/components/button";
 import styles from "./CurricularCreateModal.module.css";
 
 import { createCurricular } from "../../api/curricularsApi";
+import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
+
 
 type Props = {
   open: boolean;
@@ -82,11 +84,11 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
       size="md"
       footer={
         <>
-          <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
-          </Button>
           <Button onClick={handleSubmit} loading={loading}>
             등록
+          </Button>
+          <Button variant="secondary" onClick={handleClose} disabled={loading}>
+            취소
           </Button>
         </>
       }
@@ -120,18 +122,10 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
 
           <label className={styles.field}>
             <div className={styles.label}>주관학과</div>
-            {/* TODO: 학과 목록 연동 후 select로 교체 */}
-            <input
-              className={styles.control}
-              type="number"
-              value={deptId === 0 ? "" : deptId}
-              onChange={(e) => {
-                const v = e.target.value;
-                setDeptId(v === "" ? 0 : Number(v));
-              }}
-              placeholder="학과 ID 입력"
-              min={1}
-            />
+              <DeptFilterDropdown
+                value={deptId > 0 ? String(deptId) : ""}
+                onChange={(v) => setDeptId(v ? Number(v) : 0)}
+              />
           </label>
 
           <label className={styles.field}>

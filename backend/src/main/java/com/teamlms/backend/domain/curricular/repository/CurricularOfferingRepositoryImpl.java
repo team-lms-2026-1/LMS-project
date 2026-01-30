@@ -220,6 +220,10 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
                 c.curricularId,
                 c.curricularName,
                 c.credits,
+                c.description,
+
+                c.deptId,
+                d.deptName,
 
                 s.semesterId,
                 s.displayName,
@@ -231,6 +235,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
 
                 o.dayOfWeek,
                 o.period,
+
                 o.capacity,
                 count(distinct case
                     when e.enrollmentStatus = com.teamlms.backend.domain.curricular.enums.EnrollmentStatus.ENROLLED
@@ -238,18 +243,19 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
                 end),
 
                 o.location,
-
                 o.status
             )
             from CurricularOffering o
             join Curricular c on c.curricularId = o.curricularId
+            join Dept d on d.deptId = c.deptId
             join Semester s on s.semesterId = o.semesterId
             join ProfessorProfile p on p.accountId = o.professorAccountId
             left join Enrollment e on e.offeringId = o.offeringId
             where o.offeringId = :offeringId
             group by
                 o.offeringId, o.offeringCode,
-                c.curricularId, c.curricularName, c.credits,
+                c.curricularId, c.curricularName, c.credits, c.description,
+                c.deptId, d.deptName,
                 s.semesterId, s.displayName,
                 p.accountId, p.name, p.email, p.phone,
                 o.dayOfWeek, o.period,
@@ -257,6 +263,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
                 o.location,
                 o.status
         """;
+
 
         return em.createQuery(jpql, CurricularOfferingDetailResponse.class)
                 .setParameter("offeringId", offeringId)

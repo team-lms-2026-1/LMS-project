@@ -60,17 +60,6 @@ export function Dropdown({
             </option>
           ))}
         </select>
-
-        {clearable && onClear && value !== "" && !isDisabled ? (
-          <button
-            type="button"
-            className={styles.clearBtn}
-            onClick={onClear}
-            aria-label="선택 해제"
-            title="선택 해제"
-          >
-          </button>
-        ) : null}
       </div>
     </div>
   );
