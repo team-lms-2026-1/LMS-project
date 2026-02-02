@@ -18,11 +18,11 @@ export default function QnaPageClient() {
 
   useEffect(() => {
     actions.goPage(page);
-  }, [page]);
+  }, [page, actions]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
-  }, [size, state.size]);
+  }, [size, state.size, actions]);
 
   const handleSearch = useCallback(() => {
     setPage(1);
@@ -40,7 +40,7 @@ export default function QnaPageClient() {
       if (!ok) return;
 
       try {
-        await actions.deleteQuestion(questionId); // ✅ hook에 이 액션이 있어야 함(없으면 아래 참고)
+        await actions.deleteQuestion(questionId); // hook에 있어야 함
         await actions.reload();
       } catch (e: any) {
         alert(e?.message ?? "삭제 중 오류가 발생했습니다.");
@@ -52,19 +52,16 @@ export default function QnaPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        {/* ✅ 제목 + 검색 */}
-        <div className={styles.topRow}>
-          <h1 className={styles.title}>Q&A</h1>
+        <h1 className={styles.title}>Q&A</h1>
 
-          <div className={styles.rightControls}>
-            <div className={styles.searchBarWrap}>
-              <SearchBar
-                value={inputKeyword}
-                onChange={setInputKeyword}
-                onSearch={handleSearch}
-                placeholder="제목 검색"
-              />
-            </div>
+        <div className={styles.searchRow}>
+          <div className={styles.searchBarWrap}>
+            <SearchBar
+              value={inputKeyword}
+              onChange={setInputKeyword}
+              onSearch={handleSearch}
+              placeholder="제목 검색"
+            />
           </div>
         </div>
 
@@ -72,12 +69,15 @@ export default function QnaPageClient() {
 
         <QnaTable items={state.items} loading={state.loading} onDeleteClick={handleDelete} />
 
+        {/* ✅ 자료실과 동일한 footerRow 구조로 통일 */}
         <div className={styles.footerRow}>
-          <Button type="button" onClick={goCategories}>
-            카테고리 관리
-          </Button>
+          <div className={styles.footerLeft}>
+            <Button variant="secondary" onClick={goCategories}>
+              카테고리 관리
+            </Button>
+          </div>
 
-          <div className={styles.paginationCenter}>
+          <div className={styles.footerCenter}>
             <PaginationSimple
               page={page}
               totalPages={state.meta.totalPages}
@@ -85,6 +85,9 @@ export default function QnaPageClient() {
               disabled={state.loading}
             />
           </div>
+
+          {/* ✅ QnA는 등록 버튼이 없으니 오른쪽은 빈 영역(레이아웃 정렬용) */}
+          <div className={styles.footerRight} />
         </div>
       </div>
     </div>

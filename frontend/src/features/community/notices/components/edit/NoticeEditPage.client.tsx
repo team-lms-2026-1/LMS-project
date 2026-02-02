@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./NoticeEditPage.module.css";
-import type { Category, NoticeListItemDto, UpdateNoticeRequestDto } from "../../api/types";
-import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/NoticesApi";
+import type { Category, NoticeListItemDto } from "../../api/types";
+import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/noticesApi";
 import { Button } from "@/components/button";
+
+/** ✅ 이 화면 내부에서만 쓰는 "기존 첨부" 타입: attachmentId 기반 */
+type ExistingAttachment = {
+  attachmentId?: number;
+  fileName: string;
+  url?: string;
+};
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
@@ -16,8 +24,8 @@ function normalizeDetail(payload: any): NoticeListItemDto {
   const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
 
   return {
-    noticeId: Number(raw?.noticeId ?? 0),
-    category: raw?.category,
+    noticeId: Number(raw?.noticeId ?? raw?.noticeId ?? raw?.noticeId ?? 0),
+    category: raw?.category ?? null,
     title: String(raw?.title ?? ""),
     content: String(raw?.content ?? ""),
     authorName: String(raw?.authorName ?? ""),
@@ -28,6 +36,46 @@ function normalizeDetail(payload: any): NoticeListItemDto {
   };
 }
 
+/** ✅ 백엔드 files 항목에서 attachmentId 추출 */
+function normalizeExistingAttachments(files: any[]): ExistingAttachment[] {
+  if (!Array.isArray(files)) return [];
+
+  return files.map((f: any, idx: number) => {
+    // ✅ attachmentId가 number/string 어떤 타입이든 숫자로 강제 변환
+    const rawId = f?.attachmentId ?? f?.id ?? f?.fileId;
+    const attachmentId = rawId == null ? undefined : Number(rawId);
+    const safeAttachmentId = Number.isFinite(attachmentId) ? attachmentId : undefined;
+
+    // ✅ 백엔드 오타(originaName)까지 흡수
+    const fileName = String(
+      f?.originalName ?? f?.originaName ?? f?.fileName ?? f?.name ?? `첨부파일 ${idx + 1}`
+    );
+
+    const url =
+      typeof f?.url === "string"
+        ? f.url
+        : typeof f?.downloadUrl === "string"
+          ? f.downloadUrl
+          : typeof f?.fileUrl === "string"
+            ? f.fileUrl
+            : undefined;
+
+    return { attachmentId: safeAttachmentId, fileName, url };
+  });
+}
+
+
+function formatBytes(bytes: number) {
+  const units = ["B", "KB", "MB", "GB"];
+  let v = bytes;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
 export default function NoticeEditPageClient() {
   const router = useRouter();
   const params = useParams<{ noticeId?: string }>();
@@ -35,6 +83,8 @@ export default function NoticeEditPageClient() {
 
   const LIST_PATH = "/admin/community/notices";
   const DETAIL_PATH = `/admin/community/notices/${noticeId}`;
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [load, setLoad] = useState<LoadState>({ loading: true, error: null, data: null });
 
@@ -46,6 +96,11 @@ export default function NoticeEditPageClient() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
+
+  // ✅ 첨부 관련 상태 (attachmentId 기반)
+  const [existingFiles, setExistingFiles] = useState<ExistingAttachment[]>([]);
+  const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<number[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
 
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string>("");
@@ -71,6 +126,11 @@ export default function NoticeEditPageClient() {
         setTitle(data.title ?? "");
         setContent(data.content ?? "");
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
+
+        // ✅ 기존 첨부 세팅 + 변경 상태 초기화
+        setExistingFiles(normalizeExistingAttachments(data.files ?? []));
+        setDeletedAttachmentIds([]);
+        setNewFiles([]);
       } catch (e: any) {
         if (!alive) return;
         setLoad({
@@ -117,6 +177,44 @@ export default function NoticeEditPageClient() {
     router.push(DETAIL_PATH);
   };
 
+  // ===== ✅ 새 파일 추가/삭제 =====
+  const addFiles = (incoming: File[]) => {
+    if (!incoming.length) return;
+
+    setNewFiles((prev) => {
+      const map = new Map(prev.map((f) => [`${f.name}_${f.size}_${f.lastModified}`, f]));
+      for (const f of incoming) map.set(`${f.name}_${f.size}_${f.lastModified}`, f);
+      return Array.from(map.values());
+    });
+  };
+
+  const onFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const list = Array.from(e.target.files ?? []);
+    addFiles(list);
+    e.target.value = "";
+  };
+
+  const removeNewFile = (key: string) => {
+    setNewFiles((prev) => prev.filter((f) => `${f.name}_${f.size}_${f.lastModified}` !== key));
+  };
+
+  // ===== ✅ 기존 파일 삭제 토글 (attachmentId 기반) =====
+  const isDeletedExisting = (f: ExistingAttachment) => {
+    if (typeof f.attachmentId === "number") return deletedAttachmentIds.includes(f.attachmentId);
+    return false;
+  };
+
+  const toggleDeleteExisting = (f: ExistingAttachment) => {
+    if (typeof f.attachmentId !== "number") {
+      alert("이 첨부파일은 attachmentId가 없어 삭제할 수 없습니다. 백엔드 응답에 attachmentId가 필요합니다.");
+      return;
+    }
+
+    setDeletedAttachmentIds((prev) =>
+      prev.includes(f.attachmentId!) ? prev.filter((x) => x !== f.attachmentId) : [...prev, f.attachmentId!]
+    );
+  };
+
   const onSave = async () => {
     setFormError("");
 
@@ -125,15 +223,22 @@ export default function NoticeEditPageClient() {
     if (!t) return setFormError("제목을 입력하세요.");
     if (!c) return setFormError("내용을 입력하세요.");
 
-    const body: UpdateNoticeRequestDto = {
-      title: t,
-      content: c,
-      categoryId: categoryId ? Number(categoryId) : undefined,
-    };
+    const hasFileChanges = newFiles.length > 0 || deletedAttachmentIds.length > 0;
 
     setSaving(true);
     try {
-      await updateNotice(noticeId, body);
+      // ✅ 백엔드가 deleteFileIds로 받으니까 attachmentId 값을 그대로 넣어준다
+      await updateNotice(
+        noticeId,
+        {
+          title: t,
+          content: c,
+          categoryId: categoryId ? Number(categoryId) : undefined,
+          deleteFileIds: deletedAttachmentIds,
+        } as any,
+        hasFileChanges ? newFiles : undefined
+      );
+
       router.push(DETAIL_PATH);
     } catch (e: any) {
       setFormError(e?.message ?? "수정에 실패했습니다.");
@@ -153,7 +258,6 @@ export default function NoticeEditPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        {/* ✅ 상단 라인: breadcrumb + 우측 목록으로 */}
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
             <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
@@ -235,32 +339,111 @@ export default function NoticeEditPageClient() {
               />
             </div>
 
+            {/* ✅ 첨부 */}
             <div className={styles.attachBox}>
               <div className={styles.attachRow}>
                 <div className={styles.attachLabel}>첨부</div>
-                <div className={styles.attachList}>
-                  {Array.isArray(data.files) && data.files.length > 0 ? (
-                    <ul className={styles.attachUl}>
-                      {data.files.map((f: any, idx: number) => {
-                        const name =
-                          typeof f === "string"
-                            ? f
-                            : String(f?.fileName ?? f?.name ?? f?.originalName ?? `첨부파일 ${idx + 1}`);
+
+                <div className={styles.attachWrap}>
+                  <div className={styles.attachTabs}>
+                    <button type="button" className={styles.tabActive} disabled={saving}>
+                      내 PC
+                    </button>
+                  </div>
+
+                  <div className={styles.dropzone}>
+                    <div className={styles.dropText}>
+                      Drop here to attach or{" "}
+                      <button
+                        type="button"
+                        className={styles.uploadLink}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={saving}
+                      >
+                        upload
+                      </button>
+                    </div>
+                    <div className={styles.maxSize}>Max size: 50MB</div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      className={styles.hiddenFile}
+                      onChange={onFileInputChange}
+                      disabled={saving}
+                    />
+                  </div>
+
+                  {/* ✅ 기존 첨부파일 목록 */}
+                  <div className={styles.fileList}>
+                    {existingFiles.length > 0 ? (
+                      existingFiles.map((f, idx) => {
+                        const deleted = isDeletedExisting(f);
+                        const key = `${f.attachmentId ?? "noid"}_${idx}`;
                         return (
-                          <li key={idx} className={styles.attachLi}>
-                            <span className={styles.attachName}>{name}</span>
-                          </li>
+                          <div key={key} className={styles.fileItem}>
+                            <div className={styles.fileMeta}>
+                              <span
+                                className={styles.fileName}
+                                style={{
+                                  textDecoration: deleted ? "line-through" : "none",
+                                  opacity: deleted ? 0.6 : 1,
+                                }}
+                              >
+                                {f.fileName}
+                              </span>
+                              {f.url ? (
+                                <a className={styles.fileLink} href={f.url} target="_blank" rel="noreferrer">
+                                  열기
+                                </a>
+                              ) : null}
+                            </div>
+
+                            <button
+                              type="button"
+                              className={styles.fileRemove}
+                              onClick={() => toggleDeleteExisting(f)}
+                              disabled={saving}
+                            >
+                              {deleted ? "삭제 취소" : "삭제"}
+                            </button>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className={styles.attachEmpty}>기존 첨부파일 없음</div>
+                    )}
+                  </div>
+
+                  {/* ✅ 새로 선택한 파일 목록 */}
+                  {newFiles.length > 0 && (
+                    <div className={styles.fileList}>
+                      {newFiles.map((f) => {
+                        const key = `${f.name}_${f.size}_${f.lastModified}`;
+                        return (
+                          <div key={key} className={styles.fileItem}>
+                            <div className={styles.fileMeta}>
+                              <span className={styles.fileName}>{f.name}</span>
+                              <span className={styles.fileSize}>{formatBytes(f.size)}</span>
+                            </div>
+                            <button
+                              type="button"
+                              className={styles.fileRemove}
+                              onClick={() => removeNewFile(key)}
+                              disabled={saving}
+                            >
+                              삭제
+                            </button>
+                          </div>
                         );
                       })}
-                    </ul>
-                  ) : (
-                    <div className={styles.attachEmpty}>첨부파일 없음</div>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* ✅ 하단: 취소 / 수정 */}
             <div className={styles.footerRow}>
               <Button variant="secondary" onClick={onCancel} disabled={saving}>
                 취소

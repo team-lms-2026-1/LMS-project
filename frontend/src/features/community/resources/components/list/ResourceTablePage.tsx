@@ -36,7 +36,6 @@ export function ResourcesTable({ items, loading, onReload  }: Props) {
       }
 
       alert("삭제되었습니다.");
-      // ✅ 현재 페이지 데이터 갱신
       router.refresh();
       onReload ?.();
     } catch (e: any) {
@@ -49,7 +48,7 @@ export function ResourcesTable({ items, loading, onReload  }: Props) {
     { header: "번호", align: "left", render: (r) => r.resourceId },
     { header: "분류", align: "left", render: (r) => {
         const c = r.category;
-        if (!c) return "미분류"; // ✅ null/undefined 방어
+        if (!c) return "미분류"; 
         return (
           <span
             className={styles.badge}

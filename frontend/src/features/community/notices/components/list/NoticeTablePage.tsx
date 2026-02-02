@@ -16,7 +16,6 @@ export function NoticesTable({ items, loading, onReload  }: Props) {
   const router = useRouter();
 
   const goEdit = (id: number) => {
-    // ✅ NoticeEditPage.client.tsx가 연결된 라우트로 맞춰줘
     const EDIT_PATH = `/admin/community/notices/${id}/edit`;
     router.push(EDIT_PATH);
   };
@@ -37,7 +36,6 @@ export function NoticesTable({ items, loading, onReload  }: Props) {
       }
 
       alert("삭제되었습니다.");
-      // ✅ 현재 페이지 데이터 갱신
       router.refresh();
       onReload ?.();
     } catch (e: any) {
@@ -50,7 +48,7 @@ export function NoticesTable({ items, loading, onReload  }: Props) {
     { header: "번호", align: "left", render: (r) => r.noticeId },
     { header: "분류", align: "left", render: (r) => {
         const c = r.category;
-        if (!c) return "미분류"; // ✅ null/undefined 방어
+        if (!c) return "미분류"; 
         return (
           <span
             className={styles.badge}

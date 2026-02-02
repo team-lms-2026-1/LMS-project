@@ -13,32 +13,47 @@ export type PageMeta = {
   sort: string[];
 };
 
-export type FileType = "IMAGE" | "DOCUMENT" | "VIDEO" | "ETC" | string;
-
-export type QnaStatus = "SCHEDULED" | "ONGOING" | "ENDED" | string;
-
-export type SearchType = "TITLE" | "CONTENT" | "TITLE_OR_CONTENT" | "WRITER" | string;
-
 export type Category = {
-  categoryId : number;
-  name : string;
-  bgColorHex : string;
-  textColorHex : string;
-}
+  categoryId: number;
+  name: string;
+  bgColorHex: string;
+  textColorHex: string;
+};
 
-/** DTO */
-export type QnaListItemDto={
-    questionId : number;
-    category : Category | null;
-    title : string;
-    content : string;
-    authorName : string;
-    viewCount : number;
-    createdAt : string;
-    hasAnswer : boolean;
-}
+/** ✅ 공통: 작성자 식별자(백엔드가 주면 사용) */
+export type AuthorIdentity = {
+  authorId?: number | null;        // accountId 같은 숫자
+  authorLoginId?: string | null;   // loginId 같은 문자열
+};
 
-type MeDto = { loginId: string };
+/** ✅ 목록 DTO */
+export type QnaListItemDto = {
+  questionId: number;
+  category: Category | null;
+  title: string;
+  content: string;
+
+  authorName: string;
+
+  // ✅ 본인 글 판별용(백엔드가 주면 사용)
+  authorId?: number | null;
+  authorLoginId?: string | null;
+
+  viewCount: number;
+  createdAt: string;
+  hasAnswer: boolean;
+};
+
+/** ✅ Me */
+export type MeDto = {
+  // 최소: 본인 판별에 필요한 값
+  loginId: string;
+
+  // (있으면 더 좋음)
+  accountId?: number;
+  accountType?: string;
+  permissionCodes?: string[];
+};
 
 export type MeResponse = ApiResponse<MeDto, null>;
 
@@ -52,23 +67,26 @@ export type CreateQnaQuestionRequestDto = {
 /** Detail DTO */
 export type QnaDetailDto = {
   questionId: number;
-  category: Category;
+  category: Category | null;
   title: string;
   content: string;
+
   authorName: string;
+
+  // ✅ 본인 글 판별용(백엔드가 주면 사용)
+  authorId?: number | null;
+  authorLoginId?: string | null;
+
   viewCount: number;
   createdAt: string;
   hasAnswer: boolean;
 };
 
-export type CreateQnaQuestionResponseDto = {
-  questionId: number;
-};
+export type CreateQnaQuestionResponseDto = { questionId: number };
 export type CreateQnaQuestionResponse = ApiResponse<CreateQnaQuestionResponseDto, null>;
 
-/** Response */
-export type QnaListResponse = ApiResponse<QnaListItemDto[], PageMeta>;
 export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
-export type QnaDetailResponse = ApiResponse<QnaDetailDto, null>;
 
+export type QnaListResponse = ApiResponse<QnaListItemDto[], PageMeta>;
+export type QnaDetailResponse = ApiResponse<QnaDetailDto, null>;
 export type QnaCategoryListResponse = ApiResponse<Category[], null>;

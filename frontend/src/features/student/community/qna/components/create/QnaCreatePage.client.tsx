@@ -128,7 +128,7 @@ export default function QnaCreatePageClient() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="제목을 입력하세요"
               disabled={saving}
-              maxLength={200}
+              maxLength={190}
             />
           </div>
 

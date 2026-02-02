@@ -20,7 +20,10 @@ function toQuery(query: QnaListQuery) {
 }
 
 async function requestJson<T>(url: string, init: RequestInit, failMessage: string, fallback: T): Promise<T> {
-  const res = await fetch(url, { cache: "no-store", ...init });
+  const res = await fetch(url, { cache: "no-store", credentials: "include", ...init, headers: {
+      ...(init.headers ?? {}),
+      // "authorization": `Bearer ${token}`,  // ✅ 만약 토큰 헤더 방식이면 여기서 통일
+    }, });
 
   if (!res.ok) {
     let msg = `${failMessage} (${res.status})`;

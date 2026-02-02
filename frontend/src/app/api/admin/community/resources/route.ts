@@ -1,27 +1,42 @@
-import { proxyToBackend } from "@/lib/bff";
+import { proxyToBackend, proxyStreamToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const TAG = "admin:resources";
 
 export async function GET(req: Request) {
-  return proxyToBackend(req, "/api/v1/admin/community/resources", { 
+  return proxyToBackend(req, "/api/v1/admin/community/resources", {
     method: "GET",
     cache: "force-cache",
-    next: {revalidate: 600, tags: [TAG]}
+    next: { revalidate: 600, tags: [TAG] },
   });
 }
 
+function isMultipart(req: Request) {
+  const ct = (req.headers.get("content-type") ?? "").toLowerCase();
+  return ct.startsWith("multipart/form-data");
+}
+
 export async function POST(req: Request) {
-  const body = await req.json();
+  if (isMultipart(req)) {
+    const res = await proxyStreamToBackend(req, {
+      method: "POST",
+      upstreamPath: "/api/v1/admin/community/resources",
+      forwardQuery: false,
+    });
+
+    if (res.ok) revalidateTag(TAG);
+    return res;
+  }
 
   const res = await proxyToBackend(req, "/api/v1/admin/community/resources", {
     method: "POST",
     forwardQuery: false,
-    body,
-    cache: "no-store"
+    cache: "no-store",
   });
 
   if (res.ok) revalidateTag(TAG);
-
   return res;
 }
