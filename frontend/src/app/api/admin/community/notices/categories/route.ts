@@ -1,7 +1,10 @@
 import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
-const TAG = "admin:noties:categories";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const TAG = "admin:notices:categories";
 
 export async function GET(req: Request) {
   return proxyToBackend(req, "/api/v1/admin/community/notices/categories", {
@@ -11,9 +14,6 @@ export async function GET(req: Request) {
     forwardQuery: true,
   });
 }
-
-// ✅ 카테고리 등록/수정/삭제가 학생 화면에 필요 없으면 아래는 지워도 됨.
-// 혹시 추후 확장 대비로 동일 형식으로 넣어둠.
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);

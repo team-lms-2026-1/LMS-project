@@ -1,19 +1,35 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./ResourceCreatePage.module.css";
 import type { Category, CreateResourceRequestDto } from "../../api/types";
-import { createResource, fetchResourceCategories } from "../../api/ResourcesApi";
+import { createResource, fetchResourceCategories } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
 
-const LIST_PATH = "/admin/community/resources"; // 
-
+const LIST_PATH = "/admin/community/resources";
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
+
+// ✅ 리소스 업로드 multipart key가 공지랑 다르면 여기만 바꿔
+// 예) 백엔드가 request 대신 "resourceRequest"를 요구하면 REQUEST_PART_NAME = "resourceRequest"
+const REQUEST_PART_NAME = "request";
+const FILE_PART_NAME = "files";
 
 function toMidnightLocalDateTime(dateOnly: string) {
   if (!dateOnly) return null;
   return `${dateOnly}T00:00:00`;
+}
+
+function formatBytes(bytes: number) {
+  const units = ["B", "KB", "MB", "GB"];
+  let v = bytes;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
 export default function ResourceCreatePageClient() {
@@ -29,6 +45,9 @@ export default function ResourceCreatePageClient() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
+
+  // ✅ 파일 상태
+  const [files, setFiles] = useState<File[]>([]);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>("");
@@ -56,11 +75,32 @@ export default function ResourceCreatePageClient() {
     return () => {
       alive = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canSubmit = useMemo(() => {
     return title.trim().length > 0 && content.trim().length > 0 && !saving;
   }, [title, content, saving]);
+
+  const addFiles = (incoming: File[]) => {
+    if (!incoming.length) return;
+
+    setFiles((prev) => {
+      const map = new Map(prev.map((f) => [`${f.name}_${f.size}_${f.lastModified}`, f]));
+      for (const f of incoming) map.set(`${f.name}_${f.size}_${f.lastModified}`, f);
+      return Array.from(map.values());
+    });
+  };
+
+  const onFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const list = Array.from(e.target.files ?? []);
+    addFiles(list);
+    e.target.value = ""; // 같은 파일 재선택 가능
+  };
+
+  const removeFile = (key: string) => {
+    setFiles((prev) => prev.filter((f) => `${f.name}_${f.size}_${f.lastModified}` !== key));
+  };
 
   const onSubmit = async () => {
     setError("");
@@ -70,18 +110,57 @@ export default function ResourceCreatePageClient() {
     if (!t) return setError("제목을 입력하세요.");
     if (!c) return setError("내용을 입력하세요.");
 
-    const body: CreateResourceRequestDto = {
-      title: t,
-      content: c,
-      categoryId: categoryId ? Number(categoryId) : undefined,
-      displayStartAt: toMidnightLocalDateTime(displayStartAt),
-      displayEndAt: toMidnightLocalDateTime(displayEndAt),
-    };
-
     setSaving(true);
     try {
-      await createResource(body);
+      // ✅ 파일 있으면 multipart 전송
+      if (files.length > 0) {
+        const fd = new FormData();
+
+        const payload = {
+          categoryId: categoryId ? Number(categoryId) : null,
+          title: t,
+          content: c,
+          displayStartAt: toMidnightLocalDateTime(displayStartAt),
+          displayEndAt: toMidnightLocalDateTime(displayEndAt),
+        };
+
+        // 핵심: JSON 파트를 application/json Blob으로
+        fd.append(REQUEST_PART_NAME, new Blob([JSON.stringify(payload)], { type: "application/json" }));
+
+        // 파일 파트
+        for (const f of files) fd.append(FILE_PART_NAME, f);
+
+        const res = await fetch("/api/admin/community/resources", {
+          method: "POST",
+          body: fd,
+        });
+
+        if (!res.ok) {
+          let msg = `등록 실패 (${res.status})`;
+          try {
+            const data = await res.json();
+            msg = data?.message ?? msg;
+          } catch {
+            const text = await res.text().catch(() => "");
+            if (text) msg = text;
+          }
+          throw new Error(msg);
+        }
+      } else {
+        // ✅ 파일 없으면 기존 JSON 등록 API 사용
+        const body: CreateResourceRequestDto = {
+          title: t,
+          content: c,
+          categoryId: categoryId ? Number(categoryId) : undefined,
+          displayStartAt: toMidnightLocalDateTime(displayStartAt),
+          displayEndAt: toMidnightLocalDateTime(displayEndAt),
+        };
+
+        await createResource(body);
+      }
+
       router.push(LIST_PATH);
+      
     } catch (e: any) {
       setError(e?.message ?? "등록에 실패했습니다.");
     } finally {
@@ -89,21 +168,19 @@ export default function ResourceCreatePageClient() {
     }
   };
 
-  const onCancel = () => {
-    router.push(LIST_PATH);
-  };
+  const onCancel = () => router.push(LIST_PATH);
 
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
         <span className={styles.homeIcon}>⌂</span>
         <span className={styles.sep}>&gt;</span>
-        <strong>공지사항 관리</strong>
+        <strong>자료실 관리</strong>
       </div>
 
       <div className={styles.card}>
         <div className={styles.headerRow}>
-          <h1 className={styles.pageTitle}>공지사항 등록</h1>
+          <h1 className={styles.pageTitle}>자료실 등록</h1>
           <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
             목록으로
           </Button>
@@ -139,28 +216,30 @@ export default function ResourceCreatePageClient() {
                     </option>
                   ))}
                 </select>
-                  <div className={styles.row}>
-                    <div className={styles.labelCell}>게시기간</div>
-                    <div className={styles.contentCell}>
-                      <div className={styles.periodRow}>
-                        <input
-                          type="date"
-                          className={styles.date}
-                          value={displayStartAt}
-                          onChange={(e) => setDisplayStartAt(e.target.value)}
-                          disabled={saving}
-                        />
-                        <span className={styles.tilde}>~</span>
-                        <input
-                          type="date"
-                          className={styles.date}
-                          value={displayEndAt}
-                          onChange={(e) => setDisplayEndAt(e.target.value)}
-                          disabled={saving}
-                        />
-                      </div>
-                    </div>
-                  </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 게시기간 row */}
+          <div className={styles.row}>
+            <div className={styles.labelCell}>게시기간</div>
+            <div className={styles.contentCell}>
+              <div className={styles.periodRow}>
+                <input
+                  type="date"
+                  className={styles.date}
+                  value={displayStartAt}
+                  onChange={(e) => setDisplayStartAt(e.target.value)}
+                  disabled={saving}
+                />
+                <span className={styles.tilde}>~</span>
+                <input
+                  type="date"
+                  className={styles.date}
+                  value={displayEndAt}
+                  onChange={(e) => setDisplayEndAt(e.target.value)}
+                  disabled={saving}
+                />
               </div>
             </div>
           </div>
@@ -197,8 +276,13 @@ export default function ResourceCreatePageClient() {
             </div>
           </div>
 
+          {/* 첨부파일 row */}
           <div className={styles.row}>
-            <div className={styles.labelCell}>첨부<br />파일</div>
+            <div className={styles.labelCell}>
+              첨부
+              <br />
+              파일
+            </div>
             <div className={styles.contentCell}>
               <div className={styles.attachWrap}>
                 <div className={styles.attachTabs}>
@@ -219,16 +303,42 @@ export default function ResourceCreatePageClient() {
                       upload
                     </button>
                   </div>
-                  <div className={styles.maxSize}>Max size: 50B</div>
+                  <div className={styles.maxSize}>Max size: 50MB</div>
 
                   <input
                     ref={fileInputRef}
                     type="file"
                     multiple
                     className={styles.hiddenFile}
-                    onChange={() => {}}
+                    onChange={onFileInputChange}
+                    disabled={saving}
                   />
                 </div>
+
+                {/* ✅ 선택된 파일 목록 */}
+                {files.length > 0 && (
+                  <div className={styles.fileList}>
+                    {files.map((f) => {
+                      const key = `${f.name}_${f.size}_${f.lastModified}`;
+                      return (
+                        <div key={key} className={styles.fileItem}>
+                          <div className={styles.fileMeta}>
+                            <span className={styles.fileName}>{f.name}</span>
+                            <span className={styles.fileSize}>{formatBytes(f.size)}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className={styles.fileRemove}
+                            onClick={() => removeFile(key)}
+                            disabled={saving}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>

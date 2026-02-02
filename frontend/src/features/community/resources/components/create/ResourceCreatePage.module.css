@@ -229,3 +229,61 @@
   gap: 10px;
   margin-top: 12px;
 }
+
+.fileList {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.fileMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 420px;
+}
+
+.fileSize {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.fileRemove {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.fileRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.fileList { margin-top: 10px; display: grid; gap: 8px; }
+.fileItem { display:flex; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; background:#fff; }
+.fileMeta { display:flex; gap:10px; min-width:0; }
+.fileName { font-size:13px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:420px; }
+.fileSize { font-size:12px; color:#6b7280; }
+.fileRemove { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; }
+.fileRemove:disabled { opacity:.5; cursor:not-allowed; }
