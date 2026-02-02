@@ -1,5 +1,5 @@
-import ResourceCreatePage from "@/features/community/resources/components/ResourceCreatePage";
+import ResourceCreatePageClient from "@/features/community/resources/components/create/ResourceCreatePage.client";
 
 export default function Page() {
-  return <ResourceCreatePage />;
+  return <ResourceCreatePageClient />;
 }

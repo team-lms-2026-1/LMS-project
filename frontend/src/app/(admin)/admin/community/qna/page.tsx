@@ -1,5 +1,5 @@
-import QnaListPage from "@/features/community/qna/components/QnaListPage";
+import QnaPageClient from "@/features/community/qna/components/list/QnaPage.client"
 
 export default function Page() {
-  return <QnaListPage />;
+  return <QnaPageClient />;
 }

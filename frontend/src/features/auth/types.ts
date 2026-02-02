@@ -18,3 +18,16 @@ export type ApiErrorShape = {
   message: string;
   code?: string;
 };
+
+
+export type AuthMeDto = {
+  accountId: number;
+  loginId: string;
+  accountType: "ADMIN" | "PROFESSOR" | "STUDENT" | string;
+  permissionCodes: string[];
+};
+
+export type ApiResponse<T> = {
+  data: T;
+  meta: any | null;
+};

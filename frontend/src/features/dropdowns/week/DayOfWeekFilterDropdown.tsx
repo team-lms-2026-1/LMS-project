@@ -6,11 +6,11 @@ import type { SelectOption } from "@/features/dropdowns/depts/types";
 
 const OPTIONS: SelectOption[] = [
   { value: "MONDAY", label: "월" },
-  { value: "TUEDAY", label: "화" },
-  { value: "WEDDAY", label: "수" },
-  { value: "THUDAY", label: "목" },
+  { value: "TUESDAY", label: "화" },
+  { value: "WEDNESDAY", label: "수" },
+  { value: "THURSDAY", label: "목" },
   { value: "FRIDAY", label: "금" },
-  { value: "SATDAY", label: "토" },
+  { value: "SATURDAY", label: "토" },
   { value: "SUNDAY", label: "일" },
 ];
 

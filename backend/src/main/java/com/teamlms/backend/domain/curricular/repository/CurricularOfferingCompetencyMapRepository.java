@@ -30,4 +30,6 @@ public interface CurricularOfferingCompetencyMapRepository
 
     Optional<CurricularOfferingCompetencyMap>
     findByIdOfferingIdAndWeight(Long offeringId, Integer weight);
+
+    void deleteByIdOfferingId(Long offeringId);
 }

@@ -1,7 +1,18 @@
+/* features/curricular/offerings/components/OfferingDetailSection.module.css */
+
 .wrap {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.error {
+  padding: 10px 12px;
+  border: 1px solid #fda29b;
+  background: #fffbfa;
+  color: #b42318;
+  border-radius: 12px;
+  font-weight: 800;
 }
 
 .section {
@@ -44,10 +55,11 @@
   gap: 12px 18px;
 }
 
-/* ✅ 한 칸(field): 라벨 | 값 (가로) */
-.field {
+/* ✅ 조회용 field (label | box) */
+.field,
+.fieldEdit {
   display: grid;
-  grid-template-columns: 90px 1fr; /* ✅ 라벨 옆에 값 */
+  grid-template-columns: 90px 1fr;
   gap: 10px;
   align-items: center;
 
@@ -70,9 +82,9 @@
 
   display: flex;
   align-items: center;
-  justify-content: center;   /* ✅ 가로 가운데 */
+  justify-content: center;
 
-  text-align: center;        /* ✅ 텍스트 가운데 */
+  text-align: center;
 
   border: 1px solid #d0d5dd;
   border-radius: 10px;
@@ -87,8 +99,64 @@
   white-space: nowrap;
 }
 
+/* ✅ 수정모드에서 수정 불가(연한 회색) */
+.readonlyBox {
+  background: #f6f8fa;
+  color: #6e7781;
+  border-color: #eaecf0;
+}
 
-/* 설명: 라벨 옆에 큰 박스 */
+/* ✅ 편집 박스(인풋류) */
+.editBox {
+  background: #fff;
+}
+
+/* ✅ valueBox 안에 들어가는 input 공통 */
+.control {
+  width: 100%;
+  height: 34px;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 900;
+  color: #101828;
+
+  text-align: center;
+}
+
+.control:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* ✅ 드롭다운 전용: 박스를 우리가 그리지 않음(겹침 방지)
+   Dropdown 컴포넌트가 wrap/control/select를 자체로 가지고 있음 */
+.dropdownOnlyWrap {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Dropdown의 min-width(180px) 때문에 그리드에서 넘치면 싫으니 */
+  width: 100%;
+}
+
+/* Dropdown의 wrap이 inline-flex라 가운데 정렬 */
+.dropdownOnlyWrap :global(.wrap) {
+  width: 100%;
+  min-width: 0;
+}
+
+.fieldEdit[aria-disabled="true"] .dropdownOnlyWrap {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/* 설명: 라벨 옆 큰 박스 */
 .descRow {
   display: grid;
   grid-template-columns: 90px 1fr;
@@ -125,12 +193,12 @@
   word-break: break-word;
 }
 
-/* 수정 버튼 */
 .sectionFooter {
   padding: 14px 16px 16px;
   border-top: 1px solid #eef2f6;
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   background: #fff;
 }
 
@@ -141,6 +209,28 @@
   border-radius: 999px;
   background: #f2f4f7;
   border: 1px solid #eaecf0;
+}
+
+/* 담당교수 드롭다운 라인 */
+.inlineEditRow {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.inlineEditLabel {
+  font-size: 14px;
+  font-weight: 900;
+  color: #667085;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.inlineEditRow[aria-disabled="true"] {
+  opacity: 0.75;
+  pointer-events: none;
 }
 
 /* 반응형 */
@@ -157,12 +247,15 @@
   }
 
   .field,
-  .descRow {
+  .fieldEdit,
+  .descRow,
+  .inlineEditRow {
     grid-template-columns: 90px 1fr;
   }
 
   .label,
-  .descLabel {
+  .descLabel,
+  .inlineEditLabel {
     text-align: left;
   }
 
@@ -170,3 +263,5 @@
     white-space: normal;
   }
 }
+
+

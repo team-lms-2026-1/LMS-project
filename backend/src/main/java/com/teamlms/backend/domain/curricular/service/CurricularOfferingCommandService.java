@@ -12,6 +12,7 @@ import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.account.repository.ProfessorProfileRepository;
 import com.teamlms.backend.domain.competency.repository.CompetencyRepository;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUpdateRequest;
+import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingBulkUpdateRequest;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingPatchRequest;
 import com.teamlms.backend.domain.curricular.entity.CurricularOffering;
 import com.teamlms.backend.domain.curricular.entity.CurricularOfferingCompetencyMap;
@@ -64,6 +65,10 @@ public class CurricularOfferingCommandService {
 
         if (!curricularRepository.existsById(curricularId)) {
             throw new BusinessException(ErrorCode.CURRICULAR_NOT_FOUND, curricularId);
+        }
+
+        if (curricularOfferingRepository.existsByCurricularIdAndSemesterId(curricularId, semesterId)) {
+            throw new BusinessException(ErrorCode.CURRICULAR_OFFERING_ALREADY_EXISTS, curricularId);
         }
 
         if (curricularOfferingRepository.existsByOfferingCode(offeringCode)) {
@@ -143,6 +148,7 @@ public class CurricularOfferingCommandService {
             OfferingStatus targetStatus,
             Long actorAccountId
     ) {
+
         CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId));
 
@@ -164,11 +170,16 @@ public class CurricularOfferingCommandService {
     // =====================
     private void validateTransition(OfferingStatus from, OfferingStatus to) {
 
+        // ✅ COMPLETED는 잠금 상태: 어떤 상태로도 변경 불가(취소 포함)
+        if (from == OfferingStatus.COMPLETED && to != OfferingStatus.COMPLETED) {
+            throw new BusinessException(
+                ErrorCode.CURRICULAR_OFFERING_STATUS_LOCKED,
+                from, to
+            );
+        }
+
         // ✅ 허용 전이
         if (from == OfferingStatus.DRAFT && to == OfferingStatus.OPEN) return;
-
-        // OPEN 상태에서 정원 찼으면 ENROLLMENT_CLOSED로 자동 전환하는 편이 일반적이지만,
-        // 수동 전환도 허용할지 여부는 정책 선택. (여기서는 허용)
         if (from == OfferingStatus.OPEN && to == OfferingStatus.ENROLLMENT_CLOSED) return;
 
         if (from == OfferingStatus.OPEN && to == OfferingStatus.IN_PROGRESS) return;
@@ -176,12 +187,12 @@ public class CurricularOfferingCommandService {
 
         if (from == OfferingStatus.IN_PROGRESS && to == OfferingStatus.COMPLETED) return;
 
-        // 언제든 취소는 허용
+        // 언제든 취소는 허용 (단, COMPLETED는 위에서 이미 막힘)
         if (to == OfferingStatus.CANCELED) return;
 
         throw new BusinessException(
-                ErrorCode.INVALID_OFFERING_STATUS_TRANSITION,
-                from, to
+            ErrorCode.INVALID_OFFERING_STATUS_TRANSITION,
+            from, to
         );
     }
 
@@ -266,38 +277,59 @@ public class CurricularOfferingCommandService {
     }
 
     // 역량 맵핑
-    public void patchMapping(Long offeringId, OfferingCompetencyMappingPatchRequest req) {
-        
-        // offering 존재
+    public void patchMapping(Long offeringId, OfferingCompetencyMappingBulkUpdateRequest req) {
+
         CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId));
 
-        // offering status 가 완료면 수정불가
         if (offering.getStatus() == OfferingStatus.COMPLETED) {
             throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE, offeringId);
         }
-        if (!competencyRepository.existsById(req.competencyId())) {
-            throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, req.competencyId());
+
+        var reqs = req.mappings();
+
+        // 요청 weight 중복 방지 (swap 포함해서 최종 중복만 막으면 됨)
+        long distinctWeight = reqs.stream()
+                .map(OfferingCompetencyMappingPatchRequest::weight)
+                .distinct()
+                .count();
+        if (distinctWeight != reqs.size()) {
+            throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_WEIGHT_DUPLICATED, offeringId);
         }
-        // weight 중복이면 409 (다른 competency가 쓰는 중)
-        competencyMapRepository.findByIdOfferingIdAndWeight(offeringId, req.weight()).ifPresent(m -> {
-            if (!m.getCompetencyId().equals(req.competencyId())) {
-                throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_WEIGHT_DUPLICATED, offeringId, req.weight());
-            }
-        });
-        // upsert (없으면 생성, 있으면 수정)
-        CurricularOfferingCompetencyMapId id = new CurricularOfferingCompetencyMapId(offeringId, req.competencyId());
 
-        CurricularOfferingCompetencyMap map = competencyMapRepository.findById(id)
-                .orElseGet(() -> CurricularOfferingCompetencyMap.builder().id(id).build());
+        // competency 존재 검증 (N번 existsById 대신 한 방에)
+        var ids = reqs.stream().map(OfferingCompetencyMappingPatchRequest::competencyId).distinct().toList();
+        long existCount = competencyRepository.countByCompetencyIdIn(ids); // 이런 메서드 하나 추가 추천
+        if (existCount != ids.size()) {
+            throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, "some competencyId not found");
+        }
 
-        map.changeWeight(req.weight());
+        // ✅ 핵심: 기존 맵핑 전부 삭제 후 재생성
+        competencyMapRepository.deleteByIdOfferingId(offeringId);
 
-        competencyMapRepository.save(map);
+        var entities = reqs.stream().map(r -> {
+            var id = new CurricularOfferingCompetencyMapId(offeringId, r.competencyId());
+            var map = CurricularOfferingCompetencyMap.builder().id(id).build();
+            map.changeWeight(r.weight());
+            return map;
+        }).toList();
+
+        competencyMapRepository.saveAll(entities);
     }
 
     // 학생성적 입력
     public void patchScore(Long offeringId, Long enrollmentId, Integer rawScore){
+
+        // ✅ 0) 교과운영(Offering) 상태 확인: IN_PROGRESS일 때만 성적 입력 가능
+        CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
+            .orElseThrow(() -> new BusinessException(
+                ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId
+            ));
+
+        if (offering.getStatus() != OfferingStatus.IN_PROGRESS) {
+            throw new BusinessException(ErrorCode.OFFERING_NOT_GRADEABLE_STATUS);
+        }
+
         Enrollment e = enrollmentRepository.findById(enrollmentId)
         .orElseThrow(() -> new BusinessException(
             ErrorCode.ENROLLMENT_NOT_FOUND, enrollmentId

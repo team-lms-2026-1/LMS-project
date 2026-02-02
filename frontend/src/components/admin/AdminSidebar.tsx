@@ -15,7 +15,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { label: "공지사항", href: "/admin/community/notices" },
       { label: "자료실", href: "/admin/community/resources" },
-      { label: "FAQ", href: "/admin/community/faq" },
+      { label: "FAQ", href: "/admin/community/faqs" },
       { label: "Q&A", href: "/admin/community/qna" },
     ],
   },

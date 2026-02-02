@@ -1,0 +1,81 @@
+.page {
+  padding: 0;
+  min-height: 100vh;
+  background-color: transparent;
+}
+
+.card {
+  background: transparent;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+
+.footerRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 버튼은 오른쪽 */
+  margin-top: 20px;
+  height: 40px;
+}
+
+/* PaginationSimple을 가운데 고정 */
+.footerRow > :first-child {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.createBtn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.createBtn:hover { 
+  filter: brightness(0.95); 
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.rightControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchBarWrap {
+  width: 320px; /* 필요하면 조절 */
+}

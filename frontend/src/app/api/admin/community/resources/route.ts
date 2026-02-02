@@ -1,13 +1,27 @@
-// src/app/api/admin/community/resources/route.ts
 import { proxyToBackend } from "@/lib/bff";
+import { revalidateTag } from "next/cache";
 
-const UPSTREAM = "/api/v1/admin/community/resources";
+const TAG = "admin:resources";
 
 export async function GET(req: Request) {
-  return proxyToBackend(req, UPSTREAM, { method: "GET", forwardQuery: true });
+  return proxyToBackend(req, "/api/v1/admin/community/resources", { 
+    method: "GET",
+    cache: "force-cache",
+    next: {revalidate: 600, tags: [TAG]}
+  });
 }
 
 export async function POST(req: Request) {
-  const body = await req.json().catch(() => null);
-  return proxyToBackend(req, UPSTREAM, { method: "POST", body, forwardQuery: false });
+  const body = await req.json();
+
+  const res = await proxyToBackend(req, "/api/v1/admin/community/resources", {
+    method: "POST",
+    forwardQuery: false,
+    body,
+    cache: "no-store"
+  });
+
+  if (res.ok) revalidateTag(TAG);
+
+  return res;
 }

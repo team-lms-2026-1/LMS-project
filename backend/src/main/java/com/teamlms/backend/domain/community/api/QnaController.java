@@ -95,9 +95,10 @@ public class QnaController {
     }
     
     // =================================================================
-    // 5. Q&A 질문 삭제 - 학생만 가능
+    // 5. Q&A 질문 삭제 - 학생, 어드민 가능
     // =================================================================
-    @DeleteMapping("/api/v1/student/community/qna/questions/{questionId}")
+    @DeleteMapping({"/api/v1/student/community/qna/questions/{questionId}",
+                    "/api/v1/admin/community/qna/questions/{questionId}"})
     @PreAuthorize("hasAuthority('QNA_DELETE')")
     public ApiResponse<?> deleteQuestion(@PathVariable Long questionId, @AuthenticationPrincipal AuthUser user) {
             qnaService.deleteQuestion(questionId, user.getAccountId());

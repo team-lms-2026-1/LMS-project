@@ -1,4 +1,4 @@
-import QnaCategoryPage from "@/features/community/qna/categories/components/QnaCategoryPage";
+import CategoryPageClient from "@/features/community/categories/components/list/CategoryPage.client";
 export default function Page() {
-  return <QnaCategoryPage />;
+  return <CategoryPageClient scope="qna" />;
 }

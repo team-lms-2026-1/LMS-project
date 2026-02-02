@@ -1,14 +1,30 @@
 import { proxyToBackend } from "@/lib/bff";
+import { revalidateTag } from "next/cache";
 
-// ✅ 백엔드 실제 엔드포인트로 맞추세요
-const BACKEND_PATH = "/api/v1/admin/community/notices/categories";
+const TAG = "admin:noties:categories";
 
 export async function GET(req: Request) {
-  // querystring(page, size, keyword 등) 그대로 forward
-  return proxyToBackend(req, BACKEND_PATH, { method: "GET", forwardQuery: true });
+  return proxyToBackend(req, "/api/v1/admin/community/notices/categories", {
+    method: "GET",
+    cache: "force-cache",
+    next: { revalidate: 600, tags: [TAG] },
+    forwardQuery: true,
+  });
 }
+
+// ✅ 카테고리 등록/수정/삭제가 학생 화면에 필요 없으면 아래는 지워도 됨.
+// 혹시 추후 확장 대비로 동일 형식으로 넣어둠.
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
-  return proxyToBackend(req, BACKEND_PATH, { method: "POST", body, forwardQuery: false });
+
+  const res = await proxyToBackend(req, "/api/v1/admin/community/notices/categories", {
+    method: "POST",
+    forwardQuery: false,
+    body,
+    cache: "no-store",
+  });
+
+  if (res.ok) revalidateTag(TAG);
+  return res;
 }

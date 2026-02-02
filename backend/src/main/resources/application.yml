@@ -2,6 +2,14 @@
 spring:
   application:
     name: backend
+# =====================커뮤니티===============================
+    # 파일 업로드 용량 설정 
+  servlet:
+    multipart:
+      max-file-size: 80MB       # 파일 하나당 최대 크기 (기본 1MB)
+      max-request-size: 80MB    # 한 번 요청의 전체 크기 (기본 10MB)
+# ============================================================
+
   jpa:
     open-in-view: false
     properties:
