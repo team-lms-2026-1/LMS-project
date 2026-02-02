@@ -82,6 +82,15 @@ export type QnaDetailDto = {
   hasAnswer: boolean;
 };
 
+export type UpdateQnaQuestionRequestDto = {
+  title: string;
+  content: string;
+  categoryId?: number | null;
+};
+
+export type UpdateQnaQuestionResponseDto = { questionId: number };
+export type UpdateQnaQuestionResponse = ApiResponse<UpdateQnaQuestionResponseDto, null>;
+
 export type CreateQnaQuestionResponseDto = { questionId: number };
 export type CreateQnaQuestionResponse = ApiResponse<CreateQnaQuestionResponseDto, null>;
 

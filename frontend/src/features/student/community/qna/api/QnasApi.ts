@@ -7,6 +7,8 @@ import type {
   QnaCategoryListResponse,
   MeResponse,
   SuccessResponse,
+  UpdateQnaQuestionRequestDto, 
+  UpdateQnaQuestionResponse,
 } from "./types";
 
 export type QnaListQuery = { page?: number; size?: number; keyword?: string };
@@ -102,4 +104,22 @@ export async function deleteQnaQuestion(questionId: number) {
 export async function fetchMe() {
   // NOTE: 실제 프로젝트 엔드포인트가 /api/student/me 라면 여기만 바꾸면 됨
   return getJson<MeResponse>(`/api/student/mypage`);
+}
+
+/** ✅ 질문 수정 */
+export async function updateQnaQuestion(questionId: number, body: UpdateQnaQuestionRequestDto) {
+  const res = await fetch(`/api/student/community/qna/questions/${questionId}/edit`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `수정 실패 (${res.status})`);
+  }
+
+  return true;
 }

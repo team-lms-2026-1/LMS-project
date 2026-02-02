@@ -183,9 +183,18 @@ export default function QnaDetailpageClient() {
 
               {/* ✅ 본인 글일 때만 삭제 버튼 표시 */}
               {isMine && (
-                <Button type="button" variant="danger" onClick={handleDelete}>
-                  삭제
-                </Button>
+                <div className={styles.ownerActions}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => router.push(`/student/community/qna/questions/${data.questionId}/edit`)}
+                  >
+                    수정
+                  </Button>
+                  <Button type="button" variant="danger" onClick={handleDelete}>
+                    삭제
+                  </Button>
+                </div>
               )}
             </div>
           </div>
