@@ -17,4 +17,11 @@ public interface StudentGradeReportRepositoryCustom {
             Long semesterId,
             Pageable pageable
     );
+
+    Page<StudentCourseGradeListItem> listCurricularGrade(
+            Long deptId,
+            String keyword,
+            Pageable pageable
+    );
 }
+
