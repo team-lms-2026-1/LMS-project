@@ -91,41 +91,41 @@ public class NoticeService {
         return notice.getId();
     }
 
-    // 4. 수정
-    @Transactional
-    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
-        Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
+    // // 4. 수정
+    // @Transactional
+    // public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
+    //     Notice notice = noticeRepository.findById(noticeId)
+    //             .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
 
-        // 4-1. 정보 수정
-        if (request.getCategoryId() != null) {
-            NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
-            notice.changeCategory(category); // 엔티티에 changeCategory 메서드 필요
-        }
+    //     // 4-1. 정보 수정
+    //     if (request.getCategoryId() != null) {
+    //         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
+    //                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+    //         notice.changeCategory(category); // 엔티티에 changeCategory 메서드 필요
+    //     }
         
-        // 자료실 스타일의 필드별 수정
-        if (request.getTitle() != null) notice.changeTitle(request.getTitle());
-        if (request.getContent() != null) notice.changeContent(request.getContent());
-        if (request.getDisplayStartAt() != null) notice.changeDisplayStartAt(parseDateTime(request.getDisplayStartAt()));
-        if (request.getDisplayEndAt() != null) notice.changeDisplayEndAt(parseDateTime(request.getDisplayEndAt()));
+    //     // 자료실 스타일의 필드별 수정
+    //     if (request.getTitle() != null) notice.changeTitle(request.getTitle());
+    //     if (request.getContent() != null) notice.changeContent(request.getContent());
+    //     if (request.getDisplayStartAt() != null) notice.changeDisplayStartAt(parseDateTime(request.getDisplayStartAt()));
+    //     if (request.getDisplayEndAt() != null) notice.changeDisplayEndAt(parseDateTime(request.getDisplayEndAt()));
 
-        // 4-2. 파일 삭제
-        if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
-            List<NoticeAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
-            for (NoticeAttachment att : attachmentsToDelete) {
-                s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
-            }
-            attachmentRepository.deleteAllById(request.getDeleteFileIds());
-        }
+    //     // 4-2. 파일 삭제
+    //     if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
+    //         List<NoticeAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
+    //         for (NoticeAttachment att : attachmentsToDelete) {
+    //             s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
+    //         }
+    //         attachmentRepository.deleteAllById(request.getDeleteFileIds());
+    //     }
 
-        // 4-3. 새 파일 추가
-        if (newFiles != null && !newFiles.isEmpty()) {
-            Account modifier = accountRepository.findById(modifierId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
-            saveAttachments(newFiles, notice, modifier);
-        }
-    }
+    //     // 4-3. 새 파일 추가
+    //     if (newFiles != null && !newFiles.isEmpty()) {
+    //         Account modifier = accountRepository.findById(modifierId)
+    //                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
+    //         saveAttachments(newFiles, notice, modifier);
+    //     }
+    // }
 
     // 5. 삭제
     @Transactional
@@ -140,6 +140,61 @@ public class NoticeService {
         noticeRepository.delete(notice);
     }
 
+    // =================================================================
+    // 4. 공지사항 수정
+    // =================================================================
+    @Transactional
+    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
+
+        // 4-1. 기본 정보 수정
+        if (request.getCategoryId() != null) {
+            NoticeCategory category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+            notice.changeCategory(category);
+        }
+
+        if (request.getTitle() != null) notice.changeTitle(request.getTitle());
+        if (request.getContent() != null) notice.changeContent(request.getContent());
+        
+        // 날짜 파싱 로직 (String -> LocalDateTime)
+        if (request.getDisplayStartAt() != null) {
+            notice.changeDisplayStartAt(LocalDateTime.parse(request.getDisplayStartAt())); // 포맷에 따라 DateTimeFormatter 필요할 수 있음
+        }
+        if (request.getDisplayEndAt() != null) {
+            notice.changeDisplayEndAt(LocalDateTime.parse(request.getDisplayEndAt()));
+        }
+
+        // 4-2. 파일 삭제 (중요: 보안 검증 추가)
+        if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
+            List<NoticeAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
+            
+            for (NoticeAttachment att : attachmentsToDelete) {
+                // [보안 검증] 삭제하려는 파일이 현재 수정 중인 공지사항의 파일이 맞는지 확인
+                if (!att.getNotice().getId().equals(noticeId)) {
+                    continue; // 혹은 예외 발생 (본인 게시글의 파일이 아님)
+                }
+
+                // 1. S3 삭제 요청
+                String s3Key = extractKeyFromUrl(att.getStorageKey()); // URL에서 키 추출
+                s3Service.delete(s3Key);
+
+                // 2. DB 삭제 (loop 안에서 지우거나, 검증된 리스트를 모아서 밖에서 지움)
+                attachmentRepository.delete(att);
+            }
+        }
+
+        // 4-3. 새 파일 추가
+        if (newFiles != null && !newFiles.isEmpty()) {
+            Account modifier = accountRepository.findById(modifierId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
+            
+            // saveAttachments 내부 로직은 기존 구현 사용
+            saveAttachments(newFiles, notice, modifier);
+        }
+
+    }
     // =================================================================
     // Helper Methods
     // =================================================================
