@@ -55,7 +55,8 @@ public class StudySpaceController {
     }
 
     // 학습공간 상세 조회
-    @GetMapping("/api/v1/student/spaces/{spaceId}")
+    @GetMapping({ "/api/v1/student/spaces/{spaceId}",
+            "api/v1/admin/spaces/{spaceId}" })
     @PreAuthorize("hasAuthority('SPACE_READ')")
     public ApiResponse<SpaceDetailResponse> getSpaceDetail(@PathVariable Long spaceId) {
         return ApiResponse.ok(queryService.getSpaceDetail(spaceId));
