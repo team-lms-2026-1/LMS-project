@@ -4,10 +4,10 @@ import { revalidateTag } from "next/cache";
 const TAG = "admin:curricular-offering";
 
 
-export async function PATCH(req:Request, { params }: {params: {id: string }}) {
+export async function PATCH(req:Request, { params }: {params: {offeringId: string }}) {
     const body = await req.json();
 
-    const res = await proxyToBackend(req, `/api/v1/admin/curricular-offerings/${params.id}/status`, {
+    const res = await proxyToBackend(req, `/api/v1/admin/curricular-offerings/${params.offeringId}/status`, {
         method: "PATCH",
         body,
         cache: "no-store"

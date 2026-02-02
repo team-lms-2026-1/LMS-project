@@ -118,6 +118,10 @@ export type CurricularOfferingDetailUpdateRequest = {
   professorAccountId: number;
 }
 
+export type OfferingScorePatchRequest = {
+  rawScore: number;
+};
+
 export type CurricularOfferingStatusUpdateRequest = {
   status: OfferingStatus;
 }

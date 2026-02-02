@@ -84,25 +84,44 @@ public class EnrollmentCommandService {
     // 신청 취소 (status 변경만)
     public void cancel(Long offeringId, Long studentAccountId) {
 
-        Enrollment e = enrollmentRepository.findByOfferingIdAndStudentAccountId(offeringId, studentAccountId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENROLLMENT_NOT_FOUND, offeringId, studentAccountId));
+        CurricularOffering offering = offeringRepository.findById(offeringId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId
+                ));
 
+        // ✅ 신청취소 가능 상태 제한
+        if (!(offering.getStatus() == OfferingStatus.OPEN
+                || offering.getStatus() == OfferingStatus.ENROLLMENT_CLOSED)) {
+            throw new BusinessException(
+                    ErrorCode.ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS,
+                    offeringId,
+                    offering.getStatus()
+            );
+            // 또는 return; 로 idempotent하게 할 수도 있는데,
+            // 일반적으로 "취소 불가 기간"은 명확히 409/403으로 알려주는 게 UX/정책상 좋음
+        }
+
+        Enrollment e = enrollmentRepository.findByOfferingIdAndStudentAccountId(offeringId, studentAccountId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ENROLLMENT_NOT_FOUND, offeringId, studentAccountId
+                ));
+
+        // 이미 취소/드랍 상태면 idemponent 처리
         if (e.getEnrollmentStatus() != EnrollmentStatus.ENROLLED) {
-            return; // idempotent하게 처리하거나, 예외로 막거나 (정책 선택)
+            return;
         }
 
         e.cancel();
 
-        // 취소하면 자리가 비니까, offering이 ENROLLMENT_CLOSED였다면 OPEN으로 풀어줄지 정책 선택
-        // 보통은 OPEN으로 다시 푸는게 사용자 경험 좋음 (자동 전환)
-        CurricularOffering offering = offeringRepository.findById(offeringId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId));
-
+        // ✅ 취소로 인해 자리 생기면 ENROLLMENT_CLOSED -> OPEN 자동 전환(정책)
         if (offering.getStatus() == OfferingStatus.ENROLLMENT_CLOSED) {
-            long enrolledCount = enrollmentRepository.countByOfferingIdAndEnrollmentStatus(offeringId, EnrollmentStatus.ENROLLED);
+            long enrolledCount = enrollmentRepository.countByOfferingIdAndEnrollmentStatus(
+                    offeringId, EnrollmentStatus.ENROLLED
+            );
             if (enrolledCount < offering.getCapacity()) {
                 offering.changeStatus(OfferingStatus.OPEN);
             }
         }
     }
+
 }

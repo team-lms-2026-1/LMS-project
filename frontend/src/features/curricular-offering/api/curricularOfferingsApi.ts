@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { CurricularDetailFormResponse, CurricularOfferingCompetencyMappingBulkUpdateRequest, CurricularOfferingCompetencyResponse, CurricularOfferingCreateRequest, CurricularOfferingDetailUpdateRequest, CurricularOfferingListResponse, CurricularOfferingStatusUpdateRequest, CurricularOfferingStudentResponse } from "./types";
+import { CurricularDetailFormResponse, CurricularOfferingCompetencyMappingBulkUpdateRequest, CurricularOfferingCompetencyResponse, CurricularOfferingCreateRequest, CurricularOfferingDetailUpdateRequest, CurricularOfferingListResponse, CurricularOfferingStatusUpdateRequest, CurricularOfferingStudentResponse, OfferingScorePatchRequest } from "./types";
 import { SuccessResponse } from "@/features/curricular/api/types";
 
 
@@ -101,7 +101,24 @@ export async function fetchCurricularOfferingStudentList(id: number, query: Curr
   if (query.keyword) sp.set("keyword", query.keyword);
 
   const qs = sp.toString();
-  const url = qs ? `/api/admin/curricular/offerings/${id}/student?${qs}` : `/api/admin/curricular/offerings/${id}/student`;
+  const url = qs ? `/api/admin/curricular/offerings/${id}/students?${qs}` : `/api/admin/curricular/offerings/${id}/student`;
 
   return getJson<CurricularOfferingStudentResponse>(url);
+}
+
+// student score patch
+export async function updateStudentScore(
+  offeringId: number,
+  enrollmentId: number,
+  body: OfferingScorePatchRequest
+) {
+  return getJson<SuccessResponse>(
+    `/api/admin/curricular/offerings/${offeringId}/students/${enrollmentId}/score`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    }
+  );
 }

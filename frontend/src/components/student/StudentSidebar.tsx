@@ -28,8 +28,9 @@
       key: "course",
       title: "교과",
       items: [
-        { label: "교과 정보 조회", href: "/student/course" },
-        { label: "성적 조회", href: "/student/course/grades" },
+        { label: "이수 신청", href: "/student/curricular/offerings" },
+        { label: "이수 신청현황", href: "/student/curricular/enrollments" },
+        { label: "이수중 교과", href: "/student/curricular/current-enrollments" },
       ],
     },
     {
