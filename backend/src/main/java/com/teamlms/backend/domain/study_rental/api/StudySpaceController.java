@@ -1,7 +1,7 @@
 package com.teamlms.backend.domain.study_rental.api;
 
 import com.teamlms.backend.global.security.principal.AuthUser;
-import com.teamlms.backend.domain.account.entity.Account; 
+import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.study_rental.api.dto.RentalApplyRequest;
 import com.teamlms.backend.domain.study_rental.api.dto.RoomDetailResponse;
 import com.teamlms.backend.domain.study_rental.api.dto.SpaceDetailResponse;
@@ -38,13 +38,13 @@ public class StudySpaceController {
     private final StudyRentalCommandService rentalCommandService;
 
     // 학습공간 목록 조회
-    @GetMapping("/api/v1/student/spaces")
+    @GetMapping({ "/api/v1/student/spaces",
+            "/api/v1/admin/spaces" })
     @PreAuthorize("hasAuthority('SPACE_READ')")
     public ApiResponse<List<SpaceListResponse>> listSpaces(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword
-    ) {
+            @RequestParam(required = false) String keyword) {
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by(Sort.Direction.DESC, "createdAt"));
         SpaceSearchCondition condition = SpaceSearchCondition.builder()
                 .keyword(keyword)
@@ -76,30 +76,27 @@ public class StudySpaceController {
             @Valid @RequestBody RentalApplyRequest req,
             @AuthenticationPrincipal Object principal // Object로 받음
     ) {
-        Long accountId; 
+        Long accountId;
 
         if (principal == null) {
             throw new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND);
         }
 
         if (principal instanceof AuthUser) {
-            accountId = ((AuthUser) principal).getAccountId(); 
-        } 
-        else if (principal instanceof Account) {
+            accountId = ((AuthUser) principal).getAccountId();
+        } else if (principal instanceof Account) {
             accountId = ((Account) principal).getAccountId();
-        } 
-        else if (principal instanceof Long) {
+        } else if (principal instanceof Long) {
             accountId = (Long) principal;
-        } 
-        else {
+        } else {
             log.error("Principal Type Mismatch: {}", principal.getClass().getName());
             throw new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND);
         }
-        
+
         log.info("Rental Request - Account ID: {}", accountId);
 
         rentalCommandService.applyRental(accountId, req);
-        
+
         return ApiResponse.ok(new SuccessResponse());
     }
 }
