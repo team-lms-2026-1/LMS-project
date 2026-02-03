@@ -2,9 +2,7 @@
 
 import { Table, type TableColumn } from "@/components/table";
 import { DeptMajorListItemDto, DeptProfessorListItemDto, DeptStudentListItemDto } from "../../api/types";
-import styles from "./DeptDetailTable.module.css";
-import { Button } from "@/components/button";
-import { StatusPill } from "@/components/status";
+
 
 type Props = {
   items: DeptMajorListItemDto[];

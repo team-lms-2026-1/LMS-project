@@ -1,0 +1,64 @@
+.modal {
+  width: 380px;
+  margin: 0 auto;        /* 가로 중앙 */
+  padding: 20px 20px 20px;
+  background: white;
+  box-sizing: border-box;
+}
+
+
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;           /* ★ 오른쪽 여백 제거 */
+  height: 38px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  padding: 0 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.textarea {
+  width: 100%;           /* ★ 오른쪽 여백 제거 */
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  padding: 10px;
+  font-size: 14px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggleText {
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end; 
+  padding-right: 0; /* 오른쪽 여백 제거 */
+}

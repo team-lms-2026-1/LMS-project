@@ -12,6 +12,7 @@ export async function GET(
   return proxyToBackend(req, `/api/v1/admin/depts/${deptId}/students`, {
     method: "GET",
     cache: "no-store",
+    forwardQuery: true, // 👈 ?page=2&size=20 그대로 백엔드로 전달
     next: { tags: [TAG] },
   });
 }

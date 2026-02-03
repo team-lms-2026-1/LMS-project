@@ -1,11 +1,7 @@
 .page {
   padding: 0;
   min-height: 100vh;
-  background-color: transparent;
-}
-
-.card {
-  background: transparent;
+  background-color: #f9f9f9;
 }
 
 .title {
@@ -14,21 +10,12 @@
   margin-bottom: 20px;
 }
 
-
-.footerRow {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end; /* 버튼은 오른쪽 */
-  margin-top: 20px;
-  height: 40px;
-}
-
-/* PaginationSimple을 가운데 고정 */
-.footerRow > :first-child {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+.card {
+  margin-top: 0;
+  border-radius: 0 10px 10px 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 16px 20px;
 }
 
 .searchRow {
@@ -37,4 +24,100 @@
   justify-content: flex-end;
   gap: 8px;
   margin-bottom: 16px;
+}
+
+.paginationRow {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.footerRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 20px;
+  height: 40px;
+}
+
+.footerRow > :first-child {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tabRow {
+  display: flex;
+  gap: 4px;
+  margin-top: 24x;
+}
+
+.tabButton {
+  border-radius: 8px 8px 0 0 !important;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: none !important;
+}
+
+.tabButtonInactive {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #e5e7eb !important;
+  border-bottom: none !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 8px 18px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.tabButtonActive {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: 1px solid #2563eb !important;
+  border-bottom: none !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 8px 18px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+.majorCreateButton {
+  padding: 6px 14px;      /* 버튼 크기 조절 */
+  font-size: 14px;
+  font-weight: 500;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.headerLeft {
+  flex: 0 0 auto;
+}
+
+.headerRight {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 200px;
+}
+
+.deptDescription {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.topArea {
+  background: #f9fafb; /* 🔥 아주 연한 회색 */
+  padding-bottom: 20px; /* 테이블과 자연스럽게 간격 */
+  margin-bottom: 16px;  /* 테이블과 벌어지지 않게 */
+}
+.headerArea {
+  background-color: #f9fafb; /* 연한 회색 */
+  padding: 0 24px 0;        /* 위쪽 여백만; 아래는 0 (카드랑 붙게) */
+  margin-bottom: 0;         /* 카드와 사이에 공백 안 생기게 */
 }

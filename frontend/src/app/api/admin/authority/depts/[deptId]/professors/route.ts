@@ -12,6 +12,8 @@ export async function GET(
   return proxyToBackend(req, `/api/v1/admin/depts/${deptId}/professors`, {
     method: "GET",
     cache: "no-store",
+    // 쿼리스트링(page, size 같은 거)이 있으면 같이 넘기고 싶으면:
+    forwardQuery: true,
     next: { tags: [TAG] },
   });
 }
