@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import { Table } from "@/components/table/Table";
@@ -12,26 +13,45 @@ import { TableColumn } from "@/components/table/types";
 import { useState } from "react";
 import { Button } from "@/components/button/Button";
 import { StatusPill, StatusType } from "@/components/status/StatusPill";
+import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
+import toast from "react-hot-toast";
 
 export default function SurveyListPage() {
   const router = useRouter();
-  const { data, loading, page, setPage, totalPages, refresh } = useSurveyList();
   const [searchQuery, setSearchQuery] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const { data, loading, page, setPage, totalPages, refresh } = useSurveyList(keyword);
+
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  const handleSearch = () => {
+    setPage(1); // Reset page on search
+    setKeyword(searchQuery);
+  };
 
   const handleEdit = (id: number) => {
     router.push(`/admin/surveys/${id}`);
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm("정말 삭제하시겠습니까?")) {
-      try {
-        await deleteSurvey(id);
-        alert("삭제되었습니다.");
-        refresh();
-      } catch (e) {
-        console.error(e);
-        alert("삭제 실패");
-      }
+  const openDeleteConfirm = (id: number) => {
+    setDeleteId(id);
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteId(null);
+  };
+
+  const handleDelete = async () => {
+    if (deleteId === null) return;
+    try {
+      await deleteSurvey(deleteId);
+      toast.success("삭제되었습니다.");
+      refresh();
+    } catch (e) {
+      console.error(e);
+      toast.error("삭제 실패");
+    } finally {
+      closeDeleteConfirm();
     }
   };
 
@@ -66,10 +86,19 @@ export default function SurveyListPage() {
     },
     {
       header: "작성일",
-      field: "startAt",
       width: "150px",
       align: "center",
-      render: (row) => row.startAt ? row.startAt.split(" ")[0] : "-",
+      render: (row) => row.createdAt ? row.createdAt.split(" ")[0] : "-",
+    },
+    {
+      header: "기간",
+      width: "220px",
+      align: "center",
+      render: (row) => (
+        <>
+          {new Date(row.startAt).toLocaleDateString()} ~ {new Date(row.endAt).toLocaleDateString()}
+        </>
+      ),
     },
     {
       header: "관리",
@@ -92,7 +121,7 @@ export default function SurveyListPage() {
             className={styles.deleteBtn}
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete(row.surveyId);
+              openDeleteConfirm(row.surveyId);
             }}
           >
             삭제
@@ -111,7 +140,7 @@ export default function SurveyListPage() {
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="검색어 입력..."
-            onSearch={() => { }}
+            onSearch={handleSearch}
           />
         </div>
       </div>
@@ -138,6 +167,16 @@ export default function SurveyListPage() {
       <div className={styles.paginationWrapper}>
         <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
       </div>
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        title="설문 삭제"
+        description="정말 이 설문을 삭제하시겠습니까?"
+        confirmText="삭제"
+        danger
+        onConfirm={handleDelete}
+        onCancel={closeDeleteConfirm}
+      />
     </div>
   );
 }

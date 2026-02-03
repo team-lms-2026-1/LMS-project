@@ -38,6 +38,7 @@ public class SurveyCommandService {
             }
 
             validateAdmin(adminId);
+            validateQuestionOptions(request.getQuestions());
 
             Survey survey = Survey.builder()
                     .type(request.getType())
@@ -58,9 +59,13 @@ public class SurveyCommandService {
                             .sortOrder(q.getSortOrder())
                             .minVal(q.getMinVal())
                             .maxVal(q.getMaxVal())
+
                             .minLabel(q.getMinLabel())
                             .maxLabel(q.getMaxLabel())
                             .isRequired(q.getIsRequired())
+                            // [New]
+                            .questionType(q.getQuestionType() != null ? q.getQuestionType() : SurveyQuestionType.RATING) // Default
+                            .options(q.getOptions())
                             .build())
                     .collect(Collectors.toList());
 
@@ -81,6 +86,7 @@ public class SurveyCommandService {
     // 2. 설문 수정
     public void updateSurvey(Long adminId, Long surveyId, SurveyUpdateRequest request) {
         validateAdmin(adminId);
+        validateQuestionOptions(request.getQuestions());
 
         Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
@@ -105,8 +111,12 @@ public class SurveyCommandService {
                         .questionText(q.getQuestionText())
                         .sortOrder(order++)
                         .minVal(q.getMinVal()).maxVal(q.getMaxVal())
+
                         .minLabel(q.getMinLabel()).maxLabel(q.getMaxLabel())
                         .isRequired(q.getIsRequired())
+                        // [New]
+                        .questionType(q.getQuestionType() != null ? q.getQuestionType() : SurveyQuestionType.RATING)
+                        .options(q.getOptions())
                         .build());
             }
             questionRepository.saveAll(newQuestions);
@@ -189,6 +199,34 @@ public class SurveyCommandService {
             return Collections.emptyList();
         System.out.println("DEBUG: Querying depts=" + deptIds + ", grades=" + grades);
         return accountRepository.findAllByDeptIdInAndGradeLevelIn(deptIds, grades);
+    }
+
+    private void validateQuestionOptions(List<SurveyCreateRequest.QuestionDto> questions) {
+        if (questions == null || questions.isEmpty()) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        }
+
+        for (int i = 0; i < questions.size(); i++) {
+            SurveyCreateRequest.QuestionDto q = questions.get(i);
+
+            // 객관식 질문인 경우 옵션 검증
+            if (q.getQuestionType() == SurveyQuestionType.MULTIPLE_CHOICE ||
+                    q.getQuestionType() == SurveyQuestionType.SINGLE_CHOICE) {
+
+                // 옵션이 없는 경우
+                if (q.getOptions() == null || q.getOptions().isEmpty()) {
+                    throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+                }
+
+                // 빈 옵션이 있는지 확인
+                for (int j = 0; j < q.getOptions().size(); j++) {
+                    String option = q.getOptions().get(j);
+                    if (option == null || option.trim().isEmpty()) {
+                        throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+                    }
+                }
+            }
+        }
     }
 
     private void validateAdmin(Long adminId) {

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getSurveyList } from "../service";
 import { SurveyListResponse } from "../types";
 
-export function useSurveyList() {
+export function useSurveyList(keyword: string = "") {
     const [data, setData] = useState<SurveyListResponse[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
@@ -13,7 +13,7 @@ export function useSurveyList() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await getSurveyList(page, 10);
+            const res = await getSurveyList(page, 10, keyword);
             setData(res.items);
             setTotalPages(Math.ceil(res.totalItems / res.size));
         } catch (e) {
@@ -25,7 +25,7 @@ export function useSurveyList() {
 
     useEffect(() => {
         fetchData();
-    }, [page]);
+    }, [page, keyword]);
 
     return {
         data,

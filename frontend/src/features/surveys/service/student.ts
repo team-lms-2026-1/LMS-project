@@ -8,8 +8,14 @@ import {
 
 const BASE_URL = "/api/student/surveys";
 
-export async function fetchAvailableSurveys() {
-    return getJson<SurveyListResponse[]>(`${BASE_URL}/available`);
+export async function fetchAvailableSurveys(keyword?: string) {
+    const params = new URLSearchParams();
+    if (keyword && keyword.trim()) {
+        params.append("keyword", keyword);
+    }
+    const queryString = params.toString();
+    const url = queryString ? `${BASE_URL}/available?${queryString}` : `${BASE_URL}/available`;
+    return getJson<SurveyListResponse[]>(url);
 }
 
 export async function fetchSurveyDetail(id: string | number) {

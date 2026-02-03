@@ -31,6 +31,9 @@ public class SurveyCreateRequest {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endAt;
 
+    @NotNull(message = "질문 목록은 필수입니다")
+    @jakarta.validation.constraints.NotEmpty(message = "질문을 하나 이상 추가해주세요")
+    @jakarta.validation.Valid
     private List<QuestionDto> questions;
     private TargetFilterDto targetFilter;
 
@@ -40,13 +43,19 @@ public class SurveyCreateRequest {
     @ToString
     @NoArgsConstructor
     public static class QuestionDto {
+        @NotBlank(message = "질문 내용을 입력해주세요")
         private String questionText;
         private Integer sortOrder;
         private Integer minVal = 1;
         private Integer maxVal = 5;
         private String minLabel;
         private String maxLabel;
+
         private Boolean isRequired = true;
+
+        // [New]
+        private com.teamlms.backend.domain.survey.enums.SurveyQuestionType questionType;
+        private List<String> options;
     }
 
     @Getter

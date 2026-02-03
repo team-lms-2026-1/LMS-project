@@ -3,6 +3,7 @@ package com.teamlms.backend.domain.survey.service;
 import com.teamlms.backend.domain.survey.api.dto.*; // 외부 DTO
 import com.teamlms.backend.domain.survey.dto.InternalSurveySearchRequest; // 내부 DTO
 import com.teamlms.backend.domain.survey.entity.*;
+import com.teamlms.backend.domain.survey.enums.SurveyStatus;
 import com.teamlms.backend.domain.survey.enums.SurveyTargetStatus;
 import com.teamlms.backend.domain.survey.repository.*;
 import com.teamlms.backend.global.exception.base.BusinessException;
@@ -23,11 +24,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 @RequiredArgsConstructor
@@ -51,12 +54,20 @@ public class SurveyQueryService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        Page<Survey> surveys = surveyRepository.findAll(pageable);
+        Specification<Survey> spec = (root, query, cb) -> {
+            if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
+                return cb.like(root.get("title"), "%" + request.getKeyword() + "%");
+            }
+            return null;
+        };
+
+        Page<Survey> surveys = surveyRepository.findAll(spec, pageable);
         return surveys.map(this::toSurveyListResponse);
     }
 
     // 사용자 참여 가능 목록
-    public List<SurveyListResponse> getAvailableSurveys(Long userId) {
+    public List<SurveyListResponse> getAvailableSurveys(Long userId, String keyword) {
+
         Account user = accountRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
 
@@ -70,11 +81,24 @@ public class SurveyQueryService {
                 SurveyTargetStatus.PENDING);
         List<Long> surveyIds = targets.stream().map(SurveyTarget::getSurveyId).toList();
 
-        List<Survey> surveys = surveyRepository.findAllById(surveyIds);
+        if (surveyIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Survey> surveys;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+
+            surveys = surveyRepository.findByIdInAndTitleContaining(surveyIds, keyword);
+        } else {
+
+            surveys = surveyRepository.findAllById(surveyIds);
+        }
+
         return surveys.stream().map(this::toSurveyListResponse).collect(Collectors.toList());
     }
 
     // 상세 조회
+    @Transactional
     public SurveyDetailResponse getSurveyDetail(Long surveyId, Long userId) {
         Account user = accountRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
@@ -86,18 +110,28 @@ public class SurveyQueryService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
+        // 설문 조회 (한 번만)
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
+
         if ("STUDENT".equals(role)) {
             // 학생은 '자신이 대상자'인 경우에만 볼 수 있음
             boolean isTarget = targetRepository.findBySurveyIdAndTargetAccountId(surveyId, userId).isPresent();
             if (!isTarget) {
                 throw new BusinessException(ErrorCode.SURVEY_NOT_TARGET); // "대상자가 아닙니다" 에러
             }
+
+            // [추가] 설문 기간 체크
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            if (now.isBefore(survey.getStartAt()) || now.isAfter(survey.getEndAt())) {
+                throw new BusinessException(ErrorCode.SURVEY_NOT_OPEN); // "현재 진행 중인 설문이 아닙니다."
+            }
+
+            // [추가] 조회수 증가 (학생이 설문을 볼 때만)
+            survey.increaseViewCount();
         }
 
         // 관리자는 검사 없이 통과 (Admin은 모든 설문 내용 볼 수 있음)
-
-        Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
 
         List<SurveyQuestion> questions = questionRepository.findBySurveyIdOrderBySortOrderAsc(surveyId);
 
@@ -109,10 +143,9 @@ public class SurveyQueryService {
         // 관리자 권한 체크
         validateAdmin(adminId);
 
-        // 설문 존재 확인
-        if (!surveyRepository.existsById(surveyId)) {
-            throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND);
-        }
+        // 설문 조회
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
 
         long total = targetRepository.countBySurveyId(surveyId);
         long submitted = targetRepository.countBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED);
@@ -155,11 +188,16 @@ public class SurveyQueryService {
 
         return SurveyStatsResponse.builder()
                 .surveyId(surveyId)
+                .title(survey.getTitle())
+                .description(survey.getDescription())
+                .startAt(survey.getStartAt())
+                .endAt(survey.getEndAt())
                 .totalTargets(total)
                 .submittedCount(submitted)
                 .responseRate(rate)
                 .responseByGrade(byGrade)
                 .responseByDept(byDept)
+                .createdAt(survey.getCreatedAt())
                 .build();
     }
 
@@ -172,15 +210,12 @@ public class SurveyQueryService {
             throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND);
         }
 
-        // 대상자 목록 조회 (Account 정보가 필요하므로 Fetch Join을 쓰면 좋지만, 일단 기본 조회)
+        // 대상자 목록 조회
         Page<SurveyTarget> targets = targetRepository.findBySurveyId(surveyId, pageable);
 
-        // Account 정보를 가져오기 위해 target.getTargetAccountId()를 사용
-        // 실무에서는 성능을 위해 AccountRepository.findAllById 로 한 번에 가져와서 매핑하는 것이 좋습니다.
-        // 여기서는 간단하게 구현합니다.
         return targets.map(target -> {
             Account user = accountRepository.findById(target.getTargetAccountId())
-                    .orElse(null); // 혹시 유저가 삭제되었을 경우 대비
+                    .orElse(null);
 
             return SurveyParticipantResponse.builder()
                     .targetId(target.getId())
@@ -203,13 +238,24 @@ public class SurveyQueryService {
 
     // --- Mappers ---
     private SurveyListResponse toSurveyListResponse(Survey survey) {
+        // 현재 시간 기준으로 상태 계산
+        LocalDateTime now = LocalDateTime.now();
+        SurveyStatus displayStatus = survey.getStatus();
+
+        // 설문 기간이 아니면 CLOSED로 표시
+        if (now.isBefore(survey.getStartAt()) || now.isAfter(survey.getEndAt())) {
+            displayStatus = SurveyStatus.CLOSED;
+        }
+
         return SurveyListResponse.builder()
                 .surveyId(survey.getId())
                 .type(survey.getType())
                 .title(survey.getTitle())
-                .status(survey.getStatus())
+                .status(displayStatus)
                 .startAt(survey.getStartAt())
                 .endAt(survey.getEndAt())
+                .viewCount(survey.getViewCount())
+                .createdAt(survey.getCreatedAt())
                 .build();
     }
 
@@ -222,7 +268,8 @@ public class SurveyQueryService {
                 .status(survey.getStatus())
                 .startAt(survey.getStartAt())
                 .endAt(survey.getEndAt())
-                .questions(questions.stream().map(this::toQuestionResponse).collect(Collectors.toList()))
+
+                .questions(questions.stream().map(q -> toQuestionResponse(q)).collect(Collectors.toList()))
                 .build();
     }
 
@@ -234,8 +281,12 @@ public class SurveyQueryService {
                 .minVal(question.getMinVal())
                 .maxVal(question.getMaxVal())
                 .minLabel(question.getMinLabel())
+
                 .maxLabel(question.getMaxLabel())
                 .isRequired(question.getIsRequired())
+                // [New]
+                .questionType(question.getQuestionType())
+                .options(question.getOptions())
                 .build();
     }
 }

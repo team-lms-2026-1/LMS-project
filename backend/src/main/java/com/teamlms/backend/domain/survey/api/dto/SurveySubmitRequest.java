@@ -11,7 +11,8 @@ import java.util.Map;
 public class SurveySubmitRequest {
     @NotNull
     private Long surveyId;
-    
+
     @NotNull
-    private Map<String, Integer> responses; // Key:문항ID, Value:점수
+
+    private Map<String, Object> responses; // Key:문항ID, Value:답변(점수Int, 문자열String, Checkbox List 등)
 }

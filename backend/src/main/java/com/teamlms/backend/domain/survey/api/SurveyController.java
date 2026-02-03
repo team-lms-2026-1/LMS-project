@@ -68,9 +68,10 @@ public class SurveyController {
     // [User] 참여 가능 설문 조회
     @GetMapping("/surveys/available")
     public ResponseEntity<List<SurveyListResponse>> getAvailableSurveys(
-            @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user,
+            @RequestParam(required = false) String keyword) {
 
-        return ResponseEntity.ok(queryService.getAvailableSurveys(user.getAccountId()));
+        return ResponseEntity.ok(queryService.getAvailableSurveys(user.getAccountId(), keyword));
     }
 
     // [User] 설문 상세 조회

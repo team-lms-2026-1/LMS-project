@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { createSurvey, getSurveyDetail, updateSurvey } from "../service";
 import {
     QuestionResponseDto,
@@ -26,6 +28,7 @@ export function useSurveyDetail(idStr: string | undefined) {
     const [selectedDeptIds, setSelectedDeptIds] = useState<number[]>([]);
     const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
 
+
     const createNewQuestion = (order: number): QuestionResponseDto => ({
         questionId: -Date.now() - Math.random(),
         questionText: "",
@@ -35,6 +38,8 @@ export function useSurveyDetail(idStr: string | undefined) {
         minLabel: "전혀 그렇지 않다",
         maxLabel: "매우 그렇다",
         isRequired: true,
+        questionType: "RATING",
+        options: []
     });
 
     const loadData = async (id: number) => {
@@ -46,7 +51,8 @@ export function useSurveyDetail(idStr: string | undefined) {
             setDates({ startAt: data.startAt, endAt: data.endAt });
         } catch (e) {
             console.error(e);
-            alert("데이터를 불러오는데 실패했습니다.");
+
+            toast.error("데이터를 불러오는데 실패했습니다.");
         } finally {
             setLoading(false);
         }
@@ -83,36 +89,69 @@ export function useSurveyDetail(idStr: string | undefined) {
         setQuestions((prev) => prev.filter((_, i) => i !== index));
     };
 
-    const updateQuestion = (index: number, text: string) => {
+    const updateQuestion = (index: number, updates: Partial<QuestionResponseDto>) => {
         setQuestions((prev) => {
             const next = [...prev];
-            next[index] = { ...next[index], questionText: text };
+            next[index] = { ...next[index], ...updates };
             return next;
         });
     };
 
+
+
     const submitSurvey = async () => {
         if (!title.trim()) {
-            alert("제목을 입력해주세요.");
+            toast.error("제목을 입력해주세요.");
             return;
+        }
+
+        // 질문이 하나도 없는 경우
+        if (questions.length === 0) {
+            toast.error("질문을 하나 이상 추가해주세요.");
+            return;
+        }
+
+        // 빈 질문이 있는지 확인
+        const emptyQuestionIndex = questions.findIndex(q => !q.questionText.trim());
+        if (emptyQuestionIndex !== -1) {
+            toast.error(`${emptyQuestionIndex + 1}번 질문의 내용을 입력해주세요.`);
+            return;
+        }
+
+        // 객관식 질문의 옵션 검증
+        for (let i = 0; i < questions.length; i++) {
+            const q = questions[i];
+            if (q.questionType === "MULTIPLE_CHOICE" || q.questionType === "SINGLE_CHOICE") {
+                // 옵션이 없는 경우
+                if (!q.options || q.options.length === 0) {
+                    toast.error(`${i + 1}번 질문에 옵션을 하나 이상 추가해주세요.`);
+                    return;
+                }
+                // 빈 옵션이 있는지 확인
+                const emptyOptionIndex = q.options.findIndex(opt => !opt.trim());
+                if (emptyOptionIndex !== -1) {
+                    toast.error(`${i + 1}번 질문의 ${emptyOptionIndex + 1}번 옵션 내용을 입력해주세요.`);
+                    return;
+                }
+            }
         }
 
         if (isNew) {
             if (targetType === "DEPT" && selectedDeptIds.length === 0) {
-                alert("대상이 될 학과를 하나 이상 선택해주세요.");
+                toast.error("대상이 될 학과를 하나 이상 선택해주세요.");
                 return;
             }
             if (targetType === "GRADE" && selectedGrades.length === 0) {
-                alert("대상이 될 학년을 하나 이상 선택해주세요.");
+                toast.error("대상이 될 학년을 하나 이상 선택해주세요.");
                 return;
             }
             if (targetType === "DEPT_GRADE") {
                 if (selectedDeptIds.length === 0) {
-                    alert("학과를 선택해주세요.");
+                    toast.error("학과를 선택해주세요.");
                     return;
                 }
                 if (selectedGrades.length === 0) {
-                    alert("학년을 선택해주세요.");
+                    toast.error("학년을 선택해주세요.");
                     return;
                 }
             }
@@ -139,7 +178,10 @@ export function useSurveyDetail(idStr: string | undefined) {
             maxVal: q.maxVal,
             minLabel: q.minLabel,
             maxLabel: q.maxLabel,
+
             isRequired: q.isRequired,
+            questionType: q.questionType,
+            options: q.options,
         }));
 
         try {
@@ -171,11 +213,11 @@ export function useSurveyDetail(idStr: string | undefined) {
                 await updateSurvey(Number(idStr), payload);
             }
 
-            alert("저장되었습니다.");
+            toast.success("저장되었습니다.");
             router.push("/admin/surveys");
         } catch (e) {
             console.error(e);
-            alert("저장에 실패했습니다.");
+            toast.error("저장에 실패했습니다.");
         } finally {
             setLoading(false);
         }

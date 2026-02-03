@@ -53,6 +53,8 @@ async function proxy(req: Request, upstreamUrl: string, method: string) {
 }
 
 export async function GET(req: Request) {
-    const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}`;
+    const { searchParams } = new URL(req.url);
+    const queryString = searchParams.toString();
+    const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}${queryString ? `?${queryString}` : ''}`;
     return proxy(req, upstreamUrl, "GET");
 }

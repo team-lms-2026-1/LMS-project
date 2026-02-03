@@ -23,7 +23,14 @@ export default function SurveyStatsPage({ params }: { params: { id: string } }) 
 
     return (
         <div className={styles.container}>
-            <h1 className={styles.title}>설문 통계</h1>
+            <header className={styles.header}>
+                <h1 className={styles.title}>{stats.title}</h1>
+                <div className={styles.meta}>
+                    <span>작성일: {new Date(stats.createdAt).toLocaleDateString()}</span>
+                    <span className={styles.divider}>|</span>
+                    <span>기간: {new Date(stats.startAt).toLocaleString()} ~ {new Date(stats.endAt).toLocaleString()}</span>
+                </div>
+            </header>
 
             <div className={styles.grid}>
                 <StatCard label="총 대상자" value={`${stats.totalTargets}명`} />

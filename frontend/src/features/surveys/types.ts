@@ -22,7 +22,19 @@ export interface SurveyListResponse {
   startAt: string; // yyyy-MM-dd HH:mm
   endAt: string; // yyyy-MM-dd HH:mm
   viewCount?: number;
+  createdAt: string;
 }
+
+
+
+export type SurveyQuestionType = "RATING" | "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "ESSAY";
+
+export const SurveyQuestionTypeLabel: Record<SurveyQuestionType, string> = {
+  RATING: "척도형 (점수)",
+  SINGLE_CHOICE: "객관식 (단일 선택)",
+  MULTIPLE_CHOICE: "객관식 (다중 선택)",
+  ESSAY: "주관식 (서술형)",
+};
 
 export interface QuestionResponseDto {
   questionId: number;
@@ -33,6 +45,8 @@ export interface QuestionResponseDto {
   minLabel: string;
   maxLabel: string;
   isRequired: boolean;
+  questionType?: SurveyQuestionType;
+  options?: string[];
 }
 
 export interface SurveyDetailResponse {
@@ -48,11 +62,16 @@ export interface SurveyDetailResponse {
 
 export interface SurveyStatsResponse {
   surveyId: number;
+  title: string;
+  description: string;
+  startAt: string;
+  endAt: string;
   totalTargets: number;
   submittedCount: number;
   responseRate: number;
   responseByDept: Record<string, number>;
   responseByGrade: Record<string, number>;
+  createdAt: string;
 }
 
 // Request DTOs
@@ -64,6 +83,8 @@ export interface QuestionDto {
   minLabel?: string;
   maxLabel?: string;
   isRequired?: boolean;
+  questionType?: SurveyQuestionType;
+  options?: string[];
 }
 
 export interface TargetFilterDto {
@@ -94,5 +115,5 @@ export interface SurveyUpdateRequest {
 
 export interface SurveySubmitRequest {
   surveyId: number;
-  responses: Record<string, number>; // key: questionId, value: score
+  responses: Record<string, any>; // key: questionId, value: score | text | string[]
 }

@@ -2,7 +2,7 @@ package com.teamlms.backend.domain.survey.entity;
 
 import com.teamlms.backend.domain.survey.enums.SurveyStatus;
 import com.teamlms.backend.domain.survey.enums.SurveyType;
-import com.teamlms.backend.global.audit.BaseEntity; 
+import com.teamlms.backend.global.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "survey", indexes = {
-    @Index(name = "idx_survey_status", columnList = "status"),
-    @Index(name = "idx_survey_dates", columnList = "start_at, end_at")
+        @Index(name = "idx_survey_status", columnList = "status"),
+        @Index(name = "idx_survey_dates", columnList = "start_at, end_at")
 })
 public class Survey extends BaseEntity {
 
@@ -48,6 +48,10 @@ public class Survey extends BaseEntity {
     @Column(name = "target_gen_type", nullable = false)
     private String targetGenType;
 
+    @Column(name = "view_count", nullable = false)
+    @Builder.Default
+    private Long viewCount = 0L;
+
     // 상태 변경 비즈니스 메서드
     public void open() {
         this.status = SurveyStatus.OPEN;
@@ -56,10 +60,18 @@ public class Survey extends BaseEntity {
     public void close() {
         this.status = SurveyStatus.CLOSED;
     }
+
     public void update(String title, String description, LocalDateTime startAt, LocalDateTime endAt) {
         this.title = title;
         this.description = description;
         this.startAt = startAt;
         this.endAt = endAt;
+    }
+
+    public void increaseViewCount() {
+        if (this.viewCount == null) {
+            this.viewCount = 0L;
+        }
+        this.viewCount++;
     }
 }

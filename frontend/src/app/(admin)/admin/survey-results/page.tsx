@@ -53,10 +53,19 @@ export default function SurveyResultsPage() {
         },
         {
             header: "작성일",
-            field: "startAt",
             width: "150px",
             align: "center",
-            render: (row) => row.startAt ? row.startAt.split(" ")[0] : "-",
+            render: (row) => row.createdAt ? row.createdAt.split(" ")[0] : "-",
+        },
+        {
+            header: "기간",
+            width: "220px",
+            align: "center",
+            render: (row) => (
+                <>
+                    {new Date(row.startAt).toLocaleDateString()} ~ {new Date(row.endAt).toLocaleDateString()}
+                </>
+            ),
         },
         {
             header: "통계",
