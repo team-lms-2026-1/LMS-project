@@ -83,10 +83,16 @@ export interface SurveyCreateRequest {
   targetFilter?: TargetFilterDto;
 }
 
+
 export interface SurveyUpdateRequest {
   title: string;
   description?: string;
   startAt: string;
   endAt: string;
   questions: QuestionDto[];
+}
+
+export interface SurveySubmitRequest {
+  surveyId: number;
+  responses: Record<string, number>; // key: questionId, value: score
 }

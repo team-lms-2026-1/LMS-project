@@ -58,7 +58,19 @@ export function useSurveyDetail(idStr: string | undefined) {
         } else {
             setTitle("");
             setQuestions([createNewQuestion(1)]);
-            setDates(null);
+
+            const n = new Date();
+            const next = new Date();
+            next.setDate(n.getDate() + 7); // Default 7 days
+
+            // Simple formatter for local datetime-local (YYYY-MM-DDTHH:mm)
+            const fmt = (d: Date) => {
+                const pad = (num: number) => String(num).padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+
+            setDates({ startAt: fmt(n), endAt: fmt(next) });
+
             setTargetType("ALL");
         }
     }, [idStr, isNew]);
@@ -181,10 +193,14 @@ export function useSurveyDetail(idStr: string | undefined) {
         submitSurvey,
         // Target Filter Props
         targetType,
+
         setTargetType,
         selectedDeptIds,
         setSelectedDeptIds,
         selectedGrades,
         setSelectedGrades,
+        // Date Props
+        dates,
+        setDates,
     };
 }

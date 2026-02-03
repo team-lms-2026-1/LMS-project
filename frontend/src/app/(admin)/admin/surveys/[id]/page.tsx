@@ -27,8 +27,12 @@ export default function SurveyDetailPage() {
         setTargetType,
         selectedDeptIds,
         setSelectedDeptIds,
+
         selectedGrades,
         setSelectedGrades,
+        // Date Props
+        dates,
+        setDates,
     } = useSurveyDetail(idStr);
 
     const handleCancel = () => {
@@ -54,6 +58,33 @@ export default function SurveyDetailPage() {
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="설문 제목을 입력하세요"
                 />
+            </div>
+
+            {/* Date Section */}
+            <div className={styles.formGroup}>
+                <label className={styles.label}>설문 기간</label>
+                <div style={{ display: "flex", gap: "1rem" }}>
+                    <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: "0.9rem", color: "#666" }}>시작일시</span>
+                        <input
+                            type="datetime-local"
+                            className={styles.inputTitle}
+                            style={{ marginTop: "4px" }}
+                            value={dates?.startAt?.replace(" ", "T") || ""}
+                            onChange={(e) => setDates(prev => prev ? { ...prev, startAt: e.target.value } : { startAt: e.target.value, endAt: "" })}
+                        />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: "0.9rem", color: "#666" }}>종료일시</span>
+                        <input
+                            type="datetime-local"
+                            className={styles.inputTitle}
+                            style={{ marginTop: "4px" }}
+                            value={dates?.endAt?.replace(" ", "T") || ""}
+                            onChange={(e) => setDates(prev => prev ? { ...prev, endAt: e.target.value } : { startAt: "", endAt: e.target.value })}
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Target Selection Section - Only for New Surveys */}
