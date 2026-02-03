@@ -9,6 +9,7 @@ import type { AccountLogListItem } from "../types";
 const PAGE_SIZE = 10;
 
 type UiAccountRow = {
+  accountId: number;
   loginId: string;
   role: string;
   name: string;
@@ -52,6 +53,7 @@ export default function AccountLogListPage() {
   ====================== */
   const rows: UiAccountRow[] = useMemo(() => {
     return items.map<UiAccountRow>((a) => ({
+      accountId: a.accountId,
       loginId: a.loginId,
       role: a.accountType,
       name: a.name,
@@ -131,9 +133,7 @@ export default function AccountLogListPage() {
                 <td>
                   <Link
                     className={styles.link}
-                    href={`/system-status/account-logs/${encodeURIComponent(
-                      a.loginId
-                    )}`}
+                    href={`/admin/system-status/account-logs/${a.accountId}`}
                   >
                     {a.loginId}
                   </Link>
@@ -183,9 +183,8 @@ export default function AccountLogListPage() {
             return (
               <button
                 key={n}
-                className={`${styles.pageNum} ${
-                  n === safePage ? styles.pageNumActive : ""
-                }`}
+                className={`${styles.pageNum} ${n === safePage ? styles.pageNumActive : ""
+                  }`}
                 onClick={() => setPage(n)}
               >
                 {n}

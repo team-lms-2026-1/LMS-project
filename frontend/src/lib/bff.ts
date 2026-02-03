@@ -29,6 +29,21 @@ function getAccessToken() {
   return cookies().get("access_token")?.value;
 }
 
+function getClientIp(req: Request): string {
+  // Try to get real IP from various headers (for proxy scenarios)
+  const headers = req.headers;
+  const forwarded = headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+  const realIp = headers.get("x-real-ip");
+  if (realIp) {
+    return realIp;
+  }
+  // Fallback - in Next.js, this might be proxied
+  return "unknown";
+}
+
 async function readTextSafe(res: Response) {
   try {
     return await res.text();
@@ -67,18 +82,18 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
   const qs = forwardQuery ? new URL(req.url).search : "";
   const url = `${base.replace(/\/+$/, "")}${upstreamPath}${qs}`;
 
+  const clientIp = getClientIp(req);
+
   const res = await fetch(url, {
     method: options.method ?? "GET",
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
+      "X-Forwarded-For": clientIp,
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...(options.headers ?? {}),
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
-
-
-    // 여기 수정!! revalidate 쓰기 위해서
 
     cache: options.cache ?? "force-cache",
     next: options.next,
@@ -125,6 +140,8 @@ export async function proxyStreamToBackend(req: Request, options: StreamProxyOpt
   const qs = forwardQuery ? new URL(req.url).search : "";
   const upstreamUrl = `${base.replace(/\/+$/, "")}${options.upstreamPath}${qs}`;
 
+  const clientIp = getClientIp(req);
+
   const headers = new Headers(req.headers);
   headers.delete("host");
   headers.delete("connection");
@@ -132,11 +149,18 @@ export async function proxyStreamToBackend(req: Request, options: StreamProxyOpt
   headers.delete("cookie");
   headers.delete("accept-encoding");
   headers.set("Authorization", `Bearer ${token}`);
+  headers.set("X-Forwarded-For", clientIp);
 
   const init: any = { method, headers, cache: "no-store" };
   if (withBody) {
-    init.body = req.body;
-    init.duplex = "half";
+    const contentType = req.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const bodyText = await req.text();
+      init.body = bodyText;
+    } else {
+      init.body = req.body;
+      init.duplex = "half";
+    }
   }
 
   const res = await fetch(upstreamUrl, init);
