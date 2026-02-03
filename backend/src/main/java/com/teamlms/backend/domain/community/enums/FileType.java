@@ -21,9 +21,11 @@ public enum FileType {
             return IMAGE;
         } else if (contentType.contains("pdf") || contentType.contains("word") || contentType.contains("hwp")) {
             return DOCUMENT;
-        } else if (contentType.startsWith("video")) {
+        } // [수정] mp4 등 구체적인 비디오 포맷 명시 추가
+        else if (contentType.startsWith("video") || contentType.contains("mp4") || contentType.contains("avi") || contentType.contains("mov") || contentType.contains("quicktime") || contentType.contains("wmv")) {
             return VIDEO;
         }
+        
         return ETC;
     }
 }

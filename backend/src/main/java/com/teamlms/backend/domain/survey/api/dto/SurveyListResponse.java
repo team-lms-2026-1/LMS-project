@@ -16,9 +16,14 @@ public class SurveyListResponse {
     private SurveyType type;
     private String title;
     private SurveyStatus status;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime startAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endAt;
+
+    private Long viewCount;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime createdAt;
 }
