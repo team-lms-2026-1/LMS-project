@@ -13,7 +13,7 @@ export type PageMeta = {
     sort: string[];
 };
 
-export type RentalStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELED";
+export type RentalStatus = "REQUESTED" | "APPROVED" | "REJECTED" | "CANCELED";
 
 export type RentalDto = {
     rentalId: number;
