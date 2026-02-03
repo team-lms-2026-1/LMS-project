@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +187,54 @@ public class SurveyQueryService {
             }
         }
 
+        // --- 문항별 통계 상세 집계 ---
+        List<SurveyQuestion> questions = questionRepository.findBySurveyIdOrderBySortOrderAsc(surveyId);
+        List<SurveyTarget> submittedTargets = (submitted > 0)
+                ? targetRepository.findAllBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED)
+                : new ArrayList<>();
+
+        List<SurveyStatsResponse.QuestionStats> questionStatsList = new ArrayList<>();
+
+        for (SurveyQuestion q : questions) {
+            Map<String, Long> answerCounts = new HashMap<>();
+            List<String> essayAnswers = new ArrayList<>();
+
+            for (SurveyTarget t : submittedTargets) {
+                Map<String, Object> responses = t.getResponseJson();
+                if (responses == null)
+                    continue;
+
+                Object answer = responses.get(String.valueOf(q.getId()));
+                if (answer == null)
+                    continue;
+
+                if (q.getQuestionType() == com.teamlms.backend.domain.survey.enums.SurveyQuestionType.ESSAY) {
+                    essayAnswers.add(answer.toString());
+                } else if (q
+                        .getQuestionType() == com.teamlms.backend.domain.survey.enums.SurveyQuestionType.MULTIPLE_CHOICE) {
+                    if (answer instanceof List) {
+                        List<?> selected = (List<?>) answer;
+                        for (Object opt : selected) {
+                            String key = opt.toString();
+                            answerCounts.put(key, answerCounts.getOrDefault(key, 0L) + 1);
+                        }
+                    }
+                } else {
+                    // RATING, SINGLE_CHOICE
+                    String key = answer.toString();
+                    answerCounts.put(key, answerCounts.getOrDefault(key, 0L) + 1);
+                }
+            }
+
+            questionStatsList.add(SurveyStatsResponse.QuestionStats.builder()
+                    .questionId(q.getId())
+                    .title(q.getQuestionText())
+                    .type(q.getQuestionType())
+                    .answerCounts(answerCounts)
+                    .essayAnswers(essayAnswers)
+                    .build());
+        }
+
         return SurveyStatsResponse.builder()
                 .surveyId(surveyId)
                 .title(survey.getTitle())
@@ -198,6 +247,7 @@ public class SurveyQueryService {
                 .responseByGrade(byGrade)
                 .responseByDept(byDept)
                 .createdAt(survey.getCreatedAt())
+                .questions(questionStatsList)
                 .build();
     }
 

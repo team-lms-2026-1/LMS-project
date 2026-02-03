@@ -5,6 +5,7 @@ import { getSurveyStats } from "@/features/surveys/service";
 import { SurveyStatsResponse } from "@/features/surveys/types";
 import { StatCard } from "@/features/surveys/components/StatCard";
 import { SurveyStatsChart } from "@/features/surveys/components/SurveyStatsChart";
+import { SurveyQuestionStats } from "@/features/surveys/components/SurveyQuestionStats";
 import styles from "./page.module.css";
 
 export default function SurveyStatsPage({ params }: { params: { id: string } }) {
@@ -39,6 +40,8 @@ export default function SurveyStatsPage({ params }: { params: { id: string } }) 
             </div>
 
             <SurveyStatsChart stats={stats} />
+
+            <SurveyQuestionStats questions={stats.questions} />
         </div>
     );
 }

@@ -60,6 +60,14 @@ export interface SurveyDetailResponse {
   questions: QuestionResponseDto[];
 }
 
+export interface QuestionStats {
+  questionId: number;
+  title: string;
+  type: SurveyQuestionType;
+  answerCounts: Record<string, number>;
+  essayAnswers: string[];
+}
+
 export interface SurveyStatsResponse {
   surveyId: number;
   title: string;
@@ -72,6 +80,7 @@ export interface SurveyStatsResponse {
   responseByDept: Record<string, number>;
   responseByGrade: Record<string, number>;
   createdAt: string;
+  questions: QuestionStats[];
 }
 
 // Request DTOs
