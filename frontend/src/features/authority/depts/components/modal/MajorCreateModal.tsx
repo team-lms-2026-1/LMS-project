@@ -6,7 +6,7 @@ import styles from "./MajorCreateModal.module.css";
 import { Modal } from "@/components/modal";
 import { Button } from "@/components/button";
 import { ToggleSwitch } from "@/components/toggle";
-import { getJson } from "@/lib/http";
+import { createMajor } from "@/features/authority/depts/api/deptsApi";
 
 type Props = {
   deptId: string;
@@ -45,10 +45,13 @@ export default function MajorCreateModal({
         active: isActive,
       };
 
-      await getJson(`/api/bff/admin/depts/${deptId}/majors`, {
-        method: "POST",
-        body: JSON.stringify(body),
+      await createMajor(Number(deptId), {
+        majorName,
+        majorCode,
+        description,
+        active: isActive,
       });
+
 
       // 부모에게 "생성됨" 알리기
       onCreated?.();

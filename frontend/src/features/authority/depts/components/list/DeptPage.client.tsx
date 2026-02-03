@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./DeptPage.module.css"
-import { CurricularsTable } from "./DeptTable";
+import { DeptsTable } from "./DeptTable";
 import { OutButton } from "@/components/button/OutButton";
 import { useDeptList } from "../../hooks/useDeptList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
+import DeptCreatePage from "../modal/DeptCreatePage";
+import { updateDeptStatus } from "../../api/deptsApi";
 
 export default function DeptPageClient() {
   const { state, actions } = useDeptList();
@@ -17,6 +19,15 @@ export default function DeptPageClient() {
 
   const handleCreated = async () => {
     await actions.reload();
+    setPage(1);
+  };
+  const handleToggleStatus = async (deptId: number, nextActive: boolean) => {
+    try {
+      await updateDeptStatus(deptId, nextActive);
+      await actions.reload();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
@@ -56,11 +67,13 @@ export default function DeptPageClient() {
         </div>
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
-        <CurricularsTable
+        <DeptsTable
           items={state.items}
           loading={state.loading}
           onEditClick={(id) => setEditId(id)}
+          onToggleStatus={handleToggleStatus}
         />
+
 
         <div className={styles.footerRow}>
           <PaginationSimple
@@ -74,6 +87,12 @@ export default function DeptPageClient() {
           </OutButton>
         </div>
       </div>
+      {isModalOpen && (
+        <DeptCreatePage
+          onClose={() => setIsModalOpen(false)}
+          onCreated={handleCreated}
+        />
+      )}
     </div>
   )
 }

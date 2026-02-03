@@ -6,14 +6,16 @@ import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
 import styles from "./DeptTable.module.css";
+import { ToggleSwitch } from "@/components/toggle/ToggleSwitch";
 
 type Props = {
   items: DeptListItemDto[];
   loading: boolean;
   onEditClick: (id: number) => void;
+  onToggleStatus?: (id: number, nextActive: boolean) => void;
 };
 
-export function CurricularsTable({ items, loading, onEditClick }: Props) {
+export function DeptsTable({ items, loading, onEditClick, onToggleStatus }: Props) {
   const columns: Array<TableColumn<DeptListItemDto>> = [
     {
       header: "학과코드",
@@ -56,12 +58,18 @@ export function CurricularsTable({ items, loading, onEditClick }: Props) {
       header: "사용여부",
       align: "center",
       render: (r) => (
-        <StatusPill
-          status={r.isActive ? "ACTIVE" : "INACTIVE"}
-          label={r.isActive ? "활성" : "비활성"}
+        <ToggleSwitch
+          checked={r.isActive}
+          onChange={(next) => onToggleStatus?.(r.deptId, next)}
+          onLabel="on"
+          offLabel="off"
+          disabled={loading}
         />
       ),
     },
+
+
+
     {
       header: "관리",
       width: 140,

@@ -1,0 +1,87 @@
+/* frontend/src/features/authority/depts/styles/DeptCreate.module.css */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px 28px;
+  min-width: 420px;
+  max-width: 520px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.input,
+.textarea {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.error {
+  color: #e03131;
+  font-size: 13px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.cancelButton,
+.submitButton {
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+.cancelButton {
+  background: #f5f5f5;
+}
+
+.submitButton {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}

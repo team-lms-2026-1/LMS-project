@@ -14,29 +14,29 @@ export type PageMeta = {
 };
 
 
-export type MajorType= "PRIMARY" | "DOUBLE" | "MINOR" | string;
+export type MajorType = "PRIMARY" | "DOUBLE" | "MINOR" | string;
 
 /** DTO */
 export type DeptListItemDto = {
-            deptId: number;
-            deptCode: string;
-            deptName: string;
-            headProfessorName: string;
-            studentCount: number;
-            professorCount: number;
-            isActive: boolean;
+  deptId: number;
+  deptCode: string;
+  deptName: string;
+  headProfessorName: string;
+  studentCount: number;
+  professorCount: number;
+  isActive: boolean;
 }
-export type DeptListResponse = ApiResponse<DeptListItemDto[],PageMeta>;
-export type SuccessResponse = ApiResponse<{success: boolean},null>;
+export type DeptListResponse = ApiResponse<DeptListItemDto[], PageMeta>;
+export type SuccessResponse<T = { success: boolean }> = ApiResponse<T, null>;
 /** 상세 - 교수 DTO */
 export type DeptProfessorListItemDto = {
-            proId: string;            //교번
-            proName: string;          //이름
-            proEmail: string;         //이메일
-            proAdd: string;           //연락처
+  proId: string;            //교번
+  proName: string;          //이름
+  proEmail: string;         //이메일
+  proAdd: string;           //연락처
 }
 
-export type DeptProfessorListItemDtoResponse = ApiResponse<DeptProfessorListItemDto[],PageMeta>;
+export type DeptProfessorListItemDtoResponse = ApiResponse<DeptProfessorListItemDto[], PageMeta>;
 
 export type BackendProfessorItem = {
   accountId: number;
@@ -51,14 +51,14 @@ export type BackendProfessorListResponse = ApiResponse<BackendProfessorItem[], P
 
 /** 상세 - 학생 DTO */
 export type DeptStudentListItemDto = {
-            stuId: string;              //학번
-            stuName: string;            //이름
-            stuClass: number;           //학년
-            stuStatus: string;          //재학 상태
-            stuMajor: string            //전공명
+  stuId: string;              //학번
+  stuName: string;            //이름
+  stuClass: number;           //학년
+  stuStatus: string;          //재학 상태
+  stuMajor: string            //전공명
 }
 
-export type DeptStudentListItemDtoResponse = ApiResponse<DeptStudentListItemDto[],PageMeta>;
+export type DeptStudentListItemDtoResponse = ApiResponse<DeptStudentListItemDto[], PageMeta>;
 
 export type BackendStudentItem = {
   studentNo: string;
@@ -73,11 +73,11 @@ export type BackendStudentListResponse = ApiResponse<BackendStudentItem[], PageM
 
 /** 상세 - 전공 DTO */
 export type DeptMajorListItemDto = {
-            majName: string;
-            majCount: number;
+  majName: string;
+  majCount: number;
 }
 
-export type DeptmajorListItemDtoResponse = ApiResponse<DeptMajorListItemDto[],PageMeta>;
+export type DeptmajorListItemDtoResponse = ApiResponse<DeptMajorListItemDto[], PageMeta>;
 /**Response */
 export type BackendMajorItem = {
   majorId: number;
@@ -87,3 +87,20 @@ export type BackendMajorItem = {
 
 /** 백엔드 전공 목록 응답 */
 export type BackendMajorListResponse = ApiResponse<BackendMajorItem[], PageMeta>;
+// frontend/src/features/authority/depts/api/types.ts
+
+export type DeptCreateRequest = {
+  deptCode: string;
+  deptName: string;
+  description: string;
+  active: boolean;
+};
+
+export type MajorCreateRequest = {
+  majorCode: string;
+  majorName: string;
+  description: string;
+  active: boolean;
+};
+
+export type MajorCreateResponse = SuccessResponse<null>;

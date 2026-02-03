@@ -5,6 +5,7 @@ import {
   DeptListResponse,
   SuccessResponse,
   PageMeta,
+
   // 교수
   BackendProfessorListResponse,
   DeptProfessorListItemDto,
@@ -17,6 +18,10 @@ import {
   BackendMajorListResponse,
   DeptMajorListItemDto,
   DeptmajorListItemDtoResponse,
+
+  MajorCreateRequest,
+  DeptCreateRequest,
+  MajorCreateResponse,
 } from "./types";
 
 export type DeptListQuery = {
@@ -139,4 +144,32 @@ export async function fetchDeptMajorList(
   };
 
   return mapped;
+}
+
+export async function updateDeptStatus(
+  deptId: number,
+  active: boolean
+) {
+  return getJson(`/api/admin/authority/depts/${deptId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ active }),
+  });
+}
+
+
+export async function createDept(body: DeptCreateRequest) {
+  return getJson<SuccessResponse<null>>(`/api/admin/authority/depts`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function createMajor(
+  deptId: number,
+  body: MajorCreateRequest
+) {
+  return getJson<MajorCreateResponse>(`/api/admin/authority/depts/${deptId}/majors`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

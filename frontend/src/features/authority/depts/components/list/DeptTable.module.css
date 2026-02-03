@@ -17,3 +17,16 @@
 .editButton:hover {
   background-color: #eef2ff;
 }
+
+/* DeptTable.module.css */
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.toggleText {
+  font-size: 14px;
+}
