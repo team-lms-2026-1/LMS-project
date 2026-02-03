@@ -139,7 +139,7 @@ public class SurveyQueryService {
             List<Long> deptIds = profiles.stream().map(StudentProfile::getDeptId).distinct()
                     .collect(Collectors.toList());
             List<Dept> depts = deptRepository.findAllById(deptIds);
-            Map<Long, String> deptMap = depts.stream().collect(Collectors.toMap(Dept::getId, Dept::getDeptName));
+            Map<Long, String> deptMap = depts.stream().collect(Collectors.toMap(Dept::getDeptId, Dept::getDeptName));
 
             // 4. 집계
             for (StudentProfile p : profiles) {
