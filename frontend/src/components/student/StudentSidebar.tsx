@@ -70,63 +70,6 @@ type NavSection = { key: string; title: string; items: NavItem[] };
     },
   ];
 
-  {
-    key: "mypage",
-    title: "마이페이지",
-    items: [{ label: "마이 캘린더", href: "/student/mypage/calendar" }],
-  },
-  {
-    key: "survey",
-    title: "설문",
-    items: [
-      { label: "설문 목록", href: "/student/surveys" },
-    ],
-  },
-  {
-    key: "course",
-    title: "교과",
-    items: [
-      { label: "교과 정보 조회", href: "/student/course" },
-      { label: "성적 조회", href: "/student/course/grades" },
-    ],
-  },
-  {
-    key: "extra",
-    title: "비교과",
-    items: [
-      { label: "비교과 프로그램 신청", href: "/student/extra/apply" },
-      { label: "비교과 목록 조회", href: "/student/extra" },
-      { label: "비교과 수료 항목", href: "/student/extra/completions" },
-    ],
-  },
-  {
-    key: "mentoring",
-    title: "멘토링",
-    items: [
-      { label: "멘토링 신청", href: "/student/mentoring/apply" },
-      { label: "질문", href: "/student/mentoring/questions" },
-    ],
-  },
-  {
-    key: "competency",
-    title: "역량진단",
-    items: [
-      { label: "안내", href: "/student/competency/guide" },
-      { label: "진단목록", href: "/student/competency" },
-      { label: "결과 조회", href: "/student/competency/results" },
-    ],
-  },
-  {
-    key: "space",
-    title: "학습공간대여",
-    items: [
-      { label: "학습공간대여 및 신청", href: "/student/space" },
-      { label: "신청내역확인", href: "/student/space/history" },
-    ],
-  },
-];
-
-
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
