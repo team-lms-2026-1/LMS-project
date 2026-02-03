@@ -89,14 +89,11 @@ public enum ErrorCode {
     GRADE_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "GRADE_ALREADY_CONFIRMED", "이미 성적이 확정된 수강 정보는 수정할 수 없습니다.", "grade.already.confirmed"),
 
     // =========================
-<<<<<<< Updated upstream
     // Domain: ExtraCurricular
     // =========================
     EXTRA_CURRICULAR_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "EXTRA_CURRICULAR_CODE_ALREADY_EXISTS", "이미 사용 중인 비교과목 코드입니다.", "extra.curricular.code.alreadyExists"),
     EXTRA_CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_CURRICULAR_NOT_FOUND", "비교과목을 찾을 수 없습니다.", "extra.curricular.notFound"),
     // =========================
-=======
->>>>>>> Stashed changes
     // Domain: Competency
     // =========================
     COMPETENCY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPETENCY_NOT_FOUND", "역량 정보가 존재하지 않습니다.", "competency.notFound"),
