@@ -14,13 +14,10 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(
-    name = "survey_target",
-    indexes = {
+@Table(name = "survey_target", indexes = {
         @Index(name = "idx_target_user", columnList = "target_account_id, status"),
         @Index(name = "idx_target_unique", columnList = "survey_id, target_account_id", unique = true)
-    }
-)
+})
 public class SurveyTarget {
 
     @Id
@@ -45,15 +42,16 @@ public class SurveyTarget {
     private LocalDateTime submittedAt;
 
     // ✅ 응답 데이터: Map<문항ID(String), 점수(Integer)>
+
     // DB에는 JSONB(PostgreSQL) 또는 JSON(MySQL) 타입으로 저장됨
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "response_json", columnDefinition = "jsonb")
-    private Map<String, Integer> responseJson;
+    private Map<String, Object> responseJson;
 
     // 응답 제출 처리 메서드
-    public void submit(Map<String, Integer> responses) {
+    public void submit(Map<String, Object> responses) {
         this.responseJson = responses;
         this.status = SurveyTargetStatus.SUBMITTED;
         this.submittedAt = LocalDateTime.now();
     }
-}                                                                                                              
+}

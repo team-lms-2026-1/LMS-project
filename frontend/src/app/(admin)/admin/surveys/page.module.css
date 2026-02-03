@@ -1,0 +1,57 @@
+.container {
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 80vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.searchWrapper {
+  width: 300px;
+}
+
+.tableWrapper {
+  margin-bottom: 20px;
+}
+
+.actionCell {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.editBtn,
+.deleteBtn {
+  font-size: 13px;
+  padding: 6px 12px;
+  min-width: 60px;
+}
+
+.createBtnWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.paginationWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.statsBtn {
+  font-size: 13px;
+  padding: 6px 12px;
+}

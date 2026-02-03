@@ -91,7 +91,7 @@ public enum ErrorCode {
     ENROLLMENT_NOT_GRADEABLE(HttpStatus.CONFLICT, "ENROLLMENT_NOT_GRADEABLE", "취소된 수강 정보에는 성적을 입력할 수 없습니다.", "enrollment.not.gradeable"),
     GRADE_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "GRADE_ALREADY_CONFIRMED", "이미 성적이 확정된 수강 정보는 수정할 수 없습니다.", "grade.already.confirmed"),
     CURRICULAR_OFFERING_STATUS_LOCKED(HttpStatus.CONFLICT,"CURRICULAR_OFFERING_STATUS_LOCKED","이미 완료된 교과운영은 상태를 변경할 수 없습니다.", "curricular.offering.status.locked"),
-
+    ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS( HttpStatus.FORBIDDEN, "ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS", "현재 교과 운영 상태에서는 수강 신청을 취소할 수 없습니다.", "enrollment.cancel.notAllowedStatus" ),
     // =========================
     // Domain: ExtraCurricular
     // =========================

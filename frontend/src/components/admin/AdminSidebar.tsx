@@ -36,7 +36,10 @@ const SECTIONS: NavSection[] = [
   {
     key: "survey",
     title: "설문 통합 관리",
-    items: [{ label: "설문 목록", href: "/surveys" }],
+    items: [
+      { label: "설문 목록", href: "/admin/surveys" },
+      { label: "설문 통계", href: "/admin/survey-results" },
+    ],
   },
   {
     key: "personal",
@@ -52,8 +55,9 @@ const SECTIONS: NavSection[] = [
     key: "course",
     title: "교과 관리",
     items: [
-      { label: "교과 목록", href: "/admin/curricular/curriculars" },
-      { label: "교과운영 목록", href: "/admin/curricular/offerings" },
+      { label: "교과 관리", href: "/admin/curricular/curriculars" },
+      { label: "교과운영 관리", href: "/admin/curricular/offerings" },
+      { label: "교과성적 관리", href: "/admin/curricular/grade-reports" },
     ],
   },
   {

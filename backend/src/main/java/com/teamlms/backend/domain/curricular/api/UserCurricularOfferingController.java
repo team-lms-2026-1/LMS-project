@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingDetailResponse;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUserListItem;
+import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingItem;
 import com.teamlms.backend.domain.curricular.service.CurricularOfferingQueryService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
@@ -40,6 +41,24 @@ public class UserCurricularOfferingController {
                 curricularOfferingQueryService.listForUser(keyword, pageable);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
+    }
+
+    // 상세 ( 기본 )
+    @GetMapping(value = {"/api/v1/student/curriculars/{offeringId}", "/api/v1/professor/curriculars/{offeringId}"})
+    public ApiResponse<CurricularOfferingDetailResponse> detail(
+        @PathVariable Long offeringId
+    ) {
+        return ApiResponse.ok(
+        curricularOfferingQueryService.getDetail(offeringId)
+        );
+    }
+
+    // 상세 ( 역량 맵핑 )
+    @GetMapping(value = {"/api/v1/student/curriculars/{offeringId}/competency-mapping", "/api/v1/professor/curriculars/{offeringId}/competency-mapping"})
+    public ApiResponse<List<OfferingCompetencyMappingItem>> getMapping(
+            @PathVariable Long offeringId
+    ) {
+        return ApiResponse.ok(curricularOfferingQueryService.getMapping(offeringId));
     }
 }
 

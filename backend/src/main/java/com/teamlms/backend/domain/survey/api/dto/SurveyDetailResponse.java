@@ -18,7 +18,7 @@ public class SurveyDetailResponse {
     private String title;
     private String description;
     private SurveyStatus status;
-    
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime startAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
@@ -26,7 +26,8 @@ public class SurveyDetailResponse {
 
     private List<QuestionResponseDto> questions;
 
-    @Getter @Builder
+    @Getter
+    @Builder
     public static class QuestionResponseDto {
         private Long questionId;
         private String questionText;
@@ -35,6 +36,11 @@ public class SurveyDetailResponse {
         private Integer maxVal;
         private String minLabel;
         private String maxLabel;
+
         private Boolean isRequired;
+
+        // [New]
+        private com.teamlms.backend.domain.survey.enums.SurveyQuestionType questionType;
+        private List<String> options;
     }
 }
