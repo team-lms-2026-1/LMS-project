@@ -1,3 +1,5 @@
+import { Page } from "@/features/community/categories/api/types";
+
 export type ApiResponse<T, M = null> = {
   data: T;
   meta: M;
@@ -89,12 +91,56 @@ export type CurricularOfferingStudentListItemDto = {
   completionStatus: CompletionStatus;
 }
 
+export type CurricularOfferingGradeListItemDto = {
+  studentAccountId: number;
+  studentNo: number;
+  deptName: string;
+  gradeLevel: number;
+  name: string;
+  gpa: number;
+}
+
+export type StudentGradeTrendItemDto = {
+  semesterId: number;
+  semesterName: string;           // 예: "2026-2"
+  semesterGpa: number;            // Double -> number
+  semesterEarnedCredits: number;  // Long -> number
+};
+
+export type StudentGradeDetailHeaderDto = {
+  studentAccountId: number;
+  studentName: string;
+  studentNo: string;
+
+  deptId: number;
+  deptName: string;
+  gradeLevel: number;
+
+  maxSemesterGpa: number;
+  overallGpa: number;
+  totalEarnedCredits: number;
+
+  trend: StudentGradeTrendItemDto[];
+};
+
+export type StudentGradeDetailListDto = {
+  enrollmentId: number;
+  semesterId: number;
+  semesterName: string;
+  curricularCode: string;
+  curricularName: string;
+  credits: number;
+  grade: string;
+}
 
 /** Response */
 export type CurricularOfferingListResponse = ApiResponse<CurricularOfferingListItemDto[], PageMeta>;
 export type CurricularDetailFormResponse =ApiResponse<CurricularOfferingDetailDto, null>;
 export type CurricularOfferingCompetencyResponse = ApiResponse<CurricularOfferingCompetencyDto[], null>;
 export type CurricularOfferingStudentResponse = ApiResponse<CurricularOfferingStudentListItemDto[], PageMeta>
+export type CurricularOfferingGradeListResponse = ApiResponse<CurricularOfferingGradeListItemDto[], PageMeta>;
+export type StudentGradeDetailHeaderResponse = ApiResponse<StudentGradeDetailHeaderDto>;
+export type StudentGradeDetailListResponse = ApiResponse<StudentGradeDetailListDto[], PageMeta>;
 
 /** Request */
 export type CurricularOfferingCreateRequest = {

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.teamlms.backend.domain.curricular.api.dto.CurricularGradeListItem;
 import com.teamlms.backend.domain.curricular.api.dto.StudentCourseGradeListItem;
 import com.teamlms.backend.domain.curricular.api.dto.StudentGradeDetailHeaderResponse;
 
@@ -15,10 +16,11 @@ public interface StudentGradeReportRepositoryCustom {
     Page<StudentCourseGradeListItem> listCurricular(
             Long studentAccountId,
             Long semesterId,
-            Pageable pageable
+            Pageable pageable,
+            String keyword
     );
 
-    Page<StudentCourseGradeListItem> listCurricularGrade(
+    Page<CurricularGradeListItem> listCurricularGrade(
             Long deptId,
             String keyword,
             Pageable pageable

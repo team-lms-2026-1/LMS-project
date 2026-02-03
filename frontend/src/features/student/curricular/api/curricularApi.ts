@@ -1,7 +1,7 @@
 import { getJson } from "@/lib/http";
 import { SuccessResponse } from "@/features/curricular/api/types";
 import { CurricularEnrollmentListResponse, CurricularOfferingListResponse } from "./types";
-import { CurricularDetailFormResponse, CurricularOfferingCompetencyResponse } from "@/features/curricular-offering/api/types";
+import { CurricularDetailFormResponse, CurricularOfferingCompetencyResponse, StudentGradeDetailHeaderResponse, StudentGradeDetailListResponse } from "@/features/curricular-offering/api/types";
 
 export type CurricularOfferingsListQuery = {
   page?: number;
@@ -80,4 +80,35 @@ export async function fetchCurricularOfferingCompetency(id: number) {
   return getJson<CurricularOfferingCompetencyResponse>( url, {
       cache: "no-store"
   });
+}
+
+// grade detail-header
+export async function fetchCurricularGradeMeHeader() {
+  const url = `/api/student/curricular/grade-reports/me`
+  return getJson<StudentGradeDetailHeaderResponse>( url, {
+      cache: "no-store"
+  });
+}
+
+// grade detail-list
+export type CurricularGradeDetailListQuery = {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  semesterId?: number;
+};
+
+export async function fetchCurricularGradeMeList(query: CurricularGradeDetailListQuery) {
+  const sp = new URLSearchParams();
+  if (query.page) sp.set("page", String(query.page));
+  if (query.size) sp.set("size", String(query.size));
+  if (query.keyword) sp.set("keyword", query.keyword);
+  if (query.semesterId != null) {
+    sp.set("semesterId", String(query.semesterId));
+  }
+
+  const qs = sp.toString();
+  const url = qs ? `/api/student/curricular/grade-reports/me/list?${qs}` : `/api/student/curricular/grade-reports/me/list`;
+
+  return getJson<StudentGradeDetailListResponse>(url);
 }

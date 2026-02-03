@@ -27,7 +27,7 @@ public class StudentGradeReportQueryService {
         return repo.getDetailHeader(studentAccountId);
     }
 
-    public Page<StudentCourseGradeListItem> listCurricular(Long studentAccountId, Long semesterId, Pageable pageable) {
-        return repo.listCurricular(studentAccountId, semesterId, pageable);
+    public Page<StudentCourseGradeListItem> listCurricular(Long studentAccountId, Long semesterId, Pageable pageable, String keyword) {
+        return repo.listCurricular(studentAccountId, semesterId, pageable, keyword);
     }
 }

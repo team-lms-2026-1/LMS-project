@@ -31,6 +31,7 @@
         { label: "이수 신청", href: "/student/curricular/offerings" },
         { label: "이수 신청현황", href: "/student/curricular/enrollments" },
         { label: "이수중 교과", href: "/student/curricular/current-enrollments" },
+        { label: "교과 성적", href: "/student/curricular/grade-reports" },
       ],
     },
     {
