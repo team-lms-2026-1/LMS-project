@@ -1,0 +1,193 @@
+.page {
+    padding: 24px;
+    background-color: #f8f9fa;
+    /* Light background similar to design */
+    min-height: 100vh;
+    font-family: var(--font-inter, sans-serif);
+}
+
+/* Header */
+.headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.leftGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #555;
+    gap: 6px;
+}
+
+.homeIcon {
+    font-size: 16px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+}
+
+/* Search Bar */
+.searchBar {
+    display: flex;
+    gap: 8px;
+}
+
+.searchInput {
+    width: 240px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.searchBtn {
+    height: 40px;
+    padding: 0 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #333;
+}
+
+.searchBtn:hover {
+    background-color: #f0f0f0;
+}
+
+/* Table Card */
+.tableCard {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    /* Top border blue accent as per design maybe? Or just wrapper border */
+    /* The design shows a blue border around the table or card? */
+    /* Let's replicate the blue border style if exact match needed, but standard card is safer. */
+    /* Design seems to have a blue outline on the table container */
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tableBorderWrap {
+    border: 2px solid #3b82f6;
+    /* Blue border as shown in image */
+    border-radius: 6px;
+    margin: 0;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.thead {
+    background-color: #fafafa;
+    border-bottom: 1px solid #eee;
+}
+
+.th {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+
+.tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.tbody tr:last-child {
+    border-bottom: none;
+}
+
+.td {
+    padding: 16px;
+    font-size: 14px;
+    color: #444;
+    vertical-align: middle;
+}
+
+/* Status Buttons */
+.btnGroup {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.approveBtn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.approveBtn:hover {
+    background-color: #2563eb;
+}
+
+.rejectBtn {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.rejectBtn:hover {
+    background-color: #dc2626;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    gap: 8px;
+}
+
+.pageBtn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+}
+
+.pageBtn:hover {
+    background-color: #f5f5f5;
+}
+
+.pageBtn.active {
+    border-color: #a855f7;
+    /* Purple accent from existing design system or design? user image shows purple active page 1 */
+    color: #a855f7;
+    font-weight: bold;
+}

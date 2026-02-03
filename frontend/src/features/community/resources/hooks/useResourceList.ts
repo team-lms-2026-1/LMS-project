@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ResourceListItemDto, PageMeta } from "../api/types";
-import { fetchResourcesList } from "../api/ResourcesApi";
+import { fetchResourcesList } from "../api/resourcesApi";
 
 
 const defaultMeta: PageMeta = {
