@@ -107,6 +107,7 @@ public class StudyRentalQueryService {
                 .endTime(rental.getEndAt() != null ? rental.getEndAt().toLocalTime() : null)
                 .status(rental.getStatus())
                 .requestedAt(rental.getAppliedAt())
+                .rejectionReason(rental.getRejectionReason())
                 .space(rental.getStudyRoom() != null && rental.getStudyRoom().getStudySpace() != null
                         ? RentalResponse.SpaceSummary.builder()
                                 .spaceId(rental.getStudyRoom().getStudySpace().getId())
