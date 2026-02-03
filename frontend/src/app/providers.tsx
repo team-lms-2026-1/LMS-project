@@ -3,13 +3,19 @@
 
 import React from "react";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "@/features/auth/AuthProvider"; // 경로 맞춰
+import { AuthProvider } from "@/features/auth/AuthProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <AuthProvider>
       {children}
-      <Toaster position="top-center" />
+      {mounted && <Toaster position="top-center" />}
     </AuthProvider>
   );
 }
