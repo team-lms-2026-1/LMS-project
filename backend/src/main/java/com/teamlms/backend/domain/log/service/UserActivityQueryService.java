@@ -24,68 +24,76 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserActivityQueryService {
 
-    private final UserActivityListRepository userActivityListRepository;
-    private final AccountAccessLogRepository accountAccessLogRepository;
+        private final UserActivityListRepository userActivityListRepository;
+        private final AccountAccessLogRepository accountAccessLogRepository;
 
-    public Page<UserActivityListItem> list(String keyword, Pageable pageable) {
+        public Page<UserActivityListItem> list(String keyword, Pageable pageable) {
 
-        Page<UserActivityRow> rows =
-                userActivityListRepository.findUserActivityRows(keyword, pageable);
+                Page<UserActivityRow> rows = userActivityListRepository.findUserActivityRows(keyword, pageable);
 
-        return rows.map(r -> new UserActivityListItem(
-                r.getAccountId(),
-                r.getLoginId(),
-                r.getAccountType(),
-                r.getName(),
-                r.getLastActivityAt(),
-                Boolean.TRUE.equals(r.getIsOnline())
-        ));
-    }
+                return rows.map(r -> new UserActivityListItem(
+                                r.getAccountId(),
+                                r.getLoginId(),
+                                r.getAccountType(),
+                                r.getName(),
+                                r.getLastActivityAt(),
+                                Boolean.TRUE.equals(r.getIsOnline())));
+        }
 
-    public UserActivitySummary summary(String keyword) {
-        UserActivitySummaryRow row = userActivityListRepository.findSummary(keyword);
+        public UserActivitySummary summary(String keyword) {
+                UserActivitySummaryRow row = userActivityListRepository.findSummary(keyword);
 
-        long total = (row == null || row.getTotalAccounts() == null) ? 0L : row.getTotalAccounts();
-        long online = (row == null || row.getOnlineAccounts() == null) ? 0L : row.getOnlineAccounts();
+                long total = (row == null || row.getTotalAccounts() == null) ? 0L : row.getTotalAccounts();
+                long online = (row == null || row.getOnlineAccounts() == null) ? 0L : row.getOnlineAccounts();
 
-        return new UserActivitySummary(total, online);
-    }
-    /**
-     * 접근 로그 상세 (헤더 + 아이템 + meta용 page)
-     * - 사용 레포: UserActivityListRepository + AccountAccessLogRepository (2개)
-     */
-    public AccessLogDetailResult accessLogsDetail(Long accountId, Pageable pageable) {
+                return new UserActivitySummary(total, online);
+        }
 
-        UserHeaderRow headerRow = userActivityListRepository.findHeaderByAccountId(accountId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
+        /**
+         * 접근 로그 상세 (헤더 + 아이템 + meta용 page)
+         * - 사용 레포: UserActivityListRepository + AccountAccessLogRepository (2개)
+         */
+        public AccessLogDetailResult accessLogsDetail(Long accountId, java.time.LocalDate from, java.time.LocalDate to,
+                        String keyword, Pageable pageable) {
 
-        Page<AccountAccessLogRow> logPage =
-                accountAccessLogRepository.findPageByAccountId(accountId, pageable);
+                java.time.LocalDateTime fromDt = (from == null) ? null : from.atStartOfDay();
+                java.time.LocalDateTime toDt = (to == null) ? null : to.atTime(java.time.LocalTime.MAX);
+                String safeKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
 
-        UserAccessLogDetailResponse.Header header =
-                new UserAccessLogDetailResponse.Header(
-                        headerRow.getAccountId(),
-                        headerRow.getLoginId(),
-                        headerRow.getAccountType(),
-                        headerRow.getName()
-                );
+                UserHeaderRow headerRow = userActivityListRepository.findHeaderByAccountId(accountId)
+                                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
-        List<UserAccessLogDetailResponse.Item> items =
-                logPage.map(r -> new UserAccessLogDetailResponse.Item(
-                        r.getLogId(),
-                        r.getAccessedAt(),
-                        r.getAccessUrl(),
-                        r.getIp(),
-                        r.getOs()
-                )).getContent();
+                // 학과 정보는 별도 쿼리로 조회 (성능 개선)
+                String departmentName = userActivityListRepository.findDepartmentNameByAccountId(accountId)
+                                .orElse(null);
 
-        UserAccessLogDetailResponse data = new UserAccessLogDetailResponse(header, items);
+                // 디버깅용 로그 (실제 값 확인)
+                System.out.println("[DEBUG-LOG] accountId: " + accountId + " -> department: " + departmentName);
 
-        return new AccessLogDetailResult(data, logPage);
-    }
+                Page<AccountAccessLogRow> logPage = accountAccessLogRepository.findPageByAccountId(accountId, fromDt,
+                                toDt, safeKeyword, pageable);
 
-    public record AccessLogDetailResult(
-            UserAccessLogDetailResponse data,
-            Page<AccountAccessLogRow> page
-    ) {}
+                UserAccessLogDetailResponse.Header header = new UserAccessLogDetailResponse.Header(
+                                headerRow.getAccountId(),
+                                headerRow.getLoginId(),
+                                headerRow.getAccountType(),
+                                headerRow.getName(),
+                                departmentName); // 별도로 조회한 학과명 사용
+
+                List<UserAccessLogDetailResponse.Item> items = logPage.map(r -> new UserAccessLogDetailResponse.Item(
+                                r.getLogId(),
+                                r.getAccessedAt(),
+                                r.getAccessUrl(),
+                                r.getIp(),
+                                r.getOs())).getContent();
+
+                UserAccessLogDetailResponse data = new UserAccessLogDetailResponse(header, items);
+
+                return new AccessLogDetailResult(data, logPage);
+        }
+
+        public record AccessLogDetailResult(
+                        UserAccessLogDetailResponse data,
+                        Page<AccountAccessLogRow> page) {
+        }
 }

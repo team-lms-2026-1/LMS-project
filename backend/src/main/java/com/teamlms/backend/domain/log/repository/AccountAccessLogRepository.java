@@ -21,36 +21,32 @@ public interface AccountAccessLogRepository extends JpaRepository<AccountAccessL
 
     // 엑셀 export
     @Query(value = """
-        SELECT *
-        FROM account_access_log
-        WHERE accessed_at >= :from AND accessed_at <= :to
-        ORDER BY accessed_at DESC
-        LIMIT :limit
-        """, nativeQuery = true)
+            SELECT *
+            FROM account_access_log
+            WHERE accessed_at >= :from AND accessed_at <= :to
+            ORDER BY accessed_at DESC
+            LIMIT :limit
+            """, nativeQuery = true)
     List<AccountAccessLog> findForExport(
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
-            @Param("limit") int limit
-    );
+            @Param("limit") int limit);
 
     @Query(value = """
-        SELECT *
-        FROM account_access_log
-        WHERE account_id = :accountId
-          AND accessed_at >= :from AND accessed_at <= :to
-        ORDER BY accessed_at DESC
-        LIMIT :limit
-        """, nativeQuery = true)
+            SELECT *
+            FROM account_access_log
+            WHERE account_id = :accountId
+              AND accessed_at >= :from AND accessed_at <= :to
+            ORDER BY accessed_at DESC
+            LIMIT :limit
+            """, nativeQuery = true)
     List<AccountAccessLog> findForExportByAccountId(
             @Param("accountId") Long accountId,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
-            @Param("limit") int limit
-    );
+            @Param("limit") int limit);
 
-    // 상세
-    @Query(
-        value = """
+    @Query(value = """
             SELECT
             log_id AS logId,
             accessed_at AS accessedAt,
@@ -59,19 +55,33 @@ public interface AccountAccessLogRepository extends JpaRepository<AccountAccessL
             os AS os
             FROM account_access_log
             WHERE account_id = :accountId
+              AND accessed_at >= COALESCE(:from, '1970-01-01'::timestamp)
+              AND accessed_at <= COALESCE(:to, '2099-12-31'::timestamp)
+              AND (
+                :keyword IS NULL
+                OR :keyword = ''
+                OR access_url LIKE CONCAT('%', :keyword, '%')
+                OR ip LIKE CONCAT('%', :keyword, '%')
+              )
             ORDER BY accessed_at DESC
-            """,
-        countQuery = """
+            """, countQuery = """
             SELECT COUNT(*)
             FROM account_access_log
             WHERE account_id = :accountId
-            """,
-        nativeQuery = true
-    )
+              AND accessed_at >= COALESCE(:from, '1970-01-01'::timestamp)
+              AND accessed_at <= COALESCE(:to, '2099-12-31'::timestamp)
+              AND (
+                :keyword IS NULL
+                OR :keyword = ''
+                OR access_url LIKE CONCAT('%', :keyword, '%')
+                OR ip LIKE CONCAT('%', :keyword, '%')
+              )
+            """, nativeQuery = true)
     Page<AccountAccessLogRow> findPageByAccountId(
             @Param("accountId") Long accountId,
-            Pageable pageable
-    );
-
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("keyword") String keyword,
+            Pageable pageable);
 
 }

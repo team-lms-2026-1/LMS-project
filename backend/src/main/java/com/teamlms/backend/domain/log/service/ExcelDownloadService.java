@@ -35,10 +35,18 @@ public class ExcelDownloadService {
         validate(req);
 
         // 감사 로그용: "요청 조건 그대로" 저장
-        String filterJson = toJson(req.getFilter());
+        String filterJson = "";
+        try {
+            filterJson = objectMapper.writeValueAsString(req.getFilter());
+        } catch (Exception e) {
+            System.err.println("[ERROR-EXPORT] serialization failed: " + e.getMessage());
+            filterJson = "{\"error\":\"serialization failed\"}";
+        }
 
+        System.out.println("[DEBUG-EXPORT] Fetching logs for resource: " + req.getResourceCode());
         // 현재는 ACCESS_LOG만 구현(원하면 LOGIN_LOG 등 추가 가능)
         List<AccountAccessLog> rows = fetchLogs(req);
+        System.out.println("[DEBUG-EXPORT] Fetched rows: " + (rows != null ? rows.size() : 0));
 
         byte[] fileBytes = buildAccessLogCsv(rows);
 
@@ -47,8 +55,7 @@ public class ExcelDownloadService {
                 actorAccountId,
                 req.getResourceCode(),
                 req.getReason(),
-                filterJson
-        );
+                filterJson);
 
         return fileBytes;
     }
@@ -82,7 +89,8 @@ public class ExcelDownloadService {
         }
 
         // to만 없으면 "현재"까지
-        if (from != null && to == null) to = LocalDateTime.now();
+        if (from != null && to == null)
+            to = LocalDateTime.now();
         // from만 없으면 "과거 무한"이 되므로 금지(정책)
         if (from == null) {
             throw new IllegalArgumentException("from is required when to is provided");
@@ -92,14 +100,6 @@ public class ExcelDownloadService {
             return accountAccessLogRepository.findForExportByAccountId(targetAccountId, from, to, EXPORT_LIMIT);
         }
         return accountAccessLogRepository.findForExport(from, to, EXPORT_LIMIT);
-    }
-
-    private String toJson(Object filter) {
-        try {
-            return objectMapper.writeValueAsString(filter);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("failed to serialize filter_json", e);
-        }
     }
 
     /**
@@ -112,13 +112,13 @@ public class ExcelDownloadService {
 
         for (AccountAccessLog r : rows) {
             sb.append(n(r.getLogId())).append(',')
-              .append(n(r.getAccountId())).append(',')
-              .append(csv(r.getAccessedAt())).append(',')
-              .append(csv(r.getAccessUrl())).append(',')
-              .append(csv(r.getIp())).append(',')
-              .append(csv(r.getOs())).append(',')
-              .append(csv(r.getUserAgent()))
-              .append('\n');
+                    .append(n(r.getAccountId())).append(',')
+                    .append(csv(r.getAccessedAt())).append(',')
+                    .append(csv(r.getAccessUrl())).append(',')
+                    .append(csv(r.getIp())).append(',')
+                    .append(csv(r.getOs())).append(',')
+                    .append(csv(r.getUserAgent()))
+                    .append('\n');
         }
 
         return sb.toString().getBytes(StandardCharsets.UTF_8);
@@ -132,10 +132,12 @@ public class ExcelDownloadService {
      * CSV 안전 처리: 쉼표/개행/따옴표 포함 시 쌍따옴표로 감싸고 따옴표 이스케이프
      */
     private String csv(Object v) {
-        if (v == null) return "";
+        if (v == null)
+            return "";
         String s = String.valueOf(v);
         boolean needQuote = s.contains(",") || s.contains("\n") || s.contains("\r") || s.contains("\"");
-        if (!needQuote) return s;
+        if (!needQuote)
+            return s;
         return "\"" + s.replace("\"", "\"\"") + "\"";
     }
 }
