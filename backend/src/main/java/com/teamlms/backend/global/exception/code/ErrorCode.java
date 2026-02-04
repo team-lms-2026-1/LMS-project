@@ -97,24 +97,16 @@ public enum ErrorCode {
     ENROLLMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "ENROLLMENT_ALREADY_EXISTS", "이미 수강 신청된 교과입니다.",
             "enrollment.already.exists"),
     OFFERING_CAPACITY_FULL(HttpStatus.CONFLICT, "OFFERING_CAPACITY_FULL", "수강 정원이 초과되었습니다.", "offering.capacity.full"),
-    OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE",
-            "완료된 교과 운영의 역량 맵핑은 수정할 수 없습니다.", "offering.competency.mapping.notEditable"),
-    OFFERING_COMPETENCY_WEIGHT_DUPLICATED(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_WEIGHT_DUPLICATED",
-            "중복된 역량 맵핑 점수가 있습니다.", "offering.competency.weight.duplicated"),
-    CURRICULAR_OFFERING_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_ALREADY_EXISTS",
-            "이미 해당 학기에 개설된 교과입니다.", "curricular.offering.already.exists"),
+    OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE", "완료된 교과 운영의 역량 맵핑은 수정할 수 없습니다.", "offering.competency.mapping.notEditable"),
+    OFFERING_COMPETENCY_WEIGHT_DUPLICATED(HttpStatus.CONFLICT, "OFFERING_COMPETENCY_WEIGHT_DUPLICATED", "중복된 역량 맵핑 점수가 있습니다.", "offering.competency.weight.duplicated"),
+    CURRICULAR_OFFERING_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_ALREADY_EXISTS", "이미 해당 학기에 개설된 교과입니다.", "curricular.offering.already.exists"),
 
-    OFFERING_NOT_GRADEABLE_STATUS(HttpStatus.CONFLICT, "OFFERING_NOT_GRADEABLE_STATUS", "점수입력 상태가 아닙니다.",
-            "offering.gradeinput.mismatch"),
-    ENROLLMENT_OFFERING_MISMATCH(HttpStatus.CONFLICT, "ENROLLMENT_OFFERING_MISMATCH", "해당 수강정보는 요청한 교과 운영에 속하지 않습니다.",
-            "enrollment.offering.mismatch"),
-    ENROLLMENT_NOT_GRADEABLE(HttpStatus.CONFLICT, "ENROLLMENT_NOT_GRADEABLE", "취소된 수강 정보에는 성적을 입력할 수 없습니다.",
-            "enrollment.not.gradeable"),
-    GRADE_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "GRADE_ALREADY_CONFIRMED", "이미 성적이 확정된 수강 정보는 수정할 수 없습니다.",
-            "grade.already.confirmed"),
-    CURRICULAR_OFFERING_STATUS_LOCKED(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_STATUS_LOCKED",
-            "이미 완료된 교과운영은 상태를 변경할 수 없습니다.", "curricular.offering.status.locked"),
-
+    OFFERING_NOT_GRADEABLE_STATUS (HttpStatus.CONFLICT, "OFFERING_NOT_GRADEABLE_STATUS", "점수입력 상태가 아닙니다.", "offering.gradeinput.mismatch"),
+    ENROLLMENT_OFFERING_MISMATCH(HttpStatus.CONFLICT, "ENROLLMENT_OFFERING_MISMATCH", "해당 수강정보는 요청한 교과 운영에 속하지 않습니다.", "enrollment.offering.mismatch"),
+    ENROLLMENT_NOT_GRADEABLE(HttpStatus.CONFLICT, "ENROLLMENT_NOT_GRADEABLE", "취소된 수강 정보에는 성적을 입력할 수 없습니다.", "enrollment.not.gradeable"),
+    GRADE_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "GRADE_ALREADY_CONFIRMED", "이미 성적이 확정된 수강 정보는 수정할 수 없습니다.", "grade.already.confirmed"),
+    CURRICULAR_OFFERING_STATUS_LOCKED(HttpStatus.CONFLICT,"CURRICULAR_OFFERING_STATUS_LOCKED","이미 완료된 교과운영은 상태를 변경할 수 없습니다.", "curricular.offering.status.locked"),
+    ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS( HttpStatus.FORBIDDEN, "ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS", "현재 교과 운영 상태에서는 수강 신청을 취소할 수 없습니다.", "enrollment.cancel.notAllowedStatus" ),
     // =========================
     // Domain: ExtraCurricular
     // =========================

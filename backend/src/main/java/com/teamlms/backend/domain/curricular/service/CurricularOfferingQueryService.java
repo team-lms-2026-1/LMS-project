@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingDetailResponse;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUserListItem;
+import com.teamlms.backend.domain.curricular.api.dto.EnrollListItem;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingItem;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingStudentListItem;
 import com.teamlms.backend.domain.curricular.repository.CurricularOfferingCompetencyMapRepository;

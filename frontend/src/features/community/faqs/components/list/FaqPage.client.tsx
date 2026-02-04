@@ -43,7 +43,7 @@ export default function FaqPageClient() {
 
   const goCategoryManage = () => {
     // ✅ 카테고리 관리 주소 (프로젝트 라우트에 맞게 수정)
-    // router.push("/admin/community/faqs/categories");
+    router.push("/admin/community/faqs/categories");
   };
 
   return (

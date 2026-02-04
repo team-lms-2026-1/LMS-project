@@ -1,23 +1,14 @@
 .page {
-  padding: 24px;
-  background: #f6f7fb;
-  min-height: calc(100vh - 60px);
+  padding: 20px 24px;
 }
 
-.card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 18px 18px 16px;
-}
-
-/* 상단: breadcrumb + 우측 목록으로 */
+/* ===== 상단 breadcrumb (수정화면용) ===== */
 .breadcrumbRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
   margin-bottom: 10px;
+  gap: 10px;
 }
 
 .breadcrumb {
@@ -34,7 +25,7 @@
 }
 
 .crumb:hover {
-  color: #374151;
+  color: #111827;
   text-decoration: underline;
 }
 
@@ -48,17 +39,25 @@
 }
 
 .title {
-  margin: 8px 0 14px;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   color: #111827;
+  margin: 0 0 10px;
+}
+
+/* ===== 카드 ===== */
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
 }
 
 /* 로딩/에러 */
 .loadingBox {
-  padding: 18px;
+  padding: 12px;
   border: 1px dashed #d1d5db;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #fafafa;
   font-size: 13px;
   color: #6b7280;
@@ -70,46 +69,45 @@
   border: 1px solid #fecaca;
   background: #fff1f2;
   color: #b91c1c;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 13px;
 }
 
-/* 본문 박스 */
+/* ===== 본문 박스(등록창 formTable 느낌) ===== */
 .detailBox {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border: 1px solid #d1d5db;
   background: #fff;
-  overflow: hidden;
 }
 
-/* 헤더(카테고리 배지 + 제목 입력) */
+/* 상단: 배지 + 제목 입력 */
 .headRow {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 14px 10px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
+  height: 26px;
+  padding: 0 10px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 800;
-  line-height: 1.8;
+  line-height: 1;
   white-space: nowrap;
 }
 
 .headTitleInput {
+  height: 30px;
   flex: 1;
-  height: 36px;
+  min-width: 0;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 0 12px;
-  font-size: 14px;
-  font-weight: 700;
+  border-radius: 4px;
+  padding: 0 10px;
+  font-size: 13px;
   outline: none;
   background: #fff;
 }
@@ -119,14 +117,14 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
-/* 메타 + 카테고리 셀렉트 */
+/* 메타 줄(등록창 row/grid 톤) */
 .metaRow {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  padding: 12px 14px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fafafa;
+  padding: 10px 12px;
+  border-bottom: 1px solid #d1d5db;
+  background: #fff;
 }
 
 .metaItem {
@@ -138,29 +136,29 @@
 
 .metaLabel {
   font-size: 12px;
-  color: #6b7280;
-  font-weight: 800;
+  font-weight: 700;
+  color: #111827;
   white-space: nowrap;
 }
 
 .metaValue {
   font-size: 13px;
   color: #111827;
-  font-weight: 700;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .categorySelect {
-  height: 32px;
+  height: 30px;
+  width: 160px;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 0 10px;
   font-size: 13px;
-  background: #fff;
   outline: none;
-  min-width: 140px;
+  background: #fff;
 }
 
 .categorySelect:focus {
@@ -170,19 +168,19 @@
 
 /* 내용 */
 .contentBox {
-  padding: 14px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  border-bottom: 1px solid #d1d5db;
 }
 
 .contentTextarea {
   width: 100%;
-  min-height: 240px;
+  min-height: 180px;
   border: 1px solid #d1d5db;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 13px;
-  line-height: 1.6;
+  border-radius: 4px;
   outline: none;
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.55;
   resize: vertical;
   background: #fff;
 }
@@ -192,53 +190,151 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
-/* 첨부 */
+/* ===== 첨부 (등록창과 거의 동일) ===== */
 .attachBox {
-  padding: 14px;
+  padding: 10px 12px;
 }
 
 .attachRow {
   display: grid;
-  grid-template-columns: 70px 1fr;
+  grid-template-columns: 86px 1fr;
   gap: 12px;
   align-items: flex-start;
 }
 
 .attachLabel {
+  padding: 10px 0;
+  font-weight: 700;
   font-size: 13px;
-  font-weight: 800;
   color: #111827;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.attachList {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 12px;
+.attachWrap {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
   background: #fff;
 }
 
-.attachUl {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.attachTabs {
+  padding: 8px 10px;
+  border-bottom: 1px solid #d1d5db;
 }
 
-.attachLi {
+.tabActive {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 12px;
+  cursor: default;
+}
+
+.dropzone {
+  padding: 18px 10px;
+  border: 1px dashed #d1d5db;
+  margin: 10px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.dropText {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.uploadLink {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+}
+
+.uploadLink:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.maxSize {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.hiddenFile {
+  display: none;
+}
+
+/* 파일 리스트 */
+.fileList {
+  margin: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.fileItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #111827;
+  justify-content: space-between;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  gap: 10px;
 }
 
-.attachName {
-  font-weight: 600;
+.fileMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 420px;
+}
+
+.fileSize {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.fileLink {
+  font-size: 12px;
+  color: #2563eb;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.fileRemove {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fileRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .attachEmpty {
+  margin: 10px;
   font-size: 13px;
   color: #6b7280;
 }
@@ -248,12 +344,12 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding: 12px 14px 14px;
-  border-top: 1px solid #e5e7eb;
-  background: #fff;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d1d5db;
 }
 
-/* 반응형 */
+/* ===== 반응형 ===== */
 @media (max-width: 900px) {
   .metaRow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -261,6 +357,11 @@
 }
 
 @media (max-width: 520px) {
+  .breadcrumbRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .headRow {
     flex-direction: column;
     align-items: stretch;
@@ -272,5 +373,18 @@
 
   .attachRow {
     grid-template-columns: 1fr;
+  }
+
+  .attachLabel {
+    justify-content: flex-start;
+  }
+
+  .fileItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fileName {
+    max-width: 100%;
   }
 }
