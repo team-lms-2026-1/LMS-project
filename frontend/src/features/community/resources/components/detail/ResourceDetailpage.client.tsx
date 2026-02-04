@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./ResourceDetailPage.module.css";
 import type { ResourceListItemDto } from "../../api/types";
-import { fetchResourceDetail } from "../../api/ResourcesApi";
+import { fetchResourceDetail } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
 
 type LoadState =

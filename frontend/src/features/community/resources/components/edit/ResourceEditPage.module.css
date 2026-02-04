@@ -210,6 +210,139 @@
   color: #111827;
 }
 
+/* ✅ 등록 페이지 스타일: wrap/tabs/dropzone/fileList */
+.attachWrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.attachTabs {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.tabActive {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+  cursor: default;
+}
+
+.dropzone {
+  padding: 18px 12px;
+  margin: 12px;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+  text-align: center;
+  color: #6b7280;
+  background: #fafafa;
+}
+
+.dropText {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.uploadLink {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+}
+
+.uploadLink:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.maxSize {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.hiddenFile {
+  display: none;
+}
+
+/* 파일 리스트 */
+.fileList {
+  padding: 0 12px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.fileMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 520px;
+}
+
+.fileSize {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.fileLink {
+  font-size: 12px;
+  color: #2563eb;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.fileRemove {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fileRemove:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.fileRemove:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* 기존 스타일 호환(혹시 남아있으면) */
 .attachList {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -241,6 +374,7 @@
 .attachEmpty {
   font-size: 13px;
   color: #6b7280;
+  padding: 0 12px 12px;
 }
 
 /* 하단 버튼 */
@@ -272,5 +406,9 @@
 
   .attachRow {
     grid-template-columns: 1fr;
+  }
+
+  .fileName {
+    max-width: 260px;
   }
 }

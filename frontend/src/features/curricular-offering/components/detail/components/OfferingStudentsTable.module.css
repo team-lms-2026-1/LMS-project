@@ -17,3 +17,13 @@
 .editButton:hover {
   background-color: #eef2ff;
 }
+
+.scoreInput {
+  width: 72px;
+  height: 34px;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  padding: 0 10px;
+  text-align: center;
+  outline: none;
+}

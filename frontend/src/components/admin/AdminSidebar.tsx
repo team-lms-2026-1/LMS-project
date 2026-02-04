@@ -30,13 +30,16 @@ const SECTIONS: NavSection[] = [
   },
   {
     key: "system-status",
-    title: "시스템환경 관리",
-    items: [{ label: "계정로그관리", href: "/asmin/system-status" }],
+    title: "시스템현황 관리",
+    items: [{ label: "계정로그관리", href: "/admin/system-status/account-logs" }],
   },
   {
     key: "survey",
     title: "설문 통합 관리",
-    items: [{ label: "설문 목록", href: "/surveys" }],
+    items: [
+      { label: "설문 목록", href: "/admin/surveys" },
+      { label: "설문 통계", href: "/admin/survey-results" },
+    ],
   },
   {
     key: "personal",
@@ -52,8 +55,9 @@ const SECTIONS: NavSection[] = [
     key: "course",
     title: "교과 관리",
     items: [
-      { label: "교과 목록", href: "/admin/curricular/curriculars" },
-      { label: "교과운영 목록", href: "/admin/curricular/offerings" },
+      { label: "교과 관리", href: "/admin/curricular/curriculars" },
+      { label: "교과운영 관리", href: "/admin/curricular/offerings" },
+      { label: "교과성적 관리", href: "/admin/curricular/grade-reports" },
     ],
   },
   {

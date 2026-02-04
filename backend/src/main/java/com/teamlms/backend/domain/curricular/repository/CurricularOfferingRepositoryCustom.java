@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingDetailResponse;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUserListItem;
+import com.teamlms.backend.domain.curricular.api.dto.EnrollListItem;
 
 public interface CurricularOfferingRepositoryCustom {
 
@@ -21,4 +22,9 @@ public interface CurricularOfferingRepositoryCustom {
     );
 
     CurricularOfferingDetailResponse findOfferingDetail(Long offeringId);
+
+    Page<EnrollListItem> findOfferingEnrollList(Long accountId, Pageable pageable);
+    Page<EnrollListItem> findOfferingCurrentEnrollments(Long accountId, Pageable pageable);
+
+
 }

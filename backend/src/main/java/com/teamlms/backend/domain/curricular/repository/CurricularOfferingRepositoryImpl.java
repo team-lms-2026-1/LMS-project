@@ -1,5 +1,7 @@
 package com.teamlms.backend.domain.curricular.repository;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.*;
@@ -8,9 +10,11 @@ import org.springframework.stereotype.Repository;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingDetailResponse;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUserListItem;
+import com.teamlms.backend.domain.curricular.api.dto.EnrollListItem;
 import com.teamlms.backend.domain.curricular.enums.OfferingStatus;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 
@@ -197,9 +201,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
         query.setParameter(
             "visibleStatuses",
             List.of(
-                OfferingStatus.OPEN,
-                OfferingStatus.ENROLLMENT_CLOSED,
-                OfferingStatus.IN_PROGRESS
+                OfferingStatus.OPEN
             )
         );
 
@@ -269,4 +271,170 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
                 .setParameter("offeringId", offeringId)
                 .getSingleResult();
     }
+    @Override
+    public Page<EnrollListItem> findOfferingEnrollList(
+            Long accountId,
+            Pageable pageable
+    ) {
+
+        String baseJpql = """
+            from Enrollment e
+            join CurricularOffering o on o.offeringId = e.offeringId
+            join Curricular c on c.curricularId = o.curricularId
+            join Semester s on s.semesterId = o.semesterId
+            join ProfessorProfile p on p.accountId = o.professorAccountId
+
+            left join CurricularOfferingCompetencyMap m
+                on m.id.offeringId = o.offeringId
+            left join Competency comp
+                on comp.competencyId = m.id.competencyId
+        """;
+
+        String where = """
+            where e.studentAccountId = :accountId
+            and e.enrollmentStatus =
+                com.teamlms.backend.domain.curricular.enums.EnrollmentStatus.ENROLLED
+            and o.status in (
+                com.teamlms.backend.domain.curricular.enums.OfferingStatus.OPEN,
+                com.teamlms.backend.domain.curricular.enums.OfferingStatus.ENROLLMENT_CLOSED
+            )
+        """;
+
+        String groupBy = """
+            group by
+                o.offeringId,
+                o.offeringCode,
+                c.curricularName,
+                o.capacity,
+                p.name,
+                s.displayName,
+                c.credits
+        """;
+
+        String orderBy = " order by max(e.createdAt) desc";
+
+        // ================= content =================
+        String contentJpql = """
+            select new com.teamlms.backend.domain.curricular.api.dto.EnrollListItem(
+                o.offeringId,
+                o.offeringCode,
+                c.curricularName,
+                o.capacity,
+                p.name,
+                s.displayName,
+                c.credits,
+
+                count(distinct e.enrollmentId),
+
+                max(case when m.weight = 6 then comp.name else null end),
+                max(case when m.weight = 5 then comp.name else null end)
+            )
+        """ + baseJpql + where + groupBy + orderBy;
+
+        TypedQuery<EnrollListItem> contentQuery =
+                em.createQuery(contentJpql, EnrollListItem.class);
+
+        contentQuery.setParameter("accountId", accountId);
+        contentQuery.setFirstResult((int) pageable.getOffset());
+        contentQuery.setMaxResults(pageable.getPageSize());
+
+        List<EnrollListItem> content = contentQuery.getResultList();
+
+        // ================= count =================
+        String countJpql = """
+            select count(distinct o.offeringId)
+        """ + baseJpql + where;
+
+        TypedQuery<Long> countQuery =
+                em.createQuery(countJpql, Long.class);
+
+        countQuery.setParameter("accountId", accountId);
+
+        long total = countQuery.getSingleResult();
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public Page<EnrollListItem> findOfferingCurrentEnrollments(
+            Long accountId,
+            Pageable pageable
+    ) {
+
+        String baseJpql = """
+            from Enrollment e
+            join CurricularOffering o on o.offeringId = e.offeringId
+            join Curricular c on c.curricularId = o.curricularId
+            join Semester s on s.semesterId = o.semesterId
+            join ProfessorProfile p on p.accountId = o.professorAccountId
+
+            left join CurricularOfferingCompetencyMap m
+                on m.id.offeringId = o.offeringId
+            left join Competency comp
+                on comp.competencyId = m.id.competencyId
+        """;
+
+        String where = """
+            where e.studentAccountId = :accountId
+            and e.enrollmentStatus =
+                com.teamlms.backend.domain.curricular.enums.EnrollmentStatus.ENROLLED
+            and o.status =
+                com.teamlms.backend.domain.curricular.enums.OfferingStatus.IN_PROGRESS
+        """;
+
+        String groupBy = """
+            group by
+                o.offeringId,
+                o.offeringCode,
+                c.curricularName,
+                o.capacity,
+                p.name,
+                s.displayName,
+                c.credits
+        """;
+
+        String orderBy = " order by max(e.createdAt) desc";
+
+        // ================= content =================
+        String contentJpql = """
+            select new com.teamlms.backend.domain.curricular.api.dto.EnrollListItem(
+                o.offeringId,
+                o.offeringCode,
+                c.curricularName,
+                o.capacity,
+                p.name,
+                s.displayName,
+                c.credits,
+
+                count(distinct e.enrollmentId),
+
+                max(case when m.weight = 6 then comp.name else null end),
+                max(case when m.weight = 5 then comp.name else null end)
+            )
+        """ + baseJpql + where + groupBy + orderBy;
+
+        TypedQuery<EnrollListItem> contentQuery =
+                em.createQuery(contentJpql, EnrollListItem.class);
+
+        contentQuery.setParameter("accountId", accountId);
+        contentQuery.setFirstResult((int) pageable.getOffset());
+        contentQuery.setMaxResults(pageable.getPageSize());
+
+        List<EnrollListItem> content = contentQuery.getResultList();
+
+        // ================= count =================
+        String countJpql = """
+            select count(distinct o.offeringId)
+        """ + baseJpql + where;
+
+        TypedQuery<Long> countQuery =
+                em.createQuery(countJpql, Long.class);
+
+        countQuery.setParameter("accountId", accountId);
+
+        long total = countQuery.getSingleResult();
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
 }

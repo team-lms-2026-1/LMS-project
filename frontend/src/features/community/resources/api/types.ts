@@ -14,17 +14,17 @@ export type PageMeta = {
 };
 
 export type FileType = "IMAGE" | "DOCUMENT" | "VIDEO" | "ETC" | string;
-
 export type NoticeStatus = "SCHEDULED" | "ONGOING" | "ENDED" | string;
-
 export type SearchType = "TITLE" | "CONTENT" | "TITLE_OR_CONTENT" | "WRITER" | string;
 
-export type Category = {
-  categoryId : number;
-  name : string;
-  bgColorHex : string;
-  textColorHex : string;
-}
+  export type HexColor = `#${string}`;
+
+  export type Category = {
+    categoryId: number;
+    name: string;
+    bgColorHex: HexColor;
+    textColorHex: HexColor;
+  };
 
 /** DTO */
 export type ResourceListItemDto={
@@ -35,7 +35,7 @@ export type ResourceListItemDto={
     authorName : string;
     viewCount : number;
     createdAt : string;
-    files : []
+    files : any[]
 }
 
 export type CreateResourceRequestDto = {
@@ -46,11 +46,38 @@ export type CreateResourceRequestDto = {
   displayEndAt?: string | null;
 };
 
-// ✅ 수정 요청 DTO (Create와 동일 구조면 재사용 가능)
 export type UpdateResourceRequestDto = {
   title: string;
   content: string;
   categoryId?: number ;
+  deleteFileIds?: number[];
+};
+
+export type ResourceFileDto = {
+  // 삭제 식별자 후보 (백엔드가 둘 중 하나라도 내려줘야 삭제 가능)
+  fileId?: number;
+  id?: number; // 일부 백엔드가 id로 주는 경우 대비
+  storageKey?: string;
+
+  // 표시용 이름 후보
+  fileName?: string;
+  originalName?: string;
+  name?: string;
+
+  // 링크 후보
+  url?: string;
+  downloadUrl?: string;
+
+  // 부가 메타(있으면 활용)
+  fileType?: FileType;
+  size?: number;
+};
+
+export type ExistingFile = {
+  fileId?: number;
+  storageKey?: string;
+  fileName: string;
+  url?: string;
 };
 
 // ✅ 수정 응답 (백엔드가 success만 주면 SuccessResponse 쓰면 됨)

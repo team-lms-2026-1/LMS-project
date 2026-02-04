@@ -1,0 +1,199 @@
+.page {
+  padding: 24px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px;
+}
+
+/* ✅ 상세와 동일한 breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.crumb {
+  cursor: pointer;
+}
+.crumb:hover {
+  text-decoration: underline;
+}
+
+.sep {
+  color: #9ca3af;
+}
+
+.current {
+  color: #111827;
+  font-weight: 700;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 14px 0;
+}
+
+.errorMessage {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.loadingBox {
+  padding: 18px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ✅ 상세의 detailBox 톤 그대로 "편집 폼 박스" */
+.formBox {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ✅ 헤더(카테고리 배지 + 제목 입력) */
+.headRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.titleInput {
+  flex: 1;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  font-weight: 800;
+  font-size: 13px;
+  outline: none;
+}
+
+.titleInput:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ✅ 메타 row(분류 select) - 상세 metaRow와 동일한 구조 */
+.metaRow {
+  display: flex;
+  gap: 18px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  align-items: center;
+}
+
+.metaLabel {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.metaValue {
+  color: #111827;
+  font-weight: 700;
+}
+
+.categorySelect {
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 0 10px;
+  outline: none;
+}
+
+.categorySelect:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ✅ 내용 영역 - 상세 contentBox 느낌 유지 */
+.contentBox {
+  padding: 14px;
+  background: #fff;
+  min-height: 220px;
+}
+
+.contentTextarea {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+  color: #111827;
+  line-height: 1.7;
+  outline: none;
+  resize: vertical;
+  background: #fff;
+}
+
+.contentTextarea:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ✅ 하단 버튼 row - 상세 footerRow 톤 그대로 */
+.footerRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+/* (선택) 모바일에서 metaRow 줄바꿈 자연스럽게 */
+@media (max-width: 640px) {
+  .headRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .titleInput {
+    width: 100%;
+  }
+
+  .footerRow {
+    flex-direction: column;
+  }
+}
