@@ -10,7 +10,7 @@ const BASE = "/api/student/study-space/spaces-rentals";
 const AUTH_ME = "/api/auth/me";
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, { ...init, credentials: "include" });
+  const res = await fetch(url, { ...init, credentials: "include", cache: "no-store", });
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");

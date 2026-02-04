@@ -5,8 +5,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const BACKEND_BASE = "/api/v1/student/spaces-rentals";
-
-/** ✅ 목록 캐시 태그 */
 const TAG = "student:rentals";
 
 /** ✅ 목록 조회 */
@@ -19,6 +17,7 @@ export async function GET(req: Request) {
   });
 }
 
+/** ✅ 신청(생성) */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
 
@@ -29,9 +28,6 @@ export async function POST(req: Request) {
     cache: "no-store",
   });
 
-  if (res.status >= 200 && res.status < 300) {
-    revalidateTag(TAG);
-  }
-
+  if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
   return res;
 }
