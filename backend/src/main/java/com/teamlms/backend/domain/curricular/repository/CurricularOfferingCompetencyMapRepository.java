@@ -11,25 +11,27 @@ import com.teamlms.backend.domain.curricular.entity.CurricularOfferingCompetency
 import com.teamlms.backend.domain.curricular.entity.CurricularOfferingCompetencyMapId;
 
 public interface CurricularOfferingCompetencyMapRepository
-        extends JpaRepository<CurricularOfferingCompetencyMap, CurricularOfferingCompetencyMapId>, CurricularOfferingCompetencyMapRepositoryCustom {
+    extends JpaRepository<CurricularOfferingCompetencyMap, CurricularOfferingCompetencyMapId>,
+    CurricularOfferingCompetencyMapRepositoryCustom {
 
-    List<CurricularOfferingCompetencyMap> findAllByIdOfferingId(Long offeringId);
+  List<CurricularOfferingCompetencyMap> findAllByIdOfferingId(Long offeringId);
 
-    void deleteAllByIdOfferingId(Long offeringId);
+  void deleteAllByIdOfferingId(Long offeringId);
 
-    long countByIdOfferingId(Long offeringId);
+  long countByIdOfferingId(Long offeringId);
 
-    // weight 1~6이 모두 존재하는지 체크용
-    @Query("""
-        select count(distinct m.weight)
-        from CurricularOfferingCompetencyMap m
-        where m.id.offeringId = :offeringId
-          and m.weight between 1 and 6
-    """)
-    long countDistinctWeight1to6(@Param("offeringId") Long offeringId);
+  // weight 1~6이 모두 존재하는지 체크용
+  @Query("""
+          select count(distinct m.weight)
+          from CurricularOfferingCompetencyMap m
+          where m.id.offeringId = :offeringId
+            and m.weight between 1 and 6
+      """)
+  long countDistinctWeight1to6(@Param("offeringId") Long offeringId);
 
-    Optional<CurricularOfferingCompetencyMap>
-    findByIdOfferingIdAndWeight(Long offeringId, Integer weight);
+  Optional<CurricularOfferingCompetencyMap> findByIdOfferingIdAndWeight(Long offeringId, Integer weight);
 
-    void deleteByIdOfferingId(Long offeringId);
+  Optional<CurricularOfferingCompetencyMap> findByIdOfferingIdAndIdCompetencyId(Long offeringId, Long competencyId);
+
+  void deleteByIdOfferingId(Long offeringId);
 }
