@@ -206,7 +206,7 @@ export const accountsApi = {
 
   /** ✅ 학과 드롭다운 */
   async listDepts(): Promise<DeptDto[]> {
-    const res = await fetch("/api/authority/depts/dropdown", { cache: "no-store" });
+    const res = await fetch("/api/admin/authority/depts/dropdown", { cache: "no-store" });
     if (!res.ok) throw new Error("학과 목록 조회 실패");
 
     const json = await res.json();
@@ -220,7 +220,7 @@ export const accountsApi = {
 
   /** ✅ 주전공(학과 선택 -> 해당 학과 전공만) */
   async listMajorsByDept(deptId: number): Promise<MajorDto[]> {
-    const res = await fetch(`/api/authority/depts/${deptId}/majors/dropdown`, {
+    const res = await fetch(`/api/admin/authority/depts/${deptId}/majors/dropdown`, {
       cache: "no-store",
     });
     if (!res.ok) throw new Error("전공 목록 조회 실패");
@@ -238,7 +238,7 @@ export const accountsApi = {
   /** ✅ 부/복수전공: 학과 무관 전체 전공 */
   async listMajorsAll(): Promise<MajorDto[]> {
     // 프로젝트에 맞게 엔드포인트가 다르면 여기만 수정하면 됨
-    const res = await fetch(`/api/authority/majors/dropdown`, { cache: "no-store" });
+    const res = await fetch(`/api/admin/authority/majors/dropdown`, { cache: "no-store" });
     if (!res.ok) throw new Error("전체 전공 목록 조회 실패");
 
     const json = await res.json();

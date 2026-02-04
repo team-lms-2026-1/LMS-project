@@ -6,10 +6,15 @@ import { useRentalsList } from "../../hooks/useRentalsList";
 import RentalsTable from "./RentalsTable";
 import { SearchBar } from "@/components/searchbar";
 import { PaginationSimple } from "@/components/pagination";
+import RejectedModal from "../modal/RejectedModal";
 
 export default function RentalsPageClient() {
     const { data, meta, loading, updateParams, approveRental, rejectRental } = useRentalsList();
     const [keyword, setKeyword] = useState("");
+
+    // Modal State
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [selectedRentalId, setSelectedRentalId] = useState<number | null>(null);
 
     const onSearch = () => {
         updateParams({ keyword, page: 1 });
@@ -17,6 +22,21 @@ export default function RentalsPageClient() {
 
     const handlePageChange = (newPage: number) => {
         updateParams({ page: newPage });
+    };
+
+    // 반려 버튼 클릭 시 모달 오픈
+    const onRejectClick = (id: number) => {
+        setSelectedRentalId(id);
+        setRejectModalOpen(true);
+    };
+
+    // 모달에서 확인 클릭 시 실제 반려 처리
+    const onRejectConfirm = (reason: string) => {
+        if (selectedRentalId) {
+            rejectRental(selectedRentalId, reason);
+        }
+        setRejectModalOpen(false);
+        setSelectedRentalId(null);
     };
 
     return (
@@ -49,20 +69,27 @@ export default function RentalsPageClient() {
                     data={data}
                     loading={loading}
                     onApprove={approveRental}
-                    onReject={rejectRental}
+                    onReject={onRejectClick}
                 />
-
-                {/* Pagination (공용 컴포넌트) */}
-                {meta && (
-                    <div className={styles.pagination}>
-                        <PaginationSimple
-                            page={meta.page}
-                            totalPages={meta.totalPages}
-                            onChange={handlePageChange}
-                        />
-                    </div>
-                )}
             </div>
+
+            {/* Pagination (공용 컴포넌트) - Footer 위치로 이동 */}
+            {meta && (
+                <div className={styles.paginationFooter}>
+                    <PaginationSimple
+                        page={meta.page}
+                        totalPages={meta.totalPages}
+                        onChange={handlePageChange}
+                    />
+                </div>
+            )}
+
+            {/* 반려 사유 모달 */}
+            <RejectedModal
+                open={rejectModalOpen}
+                onClose={() => setRejectModalOpen(false)}
+                onConfirm={onRejectConfirm}
+            />
         </div>
     );
 }

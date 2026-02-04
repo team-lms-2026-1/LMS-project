@@ -4,10 +4,8 @@ import { revalidateTag } from "next/cache";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** ✅ 백엔드 실제 엔드포인트 */
 const BACKEND_BASE = "/api/v1/admin/spaces";
 
-/** ✅ 목록/상세 캐시 태그 */
 const TAG = "admin:spaces";
 
 type Ctx = { params: { spaceId: string } };
@@ -21,11 +19,6 @@ function isMultipart(req: Request) {
   return ct.toLowerCase().includes("multipart/form-data");
 }
 
-/**
- * ✅ 수정(PATCH)
- * - multipart: 이미지 포함(FormData boundary 유지) => proxyStreamToBackend
- * - json: 일반 수정 => proxyToBackend
- */
 export async function PATCH(req: Request, ctx: Ctx) {
   if (isMultipart(req)) {
     const res = await proxyStreamToBackend(req, {

@@ -34,7 +34,6 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
   const [spaceName, setSpaceName] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
-  const [isRentable, setIsRentable] = useState(true);
   
   const [originImageUrl, setOriginImageUrl] = useState<string>(""); // 기존 대표 이미지(정렬 1)
   const [imageFile, setImageFile] = useState<File | null>(null);    // 새로 올린 이미지
@@ -58,7 +57,6 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
         setSpaceName(d.spaceName);
         setLocation(d.location);
         setDescription(d.description);
-        setIsRentable(d.isRentable);
 
         const main = [...(d.images ?? [])].sort((a, b) => a.sortOrder - b.sortOrder)[0]?.imageUrl ?? "";
         setOriginImageUrl(main);
@@ -199,7 +197,6 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
       spaceName: spaceName.trim(),
       location: location.trim(),
       description: description.trim(),
-      isRentable,
       rules: cleanedRules as SpaceRuleUpsertDto[],
       deleteMainImage: deleteOriginImage && !imageFile ? true : false,
     };
@@ -277,14 +274,6 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="위치"
                   />
-                  <label className={styles.checkRow}>
-                    <input
-                      type="checkbox"
-                      checked={isRentable}
-                      onChange={(e) => setIsRentable(e.target.checked)}
-                    />
-                    <span>대여 가능</span>
-                  </label>
                 </div>
 
                 <textarea

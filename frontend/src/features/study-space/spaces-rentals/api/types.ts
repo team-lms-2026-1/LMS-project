@@ -42,6 +42,7 @@ export type RentalListParams = {
     page?: number;
     size?: number;
     keyword?: string; // 검색어
+    sort?: string | string[]; // 정렬 (예: "rentalId,desc")
 };
 
 export type RentalListResponse = ApiResponse<RentalDto[], PageMeta>;

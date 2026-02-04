@@ -78,7 +78,6 @@ export type UpdateSpaceDetailRequestDto = {
   spaceName: string;
   location: string;
   description: string;
-  isRentable: boolean;
   rules: SpaceRuleUpsertDto[];
   deleteMainImage?: boolean;
 };
@@ -89,7 +88,6 @@ export type CreateSpaceDetailRequestDto = {
   spaceName: string;
   location: string;
   description: string;
-  isRentable: boolean;
   rules: SpaceRuleUpsertDto[];
 };
 export type CreateSpaceDetailResponse = ApiResponse<SpaceDetailDto, null>;

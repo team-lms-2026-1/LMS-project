@@ -29,7 +29,6 @@ export default function SpacesCreatePageClient() {
   const [spaceName, setSpaceName] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
-  const [isRentable, setIsRentable] = useState(true);
 
   // ✅ 등록은 기존 이미지 개념이 없고 새 이미지 1장만
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -148,7 +147,6 @@ export default function SpacesCreatePageClient() {
       spaceName: spaceName.trim(),
       location: location.trim(),
       description: description.trim(),
-      isRentable,
       rules: cleanedRules as SpaceRuleUpsertDto[],
     };
 
@@ -228,10 +226,6 @@ export default function SpacesCreatePageClient() {
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="위치"
               />
-              <label className={styles.checkRow}>
-                <input type="checkbox" checked={isRentable} onChange={(e) => setIsRentable(e.target.checked)} />
-                <span>대여 가능</span>
-              </label>
             </div>
 
             <textarea

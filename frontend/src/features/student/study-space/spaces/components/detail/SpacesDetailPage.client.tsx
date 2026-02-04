@@ -7,7 +7,7 @@ import styles from "./SpacesDetailPage.module.css";
 import { spacesApi } from "../../api/SpacesApi";
 import type { SpaceDetailDto } from "../../api/types";
 import { Button } from "@/components/button";
-import SpacesRoomModal from "../modal/SpacesRoomModal.client";
+import SpacesModal from "../modal/SpacesModal.client";
 
 type Props = {
   spaceId: number;
@@ -58,28 +58,12 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
     return [...rules].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [data]);
 
-  const onClickManage = () => {
+  const onClickReserve = () => {
     setRoomOpen(true);
   };
 
-  const onClickEdit = () => {
-    router.push(`/admin/study-space/spaces/${spaceId}/edit`);
-  };
-
   const onGoList = () => {
-    router.push("/admin/study-space/spaces");
-  };
-
-  const onClickDelete = async () => {
-    if (!confirm("정말 삭제할까요?")) return;
-
-    try {
-      await spacesApi.remove(spaceId);
-      router.push("/admin/study-space/spaces");
-      router.refresh();
-    } catch (e: any) {
-      alert(e?.message || "삭제 중 오류가 발생했습니다.");
-    }
+    router.push("/student/study-space/spaces");
   };
 
   return (
@@ -87,7 +71,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
       <div className={styles.headerRow}>
         <div className={styles.leftGroup}>
           <button type="button" className={styles.backTextBtn} onClick={onGoList}>
-            학습공간 관리
+            학습공간
           </button>
           <div className={styles.breadcrumb}>&gt; 학습공간 상세페이지</div>
         </div>
@@ -119,7 +103,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
               </div>
             </div>
 
-            {/* 우측: 제목/설명 + 관리 버튼 */}
+            {/* 우측: 제목/설명 + 예약 버튼 */}
             <div className={styles.right}>
               <div className={styles.titleRow}>
                 <h1 className={styles.title}>{data.spaceName}</h1>
@@ -129,8 +113,8 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
               <p className={styles.desc}>{data.description}</p>
 
               <div className={styles.manageRow}>
-                <Button variant="secondary" onClick={onClickManage}>
-                  그룹 스터디실 관리
+                <Button variant="secondary" onClick={onClickReserve}>
+                  그룹 스터디실 예약하기
                 </Button>
               </div>
 
@@ -139,20 +123,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
           </div>
         )}
       </div>
-
-      {/* 하단 버튼 */}
-      <div className={styles.bottomActions}>
-        <Button variant="secondary" onClick={onClickEdit}>
-          수정
-        </Button>
-
-        <Button className={styles.dangerBtn} variant="primary" onClick={onClickDelete}>
-          삭제
-        </Button>
-      </div>
-
-      {/* ✅ 그룹 스터디실 관리 모달 (모달 내부에서 API 처리) */}
-      <SpacesRoomModal open={roomOpen} onClose={() => setRoomOpen(false)} spaceId={spaceId} />
+      <SpacesModal open={roomOpen} onClose={() => setRoomOpen(false)} spaceId={spaceId} />
     </div>
   );
 }

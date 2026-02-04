@@ -167,6 +167,13 @@
     gap: 8px;
 }
 
+.paginationFooter {
+  display: flex;
+  justify-content: center; /* ✅ 중앙 */
+  align-items: center;
+  margin-top: 16px;
+}
+
 .pageBtn {
     width: 32px;
     height: 32px;

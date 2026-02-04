@@ -6,25 +6,19 @@ export const dynamic = "force-dynamic";
 
 const TAG = "admin:spaces-rentals";
 
-export async function GET(req: Request) {
-  const upstream = `/api/v1/admin/spaces-rentals`;
+type Ctx = { params: { rentalId: string } };
 
-  return proxyToBackend(req, upstream, {
-    method: "GET",
-    forwardQuery: true,
-    cache: "force-cache",
-    next: { revalidate: 600, tags: [TAG] },
-  });
-}
+export async function PATCH(req: Request, ctx: Ctx) {
+  const id = encodeURIComponent(ctx.params.rentalId);
+  const upstream = `/api/v1/admin/spaces-rentals/${id}`;
 
-export async function PATCH(req: Request) {
-  const upstream = `/api/v1/admin/spaces-rentals`;
+  // ✅ 핵심: PATCH 바디를 읽어서 전달
   const body = await req.json().catch(() => null);
 
   const res = await proxyToBackend(req, upstream, {
     method: "PATCH",
     body,
-    forwardQuery: true,
+    forwardQuery: false,
     cache: "no-store",
   });
 
