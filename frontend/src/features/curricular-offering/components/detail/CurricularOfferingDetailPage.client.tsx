@@ -45,7 +45,7 @@ export function CurricularOfferingDetailPageClient() {
       {/* 본문 */}
       <div className={styles.body}>
         {tab === "detail" && <OfferingDetailSection offeringId={offeringId} data={data} onReload={() => actions.reload?.()}/>}
-        {tab === "students" && <OfferingStudentsSection offeringId={offeringId} />}
+        {tab === "students" && <OfferingStudentsSection offeringId={offeringId} offeringStatus={data.status} />}
         {tab === "competencies" && <OfferingCompetenciesSection offeringId={offeringId} data={data} />}
       </div>
     </div>

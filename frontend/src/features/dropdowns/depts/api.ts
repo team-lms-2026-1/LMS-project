@@ -7,6 +7,6 @@ import type { DeptsDropdownResponse } from "./types";
  */
 export async function fetchDeptsDropdown() {
   return getJson<DeptsDropdownResponse>("/api/dropdown/depts", {
-    cache: "force-cache",
+    cache: "no-store",
   });
 }

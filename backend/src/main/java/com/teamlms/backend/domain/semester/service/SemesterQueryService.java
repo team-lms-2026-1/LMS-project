@@ -12,6 +12,7 @@ import com.teamlms.backend.domain.semester.api.dto.SemesterDropdownItem;
 import com.teamlms.backend.domain.semester.api.dto.SemesterEditFormResponse;
 import com.teamlms.backend.domain.semester.api.dto.SemesterListItem;
 import com.teamlms.backend.domain.semester.entity.Semester;
+import com.teamlms.backend.domain.semester.enums.SemesterStatus;
 import com.teamlms.backend.domain.semester.repository.SemesterRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
@@ -41,9 +42,11 @@ public class SemesterQueryService {
 
     // 학기 목록 드롭다운 조회
     public List<SemesterDropdownItem> getSemesterDropdown() {
-        return semesterRepository.findAll(Sort.by(Sort.Direction.DESC, "year")
-                                        .and(Sort.by(Sort.Direction.DESC, "term")))
+        return semesterRepository
+                .findAll(Sort.by(Sort.Direction.DESC, "year")
+                            .and(Sort.by(Sort.Direction.DESC, "term")))
                 .stream()
+                .filter(s -> s.getStatus() == SemesterStatus.ACTIVE)
                 .map(SemesterDropdownItem::from)
                 .toList();
     }
