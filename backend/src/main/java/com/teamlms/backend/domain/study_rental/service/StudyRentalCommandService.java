@@ -45,19 +45,18 @@ public class StudyRentalCommandService {
 
         // 중복 예약 확인 (이미 승인된 건과 겹치는지)
         boolean isOverlapped = !rentalRepository.findOverlappingRentals(
-                room.getId(), 
-                RentalStatus.APPROVED, 
-                startAt, 
-                endAt
-        ).isEmpty();
-        
+                room.getId(),
+                RentalStatus.APPROVED,
+                startAt,
+                endAt).isEmpty();
+
         if (isOverlapped) {
             throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_TIME);
         }
 
         StudyRoomRental rental = StudyRoomRental.builder()
                 .studyRoom(room)
-                .applicant(applicant) 
+                .applicant(applicant)
                 .startAt(startAt)
                 .endAt(endAt)
                 .status(RentalStatus.REQUESTED)
@@ -76,16 +75,34 @@ public class StudyRentalCommandService {
 
         if (req.getStatus() == RentalStatus.APPROVED) {
             boolean isOverlapped = !rentalRepository.findOverlappingRentals(
-                    rental.getStudyRoom().getId(), 
-                    RentalStatus.APPROVED, 
-                    rental.getStartAt(), 
-                    rental.getEndAt()
-            ).isEmpty();
+                    rental.getStudyRoom().getId(),
+                    RentalStatus.APPROVED,
+                    rental.getStartAt(),
+                    rental.getEndAt()).isEmpty();
 
             if (isOverlapped) {
                 throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_TIME);
             }
         }
         rental.process(req.getStatus(), processor, req.getRejectionReason());
+    }
+
+    // 3. 예약 취소 (학생용)
+    public void cancelRental(Long accountId, Long rentalId) {
+        StudyRoomRental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_NOT_FOUND));
+
+        // 1. 본인 확인
+        if (!rental.getApplicant().getAccountId().equals(accountId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        // 2. 상태 확인 (이미 처리되었거나 취소된 경우 방지)
+        if (rental.getStatus() == RentalStatus.REJECTED || rental.getStatus() == RentalStatus.CANCELED) {
+            throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_UPDATE);
+        }
+
+        // 3. 취소 처리
+        rental.cancel();
     }
 }

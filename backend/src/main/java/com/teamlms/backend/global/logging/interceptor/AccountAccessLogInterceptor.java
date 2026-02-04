@@ -30,8 +30,7 @@ public class AccountAccessLogInterceptor implements HandlerInterceptor {
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler,
-            Exception ex
-    ) {
+            Exception ex) {
 
         if (!shouldLog(request, response)) {
             return;
@@ -60,7 +59,8 @@ public class AccountAccessLogInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
 
         // 0) 노이즈/내부 엔드포인트 제외
-        if (uri == null) return false;
+        if (uri == null)
+            return false;
 
         if (uri.startsWith("/error")
                 || uri.startsWith("/actuator")
@@ -72,16 +72,19 @@ public class AccountAccessLogInterceptor implements HandlerInterceptor {
         // 1) 인증 API 제외 (원하면 login/logout만 true로 따로 처리)
         if (uri.startsWith("/api/v1/auth")) {
             // 로그인/로그아웃까지 access_log로 남기고 싶으면 아래 두 줄을 살리고, 위 if를 조정해도 됨.
-            // if (uri.equals("/api/v1/auth/login") || uri.equals("/api/v1/auth/logout")) return true;
+            // if (uri.equals("/api/v1/auth/login") || uri.equals("/api/v1/auth/logout"))
+            // return true;
             return false;
         }
 
         // 2) 역할별 API 기록
         boolean isRoleApi = uri.startsWith("/api/v1/admin")
                 || uri.startsWith("/api/v1/student")
-                || uri.startsWith("/api/v1/professor");
+                || uri.startsWith("/api/v1/professor")
+                || uri.startsWith("/api/v1/surveys"); // 설문 관련 API 추가
 
-        if (!isRoleApi) return false;
+        if (!isRoleApi)
+            return false;
 
         // 3) (선택) 정적/문서/파일 같은 것 제외하고 싶으면 여기서 추가
 

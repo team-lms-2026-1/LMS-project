@@ -9,12 +9,9 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(
-    name = "competency",
-    indexes = {
+@Table(name = "competency", indexes = {
         @Index(name = "idx_competency_sort_order", columnList = "sort_order")
-    }
-)
+})
 public class Competency extends BaseEntity {
 
     @Id

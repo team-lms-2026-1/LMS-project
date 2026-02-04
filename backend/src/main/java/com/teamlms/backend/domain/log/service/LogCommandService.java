@@ -35,9 +35,9 @@ public class LogCommandService {
     public void upsertUserActivity(Long accountId, HttpServletRequest request) {
         LocalDateTime now = LocalDateTime.now();
 
-        String path = RequestInfoExtractor.getRequestPath(request);
-        String ip = RequestInfoExtractor.getClientIp(request);
-        String userAgent = RequestInfoExtractor.getUserAgent(request);
+        String path = truncate(RequestInfoExtractor.getRequestPath(request), 255);
+        String ip = truncate(RequestInfoExtractor.getClientIp(request), 50);
+        String userAgent = truncate(RequestInfoExtractor.getUserAgent(request), 255);
 
         userActivityRepository.upsert(accountId, now, path, ip, userAgent);
     }
@@ -51,10 +51,12 @@ public class LogCommandService {
 
         String path = RequestInfoExtractor.getRequestPath(request);
         String qs = RequestInfoExtractor.getQueryString(request);
-        String accessUrl = (qs == null || qs.isBlank()) ? path : path + "?" + qs;
+        String accessUrlRaw = (qs == null || qs.isBlank()) ? path : path + "?" + qs;
+        String accessUrl = truncate(accessUrlRaw, 255);
 
-        String ip = RequestInfoExtractor.getClientIp(request);
-        String userAgent = RequestInfoExtractor.getUserAgent(request);
+        String ip = truncate(RequestInfoExtractor.getClientIp(request), 50);
+        String userAgent = truncate(RequestInfoExtractor.getUserAgent(request), 255);
+        String os = truncate(parseOs(userAgent), 50);
 
         AccountAccessLog log = AccountAccessLog.builder()
                 .accountId(accountId)
@@ -62,10 +64,37 @@ public class LogCommandService {
                 .accessUrl(accessUrl)
                 .ip(ip)
                 .userAgent(userAgent)
-                .os(null) // TODO: 필요하면 userAgent에서 OS 파싱
+                .os(os)
                 .build();
 
         accountAccessLogRepository.save(log);
+    }
+
+    private String parseOs(String userAgent) {
+        if (userAgent == null)
+            return "Unknown";
+        String ua = userAgent.toLowerCase();
+        if (ua.contains("windows"))
+            return "Windows";
+        if (ua.contains("mac os"))
+            return "macOS";
+        if (ua.contains("linux"))
+            return "Linux";
+        if (ua.contains("android"))
+            return "Android";
+        if (ua.contains("iphone") || ua.contains("ipad"))
+            return "iOS";
+
+        // 디버깅용: 감지 실패 시 UA 앞부분 일부 표시
+        String snippet = userAgent.length() > 20 ? userAgent.substring(0, 20) : userAgent;
+        return "Other (" + snippet + ")";
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value != null && value.length() > maxLength) {
+            return value.substring(0, maxLength);
+        }
+        return value;
     }
 
     /**
