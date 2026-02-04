@@ -24,15 +24,6 @@ public class MentoringController {
     private final MentoringCommandService commandService;
     private final MentoringQueryService queryService;
 
-    // [Admin] 멘토링 모집 공고 생성
-    @PostMapping("/admin/mentoring/recruitments")
-    public ResponseEntity<Long> createRecruitment(
-            @AuthenticationPrincipal AuthUser user,
-            @RequestBody @Valid MentoringRecruitmentCreateRequest request) {
-        Long id = commandService.createRecruitment(user.getAccountId(), request);
-        return ResponseEntity.ok(id);
-    }
-
     // [Admin/User] 멘토링 모집 목록 조회
     @GetMapping("/mentoring/recruitments")
     public ResponseEntity<Page<MentoringRecruitmentResponse>> getRecruitments(Pageable pageable) {
@@ -63,12 +54,45 @@ public class MentoringController {
         return ResponseEntity.ok().build();
     }
 
+    // [User] 내 멘토링 매칭 목록 조회
+    @GetMapping("/mentoring/matchings")
+    public ResponseEntity<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringMatchingResponse>> getMyMatchings(
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(queryService.getMyMatchings(user.getAccountId()));
+    }
+
+    // [User] 멘토링 채팅 내역 조회
+    @GetMapping("/mentoring/matchings/{id}/chat")
+    public ResponseEntity<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse>> getChatHistory(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(queryService.getChatHistory(id));
+    }
+
     // [User] 멘토링 답변 등록
     @PostMapping("/mentoring/answers")
     public ResponseEntity<Void> createAnswer(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid MentoringAnswerRequest request) {
         commandService.createAnswer(user.getAccountId(), request);
+        return ResponseEntity.ok().build();
+    }
+
+    // [Admin] 멘토링 모집 공고 수정
+    @PutMapping("/admin/mentoring/recruitments/{id}")
+    public ResponseEntity<Void> updateRecruitment(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id,
+            @RequestBody @Valid com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentUpdateRequest request) {
+        commandService.updateRecruitment(user.getAccountId(), id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    // [Admin] 멘토링 모집 공고 삭제
+    @DeleteMapping("/admin/mentoring/recruitments/{id}")
+    public ResponseEntity<Void> deleteRecruitment(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long id) {
+        commandService.deleteRecruitment(user.getAccountId(), id);
         return ResponseEntity.ok().build();
     }
 }

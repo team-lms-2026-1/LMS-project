@@ -1,0 +1,123 @@
+.page {
+    padding: 24px;
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.smBtn {
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    height: 32px !important;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+}
+
+.searchBox {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 300px;
+}
+
+.tableWrap {
+    margin-bottom: 16px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.paginationContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    min-width: 500px;
+    max-width: 90%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modalTitle {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.formGroup {
+    margin-bottom: 16px;
+}
+
+.label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.input,
+.textarea,
+.select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}

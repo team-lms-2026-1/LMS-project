@@ -38,4 +38,15 @@ public class MentoringRecruitment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private MentoringRecruitmentStatus status;
+
+    public void update(Long semesterId, String title, String description,
+            LocalDateTime recruitStartAt, LocalDateTime recruitEndAt,
+            MentoringRecruitmentStatus status) {
+        this.semesterId = semesterId;
+        this.title = title;
+        this.description = description;
+        this.recruitStartAt = recruitStartAt;
+        this.recruitEndAt = recruitEndAt;
+        this.status = status;
+    }
 }

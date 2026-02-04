@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MentoringQuestionRepository extends JpaRepository<MentoringQuestion, Long> {
+    java.util.List<MentoringQuestion> findAllByMatchingId(Long matchingId);
+
+    java.util.List<MentoringQuestion> findAllByMatchingIdIn(java.util.Collection<Long> matchingIds);
 }

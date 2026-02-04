@@ -175,7 +175,9 @@ public enum ErrorCode {
     MENTORING_NOT_MENTOR(HttpStatus.FORBIDDEN, "MENTORING_NOT_MENTOR", "해당 멘토링의 멘토가 아닙니다.", "mentoring.notMentor"),
     MENTORING_NOT_MENTEE(HttpStatus.FORBIDDEN, "MENTORING_NOT_MENTEE", "해당 멘토링의 멘티가 아닙니다.", "mentoring.notMentee"),
     MENTORING_INVALID_ROLE_APPLICATION(HttpStatus.BAD_REQUEST, "MENTORING_INVALID_ROLE_APPLICATION",
-            "해당 역할로 신청할 수 없는 계정입니다.", "mentoring.application.invalidRole");
+            "해당 역할로 신청할 수 없는 계정입니다.", "mentoring.application.invalidRole"),
+    MENTORING_APPLICATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "MENTORING_APPLICATION_ALREADY_EXISTS",
+            "이미 해당 공고에 신청하셨습니다.", "mentoring.application.alreadyExists");
 
     private final HttpStatus httpStatus;
     private final String code;

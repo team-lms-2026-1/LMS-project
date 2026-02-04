@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MentoringAnswerRepository extends JpaRepository<MentoringAnswer, Long> {
+    java.util.List<MentoringAnswer> findAllByQuestionIdIn(java.util.Collection<Long> questionIds);
+
+    void deleteAllByQuestionIdIn(java.util.Collection<Long> questionIds);
 }

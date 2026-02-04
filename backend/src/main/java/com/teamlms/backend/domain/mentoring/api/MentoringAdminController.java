@@ -10,12 +10,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentCreateRequest;
+
 @RestController
 @RequestMapping("/api/v1/admin/mentoring")
 @RequiredArgsConstructor
 public class MentoringAdminController {
 
     private final MentoringCommandService commandService;
+    private final com.teamlms.backend.domain.mentoring.service.MentoringQueryService queryService;
+
+    // [Admin] 멘토링 모집 공고 생성
+    @PostMapping("/recruitments")
+    public ResponseEntity<Long> createRecruitment(
+            @AuthenticationPrincipal AuthUser admin,
+            @RequestBody @Valid MentoringRecruitmentCreateRequest request) {
+        Long id = commandService.createRecruitment(admin.getAccountId(), request);
+        return ResponseEntity.ok(id);
+    }
 
     // [Admin] 멘토링 신청 상태 변경 (승인/반려)
     @PatchMapping("/applications/{id}/status")
@@ -34,5 +46,12 @@ public class MentoringAdminController {
             @RequestBody @Valid MentoringMatchingRequest request) {
         commandService.match(admin.getAccountId(), request);
         return ResponseEntity.ok().build();
+    }
+
+    // [Admin] 멘토링 신청 목록 조회
+    @GetMapping("/recruitments/{id}/applications")
+    public ResponseEntity<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringApplicationResponse>> getApplications(
+            @PathVariable Long id) {
+        return ResponseEntity.ok(queryService.getApplications(id));
     }
 }
