@@ -145,22 +145,19 @@ export async function fetchDeptMajorList(
 
   return mapped;
 }
-
-export async function updateDeptStatus(
-  deptId: number,
-  active: boolean
-) {
-  return getJson(`/api/admin/authority/depts/${deptId}`, {
+export async function updateDeptStatus(deptId: number, active: boolean) {
+  return getJson(`/api/admin/authority/depts/${deptId}/status`, {
     method: "PATCH",
-    body: JSON.stringify({ active }),
+    body: JSON.stringify({
+      status: active ? "ACTIVE" : "INACTIVE",
+    }),
   });
 }
-
 
 export async function createDept(body: DeptCreateRequest) {
   return getJson<SuccessResponse<null>>(`/api/admin/authority/depts`, {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify({ status }),
   });
 }
 
