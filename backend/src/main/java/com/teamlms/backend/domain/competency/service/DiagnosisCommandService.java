@@ -322,7 +322,7 @@ public class DiagnosisCommandService {
             throw new BusinessException(ErrorCode.CANNOT_MODIFY_CLOSED_DIAGNOSIS);
         }
         if (current == DiagnosisRunStatus.OPEN && next == DiagnosisRunStatus.DRAFT) {
-            throw new BusinessException(ErrorCode.CANNOT_REVERT_TO_DRAFT);
+            throw new BusinessException(ErrorCode.CANNOT_MODIFY_QUESTIONS_AFTER_OPEN);
         }
     }
 

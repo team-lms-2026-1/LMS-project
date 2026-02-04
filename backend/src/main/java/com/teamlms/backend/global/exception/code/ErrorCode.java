@@ -175,8 +175,6 @@ public enum ErrorCode {
     DIAGNOSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "DIAGNOSIS_NOT_FOUND", "진단을 찾을 수 없습니다.", "diagnosis.notFound"),
     CANNOT_MODIFY_QUESTIONS_AFTER_OPEN(HttpStatus.BAD_REQUEST, "CANNOT_MODIFY_QUESTIONS_AFTER_OPEN",
             "진단이 시작된 후는 문항을 수정할 수 없습니다.", "diagnosis.modify.questions.afterOpen"),
-    CANNOT_REVERT_TO_DRAFT(HttpStatus.BAD_REQUEST, "CANNOT_REVERT_TO_DRAFT", "진단이 시작된 후는 문항을 수정할 수 없습니다.",
-            "diagnosis.modify.questions.afterOpen"),
     ALREADY_SUBMITTED_DIAGNOSIS(HttpStatus.CONFLICT, "ALREADY_SUBMITTED_DIAGNOSIS", "이미 제출한 진단입니다.",
             "diagnosis.alreadySubmitted"),
     INVALID_COMPETENCY_WEIGHT(HttpStatus.BAD_REQUEST, "INVALID_COMPETENCY_WEIGHT", "역량 가중치는 0에서 6 사이여야 합니다.",
