@@ -83,6 +83,7 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
   const url = `${base.replace(/\/+$/, "")}${upstreamPath}${qs}`;
 
   const clientIp = getClientIp(req);
+  const userAgent = req.headers.get("user-agent") ?? "";
 
   const res = await fetch(url, {
     method: options.method ?? "GET",
@@ -90,12 +91,13 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
       "X-Forwarded-For": clientIp,
+      "User-Agent": userAgent,
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...(options.headers ?? {}),
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
 
-    cache: options.cache ?? "force-cache",
+    cache: options.cache ?? "no-store",
     next: options.next,
   });
 

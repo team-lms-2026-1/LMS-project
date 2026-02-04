@@ -1,4 +1,6 @@
-.page { padding: 18px; }
+.page {
+  padding: 18px;
+}
 
 .headerRow {
   display: flex;
@@ -7,21 +9,15 @@
   margin-bottom: 14px;
 }
 
-.title { font-size: 18px; font-weight: 700; }
-
-.searchBox { display: flex; gap: 8px; align-items: center; }
-.searchInput {
-  width: 240px;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  padding: 8px 10px;
+.title {
+  font-size: 18px;
+  font-weight: 700;
 }
-.searchButton {
-  border: 1px solid #d9d9d9;
-  background: #fff;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
+
+.searchBox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .kpiGrid {
@@ -37,65 +33,33 @@
   padding: 14px;
   background: #fff;
 }
-.kpiLabel { color: #666; font-size: 12px; }
-.kpiValue { font-size: 20px; font-weight: 800; margin-top: 6px; }
+
+.kpiLabel {
+  color: #666;
+  font-size: 12px;
+}
+
+.kpiValue {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 6px;
+}
 
 .tableWrap {
-  border: 1px solid #ededed;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #fff;
+  margin-bottom: 16px;
 }
 
-.table { width: 100%; border-collapse: collapse; }
-.table thead th {
-  text-align: left;
-  font-size: 12px;
-  color: #555;
-  background: #fafafa;
-  padding: 10px 12px;
-  border-bottom: 1px solid #ededed;
-}
-.table tbody td {
-  padding: 12px;
-  border-bottom: 1px solid #f2f2f2;
-  font-size: 13px;
+.link {
+  color: #1f4bd8;
+  text-decoration: none;
 }
 
-.row:hover { background: #fbfbfb; }
-.link { color: #1f4bd8; text-decoration: none; }
-.link:hover { text-decoration: underline; }
-
-.thRight { text-align: right; }
-.tdRight { text-align: right; }
-
-.badge {
-  display: inline-block;
-  min-width: 72px;
-  text-align: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
+.link:hover {
+  text-decoration: underline;
 }
-.badgeOn { background: #18b06b; color: #fff; }
-.badgeOff { background: #e6e6e6; color: #555; }
 
-.empty { text-align: center; padding: 28px 12px; color: #777; }
-
-.pagination {
+.paginationContainer {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 6px;
-  margin-top: 14px;
+  margin-top: 20px;
 }
-.pageBtn, .pageNum {
-  border: 1px solid #d9d9d9;
-  background: #fff;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-.pageBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-.pageNumActive { border-color: #7b61ff; color: #7b61ff; font-weight: 800; }

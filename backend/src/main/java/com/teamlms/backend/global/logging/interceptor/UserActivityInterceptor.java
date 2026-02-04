@@ -30,8 +30,7 @@ public class UserActivityInterceptor implements HandlerInterceptor {
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler,
-            Exception ex
-    ) {
+            Exception ex) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof AuthUser authUser)) {

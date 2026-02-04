@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "../styles/accountLogList.module.css";
 import { fetchAccountLogs } from "../lib/clientApi";
 import type { AccountLogListItem } from "../types";
+import { SearchBar } from "@/components/searchbar/SearchBar";
+import { Table } from "@/components/table/Table";
+import { PaginationSimple } from "@/components/pagination/PaginationSimple";
+import { StatusPill } from "@/components/status/StatusPill";
+import type { TableColumn } from "@/components/table/types";
 
 const PAGE_SIZE = 10;
 
@@ -18,6 +23,8 @@ type UiAccountRow = {
 };
 
 export default function AccountLogListPage() {
+  const router = useRouter();
+
   // ✅ 입력창에 바인딩되는 값
   const [keywordInput, setKeywordInput] = useState("");
   // ✅ 실제 서버 검색에 사용되는 값(검색 버튼/엔터로 확정)
@@ -64,11 +71,35 @@ export default function AccountLogListPage() {
     }));
   }, [items]);
 
+  const columns = useMemo<TableColumn<UiAccountRow>[]>(
+    () => [
+      {
+        header: "로그인 ID",
+        field: "loginId",
+        // Link 제거: 전체 행 클릭으로 대체
+      },
+      { header: "계정 유형", field: "role" },
+      { header: "이름", field: "name" },
+      { header: "최근접속 일시", field: "lastAccessAt" },
+      {
+        header: "로그인 유무",
+        field: "status",
+        align: "right",
+        render: (row) =>
+          row.status === "LOGGED_IN" ? (
+            <StatusPill status="ACTIVE" label="로그인중" />
+          ) : (
+            <StatusPill status="INACTIVE" label="비로그인" />
+          ),
+      },
+    ],
+    []
+  );
+
   /* ======================
      페이징 계산
   ====================== */
   const totalPages = Math.max(1, Math.ceil(totalElements / PAGE_SIZE));
-  const safePage = Math.min(Math.max(1, page), totalPages);
 
   const onSearch = () => {
     setPage(1);
@@ -84,18 +115,13 @@ export default function AccountLogListPage() {
       <div className={styles.headerRow}>
         <div className={styles.title}>계정 로그 관리</div>
 
-        <div className={styles.searchBox}>
-          <input
-            className={styles.searchInput}
-            placeholder="아이디 및 이름으로 검색"
-            value={keywordInput}
-            onChange={(e) => setKeywordInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onSearch()}
-          />
-          <button className={styles.searchButton} onClick={onSearch}>
-            검색
-          </button>
-        </div>
+        <SearchBar
+          value={keywordInput}
+          onChange={setKeywordInput}
+          onSearch={onSearch}
+          placeholder="아이디 및 이름으로 검색"
+          className={styles.searchBox}
+        />
       </div>
 
       {/* KPI */}
@@ -117,88 +143,23 @@ export default function AccountLogListPage() {
 
       {/* 테이블 */}
       <div className={styles.tableWrap}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>로그인 ID</th>
-              <th>계정 유형</th>
-              <th>이름</th>
-              <th>최근접속 일시</th>
-              <th className={styles.thRight}>로그인 유무</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((a) => (
-              <tr key={a.loginId} className={styles.row}>
-                <td>
-                  <Link
-                    className={styles.link}
-                    href={`/admin/system-status/account-logs/${a.accountId}`}
-                  >
-                    {a.loginId}
-                  </Link>
-                </td>
-                <td>{a.role}</td>
-                <td>{a.name}</td>
-                <td>{a.lastAccessAt}</td>
-                <td className={styles.tdRight}>
-                  {a.status === "LOGGED_IN" ? (
-                    <span className={`${styles.badge} ${styles.badgeOn}`}>
-                      로그인중
-                    </span>
-                  ) : (
-                    <span className={`${styles.badge} ${styles.badgeOff}`}>
-                      비로그인
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-
-            {!loading && rows.length === 0 && (
-              <tr>
-                <td className={styles.empty} colSpan={5}>
-                  검색 결과가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <Table
+          columns={columns}
+          items={rows}
+          rowKey={(r) => r.accountId}
+          loading={loading}
+          emptyText="검색 결과가 없습니다."
+          onRowClick={(row) => router.push(`/admin/system-status/account-logs/${row.accountId}`)}
+        />
       </div>
 
       {/* 페이지네이션 */}
-      <div className={styles.pagination}>
-        <button
-          className={styles.pageBtn}
-          disabled={safePage <= 1}
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-        >
-          &lt;
-        </button>
-
-        {Array.from({ length: totalPages })
-          .slice(0, 10)
-          .map((_, idx) => {
-            const n = idx + 1;
-            return (
-              <button
-                key={n}
-                className={`${styles.pageNum} ${n === safePage ? styles.pageNumActive : ""
-                  }`}
-                onClick={() => setPage(n)}
-              >
-                {n}
-              </button>
-            );
-          })}
-
-        <button
-          className={styles.pageBtn}
-          disabled={safePage >= totalPages}
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-        >
-          &gt;
-        </button>
+      <div className={styles.paginationContainer}>
+        <PaginationSimple
+          page={page}
+          totalPages={totalPages}
+          onChange={setPage}
+        />
       </div>
     </div>
   );

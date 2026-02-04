@@ -7,6 +7,9 @@ export async function fetchAccountLogs(params: { page?: number; size?: number, k
   if (params.size) qs.set("size", String(params.size));
   if (params.keyword && params.keyword.trim()) qs.set("keyword", params.keyword.trim());
 
+  // Cache buster
+  qs.set("_t", Date.now().toString());
+
   return getJson<AccountLogListResponse>(`/api/admin/system-status/account-logs?${qs.toString()}`);
 }
 
@@ -20,6 +23,9 @@ export async function fetchAccountDetailLogs(
   if (params.from) qs.set("from", params.from);
   if (params.to) qs.set("to", params.to);
   if (params.keyword && params.keyword.trim()) qs.set("keyword", params.keyword.trim());
+
+  // Cache buster
+  qs.set("_t", Date.now().toString());
 
   return getJson<AccountLogDetailResponse>(`/api/admin/system-status/account-logs/${accountId}/access-logs?${qs.toString()}`);
 }

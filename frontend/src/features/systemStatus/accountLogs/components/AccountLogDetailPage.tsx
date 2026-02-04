@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/accountLogDetail.module.css";
 import { fetchAccountDetailLogs, downloadAccessLogs } from "../lib/clientApi";
 import PrivacyExcelDownloadModal from "./PrivacyExcelDownloadModal";
 import type { AccountLogDetailAccount, AccountAccessLogRow } from "../types";
+import { SearchBar } from "@/components/searchbar/SearchBar";
+import { Table } from "@/components/table/Table";
+import { PaginationSimple } from "@/components/pagination/PaginationSimple";
+import { Button } from "@/components/button/Button";
+import type { TableColumn } from "@/components/table/types";
 
 type Props = { accountId: string };
 
@@ -101,7 +106,19 @@ export default function AccountLogDetailPage({ accountId }: Props) {
 
   // Pagination Calc
   const totalPages = Math.max(1, Math.ceil(totalElements / PAGE_SIZE));
-  const safePage = Math.min(Math.max(1, page), totalPages);
+
+  const columns = useMemo<TableColumn<AccountAccessLogRow>[]>(() => [
+    { header: "번호", field: "logId", width: "10%" },
+    {
+      header: "일시",
+      field: "accessedAt",
+      width: "20%",
+      render: (row) => row.accessedAt ? new Date(row.accessedAt).toLocaleString() : "-"
+    },
+    { header: "접속URL", field: "accessUrl", width: "40%" },
+    { header: "아이피", field: "ip", width: "15%" },
+    { header: "접속환경", field: "os", width: "15%" },
+  ], []);
 
   if (loading && !account) {
     return <div className={styles.page}>Loading...</div>;
@@ -137,65 +154,37 @@ export default function AccountLogDetailPage({ accountId }: Props) {
           <input className={styles.dateInput} type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           <span className={styles.wave}>~</span>
           <input className={styles.dateInput} type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-          <div className={styles.searchBox}>
-            <input
-              className={styles.searchInput}
-              placeholder="검색어 입력"
-              value={keywordInput}
-              onChange={(e) => setKeywordInput(e.target.value)}
-            />
-          </div>
-          <button className={styles.searchBtn} onClick={onSearch}>검색</button>
+
+          <SearchBar
+            value={keywordInput}
+            onChange={setKeywordInput}
+            onSearch={onSearch}
+            placeholder="검색어 입력"
+          />
         </div>
       </div>
 
       <div className={styles.tableWrap}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>번호</th>
-              <th>일시</th>
-              <th>접속URL</th>
-              <th>아이피</th>
-              <th>접속환경</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((l) => (
-              <tr key={l.logId}>
-                <td>{l.logId}</td>
-                <td>{l.accessedAt ? new Date(l.accessedAt).toLocaleString() : "-"}</td>
-                <td>{l.accessUrl}</td>
-                <td>{l.ip}</td>
-                <td>{l.os}</td>
-              </tr>
-            ))}
-
-            {!loading && logs.length === 0 && (
-              <tr>
-                <td className={styles.empty} colSpan={5}>
-                  로그가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <Table
+          columns={columns}
+          items={logs}
+          rowKey={(r) => r.logId}
+          loading={loading}
+          emptyText="로그가 없습니다."
+        />
       </div>
 
-      <div className={styles.pagination}>
-        <button className={styles.pageBtn} disabled={safePage <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>&lt;</button>
-        {Array.from({ length: Math.min(totalPages, 10) }).map((_, i) => {
-          const n = i + 1;
-          return (
-            <button key={n} className={`${styles.pageNum} ${n === safePage ? styles.pageNumActive : ""}`} onClick={() => setPage(n)}>{n}</button>
-          );
-        })}
-        <button className={styles.pageBtn} disabled={safePage >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>&gt;</button>
+      <div className={styles.paginationContainer}>
+        <PaginationSimple
+          page={page}
+          totalPages={totalPages}
+          onChange={setPage}
+        />
       </div>
 
-      <button className={styles.excelBtn} onClick={() => setIsModalOpen(true)}>
+      <Button variant="primary" className={styles.excelBtn} onClick={() => setIsModalOpen(true)}>
         Excel 다운로드
-      </button>
+      </Button>
 
       <PrivacyExcelDownloadModal
         open={isModalOpen}
