@@ -1,13 +1,19 @@
 package com.teamlms.backend.domain.mentoring.service;
 
-import com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentResponse;
-import com.teamlms.backend.domain.mentoring.entity.MentoringRecruitment;
-import com.teamlms.backend.domain.mentoring.repository.MentoringRecruitmentRepository;
+import com.teamlms.backend.domain.mentoring.api.dto.*;
+import com.teamlms.backend.domain.mentoring.entity.*;
+import com.teamlms.backend.domain.mentoring.repository.*;
+import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -21,64 +27,45 @@ public class MentoringQueryService {
     private final com.teamlms.backend.domain.mentoring.repository.MentoringQuestionRepository questionRepository;
     private final com.teamlms.backend.domain.mentoring.repository.MentoringAnswerRepository answerRepository;
 
-    public java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringMatchingResponse> getMyMatchings(
-            Long accountId) {
-        java.util.List<com.teamlms.backend.domain.mentoring.entity.MentoringApplication> myApps = applicationRepository
-                .findAllByAccountId(accountId);
+    public List<MentoringMatchingResponse> getMyMatchings(Long accountId) {
+        List<MentoringApplication> myApps = applicationRepository.findAllByAccountId(accountId);
         if (myApps.isEmpty())
-            return java.util.Collections.emptyList();
+            return Collections.emptyList();
 
-        java.util.List<Long> myAppIds = myApps.stream()
-                .map(com.teamlms.backend.domain.mentoring.entity.MentoringApplication::getApplicationId).toList();
-        java.util.List<com.teamlms.backend.domain.mentoring.entity.MentoringMatching> matchings = matchingRepository
+        List<Long> myAppIds = myApps.stream().map(MentoringApplication::getApplicationId).toList();
+        List<MentoringMatching> matchings = matchingRepository
                 .findAllByMentorApplicationIdInOrMenteeApplicationIdIn(myAppIds, myAppIds);
 
-        java.util.List<Long> mentorAppIds = matchings.stream()
-                .map(com.teamlms.backend.domain.mentoring.entity.MentoringMatching::getMentorApplicationId).toList();
-        java.util.List<Long> menteeAppIds = matchings.stream()
-                .map(com.teamlms.backend.domain.mentoring.entity.MentoringMatching::getMenteeApplicationId).toList();
+        List<Long> allAppIds = new ArrayList<>();
+        matchings.forEach(m -> {
+            allAppIds.add(m.getMentorApplicationId());
+            allAppIds.add(m.getMenteeApplicationId());
+        });
 
-        java.util.List<Long> allAppIds = new java.util.ArrayList<>();
-        allAppIds.addAll(mentorAppIds);
-        allAppIds.addAll(menteeAppIds);
+        Map<Long, MentoringApplication> appMap = applicationRepository.findAllById(allAppIds).stream()
+                .collect(Collectors.toMap(MentoringApplication::getApplicationId, Function.identity()));
 
-        java.util.Map<Long, com.teamlms.backend.domain.mentoring.entity.MentoringApplication> appMap = applicationRepository
-                .findAllById(allAppIds).stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        com.teamlms.backend.domain.mentoring.entity.MentoringApplication::getApplicationId,
-                        java.util.function.Function.identity()));
+        List<Long> partnerAccountIds = matchings.stream()
+                .map(m -> myAppIds.contains(m.getMentorApplicationId())
+                        ? appMap.get(m.getMenteeApplicationId()).getAccountId()
+                        : appMap.get(m.getMentorApplicationId()).getAccountId())
+                .toList();
 
-        java.util.List<Long> partnerAccountIds = matchings.stream()
-                .map(m -> {
-                    if (myAppIds.contains(m.getMentorApplicationId())) {
-                        return appMap.get(m.getMenteeApplicationId()).getAccountId();
-                    } else {
-                        return appMap.get(m.getMentorApplicationId()).getAccountId();
-                    }
-                }).toList();
+        Map<Long, Account> accountMap = accountRepository.findAllById(partnerAccountIds).stream()
+                .collect(Collectors.toMap(Account::getAccountId, Function.identity(), (a, b) -> a));
 
-        java.util.Map<Long, com.teamlms.backend.domain.account.entity.Account> accountMap = accountRepository
-                .findAllById(partnerAccountIds).stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        com.teamlms.backend.domain.account.entity.Account::getAccountId,
-                        java.util.function.Function.identity()));
-
-        java.util.List<Long> recruitmentIds = matchings.stream()
-                .map(com.teamlms.backend.domain.mentoring.entity.MentoringMatching::getRecruitmentId).toList();
-        java.util.Map<Long, MentoringRecruitment> recruitMap = recruitmentRepository.findAllById(recruitmentIds)
-                .stream()
-                .collect(java.util.stream.Collectors.toMap(MentoringRecruitment::getRecruitmentId,
-                        java.util.function.Function.identity()));
+        List<Long> recruitmentIds = matchings.stream().map(MentoringMatching::getRecruitmentId).toList();
+        Map<Long, MentoringRecruitment> recruitMap = recruitmentRepository.findAllById(recruitmentIds).stream()
+                .collect(Collectors.toMap(MentoringRecruitment::getRecruitmentId, Function.identity()));
 
         return matchings.stream().map(m -> {
             boolean isMentor = myAppIds.contains(m.getMentorApplicationId());
-            com.teamlms.backend.domain.mentoring.entity.MentoringApplication partnerApp = isMentor
-                    ? appMap.get(m.getMenteeApplicationId())
+            MentoringApplication partnerApp = isMentor ? appMap.get(m.getMenteeApplicationId())
                     : appMap.get(m.getMentorApplicationId());
-            com.teamlms.backend.domain.account.entity.Account partnerAcc = accountMap.get(partnerApp.getAccountId());
+            Account partnerAcc = accountMap.get(partnerApp.getAccountId());
             MentoringRecruitment recruitment = recruitMap.get(m.getRecruitmentId());
 
-            return com.teamlms.backend.domain.mentoring.api.dto.MentoringMatchingResponse.builder()
+            return MentoringMatchingResponse.builder()
                     .matchingId(m.getMatchingId())
                     .recruitmentId(m.getRecruitmentId())
                     .recruitmentTitle(recruitment.getTitle())
@@ -91,64 +78,58 @@ public class MentoringQueryService {
         }).toList();
     }
 
-    public java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse> getChatHistory(
-            Long matchingId) {
-        java.util.List<com.teamlms.backend.domain.mentoring.entity.MentoringQuestion> questions = questionRepository
-                .findAllByMatchingId(matchingId);
+    public List<MentoringChatMessageResponse> getChatHistory(Long matchingId) {
+        List<MentoringQuestion> questions = questionRepository.findAllByMatchingId(matchingId);
         if (questions.isEmpty())
-            return java.util.Collections.emptyList();
+            return Collections.emptyList();
 
-        java.util.List<Long> qIds = questions.stream()
-                .map(com.teamlms.backend.domain.mentoring.entity.MentoringQuestion::getQuestionId).toList();
-        java.util.List<com.teamlms.backend.domain.mentoring.entity.MentoringAnswer> answers = answerRepository
-                .findAllByQuestionIdIn(qIds);
+        List<Long> qIds = questions.stream().map(MentoringQuestion::getQuestionId).toList();
+        List<MentoringAnswer> answers = answerRepository.findAllByQuestionIdIn(qIds);
 
-        java.util.List<Long> writerIds = new java.util.ArrayList<>();
-        writerIds.addAll(questions.stream()
-                .map(com.teamlms.backend.domain.mentoring.entity.MentoringQuestion::getWriterId).toList());
-        writerIds.addAll(answers.stream().map(com.teamlms.backend.domain.mentoring.entity.MentoringAnswer::getWriterId)
-                .toList());
+        List<Long> writerIds = new ArrayList<>();
+        questions.forEach(q -> writerIds.add(q.getWriterId()));
+        answers.forEach(a -> writerIds.add(a.getWriterId()));
 
-        java.util.Map<Long, com.teamlms.backend.domain.account.entity.Account> accountMap = accountRepository
-                .findAllById(writerIds).stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        com.teamlms.backend.domain.account.entity.Account::getAccountId,
-                        java.util.function.Function.identity(), (a, b) -> a));
+        if (writerIds.isEmpty())
+            return new ArrayList<>();
 
-        java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse> chat = new java.util.ArrayList<>();
+        Map<Long, Account> accountMap = accountRepository.findAllById(writerIds).stream()
+                .collect(Collectors.toMap(Account::getAccountId, Function.identity(), (a, b) -> a));
 
-        for (com.teamlms.backend.domain.mentoring.entity.MentoringQuestion q : questions) {
-            com.teamlms.backend.domain.account.entity.Account writer = accountMap.get(q.getWriterId());
-            chat.add(com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse.builder()
+        List<MentoringChatMessageResponse> chat = new ArrayList<>();
+
+        for (MentoringQuestion q : questions) {
+            Account writer = accountMap.get(q.getWriterId());
+            String senderName = (writer != null) ? writer.getLoginId() : "Unknown(" + q.getWriterId() + ")";
+            chat.add(MentoringChatMessageResponse.builder()
                     .id(q.getQuestionId())
                     .senderId(q.getWriterId())
-                    .senderName(writer.getLoginId())
+                    .senderName(senderName)
                     .content(q.getContent())
                     .type("QUESTION")
                     .createdAt(q.getCreatedAt())
                     .build());
         }
 
-        for (com.teamlms.backend.domain.mentoring.entity.MentoringAnswer a : answers) {
-            com.teamlms.backend.domain.account.entity.Account writer = accountMap.get(a.getWriterId());
-            chat.add(com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse.builder()
+        for (MentoringAnswer a : answers) {
+            Account writer = accountMap.get(a.getWriterId());
+            String senderName = (writer != null) ? writer.getLoginId() : "Unknown(" + a.getWriterId() + ")";
+            chat.add(MentoringChatMessageResponse.builder()
                     .id(a.getAnswerId())
                     .senderId(a.getWriterId())
-                    .senderName(writer.getLoginId())
+                    .senderName(senderName)
                     .content(a.getContent())
                     .type("ANSWER")
                     .createdAt(a.getCreatedAt())
                     .build());
         }
 
-        chat.sort(java.util.Comparator
-                .comparing(com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse::getCreatedAt));
+        chat.sort(Comparator.comparing(MentoringChatMessageResponse::getCreatedAt));
         return chat;
     }
 
     public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable) {
-        return recruitmentRepository.findAll(pageable)
-                .map(MentoringRecruitmentResponse::from);
+        return recruitmentRepository.findAll(pageable).map(MentoringRecruitmentResponse::from);
     }
 
     public MentoringRecruitmentResponse getRecruitment(Long id) {
@@ -157,24 +138,15 @@ public class MentoringQueryService {
         return MentoringRecruitmentResponse.from(recruitment);
     }
 
-    public java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringApplicationResponse> getApplications(
-            Long recruitmentId) {
-        java.util.List<com.teamlms.backend.domain.mentoring.entity.MentoringApplication> apps = applicationRepository
-                .findAllByRecruitmentId(recruitmentId);
+    public List<MentoringApplicationResponse> getApplications(Long recruitmentId) {
+        List<MentoringApplication> apps = applicationRepository.findAllByRecruitmentId(recruitmentId);
+        List<Long> accountIds = apps.stream().map(MentoringApplication::getAccountId).toList();
 
-        java.util.List<Long> accountIds = apps.stream()
-                .map(com.teamlms.backend.domain.mentoring.entity.MentoringApplication::getAccountId)
-                .toList();
-
-        java.util.Map<Long, com.teamlms.backend.domain.account.entity.Account> accountMap = accountRepository
-                .findAllById(accountIds).stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        com.teamlms.backend.domain.account.entity.Account::getAccountId,
-                        java.util.function.Function.identity()));
+        Map<Long, Account> accountMap = accountRepository.findAllById(accountIds).stream()
+                .collect(Collectors.toMap(Account::getAccountId, Function.identity(), (a, b) -> a));
 
         return apps.stream()
-                .map(app -> com.teamlms.backend.domain.mentoring.api.dto.MentoringApplicationResponse.of(app,
-                        accountMap.get(app.getAccountId())))
+                .map(app -> MentoringApplicationResponse.of(app, accountMap.get(app.getAccountId())))
                 .toList();
     }
 }
