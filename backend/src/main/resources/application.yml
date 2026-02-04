@@ -20,6 +20,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    out-of-order: true # 마이그레이션 순서 유연하게 허용
 
   # ★★★ [이동됨] AWS S3 설정 (모든 환경에서 사용) ★★★
   cloud:
