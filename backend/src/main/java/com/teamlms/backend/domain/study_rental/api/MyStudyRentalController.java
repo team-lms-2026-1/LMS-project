@@ -28,6 +28,7 @@ import java.util.List;
 public class MyStudyRentalController {
 
     private final StudyRentalQueryService queryService;
+    private final com.teamlms.backend.domain.study_rental.service.StudyRentalCommandService commandService;
 
     // 내 예약 내역 조회
     @GetMapping("/api/v1/student/spaces-rentals")
@@ -58,6 +59,19 @@ public class MyStudyRentalController {
         Page<RentalResponse> result = queryService.getRentalList(condition, pageable);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
+    }
+
+    // 예약 취소
+    @PatchMapping("/api/v1/student/spaces-rentals/{rentalId}/cancel")
+    @PreAuthorize("hasAuthority('RENTAL_DELETE')")
+    public ApiResponse<Void> cancelRental(
+            @PathVariable Long rentalId,
+            @AuthenticationPrincipal Object principal) {
+
+        Long accountId = extractAccountId(principal);
+        commandService.cancelRental(accountId, rentalId);
+
+        return ApiResponse.ok(null);
     }
 
     /**
