@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  if (req.nextUrl.pathname.startsWith("/admin")) {
+  const p = req.nextUrl.pathname;
+  if (p.startsWith("/admin") || p.startsWith("/professor") || p.startsWith("/student")) {
     const token = req.cookies.get("access_token")?.value;
     if (!token) {
       const url = req.nextUrl.clone();
@@ -13,4 +14,4 @@ export function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ["/admin/:path*"] };
+export const config = { matcher: ["/admin/:path*", "/professor/:path*", "/student/:path*"] };

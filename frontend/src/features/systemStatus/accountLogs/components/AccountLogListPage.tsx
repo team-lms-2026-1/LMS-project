@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import styles from "../styles/accountLogList.module.css";
 import { fetchAccountLogs } from "../lib/clientApi";
 import type { AccountLogListItem } from "../types";
@@ -51,6 +52,10 @@ export default function AccountLogListPage() {
         setItems(res.data.items);
         setSummary(res.data.summary);
         setTotalElements(res.meta.totalElements);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("로그 목록을 불러오지 못했습니다.");
       })
       .finally(() => setLoading(false));
   }, [page, keyword]);
@@ -111,55 +116,58 @@ export default function AccountLogListPage() {
   ====================== */
   return (
     <div className={styles.page}>
-      {/* 헤더 */}
-      <div className={styles.headerRow}>
-        <div className={styles.title}>계정 로그 관리</div>
+      <div className={styles.card}>
+        <h1 className={styles.title}>계정 로그 관리</h1>
 
-        <SearchBar
-          value={keywordInput}
-          onChange={setKeywordInput}
-          onSearch={onSearch}
-          placeholder="아이디 및 이름으로 검색"
-          className={styles.searchBox}
-        />
-      </div>
+        <div className={styles.searchRow}>
+          <SearchBar
+            value={keywordInput}
+            onChange={setKeywordInput}
+            onSearch={onSearch}
+            placeholder="아이디 및 이름으로 검색"
+          />
+        </div>
 
-      {/* KPI */}
-      <div className={styles.kpiGrid}>
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiLabel}>총 계정 수</div>
-          <div className={styles.kpiValue}>
-            {summary.totalAccounts.toLocaleString()}
+        {/* KPI */}
+        <div className={styles.kpiGrid}>
+          <div className={styles.kpiCard}>
+            <div className={styles.kpiLabel}>총 계정 수</div>
+            <div className={styles.kpiValue}>
+              {summary.totalAccounts.toLocaleString()}
+            </div>
+          </div>
+
+          <div className={styles.kpiCard}>
+            <div className={styles.kpiLabel}>현 로그인중</div>
+            <div className={styles.kpiValue}>
+              {summary.onlineAccounts.toLocaleString()}
+            </div>
           </div>
         </div>
 
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiLabel}>현 로그인중</div>
-          <div className={styles.kpiValue}>
-            {summary.onlineAccounts.toLocaleString()}
-          </div>
+        <div className={styles.tableWrap}>
+          <Table
+            columns={columns}
+            items={rows}
+            rowKey={(r) => r.accountId}
+            loading={loading}
+            skeletonRowCount={10}
+            emptyText="검색 결과가 없습니다."
+            onRowClick={(row) => router.push(`/admin/system-status/account-logs/${row.accountId}`)}
+          />
         </div>
-      </div>
 
-      {/* 테이블 */}
-      <div className={styles.tableWrap}>
-        <Table
-          columns={columns}
-          items={rows}
-          rowKey={(r) => r.accountId}
-          loading={loading}
-          emptyText="검색 결과가 없습니다."
-          onRowClick={(row) => router.push(`/admin/system-status/account-logs/${row.accountId}`)}
-        />
-      </div>
-
-      {/* 페이지네이션 */}
-      <div className={styles.paginationContainer}>
-        <PaginationSimple
-          page={page}
-          totalPages={totalPages}
-          onChange={setPage}
-        />
+        <div className={styles.footerRow}>
+          <div className={styles.footerLeft} />
+          <div className={styles.footerCenter}>
+            <PaginationSimple
+              page={page}
+              totalPages={totalPages}
+              onChange={setPage}
+            />
+          </div>
+          <div className={styles.footerRight} />
+        </div>
       </div>
     </div>
   );

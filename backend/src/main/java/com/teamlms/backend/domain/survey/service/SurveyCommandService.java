@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.survey.service;
 
 import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.survey.api.dto.SurveyCreateRequest;
 import com.teamlms.backend.domain.survey.api.dto.SurveyUpdateRequest;
@@ -142,7 +143,7 @@ public class SurveyCommandService {
         System.out.println("DEBUG: GenType: " + type);
 
         if ("ALL".equals(type)) {
-            targets = accountRepository.findAll();
+            targets = accountRepository.findAllByAccountType(AccountType.STUDENT);
         } else if ("DEPT".equals(type)) {
             // 학과별
             targets = selectByDepts(filter.getDeptIds());

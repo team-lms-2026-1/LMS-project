@@ -76,19 +76,19 @@ function normalizeRow(r: any): AccountRowDto {
   } else {
     base.profile = name
       ? {
-          name,
-          email,
-          phone,
-          memo,
-          deptId: r.deptId,
+        name,
+        email,
+        phone,
+        memo,
+        deptId: r.deptId,
 
-          studentNo: r.studentNo,
-          gradeLevel: r.gradeLevel,
-          academicStatus: r.academicStatus,
-          majors: r.majors,
+        studentNo: r.studentNo,
+        gradeLevel: r.gradeLevel,
+        academicStatus: r.academicStatus,
+        majors: r.majors,
 
-          professorNo: r.professorNo,
-        }
+        professorNo: r.professorNo,
+      }
       : undefined;
   }
 

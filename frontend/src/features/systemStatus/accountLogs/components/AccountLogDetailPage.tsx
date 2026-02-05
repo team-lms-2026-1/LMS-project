@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import styles from "../styles/accountLogDetail.module.css";
 import { fetchAccountDetailLogs, downloadAccessLogs } from "../lib/clientApi";
 import PrivacyExcelDownloadModal from "./PrivacyExcelDownloadModal";
@@ -66,6 +67,7 @@ export default function AccountLogDetailPage({ accountId }: Props) {
       })
       .catch((err) => {
         console.error("Failed to load account logs:", err);
+        toast.error("상세 로그를 불러오지 못했습니다.");
       })
       .finally(() => setLoading(false));
   };
@@ -98,9 +100,9 @@ export default function AccountLogDetailPage({ accountId }: Props) {
       a.download = `account_logs_${accountId}_${activeParams.from}_${activeParams.to}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("다운로드 실패");
+      toast.error(e.message || "다운로드 실패");
     }
   };
 
@@ -137,54 +139,62 @@ export default function AccountLogDetailPage({ accountId }: Props) {
 
   return (
     <div className={styles.page}>
-      <div className={styles.topRow}>
-        <div>
-          <div className={styles.breadcrumb}>시스템현황관리 &gt; 계정 로그 관리</div>
-          <div className={styles.title}>계정 로그 관리 상세</div>
+      <div className={styles.card}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>계정 로그 관리 상세</h1>
         </div>
-      </div>
 
-      <div className={styles.summaryBar}>
-        <div className={styles.summaryCell}>계정 유형: <b>{account?.accountType}</b></div>
-        <div className={styles.summaryCell}>이름 : <b>{account?.name}</b></div>
-        <div className={styles.summaryCell}>ID : <b>{account?.loginId}</b></div>
-        <div className={styles.summaryCell}>소속학과 : <b>{account?.departmentName ?? "-"}</b></div>
+        <div className={styles.summaryBar}>
+          <div className={styles.summaryCell}>계정 유형: <b>{account?.accountType}</b></div>
+          <div className={styles.summaryCell}>이름 : <b>{account?.name}</b></div>
+          <div className={styles.summaryCell}>ID : <b>{account?.loginId}</b></div>
+          <div className={styles.summaryCell}>소속학과 : <b>{account?.departmentName ?? "-"}</b></div>
 
-        <div className={styles.controls}>
-          <input className={styles.dateInput} type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          <span className={styles.wave}>~</span>
-          <input className={styles.dateInput} type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <div className={styles.controls}>
+            <input className={styles.dateInput} type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <span className={styles.wave}>~</span>
+            <input className={styles.dateInput} type="date" value={to} onChange={(e) => setTo(e.target.value)} />
 
-          <SearchBar
-            value={keywordInput}
-            onChange={setKeywordInput}
-            onSearch={onSearch}
-            placeholder="검색어 입력"
+            <SearchBar
+              value={keywordInput}
+              onChange={setKeywordInput}
+              onSearch={onSearch}
+              placeholder="검색어 입력"
+            />
+          </div>
+        </div>
+
+        <div className={styles.tableWrap}>
+          <Table
+            columns={columns}
+            items={logs}
+            rowKey={(r) => r.logId}
+            loading={loading}
+            skeletonRowCount={10}
+            emptyText="로그가 없습니다."
           />
         </div>
-      </div>
 
-      <div className={styles.tableWrap}>
-        <Table
-          columns={columns}
-          items={logs}
-          rowKey={(r) => r.logId}
-          loading={loading}
-          emptyText="로그가 없습니다."
-        />
+        <div className={styles.footerRow}>
+          <div className={styles.footerLeft}>
+            <Button variant="secondary" onClick={() => router.push("/admin/system-status/account-logs")}>
+              목록으로
+            </Button>
+          </div>
+          <div className={styles.footerCenter}>
+            <PaginationSimple
+              page={page}
+              totalPages={totalPages}
+              onChange={setPage}
+            />
+          </div>
+          <div className={styles.footerRight}>
+            <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+              Excel 다운로드
+            </Button>
+          </div>
+        </div>
       </div>
-
-      <div className={styles.paginationContainer}>
-        <PaginationSimple
-          page={page}
-          totalPages={totalPages}
-          onChange={setPage}
-        />
-      </div>
-
-      <Button variant="primary" className={styles.excelBtn} onClick={() => setIsModalOpen(true)}>
-        Excel 다운로드
-      </Button>
 
       <PrivacyExcelDownloadModal
         open={isModalOpen}

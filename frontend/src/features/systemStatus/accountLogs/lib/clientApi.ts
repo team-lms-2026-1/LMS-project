@@ -44,6 +44,16 @@ export async function downloadAccessLogs(payload: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error("Download failed");
+  if (!res.ok) {
+    let errorMessage = "Download failed";
+    try {
+      const errorData = await res.json();
+      if (errorData?.message) errorMessage = errorData.message;
+      else if (errorData?.code) errorMessage = `Error: ${errorData.code}`;
+    } catch {
+      // ignore
+    }
+    throw new Error(errorMessage);
+  }
   return res.blob();
 }

@@ -88,11 +88,9 @@ public class SurveyQueryService {
 
         List<Survey> surveys;
         if (keyword != null && !keyword.trim().isEmpty()) {
-
             surveys = surveyRepository.findByIdInAndTitleContaining(surveyIds, keyword);
         } else {
-
-            surveys = surveyRepository.findAllById(surveyIds);
+            surveys = surveyRepository.findAllByIdInOrderByIdDesc(surveyIds);
         }
 
         return surveys.stream().map(this::toSurveyListResponse).collect(Collectors.toList());

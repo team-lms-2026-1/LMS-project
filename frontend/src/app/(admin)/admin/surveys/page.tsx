@@ -13,7 +13,7 @@ import { TableColumn } from "@/components/table/types";
 import { useState } from "react";
 import { Button } from "@/components/button/Button";
 import { StatusPill, StatusType } from "@/components/status/StatusPill";
-import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 import toast from "react-hot-toast";
 
 export default function SurveyListPage() {
@@ -68,9 +68,19 @@ export default function SurveyListPage() {
       field: "status",
       width: "100px",
       align: "center",
-      render: (row) => (
-        <StatusPill status={row.status as StatusType} />
-      )
+      render: (row) => {
+        const now = new Date();
+        const start = new Date(row.startAt);
+        const end = new Date(row.endAt);
+
+        if (now < start) {
+          return <StatusPill status="PENDING" label="대기" />;
+        } else if (now >= start && now <= end) {
+          return <StatusPill status="ACTIVE" label="OPEN" />;
+        } else {
+          return <StatusPill status="INACTIVE" label="CLOSED" />;
+        }
+      }
     },
     {
       header: "제목",
@@ -109,33 +119,29 @@ export default function SurveyListPage() {
           <Button
             variant="secondary"
             className={styles.editBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEdit(row.surveyId);
-            }}
+            onClick={() => handleEdit(row.surveyId)}
           >
             수정
           </Button>
           <Button
             variant="danger"
             className={styles.deleteBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              openDeleteConfirm(row.surveyId);
-            }}
+            onClick={() => openDeleteConfirm(row.surveyId)}
           >
             삭제
           </Button>
         </div>
       ),
+      stopRowClick: true,
     },
   ];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className={styles.page}>
+      <div className={styles.card}>
         <h1 className={styles.title}>설문 통합 관리</h1>
-        <div className={styles.searchWrapper}>
+
+        <div className={styles.searchRow}>
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -143,39 +149,41 @@ export default function SurveyListPage() {
             onSearch={handleSearch}
           />
         </div>
+
+        <div className={styles.tableWrap}>
+          <Table
+            columns={columns}
+            items={data}
+            rowKey={(row) => row.surveyId}
+            loading={loading}
+            skeletonRowCount={10}
+            onRowClick={(row) => handleEdit(row.surveyId)}
+          />
+        </div>
+
+        <div className={styles.footerRow}>
+          <div className={styles.footerLeft} />
+          <div className={styles.footerCenter}>
+            <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
+          </div>
+          <div className={styles.footerRight}>
+            <Button
+              variant="primary"
+              onClick={() => router.push("/admin/surveys/new")}
+            >
+              등록
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className={styles.tableWrapper}>
-        <Table
-          columns={columns}
-          items={data}
-          rowKey={(row) => row.surveyId}
-          loading={loading}
-          onRowClick={(row) => handleEdit(row.surveyId)}
-        />
-      </div>
-
-      <div className={styles.createBtnWrapper}>
-        <Button
-          variant="primary"
-          onClick={() => router.push("/admin/surveys/new")}
-        >
-          등록
-        </Button>
-      </div>
-
-      <div className={styles.paginationWrapper}>
-        <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
-      </div>
-
-      <ConfirmDialog
+      <ConfirmModal
         open={deleteId !== null}
         title="설문 삭제"
-        description="정말 이 설문을 삭제하시겠습니까?"
-        confirmText="삭제"
-        danger
+        message="정말 이 설문을 삭제하시겠습니까?"
         onConfirm={handleDelete}
         onCancel={closeDeleteConfirm}
+        type="danger"
       />
     </div>
   );

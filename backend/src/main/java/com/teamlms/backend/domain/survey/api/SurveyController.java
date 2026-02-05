@@ -16,6 +16,8 @@ import com.teamlms.backend.domain.survey.api.dto.SurveyStatsResponse;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +58,7 @@ public class SurveyController {
             @RequestParam(required = false) SurveyType type,
             @RequestParam(required = false) SurveyStatus status,
             @RequestParam(required = false) String keyword,
-            Pageable pageable) {
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         InternalSurveySearchRequest searchRequest = InternalSurveySearchRequest.builder()
                 .type(type).status(status).keyword(keyword).build();

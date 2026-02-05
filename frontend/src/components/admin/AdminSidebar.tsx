@@ -72,7 +72,11 @@ const SECTIONS: NavSection[] = [
   {
     key: "mentoring",
     title: "멘토링",
-    items: [{ label: "멘토링 관리", href: "/competencies" }],
+    items: [
+      { label: "모집 공고 등록", href: "/admin/mentoring/recruitments" },
+      { label: "신청 승인", href: "/admin/mentoring/applications" },
+      { label: "멘토-멘티 매칭", href: "/admin/mentoring/matching" },
+    ],
   },
   {
     key: "counsel",

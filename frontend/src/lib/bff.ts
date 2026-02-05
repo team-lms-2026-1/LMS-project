@@ -101,8 +101,19 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
     next: options.next,
   });
 
+  if (res.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const contentType = res.headers.get("content-type") ?? "";
+  const contentLength = res.headers.get("content-length");
+
   if (!contentType.includes("application/json")) {
+    // 만약 Body가 없고 성공 응답이라면 통과 (예: 200 OK with Void)
+    if (res.ok && contentLength === "0") {
+      return NextResponse.json({}, { status: res.status });
+    }
+
     const text = await readTextSafe(res);
     return NextResponse.json(
       {
