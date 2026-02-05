@@ -1,4 +1,4 @@
- package com.teamlms.backend.domain.community.service;
+package com.teamlms.backend.domain.community.service;
 
 import com.teamlms.backend.domain.community.api.dto.ExternalCategoryRequest;
 import com.teamlms.backend.domain.community.entity.NoticeCategory;
@@ -29,9 +29,9 @@ public class NoticeCategoryService {
     @Transactional
     public Long createCategory(ExternalCategoryRequest request) {
         // 이름 중복 검사 (선택 사항)
-        // if (categoryRepository.existsByName(request.getName())) {
-        //     throw new BusinessException(ErrorCode.DUPLICATE_CATEGORY_NAME);
-        // }
+        if (categoryRepository.existsByName(request.getName())) {
+            throw new BusinessException(ErrorCode.DUPLICATE_CATEGORY_NAME);
+        }
 
         NoticeCategory category = NoticeCategory.builder()
                 .name(request.getName())
@@ -42,6 +42,7 @@ public class NoticeCategoryService {
         NoticeCategory savedCategory = categoryRepository.save(category);
         return savedCategory.getId();
     }
+
     // 1. 목록 조회
     public Page<Map<String, Object>> getCategoryList(Pageable pageable, String keyword) {
         Page<NoticeCategory> categories;
@@ -71,6 +72,12 @@ public class NoticeCategoryService {
         NoticeCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
 
+        // 이름 변경 시 중복 검사 (자기 자신은 제외)
+        if (!category.getName().equals(request.getName())
+                && categoryRepository.findByName(request.getName()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_CATEGORY_NAME);
+        }
+
         category.update(request.getName(), request.getBgColorHex(), request.getTextColorHex());
     }
 
@@ -81,15 +88,16 @@ public class NoticeCategoryService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
 
         // (선택사항) 해당 카테고리에 글이 있으면 삭제 막기
-        // if (noticeRepository.countByCategory(category) > 0) {
-        //     throw new BusinessException(ErrorCode.CATEGORY_HAS_POSTS);
-        // }
+        if (noticeRepository.countByCategory(category) > 0) {
+            throw new BusinessException(ErrorCode.CATEGORY_DELETE_NOT_ALLOWED);
+        }
 
         categoryRepository.delete(category);
     }
 
     private String formatDateTime(LocalDateTime dt) {
-        if (dt == null) return null;
+        if (dt == null)
+            return null;
         return dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 }

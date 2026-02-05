@@ -17,17 +17,18 @@ import java.util.Map;
 import java.util.List;
 
 @RestController
-@RequestMapping 
+@RequestMapping
 @RequiredArgsConstructor
 public class QnaCategoryController {
 
     private final QnaCategoryService service;
+
     // =================================================================
     // 1. Q&A 카테고리 목록 조회 - 전부가능
     // =================================================================
-    @GetMapping({"/api/v1/student/community/qna/categories",
-                 "/api/v1/admin/community/qna/categories",
-                 "/api/v1/professor/community/qna/categories"})
+    @GetMapping({ "/api/v1/student/community/qna/categories",
+            "/api/v1/admin/community/qna/categories",
+            "/api/v1/professor/community/qna/categories" })
     @PreAuthorize("hasAuthority('QNA_READ')")
     public ApiResponse<List<ExternalCategoryResponse>> getQnaCategories(
             @RequestParam(defaultValue = "1") int page,
@@ -36,7 +37,6 @@ public class QnaCategoryController {
         return getQnaCategoryListInternal(page, size, keyword);
     }
 
-   
     private ApiResponse<List<ExternalCategoryResponse>> getQnaCategoryListInternal(int page, int size, String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
@@ -44,17 +44,13 @@ public class QnaCategoryController {
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
-
+                Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<ExternalCategoryResponse> pageResult = service.getList(pageable, keyword);
-        
         return ApiResponse.of(
-                pageResult.getContent(), 
-                PageMeta.from(pageResult)
-        );
+                pageResult.getContent(),
+                PageMeta.from(pageResult));
     }
-    
+
     // =================================================================
     // 2. Q&A 카테고리 등록 - 어드민만 가능
     // =================================================================
