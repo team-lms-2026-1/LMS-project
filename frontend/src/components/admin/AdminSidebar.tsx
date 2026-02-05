@@ -65,8 +65,8 @@ const SECTIONS: NavSection[] = [
     title: "비교과 관리",
     items: [
       { label: "비교과 관리", href: "/admin/extra-curricular/extra-curriculars" },
-      { label: "비운영 관리", href: "/admin/extra-curricular/offerings" },
-      { label: "비교과 성적 관리", href: "/admin/extra-curricular/grade-reports" },
+      { label: "비교과운영 관리", href: "/admin/extra-curricular/offerings" },
+      { label: "비교과성적관리", href: "/admin/extra-curricular/grade-reports" },
     ],
   },
   {

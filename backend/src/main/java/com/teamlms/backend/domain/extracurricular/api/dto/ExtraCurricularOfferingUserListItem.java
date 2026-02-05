@@ -1,0 +1,13 @@
+package com.teamlms.backend.domain.extracurricular.api.dto;
+
+public record ExtraCurricularOfferingUserListItem(
+    Long extraOfferingId,
+
+    String extraOfferingCode,
+    String extraOfferingName,
+
+    String hostContactName,       // 주관기관
+    Long rewardPointDefault,      // 포인트
+    Long recognizedHoursDefault  // 인정시간
+
+) {}

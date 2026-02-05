@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularListItem;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricular;
 
-public interface ExtraCurricularRepository extends JpaRepository<ExtraCurricular, Long> {
+public interface ExtraCurricularRepository extends JpaRepository<ExtraCurricular, Long>, ExtraCurricularRepositoryCustom {
     
     boolean existsByExtraCurricularCode(String extraCurricularCode);
 
@@ -30,4 +30,5 @@ public interface ExtraCurricularRepository extends JpaRepository<ExtraCurricular
              lower(e.extraCurricularName) like lower(concat('%', :keyword, '%')))
         """)
     Page<ExtraCurricularListItem> findList(@Param("keyword") String keyword, Pageable pageable);
+   
 }

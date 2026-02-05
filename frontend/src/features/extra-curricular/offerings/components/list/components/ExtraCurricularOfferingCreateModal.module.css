@@ -1,0 +1,66 @@
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.control {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.error {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+/* text area */
+textarea.control {
+  height: auto;          /* ✅ input의 40px 무효화 */
+  min-height: 120px;     /* ✅ 설명칸다운 높이 */
+  padding: 10px 12px;    /* ✅ textarea는 상하 padding 필요 */
+  resize: vertical;      /* ✅ 사용자가 늘릴 수 있게(선택) */
+  line-height: 1.4;      /* ✅ 텍스트 가독성 */
+}
+
+.controlWrap {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.controlWrap > * {
+  width: 100%;
+}

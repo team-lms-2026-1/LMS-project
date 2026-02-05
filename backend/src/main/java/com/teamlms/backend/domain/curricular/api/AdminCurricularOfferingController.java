@@ -162,7 +162,7 @@ public class AdminCurricularOfferingController {
         return ApiResponse.ok(curricularOfferingQueryService.getMapping(offeringId));
     }
 
-    // 상세 ( 역량 맵핑 ) 사용안함
+    // 상세 ( 역량 맵핑 )
     @PatchMapping("/{offeringId}/competency-mapping")
     public ApiResponse<SuccessResponse> patchMapping(
             @PathVariable Long offeringId,

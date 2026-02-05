@@ -82,7 +82,7 @@ export default function CurricularOfferingPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            교과등록
+            운영등록
           </OutButton>
         </div>
         <CurricularOfferingCreateModal
