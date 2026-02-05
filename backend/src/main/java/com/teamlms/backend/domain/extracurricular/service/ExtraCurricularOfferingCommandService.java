@@ -6,14 +6,19 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import com.teamlms.backend.domain.competency.repository.CompetencyRepository;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferingCreateRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferingPatchRequest;
+import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingBulkUpdateRequest;
+import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingPatchRequest;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOffering;
+import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOfferingCompetencyMap;
+import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOfferingCompetencyMapId;
 import com.teamlms.backend.domain.extracurricular.enums.CompletionStatus;
 import com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus;
 import com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularApplicationRepository;
+import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingCompetencyMapRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionCompletionRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionRepository;
@@ -32,6 +37,9 @@ public class ExtraCurricularOfferingCommandService {
     private final ExtraCurricularSessionCompletionRepository completionRepository;
     private final ExtraCurricularApplicationRepository applicationRepository;
 
+    private final CompetencyRepository competencyRepository;
+    private final ExtraCurricularOfferingCompetencyMapRepository competencyMapRepository;
+
     // =====================
     // 개설 생성
     // =====================
@@ -47,19 +55,19 @@ public class ExtraCurricularOfferingCommandService {
         }
 
         ExtraCurricularOffering e = ExtraCurricularOffering.builder()
-            .extraCurricularId(req.extraCurricularId())
-            .extraOfferingCode(offeringCode)
-            .extraOfferingName(req.extraOfferingName().trim())
-            .hostContactName(trimOrNull(req.hostContactName()))
-            .hostContactPhone(trimOrNull(req.hostContactPhone()))
-            .hostContactEmail(trimOrNull(req.hostContactEmail()))
-            .rewardPointDefault(req.rewardPointDefault())
-            .recognizedHoursDefault(req.recognizedHoursDefault())
-            .semesterId(req.semesterId())
-            .operationStartAt(req.operationStartAt())
-            .operationEndAt(req.operationEndAt())
-            .status(ExtraOfferingStatus.DRAFT)
-            .build();
+                .extraCurricularId(req.extraCurricularId())
+                .extraOfferingCode(offeringCode)
+                .extraOfferingName(req.extraOfferingName().trim())
+                .hostContactName(trimOrNull(req.hostContactName()))
+                .hostContactPhone(trimOrNull(req.hostContactPhone()))
+                .hostContactEmail(trimOrNull(req.hostContactEmail()))
+                .rewardPointDefault(req.rewardPointDefault())
+                .recognizedHoursDefault(req.recognizedHoursDefault())
+                .semesterId(req.semesterId())
+                .operationStartAt(req.operationStartAt())
+                .operationEndAt(req.operationEndAt())
+                .status(ExtraOfferingStatus.DRAFT)
+                .build();
 
         offeringRepository.save(e);
     }
@@ -70,17 +78,17 @@ public class ExtraCurricularOfferingCommandService {
     public void patch(Long extraOfferingId, ExtraCurricularOfferingPatchRequest req) {
 
         ExtraCurricularOffering offering = offeringRepository.findById(extraOfferingId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, extraOfferingId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, extraOfferingId));
 
         if (offering.getStatus() != ExtraOfferingStatus.DRAFT) {
             throw new BusinessException(
-                ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_EDITABLE,
-                extraOfferingId, offering.getStatus()
+                    ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_EDITABLE,
+                    extraOfferingId, offering.getStatus()
             );
         }
 
         var nextStart = (req.operationStartAt() != null) ? req.operationStartAt() : offering.getOperationStartAt();
-        var nextEnd   = (req.operationEndAt() != null) ? req.operationEndAt() : offering.getOperationEndAt();
+        var nextEnd = (req.operationEndAt() != null) ? req.operationEndAt() : offering.getOperationEndAt();
 
         if (!nextEnd.isAfter(nextStart)) {
             throw new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_PERIOD_INVALID);
@@ -94,7 +102,7 @@ public class ExtraCurricularOfferingCommandService {
             }
 
             boolean duplicated = offeringRepository
-                .existsByExtraOfferingCodeAndExtraOfferingIdNot(nextCode, extraOfferingId);
+                    .existsByExtraOfferingCodeAndExtraOfferingIdNot(nextCode, extraOfferingId);
 
             if (duplicated) {
                 throw new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_CODE_ALREADY_EXISTS, nextCode);
@@ -102,16 +110,16 @@ public class ExtraCurricularOfferingCommandService {
         }
 
         offering.patchForDraft(
-            nextCode,
-            trimOrNull(req.extraOfferingName()),
-            trimOrNull(req.hostContactName()),
-            trimOrNull(req.hostContactPhone()),
-            trimOrNull(req.hostContactEmail()),
-            req.rewardPointDefault(),
-            req.recognizedHoursDefault(),
-            req.semesterId(),
-            req.operationStartAt(),
-            req.operationEndAt()
+                nextCode,
+                trimOrNull(req.extraOfferingName()),
+                trimOrNull(req.hostContactName()),
+                trimOrNull(req.hostContactPhone()),
+                trimOrNull(req.hostContactEmail()),
+                req.rewardPointDefault(),
+                req.recognizedHoursDefault(),
+                req.semesterId(),
+                req.operationStartAt(),
+                req.operationEndAt()
         );
     }
 
@@ -209,10 +217,59 @@ public class ExtraCurricularOfferingCommandService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, extraOfferingId));
 
         if (offering.getStatus() != ExtraOfferingStatus.OPEN) {
-            // ✅ 이 ErrorCode는 너 enum에 없어서 반드시 추가해야 함
-            throw new BusinessException(ErrorCode.EXTRA_CURRICULAR_SESSION_NOT_EDITABLE, extraOfferingId, offering.getStatus());
+            throw new BusinessException(
+                    ErrorCode.EXTRA_CURRICULAR_SESSION_NOT_EDITABLE,
+                    extraOfferingId, offering.getStatus()
+            );
         }
 
         completionRepository.deleteBySessionId(sessionId);
+    }
+
+    // =====================
+    // 역량 맵핑 (Offering 기준)
+    // =====================
+    public void patchMapping(Long extraOfferingId, ExtraOfferingCompetencyMappingBulkUpdateRequest req) {
+
+        ExtraCurricularOffering offering = offeringRepository.findById(extraOfferingId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, extraOfferingId));
+
+        if (offering.getStatus() == ExtraOfferingStatus.COMPLETED) {
+            throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_MAPPING_NOT_EDITABLE, extraOfferingId);
+        }
+
+        var reqs = req.mappings();
+
+        // 요청 weight 중복 방지
+        long distinctWeight = reqs.stream()
+                .map(ExtraOfferingCompetencyMappingPatchRequest::weight)
+                .distinct()
+                .count();
+        if (distinctWeight != reqs.size()) {
+            throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_WEIGHT_DUPLICATED, extraOfferingId);
+        }
+
+        // competency 존재 검증
+        var ids = reqs.stream()
+                .map(ExtraOfferingCompetencyMappingPatchRequest::competencyId)
+                .distinct()
+                .toList();
+
+        long existCount = competencyRepository.countByCompetencyIdIn(ids);
+        if (existCount != ids.size()) {
+            throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, "some competencyId not found");
+        }
+
+        // ✅ 기존 맵핑 전부 삭제 후 재생성
+        competencyMapRepository.deleteByIdExtraOfferingId(extraOfferingId);
+
+        var entities = reqs.stream().map(r -> {
+            var id = new ExtraCurricularOfferingCompetencyMapId(extraOfferingId, r.competencyId());
+            var map = ExtraCurricularOfferingCompetencyMap.builder().id(id).build();
+            map.changeWeight(r.weight());
+            return map;
+        }).toList();
+
+        competencyMapRepository.saveAll(entities);
     }
 }

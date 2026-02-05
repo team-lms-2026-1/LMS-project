@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { ExtraCurricularOfferingCreateRequest, ExtraCurricularOfferingDetailResponse, ExtraCurricularOfferingDetailUpdateRequest, ExtraCurricularOfferingListResponsee, SuccessResponse } from "./types";
+import { ExtraCurricularOfferingCompetencyMappingBulkUpdateRequest, ExtraCurricularOfferingCompetencyResponse, ExtraCurricularOfferingCreateRequest, ExtraCurricularOfferingDetailResponse, ExtraCurricularOfferingDetailUpdateRequest, ExtraCurricularOfferingListResponsee, SuccessResponse } from "./types";
 import { ExtraCurricularOfferingUserListResponse } from "@/features/student/extra-curricular/offerings/api/types";
 
 export type ExtraCurricularOfferingListQuery = {
@@ -45,6 +45,26 @@ export async function updateCurricularOfferingDetail(
   body: ExtraCurricularOfferingDetailUpdateRequest
 ) {
   return getJson<SuccessResponse>(`/api/admin/extra-curricular/offerings/${id}/basic`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store"
+  })
+}
+
+// competency
+export async function fetchExtraCurricularOfferingCompetency(id: number) {
+  const url = `/api/admin/extra-curricular/offerings/${id}/competency`
+  return getJson<ExtraCurricularOfferingCompetencyResponse>( url, {
+      cache: "no-store"
+  });
+}
+
+export async function updateExtraCurricularOfferingCompetency(
+  id: number,
+  body: ExtraCurricularOfferingCompetencyMappingBulkUpdateRequest
+) {
+  return getJson<SuccessResponse>(`/api/admin/extra-curricular/offerings/${id}/competency`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
