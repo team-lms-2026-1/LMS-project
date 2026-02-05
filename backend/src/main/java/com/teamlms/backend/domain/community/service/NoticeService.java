@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,6 +35,7 @@ public class NoticeService {
     private final NoticeCategoryRepository categoryRepository;
     private final NoticeAttachmentRepository attachmentRepository;
     private final AccountRepository accountRepository;
+    private final CommunityAccountRepository communityAccountRepository;
     private final S3Service s3Service;
 
     // 1. 목록 조회 (자료실 스타일: Condition 객체 활용)
@@ -46,12 +48,18 @@ public class NoticeService {
 
         // 리포지토리에 새로 만든 findNotices 메서드 호출
         Page<Notice> notices = noticeRepository.findNotices(
-                condition.getCategoryId(), 
-                condition.getTitleKeyword(), 
-                pageable
-        );
-        
-        return notices.map(this::convertToExternalResponse);
+                condition.getCategoryId(),
+                condition.getTitleKeyword(),
+                pageable);
+
+        // 작성자 실명 맵 생성 (N+1 방지)
+        List<Long> authorIds = notices.getContent().stream()
+                .map(n -> n.getAuthor().getAccountId())
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, String> nameMap = communityAccountRepository.findRealNamesMap(authorIds);
+
+        return notices.map(notice -> convertToExternalResponse(notice, nameMap.get(notice.getAuthor().getAccountId())));
     }
 
     // 2. 상세 조회
@@ -61,7 +69,8 @@ public class NoticeService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
 
         notice.increaseViewCount();
-        return convertToExternalResponse(notice);
+        String authorName = communityAccountRepository.findRealName(notice.getAuthor().getAccountId());
+        return convertToExternalResponse(notice, authorName);
     }
 
     // 3. 등록
@@ -93,38 +102,45 @@ public class NoticeService {
 
     // // 4. 수정
     // @Transactional
-    // public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
-    //     Notice notice = noticeRepository.findById(noticeId)
-    //             .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
+    // public void updateNotice(Long noticeId, ExternalNoticePatchRequest request,
+    // List<MultipartFile> newFiles, Long modifierId) {
+    // Notice notice = noticeRepository.findById(noticeId)
+    // .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
 
-    //     // 4-1. 정보 수정
-    //     if (request.getCategoryId() != null) {
-    //         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-    //                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
-    //         notice.changeCategory(category); // 엔티티에 changeCategory 메서드 필요
-    //     }
-        
-    //     // 자료실 스타일의 필드별 수정
-    //     if (request.getTitle() != null) notice.changeTitle(request.getTitle());
-    //     if (request.getContent() != null) notice.changeContent(request.getContent());
-    //     if (request.getDisplayStartAt() != null) notice.changeDisplayStartAt(parseDateTime(request.getDisplayStartAt()));
-    //     if (request.getDisplayEndAt() != null) notice.changeDisplayEndAt(parseDateTime(request.getDisplayEndAt()));
+    // // 4-1. 정보 수정
+    // if (request.getCategoryId() != null) {
+    // NoticeCategory category =
+    // categoryRepository.findById(request.getCategoryId())
+    // .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+    // notice.changeCategory(category); // 엔티티에 changeCategory 메서드 필요
+    // }
 
-    //     // 4-2. 파일 삭제
-    //     if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
-    //         List<NoticeAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
-    //         for (NoticeAttachment att : attachmentsToDelete) {
-    //             s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
-    //         }
-    //         attachmentRepository.deleteAllById(request.getDeleteFileIds());
-    //     }
+    // // 자료실 스타일의 필드별 수정
+    // if (request.getTitle() != null) notice.changeTitle(request.getTitle());
+    // if (request.getContent() != null) notice.changeContent(request.getContent());
+    // if (request.getDisplayStartAt() != null)
+    // notice.changeDisplayStartAt(parseDateTime(request.getDisplayStartAt()));
+    // if (request.getDisplayEndAt() != null)
+    // notice.changeDisplayEndAt(parseDateTime(request.getDisplayEndAt()));
 
-    //     // 4-3. 새 파일 추가
-    //     if (newFiles != null && !newFiles.isEmpty()) {
-    //         Account modifier = accountRepository.findById(modifierId)
-    //                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
-    //         saveAttachments(newFiles, notice, modifier);
-    //     }
+    // // 4-2. 파일 삭제
+    // if (request.getDeleteFileIds() != null &&
+    // !request.getDeleteFileIds().isEmpty()) {
+    // List<NoticeAttachment> attachmentsToDelete =
+    // attachmentRepository.findAllById(request.getDeleteFileIds());
+    // for (NoticeAttachment att : attachmentsToDelete) {
+    // s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
+    // }
+    // attachmentRepository.deleteAllById(request.getDeleteFileIds());
+    // }
+
+    // // 4-3. 새 파일 추가
+    // if (newFiles != null && !newFiles.isEmpty()) {
+    // Account modifier = accountRepository.findById(modifierId)
+    // .orElseThrow(() -> new
+    // BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
+    // saveAttachments(newFiles, notice, modifier);
+    // }
     // }
 
     // 5. 삭제
@@ -132,7 +148,7 @@ public class NoticeService {
     public void deleteNotice(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
-        
+
         for (NoticeAttachment att : notice.getAttachments()) {
             s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
         }
@@ -144,7 +160,8 @@ public class NoticeService {
     // 4. 공지사항 수정
     // =================================================================
     @Transactional
-    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
+    public void updateNotice(Long noticeId, ExternalNoticePatchRequest request, List<MultipartFile> newFiles,
+            Long modifierId) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
 
@@ -155,12 +172,15 @@ public class NoticeService {
             notice.changeCategory(category);
         }
 
-        if (request.getTitle() != null) notice.changeTitle(request.getTitle());
-        if (request.getContent() != null) notice.changeContent(request.getContent());
-        
+        if (request.getTitle() != null)
+            notice.changeTitle(request.getTitle());
+        if (request.getContent() != null)
+            notice.changeContent(request.getContent());
+
         // 날짜 파싱 로직 (String -> LocalDateTime)
         if (request.getDisplayStartAt() != null) {
-            notice.changeDisplayStartAt(LocalDateTime.parse(request.getDisplayStartAt())); // 포맷에 따라 DateTimeFormatter 필요할 수 있음
+            notice.changeDisplayStartAt(LocalDateTime.parse(request.getDisplayStartAt())); // 포맷에 따라 DateTimeFormatter
+                                                                                           // 필요할 수 있음
         }
         if (request.getDisplayEndAt() != null) {
             notice.changeDisplayEndAt(LocalDateTime.parse(request.getDisplayEndAt()));
@@ -169,7 +189,7 @@ public class NoticeService {
         // 4-2. 파일 삭제 (중요: 보안 검증 추가)
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
             List<NoticeAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
-            
+
             for (NoticeAttachment att : attachmentsToDelete) {
                 // [보안 검증] 삭제하려는 파일이 현재 수정 중인 공지사항의 파일이 맞는지 확인
                 if (!att.getNotice().getId().equals(noticeId)) {
@@ -189,7 +209,7 @@ public class NoticeService {
         if (newFiles != null && !newFiles.isEmpty()) {
             Account modifier = accountRepository.findById(modifierId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
-            
+
             // saveAttachments 내부 로직은 기존 구현 사용
             saveAttachments(newFiles, notice, modifier);
         }
@@ -201,7 +221,8 @@ public class NoticeService {
 
     private void saveAttachments(List<MultipartFile> files, Notice notice, Account author) {
         for (MultipartFile file : files) {
-            if (file.isEmpty()) continue;
+            if (file.isEmpty())
+                continue;
             try {
                 String s3Url = s3Service.upload(file, "notices");
                 NoticeAttachment attachment = NoticeAttachment.builder()
@@ -210,7 +231,7 @@ public class NoticeService {
                         .originalName(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .fileSize(file.getSize())
-                        .uploadedBy(author.getAccountId()) 
+                        .uploadedBy(author.getAccountId())
                         .updatedBy(author.getAccountId())
                         .build();
                 attachmentRepository.save(attachment);
@@ -222,11 +243,12 @@ public class NoticeService {
     }
 
     private String extractKeyFromUrl(String url) {
-        if (url == null || !url.contains("notices/")) return url;
+        if (url == null || !url.contains("notices/"))
+            return url;
         return url.substring(url.indexOf("notices/"));
     }
 
-    private ExternalNoticeResponse convertToExternalResponse(Notice notice) {
+    private ExternalNoticeResponse convertToExternalResponse(Notice notice, String authorName) {
         LocalDateTime now = LocalDateTime.now();
         NoticeStatus status = NoticeStatus.ONGOING;
 
@@ -251,17 +273,17 @@ public class NoticeService {
                         .originalName(f.getOriginalName())
                         .contentType(f.getContentType())
                         .fileSize(f.getFileSize())
-                        .downloadUrl(f.getStorageKey()) 
+                        .downloadUrl(f.getStorageKey())
                         .build())
                 .collect(Collectors.toList());
 
         // 3. 최종 Response 조립
         return ExternalNoticeResponse.builder()
                 .noticeId(notice.getId())
-                .category(categoryDto) 
+                .category(categoryDto)
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .authorName(notice.getAuthor().getLoginId())
+                .authorName(authorName != null ? authorName : notice.getAuthor().getLoginId())
                 .viewCount(notice.getViewCount())
                 .createdAt(notice.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .status(status.getDescription())
@@ -270,7 +292,12 @@ public class NoticeService {
     }
 
     private LocalDateTime parseDateTime(String dateTimeStr) {
-        if (dateTimeStr == null || dateTimeStr.isBlank()) return null;
-        try { return LocalDateTime.parse(dateTimeStr); } catch (Exception e) { return null; }
+        if (dateTimeStr == null || dateTimeStr.isBlank())
+            return null;
+        try {
+            return LocalDateTime.parse(dateTimeStr);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

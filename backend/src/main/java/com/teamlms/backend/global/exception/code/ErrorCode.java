@@ -177,7 +177,25 @@ public enum ErrorCode {
     MENTORING_INVALID_ROLE_APPLICATION(HttpStatus.BAD_REQUEST, "MENTORING_INVALID_ROLE_APPLICATION",
             "해당 역할로 신청할 수 없는 계정입니다.", "mentoring.application.invalidRole"),
     MENTORING_APPLICATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "MENTORING_APPLICATION_ALREADY_EXISTS",
-            "이미 해당 공고에 신청하셨습니다.", "mentoring.application.alreadyExists");
+            "이미 해당 공고에 신청하셨습니다.", "mentoring.application.alreadyExists"),
+    // Domain: competency
+    // =========================
+    DUPLICATE_DIAGNOSIS_FOR_SEMESTER(HttpStatus.CONFLICT, "DUPLICATE_DIAGNOSIS_FOR_SEMESTER", "이미 해당 학기에 진단이 존재합니다.",
+            "diagnosis.duplicate"),
+    CANNOT_DELETE_DIAGNOSIS_WITH_SUBMISSIONS(HttpStatus.CONFLICT, "CANNOT_DELETE_DIAGNOSIS_WITH_SUBMISSIONS",
+            "이미 응답이 제출된 진단은 삭제할 수 없습니다.", "diagnosis.delete.conflict"),
+    CANNOT_MODIFY_CLOSED_DIAGNOSIS(HttpStatus.CONFLICT, "CANNOT_MODIFY_CLOSED_DIAGNOSIS", "종료된 진단은 수정할 수 없습니다.",
+            "diagnosis.modify.closed"),
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "INVALID_DATE_RANGE", "시작일이 종료일보다 빠를 수 없습니다.", "diagnosis.date.invalid"),
+    NO_RESPONSE_DATA(HttpStatus.NOT_FOUND, "NO_RESPONSE_DATA", "응답 데이터가 없습니다.", "diagnosis.response.empty"),
+    DIAGNOSIS_NOT_OPEN(HttpStatus.BAD_REQUEST, "DIAGNOSIS_NOT_OPEN", "현재 진행 중인 진단이 아닙니다.", "diagnosis.notOpen"),
+    DIAGNOSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "DIAGNOSIS_NOT_FOUND", "진단을 찾을 수 없습니다.", "diagnosis.notFound"),
+    CANNOT_MODIFY_QUESTIONS_AFTER_OPEN(HttpStatus.BAD_REQUEST, "CANNOT_MODIFY_QUESTIONS_AFTER_OPEN",
+            "진단이 시작된 후는 문항을 수정할 수 없습니다.", "diagnosis.modify.questions.afterOpen"),
+    ALREADY_SUBMITTED_DIAGNOSIS(HttpStatus.CONFLICT, "ALREADY_SUBMITTED_DIAGNOSIS", "이미 제출한 진단입니다.",
+            "diagnosis.alreadySubmitted"),
+    INVALID_COMPETENCY_WEIGHT(HttpStatus.BAD_REQUEST, "INVALID_COMPETENCY_WEIGHT", "역량 가중치는 0에서 6 사이여야 합니다.",
+            "competency.weight.invalid");
 
     private final HttpStatus httpStatus;
     private final String code;

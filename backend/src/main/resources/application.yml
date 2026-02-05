@@ -9,6 +9,11 @@ spring:
       max-file-size: 80MB       # 파일 하나당 최대 크기 (기본 1MB)
       max-request-size: 80MB    # 한 번 요청의 전체 크기 (기본 10MB)
 # ============================================================
+  
+  # i18n 메시지 설정
+  messages:
+    basename: messages/messages
+    encoding: UTF-8
 
   jpa:
     open-in-view: false
