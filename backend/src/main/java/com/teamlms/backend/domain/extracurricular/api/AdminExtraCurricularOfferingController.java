@@ -29,6 +29,8 @@ import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferin
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionCreateRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionDetailResponse;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionListItem;
+import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingBulkUpdateRequest;
+import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingItem;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingStatusChangeRequest;
 import com.teamlms.backend.domain.extracurricular.service.AdminExtraCurricularSessionCommandService;
 import com.teamlms.backend.domain.extracurricular.service.AdminExtraCurricularSessionQueryService;
@@ -160,21 +162,21 @@ public class AdminExtraCurricularOfferingController {
         );
     }
 
-    // // 상세 ( 역량 맵핑 )
-    // @GetMapping("/{extraOfferingId}/competency-mapping")
-    // public ApiResponse<List<ExtraOfferingCompetencyMappingItem>> getMapping(
-    //         @PathVariable Long extraOfferingId
-    // ) {
-    //     return ApiResponse.ok(extracurricularOfferingQueryService.getMapping(extraOfferingId));
-    // }
+    // 상세 ( 역량 맵핑 )
+    @GetMapping("/{extraOfferingId}/competency-mapping")
+    public ApiResponse<List<ExtraOfferingCompetencyMappingItem>> getMapping(
+            @PathVariable Long extraOfferingId
+    ) {
+        return ApiResponse.ok(extracurricularOfferingQueryService.getMapping(extraOfferingId));
+    }
 
-    // // 상세 ( 역량 맵핑 )
-    // @PatchMapping("/{extraOfferingId}/competency-mapping")
-    // public ApiResponse<SuccessResponse> patchMapping(
-    //         @PathVariable Long extraOfferingId,
-    //         @Valid @RequestBody ExtraOfferingCompetencyMappingBulkUpdateRequest req
-    // ) {
-    //     extraCurricularOfferingCommandService.patchMapping(extraOfferingId, req);
-    //     return ApiResponse.ok(new SuccessResponse());
-    // }
+    // 상세 ( 역량 맵핑 )
+    @PatchMapping("/{extraOfferingId}/competency-mapping")
+    public ApiResponse<SuccessResponse> patchMapping(
+            @PathVariable Long extraOfferingId,
+            @Valid @RequestBody ExtraOfferingCompetencyMappingBulkUpdateRequest req
+    ) {
+        extraCurricularOfferingCommandService.patchMapping(extraOfferingId, req);
+        return ApiResponse.ok(new SuccessResponse());
+    }
 }
