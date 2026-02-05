@@ -1,11 +1,15 @@
 package com.teamlms.backend.domain.extracurricular.service;
 
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.teamlms.backend.domain.dept.api.dto.DepartmentDropdownItem;
+import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularDropdownItem;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularListItem;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularPatchForm;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricular;
@@ -32,5 +36,13 @@ public class ExtraCurricularQueryService {
 
     public Page<ExtraCurricularListItem> list(String keyword, Pageable pageable) {
         return extraCurricularRepository.findList(keyword, pageable);
+    }
+
+    // 비교과 드롭다운 
+    public List<ExtraCurricularDropdownItem> getExtraCurricularDropdown() {
+        return extraCurricularRepository.findActiveForDropdown()
+                .stream() // 컬렉션을 하나씩 처리할 수 있는 흐름(stream) 으로 바꿔줌
+                .map(ExtraCurricularDropdownItem::from) // 각요소를 변환
+                .toList();
     }
 }

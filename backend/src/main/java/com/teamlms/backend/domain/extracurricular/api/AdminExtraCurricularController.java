@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/extra-curriculars")
+@RequestMapping("/api/v1/admin/extra-curricular/extra-curriculars")
 public class AdminExtraCurricularController {
 
     private final ExtraCurricularCommandService extraCurricularCommandService;
@@ -50,7 +50,7 @@ public class AdminExtraCurricularController {
         return ApiResponse.ok(new SuccessResponse());
     }
 
-    @GetMapping("/{extraCurricularId}/edit")
+    @GetMapping("/{extraCurricularId}")
     public ApiResponse<ExtraCurricularPatchForm> getEditForm(
         @PathVariable Long extraCurricularId
     ) {
