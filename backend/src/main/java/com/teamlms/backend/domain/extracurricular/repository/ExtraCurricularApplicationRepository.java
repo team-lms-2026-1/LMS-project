@@ -50,5 +50,17 @@ public interface ExtraCurricularApplicationRepository
     Optional<ExtraCurricularApplication> findByExtraOfferingIdAndStudentAccountId(Long extraOfferingId, Long studentAccountId);
 
     boolean existsByExtraOfferingIdAndStudentAccountId(Long extraOfferingId, Long studentAccountId);
-
+    
+    @Query("""
+        select a
+          from ExtraCurricularApplication a
+          join ExtraCurricularOffering o
+            on o.extraOfferingId = a.extraOfferingId
+         where a.studentAccountId = :studentAccountId
+           and o.semesterId = :semesterId
+    """)
+    List<ExtraCurricularApplication> findByStudentAccountIdAndSemesterId(
+        @Param("studentAccountId") Long studentAccountId,
+        @Param("semesterId") Long semesterId
+    );
 }
