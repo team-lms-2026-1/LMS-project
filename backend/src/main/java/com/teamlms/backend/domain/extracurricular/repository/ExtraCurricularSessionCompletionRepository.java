@@ -13,6 +13,8 @@ import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSessionC
 public interface ExtraCurricularSessionCompletionRepository
         extends JpaRepository<ExtraCurricularSessionCompletion, Long> {
 
+    List<ExtraCurricularSessionCompletion> findByApplicationId(Long applicationId);
+    
     /**
      * 신청자별 출석 완료 세션 수
      */
