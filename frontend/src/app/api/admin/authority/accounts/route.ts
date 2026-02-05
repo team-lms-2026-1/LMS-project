@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
+
+export const runtime = "nodejs";
+
+const TAG_ACCOUNTS = "admin:authority:accounts";
+const REVALIDATE_SECONDS = 30;
 
 type ApiResponse<T> = { success?: boolean; message?: string; data?: T };
 
@@ -7,7 +13,7 @@ function getBaseUrl() {
   return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL;
 }
 
-function buildHeaders() {
+function getToken() {
   let token = cookies().get("access_token")?.value;
 
   if (token) {
@@ -16,10 +22,17 @@ function buildHeaders() {
       .replace(/^Bearer\s+/i, "")
       .trim();
   }
+  return token || undefined;
+}
 
+function buildHeaders() {
+  const token = getToken();
   const headers = new Headers();
+
+  // GET에는 Content-Type 필요 없지만, 유지해도 무방
   headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
+
   return headers;
 }
 
@@ -36,14 +49,13 @@ async function parseErrorMessage(res: Response, fallback: string) {
   }
 }
 
-/** upstream 응답을 그대로 내려줌 (성공/실패 모두) */
-async function passthroughResponse(upstreamRes: Response) {
-  const text = await upstreamRes.text();
-  return new Response(text, {
+/** upstream 응답을 스트리밍으로 그대로 내려줌 (성공/실패 모두 가능) */
+function passthroughResponse(upstreamRes: Response) {
+  const headers = new Headers(upstreamRes.headers);
+  if (!headers.get("content-type")) headers.set("content-type", "application/json");
+  return new Response(upstreamRes.body, {
     status: upstreamRes.status,
-    headers: {
-      "content-type": upstreamRes.headers.get("content-type") ?? "application/json",
-    },
+    headers,
   });
 }
 
@@ -88,7 +100,10 @@ export async function GET(req: Request) {
       method: "GET",
       headers: buildHeaders(),
       credentials: "include",
-      cache: "no-store",
+
+      // ✅ 핵심: upstream 응답을 Next Data Cache에 저장
+      cache: "force-cache",
+      next: { revalidate: REVALIDATE_SECONDS, tags: [TAG_ACCOUNTS] },
     });
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
@@ -102,6 +117,7 @@ export async function GET(req: Request) {
     );
   }
 
+  // (선택) upstream이 GET 405이면 POST 폴백
   if (resGet.status === 405) {
     const upstreamPost = `${base}/api/v1/admin/accounts`;
 
@@ -117,7 +133,7 @@ export async function GET(req: Request) {
           ...(keyword ? { keyword } : {}),
         }),
         credentials: "include",
-        cache: "no-store",
+        cache: "no-store", // ✅ POST는 캐시 대상 아님
       });
     } catch (e) {
       const detail = e instanceof Error ? e.message : String(e);
@@ -177,6 +193,10 @@ export async function POST(req: Request) {
     );
   }
 
-  // 성공/실패 모두 그대로 내려주면 프론트에서 메시지 확인이 쉬움
+  // ✅ 생성 성공 시 목록 캐시 무효화 (다음 GET부터 최신)
+  if (upstreamRes.ok) {
+    revalidateTag(TAG_ACCOUNTS);
+  }
+
   return passthroughResponse(upstreamRes);
 }

@@ -80,3 +80,22 @@
 .switch input:checked + .slider { background: #2563eb; }
 .switch input:checked + .slider:before { transform: translateX(20px); }
 .switch[aria-disabled="true"] { opacity: 0.6; }
+
+.footerRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.footerLeft {
+  justify-self: start;
+}
+
+.footerCenter {
+  justify-self: center; 
+}
+
+.footerRight {
+  justify-self: end;
+}
