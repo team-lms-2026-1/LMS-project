@@ -1,8 +1,9 @@
-.container {
-  padding: 24px;
-  background: #fff;
-  border-radius: 8px;
-  min-height: 80vh;
+.page {
+  padding: 0;
+}
+
+.card {
+  background: transparent;
 }
 
 .header {
@@ -13,42 +14,48 @@
 }
 
 .title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .searchWrapper {
   width: 300px;
 }
 
-.tableWrapper {
-  margin-bottom: 20px;
+.tableWrap {
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.actionCell {
+.searchRow {
   display: flex;
-  gap: 8px;
-  justify-content: center;
   align-items: center;
-  white-space: nowrap;
-}
-
-.editBtn,
-.deleteBtn {
-  font-size: 13px;
-  padding: 6px 12px;
-  min-width: 60px;
-}
-
-.createBtnWrapper {
-  display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.paginationWrapper {
-  display: flex;
-  justify-content: center;
+.footerRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.footerLeft {
+  justify-self: start;
+}
+
+.footerCenter {
+  justify-self: center;
+}
+
+.footerRight {
+  justify-self: end;
 }
 
 .statsBtn {

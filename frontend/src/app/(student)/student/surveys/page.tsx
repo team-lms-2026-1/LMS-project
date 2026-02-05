@@ -45,9 +45,19 @@ export default function StudentSurveyListPage() {
             field: "status",
             width: "100px",
             align: "center",
-            render: (row) => (
-                <StatusPill status={row.status as StatusType} />
-            )
+            render: (row) => {
+                const now = new Date();
+                const start = new Date(row.startAt);
+                const end = new Date(row.endAt);
+
+                if (now < start) {
+                    return <StatusPill status="PENDING" label="대기" />;
+                } else if (now >= start && now <= end) {
+                    return <StatusPill status="ACTIVE" label="OPEN" />;
+                } else {
+                    return <StatusPill status="INACTIVE" label="CLOSED" />;
+                }
+            }
         },
         {
             header: "제목",
@@ -94,10 +104,11 @@ export default function StudentSurveyListPage() {
     ];
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h1 className={styles.title}>진행 중인 설문</h1>
-                <div className={styles.searchWrapper}>
+        <div className={styles.page}>
+            <div className={styles.card}>
+                <h1 className={styles.title}>설문 목록</h1>
+
+                <div className={styles.searchRow}>
                     <SearchBar
                         value={searchQuery}
                         onChange={setSearchQuery}
@@ -105,23 +116,25 @@ export default function StudentSurveyListPage() {
                         onSearch={handleSearch}
                     />
                 </div>
-            </div>
 
-            {loading ? (
-                <div className={styles.container}>Loading...</div>
-            ) : surveys.length === 0 ? (
-                <div style={{ padding: "2rem", textAlign: "center", color: "#666" }}>
-                    {keyword ? "검색 결과가 없습니다." : "참여 가능한 설문이 없습니다."}
+                <div className={styles.tableWrap}>
+                    <Table
+                        columns={columns}
+                        items={surveys}
+                        rowKey={(row) => row.surveyId}
+                        loading={loading}
+                        skeletonRowCount={10}
+                        emptyText={keyword ? "검색 결과가 없습니다." : "참여 가능한 설문이 없습니다."}
+                        onRowClick={(row) => router.push(`/student/surveys/${row.surveyId}`)}
+                    />
                 </div>
-            ) : (
-                <Table
-                    columns={columns}
-                    items={surveys}
-                    rowKey={(row) => row.surveyId}
-                    loading={loading}
-                    onRowClick={(row) => router.push(`/student/surveys/${row.surveyId}`)}
-                />
-            )}
+
+                <div className={styles.footerRow}>
+                    <div className={styles.footerLeft} />
+                    <div className={styles.footerCenter} />
+                    <div className={styles.footerRight} />
+                </div>
+            </div>
         </div>
     );
 }

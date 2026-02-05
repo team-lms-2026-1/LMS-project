@@ -180,6 +180,7 @@ public enum ErrorCode {
             "이미 해당 공고에 신청하셨습니다.", "mentoring.application.alreadyExists"),
     MENTORING_NOT_PARTICIPANT(HttpStatus.FORBIDDEN, "MENTORING_NOT_PARTICIPANT", "해당 멘토링의 참여자가 아닙니다.", "mentoring.notParticipant"),
     MENTORING_ALREADY_MATCHED(HttpStatus.CONFLICT, "MENTORING_ALREADY_MATCHED", "이미 매칭된 신청자입니다.", "mentoring.alreadyMatched"),
+    MENTORING_NOT_OPEN(HttpStatus.BAD_REQUEST, "MENTORING_NOT_OPEN", "현재 멘토링 모집 기간이 아닙니다.", "mentoring.notOpen"),
     // Domain: competency
     // =========================
     DUPLICATE_DIAGNOSIS_FOR_SEMESTER(HttpStatus.CONFLICT, "DUPLICATE_DIAGNOSIS_FOR_SEMESTER", "이미 해당 학기에 진단이 존재합니다.",
@@ -197,7 +198,16 @@ public enum ErrorCode {
     ALREADY_SUBMITTED_DIAGNOSIS(HttpStatus.CONFLICT, "ALREADY_SUBMITTED_DIAGNOSIS", "이미 제출한 진단입니다.",
             "diagnosis.alreadySubmitted"),
     INVALID_COMPETENCY_WEIGHT(HttpStatus.BAD_REQUEST, "INVALID_COMPETENCY_WEIGHT", "역량 가중치는 0에서 6 사이여야 합니다.",
-            "competency.weight.invalid");
+            "competency.weight.invalid"),
+
+    // =========================
+    // Domain: Log
+    // =========================
+    LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "LOG_NOT_FOUND", "로그를 찾을 수 없습니다.", "log.notFound"),
+    LOG_EXPORT_FILTER_REQUIRED(HttpStatus.BAD_REQUEST, "LOG_EXPORT_FILTER_REQUIRED", "검색 조건(필터)은 필수입니다.", "log.export.filterRequired"),
+    LOG_EXPORT_PERIOD_REQUIRED(HttpStatus.BAD_REQUEST, "LOG_EXPORT_PERIOD_REQUIRED", "대량 다운로드 방지를 위해 기간(시작일/종료일) 선택은 필수입니다.", "log.export.periodRequired"),
+    LOG_RESOURCE_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "LOG_RESOURCE_NOT_SUPPORTED", "지원하지 않는 로그 유형입니다.", "log.resource.notSupported"),
+    LOG_DATE_RANGE_INVALID(HttpStatus.BAD_REQUEST, "LOG_DATE_RANGE_INVALID", "시작일이 종료일보다 빠를 수 없습니다.", "log.dateRange.invalid");
 
     private final HttpStatus httpStatus;
     private final String code;

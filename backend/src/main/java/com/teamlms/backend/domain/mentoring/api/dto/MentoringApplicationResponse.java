@@ -26,6 +26,7 @@ public class MentoringApplicationResponse {
     private String deptName;
     private String phone;
     private String email;
+    private Long matchedCount; // 멘토인 경우 매칭된 멘티 수
 
     public static MentoringApplicationResponse of(MentoringApplication entity,
             com.teamlms.backend.domain.account.entity.Account account) {

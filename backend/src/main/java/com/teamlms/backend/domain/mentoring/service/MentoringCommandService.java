@@ -102,6 +102,15 @@ public class MentoringCommandService {
             throw new BusinessException(ErrorCode.MENTORING_INVALID_ROLE_APPLICATION);
         }
 
+        // [검증] 모집 기간 확인
+        MentoringRecruitment recruitment = recruitmentRepository.findById(request.getRecruitmentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(recruitment.getRecruitStartAt()) || now.isAfter(recruitment.getRecruitEndAt())) {
+            throw new BusinessException(ErrorCode.MENTORING_NOT_OPEN);
+        }
+
         // [검증] 중복 신청 여부 확인
         if (applicationRepository.existsByRecruitmentIdAndAccountIdAndRole(
                 request.getRecruitmentId(), accountId, request.getRole())) {
@@ -128,8 +137,7 @@ public class MentoringCommandService {
         MentoringApplication menteeApp = applicationRepository.findById(request.getMenteeApplicationId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
 
-        if (mentorApp.getStatus() == MentoringApplicationStatus.MATCHED || 
-            menteeApp.getStatus() == MentoringApplicationStatus.MATCHED) {
+        if (menteeApp.getStatus() == MentoringApplicationStatus.MATCHED) {
             throw new BusinessException(ErrorCode.MENTORING_ALREADY_MATCHED);
         }
 

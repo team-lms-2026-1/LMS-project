@@ -61,6 +61,13 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
+    key: "survey",
+    title: "설문",
+    items: [
+      { label: "설문 목록", href: "/student/surveys" },
+    ],
+  },
+  {
     key: "space",
     title: "학습공간대여",
     items: [

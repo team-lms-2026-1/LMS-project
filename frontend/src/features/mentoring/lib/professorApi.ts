@@ -2,10 +2,11 @@ import { getJson, postJson } from "@/lib/http";
 import type { MentoringRecruitment, MentoringApplication, MentoringApplicationRequest } from "../types";
 
 // 교수용 모집 공고 목록 조회 (공통 API 사용)
-export async function fetchProfessorRecruitments(params: { page?: number; size?: number }) {
+export async function fetchProfessorRecruitments(params: { page?: number; size?: number; keyword?: string }) {
     const qs = new URLSearchParams();
     if (params.page !== undefined) qs.set("page", String(params.page));
     if (params.size) qs.set("size", String(params.size));
+    if (params.keyword) qs.set("keyword", params.keyword);
     return getJson<any>(`/api/mentoring/recruitments?${qs.toString()}`);
 }
 

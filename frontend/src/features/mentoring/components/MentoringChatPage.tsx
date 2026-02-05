@@ -159,11 +159,11 @@ export default function MentoringChatPage() {
 
                         <div className={styles.messageArea}>
                             {messages.map((msg, idx) => {
-                                // 내 메시지인지 확인 (ID 비교 및 로그인 ID 비교 병행)
+                                // 내 메시지인지 확인 (ID 비교 및 로그인 ID/이름 비교, 또는 상대방 ID와 다른지 확인)
                                 const isMine = !!(state.me && (
-                                    String(msg.senderId) === String(state.me.accountId) ||
+                                    msg.senderId == state.me.accountId ||
                                     msg.senderName === state.me.loginId
-                                ));
+                                )) || !!(activeRoom && msg.senderId && msg.senderId != activeRoom.partnerId);
                                 const dateStr = new Date(msg.createdAt).toLocaleDateString();
                                 const showDate = idx === 0 || new Date(messages[idx - 1].createdAt).toLocaleDateString() !== dateStr;
 
@@ -176,7 +176,7 @@ export default function MentoringChatPage() {
                                         )}
                                         <div className={`${styles.messageRow} ${isMine ? styles.myMessage : styles.partnerMessage}`}>
                                             {!isMine && <div className={styles.messageSender}>{msg.senderName}</div>}
-                                            <div style={{ display: 'flex', flexDirection: isMine ? 'row' : 'row-reverse', alignItems: 'flex-end' }}>
+                                            <div className={styles.messageContentWrapper}>
                                                 <div className={styles.messageTime}>
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </div>

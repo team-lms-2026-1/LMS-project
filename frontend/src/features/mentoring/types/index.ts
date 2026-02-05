@@ -29,6 +29,7 @@ export interface MentoringApplication {
     deptName?: string;
     phone?: string;
     email?: string;
+    matchedCount?: number;
 }
 
 export interface MentoringRecruitmentCreateRequest {

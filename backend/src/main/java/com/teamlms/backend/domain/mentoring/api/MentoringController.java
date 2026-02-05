@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +30,10 @@ public class MentoringController {
     @GetMapping("/mentoring/recruitments")
     public ResponseEntity<Page<MentoringRecruitmentResponse>> getRecruitments(
             @AuthenticationPrincipal AuthUser user,
-            Pageable pageable) {
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(sort = "recruitmentId", direction = Sort.Direction.DESC) Pageable pageable) {
         Long accountId = (user != null) ? user.getAccountId() : null;
-        return ResponseEntity.ok(queryService.getRecruitments(pageable, accountId));
+        return ResponseEntity.ok(queryService.getRecruitments(pageable, accountId, keyword));
     }
 
     // [Admin/User] 멘토링 모집 상세 조회

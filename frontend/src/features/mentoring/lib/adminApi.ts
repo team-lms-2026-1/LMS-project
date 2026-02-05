@@ -7,10 +7,11 @@ import type {
 } from "../types";
 
 // 관리자용 모집 공고 목록 조회
-export async function fetchAdminRecruitments(params: { page?: number; size?: number }) {
+export async function fetchAdminRecruitments(params: { page?: number; size?: number; keyword?: string }) {
     const qs = new URLSearchParams();
     if (params.page !== undefined) qs.set("page", String(params.page));
     if (params.size) qs.set("size", String(params.size));
+    if (params.keyword) qs.set("keyword", params.keyword);
     return getJson<any>(`/api/mentoring/recruitments?${qs.toString()}`);
 }
 

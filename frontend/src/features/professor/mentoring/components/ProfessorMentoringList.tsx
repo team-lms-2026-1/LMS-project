@@ -14,6 +14,17 @@ import toast from "react-hot-toast";
 
 const PAGE_SIZE = 10;
 
+const SEMESTER_OPTIONS = [
+    { label: "1학기", value: 1 },
+    { label: "여름학기", value: 2 },
+    { label: "2학기", value: 3 },
+    { label: "겨울학기", value: 4 },
+];
+
+const getSemesterLabel = (id: number) => {
+    return SEMESTER_OPTIONS.find(opt => opt.value === id)?.label || `${id}학기`;
+};
+
 export default function ProfessorMentoringList() {
     const [page, setPage] = useState(1);
     const [items, setItems] = useState<MentoringRecruitment[]>([]);
@@ -25,7 +36,7 @@ export default function ProfessorMentoringList() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await fetchProfessorRecruitments({ page: page - 1, size: PAGE_SIZE });
+            const res = await fetchProfessorRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
             if (res && res.content) {
                 setItems(res.content);
                 setTotalElements(res.totalElements);
@@ -48,13 +59,25 @@ export default function ProfessorMentoringList() {
 
     const columns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (r) => `${r.semesterId}학기` },
+            { header: "학기", field: "semesterId", render: (r) => getSemesterLabel(r.semesterId) },
             { header: "제목", field: "title" },
             { header: "모집기간", field: "recruitStartAt", render: (r) => `${r.recruitStartAt.split("T")[0]} ~ ${r.recruitEndAt.split("T")[0]}` },
             {
                 header: "모집상태",
                 field: "status",
-                render: (r) => <StatusPill status={r.status === "OPEN" ? "ACTIVE" : "INACTIVE"} label={r.status} />
+                render: (r) => {
+                    const now = new Date();
+                    const start = new Date(r.recruitStartAt);
+                    const end = new Date(r.recruitEndAt);
+
+                    if (now < start) {
+                        return <StatusPill status="PENDING" label="대기" />;
+                    } else if (now >= start && now <= end) {
+                        return <StatusPill status="ACTIVE" label="OPEN" />;
+                    } else {
+                        return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    }
+                }
             },
             {
                 header: "나의 신청 정보",
@@ -88,36 +111,52 @@ export default function ProfessorMentoringList() {
 
     return (
         <div className={styles.page}>
-            <div className={styles.headerRow}>
-                <div className={styles.title}>멘토 신청</div>
-                <SearchBar
-                    value={keywordInput}
-                    onChange={setKeywordInput}
-                    onSearch={() => { }}
-                    placeholder="제목을 입력하세요"
-                    className={styles.searchBox}
-                />
-            </div>
+            <div className={styles.card}>
+                <h1 className={styles.title}>멘토 신청</h1>
 
-            <div className={styles.tableWrap}>
-                <Table
-                    columns={columns}
-                    items={items}
-                    rowKey={(r) => r.recruitmentId}
-                    loading={loading}
-                    emptyText="모집 공고가 없습니다."
-                    onRowClick={(row) => {
-                        if (row.applyStatus) {
-                            toast.error(`이미 신청한 공고입니다. (상태: ${row.applyStatus})`);
-                            return;
-                        }
-                        setSelectedRecruitment(row);
-                    }}
-                />
-            </div>
+                <div className={styles.searchRow}>
+                    <SearchBar
+                        value={keywordInput}
+                        onChange={setKeywordInput}
+                        onSearch={fetchData}
+                        placeholder="제목을 입력하세요"
+                        className={styles.searchBox}
+                    />
+                </div>
 
-            <div className={styles.paginationContainer}>
-                <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
+                <div className={styles.tableWrap}>
+                    <Table
+                        columns={columns}
+                        items={items}
+                        rowKey={(r) => r.recruitmentId}
+                        loading={loading}
+                        skeletonRowCount={PAGE_SIZE}
+                        emptyText="모집 공고가 없습니다."
+                        onRowClick={(row) => {
+                            if (row.applyStatus) {
+                                toast.error("이미 신청한 공고입니다.");
+                                return;
+                            }
+                            const now = new Date();
+                            const start = new Date(row.recruitStartAt);
+                            const end = new Date(row.recruitEndAt);
+
+                            if (now < start || now > end) {
+                                toast.error("신청 기간이 아닙니다.");
+                                return;
+                            }
+                            setSelectedRecruitment(row);
+                        }}
+                    />
+                </div>
+
+                <div className={styles.footerRow}>
+                    <div className={styles.footerLeft} />
+                    <div className={styles.footerCenter}>
+                        <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
+                    </div>
+                    <div className={styles.footerRight} />
+                </div>
             </div>
 
             {selectedRecruitment && (

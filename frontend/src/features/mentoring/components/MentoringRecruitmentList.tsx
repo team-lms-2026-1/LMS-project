@@ -22,6 +22,17 @@ import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 const PAGE_SIZE = 10;
 
+const SEMESTER_OPTIONS = [
+    { label: "1학기", value: 1 },
+    { label: "여름학기", value: 2 },
+    { label: "2학기", value: 3 },
+    { label: "겨울학기", value: 4 },
+];
+
+const getSemesterLabel = (id: number) => {
+    return SEMESTER_OPTIONS.find(opt => opt.value === id)?.label || `${id}학기`;
+};
+
 export default function MentoringRecruitmentList() {
     const router = useRouter();
 
@@ -48,7 +59,7 @@ export default function MentoringRecruitmentList() {
 
     const fetchData = () => {
         setLoading(true);
-        fetchRecruitments({ page: page - 1, size: PAGE_SIZE }) // Spring Page is 0-indexed
+        fetchRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: searchKeyword }) // Spring Page is 0-indexed
             .then((res: any) => {
                 setItems(res.content || []);
                 setTotalElements(res.totalElements || 0);
@@ -141,7 +152,7 @@ export default function MentoringRecruitmentList() {
 
     const columns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (row) => `${row.semesterId}학기` },
+            { header: "학기", field: "semesterId", render: (row) => getSemesterLabel(row.semesterId) },
             { header: "제목", field: "title" },
             {
                 header: "모집기간",
@@ -155,7 +166,19 @@ export default function MentoringRecruitmentList() {
                 header: "상태",
                 field: "status",
                 align: "center",
-                render: (row) => <StatusPill status={row.status === "OPEN" ? "ACTIVE" : "INACTIVE"} label={row.status} />
+                render: (row) => {
+                    const now = new Date();
+                    const start = new Date(row.recruitStartAt);
+                    const end = new Date(row.recruitEndAt);
+
+                    if (now < start) {
+                        return <StatusPill status="PENDING" label="대기" />;
+                    } else if (now >= start && now <= end) {
+                        return <StatusPill status="ACTIVE" label="OPEN" />;
+                    } else {
+                        return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    }
+                }
             },
             {
                 header: "관리",
@@ -190,37 +213,42 @@ export default function MentoringRecruitmentList() {
 
     return (
         <div className={styles.page}>
-            <div className={styles.headerRow}>
-                <div className={styles.title}>멘토링 모집 공고 등록</div>
-                <Button onClick={handleOpenCreate}>등록</Button>
-            </div>
+            <div className={styles.card}>
+                <h1 className={styles.title}>멘토링 모집 공고 등록</h1>
 
-            <div style={{ marginBottom: 16 }}>
-                <SearchBar
-                    value={searchKeyword}
-                    onChange={setSearchKeyword}
-                    onSearch={fetchData}
-                    placeholder="모집 공고 검색..."
-                />
-            </div>
+                <div className={styles.searchRow}>
+                    <SearchBar
+                        value={searchKeyword}
+                        onChange={setSearchKeyword}
+                        onSearch={fetchData}
+                        placeholder="모집 공고 검색..."
+                    />
+                </div>
 
-            <div className={styles.tableWrap}>
-                <Table
-                    columns={columns}
-                    items={items}
-                    rowKey={(r) => r.recruitmentId}
-                    loading={loading}
-                    skeletonRowCount={PAGE_SIZE}
-                    emptyText="모집 공고가 없습니다."
-                />
-            </div>
+                <div className={styles.tableWrap}>
+                    <Table
+                        columns={columns}
+                        items={items}
+                        rowKey={(r) => r.recruitmentId}
+                        loading={loading}
+                        skeletonRowCount={PAGE_SIZE}
+                        emptyText="모집 공고가 없습니다."
+                    />
+                </div>
 
-            <div className={styles.paginationContainer}>
-                <PaginationSimple
-                    page={page}
-                    totalPages={totalPages}
-                    onChange={setPage}
-                />
+                <div className={styles.footerRow}>
+                    <div className={styles.footerLeft} />
+                    <div className={styles.footerCenter}>
+                        <PaginationSimple
+                            page={page}
+                            totalPages={totalPages}
+                            onChange={setPage}
+                        />
+                    </div>
+                    <div className={styles.footerRight}>
+                        <Button onClick={handleOpenCreate}>등록</Button>
+                    </div>
+                </div>
             </div>
 
             {/* Create/Edit Modal */}
@@ -245,13 +273,16 @@ export default function MentoringRecruitmentList() {
                     />
                 </div>
                 <div className={styles.formGroup}>
-                    <label className={styles.label}>학기 (ID)</label>
-                    <input
-                        type="number"
+                    <label className={styles.label}>학기</label>
+                    <select
                         className={styles.input}
                         value={formData.semesterId}
                         onChange={(e) => setFormData({ ...formData, semesterId: Number(e.target.value) })}
-                    />
+                    >
+                        {SEMESTER_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className={styles.formGroup}>
                     <label className={styles.label}>설명</label>
@@ -280,21 +311,7 @@ export default function MentoringRecruitmentList() {
                     />
                 </div>
 
-                {/* Status Field (Only for Edit) */}
-                {editingId && (
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>상태</label>
-                        <select
-                            className={styles.input}
-                            value={formData.status}
-                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                        >
-                            <option value="DRAFT">DRAFT</option>
-                            <option value="OPEN">OPEN</option>
-                            <option value="CLOSED">CLOSED</option>
-                        </select>
-                    </div>
-                )}
+
             </Modal>
 
             <ConfirmModal

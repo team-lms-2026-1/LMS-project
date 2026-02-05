@@ -16,6 +16,17 @@ import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 const PAGE_SIZE = 10;
 
+const SEMESTER_OPTIONS = [
+    { label: "1학기", value: 1 },
+    { label: "여름학기", value: 2 },
+    { label: "2학기", value: 3 },
+    { label: "겨울학기", value: 4 },
+];
+
+const getSemesterLabel = (id: number) => {
+    return SEMESTER_OPTIONS.find(opt => opt.value === id)?.label || `${id}학기`;
+};
+
 export default function AdminApplicationApprovalPage() {
     const [page, setPage] = useState(1);
     const [recruitments, setRecruitments] = useState<MentoringRecruitment[]>([]);
@@ -34,7 +45,7 @@ export default function AdminApplicationApprovalPage() {
     const fetchRecruitments = async () => {
         setLoading(true);
         try {
-            const res = await fetchAdminRecruitments({ page: page - 1, size: PAGE_SIZE });
+            const res = await fetchAdminRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
             if (res && res.content) {
                 setRecruitments(res.content);
                 setTotalElements(res.totalElements);
@@ -133,7 +144,7 @@ export default function AdminApplicationApprovalPage() {
 
     const recruitmentColumns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (r) => `${r.semesterId}학기` },
+            { header: "학기", field: "semesterId", render: (r) => getSemesterLabel(r.semesterId) },
             { header: "제목", field: "title" },
             {
                 header: "모집기간",
@@ -146,7 +157,19 @@ export default function AdminApplicationApprovalPage() {
             {
                 header: "상태",
                 field: "status",
-                render: (r) => <StatusPill status={r.status === "OPEN" ? "ACTIVE" : "INACTIVE"} label={r.status} />
+                render: (r) => {
+                    const now = new Date();
+                    const start = new Date(r.recruitStartAt);
+                    const end = new Date(r.recruitEndAt);
+
+                    if (now < start) {
+                        return <StatusPill status="PENDING" label="대기" />;
+                    } else if (now >= start && now <= end) {
+                        return <StatusPill status="ACTIVE" label="OPEN" />;
+                    } else {
+                        return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    }
+                }
             },
         ],
         []
@@ -222,55 +245,65 @@ export default function AdminApplicationApprovalPage() {
 
     return (
         <div className={styles.page}>
-            <div className={styles.headerRow}>
+            <div className={styles.card}>
                 <h1 className={styles.title}>멘토링 신청 승인</h1>
-                <SearchBar
-                    value={keywordInput}
-                    onChange={setKeywordInput}
-                    onSearch={() => { }}
-                    placeholder="모집 공고 제목 검색"
-                    className={styles.searchBox}
-                />
-            </div>
 
-            <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>모집 공고 목록</h2>
-                <div className={styles.tableWrap}>
-                    <Table
-                        columns={recruitmentColumns}
-                        items={recruitments}
-                        rowKey={(r) => r.recruitmentId}
-                        loading={loading}
-                        skeletonRowCount={5}
-                        emptyText="모집 공고가 없습니다."
-                        onRowClick={(row) => setSelectedRecruitment(row)}
+                <div className={styles.searchRow}>
+                    <SearchBar
+                        value={keywordInput}
+                        onChange={setKeywordInput}
+                        onSearch={fetchRecruitments}
+                        placeholder="모집 공고 제목 검색"
+                        className={styles.searchBox}
                     />
                 </div>
-                <div className={styles.paginationContainer}>
-                    <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
+
+                <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>모집 공고 목록</h2>
+                    <div className={styles.tableWrap}>
+                        <Table
+                            columns={recruitmentColumns}
+                            items={recruitments}
+                            rowKey={(r) => r.recruitmentId}
+                            loading={loading}
+                            skeletonRowCount={5}
+                            emptyText="모집 공고가 없습니다."
+                            onRowClick={(row) => setSelectedRecruitment(row)}
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.footerRow}>
+                    <div className={styles.footerLeft} />
+                    <div className={styles.footerCenter}>
+                        <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
+                    </div>
+                    <div className={styles.footerRight} />
                 </div>
             </div>
 
             {selectedRecruitment && (
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        신청자 목록: {selectedRecruitment.title}
-                    </h2>
+                <div className={styles.section} style={{ marginTop: "40px" }}>
+                    <div className={styles.card}>
+                        <h2 className={styles.sectionTitle}>
+                            신청자 목록: {selectedRecruitment.title}
+                        </h2>
 
-                    {loadingApplications ? (
-                        <div className={styles.loadingText}>신청자 목록을 불러오는 중...</div>
-                    ) : (
-                        <div className={styles.tableWrap}>
-                            <Table
-                                columns={applicationColumns}
-                                items={applications}
-                                rowKey={(a) => a.applicationId}
-                                loading={false}
-                                emptyText="신청자가 없습니다."
-                                onRowClick={(a) => setViewApp(a)}
-                            />
-                        </div>
-                    )}
+                        {loadingApplications ? (
+                            <div className={styles.loadingText}>신청자 목록을 불러오는 중...</div>
+                        ) : (
+                            <div className={styles.tableWrap}>
+                                <Table
+                                    columns={applicationColumns}
+                                    items={applications}
+                                    rowKey={(a) => a.applicationId}
+                                    loading={false}
+                                    emptyText="신청자가 없습니다."
+                                    onRowClick={(a) => setViewApp(a)}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 

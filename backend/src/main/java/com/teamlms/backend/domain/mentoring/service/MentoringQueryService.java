@@ -152,8 +152,13 @@ public class MentoringQueryService {
         return chat;
     }
 
-    public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable, Long currentAccountId) {
-        Page<MentoringRecruitment> recruitments = recruitmentRepository.findAll(pageable);
+    public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable, Long currentAccountId, String keyword) {
+        Page<MentoringRecruitment> recruitments;
+        if (keyword != null && !keyword.isBlank()) {
+            recruitments = recruitmentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+        } else {
+            recruitments = recruitmentRepository.findAll(pageable);
+        }
         
         if (currentAccountId == null || recruitments.isEmpty()) {
             return recruitments.map(MentoringRecruitmentResponse::from);
@@ -218,6 +223,11 @@ public class MentoringQueryService {
              deptRepository.findAllById(deptIds).forEach(d -> deptNameMap.put(d.getDeptId(), d.getDeptName()));
         }
 
+        // [추가] 매칭 정보 조회하여 멘토별 매칭 수 계산
+        List<MentoringMatching> matchings = matchingRepository.findAllByRecruitmentId(recruitmentId);
+        Map<Long, Long> matchedCountMap = matchings.stream()
+                .collect(Collectors.groupingBy(MentoringMatching::getMentorApplicationId, Collectors.counting()));
+
         return apps.stream().map(app -> {
             Account account = accountMap.get(app.getAccountId());
             MentoringApplicationResponse.MentoringApplicationResponseBuilder builder = MentoringApplicationResponse.builder()
@@ -227,7 +237,8 @@ public class MentoringQueryService {
                 .role(app.getRole())
                 .status(app.getStatus())
                 .appliedAt(app.getAppliedAt())
-                .applyReason(app.getApplyReason());
+                .applyReason(app.getApplyReason())
+                .matchedCount(matchedCountMap.getOrDefault(app.getApplicationId(), 0L));
 
             if (account != null) {
                 builder.loginId(account.getLoginId());

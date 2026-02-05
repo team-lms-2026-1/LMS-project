@@ -10,9 +10,7 @@ import toast from "react-hot-toast";
 
 import { StudentSurveyQuestionCard } from "@/features/surveys/components/StudentSurveyQuestionCard";
 import { Button } from "@/components/button/Button";
-
-
-import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 export default function SurveyDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -105,47 +103,49 @@ export default function SurveyDetailPage({ params }: { params: { id: string } })
         }
     };
 
-    if (loading) return <div className={styles.container}>Loading...</div>;
-    if (error === "SURVEY_NOT_OPEN") return <div className={styles.container}>설문 기간이 아닙니다.</div>;
-    if (!survey) return <div className={styles.container}>설문을 찾을 수 없습니다.</div>;
+    if (loading) return <div className={styles.page}>Loading...</div>;
+    if (error === "SURVEY_NOT_OPEN") return <div className={styles.page}>설문 기간이 아닙니다.</div>;
+    if (!survey) return <div className={styles.page}>설문을 찾을 수 없습니다.</div>;
 
     return (
-        <div className={styles.container}>
-            <header className={styles.detailHeader}>
-                <h1 className={styles.title}>{survey.title}</h1>
-                <div style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
-                    기간: {new Date(survey.startAt).toLocaleString()} ~ {new Date(survey.endAt).toLocaleString()}
-                </div>
-            </header>
+        <div className={styles.page}>
+            <div className={styles.card}>
+                <header className={styles.detailHeader}>
+                    <h1 className={styles.title}>{survey.title}</h1>
+                    <div style={{ marginTop: "1rem", fontSize: "0.9rem", color: "#666" }}>
+                        기간: {new Date(survey.startAt).toLocaleString()} ~ {new Date(survey.endAt).toLocaleString()}
+                    </div>
+                </header>
 
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-                {survey.questions
-                    .sort((a, b) => a.sortOrder - b.sortOrder)
-                    .map((q) => (
-                        <StudentSurveyQuestionCard
-                            key={q.questionId}
-                            question={q}
-                            response={responses[String(q.questionId)]}
-                            onResponseChange={(val) => handleResponseChange(q.questionId, val)}
-                        />
-                    ))}
+                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                    {survey.questions
+                        .sort((a, b) => a.sortOrder - b.sortOrder)
+                        .map((q) => (
+                            <StudentSurveyQuestionCard
+                                key={q.questionId}
+                                question={q}
+                                response={responses[String(q.questionId)]}
+                                onResponseChange={(val) => handleResponseChange(q.questionId, val)}
+                            />
+                        ))}
 
-                <div style={{ textAlign: "center", marginTop: "2rem" }}>
-                    <Button type="submit" loading={submitting} disabled={submitting} style={{ padding: "0.8rem 3rem", fontSize: "1.1rem" }}>
-                        설문 제출하기
-                    </Button>
-                </div>
-            </form>
+                    <div style={{ textAlign: "center", marginTop: "2rem" }}>
+                        <Button type="submit" loading={submitting} disabled={submitting} style={{ padding: "0.8rem 3rem", fontSize: "1.1rem" }}>
+                            설문 제출하기
+                        </Button>
+                    </div>
+                </form>
 
-            <ConfirmDialog
-                open={confirmOpen}
-                title="설문 제출"
-                description="제출하시겠습니까? 제출 후에는 수정할 수 없습니다."
-                confirmText="제출"
-                onConfirm={handleConfirmSubmit}
-                onCancel={() => setConfirmOpen(false)}
-                loading={submitting}
-            />
+                <ConfirmModal
+                    open={confirmOpen}
+                    title="설문 제출"
+                    message="제출하시겠습니까? 제출 후에는 수정할 수 없습니다."
+                    confirmText="제출"
+                    onConfirm={handleConfirmSubmit}
+                    onCancel={() => setConfirmOpen(false)}
+                    loading={submitting}
+                />
+            </div>
         </div>
     );
 }

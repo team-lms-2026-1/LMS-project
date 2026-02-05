@@ -34,9 +34,19 @@ export default function SurveyResultsPage() {
             field: "status",
             width: "100px",
             align: "center",
-            render: (row) => (
-                <StatusPill status={row.status as StatusType} />
-            )
+            render: (row) => {
+                const now = new Date();
+                const start = new Date(row.startAt);
+                const end = new Date(row.endAt);
+
+                if (now < start) {
+                    return <StatusPill status="PENDING" label="대기" />;
+                } else if (now >= start && now <= end) {
+                    return <StatusPill status="ACTIVE" label="OPEN" />;
+                } else {
+                    return <StatusPill status="INACTIVE" label="CLOSED" />;
+                }
+            }
         },
         {
             header: "제목",
@@ -71,14 +81,12 @@ export default function SurveyResultsPage() {
             header: "통계",
             width: "120px",
             align: "center",
+            stopRowClick: true,
             render: (row) => (
                 <Button
                     variant="primary" // 강조
                     className={styles.statsBtn}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleStats(row.surveyId);
-                    }}
+                    onClick={() => handleStats(row.surveyId)}
                 >
                     결과 보기
                 </Button>
@@ -87,10 +95,11 @@ export default function SurveyResultsPage() {
     ];
 
     return (
-        <div className={styles.container}>
-            <div className={styles.header}>
+        <div className={styles.page}>
+            <div className={styles.card}>
                 <h1 className={styles.title}>설문 결과 통계</h1>
-                <div className={styles.searchWrapper}>
+
+                <div className={styles.searchRow}>
                     <SearchBar
                         value={searchQuery}
                         onChange={setSearchQuery}
@@ -98,20 +107,25 @@ export default function SurveyResultsPage() {
                         onSearch={() => { }}
                     />
                 </div>
-            </div>
 
-            <div className={styles.tableWrapper}>
-                <Table
-                    columns={columns}
-                    items={data}
-                    rowKey={(row) => row.surveyId}
-                    loading={loading}
-                    onRowClick={(row) => handleStats(row.surveyId)}
-                />
-            </div>
+                <div className={styles.tableWrap}>
+                    <Table
+                        columns={columns}
+                        items={data}
+                        rowKey={(row) => row.surveyId}
+                        loading={loading}
+                        skeletonRowCount={10}
+                        onRowClick={(row) => handleStats(row.surveyId)}
+                    />
+                </div>
 
-            <div className={styles.paginationWrapper}>
-                <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
+                <div className={styles.footerRow}>
+                    <div className={styles.footerLeft} />
+                    <div className={styles.footerCenter}>
+                        <PaginationSimple page={page} totalPages={totalPages} onChange={setPage} />
+                    </div>
+                    <div className={styles.footerRight} />
+                </div>
             </div>
         </div>
     );

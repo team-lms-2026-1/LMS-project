@@ -1,18 +1,14 @@
-.container {
-    padding: 24px;
+.page {
+    padding: 0;
 }
 
-.header {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
+.card {
+    background-color: transparent;
 }
 
 .title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: #111;
+    font-size: 22px;
+    font-weight: 600;
 }
 
 .description {
