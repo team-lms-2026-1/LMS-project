@@ -92,7 +92,7 @@ export function useCurricularOfferingsList() {
 }
 
 
-// 모달 수정조회
+// 상세- 기본
 export function useCurricularDetail(offeringId?: number, enabled: boolean = true) {
   const [data, setData] = useState<CurricularOfferingDetailDto | null>(null);
   

@@ -38,7 +38,8 @@ public enum ErrorCode {
         // Domain: Dept&Major
         // =========================
         DEPT_DEACTIVATE_NOT_ALLOWED(HttpStatus.CONFLICT, "DEPT_DEACTIVATE_NOT_ALLOWED",
-                        "연관 데이터가 존재하여 학과를 비활성화할 수 없습니다.", "dept.deactivate.notAllowed"),
+                        "연관 데이터가 존재하여 학과를 비활성화할 수 없습니다.",
+                        "dept.deactivate.notAllowed"),
         DEPT_NOT_FOUND(HttpStatus.NOT_FOUND, "DEPT_NOT_FOUND", "학과를 찾을 수 없습니다.", "lesson.notFound"),
         DUPLICATE_MAJOR_CODE(HttpStatus.CONFLICT, "DUPLICATE_MAJOR_CODE", "이미 사용 중인 전공 코드입니다.", "major.code.duplicate"),
         DUPLICATE_MAJOR_NAME(HttpStatus.CONFLICT, "DUPLICATE_MAJOR_NAME", "이미 사용 중인 전공 이름입니다.", "major.name.duplicate"),
@@ -53,7 +54,8 @@ public enum ErrorCode {
         DUPLICATE_CATEGORY_NAME(HttpStatus.CONFLICT, "DUPLICATE_CATEGORY_NAME", "이미 사용 중인 카테고리 이름입니다.",
                         "category.name.duplicate"),
         CATEGORY_DELETE_NOT_ALLOWED(HttpStatus.CONFLICT, "CATEGORY_DELETE_NOT_ALLOWED",
-                        "연관된 게시글이 존재하여 카테고리를 삭제할 수 없습니다.", "category.delete.notAllowed"),
+                        "연관된 게시글이 존재하여 카테고리를 삭제할 수 없습니다.",
+                        "category.delete.notAllowed"),
 
         // =========================
         // Domain: Community (공통)
@@ -91,7 +93,8 @@ public enum ErrorCode {
         OFFERING_NOT_EDITABLE(HttpStatus.CONFLICT, "OFFERING_NOT_EDITABLE", "Draft가 아닌 운영교과입니다.",
                         "curricular.offering.notEditable"),
         INVALID_OFFERING_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "INVALID_OFFERING_STATUS_TRANSITION",
-                        "올바르지 않은 상태변경입니다.", "offering.status.transitionInvalid"),
+                        "올바르지 않은 상태변경입니다.",
+                        "offering.status.transitionInvalid"),
         GRADE_NOT_INPUTTED(HttpStatus.BAD_REQUEST, "GRADE_NOT_INPUTTED", "입력되지 않은 성적이있습니다.", "grade.input.required"),
         OFFERING_COMPETENCY_MAPPING_INCOMPLETE(HttpStatus.NOT_FOUND, "OFFERING_COMPETENCY_MAPPING_INCOMPLETE",
                         "역량 매핑이 완료되지 않았습니다.", "offering.competency.mapping.incomplete"),
@@ -107,6 +110,7 @@ public enum ErrorCode {
                         "중복된 역량 맵핑 점수가 있습니다.", "offering.competency.weight.duplicated"),
         CURRICULAR_OFFERING_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_ALREADY_EXISTS",
                         "이미 해당 학기에 개설된 교과입니다.", "curricular.offering.already.exists"),
+
         OFFERING_NOT_GRADEABLE_STATUS(HttpStatus.CONFLICT, "OFFERING_NOT_GRADEABLE_STATUS", "점수입력 상태가 아닙니다.",
                         "offering.gradeinput.mismatch"),
         ENROLLMENT_OFFERING_MISMATCH(HttpStatus.CONFLICT, "ENROLLMENT_OFFERING_MISMATCH",
@@ -119,6 +123,7 @@ public enum ErrorCode {
                         "이미 완료된 교과운영은 상태를 변경할 수 없습니다.", "curricular.offering.status.locked"),
         ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS(HttpStatus.FORBIDDEN, "ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS",
                         "현재 교과 운영 상태에서는 수강 신청을 취소할 수 없습니다.", "enrollment.cancel.notAllowedStatus"),
+
         // =========================
         // Domain: ExtraCurricular
         // =========================
@@ -126,6 +131,63 @@ public enum ErrorCode {
                         "이미 사용 중인 비교과목 코드입니다.", "extra.curricular.code.alreadyExists"),
         EXTRA_CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_CURRICULAR_NOT_FOUND", "비교과목을 찾을 수 없습니다.",
                         "extra.curricular.notFound"),
+
+        EXTRA_CURRICULAR_OFFERING_PERIOD_INVALID(HttpStatus.BAD_REQUEST, "EXTRA_CURRICULAR_OFFERING_PERIOD_INVALID",
+                        "운영 종료일은 시작일 이후여야 합니다.", "extra.curricular.offering.period.invalid"),
+        EXTRA_CURRICULAR_OFFERING_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_CURRICULAR_OFFERING_NOT_FOUND",
+                        "비교과 운영 정보를 찾을 수 없습니다.", "extra.curricular.offering.notFound"),
+        EXTRA_CURRICULAR_OFFERING_NOT_EDITABLE(HttpStatus.CONFLICT, "EXTRA_CURRICULAR_OFFERING_NOT_EDITABLE",
+                        "현재 상태에서는 수정할 수 없습니다.", "extra.curricular.offering.notEditable"),
+        EXTRA_CURRICULAR_OFFERING_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT,
+                        "EXTRA_CURRICULAR_OFFERING_CODE_ALREADY_EXISTS", "이미 사용 중인 비교과 운영 코드입니다.",
+                        "extra.curricular.offering.code.alreadyExists"),
+
+        EXTRA_SESSION_PERIOD_INVALID(HttpStatus.BAD_REQUEST, "EXTRA_SESSION_PERIOD_INVALID", "회차 종료일은 시작일 이후여야 합니다.",
+                        "extra.curricular.session.period.invalid"),
+        EXTRA_SESSION_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "EXTRA_SESSION_NAME_ALREADY_EXISTS", "이미 존재하는 회차명입니다.",
+                        "extra.curricular.session.name.alreadyExists"),
+        EXTRA_SESSION_VIDEO_STORAGE_KEY_ALREADY_EXISTS(HttpStatus.CONFLICT,
+                        "EXTRA_SESSION_VIDEO_STORAGE_KEY_ALREADY_EXISTS", "이미 사용 중인 비디오 storageKey 입니다.",
+                        "extra.curricular.session.video.storageKey.alreadyExists"),
+        EXTRA_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_SESSION_NOT_FOUND", "회차 정보를 찾을 수 없습니다.",
+                        "extra.curricular.session.notFound"),
+
+        INVALID_EXTRA_CURRICULAR_OFFERING_STATUS_TRANSITION(
+                        HttpStatus.CONFLICT,
+                        "INVALID_EXTRA_CURRICULAR_OFFERING_STATUS_TRANSITION",
+                        "비교과 운영 상태 전이가 올바르지 않습니다.",
+                        "extra.curricular.offering.status.invalid.transition"),
+
+        EXTRA_CURRICULAR_OFFERING_STATUS_LOCKED(
+                        HttpStatus.CONFLICT,
+                        "EXTRA_CURRICULAR_OFFERING_STATUS_LOCKED",
+                        "이미 완료된 비교과 운영은 상태를 변경할 수 없습니다.",
+                        "extra.curricular.offering.status.locked"),
+
+        EXTRA_CURRICULAR_OFFERING_NOT_COMPLETABLE(
+                        HttpStatus.CONFLICT,
+                        "EXTRA_CURRICULAR_OFFERING_NOT_COMPLETABLE",
+                        "비교과 운영을 완료 처리할 수 없습니다.",
+                        "extra.curricular.offering.notCompletable"),
+
+        EXTRA_CURRICULAR_SESSION_NOT_EDITABLE(
+                        HttpStatus.CONFLICT,
+                        "EXTRA_CURRICULAR_SESSION_NOT_EDITABLE",
+                        "OPEN 상태에서만 비교과 회차를 수정/취소할 수 있습니다.",
+                        "extra.curricular.session.notEditable"),
+
+        EXTRA_APPLICATION_ALREADY_EXISTS(
+                        HttpStatus.CONFLICT,
+                        "EXTRA_APPLICATION_ALREADY_EXISTS",
+                        "이미 비교과 신청이 완료되었습니다.",
+                        "extra.application.already.exists"),
+
+        EXTRA_APPLICATION_STATUS_CONFLICT(
+                        HttpStatus.CONFLICT,
+                        "EXTRA_APPLICATION_STATUS_CONFLICT",
+                        "현재 상태에서는 비교과 신청을 처리할 수 없습니다.",
+                        "extra.application.status.conflict"),
+
         // =========================
         // Domain: Competency
         // =========================
@@ -172,7 +234,8 @@ public enum ErrorCode {
         // Domain: competency
         // =========================
         DUPLICATE_DIAGNOSIS_FOR_SEMESTER(HttpStatus.CONFLICT, "DUPLICATE_DIAGNOSIS_FOR_SEMESTER",
-                        "이미 해당 학기에 진단이 존재합니다.", "diagnosis.duplicate"),
+                        "이미 해당 학기에 진단이 존재합니다.",
+                        "diagnosis.duplicate"),
         CANNOT_DELETE_DIAGNOSIS_WITH_SUBMISSIONS(HttpStatus.CONFLICT, "CANNOT_DELETE_DIAGNOSIS_WITH_SUBMISSIONS",
                         "이미 응답이 제출된 진단은 삭제할 수 없습니다.", "diagnosis.delete.conflict"),
         CANNOT_MODIFY_CLOSED_DIAGNOSIS(HttpStatus.CONFLICT, "CANNOT_MODIFY_CLOSED_DIAGNOSIS", "종료된 진단은 수정할 수 없습니다.",
