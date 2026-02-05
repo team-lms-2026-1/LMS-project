@@ -61,6 +61,15 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
+    key: "extra",
+    title: "비교과 관리",
+    items: [
+      { label: "비교과 관리", href: "/admin/extra-curricular/extra-curriculars" },
+      { label: "비교과운영 관리", href: "/admin/extra-curricular/offerings" },
+      { label: "비교과성적관리", href: "/admin/extra-curricular/grade-reports" },
+    ],
+  },
+  {
     key: "mentoring",
     title: "멘토링",
     items: [
@@ -70,11 +79,6 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "extra",
-    title: "비교과 관리",
-    items: [{ label: "비교과 프로그램", href: "/surveys" }],
-  },
-  {
     key: "counsel",
     title: "상담 관리",
     items: [{ label: "상담 이력", href: "/surveys" }],
@@ -82,7 +86,10 @@ const SECTIONS: NavSection[] = [
   {
     key: "space",
     title: "학습 공간 대여",
-    items: [{ label: "대여 현황", href: "/competencies" }],
+    items: [
+      { label: "학습공간 목록", href: "/admin/study-space/spaces" },
+      { label: "학습공간 신청 목록", href: "/admin/study-space/spaces-rentals" },
+    ],
   },
 ];
 

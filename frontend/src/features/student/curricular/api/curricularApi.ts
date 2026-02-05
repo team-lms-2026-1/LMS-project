@@ -9,6 +9,7 @@ export type CurricularOfferingsListQuery = {
   keyword?: string;
   semesterId?: number;
 };
+
 // list
 export async function fetchCurricularOfferingsList(query: CurricularOfferingsListQuery) {
   const sp = new URLSearchParams();

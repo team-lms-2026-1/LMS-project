@@ -1,0 +1,151 @@
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+/* 2×2 레이아웃 */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* label + input 묶음 */
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+/* text area */
+textarea.control {
+  height: auto;          /* ✅ input의 40px 무효화 */
+  min-height: 120px;     /* ✅ 설명칸다운 높이 */
+  padding: 10px 12px;    /* ✅ textarea는 상하 padding 필요 */
+  resize: vertical;      /* ✅ 사용자가 늘릴 수 있게(선택) */
+  line-height: 1.4;      /* ✅ 텍스트 가독성 */
+}
+
+.controlWrap {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.controlWrap > * {
+  width: 100%;
+}
+
+
+/* 공통 input / select */
+.control {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* 읽기 전용 필드 (연도 / 학기) */
+.control:disabled {
+  background: #f8fafc;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* placeholder 톤 */
+.control::placeholder {
+  color: #9ca3af;
+}
+
+/* 에러 메시지 */
+.error {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+/* 헤더 토글 */
+.headerToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.headerToggleLabel {
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+/* 실제 input은 숨김 */
+.headerToggleInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* 트랙 */
+.headerToggleTrack {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  box-sizing: border-box;
+  transition: background 160ms ease, border-color 160ms ease;
+  cursor: pointer;
+}
+
+/* 동그라미 */
+.headerToggleThumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  transform: translateX(0);
+  transition: transform 160ms ease;
+}
+
+/* 체크(활성) */
+.headerToggleInput:checked + .headerToggleTrack {
+  background: #e6f6ef;
+  border-color: #b7e4cf;
+}
+
+.headerToggleInput:checked + .headerToggleTrack .headerToggleThumb {
+  transform: translateX(20px);
+}
+
+/* disabled */
+.headerToggleInput:disabled + .headerToggleTrack {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

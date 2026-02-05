@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { FaqListItemDto, PageMeta } from "../api/types";
 import { fetchFaqsList } from "../api/FaqsApi";
 
-
 const defaultMeta: PageMeta = {
   page: 1,
   size: 20,
@@ -23,6 +22,9 @@ export function useFaqsList() {
   const [size, setSize] = useState(20);
   const [keyword, setKeyword] = useState("");
 
+  // ✅ 추가: categoryId (null이면 전체)
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,6 +37,7 @@ export function useFaqsList() {
         page,
         size,
         keyword: keyword || undefined,
+        categoryId: categoryId ?? undefined, // ✅ 추가
       });
 
       setItems(res.data);
@@ -47,7 +50,7 @@ export function useFaqsList() {
     } finally {
       setLoading(false);
     }
-  }, [page, size, keyword]);
+  }, [page, size, keyword, categoryId]); // ✅ categoryId 의존성 추가
 
   useEffect(() => {
     load();
@@ -56,25 +59,32 @@ export function useFaqsList() {
   return {
     state: {
       items,
-      meta,   // ✅ 항상 PageMeta
+      meta,
       page,
-      size, 
+      size,
       keyword,
+      categoryId, // ✅ 추가
       loading,
       error,
     },
     actions: {
       setKeyword,
+
+      // ✅ 추가: 카테고리 변경 시 page 1로 리셋
+      setCategoryId: (cid: number | null) => {
+        setPage(1);
+        setCategoryId(cid);
+      },
+
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 
-      // ✅ PaginationBar size 변경용
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
       },
+
       reload: load,
     },
   };
-
 }

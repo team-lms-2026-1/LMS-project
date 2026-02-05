@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { QnaListItemDto, PageMeta } from "../api/types";
-import { fetchQnaList, deleteQnaQuestion } from "../api/QnasApi"; // ✅ delete 추가
+import { fetchQnaList, deleteQnaQuestion } from "../api/QnasApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -22,6 +22,9 @@ export function useQnaList() {
   const [size, setSize] = useState(20);
   const [keyword, setKeyword] = useState("");
 
+  // ✅ 추가: categoryId (null이면 전체)
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+
   const [deptId, setDeptId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -36,19 +39,20 @@ export function useQnaList() {
         page,
         size,
         keyword: keyword || undefined,
+        categoryId: categoryId ?? undefined,
       });
 
       setItems(res.data ?? []);
       setMeta(res.meta ?? defaultMeta);
     } catch (e: any) {
-      console.error("[useQnasList]", e);
+      console.error("[useQnaList]", e);
       setError(e?.message ?? "Q&A 목록 조회 실패");
       setItems([]);
       setMeta(defaultMeta);
     } finally {
       setLoading(false);
     }
-  }, [page, size, deptId, keyword]);
+  }, [page, size, keyword, categoryId]);
 
   useEffect(() => {
     load();
@@ -57,16 +61,13 @@ export function useQnaList() {
   /** ✅ 질문 삭제 */
   const deleteQuestion = useCallback(
     async (questionId: number) => {
-      // optimistic update
       const prev = items;
       setItems((cur) => cur.filter((q) => q.questionId !== questionId));
 
       try {
         await deleteQnaQuestion(questionId);
-        // 메타/페이지 반영이 필요하면 reload 호출
         await load();
       } catch (e: any) {
-        // rollback
         setItems(prev);
         throw e;
       }
@@ -77,17 +78,24 @@ export function useQnaList() {
   return {
     state: {
       items,
-      meta, // ✅ 항상 PageMeta
+      meta,
       page,
       size,
       deptId,
       keyword,
+      categoryId, 
       loading,
       error,
     },
     actions: {
       setKeyword,
-      deleteQuestion, // ✅ 이제 실제 존재
+      deleteQuestion,
+
+      setCategoryId: (cid: number | null) => {
+        setPage(1);
+        setCategoryId(cid);
+      },
+
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 

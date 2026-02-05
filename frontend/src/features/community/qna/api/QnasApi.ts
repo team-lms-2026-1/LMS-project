@@ -8,22 +8,40 @@ import type {
   DeleteQnaQuestionResponse,
 } from "./types";
 
-export type QnaListQuery = { page?: number; size?: number; keyword?: string };
+export type QnaListQuery = {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  categoryId?: number;
+};
 
 function toQuery(query: QnaListQuery) {
   const sp = new URLSearchParams();
   if (typeof query.page === "number") sp.set("page", String(query.page));
   if (typeof query.size === "number") sp.set("size", String(query.size));
   if (query.keyword?.trim()) sp.set("keyword", query.keyword.trim());
+
+  // ✅ 추가: categoryId
+  if (typeof query.categoryId === "number") sp.set("categoryId", String(query.categoryId));
+
   const qs = sp.toString();
   return qs ? `?${qs}` : "";
 }
 
-async function requestJson<T>(url: string, init: RequestInit, failMessage: string, fallback: T): Promise<T> {
-  const res = await fetch(url, { cache: "no-store", credentials: "include", ...init, headers: {
+async function requestJson<T>(
+  url: string,
+  init: RequestInit,
+  failMessage: string,
+  fallback: T
+): Promise<T> {
+  const res = await fetch(url, {
+    cache: "no-store",
+    credentials: "include",
+    ...init,
+    headers: {
       ...(init.headers ?? {}),
-      // "authorization": `Bearer ${token}`,  // ✅ 만약 토큰 헤더 방식이면 여기서 통일
-    }, });
+    },
+  });
 
   if (!res.ok) {
     let msg = `${failMessage} (${res.status})`;
@@ -59,7 +77,12 @@ export async function fetchQnaCategories() {
 /** ✅ 질문 삭제 */
 export async function deleteQnaQuestion(questionId: number) {
   const fallback: DeleteQnaQuestionResponse = { data: { success: true }, meta: null };
-  return requestJson(`/api/admin/community/qna/questions/${questionId}`, { method: "DELETE" }, "삭제 실패", fallback);
+  return requestJson(
+    `/api/admin/community/qna/questions/${questionId}`,
+    { method: "DELETE" },
+    "삭제 실패",
+    fallback
+  );
 }
 
 /* =========================

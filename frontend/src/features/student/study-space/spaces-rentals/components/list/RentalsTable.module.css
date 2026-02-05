@@ -1,0 +1,143 @@
+.wrap {
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: 70px 1.2fr 1fr 130px 160px 110px 150px;
+  gap: 0;
+  padding: 12px 14px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+  font-weight: 800;
+  color: #6b7280;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 70px 1.2fr 1fr 130px 160px 110px 150px;
+  gap: 0;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f3f4f6;
+  align-items: center;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.empty {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.colId {
+  text-align: center;
+  color: #111827;
+  font-weight: 700;
+}
+
+.colSpace,
+.colRoom,
+.colDate,
+.colTime,
+.colStatus,
+.colActions {
+  color: #111827;
+  font-size: 13px;
+}
+
+.colDate,
+.colTime {
+  color: #374151;
+}
+
+.colActions {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 65px;
+}
+
+/* 상태 배지 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+/* data-status 기반 색상 */
+.badge[data-status="REQUESTED"] {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.badge[data-status="APPROVED"] {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.badge[data-status="REJECTED"] {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.badge[data-status="CANCELLED"],
+.badge[data-status="CANCELED"],
+.badge[data-status^="CANCEL"] {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .head,
+  .row {
+    grid-template-columns: 60px 1.2fr 1fr 120px 150px 100px 140px;
+  }
+}
+
+@media (max-width: 860px) {
+  .head {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .colId {
+    text-align: left;
+  }
+
+  .colActions {
+    justify-content: flex-start;
+  }
+}
+
+.head .colActions {
+  justify-content: flex-start;
+  padding-left: 70px;
+}

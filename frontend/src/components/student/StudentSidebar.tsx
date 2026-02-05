@@ -71,13 +71,11 @@ const SECTIONS: NavSection[] = [
     key: "space",
     title: "학습공간대여",
     items: [
-      { label: "학습공간대여 및 신청", href: "/student/space" },
-      { label: "신청내역확인", href: "/student/space/history" },
+      { label: "학습공간대여 및 신청", href: "/student/study-space/spaces" },
+      { label: "신청내역확인", href: "/student/study-space/spaces-rentals" },
     ],
   },
 ];
-
-
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");

@@ -12,6 +12,7 @@ export type NotiesListQuery = {
   page?: number;
   size?: number;
   keyword?: string;
+  categoryId?: number;
 };
 
 export async function fetchFaqsList(query: NotiesListQuery) {
@@ -19,6 +20,9 @@ export async function fetchFaqsList(query: NotiesListQuery) {
   if (query.page) sp.set("page", String(query.page));
   if (query.size) sp.set("size", String(query.size));
   if (query.keyword) sp.set("keyword", query.keyword);
+
+  // ✅ 추가: categoryId
+  if (typeof query.categoryId === "number") sp.set("categoryId", String(query.categoryId));
 
   const qs = sp.toString();
   const url = qs ? `/api/admin/community/faqs?${qs}` : `/api/admin/community/faqs`;
@@ -34,7 +38,7 @@ export async function fetchFaqCategories() {
   return getJson<FaqCategoryListResponse>(`/api/admin/community/faqs/categories`);
 }
 
-/** ✅ 등록: multipart(form-data) */
+/** ✅ 등록 */
 export async function createFaq(body: CreateFaqRequestDto) {
   const res = await fetch(`/api/admin/community/faqs`, {
     method: "POST",
@@ -59,8 +63,7 @@ export async function createFaq(body: CreateFaqRequestDto) {
   }
 }
 
-
-/** ✅ 수정: multipart(form-data) (request + files) */
+/** ✅ 수정 */
 export async function updateFaq(faqId: number, body: UpdateFaqRequestDto) {
   const res = await fetch(`/api/admin/community/faqs/${faqId}`, {
     method: "PATCH",

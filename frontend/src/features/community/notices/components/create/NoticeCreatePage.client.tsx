@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./NoticeCreatePage.module.css";
 import type { Category, CreateNoticeRequestDto } from "../../api/types";
-import { createNotice, fetchNoticeCategories } from "../../api/noticesApi";
+import { createNotice, fetchNoticeCategories } from "../../api/NoticesApi";
 import { Button } from "@/components/button";
 
 const LIST_PATH = "/admin/community/notices";

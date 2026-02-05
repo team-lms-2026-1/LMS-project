@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./FaqPage.module.css";
 import { FaqsTable } from "./FaqTablePage";
 import { useFaqsList } from "../../hooks/useFaqList";
@@ -8,27 +8,51 @@ import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { Button } from "@/components/button";
 import { useRouter } from "next/navigation";
+import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
+import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
+import { fetchFaqCategories } from "../../api/FaqsApi";
+import type { Category } from "../../api/types";
 
 export default function FaqPageClient() {
   const router = useRouter();
   const { state, actions } = useFaqsList();
-
-  const handleCreated = async () => {
-    await actions.reload();
-  };
-
-  // pagination + search
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
-
   const [inputKeyword, setInputKeyword] = useState("");
+  const { get, setFilters } = useFilterQuery(["categoryId"]);
+  const categoryIdQs = get("categoryId"); 
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [catsLoading, setCatsLoading] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setCatsLoading(true);
+      try {
+        const res = await fetchFaqCategories();
+        if (!alive) return;
+        setCategories(res.data ?? []);
+      } finally {
+        if (alive) setCatsLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const v = categoryIdQs ? Number(categoryIdQs) : null;
+    actions.setCategoryId(v);
+  }, [categoryIdQs, actions]);
 
   useEffect(() => {
     actions.goPage(page);
-  }, [page]);
+  }, [page, actions]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
-  }, [size, state.size]);
+  }, [size, state.size, actions]);
 
   const handleSearch = useCallback(() => {
     setPage(1);
@@ -37,13 +61,19 @@ export default function FaqPageClient() {
   }, [inputKeyword, setPage, actions]);
 
   const goCreate = () => {
-    // ✅ 등록 페이지 (요청 경로)
     router.push("/admin/community/faqs/new");
   };
 
   const goCategoryManage = () => {
-    // ✅ 카테고리 관리 주소 (프로젝트 라우트에 맞게 수정)
     router.push("/admin/community/faqs/categories");
+  };
+
+  const categoryOptions = useMemo(() => {
+    return categories.map((c) => ({ value: String(c.categoryId), label: c.name }));
+  }, [categories]);
+
+  const onChangeCategory = (nextValue: string) => {
+    setFilters({ categoryId: nextValue || null });
   };
 
   return (
@@ -52,13 +82,25 @@ export default function FaqPageClient() {
         <h1 className={styles.title}>FAQ</h1>
 
         <div className={styles.searchRow}>
-          <div className={styles.searchBarWrap}>
-            <SearchBar
-              value={inputKeyword}
-              onChange={setInputKeyword}
-              onSearch={handleSearch}
-              placeholder="제목 검색"
-            />
+          <div className={styles.searchGroup}>
+            <div className={styles.dropdownWrap}>
+              <Dropdown
+                value={categoryIdQs || ""}
+                options={categoryOptions}
+                placeholder="전체"
+                loading={catsLoading}
+                disabled={catsLoading}
+                onChange={onChangeCategory}
+              />
+            </div>
+            <div className={styles.searchBarWrap}>
+              <SearchBar
+                value={inputKeyword}
+                onChange={setInputKeyword}
+                onSearch={handleSearch}
+                placeholder="제목 검색"
+              />
+            </div>
           </div>
         </div>
 
@@ -66,7 +108,6 @@ export default function FaqPageClient() {
 
         <FaqsTable items={state.items} loading={state.loading} onReload={actions.reload} />
 
-        {/* ✅ footerRow: 왼쪽 카테고리 관리 / 가운데 페이지네이션 / 오른쪽 등록 */}
         <div className={styles.footerRow}>
           <div className={styles.footerLeft}>
             <Button variant="secondary" onClick={goCategoryManage}>

@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { NoticeListItemDto, PageMeta } from "../api/types";
-import { fetchNoticesList } from "../api/noticesApi";
-
+import type { NoticeListItemDto, PageMeta } from "../api/types";
+import { fetchNoticesList } from "../api/NoticesApi"; // ✅ import 경로/파일명 프로젝트에 맞게 통일
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -23,7 +22,8 @@ export function useNoticesList() {
   const [size, setSize] = useState(20);
   const [keyword, setKeyword] = useState("");
 
-  const [deptId, setDeptId] = useState<number | null>(null);
+  // ✅ 추가: categoryId (null이면 전체)
+  const [categoryId, setCategoryId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +37,7 @@ export function useNoticesList() {
         page,
         size,
         keyword: keyword || undefined,
+        categoryId: categoryId ?? undefined, // ✅ 추가
       });
 
       setItems(res.data);
@@ -49,7 +50,7 @@ export function useNoticesList() {
     } finally {
       setLoading(false);
     }
-  }, [page, size, deptId, keyword]);
+  }, [page, size, keyword, categoryId]);
 
   useEffect(() => {
     load();
@@ -58,32 +59,32 @@ export function useNoticesList() {
   return {
     state: {
       items,
-      meta,   // ✅ 항상 PageMeta
+      meta,
       page,
-      size, 
-      deptId,  
+      size,
       keyword,
+      categoryId,
       loading,
       error,
     },
     actions: {
       setKeyword,
+
+      // ✅ 카테고리 변경 시 page 1로 리셋
+      setCategoryId: (cid: number | null) => {
+        setPage(1);
+        setCategoryId(cid);
+      },
+
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 
-      // ✅ PaginationBar size 변경용
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
       },
 
-      setDeptId: (id: number | null) => {
-        setPage(1);
-        setDeptId(id);
-      },
-
       reload: load,
     },
   };
-
 }
