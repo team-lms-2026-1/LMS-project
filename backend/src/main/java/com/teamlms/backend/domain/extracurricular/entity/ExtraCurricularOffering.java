@@ -102,4 +102,9 @@ public class ExtraCurricularOffering extends BaseEntity {
     public void changeStatus(ExtraOfferingStatus status) {
         this.status = status;
     }
+    
+    public void updateDefaultRewardsFromSessions(Long rewardPointDefault, Long recognizedHoursDefault) {
+        this.rewardPointDefault = rewardPointDefault;
+        this.recognizedHoursDefault = recognizedHoursDefault;
+    }
 }

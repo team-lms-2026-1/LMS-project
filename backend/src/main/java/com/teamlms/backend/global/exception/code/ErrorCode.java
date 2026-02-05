@@ -107,13 +107,65 @@ public enum ErrorCode {
     GRADE_ALREADY_CONFIRMED(HttpStatus.CONFLICT, "GRADE_ALREADY_CONFIRMED", "이미 성적이 확정된 수강 정보는 수정할 수 없습니다.", "grade.already.confirmed"),
     CURRICULAR_OFFERING_STATUS_LOCKED(HttpStatus.CONFLICT,"CURRICULAR_OFFERING_STATUS_LOCKED","이미 완료된 교과운영은 상태를 변경할 수 없습니다.", "curricular.offering.status.locked"),
     ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS( HttpStatus.FORBIDDEN, "ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS", "현재 교과 운영 상태에서는 수강 신청을 취소할 수 없습니다.", "enrollment.cancel.notAllowedStatus" ),
+
     // =========================
     // Domain: ExtraCurricular
     // =========================
-    EXTRA_CURRICULAR_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "EXTRA_CURRICULAR_CODE_ALREADY_EXISTS",
-            "이미 사용 중인 비교과목 코드입니다.", "extra.curricular.code.alreadyExists"),
-    EXTRA_CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_CURRICULAR_NOT_FOUND", "비교과목을 찾을 수 없습니다.",
-            "extra.curricular.notFound"),
+    EXTRA_CURRICULAR_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "EXTRA_CURRICULAR_CODE_ALREADY_EXISTS", "이미 사용 중인 비교과목 코드입니다.", "extra.curricular.code.alreadyExists"),
+    EXTRA_CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_CURRICULAR_NOT_FOUND", "비교과목을 찾을 수 없습니다.", "extra.curricular.notFound"),
+
+    EXTRA_CURRICULAR_OFFERING_PERIOD_INVALID(HttpStatus.BAD_REQUEST, "EXTRA_CURRICULAR_OFFERING_PERIOD_INVALID", "운영 종료일은 시작일 이후여야 합니다.", "extra.curricular.offering.period.invalid"),
+    EXTRA_CURRICULAR_OFFERING_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_CURRICULAR_OFFERING_NOT_FOUND", "비교과 운영 정보를 찾을 수 없습니다.", "extra.curricular.offering.notFound"),
+    EXTRA_CURRICULAR_OFFERING_NOT_EDITABLE(HttpStatus.CONFLICT, "EXTRA_CURRICULAR_OFFERING_NOT_EDITABLE", "현재 상태에서는 수정할 수 없습니다.", "extra.curricular.offering.notEditable"),
+    EXTRA_CURRICULAR_OFFERING_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "EXTRA_CURRICULAR_OFFERING_CODE_ALREADY_EXISTS", "이미 사용 중인 비교과 운영 코드입니다.", "extra.curricular.offering.code.alreadyExists"),
+
+    EXTRA_SESSION_PERIOD_INVALID(HttpStatus.BAD_REQUEST, "EXTRA_SESSION_PERIOD_INVALID", "회차 종료일은 시작일 이후여야 합니다.", "extra.curricular.session.period.invalid"),
+    EXTRA_SESSION_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "EXTRA_SESSION_NAME_ALREADY_EXISTS", "이미 존재하는 회차명입니다.", "extra.curricular.session.name.alreadyExists"),
+    EXTRA_SESSION_VIDEO_STORAGE_KEY_ALREADY_EXISTS(HttpStatus.CONFLICT, "EXTRA_SESSION_VIDEO_STORAGE_KEY_ALREADY_EXISTS", "이미 사용 중인 비디오 storageKey 입니다.", "extra.curricular.session.video.storageKey.alreadyExists"),
+    EXTRA_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "EXTRA_SESSION_NOT_FOUND", "회차 정보를 찾을 수 없습니다.", "extra.curricular.session.notFound"),
+
+    INVALID_EXTRA_CURRICULAR_OFFERING_STATUS_TRANSITION(
+        HttpStatus.CONFLICT,
+        "INVALID_EXTRA_CURRICULAR_OFFERING_STATUS_TRANSITION",
+        "비교과 운영 상태 전이가 올바르지 않습니다.",
+        "extra.curricular.offering.status.invalid.transition"
+    ),
+
+    EXTRA_CURRICULAR_OFFERING_STATUS_LOCKED(
+        HttpStatus.CONFLICT,
+        "EXTRA_CURRICULAR_OFFERING_STATUS_LOCKED",
+        "이미 완료된 비교과 운영은 상태를 변경할 수 없습니다.",
+        "extra.curricular.offering.status.locked"
+    ),
+
+    EXTRA_CURRICULAR_OFFERING_NOT_COMPLETABLE(
+        HttpStatus.CONFLICT,
+        "EXTRA_CURRICULAR_OFFERING_NOT_COMPLETABLE",
+        "비교과 운영을 완료 처리할 수 없습니다.",
+        "extra.curricular.offering.notCompletable"
+    ),
+
+    EXTRA_CURRICULAR_SESSION_NOT_EDITABLE(
+        HttpStatus.CONFLICT,
+        "EXTRA_CURRICULAR_SESSION_NOT_EDITABLE",
+        "OPEN 상태에서만 비교과 회차를 수정/취소할 수 있습니다.",
+        "extra.curricular.session.notEditable"
+    ),
+    
+    EXTRA_APPLICATION_ALREADY_EXISTS(
+        HttpStatus.CONFLICT,
+        "EXTRA_APPLICATION_ALREADY_EXISTS",
+        "이미 비교과 신청이 완료되었습니다.",
+        "extra.application.already.exists"
+    ),
+
+    EXTRA_APPLICATION_STATUS_CONFLICT(
+        HttpStatus.CONFLICT,
+        "EXTRA_APPLICATION_STATUS_CONFLICT",
+        "현재 상태에서는 비교과 신청을 처리할 수 없습니다.",
+        "extra.application.status.conflict"
+    ),
+
     // =========================
     // Domain: Competency
     // =========================
