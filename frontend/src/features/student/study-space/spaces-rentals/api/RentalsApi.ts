@@ -54,7 +54,9 @@ export const rentalsApi = {
   /** ✅ 취소 (네 BFF/백엔드에 맞춰 PATCH /cancel 유지) */
   async cancel(rentalId: number): Promise<CancelRentalResponse> {
     return requestJson<CancelRentalResponse>(`${BASE}/${rentalId}/cancel`, {
-      method: "PATCH",
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "REQUESTED" }),
     });
   },
 } as const;

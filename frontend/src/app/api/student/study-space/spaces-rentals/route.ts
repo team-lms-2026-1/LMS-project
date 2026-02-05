@@ -12,8 +12,7 @@ export async function GET(req: Request) {
   return proxyToBackend(req, BACKEND_BASE, {
     method: "GET",
     forwardQuery: true,
-    cache: "force-cache",
-    next: { revalidate: 300, tags: [TAG] },
+    cache: "no-store",
   });
 }
 

@@ -64,7 +64,6 @@ export default function RentalsTable({ data, loading, onApprove, onReject }: Pro
                       variant={item.status === "APPROVED" ? "secondary" : "primary"}
                       disabled={item.status === "APPROVED"}
                       onClick={() => onApprove(item.rentalId)}
-                      style={{ padding: "6px 12px", fontSize: "13px", height: "auto", minHeight: "unset" }}
                     >
                       허가
                     </Button>
@@ -72,7 +71,6 @@ export default function RentalsTable({ data, loading, onApprove, onReject }: Pro
                       variant={item.status === "REJECTED" ? "secondary" : "danger"}
                       disabled={item.status === "REJECTED"}
                       onClick={() => onReject(item.rentalId)}
-                      style={{ padding: "6px 12px", fontSize: "13px", height: "auto", minHeight: "unset" }}
                     >
                       반려
                     </Button>

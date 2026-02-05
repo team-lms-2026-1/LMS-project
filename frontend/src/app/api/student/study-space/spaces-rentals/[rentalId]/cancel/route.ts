@@ -7,14 +7,14 @@ export const dynamic = "force-dynamic";
 const BACKEND_BASE = "/api/v1/student/spaces-rentals";
 const TAG = "student:rentals";
 
-type Ctx = { params: { id: string } };
+type Ctx = { params: { rentalId: string } };
 
 export async function PATCH(req: Request, ctx: Ctx) {
-  const id = ctx.params.id;
+  const rentalId = ctx.params.rentalId;
 
   const res = await proxyToBackend(
     req,
-    `${BACKEND_BASE}/${encodeURIComponent(id)}/cancel`,
+    `${BACKEND_BASE}/${encodeURIComponent(rentalId)}/cancel`,
     {
       method: "PATCH",
       forwardQuery: false,

@@ -43,6 +43,10 @@ export default function RentalsPageClient() {
     reason: "",
   });
 
+  useEffect(() => {
+    updateParams({ page, size });
+    }, [page, size]);
+
   const title = useMemo(() => {
     const id = me?.loginId ? `(${me.loginId})` : "";
     return `내 예약 목록 ${id}`;

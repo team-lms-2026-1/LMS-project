@@ -65,8 +65,8 @@
 
 .colActions {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  justify-content: flex-start;
+  padding-left: 65px;
 }
 
 /* 상태 배지 */
@@ -77,9 +77,9 @@
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
+  line-height: 1;
   border: 1px solid transparent;
-  white-space: nowrap;
 }
 
 /* data-status 기반 색상 */
@@ -101,10 +101,12 @@
   border-color: #fecaca;
 }
 
-.badge[data-status="CANCELLED"] {
+.badge[data-status="CANCELLED"],
+.badge[data-status="CANCELED"],
+.badge[data-status^="CANCEL"] {
   background: #f3f4f6;
+  border-color: #d1d5db;
   color: #374151;
-  border-color: #e5e7eb;
 }
 
 /* 반응형 */
@@ -133,4 +135,9 @@
   .colActions {
     justify-content: flex-start;
   }
+}
+
+.head .colActions {
+  justify-content: flex-start;
+  padding-left: 70px;
 }
