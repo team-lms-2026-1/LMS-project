@@ -18,19 +18,18 @@ import java.util.Map;
 import java.util.List;
 
 @RestController
-@RequestMapping  
+@RequestMapping
 @RequiredArgsConstructor
 public class ResourceCategoryController {
 
     private final ResourceCategoryService categoryService;
 
-    
     // // =================================================================
     // // 1. 자료실 카테고로 목록 조회 - 전부가능
     // // =================================================================
-    @GetMapping({"/api/v1/student/community/resources/categories",
-                 "/api/v1/admin/community/resources/categories",
-                 "/api/v1/professor/community/resources/categories"})
+    @GetMapping({ "/api/v1/student/community/resources/categories",
+            "/api/v1/admin/community/resources/categories",
+            "/api/v1/professor/community/resources/categories" })
     @PreAuthorize("hasAuthority('RESOURCE_READ')")
     public ApiResponse<List<ExternalCategoryResponse>> getResourceCategories(
             @RequestParam(defaultValue = "1") int page,
@@ -39,25 +38,21 @@ public class ResourceCategoryController {
         return getResourceCategoryListInternal(page, size, keyword);
     }
 
-    private ApiResponse<List<ExternalCategoryResponse>> getResourceCategoryListInternal(int page, int size, String keyword) {
+    private ApiResponse<List<ExternalCategoryResponse>> getResourceCategoryListInternal(int page, int size,
+            String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
-
+                Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<ExternalCategoryResponse> pageResult = categoryService.getList(pageable, keyword);
-        
         return ApiResponse.of(
-                pageResult.getContent(), 
-                PageMeta.from(pageResult)
-        );
+                pageResult.getContent(),
+                PageMeta.from(pageResult));
     }
 
-    
     // =================================================================
     // 2. 자료실 카테고리 등록 - 어드민만 가능
     // =================================================================
@@ -75,13 +70,11 @@ public class ResourceCategoryController {
     @PreAuthorize("hasAuthority('RESOURCE_MANAGE')")
     public ApiResponse<?> update(
             @PathVariable Long categoryId,
-            @Valid @RequestBody ExternalCategoryRequest request
-    ) {
+            @Valid @RequestBody ExternalCategoryRequest request) {
         categoryService.update(categoryId, request);
         return ApiResponse.ok(Map.of("success", true));
     }
 
-    
     // =================================================================
     // 4. 자료실 카테고로 삭제 - 어드민만 가능
     // =================================================================

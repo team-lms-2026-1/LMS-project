@@ -18,17 +18,18 @@ import java.util.Map;
 import java.util.List;
 
 @RestController
-@RequestMapping 
+@RequestMapping
 @RequiredArgsConstructor
 public class FaqCategoryController {
 
     private final FaqCategoryService service;
+
     // =================================================================
     // 1. FAQ 카테고리 목록 조회 - 전부가능
     // =================================================================
-    @GetMapping({"/api/v1/student/community/faq/categories",
-                "/api/v1/admin/community/faq/categories",
-                "/api/v1/professor/community/faq/categories"})
+    @GetMapping({ "/api/v1/student/community/faq/categories",
+            "/api/v1/admin/community/faq/categories",
+            "/api/v1/professor/community/faq/categories" })
     @PreAuthorize("hasAuthority('FAQ_READ')")
     public ApiResponse<List<ExternalCategoryResponse>> getStudentFaqCategories(
             @RequestParam(defaultValue = "1") int page,
@@ -36,6 +37,7 @@ public class FaqCategoryController {
             @RequestParam(required = false) String keyword) {
         return getFaqCategoryListInternal(page, size, keyword);
     }
+
     private ApiResponse<List<ExternalCategoryResponse>> getFaqCategoryListInternal(int page, int size, String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
@@ -43,15 +45,13 @@ public class FaqCategoryController {
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
-   
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+
         Page<ExternalCategoryResponse> pageResult = service.getList(pageable, keyword);
-        
+
         return ApiResponse.of(
-                pageResult.getContent(), 
-                PageMeta.from(pageResult)
-        );
+                pageResult.getContent(),
+                PageMeta.from(pageResult));
     }
 
     // =================================================================
@@ -63,7 +63,7 @@ public class FaqCategoryController {
         Long id = service.create(request);
         return ApiResponse.ok(Map.of("categoryId", id));
     }
-    //수정
+    // 수정
     // =================================================================
     // 3. FAQ 카테고리 수정 - 어드민만 가능
     // =================================================================
@@ -74,11 +74,11 @@ public class FaqCategoryController {
         service.update(id, request);
         return ApiResponse.ok(Map.of("success", true));
     }
-    //삭제
+    // 삭제
     // =================================================================
     // 4. FAQ 카테고리 수정 - 어드민만 가능
     // =================================================================
-    
+
     @DeleteMapping("/api/v1/admin/community/faq/categories/{id}")
     @PreAuthorize("hasAuthority('NOTICE_MANAGE')")
     public ApiResponse<?> delete(@PathVariable Long id) {

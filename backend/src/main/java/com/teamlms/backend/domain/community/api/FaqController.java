@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-// import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,54 +18,51 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.List;
 
-
 @RestController
-@RequestMapping //("/api/v1/community/faqs") // 정책서 경로: /faqs
+@RequestMapping // ("/api/v1/community/faqs") // 정책서 경로: /faqs
 @RequiredArgsConstructor
 public class FaqController {
 
     private final FaqService service;
+
     // =================================================================
     // 1. FAQ 목록 조회 - 전부가능
     // =================================================================
-    @GetMapping({"/api/v1/student/community/faqs",
-                 "/api/v1/professor/community/faqs",
-                 "/api/v1/admin/community/faqs" 
+    @GetMapping({ "/api/v1/student/community/faqs",
+            "/api/v1/professor/community/faqs",
+            "/api/v1/admin/community/faqs"
     })
     @PreAuthorize("hasAuthority('FAQ_READ')")
     public ApiResponse<List<ExternalFaqResponse>> getFaqs(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String keyword
-    ) {
+            @RequestParam(required = false) String keyword) {
         // 1. 페이지 및 사이즈 유효성 검사 (안전장치: 페이지는 최소 1, 사이즈는 1~100 제한)
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
-
         // 2. PageRequest 생성 (프론트의 1페이지를 JPA의 0페이지로 변환 및 정렬 설정)
         // FAQ 특성상 최신순(createdAt DESC)으로 설정하거나 필요시 sortOrder를 추가할 수 있습니다.
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+                Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // 3. 서비스 호출
         Page<ExternalFaqResponse> pageResult = service.getList(pageable, categoryId, keyword);
-        
+
         // 4. 공통 규격(데이터 + 메타 데이터)으로 응답
         return ApiResponse.of(
-                pageResult.getContent(), 
-                PageMeta.from(pageResult)
-        );
+                pageResult.getContent(),
+                PageMeta.from(pageResult));
     }
+
     // =================================================================
     // 2. FAQ 상세 조회 - 전부가능
     // =================================================================
-    @GetMapping({"/api/v1/student/community/faqs/{id}",
-                 "/api/v1/professor/community/faqs/{id}",
-                 "/api/v1/admin/community/faqs/{id}" 
+    @GetMapping({ "/api/v1/student/community/faqs/{id}",
+            "/api/v1/professor/community/faqs/{id}",
+            "/api/v1/admin/community/faqs/{id}"
     })
     @PreAuthorize("hasAuthority('FAQ_READ')")
     public ApiResponse<?> getDetail(@PathVariable("id") Long faqId) {
