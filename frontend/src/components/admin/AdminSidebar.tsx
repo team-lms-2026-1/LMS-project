@@ -82,7 +82,10 @@ const SECTIONS: NavSection[] = [
   {
     key: "space",
     title: "학습 공간 대여",
-    items: [{ label: "대여 현황", href: "/competencies" }],
+    items: [
+      { label: "학습공간 목록", href: "/admin/study-space/spaces" },
+      { label: "학습공간 신청 목록", href: "/admin/study-space/spaces-rentals" },
+    ],
   },
 ];
 

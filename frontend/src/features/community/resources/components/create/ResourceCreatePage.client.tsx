@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./ResourceCreatePage.module.css";
 import type { Category, CreateResourceRequestDto } from "../../api/types";
-import { createResource, fetchResourceCategories } from "../../api/resourcesApi";
+import { createResource, fetchResourceCategories } from "../../api/ResourcesApi";
 import { Button } from "@/components/button";
 
 const LIST_PATH = "/admin/community/resources";

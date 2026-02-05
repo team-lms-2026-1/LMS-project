@@ -14,9 +14,42 @@ const BASE = "/api/admin/authority/accounts";
 type AccountsListParams = {
   accountType?: AccountType;
   keyword?: string;
-  page?: number;
+  page?: number; // ✅ 0-based로 보내는 걸 권장 (프론트에서 page-1 변환)
   size?: number;
 };
+
+// ✅ 공통: 서버가 다양한 포맷으로 리스트를 줄 때 "배열"만 안전하게 언랩
+function unwrapListArray(raw: any): any[] {
+  if (Array.isArray(raw)) return raw;
+
+  // 흔한 케이스: { data: [...] }
+  if (Array.isArray(raw?.data)) return raw.data;
+
+  // 흔한 케이스: { items: [...] }
+  if (Array.isArray(raw?.items)) return raw.items;
+
+  // Spring Page: { content: [...] }
+  if (Array.isArray(raw?.content)) return raw.content;
+
+  // ApiResponse + Page: { data: { items: [...] } } or { data: { content: [...] } }
+  if (Array.isArray(raw?.data?.items)) return raw.data.items;
+  if (Array.isArray(raw?.data?.content)) return raw.data.content;
+
+  // 혹시 result로 오는 경우
+  if (Array.isArray(raw?.result)) return raw.result;
+  if (Array.isArray(raw?.data?.result)) return raw.data.result;
+
+  return [];
+}
+
+// ✅ 공통: 서버가 {data:[...]} 형태인 경우 언랩(드롭다운 등에 사용)
+function unwrapArray(json: any): any[] {
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json?.items)) return json.items;
+  if (Array.isArray(json?.result)) return json.result;
+  return [];
+}
 
 // 백엔드 목록 row가 flat(name/email이 최상위)로 오는 케이스를 프론트 DTO로 변환
 function normalizeRow(r: any): AccountRowDto {
@@ -66,34 +99,27 @@ function normalizeRow(r: any): AccountRowDto {
 }
 
 function normalizeListResponse(raw: any): AccountsListResponseDto {
-  const arr =
-    raw?.data ??
-    raw?.items ??
-    raw?.content ??
-    raw?.data?.items ??
-    raw?.data?.content ??
-    [];
+  const arr = unwrapListArray(raw);
+  const items: AccountRowDto[] = arr.map(normalizeRow);
 
-  const items: AccountRowDto[] = Array.isArray(arr) ? arr.map(normalizeRow) : [];
+  // ✅ meta 위치 보강
+  const meta = raw?.meta ?? raw?.data?.meta;
 
+  // ✅ total(총개수) 추출 경로 보강 (Spring Page / ApiResponse 등)
   const total: number =
-    raw?.total ??
-    raw?.totalElements ??
-    raw?.count ??
-    raw?.data?.total ??
-    raw?.data?.totalElements ??
+    Number(meta?.totalElements ?? meta?.total ?? undefined) ||
+    Number(
+      raw?.total ??
+        raw?.totalElements ??
+        raw?.count ??
+        raw?.data?.total ??
+        raw?.data?.totalElements ??
+        raw?.data?.count ??
+        undefined
+    ) ||
     items.length;
 
   return { items, total };
-}
-
-// ✅ 공통: 서버가 {data: [...]} 형태인 경우 언랩
-function unwrapArray(json: any): any[] {
-  if (Array.isArray(json)) return json;
-  if (Array.isArray(json?.data)) return json.data;
-  if (Array.isArray(json?.items)) return json.items;
-  if (Array.isArray(json?.result)) return json.result;
-  return [];
 }
 
 /**
@@ -160,8 +186,9 @@ export const accountsApi = {
     const kw = (params?.keyword ?? "").trim();
     if (kw) qs.set("keyword", kw);
 
+    // ✅ 서버는 보통 0-based (프론트에서 page-1로 변환해서 넣는 걸 권장)
     qs.set("page", String(params?.page ?? 0));
-    qs.set("size", String(params?.size ?? 50));
+    qs.set("size", String(params?.size ?? 20));
 
     const url = `${BASE}?${qs.toString()}`;
     const raw = await bffRequest<any>(url);
@@ -171,8 +198,7 @@ export const accountsApi = {
   /** ✅ 수정 모달에서 "연락처/학과/주전공" 정확히 채우기 위해 상세 호출 */
   async detail(accountId: number): Promise<AccountRowDto> {
     const raw = await bffRequest<any>(`${BASE}/${accountId}`);
-    // 백엔드가 {data:{...}} 형태여도 대응
-    const obj = raw?.data ?? raw;
+    const obj = raw?.data ?? raw; // {data:{...}} 대응
     return normalizeRow(obj);
   },
 
@@ -180,11 +206,6 @@ export const accountsApi = {
     return bffRequest<{ accountId: number }>(BASE, { method: "POST", body });
   },
 
-  /**
-   * ✅ 핵심: update 요청은 body를 절대 profile로 감싸지 않도록
-   * - wrapper가 들어오면 flatten
-   * - majors 등 응답전용 구조 제거/정규화
-   */
   update(accountId: number, body: UpdateAccountRequestDto) {
     const payload = sanitizeUpdateBody(body);
     return bffRequest<void>(`${BASE}/${accountId}`, { method: "PATCH", body: payload });
@@ -206,7 +227,7 @@ export const accountsApi = {
 
   /** ✅ 학과 드롭다운 */
   async listDepts(): Promise<DeptDto[]> {
-    const res = await fetch("/api/authority/depts/dropdown", { cache: "no-store" });
+    const res = await fetch("/api/admin/authority/depts/dropdown", { cache: "no-store" });
     if (!res.ok) throw new Error("학과 목록 조회 실패");
 
     const json = await res.json();
@@ -220,7 +241,7 @@ export const accountsApi = {
 
   /** ✅ 주전공(학과 선택 -> 해당 학과 전공만) */
   async listMajorsByDept(deptId: number): Promise<MajorDto[]> {
-    const res = await fetch(`/api/authority/depts/${deptId}/majors/dropdown`, {
+    const res = await fetch(`/api/admin/authority/depts/${deptId}/majors/dropdown`, {
       cache: "no-store",
     });
     if (!res.ok) throw new Error("전공 목록 조회 실패");
@@ -237,8 +258,7 @@ export const accountsApi = {
 
   /** ✅ 부/복수전공: 학과 무관 전체 전공 */
   async listMajorsAll(): Promise<MajorDto[]> {
-    // 프로젝트에 맞게 엔드포인트가 다르면 여기만 수정하면 됨
-    const res = await fetch(`/api/authority/majors/dropdown`, { cache: "no-store" });
+    const res = await fetch(`/api/admin/authority/majors/dropdown`, { cache: "no-store" });
     if (!res.ok) throw new Error("전체 전공 목록 조회 실패");
 
     const json = await res.json();

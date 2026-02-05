@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import styles from "../styles/AccountListPage.module.css";
 import { AccountRowView, AccountStatus, AccountType } from "../types";
 import AccountFilters from "./AccountFilters";
@@ -10,6 +10,8 @@ import AccountEditModal from "./AccountEditModal";
 
 import { accountsApi } from "../api/accountsApi";
 import type { AccountRowDto } from "../api/dto";
+
+import { PaginationSimple, useListQuery } from "@/components/pagination";
 
 type RoleFilter = "ALL" | AccountType;
 
@@ -85,6 +87,8 @@ function mapRow(dto: AccountRowDto): AccountRowView {
 }
 
 export default function AccountListPage() {
+  const SIZE = 20;
+
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
   const [keywordDraft, setKeywordDraft] = useState("");
   const [keywordApplied, setKeywordApplied] = useState("");
@@ -99,41 +103,114 @@ export default function AccountListPage() {
 
   const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
 
-  // ✅ 서버 호출 파라미터를 여기서 확정
-  const listParams = useMemo(() => {
-    const keyword = keywordApplied.trim();
+  // ✅ URL query 기반 pagination (UI는 1-based)
+  const { page: pageRaw, setPage: setPageRaw } = useListQuery({
+    defaultPage: 1,
+    defaultSize: SIZE,
+  });
+
+  // ✅ page 정규화
+  const page = useMemo(() => {
+    const n = Number(pageRaw);
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }, [pageRaw]);
+
+  /**
+   * ✅ 핵심: useListQuery의 setPage가 매 렌더마다 바뀌어도
+   * safeSetPage는 "항상 같은 함수"로 유지 (effect 루프 방지)
+   */
+  const pageRef = useRef(page);
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
+
+  const setPageRef = useRef(setPageRaw);
+  useEffect(() => {
+    setPageRef.current = setPageRaw;
+  }, [setPageRaw]);
+
+  const safeSetPage = useCallback((next: number) => {
+    const cur = pageRef.current;
+    if (cur === next) return;
+    setPageRef.current(next);
+  }, []);
+
+  const [totalPages, setTotalPages] = useState(1);
+
+  // ✅ 수동 reload 트리거
+  const [reloadTick, setReloadTick] = useState(0);
+  const reload = useCallback(() => setReloadTick((t) => t + 1), []);
+
+  // ✅ API params (0-based 변환)
+  const apiParams = useMemo(() => {
+    const kw = keywordApplied.trim();
     return {
       accountType: roleFilter === "ALL" ? undefined : roleFilter,
-      keyword: keyword.length ? keyword : undefined,
-      page: 0,   // ✅ 0-based 안전
-      size: 50,
+      keyword: kw.length ? kw : undefined,
+      page: page,
+      size: SIZE,
     };
-  }, [roleFilter, keywordApplied]);
+  }, [roleFilter, keywordApplied, page]);
 
-  const fetchList = useCallback(async () => {
-    setLoading(true);
-    setErrorMsg(null);
+  // ✅ 의존성용 “문자열 키”로 고정 (object identity 흔들림 방지)
+  const fetchKey = useMemo(() => {
+    return JSON.stringify({
+      accountType: apiParams.accountType ?? null,
+      keyword: apiParams.keyword ?? null,
+      page: apiParams.page,
+      size: apiParams.size,
+      reloadTick,
+    });
+  }, [apiParams, reloadTick]);
 
-    try {
-      const res = await accountsApi.list(listParams);
-      const list = res?.items ?? [];
-      setRows(list.map(mapRow));
-    } catch (e: any) {
-      setErrorMsg(e?.message ?? "목록 조회 실패");
-      setRows([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [listParams]);
+  // ✅ 최신 요청만 반영
+  const seqRef = useRef(0);
 
-  // ✅ roleFilter/keywordApplied가 바뀌면 자동으로 재조회
   useEffect(() => {
-    fetchList();
-  }, [fetchList]);
+    let alive = true;
+    const seq = ++seqRef.current;
 
-  // ✅ 서버가 이미 accountType으로 필터링하므로 기본적으로 rows 그대로 사용
-  // (혹시 백엔드가 accountType을 무시하는 경우를 대비해 “보조 필터”는 남겨둘 수 있음)
+    (async () => {
+      setLoading(true);
+      setErrorMsg(null);
+
+      try {
+        const res = await accountsApi.list(apiParams); // { items, total }
+
+        if (!alive || seq !== seqRef.current) return;
+
+        const total = Number(res.total ?? 0);
+        const tp = Math.max(1, Math.ceil(total / SIZE));
+
+        setTotalPages((prev) => (prev === tp ? prev : tp));
+
+        // ✅ 페이지 범위 보정(필터/삭제로 페이지 줄었을 때)
+        if (page > tp) {
+          safeSetPage(tp);
+          return;
+        }
+
+        setRows((res.items ?? []).map(mapRow));
+      } catch (e: any) {
+        if (!alive || seq !== seqRef.current) return;
+        setErrorMsg(e?.message ?? "목록 조회 실패");
+        setRows([]);
+        setTotalPages(1);
+      } finally {
+        if (!alive || seq !== seqRef.current) return;
+        setLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+    // ✅ fetchKey만 의존 (무한루프 차단)
+  }, [fetchKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const displayRows = useMemo(() => {
+    // 서버가 이미 accountType 필터링을 하면 rows 그대로 써도 됨.
+    // 안전장치로 남겨도 괜찮음.
     if (roleFilter === "ALL") return rows;
     return rows.filter((r) => r.account.accountType === roleFilter);
   }, [rows, roleFilter]);
@@ -187,18 +264,17 @@ export default function AccountListPage() {
           keyword={keywordDraft}
           onChangeRole={(v) => {
             setRoleFilter(v);
-            // ✅ 탭 바꾸면 첫 조회 상태로(원하면 유지해도 됨)
-            // setKeywordDraft("");
-            // setKeywordApplied("");
+            safeSetPage(1);
           }}
           onChangeKeyword={setKeywordDraft}
           onApply={() => {
-            // ✅ setTimeout 제거: 적용값만 바꾸면 useEffect가 fetchList 실행
             setKeywordApplied(keywordDraft.trim());
+            safeSetPage(1);
           }}
         />
 
         {errorMsg && <div style={{ padding: 12, color: "#b91c1c" }}>{errorMsg}</div>}
+
         {loading ? (
           <div style={{ padding: 12 }}>로딩중...</div>
         ) : (
@@ -212,6 +288,19 @@ export default function AccountListPage() {
             }}
           />
         )}
+
+        <div className={styles.footerRow}>
+          <div className={styles.footerLeft} />
+          <div className={styles.footerCenter}>
+            <PaginationSimple
+              page={page}
+              totalPages={totalPages}
+              onChange={safeSetPage}
+              disabled={loading}
+            />
+          </div>
+          <div className={styles.footerRight} />
+        </div>
       </div>
 
       <AccountCreateModal
@@ -219,7 +308,7 @@ export default function AccountListPage() {
         onClose={() => setCreateOpen(false)}
         onCreated={async () => {
           setCreateOpen(false);
-          await fetchList();
+          reload();
         }}
       />
 
@@ -229,7 +318,7 @@ export default function AccountListPage() {
         onClose={() => setEditOpen(false)}
         onSaved={async () => {
           setEditOpen(false);
-          await fetchList();
+          reload();
         }}
       />
     </div>
