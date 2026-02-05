@@ -1,5 +1,5 @@
-import AdminMentoringMatchingPage from "@/features/mentoring/components/admin/AdminMentoringMatchingPage";
+import MentoringRecruitmentList from "@/features/mentoring/components/MentoringRecruitmentList";
 
 export default function Page() {
-    return <AdminMentoringMatchingPage />;
+    return <MentoringRecruitmentList />;
 }

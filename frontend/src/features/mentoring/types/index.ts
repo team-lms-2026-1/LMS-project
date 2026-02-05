@@ -10,6 +10,8 @@ export interface MentoringRecruitment {
     recruitStartAt: string;
     recruitEndAt: string;
     status: RecruitmentStatus;
+    appliedRole?: string;
+    applyStatus?: MentoringStatus;
 }
 
 export interface MentoringApplication {
@@ -21,6 +23,12 @@ export interface MentoringApplication {
     role: MentoringRole;
     status: MentoringStatus;
     appliedAt: string;
+    applyReason?: string;
+    studentNo?: string;
+    gradeLevel?: number;
+    deptName?: string;
+    phone?: string;
+    email?: string;
 }
 
 export interface MentoringRecruitmentCreateRequest {
@@ -45,6 +53,7 @@ export interface MentoringMatchingRequest {
 export interface MentoringApplicationRequest {
     recruitmentId: number;
     role: MentoringRole; // "MENTOR" or "MENTEE"
+    reason?: string;
 }
 
 export interface MentoringMatchingResponse {

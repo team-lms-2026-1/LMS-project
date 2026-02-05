@@ -43,19 +43,19 @@ function normalizeRow(r: any): AccountRowDto {
   } else {
     base.profile = name
       ? {
-          name,
-          email,
-          phone,
-          memo,
-          deptId: r.deptId,
+        name,
+        email,
+        phone,
+        memo,
+        deptId: r.deptId,
 
-          studentNo: r.studentNo,
-          gradeLevel: r.gradeLevel,
-          academicStatus: r.academicStatus,
-          majors: r.majors,
+        studentNo: r.studentNo,
+        gradeLevel: r.gradeLevel,
+        academicStatus: r.academicStatus,
+        majors: r.majors,
 
-          professorNo: r.professorNo,
-        }
+        professorNo: r.professorNo,
+      }
       : undefined;
   }
 
@@ -206,7 +206,7 @@ export const accountsApi = {
 
   /** ✅ 학과 드롭다운 */
   async listDepts(): Promise<DeptDto[]> {
-    const res = await fetch("/api/authority/depts/dropdown", { cache: "no-store" });
+    const res = await fetch("/api/admin/authority/depts/dropdown", { cache: "no-store" });
     if (!res.ok) throw new Error("학과 목록 조회 실패");
 
     const json = await res.json();
@@ -220,7 +220,7 @@ export const accountsApi = {
 
   /** ✅ 주전공(학과 선택 -> 해당 학과 전공만) */
   async listMajorsByDept(deptId: number): Promise<MajorDto[]> {
-    const res = await fetch(`/api/authority/depts/${deptId}/majors/dropdown`, {
+    const res = await fetch(`/api/admin/authority/depts/${deptId}/majors/dropdown`, {
       cache: "no-store",
     });
     if (!res.ok) throw new Error("전공 목록 조회 실패");

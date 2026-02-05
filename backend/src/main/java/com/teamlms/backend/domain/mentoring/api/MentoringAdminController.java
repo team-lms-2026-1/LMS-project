@@ -29,6 +29,25 @@ public class MentoringAdminController {
         return ResponseEntity.ok(id);
     }
 
+    // [Admin] 멘토링 모집 공고 수정
+    @PutMapping("/recruitments/{id}")
+    public ResponseEntity<Void> updateRecruitment(
+            @AuthenticationPrincipal AuthUser admin,
+            @PathVariable Long id,
+            @RequestBody @Valid com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentUpdateRequest request) {
+        commandService.updateRecruitment(admin.getAccountId(), id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    // [Admin] 멘토링 모집 공고 삭제
+    @DeleteMapping("/recruitments/{id}")
+    public ResponseEntity<Void> deleteRecruitment(
+            @AuthenticationPrincipal AuthUser admin,
+            @PathVariable Long id) {
+        commandService.deleteRecruitment(admin.getAccountId(), id);
+        return ResponseEntity.ok().build();
+    }
+
     // [Admin] 멘토링 신청 상태 변경 (승인/반려)
     @PatchMapping("/applications/{id}/status")
     public ResponseEntity<Void> updateApplicationStatus(

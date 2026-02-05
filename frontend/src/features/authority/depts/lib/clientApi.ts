@@ -22,8 +22,8 @@ export async function fetchDepartments(params?: {
 
   const query = qs.toString();
   const url = query
-    ? `/api/depts?${query}`
-    : `/api/depts`;
+    ? `/api/admin/departments?${query}`
+    : `/api/admin/departments`;
 
   return getJson<DeptListResponse>(url);
 }

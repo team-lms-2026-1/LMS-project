@@ -31,38 +31,17 @@ export function TargetSelector({
     const [depts, setDepts] = useState<Dept[]>([]);
 
     useEffect(() => {
-        fetchDepartments({ page: 0, size: 100 }).then(res => {
-            if (res.content && res.content.length > 0) {
-                const list = res.content.map((d: any) => ({
+        fetchDepartments({ page: 1, size: 1000 }).then(res => {
+            if (res.data && res.data.length > 0) {
+                const list = res.data.map((d: any) => ({
                     deptId: d.deptId,
                     deptName: d.deptName
                 }));
-                // Mock data fallback if fetched data seems too few (for testing)
-                if (list.length < 3) {
-                    setDepts([
-                        { deptId: 1, deptName: "컴퓨터공학과" },
-                        { deptId: 2, deptName: "전자공학과" },
-                        { deptId: 3, deptName: "경영학과" },
-                    ]);
-                } else {
-                    setDepts(list);
-                }
-            } else {
-                // Fallback Mock Data if list is empty
-                setDepts([
-                    { deptId: 1, deptName: "컴퓨터공학과" },
-                    { deptId: 2, deptName: "전자공학과" },
-                    { deptId: 3, deptName: "경영학과" },
-                ]);
+                const activeDepts = list.filter((d: any) => d.isActive !== false); // inactive check if needed, though API returns boolean
+                setDepts(list);
             }
         }).catch(err => {
             console.error(err);
-            // Fallback Mock Data on error
-            setDepts([
-                { deptId: 1, deptName: "컴퓨터공학과" },
-                { deptId: 2, deptName: "전자공학과" },
-                { deptId: 3, deptName: "경영학과" },
-            ]);
         });
     }, []);
 

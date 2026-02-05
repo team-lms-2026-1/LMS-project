@@ -124,15 +124,16 @@
 /* Bubbles */
 .messageRow {
     display: flex;
+    flex-direction: column;
     width: 100%;
 }
 
 .myMessage {
-    justify-content: flex-end;
+    align-items: flex-end;
 }
 
 .partnerMessage {
-    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .bubble {

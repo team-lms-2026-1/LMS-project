@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import styles from "./MentoringChat.module.css";
 import { fetchMyMatchings, fetchChatHistory, sendQuestion, sendAnswer, MentoringMatching, ChatMessage } from "../lib/chatApi";
 import { useAuth } from "@/features/auth/AuthProvider";
+import toast from "react-hot-toast";
 
 export default function MentoringChatPage() {
     const { state } = useAuth();
@@ -24,6 +25,12 @@ export default function MentoringChatPage() {
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    useEffect(() => {
+        if (messages.length > 0) {
+            scrollToBottom();
+        }
+    }, [messages]);
 
     useEffect(() => {
         const init = async () => {
@@ -79,24 +86,28 @@ export default function MentoringChatPage() {
         try {
             setSending(true);
             if (activeRoom.role === "MENTEE") {
-                // Mentees send Questions
+                // Mentees always send Questions
                 await sendQuestion({
                     matchingId: activeRoom.matchingId,
                     content: inputValue
                 });
             } else {
-                // Mentors send Answers
-                // Need a questionId. For this simplified chat, we find the latest question in the matching.
-                // In production, you might want a more complex threading.
+                // Mentors: check if there's an unanswered question
                 const lastQuestion = [...messages].reverse().find(m => m.type === "QUESTION");
-                if (!lastQuestion) {
-                    alert("답변할 질문이 없습니다. 멘티가 먼저 질문을 남겨야 합니다.");
-                    return;
+
+                if (lastQuestion) {
+                    // If there's a question, send an Answer
+                    await sendAnswer({
+                        questionId: lastQuestion.id,
+                        content: inputValue
+                    });
+                } else {
+                    // If no question exists, mentor can also send a Question to start conversation
+                    await sendQuestion({
+                        matchingId: activeRoom.matchingId,
+                        content: inputValue
+                    });
                 }
-                await sendAnswer({
-                    questionId: lastQuestion.id,
-                    content: inputValue
-                });
             }
             setInputValue("");
             const data = await fetchChatHistory(selectedId!);
@@ -104,7 +115,7 @@ export default function MentoringChatPage() {
             setTimeout(scrollToBottom, 50);
         } catch (e: any) {
             console.error(e);
-            alert("전송 실패: " + (e.message || ""));
+            toast.error("전송 실패: " + (e.message || ""));
         } finally {
             setSending(false);
         }
@@ -142,14 +153,17 @@ export default function MentoringChatPage() {
                 {activeRoom ? (
                     <>
                         <div className={styles.chatHeader}>
-                            <div className={styles.chatPartnerName}>{activeRoom.partnerName} 님</div>
+                            <div className={styles.chatPartnerName}>{activeRoom.partnerName}</div>
                             <div className={styles.chatInfo}>{activeRoom.recruitmentTitle}</div>
                         </div>
 
                         <div className={styles.messageArea}>
                             {messages.map((msg, idx) => {
-                                // auth 정보가 없으면 기본적으로 상대방 메시지로 처리
-                                const isMine = state.me ? Number(msg.senderId) === Number(state.me.accountId) : false;
+                                // 내 메시지인지 확인 (ID 비교 및 로그인 ID 비교 병행)
+                                const isMine = !!(state.me && (
+                                    String(msg.senderId) === String(state.me.accountId) ||
+                                    msg.senderName === state.me.loginId
+                                ));
                                 const dateStr = new Date(msg.createdAt).toLocaleDateString();
                                 const showDate = idx === 0 || new Date(messages[idx - 1].createdAt).toLocaleDateString() !== dateStr;
 

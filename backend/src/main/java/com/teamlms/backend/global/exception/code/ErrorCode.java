@@ -178,6 +178,8 @@ public enum ErrorCode {
             "해당 역할로 신청할 수 없는 계정입니다.", "mentoring.application.invalidRole"),
     MENTORING_APPLICATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "MENTORING_APPLICATION_ALREADY_EXISTS",
             "이미 해당 공고에 신청하셨습니다.", "mentoring.application.alreadyExists"),
+    MENTORING_NOT_PARTICIPANT(HttpStatus.FORBIDDEN, "MENTORING_NOT_PARTICIPANT", "해당 멘토링의 참여자가 아닙니다.", "mentoring.notParticipant"),
+    MENTORING_ALREADY_MATCHED(HttpStatus.CONFLICT, "MENTORING_ALREADY_MATCHED", "이미 매칭된 신청자입니다.", "mentoring.alreadyMatched"),
     // Domain: competency
     // =========================
     DUPLICATE_DIAGNOSIS_FOR_SEMESTER(HttpStatus.CONFLICT, "DUPLICATE_DIAGNOSIS_FOR_SEMESTER", "이미 해당 학기에 진단이 존재합니다.",

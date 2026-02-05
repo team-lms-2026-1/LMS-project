@@ -114,6 +114,7 @@ public class MentoringCommandService {
                 .role(request.getRole())
                 .status(MentoringApplicationStatus.APPLIED)
                 .appliedAt(LocalDateTime.now())
+                .applyReason(request.getReason())
                 .build();
 
         applicationRepository.save(application);
@@ -122,6 +123,16 @@ public class MentoringCommandService {
     private final MentoringMatchingRepository matchingRepository;
 
     public void match(Long adminId, MentoringMatchingRequest request) {
+        MentoringApplication mentorApp = applicationRepository.findById(request.getMentorApplicationId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
+        MentoringApplication menteeApp = applicationRepository.findById(request.getMenteeApplicationId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
+
+        if (mentorApp.getStatus() == MentoringApplicationStatus.MATCHED || 
+            menteeApp.getStatus() == MentoringApplicationStatus.MATCHED) {
+            throw new BusinessException(ErrorCode.MENTORING_ALREADY_MATCHED);
+        }
+
         MentoringMatching matching = MentoringMatching.builder()
                 .recruitmentId(request.getRecruitmentId())
                 .mentorApplicationId(request.getMentorApplicationId())
@@ -132,6 +143,10 @@ public class MentoringCommandService {
                 .build();
 
         matchingRepository.save(matching);
+
+        // Update statuses
+        mentorApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
+        menteeApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
     }
 
     private final MentoringQuestionRepository questionRepository;
@@ -153,15 +168,17 @@ public class MentoringCommandService {
     }
 
     public void createQuestion(Long writerId, MentoringQuestionRequest request) {
-        // [검증] 질문은 멘티만 등록 가능
+        // [검증] 질문은 참여자(멘토 또는 멘티)만 등록 가능
         MentoringMatching matching = matchingRepository.findById(request.getMatchingId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_MATCHING_NOT_FOUND));
 
         MentoringApplication menteeApp = applicationRepository.findById(matching.getMenteeApplicationId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
+        MentoringApplication mentorApp = applicationRepository.findById(matching.getMentorApplicationId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
 
-        if (!menteeApp.getAccountId().equals(writerId)) {
-            throw new BusinessException(ErrorCode.MENTORING_NOT_MENTEE);
+        if (!menteeApp.getAccountId().equals(writerId) && !mentorApp.getAccountId().equals(writerId)) {
+            throw new BusinessException(ErrorCode.MENTORING_NOT_PARTICIPANT);
         }
 
         MentoringQuestion question = MentoringQuestion.builder()

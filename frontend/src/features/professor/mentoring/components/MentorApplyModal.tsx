@@ -13,6 +13,8 @@ interface MentorApplyModalProps {
 
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
+import toast from "react-hot-toast";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 interface MentorApplyModalProps {
     recruitment: MentoringRecruitment;
@@ -23,22 +25,25 @@ interface MentorApplyModalProps {
 export function MentorApplyModal({ recruitment, onClose, onSuccess }: MentorApplyModalProps) {
     const [submitting, setSubmitting] = useState(false);
 
-    const handleSubmit = async () => {
-        if (submitting) return;
+    const [showConfirm, setShowConfirm] = useState(false);
 
-        if (!confirm("멘토로 신청하시겠습니까?")) return;
+    const handleSubmit = () => {
+        setShowConfirm(true);
+    };
 
+    const confirmSubmit = async () => {
+        setShowConfirm(false);
         try {
             setSubmitting(true);
             await applyMentoringAsMentor({
                 recruitmentId: recruitment.recruitmentId,
                 role: "MENTOR"
             });
-            alert("멘토 신청이 완료되었습니다.");
+            toast.success("멘토 신청이 완료되었습니다.");
             onSuccess();
         } catch (e: any) {
             console.error(e);
-            alert("멘토 신청 실패: " + (e.message || ""));
+            toast.error("멘토 신청 실패: " + (e.message || ""));
         } finally {
             setSubmitting(false);
         }
@@ -99,6 +104,14 @@ export function MentorApplyModal({ recruitment, onClose, onSuccess }: MentorAppl
                 <p>교수님은 멘토로 신청하실 수 있습니다.</p>
                 <p>신청 후 관리자의 승인을 기다려주세요.</p>
             </div>
+
+            <ConfirmModal
+                open={showConfirm}
+                message="멘토로 신청하시겠습니까?"
+                onConfirm={confirmSubmit}
+                onCancel={() => setShowConfirm(false)}
+                loading={submitting}
+            />
         </Modal>
     );
 }

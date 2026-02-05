@@ -10,6 +10,9 @@ import { StatusPill } from "@/components/status/StatusPill";
 import { TableColumn } from "@/components/table/types";
 import { SearchBar } from "@/components/searchbar/SearchBar";
 import { Button } from "@/components/button/Button";
+import { Modal } from "@/components/modal/Modal";
+import toast from "react-hot-toast";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 const PAGE_SIZE = 10;
 
@@ -23,6 +26,10 @@ export default function AdminApplicationApprovalPage() {
     const [applications, setApplications] = useState<MentoringApplication[]>([]);
     const [loadingApplications, setLoadingApplications] = useState(false);
     const [processingId, setProcessingId] = useState<number | null>(null);
+    const [viewApp, setViewApp] = useState<MentoringApplication | null>(null);
+    const [confirmApproveId, setConfirmApproveId] = useState<number | null>(null);
+    const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
+    const [rejectReason, setRejectReason] = useState("");
 
     const fetchRecruitments = async () => {
         setLoading(true);
@@ -34,7 +41,7 @@ export default function AdminApplicationApprovalPage() {
             }
         } catch (e: any) {
             console.error(e);
-            alert("모집 공고 조회 실패: " + (e.message || ""));
+            toast.error("모집 공고 조회 실패: " + (e.message || ""));
         } finally {
             setLoading(false);
         }
@@ -47,7 +54,7 @@ export default function AdminApplicationApprovalPage() {
             setApplications(data || []);
         } catch (e: any) {
             console.error(e);
-            alert("신청자 조회 실패: " + (e.message || ""));
+            toast.error("신청자 조회 실패: " + (e.message || ""));
         } finally {
             setLoadingApplications(false);
         }
@@ -63,43 +70,60 @@ export default function AdminApplicationApprovalPage() {
         }
     }, [selectedRecruitment]);
 
-    const handleApprove = async (applicationId: number) => {
-        if (!confirm("이 신청을 승인하시겠습니까?")) return;
+    const handleApprove = (applicationId: number) => {
+        setConfirmApproveId(applicationId);
+    };
+
+    const confirmApprove = async () => {
+        if (!confirmApproveId) return;
+        const id = confirmApproveId;
+        setConfirmApproveId(null);
 
         try {
-            setProcessingId(applicationId);
-            await updateApplicationStatus(applicationId, {
+            setProcessingId(id);
+            await updateApplicationStatus(id, {
                 status: "APPROVED"
             });
-            alert("승인되었습니다.");
+            toast.success("승인되었습니다.");
             if (selectedRecruitment) {
                 fetchApplications(selectedRecruitment.recruitmentId);
             }
         } catch (e: any) {
             console.error(e);
-            alert("승인 실패: " + (e.message || ""));
+            toast.error("승인 실패: " + (e.message || ""));
         } finally {
             setProcessingId(null);
         }
     };
 
-    const handleReject = async (applicationId: number) => {
-        const reason = prompt("반려 사유를 입력해주세요:");
-        if (!reason) return;
+    const handleReject = (applicationId: number) => {
+        setRejectTargetId(applicationId);
+        setRejectReason("");
+    };
+
+    const confirmReject = async () => {
+        if (!rejectTargetId || !rejectReason.trim()) {
+            toast.error("반려 사유를 입력해주세요.");
+            return;
+        }
+
+        const id = rejectTargetId;
+        const reason = rejectReason;
+        setRejectTargetId(null);
 
         try {
-            setProcessingId(applicationId);
-            await updateApplicationStatus(applicationId, {
+            setProcessingId(id);
+            await updateApplicationStatus(id, {
                 status: "REJECTED",
                 rejectReason: reason
             });
-            alert("반려되었습니다.");
+            toast.success("반려되었습니다.");
             if (selectedRecruitment) {
                 fetchApplications(selectedRecruitment.recruitmentId);
             }
         } catch (e: any) {
             console.error(e);
-            alert("반려 실패: " + (e.message || ""));
+            toast.error("반려 실패: " + (e.message || ""));
         } finally {
             setProcessingId(null);
         }
@@ -111,7 +135,14 @@ export default function AdminApplicationApprovalPage() {
         () => [
             { header: "학기", field: "semesterId", render: (r) => `${r.semesterId}학기` },
             { header: "제목", field: "title" },
-            { header: "모집기간", field: "recruitStartAt", render: (r) => `${r.recruitStartAt.split("T")[0]} ~ ${r.recruitEndAt.split("T")[0]}` },
+            {
+                header: "모집기간",
+                field: "recruitStartAt",
+                render: (r) => {
+                    const format = (dt: string) => dt ? dt.replace("T", " ").substring(0, 16) : "-";
+                    return `${format(r.recruitStartAt)} ~ ${format(r.recruitEndAt)}`;
+                }
+            },
             {
                 header: "상태",
                 field: "status",
@@ -136,22 +167,31 @@ export default function AdminApplicationApprovalPage() {
             {
                 header: "상태",
                 field: "status",
+                align: "center",
                 render: (a) => {
-                    const statusMap: Record<string, { status: "ACTIVE" | "INACTIVE"; label: string }> = {
-                        APPLIED: { status: "INACTIVE", label: "대기" },
-                        APPROVED: { status: "ACTIVE", label: "승인" },
-                        REJECTED: { status: "INACTIVE", label: "반려" },
-                        MATCHED: { status: "ACTIVE", label: "매칭완료" },
-                        CANCELED: { status: "INACTIVE", label: "취소" }
+                    const statusLabelMap: Record<string, string> = {
+                        APPLIED: "대기",
+                        APPROVED: "승인",
+                        REJECTED: "반려",
+                        MATCHED: "매칭완료",
+                        CANCELED: "취소"
                     };
-                    const info = statusMap[a.status] || { status: "INACTIVE" as const, label: a.status };
-                    return <StatusPill status={info.status} label={info.label} />;
+                    return (
+                        <StatusPill
+                            status={
+                                a.status === "APPROVED" || a.status === "MATCHED" ? "ACTIVE" :
+                                    a.status === "REJECTED" ? "INACTIVE" : "PENDING"
+                            }
+                            label={statusLabelMap[a.status] || a.status}
+                        />
+                    );
                 }
             },
             { header: "신청일", field: "appliedAt", render: (a) => new Date(a.appliedAt).toLocaleDateString() },
             {
                 header: "작업",
                 field: "applicationId",
+                stopRowClick: true,
                 render: (a) => {
                     if (a.status !== "APPLIED") {
                         return <span className={styles.noAction}>-</span>;
@@ -160,20 +200,14 @@ export default function AdminApplicationApprovalPage() {
                         <div className={styles.actionButtons}>
                             <Button
                                 variant="primary"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleApprove(a.applicationId);
-                                }}
+                                onClick={() => handleApprove(a.applicationId)}
                                 loading={processingId === a.applicationId}
                             >
                                 승인
                             </Button>
                             <Button
                                 variant="danger"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleReject(a.applicationId);
-                                }}
+                                onClick={() => handleReject(a.applicationId)}
                                 loading={processingId === a.applicationId}
                             >
                                 반려
@@ -207,6 +241,7 @@ export default function AdminApplicationApprovalPage() {
                         items={recruitments}
                         rowKey={(r) => r.recruitmentId}
                         loading={loading}
+                        skeletonRowCount={5}
                         emptyText="모집 공고가 없습니다."
                         onRowClick={(row) => setSelectedRecruitment(row)}
                     />
@@ -232,11 +267,76 @@ export default function AdminApplicationApprovalPage() {
                                 rowKey={(a) => a.applicationId}
                                 loading={false}
                                 emptyText="신청자가 없습니다."
+                                onRowClick={(a) => setViewApp(a)}
                             />
                         </div>
                     )}
                 </div>
             )}
+
+            <Modal
+                open={!!viewApp}
+                title="신청 정보 상세"
+                onClose={() => setViewApp(null)}
+                footer={<Button onClick={() => setViewApp(null)}>닫기</Button>}
+            >
+                {viewApp && (
+                    <div className={styles.appDetail}>
+                        <div className={styles.appInfoGrid}>
+                            <div><strong>이름:</strong> {viewApp.name}</div>
+                            <div><strong>아이디:</strong> {viewApp.loginId}</div>
+                            <div><strong>학과:</strong> {viewApp.deptName || "-"}</div>
+                            <div><strong>연락처:</strong> {viewApp.phone || "-"}</div>
+                            {viewApp.studentNo && <div><strong>학번:</strong> {viewApp.studentNo}</div>}
+                            {viewApp.gradeLevel && <div><strong>학년:</strong> {viewApp.gradeLevel}</div>}
+                            <div><strong>이메일:</strong> {viewApp.email || "-"}</div>
+                        </div>
+                        <div className={styles.divider} />
+                        <div><strong>신청 역할:</strong> {viewApp.role === "MENTOR" ? "멘토" : "멘티"}</div>
+                        <div><strong>신청일:</strong> {new Date(viewApp.appliedAt).toLocaleString()}</div>
+                        <div>
+                            <strong>신청 사유:</strong>
+                            <div className={styles.appReasonBox}>
+                                {viewApp.applyReason || "내용 없음"}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+
+            {/* Approval Confirmation */}
+            <ConfirmModal
+                open={!!confirmApproveId}
+                message="이 신청을 승인하시겠습니까?"
+                onConfirm={confirmApprove}
+                onCancel={() => setConfirmApproveId(null)}
+                loading={processingId !== null}
+            />
+
+            {/* Rejection Prompt */}
+            <Modal
+                open={!!rejectTargetId}
+                title="반려 사유 입력"
+                onClose={() => setRejectTargetId(null)}
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setRejectTargetId(null)}>취소</Button>
+                        <Button variant="danger" onClick={confirmReject} loading={processingId !== null}>반려 처리</Button>
+                    </>
+                }
+            >
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div>
+                        <label className={styles.formLabel}>반려 사유</label>
+                        <textarea
+                            className={styles.textarea}
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            placeholder="반려 사유를 입력해주세요."
+                        />
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

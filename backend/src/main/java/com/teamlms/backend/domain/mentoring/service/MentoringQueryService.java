@@ -26,6 +26,9 @@ public class MentoringQueryService {
     private final com.teamlms.backend.domain.mentoring.repository.MentoringMatchingRepository matchingRepository;
     private final com.teamlms.backend.domain.mentoring.repository.MentoringQuestionRepository questionRepository;
     private final com.teamlms.backend.domain.mentoring.repository.MentoringAnswerRepository answerRepository;
+    private final com.teamlms.backend.domain.account.repository.StudentProfileRepository studentProfileRepository;
+    private final com.teamlms.backend.domain.account.repository.ProfessorProfileRepository professorProfileRepository;
+    private final com.teamlms.backend.domain.dept.repository.DeptRepository deptRepository;
 
     public List<MentoringMatchingResponse> getMyMatchings(Long accountId) {
         List<MentoringApplication> myApps = applicationRepository.findAllByAccountId(accountId);
@@ -54,6 +57,14 @@ public class MentoringQueryService {
         Map<Long, Account> accountMap = accountRepository.findAllById(partnerAccountIds).stream()
                 .collect(Collectors.toMap(Account::getAccountId, Function.identity(), (a, b) -> a));
 
+        // 상대방 프로필 정보 조회
+        Map<Long, String> nameMap = new HashMap<>();
+        List<com.teamlms.backend.domain.account.entity.StudentProfile> students = studentProfileRepository.findAllById(partnerAccountIds);
+        students.forEach(s -> nameMap.put(s.getAccountId(), s.getName()));
+
+        List<com.teamlms.backend.domain.account.entity.ProfessorProfile> professors = professorProfileRepository.findAllById(partnerAccountIds);
+        professors.forEach(p -> nameMap.put(p.getAccountId(), p.getName()));
+
         List<Long> recruitmentIds = matchings.stream().map(MentoringMatching::getRecruitmentId).toList();
         Map<Long, MentoringRecruitment> recruitMap = recruitmentRepository.findAllById(recruitmentIds).stream()
                 .collect(Collectors.toMap(MentoringRecruitment::getRecruitmentId, Function.identity()));
@@ -65,12 +76,15 @@ public class MentoringQueryService {
             Account partnerAcc = accountMap.get(partnerApp.getAccountId());
             MentoringRecruitment recruitment = recruitMap.get(m.getRecruitmentId());
 
+            String partnerRealName = nameMap.getOrDefault(partnerApp.getAccountId(), 
+                partnerAcc != null ? partnerAcc.getLoginId() : "Unknown");
+
             return MentoringMatchingResponse.builder()
                     .matchingId(m.getMatchingId())
                     .recruitmentId(m.getRecruitmentId())
                     .recruitmentTitle(recruitment.getTitle())
-                    .partnerId(partnerAcc.getAccountId())
-                    .partnerName(partnerAcc.getLoginId())
+                    .partnerId(partnerApp.getAccountId())
+                    .partnerName(partnerRealName)
                     .role(isMentor ? "MENTOR" : "MENTEE")
                     .status(m.getStatus().name())
                     .matchedAt(m.getMatchedAt())
@@ -96,11 +110,20 @@ public class MentoringQueryService {
         Map<Long, Account> accountMap = accountRepository.findAllById(writerIds).stream()
                 .collect(Collectors.toMap(Account::getAccountId, Function.identity(), (a, b) -> a));
 
+        // 프로필 정보 조회
+        Map<Long, String> nameMap = new HashMap<>();
+        List<com.teamlms.backend.domain.account.entity.StudentProfile> students = studentProfileRepository.findAllById(writerIds);
+        students.forEach(s -> nameMap.put(s.getAccountId(), s.getName()));
+
+        List<com.teamlms.backend.domain.account.entity.ProfessorProfile> professors = professorProfileRepository.findAllById(writerIds);
+        professors.forEach(p -> nameMap.put(p.getAccountId(), p.getName()));
+
         List<MentoringChatMessageResponse> chat = new ArrayList<>();
 
         for (MentoringQuestion q : questions) {
-            Account writer = accountMap.get(q.getWriterId());
-            String senderName = (writer != null) ? writer.getLoginId() : "Unknown(" + q.getWriterId() + ")";
+            String senderName = nameMap.getOrDefault(q.getWriterId(), 
+                accountMap.containsKey(q.getWriterId()) ? accountMap.get(q.getWriterId()).getLoginId() : "Unknown");
+            
             chat.add(MentoringChatMessageResponse.builder()
                     .id(q.getQuestionId())
                     .senderId(q.getWriterId())
@@ -112,8 +135,9 @@ public class MentoringQueryService {
         }
 
         for (MentoringAnswer a : answers) {
-            Account writer = accountMap.get(a.getWriterId());
-            String senderName = (writer != null) ? writer.getLoginId() : "Unknown(" + a.getWriterId() + ")";
+            String senderName = nameMap.getOrDefault(a.getWriterId(), 
+                accountMap.containsKey(a.getWriterId()) ? accountMap.get(a.getWriterId()).getLoginId() : "Unknown");
+
             chat.add(MentoringChatMessageResponse.builder()
                     .id(a.getAnswerId())
                     .senderId(a.getWriterId())
@@ -128,8 +152,39 @@ public class MentoringQueryService {
         return chat;
     }
 
-    public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable) {
-        return recruitmentRepository.findAll(pageable).map(MentoringRecruitmentResponse::from);
+    public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable, Long currentAccountId) {
+        Page<MentoringRecruitment> recruitments = recruitmentRepository.findAll(pageable);
+        
+        if (currentAccountId == null || recruitments.isEmpty()) {
+            return recruitments.map(MentoringRecruitmentResponse::from);
+        }
+
+        List<Long> recruitIds = recruitments.stream().map(MentoringRecruitment::getRecruitmentId).toList();
+        Map<Long, MentoringApplication> myAppMap = applicationRepository.findAllByRecruitmentIdInAndAccountId(recruitIds, currentAccountId)
+                .stream()
+                .collect(Collectors.toMap(MentoringApplication::getRecruitmentId, Function.identity(), (a, b) -> a));
+
+        return recruitments.map(entity -> {
+            MentoringRecruitmentResponse res = MentoringRecruitmentResponse.from(entity);
+            MentoringApplication myApp = myAppMap.get(entity.getRecruitmentId());
+            if (myApp != null) {
+                // Use reflection or copy to new builder because from() returns built object
+                // Let's modify MentoringRecruitmentResponse to have a better way or just rebuild here.
+                return MentoringRecruitmentResponse.builder()
+                        .recruitmentId(entity.getRecruitmentId())
+                        .semesterId(entity.getSemesterId())
+                        .title(entity.getTitle())
+                        .description(entity.getDescription())
+                        .recruitStartAt(entity.getRecruitStartAt())
+                        .recruitEndAt(entity.getRecruitEndAt())
+                        .status(entity.getStatus())
+                        .createdAt(entity.getCreatedAt())
+                        .appliedRole(myApp.getRole().name())
+                        .applyStatus(myApp.getStatus())
+                        .build();
+            }
+            return res;
+        });
     }
 
     public MentoringRecruitmentResponse getRecruitment(Long id) {
@@ -140,13 +195,72 @@ public class MentoringQueryService {
 
     public List<MentoringApplicationResponse> getApplications(Long recruitmentId) {
         List<MentoringApplication> apps = applicationRepository.findAllByRecruitmentId(recruitmentId);
+        if (apps.isEmpty()) return Collections.emptyList();
+
         List<Long> accountIds = apps.stream().map(MentoringApplication::getAccountId).toList();
 
         Map<Long, Account> accountMap = accountRepository.findAllById(accountIds).stream()
                 .collect(Collectors.toMap(Account::getAccountId, Function.identity(), (a, b) -> a));
 
-        return apps.stream()
-                .map(app -> MentoringApplicationResponse.of(app, accountMap.get(app.getAccountId())))
-                .toList();
+        List<com.teamlms.backend.domain.account.entity.StudentProfile> students = studentProfileRepository.findAllById(accountIds);
+        Map<Long, com.teamlms.backend.domain.account.entity.StudentProfile> studentMap = students.stream()
+            .collect(Collectors.toMap(com.teamlms.backend.domain.account.entity.StudentProfile::getAccountId, Function.identity()));
+
+        List<com.teamlms.backend.domain.account.entity.ProfessorProfile> professors = professorProfileRepository.findAllById(accountIds);
+        Map<Long, com.teamlms.backend.domain.account.entity.ProfessorProfile> professorMap = professors.stream()
+            .collect(Collectors.toMap(com.teamlms.backend.domain.account.entity.ProfessorProfile::getAccountId, Function.identity()));
+
+        Set<Long> deptIds = new HashSet<>();
+        students.forEach(s -> { if(s.getDeptId() != null) deptIds.add(s.getDeptId()); });
+        professors.forEach(p -> { if(p.getDeptId() != null) deptIds.add(p.getDeptId()); });
+        Map<Long, String> deptNameMap = new HashMap<>(); 
+        if (!deptIds.isEmpty()) {
+             deptRepository.findAllById(deptIds).forEach(d -> deptNameMap.put(d.getDeptId(), d.getDeptName()));
+        }
+
+        return apps.stream().map(app -> {
+            Account account = accountMap.get(app.getAccountId());
+            MentoringApplicationResponse.MentoringApplicationResponseBuilder builder = MentoringApplicationResponse.builder()
+                .applicationId(app.getApplicationId())
+                .recruitmentId(app.getRecruitmentId())
+                .accountId(app.getAccountId())
+                .role(app.getRole())
+                .status(app.getStatus())
+                .appliedAt(app.getAppliedAt())
+                .applyReason(app.getApplyReason());
+
+            if (account != null) {
+                builder.loginId(account.getLoginId());
+                if (account.getAccountType() == com.teamlms.backend.domain.account.enums.AccountType.STUDENT) {
+                     var p = studentMap.get(app.getAccountId());
+                     if (p != null) {
+                         builder.name(p.getName())
+                                .email(p.getEmail())
+                                .phone(p.getPhone())
+                                .studentNo(p.getStudentNo())
+                                .gradeLevel(p.getGradeLevel())
+                                .deptName(deptNameMap.get(p.getDeptId()));
+                     } else {
+                         builder.name(account.getLoginId()); 
+                     }
+                } else if (account.getAccountType() == com.teamlms.backend.domain.account.enums.AccountType.PROFESSOR) {
+                     var p = professorMap.get(app.getAccountId());
+                     if (p != null) {
+                         builder.name(p.getName())
+                                .email(p.getEmail())
+                                .phone(p.getPhone())
+                                .deptName(deptNameMap.get(p.getDeptId()));
+                     } else {
+                         builder.name(account.getLoginId());
+                     }
+                } else {
+                    builder.name(account.getLoginId());
+                }
+            } else {
+                builder.loginId("Unknown");
+                builder.name("Unknown");
+            }
+            return builder.build();
+        }).toList();
     }
 }

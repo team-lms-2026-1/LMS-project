@@ -16,4 +16,6 @@ public interface MentoringApplicationRepository extends JpaRepository<MentoringA
 
     boolean existsByRecruitmentIdAndAccountIdAndRole(Long recruitmentId, Long accountId,
             com.teamlms.backend.domain.mentoring.enums.MentoringRole role);
+
+    java.util.List<MentoringApplication> findAllByRecruitmentIdInAndAccountId(java.util.List<Long> recruitmentIds, Long accountId);
 }

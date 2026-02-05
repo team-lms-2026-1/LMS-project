@@ -10,6 +10,8 @@ import { StatusPill } from "@/components/status/StatusPill";
 import { TableColumn } from "@/components/table/types";
 import { SearchBar } from "@/components/searchbar/SearchBar";
 import { Button } from "@/components/button/Button";
+import toast from "react-hot-toast";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 const PAGE_SIZE = 10;
 
@@ -25,6 +27,7 @@ export default function AdminMentoringMatchingPage() {
     const [selectedMentor, setSelectedMentor] = useState<number | null>(null);
     const [selectedMentee, setSelectedMentee] = useState<number | null>(null);
     const [matching, setMatching] = useState(false);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     const fetchRecruitments = async () => {
         setLoading(true);
@@ -36,7 +39,7 @@ export default function AdminMentoringMatchingPage() {
             }
         } catch (e: any) {
             console.error(e);
-            alert("모집 공고 조회 실패: " + (e.message || ""));
+            toast.error("모집 공고 조회 실패: " + (e.message || ""));
         } finally {
             setLoading(false);
         }
@@ -51,7 +54,7 @@ export default function AdminMentoringMatchingPage() {
             setSelectedMentee(null);
         } catch (e: any) {
             console.error(e);
-            alert("신청자 조회 실패: " + (e.message || ""));
+            toast.error("신청자 조회 실패: " + (e.message || ""));
         } finally {
             setLoadingApplications(false);
         }
@@ -67,26 +70,29 @@ export default function AdminMentoringMatchingPage() {
         }
     }, [selectedRecruitment]);
 
-    const handleMatch = async () => {
+    const handleMatch = () => {
         if (!selectedRecruitment || !selectedMentor || !selectedMentee) {
-            alert("멘토와 멘티를 모두 선택해주세요.");
+            toast.error("멘토와 멘티를 모두 선택해주세요.");
             return;
         }
+        setIsConfirmOpen(true);
+    };
 
-        if (!confirm("선택한 멘토와 멘티를 매칭하시겠습니까?")) return;
-
+    const confirmMatch = async () => {
+        setIsConfirmOpen(false);
         try {
             setMatching(true);
             await matchMentoring({
-                recruitmentId: selectedRecruitment.recruitmentId,
-                mentorApplicationId: selectedMentor,
-                menteeApplicationId: selectedMentee
+                recruitmentId: selectedRecruitment!.recruitmentId,
+                mentorApplicationId: selectedMentor!,
+                menteeApplicationId: selectedMentee!
             });
-            alert("매칭이 완료되었습니다.");
-            fetchApplications(selectedRecruitment.recruitmentId);
+            toast.success("매칭이 완료되었습니다.");
+            fetchApplications(selectedRecruitment!.recruitmentId);
         } catch (e: any) {
             console.error(e);
-            alert("매칭 실패: " + (e.message || ""));
+            // 만약 ApiError라면 e.message가 이미 정제된 메시지임
+            toast.error("매칭 실패: " + (e.message || "서버 오류가 발생했습니다."));
         } finally {
             setMatching(false);
         }
@@ -98,7 +104,14 @@ export default function AdminMentoringMatchingPage() {
         () => [
             { header: "학기", field: "semesterId", render: (r) => `${r.semesterId}학기` },
             { header: "제목", field: "title" },
-            { header: "모집기간", field: "recruitStartAt", render: (r) => `${r.recruitStartAt.split("T")[0]} ~ ${r.recruitEndAt.split("T")[0]}` },
+            {
+                header: "모집기간",
+                field: "recruitStartAt",
+                render: (r) => {
+                    const format = (dt: string) => dt ? dt.replace("T", " ").substring(0, 16) : "-";
+                    return `${format(r.recruitStartAt)} ~ ${format(r.recruitEndAt)}`;
+                }
+            },
             {
                 header: "상태",
                 field: "status",
@@ -108,8 +121,10 @@ export default function AdminMentoringMatchingPage() {
         []
     );
 
-    const mentors = applications.filter(app => app.role === "MENTOR" && app.status === "APPROVED");
-    const mentees = applications.filter(app => app.role === "MENTEE" && app.status === "APPROVED");
+    const availableMentors = applications.filter(app => app.role === "MENTOR" && app.status === "APPROVED");
+    const matchedMentors = applications.filter(app => app.role === "MENTOR" && app.status === "MATCHED");
+    const availableMentees = applications.filter(app => app.role === "MENTEE" && app.status === "APPROVED");
+    const matchedMentees = applications.filter(app => app.role === "MENTEE" && app.status === "MATCHED");
 
     return (
         <div className={styles.page}>
@@ -132,6 +147,7 @@ export default function AdminMentoringMatchingPage() {
                         items={recruitments}
                         rowKey={(r) => r.recruitmentId}
                         loading={loading}
+                        skeletonRowCount={5}
                         emptyText="모집 공고가 없습니다."
                         onRowClick={(row) => setSelectedRecruitment(row)}
                     />
@@ -152,56 +168,92 @@ export default function AdminMentoringMatchingPage() {
                     ) : (
                         <div className={styles.matchingContainer}>
                             <div className={styles.matchingColumn}>
-                                <h3 className={styles.columnTitle}>승인된 멘토 ({mentors.length}명)</h3>
-                                <div className={styles.applicationList}>
-                                    {mentors.length === 0 ? (
-                                        <div className={styles.emptyText}>승인된 멘토가 없습니다.</div>
-                                    ) : (
-                                        mentors.map((mentor) => (
-                                            <div
-                                                key={mentor.applicationId}
-                                                className={`${styles.applicationCard} ${selectedMentor === mentor.applicationId ? styles.selected : ""}`}
-                                                onClick={() => setSelectedMentor(mentor.applicationId)}
-                                            >
+                                <h3 className={styles.columnTitle}>멘토 신청 현황</h3>
+
+                                <div className={styles.subSection}>
+                                    <h4 className={styles.subTitle}>매칭 대기 ({availableMentors.length}명)</h4>
+                                    <div className={styles.applicationList}>
+                                        {availableMentors.length === 0 ? (
+                                            <div className={styles.emptyText}>대기 중인 멘토가 없습니다.</div>
+                                        ) : (
+                                            availableMentors.map((mentor) => (
+                                                <div
+                                                    key={mentor.applicationId}
+                                                    className={`${styles.applicationCard} ${selectedMentor === mentor.applicationId ? styles.selected : ""}`}
+                                                    onClick={() => setSelectedMentor(mentor.applicationId)}
+                                                >
+                                                    <div className={styles.cardHeader}>
+                                                        <span className={styles.cardName}>{mentor.name || mentor.loginId}</span>
+                                                    </div>
+                                                    <div className={styles.cardInfo}>
+                                                        <span>신청일: {new Date(mentor.appliedAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className={styles.subSection}>
+                                    <h4 className={styles.subTitle}>매칭 완료 ({matchedMentors.length}명)</h4>
+                                    <div className={styles.applicationList}>
+                                        {matchedMentors.map((mentor) => (
+                                            <div key={mentor.applicationId} className={`${styles.applicationCard} ${styles.matchedCard}`}>
                                                 <div className={styles.cardHeader}>
                                                     <span className={styles.cardName}>{mentor.name || mentor.loginId}</span>
-                                                    {mentor.status === "MATCHED" && (
-                                                        <span className={styles.matchedBadge}>매칭됨</span>
-                                                    )}
+                                                    <span className={styles.matchedBadge}>매칭됨</span>
                                                 </div>
                                                 <div className={styles.cardInfo}>
-                                                    <span>신청일: {new Date(mentor.appliedAt).toLocaleDateString()}</span>
+                                                    <span>학과: {mentor.deptName || "-"}</span>
                                                 </div>
                                             </div>
-                                        ))
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
                             <div className={styles.matchingColumn}>
-                                <h3 className={styles.columnTitle}>승인된 멘티 ({mentees.length}명)</h3>
-                                <div className={styles.applicationList}>
-                                    {mentees.length === 0 ? (
-                                        <div className={styles.emptyText}>승인된 멘티가 없습니다.</div>
-                                    ) : (
-                                        mentees.map((mentee) => (
-                                            <div
-                                                key={mentee.applicationId}
-                                                className={`${styles.applicationCard} ${selectedMentee === mentee.applicationId ? styles.selected : ""}`}
-                                                onClick={() => setSelectedMentee(mentee.applicationId)}
-                                            >
+                                <h3 className={styles.columnTitle}>멘티 신청 현황</h3>
+
+                                <div className={styles.subSection}>
+                                    <h4 className={styles.subTitle}>매칭 대기 ({availableMentees.length}명)</h4>
+                                    <div className={styles.applicationList}>
+                                        {availableMentees.length === 0 ? (
+                                            <div className={styles.emptyText}>대기 중인 멘티가 없습니다.</div>
+                                        ) : (
+                                            availableMentees.map((mentee) => (
+                                                <div
+                                                    key={mentee.applicationId}
+                                                    className={`${styles.applicationCard} ${selectedMentee === mentee.applicationId ? styles.selected : ""}`}
+                                                    onClick={() => setSelectedMentee(mentee.applicationId)}
+                                                >
+                                                    <div className={styles.cardHeader}>
+                                                        <span className={styles.cardName}>{mentee.name || mentee.loginId}</span>
+                                                    </div>
+                                                    <div className={styles.cardInfo}>
+                                                        <span>신청일: {new Date(mentee.appliedAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className={styles.subSection}>
+                                    <h4 className={styles.subTitle}>매칭 완료 ({matchedMentees.length}명)</h4>
+                                    <div className={styles.applicationList}>
+                                        {matchedMentees.map((mentee) => (
+                                            <div key={mentee.applicationId} className={`${styles.applicationCard} ${styles.matchedCard}`}>
                                                 <div className={styles.cardHeader}>
                                                     <span className={styles.cardName}>{mentee.name || mentee.loginId}</span>
-                                                    {mentee.status === "MATCHED" && (
-                                                        <span className={styles.matchedBadge}>매칭됨</span>
-                                                    )}
+                                                    <span className={styles.matchedBadge}>매칭됨</span>
                                                 </div>
                                                 <div className={styles.cardInfo}>
-                                                    <span>신청일: {new Date(mentee.appliedAt).toLocaleDateString()}</span>
+                                                    <span>학과: {mentee.deptName || "-"}</span>
                                                 </div>
                                             </div>
-                                        ))
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -219,6 +271,14 @@ export default function AdminMentoringMatchingPage() {
                     </div>
                 </div>
             )}
+
+            <ConfirmModal
+                open={isConfirmOpen}
+                message="선택한 멘토와 멘티를 매칭하시겠습니까?"
+                onConfirm={confirmMatch}
+                onCancel={() => setIsConfirmOpen(false)}
+                loading={matching}
+            />
         </div>
     );
 }

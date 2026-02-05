@@ -75,6 +75,23 @@
     padding: 4px;
 }
 
+.subSection {
+    margin-bottom: 24px;
+}
+
+.subSection:last-child {
+    margin-bottom: 0;
+}
+
+.subTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #eee;
+}
+
 .applicationCard {
     padding: 16px;
     border: 2px solid #e0e0e0;
@@ -93,6 +110,18 @@
     border-color: #1976d2;
     background: #e3f2fd;
     box-shadow: 0 3px 8px rgba(25, 118, 210, 0.2);
+}
+
+.applicationCard.matchedCard {
+    background: #fdfdfd;
+    border-color: #eee;
+    cursor: default;
+    opacity: 0.8;
+}
+
+.applicationCard.matchedCard:hover {
+    border-color: #eee;
+    box-shadow: none;
 }
 
 .cardHeader {
@@ -237,4 +266,59 @@
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
+}
+
+/* Detail Modal & Form Styles */
+.appDetail {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    line-height: 1.6;
+}
+
+.appInfoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.appReasonBox {
+    margin-top: 8px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    border: 1px solid #e5e7eb;
+    min-height: 100px;
+    color: #4b5563;
+}
+
+.formLabel {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.divider {
+    width: 100%;
+    height: 1px;
+    background: #e5e7eb;
+    margin: 8px 0;
 }

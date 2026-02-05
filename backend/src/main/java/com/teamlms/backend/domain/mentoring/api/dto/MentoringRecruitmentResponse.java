@@ -18,6 +18,10 @@ public class MentoringRecruitmentResponse {
     private MentoringRecruitmentStatus status;
     private LocalDateTime createdAt;
 
+    // 추가: 내 신청 정보 (로그인 시에만 채워짐)
+    private String appliedRole;   // "MENTOR" or "MENTEE"
+    private com.teamlms.backend.domain.mentoring.enums.MentoringApplicationStatus applyStatus;
+
     public static MentoringRecruitmentResponse from(MentoringRecruitment entity) {
         return MentoringRecruitmentResponse.builder()
                 .recruitmentId(entity.getRecruitmentId())

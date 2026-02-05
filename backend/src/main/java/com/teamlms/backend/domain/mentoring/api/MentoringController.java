@@ -26,8 +26,11 @@ public class MentoringController {
 
     // [Admin/User] 멘토링 모집 목록 조회
     @GetMapping("/mentoring/recruitments")
-    public ResponseEntity<Page<MentoringRecruitmentResponse>> getRecruitments(Pageable pageable) {
-        return ResponseEntity.ok(queryService.getRecruitments(pageable));
+    public ResponseEntity<Page<MentoringRecruitmentResponse>> getRecruitments(
+            @AuthenticationPrincipal AuthUser user,
+            Pageable pageable) {
+        Long accountId = (user != null) ? user.getAccountId() : null;
+        return ResponseEntity.ok(queryService.getRecruitments(pageable, accountId));
     }
 
     // [Admin/User] 멘토링 모집 상세 조회
@@ -77,22 +80,5 @@ public class MentoringController {
         return ResponseEntity.ok().build();
     }
 
-    // [Admin] 멘토링 모집 공고 수정
-    @PutMapping("/admin/mentoring/recruitments/{id}")
-    public ResponseEntity<Void> updateRecruitment(
-            @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id,
-            @RequestBody @Valid com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentUpdateRequest request) {
-        commandService.updateRecruitment(user.getAccountId(), id, request);
-        return ResponseEntity.ok().build();
-    }
-
-    // [Admin] 멘토링 모집 공고 삭제
-    @DeleteMapping("/admin/mentoring/recruitments/{id}")
-    public ResponseEntity<Void> deleteRecruitment(
-            @AuthenticationPrincipal AuthUser user,
-            @PathVariable Long id) {
-        commandService.deleteRecruitment(user.getAccountId(), id);
-        return ResponseEntity.ok().build();
-    }
+    // [Admin] endpoints removed (moved to MentoringAdminController)
 }

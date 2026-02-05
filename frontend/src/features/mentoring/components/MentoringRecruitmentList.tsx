@@ -17,6 +17,8 @@ import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
 import { SearchBar } from "@/components/searchbar/SearchBar";
 import type { TableColumn } from "@/components/table/types";
+import toast from "react-hot-toast";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 const PAGE_SIZE = 10;
 
@@ -32,6 +34,8 @@ export default function MentoringRecruitmentList() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     const [formData, setFormData] = useState<MentoringRecruitmentCreateRequest & { status?: string }>({
         semesterId: 1, // Default or select
@@ -87,15 +91,25 @@ export default function MentoringRecruitmentList() {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm("정말 삭제하시겠습니까? 신청 내역도 함께 처리될 수 있습니다.")) return;
+    const handleDelete = (id: number) => {
+        setDeleteTargetId(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteTargetId) return;
+        const id = deleteTargetId;
+        setDeleteTargetId(null);
+
         try {
+            setDeleting(true);
             await deleteRecruitment(id);
-            alert("삭제되었습니다.");
+            toast.success("삭제되었습니다.");
             fetchData();
         } catch (e: any) {
             console.error(e);
-            alert("삭제 실패: " + (e.message || "Unknown error"));
+            toast.error("삭제 실패: " + (e.message || "Unknown error"));
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -110,10 +124,10 @@ export default function MentoringRecruitmentList() {
 
             if (editingId) {
                 await updateRecruitment(editingId, payload);
-                alert("수정되었습니다.");
+                toast.success("수정되었습니다.");
             } else {
                 await createRecruitment(payload);
-                alert("등록되었습니다.");
+                toast.success("등록되었습니다.");
             }
 
             setIsModalOpen(false);
@@ -121,7 +135,7 @@ export default function MentoringRecruitmentList() {
             fetchData();
         } catch (e: any) {
             console.error(e);
-            alert("저장 실패: " + (e.message || "Unknown error"));
+            toast.error("저장 실패: " + (e.message || "Unknown error"));
         }
     };
 
@@ -132,7 +146,10 @@ export default function MentoringRecruitmentList() {
             {
                 header: "모집기간",
                 field: "recruitStartAt",
-                render: (row) => `${row.recruitStartAt} ~ ${row.recruitEndAt}`
+                render: (row) => {
+                    const format = (dt: string) => dt ? dt.replace("T", " ").substring(0, 16) : "-";
+                    return `${format(row.recruitStartAt)} ~ ${format(row.recruitEndAt)}`;
+                }
             },
             {
                 header: "상태",
@@ -145,36 +162,20 @@ export default function MentoringRecruitmentList() {
                 field: "recruitmentId", // dummy
                 align: "center",
                 width: "220px",
+                stopRowClick: true,
                 render: (row) => (
                     <div style={{ display: "flex", gap: "4px", justifyContent: "center" }}>
                         <Button
                             variant="secondary"
                             className={styles.smBtn}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                // Navigate to Application List
-                                router.push(`/admin/mentoring/recruitments/${row.recruitmentId}/applications`);
-                            }}
-                        >
-                            신청관리
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            className={styles.smBtn}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenEdit(row);
-                            }}
+                            onClick={() => handleOpenEdit(row)}
                         >
                             수정
                         </Button>
                         <Button
                             variant="danger"
                             className={styles.smBtn}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(row.recruitmentId);
-                            }}
+                            onClick={() => handleDelete(row.recruitmentId)}
                         >
                             삭제
                         </Button>
@@ -190,7 +191,7 @@ export default function MentoringRecruitmentList() {
     return (
         <div className={styles.page}>
             <div className={styles.headerRow}>
-                <div className={styles.title}>멘토링 모집 관리</div>
+                <div className={styles.title}>멘토링 모집 공고 등록</div>
                 <Button onClick={handleOpenCreate}>등록</Button>
             </div>
 
@@ -209,8 +210,8 @@ export default function MentoringRecruitmentList() {
                     items={items}
                     rowKey={(r) => r.recruitmentId}
                     loading={loading}
+                    skeletonRowCount={PAGE_SIZE}
                     emptyText="모집 공고가 없습니다."
-                    onRowClick={(row) => router.push(`/admin/mentoring/recruitments/${row.recruitmentId}/applications`)}
                 />
             </div>
 
@@ -295,6 +296,15 @@ export default function MentoringRecruitmentList() {
                     </div>
                 )}
             </Modal>
+
+            <ConfirmModal
+                open={!!deleteTargetId}
+                message="정말 삭제하시겠습니까? 신청 내역도 함께 처리될 수 있습니다."
+                onConfirm={confirmDelete}
+                onCancel={() => setDeleteTargetId(null)}
+                loading={deleting}
+                type="danger"
+            />
         </div>
     );
 }

@@ -1,18 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../styles/studentMentoring.module.css";
 import { MentoringRecruitment } from "@/features/mentoring/types";
 import { applyMentoringStudent } from "@/features/mentoring/lib/studentApi";
-
-interface Props {
-    recruitment: MentoringRecruitment;
-    onClose: () => void;
-    onSuccess: () => void;
-}
-
+import { getJson } from "@/lib/http";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
+import toast from "react-hot-toast";
 
 interface Props {
     recruitment: MentoringRecruitment;
@@ -23,21 +18,59 @@ interface Props {
 export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
+        name: "",
+        deptName: "",
+        gradeLevel: "",
+        studentNo: "",
+        email: "",
+        phone: "",
         reason: "",
     });
+
+    useEffect(() => {
+        // Fetch user profile
+        getJson<any>("/api/accounts/me")
+            .then((res) => {
+                if (res.data) {
+                    const p = res.data;
+                    setFormData(prev => ({
+                        ...prev,
+                        name: p.name || "",
+                        deptName: p.deptName || "",
+                        gradeLevel: p.gradeLevel ? String(p.gradeLevel) : "",
+                        studentNo: p.studentNo || "",
+                        email: p.email || "",
+                        phone: p.phone || "",
+                    }));
+                }
+            })
+            .catch(err => console.error("Failed to load profile", err));
+    }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
             await applyMentoringStudent({
                 recruitmentId: recruitment.recruitmentId,
-                role: "MENTEE"
+                role: "MENTEE",
+                // If the backend expects these profile fields in the application request, include them. 
+                // But typically application just links to account. 
+                // The prompt says "자기 정보가 자동으로 입력되있는 상태였으면 좋겠어". 
+                // It implies these are for display or maybe contact info update?
+                // Assuming currently backend only takes recruitmentId/role based on previous file view.
+                // If backend needs reason, we send reason.
+                reason: formData.reason
             });
-            alert("신청되었습니다.");
+            toast.success("신청되었습니다.");
             onSuccess();
         } catch (e: any) {
             console.error(e);
-            alert("신청 실패: " + (e.message || "알 수 없는 오류"));
+            toast.error("신청 실패: " + (e.message || "알 수 없는 오류"));
         } finally {
             setSubmitting(false);
         }
@@ -64,7 +97,13 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                 <div className={styles.row}>
                     <div className={styles.col}>
                         <label>이름</label>
-                        <input className={styles.input} type="text" placeholder="이름" />
+                        <input
+                            className={styles.input}
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="이름"
+                        />
                     </div>
                     <div className={styles.col}>
                         <label>모집명</label>
@@ -75,18 +114,36 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
 
             <div className={styles.formGroup}>
                 <label>학과</label>
-                <input className={styles.input} type="text" placeholder="학과" />
+                <input
+                    className={styles.input}
+                    name="deptName"
+                    value={formData.deptName}
+                    onChange={handleChange}
+                    placeholder="학과"
+                />
             </div>
 
             <div className={styles.formGroup}>
                 <div className={styles.row}>
                     <div className={styles.col}>
                         <label>학년</label>
-                        <input className={styles.input} type="text" placeholder="학년" />
+                        <input
+                            className={styles.input}
+                            name="gradeLevel"
+                            value={formData.gradeLevel}
+                            onChange={handleChange}
+                            placeholder="학년"
+                        />
                     </div>
                     <div className={styles.col}>
                         <label>학번</label>
-                        <input className={styles.input} type="text" placeholder="학번" />
+                        <input
+                            className={styles.input}
+                            name="studentNo"
+                            value={formData.studentNo}
+                            onChange={handleChange}
+                            placeholder="학번"
+                        />
                     </div>
                 </div>
             </div>
@@ -95,11 +152,25 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                 <div className={styles.row}>
                     <div className={styles.col}>
                         <label>이메일</label>
-                        <input className={styles.input} type="email" placeholder="email@example.com" />
+                        <input
+                            className={styles.input}
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder="email@example.com"
+                        />
                     </div>
                     <div className={styles.col}>
                         <label>연락처</label>
-                        <input className={styles.input} type="tel" placeholder="010-0000-0000" />
+                        <input
+                            className={styles.input}
+                            name="phone"
+                            type="tel"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder="010-0000-0000"
+                        />
                     </div>
                 </div>
             </div>
@@ -108,8 +179,9 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                 <label>멘토링 신청 사유</label>
                 <textarea
                     className={styles.textarea}
+                    name="reason"
                     value={formData.reason}
-                    onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                    onChange={handleChange}
                     placeholder="신청 사유를 입력하세요"
                 />
             </div>

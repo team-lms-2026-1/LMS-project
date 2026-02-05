@@ -47,6 +47,9 @@ public class MentoringApplication extends BaseEntity {
     @Column(name = "reject_reason")
     private String rejectReason;
 
+    @Column(name = "apply_reason", columnDefinition = "TEXT")
+    private String applyReason;
+
     public void updateStatus(MentoringApplicationStatus status, String rejectReason, Long processedBy) {
         this.status = status;
         this.rejectReason = rejectReason;

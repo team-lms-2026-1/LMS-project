@@ -29,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final com.teamlms.backend.domain.account.repository.StudentProfileRepository studentProfileRepository;
+    private final com.teamlms.backend.domain.account.repository.ProfessorProfileRepository professorProfileRepository;
+    private final com.teamlms.backend.domain.dept.repository.DeptRepository deptRepository;
     private final PasswordEncoder passwordEncoder;
 
     public Account getByLoginIdOrThrow(String loginId) {
@@ -128,5 +131,43 @@ public class AccountService {
                 .createdAt(base.getCreatedAt())
                 .profile(newProfile)
                 .build();
+    }
+    // 내 정보 조회 (간단 버전)
+    public com.teamlms.backend.domain.account.api.dto.MyProfileResponse getMyProfile(Long accountId) {
+        AccountType type = accountRepository.findAccountTypeById(accountId);
+        if (type == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
+
+        var builder = com.teamlms.backend.domain.account.api.dto.MyProfileResponse.builder()
+            .accountId(accountId);
+
+        if (type == AccountType.STUDENT) {
+            studentProfileRepository.findById(accountId).ifPresent(p -> {
+                builder.name(p.getName())
+                       .email(p.getEmail())
+                       .phone(p.getPhone())
+                       .studentNo(p.getStudentNo())
+                       .gradeLevel(p.getGradeLevel());
+                
+                if (p.getDeptId() != null) {
+                    deptRepository.findById(p.getDeptId())
+                        .ifPresent(d -> builder.deptName(d.getDeptName()));
+                }
+                
+                // Primary Major lookup could be added here if needed, but deptName matches modal requirements
+            });
+        } else if (type == AccountType.PROFESSOR) {
+            professorProfileRepository.findById(accountId).ifPresent(p -> {
+                 builder.name(p.getName())
+                        .email(p.getEmail())
+                        .phone(p.getPhone());
+                        
+                 if (p.getDeptId() != null) {
+                    deptRepository.findById(p.getDeptId())
+                        .ifPresent(d -> builder.deptName(d.getDeptName()));
+                }
+            });
+        }
+        
+        return builder.build();
     }
 }

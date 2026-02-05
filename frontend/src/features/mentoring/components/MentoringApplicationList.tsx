@@ -13,6 +13,8 @@ import { StatusPill } from "@/components/status/StatusPill";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
 import type { TableColumn } from "@/components/table/types";
+import toast from "react-hot-toast";
+import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
 type Props = {
     recruitmentId: number;
@@ -28,6 +30,10 @@ export default function MentoringApplicationList({ recruitmentId }: Props) {
     const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
     const [rejectReason, setRejectReason] = useState("");
 
+    // Approve Modal
+    const [approveTargetId, setApproveTargetId] = useState<number | null>(null);
+    const [processing, setProcessing] = useState(false);
+
     const fetchData = () => {
         setLoading(true);
         fetchApplications(recruitmentId)
@@ -42,10 +48,25 @@ export default function MentoringApplicationList({ recruitmentId }: Props) {
 
     const handleStatusUpdate = async (id: number, status: MentoringStatus, reason?: string) => {
         try {
+            setProcessing(true);
             await updateApplicationStatus(id, { status, rejectReason: reason });
+            toast.success(status === "APPROVED" ? "승인되었습니다." : "반려되었습니다.");
             fetchData();
         } catch (e) {
-            alert("처리 실패");
+            toast.error("처리 실패");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const openApproveModal = (id: number) => {
+        setApproveTargetId(id);
+    };
+
+    const handleApproveConfirm = async () => {
+        if (approveTargetId) {
+            await handleStatusUpdate(approveTargetId, "APPROVED");
+            setApproveTargetId(null);
         }
     };
 
@@ -76,7 +97,7 @@ export default function MentoringApplicationList({ recruitmentId }: Props) {
                     <div className={styles.actions}>
                         {row.status === "APPLIED" && (
                             <>
-                                <Button className={styles.smBtn} onClick={() => handleStatusUpdate(row.applicationId, "APPROVED")}>승인</Button>
+                                <Button className={styles.smBtn} onClick={() => openApproveModal(row.applicationId)}>승인</Button>
                                 <Button className={styles.smBtn} variant="secondary" onClick={() => openRejectModal(row.applicationId)}>반려</Button>
                             </>
                         )}
@@ -124,6 +145,15 @@ export default function MentoringApplicationList({ recruitmentId }: Props) {
                     style={{ width: "100%" }}
                 />
             </Modal>
+
+            {/* Approve Confirm Modal */}
+            <ConfirmModal
+                open={!!approveTargetId}
+                message="이 신청을 승인하시겠습니까?"
+                onConfirm={handleApproveConfirm}
+                onCancel={() => setApproveTargetId(null)}
+                loading={processing}
+            />
         </div>
     );
 }

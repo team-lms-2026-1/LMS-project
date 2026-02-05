@@ -14,4 +14,6 @@ public class MentoringApplicationRequest {
 
     @NotNull
     private MentoringRole role;
+
+    private String reason;
 }

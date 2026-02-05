@@ -40,7 +40,7 @@ const SECTIONS: NavSection[] = [
         key: "mentoring",
         title: "멘토링",
         items: [
-            { label: "멘토링 관리", href: "/professor/mentoring" },
+            { label: "멘토 신청", href: "/professor/mentoring/apply" },
             { label: "멘토링 채팅", href: "/professor/mentoring/chat" },
         ],
     },
