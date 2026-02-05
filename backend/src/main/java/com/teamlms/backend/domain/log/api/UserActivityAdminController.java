@@ -18,53 +18,51 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/user-activity")
 public class UserActivityAdminController {
 
-    private final UserActivityQueryService userActivityQueryService;
+        private final UserActivityQueryService userActivityQueryService;
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<?> list(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword
-    ) {
-        int safePage = Math.max(page, 1);
-        int safeSize = Math.min(Math.max(size, 1), 100);
+        @GetMapping
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<?> list(
+                        @RequestParam(defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "20") int size,
+                        @RequestParam(required = false) String keyword) {
+                int safePage = Math.max(page, 1);
+                int safeSize = Math.min(Math.max(size, 1), 100);
 
-        Pageable pageable = PageRequest.of(
-                safePage - 1,
-                safeSize,
-                Sort.by(Sort.Direction.DESC, "lastActivityAt")
-        );
+                Pageable pageable = PageRequest.of(
+                                safePage - 1,
+                                safeSize,
+                                Sort.by(Sort.Direction.DESC, "lastActivityAt"));
 
-        Page<UserActivityListItem> result = userActivityQueryService.list(keyword, pageable);
-        UserActivitySummary summary = userActivityQueryService.summary(keyword);
+                Page<UserActivityListItem> result = userActivityQueryService.list(keyword, pageable);
+                UserActivitySummary summary = userActivityQueryService.summary(keyword);
 
-        UserActivityListResponse data = new UserActivityListResponse(result.getContent(), summary);
+                UserActivityListResponse data = new UserActivityListResponse(result.getContent(), summary);
 
-        return ApiResponse.of(data, PageMeta.from(result));
-    }
+                return ApiResponse.of(data, PageMeta.from(result));
+        }
 
-    @GetMapping("/{accountId}/access-logs")
-    @ResponseStatus(HttpStatus.OK)
-    public ApiResponse<?> accessLogs(
-            @PathVariable Long accountId,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        int safePage = Math.max(page, 1);
-        int safeSize = Math.min(Math.max(size, 1), 100);
+        @GetMapping("/{accountId}/access-logs")
+        @ResponseStatus(HttpStatus.OK)
+        public ApiResponse<?> accessLogs(
+                        @PathVariable Long accountId,
+                        @RequestParam(defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "20") int size,
+                        @RequestParam(required = false) java.time.LocalDate from,
+                        @RequestParam(required = false) java.time.LocalDate to,
+                        @RequestParam(required = false) String keyword) {
+                int safePage = Math.max(page, 1);
+                int safeSize = Math.min(Math.max(size, 1), 100);
 
-        Pageable pageable = PageRequest.of(
-                safePage - 1,
-                safeSize,
-                Sort.by(Sort.Direction.DESC, "accessedAt")
-        );
+                Pageable pageable = PageRequest.of(
+                                safePage - 1,
+                                safeSize,
+                                Sort.by(Sort.Direction.DESC, "accessedAt"));
 
-        var result = userActivityQueryService.accessLogsDetail(accountId, pageable);
+                var result = userActivityQueryService.accessLogsDetail(accountId, from, to, keyword, pageable);
 
-        return ApiResponse.of(
-                result.data(),
-                PageMeta.from(result.page())
-        );
-    }
+                return ApiResponse.of(
+                                result.data(),
+                                PageMeta.from(result.page()));
+        }
 }

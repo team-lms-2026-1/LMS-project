@@ -6,7 +6,7 @@ import styles from "../styles/privacyExcelModal.module.css";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onConfirmDownload: () => void;
+  onConfirmDownload: (reason: string) => void;
 };
 
 export default function PrivacyExcelDownloadModal({ open, onClose, onConfirmDownload }: Props) {
@@ -53,7 +53,7 @@ export default function PrivacyExcelDownloadModal({ open, onClose, onConfirmDown
           <button className={styles.cancelBtn} onClick={onClose}>
             취소
           </button>
-          <button className={styles.downloadBtn} disabled={!canDownload} onClick={onConfirmDownload}>
+          <button className={styles.downloadBtn} disabled={!canDownload} onClick={() => onConfirmDownload(reason)}>
             다운로드
           </button>
         </div>

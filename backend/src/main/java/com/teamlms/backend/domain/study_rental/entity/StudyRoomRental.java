@@ -15,14 +15,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@Table(
-    name = "study_room_rental",
-    indexes = {
+@Table(name = "study_room_rental", indexes = {
         @Index(name = "idx_rental_room_start", columnList = "room_id, start_at"),
         @Index(name = "idx_rental_applicant_applied", columnList = "applicant_account_id, applied_at"),
         @Index(name = "idx_rental_status_applied", columnList = "status, applied_at")
-    }
-)
+})
 public class StudyRoomRental {
 
     @Id
@@ -63,11 +60,15 @@ public class StudyRoomRental {
 
     @Column(name = "rejection_reason")
     private String rejectionReason;
-    
+
     public void process(RentalStatus newStatus, Account processor, String rejectionReason) {
         this.status = newStatus;
-        this.processor = processor;     // 처리자(관리자) 기록
+        this.processor = processor; // 처리자(관리자) 기록
         this.processedAt = LocalDateTime.now(); // 처리 시간 기록
         this.rejectionReason = rejectionReason; // 반려 사유 기록 (승인 시 null)
+    }
+
+    public void cancel() {
+        this.status = RentalStatus.CANCELED;
     }
 }

@@ -8,67 +8,69 @@ import styles from "./student-shell.module.css";
 type NavItem = { label: string; href: string };
 type NavSection = { key: string; title: string; items: NavItem[] };
 
-  const SECTIONS: NavSection[] = [
-    {
-      key: "community",
-      title: "커뮤니티",
-      items: [
-        { label: "공지사항", href: "/student/community/notices" },
-        { label: "자료실", href: "/student/community/resources" },
-        { label: "FAQ", href: "/student/community/faqs" },
-        { label: "Q&A", href: "/student/community/qna/questions" },
-      ],
-    },
-    {
-      key: "mypage",
-      title: "마이페이지",
-      items: [{ label: "마이 캘린더", href: "/student/mypage/calendar" }],
-    },
-    {
-      key: "course",
-      title: "교과",
-      items: [
-        { label: "이수 신청", href: "/student/curricular/offerings" },
-        { label: "이수 신청현황", href: "/student/curricular/enrollments" },
-        { label: "이수중 교과", href: "/student/curricular/current-enrollments" },
-        { label: "교과 성적", href: "/student/curricular/grade-reports" },
-      ],
-    },
-    {
-      key: "extra",
-      title: "비교과",
-      items: [
-        { label: "비교과 프로그램 신청", href: "/student/extra-curricular/offerings" },
-        { label: "비교과 목록 조회", href: "/student/extra" },
-        { label: "비교과 수료 항목", href: "/student/extra/completions" },
-      ],
-    },
-    {
-      key: "mentoring",
-      title: "멘토링",
-      items: [
-        { label: "멘토링 신청", href: "/student/mentoring/apply" },
-        { label: "질문", href: "/student/mentoring/questions" },
-      ],
-    },
-    {
-      key: "competency",
-      title: "역량진단",
-      items: [
-        { label: "안내", href: "/student/competency/guide" },
-        { label: "진단목록", href: "/student/competency" },
-        { label: "결과 조회", href: "/student/competency/results" },
-      ],
-    },
-    {
-      key: "space",
-      title: "학습공간대여",
-      items: [
-        { label: "학습공간대여 및 신청", href: "/student/space" },
-        { label: "신청내역확인", href: "/student/space/history" },
-      ],
-    },
-  ];
+const SECTIONS: NavSection[] = [
+  {
+    key: "community",
+    title: "커뮤니티",
+    items: [
+      { label: "공지사항", href: "/student/community/notices" },
+      { label: "자료실", href: "/student/community/resources" },
+      { label: "FAQ", href: "/student/community/faqs" },
+      { label: "Q&A", href: "/student/community/qna/questions" },
+    ],
+  },
+  {
+    key: "mypage",
+    title: "마이페이지",
+    items: [{ label: "마이 캘린더", href: "/student/mypage/calendar" }],
+  },
+  {
+    key: "course",
+    title: "교과",
+    items: [
+      { label: "이수 신청", href: "/student/curricular/offerings" },
+      { label: "이수 신청현황", href: "/student/curricular/enrollments" },
+      { label: "이수중 교과", href: "/student/curricular/current-enrollments" },
+      { label: "교과 성적", href: "/student/curricular/grade-reports" },
+    ],
+  },
+  {
+    key: "extra",
+    title: "비교과",
+    items: [
+      { label: "비교과 프로그램 신청", href: "/student/extra/apply" },
+      { label: "비교과 목록 조회", href: "/student/extra" },
+      { label: "비교과 수료 항목", href: "/student/extra/completions" },
+    ],
+  },
+  {
+    key: "mentoring",
+    title: "멘토링",
+    items: [
+      { label: "멘토링 신청", href: "/student/mentoring/apply" },
+      { label: "질문", href: "/student/mentoring/questions" },
+    ],
+  },
+  {
+    key: "competency",
+    title: "역량진단",
+    items: [
+      { label: "안내", href: "/student/competency/guide" },
+      { label: "진단목록", href: "/student/competency" },
+      { label: "결과 조회", href: "/student/competency/results" },
+    ],
+  },
+  {
+    key: "space",
+    title: "학습공간대여",
+    items: [
+      { label: "학습공간대여 및 신청", href: "/student/space" },
+      { label: "신청내역확인", href: "/student/space/history" },
+    ],
+  },
+];
+
+
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");

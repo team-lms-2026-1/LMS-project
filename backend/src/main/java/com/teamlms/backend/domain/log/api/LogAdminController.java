@@ -26,11 +26,11 @@ public class LogAdminController {
 
     private final ExcelDownloadService excelDownloadService;
 
-    @PostMapping(value = "/export", produces = "text/csv")
+    @PostMapping(value = "/export") // produces 제거하여 유연하게 대응
     public ResponseEntity<byte[]> exportLogs(
             @AuthenticationPrincipal AuthUser authUser,
-            @Valid @RequestBody LogExportRequest request
-    ) {
+            @Valid @RequestBody LogExportRequest request) {
+        System.out.println("[DEBUG-EXPORT] exportLogs called for resourceCode: " + request.getResourceCode());
         Long actorAccountId = authUser.getAccountId();
 
         byte[] bytes = excelDownloadService.exportLogsAsCsv(actorAccountId, request);

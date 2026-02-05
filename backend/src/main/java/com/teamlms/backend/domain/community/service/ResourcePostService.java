@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,6 +34,7 @@ public class ResourcePostService {
     private final ResourceCategoryRepository categoryRepository;
     private final ResourceAttachmentRepository attachmentRepository;
     private final AccountRepository accountRepository;
+    private final CommunityAccountRepository communityAccountRepository;
     private final S3Service s3Service;
 
     // 1. 목록 조회
@@ -43,12 +45,18 @@ public class ResourcePostService {
                 .build();
 
         Page<ResourcePost> posts = postRepository.findBySearchCondition(
-                condition.getCategoryId(), 
-                condition.getKeyword(), 
-                pageable
-        );
-        
-        return posts.map(this::toResponse);
+                condition.getCategoryId(),
+                condition.getKeyword(),
+                pageable);
+
+        // 작성자 실명 맵 생성 (N+1 방지)
+        List<Long> authorIds = posts.getContent().stream()
+                .map(p -> p.getAuthor().getAccountId())
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, String> nameMap = communityAccountRepository.findRealNamesMap(authorIds);
+
+        return posts.map(post -> toResponse(post, nameMap.get(post.getAuthor().getAccountId())));
     }
 
     // 2. 상세 조회
@@ -59,7 +67,8 @@ public class ResourcePostService {
 
         post.increaseViewCount();
 
-        return toResponse(post);
+        String authorName = communityAccountRepository.findRealName(post.getAuthor().getAccountId());
+        return toResponse(post, authorName);
     }
 
     // 3. 등록
@@ -89,7 +98,8 @@ public class ResourcePostService {
 
     // 4. 수정
     @Transactional
-    public void update(Long resourceId, ExternalResourcePatchRequest request, List<MultipartFile> newFiles, Long modifierId) {
+    public void update(Long resourceId, ExternalResourcePatchRequest request, List<MultipartFile> newFiles,
+            Long modifierId) {
         ResourcePost post = postRepository.findById(resourceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
@@ -99,19 +109,21 @@ public class ResourcePostService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_CATEGORY));
             post.changeCategory(category);
         }
-        if (request.getTitle() != null) post.changeTitle(request.getTitle());
-        if (request.getContent() != null) post.changeContent(request.getContent());
+        if (request.getTitle() != null)
+            post.changeTitle(request.getTitle());
+        if (request.getContent() != null)
+            post.changeContent(request.getContent());
 
         // 4-2. 기존 파일 삭제 (S3 삭제 포함)
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
-             List<ResourceAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
-             
-             // ★ S3 파일 삭제 로직 추가
-             for (ResourceAttachment att : attachmentsToDelete) {
-                 String s3Key = extractKeyFromUrl(att.getStorageKey());
-                 s3Service.delete(s3Key);
-             }
-            
+            List<ResourceAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
+
+            // ★ S3 파일 삭제 로직 추가
+            for (ResourceAttachment att : attachmentsToDelete) {
+                String s3Key = extractKeyFromUrl(att.getStorageKey());
+                s3Service.delete(s3Key);
+            }
+
             attachmentRepository.deleteAllById(request.getDeleteFileIds());
         }
 
@@ -128,7 +140,7 @@ public class ResourcePostService {
     public void delete(Long resourceId) {
         ResourcePost post = postRepository.findById(resourceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
-        
+
         // ★ [수정됨] 게시글 삭제 시 S3 파일들도 같이 삭제
         for (ResourceAttachment att : post.getAttachments()) {
             String s3Key = extractKeyFromUrl(att.getStorageKey());
@@ -144,7 +156,8 @@ public class ResourcePostService {
 
     private void saveAttachments(List<MultipartFile> files, ResourcePost post, Account author) {
         for (MultipartFile file : files) {
-            if (file.isEmpty()) continue;
+            if (file.isEmpty())
+                continue;
 
             try {
                 // S3 업로드 (폴더명: resources)
@@ -156,12 +169,12 @@ public class ResourcePostService {
                         .originalName(file.getOriginalFilename())
                         .contentType(file.getContentType())
                         .fileSize(file.getSize())
-                        .uploadedBy(author.getAccountId()) 
+                        .uploadedBy(author.getAccountId())
                         .updatedBy(author.getAccountId())
                         .build();
 
                 attachmentRepository.save(attachment);
-                
+
             } catch (IOException e) {
                 log.error("자료실 파일 업로드 실패: {}", file.getOriginalFilename(), e);
                 throw new BusinessException(ErrorCode.FILE_UPLOAD_ERROR);
@@ -177,7 +190,7 @@ public class ResourcePostService {
         return url.substring(url.indexOf("resources/"));
     }
 
-    private ExternalResourceResponse toResponse(ResourcePost entity) {
+    private ExternalResourceResponse toResponse(ResourcePost entity, String authorName) {
         ExternalCategoryResponse categoryDto = ExternalCategoryResponse.builder()
                 .categoryId(entity.getCategory().getId())
                 .name(entity.getCategory().getName())
@@ -191,7 +204,7 @@ public class ResourcePostService {
                         .originalName(f.getOriginalName())
                         .contentType(f.getContentType())
                         .fileSize(f.getFileSize())
-                        .downloadUrl(f.getStorageKey()) 
+                        .downloadUrl(f.getStorageKey())
                         .build())
                 .collect(Collectors.toList());
 
@@ -200,7 +213,7 @@ public class ResourcePostService {
                 .category(categoryDto)
                 .title(entity.getTitle())
                 .content(entity.getContent())
-                .authorName(entity.getAuthor().getLoginId())
+                .authorName(authorName != null ? authorName : entity.getAuthor().getLoginId())
                 .viewCount(entity.getViewCount())
                 .createdAt(entity.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .files(filesDto)

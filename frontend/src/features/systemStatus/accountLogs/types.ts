@@ -47,20 +47,19 @@ export type AccountLogDetailAccount = {
 };
 
 export type AccountAccessLogRow = {
-  seq: number;            // 또는 logId(백엔드에 맞게)
-  accessedAt: string;     // ISO string
+  logId: number;
+  accessedAt: string;
   accessUrl: string;
   ip: string;
-  userAgent: string;
+  os: string;
 };
 
 export type AccountLogDetailResponse = {
+  code?: number;
+  message?: string;
   data: {
-    account: AccountLogDetailAccount;
-    logs: AccountAccessLogRow[];
+    header: AccountLogDetailAccount;
+    items: AccountAccessLogRow[];
   };
-  meta: {
-    from?: string;
-    to?: string;
-  };
+  meta: PageMeta; // Pagination info from backend
 };

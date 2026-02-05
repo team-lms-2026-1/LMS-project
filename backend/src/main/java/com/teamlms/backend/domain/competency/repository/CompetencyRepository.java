@@ -10,4 +10,3 @@ public interface CompetencyRepository extends JpaRepository<Competency, Long> {
 
     long countByCompetencyIdIn(Collection<Long> competencyIds);
 }
-

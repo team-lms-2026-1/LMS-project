@@ -7,6 +7,7 @@ VALUES
   ('SPACE_READ',    '학습공간 조회', now(), now()),
   ('SPACE_MANAGE',  '학습공간 관리(생성/수정/삭제)', now(), now()),
   
+  
   -- 대여(Rental) 관련
   ('RENTAL_READ',   '대여 내역 조회', now(), now()),
   ('RENTAL_CREATE', '대여 신청', now(), now()),
@@ -25,7 +26,7 @@ JOIN auth_permission p ON p.code IN (
     'SPACE_READ',   -- 공간 목록/상세 조회
     'RENTAL_READ',  -- 내 예약 내역 조회
     'RENTAL_CREATE' -- 예약 신청
-)
+    )
 WHERE r.code = 'STUDENT_BASIC'
 ON CONFLICT DO NOTHING;
 
@@ -47,11 +48,10 @@ FROM auth_role r
 JOIN auth_permission p ON p.code IN (
     'SPACE_READ', 'SPACE_MANAGE',   -- 공간 생성, 수정, 삭제
     'RENTAL_READ', 'RENTAL_MANAGE', -- 예약 전체 조회, 승인, 반려
-    'RENTAL_CREATE'                 -- 관리자도 테스트용 신청 가능
+    'RENTAL_CREATE'  -- 예약 신청
 )
 WHERE r.code = 'ADMIN_SYSTEM'
 ON CONFLICT DO NOTHING;
-
 
 
 -- ================================================================
