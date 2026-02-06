@@ -16,11 +16,6 @@ const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "�
 const REQUEST_PART_NAME = "request";
 const FILE_PART_NAME = "files";
 
-function toMidnightLocalDateTime(dateOnly: string) {
-  if (!dateOnly) return null;
-  return `${dateOnly}T00:00:00`;
-}
-
 function formatBytes(bytes: number) {
   const units = ["B", "KB", "MB", "GB"];
   let v = bytes;
@@ -38,8 +33,6 @@ export default function ResourceCreatePageClient() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [displayStartAt, setDisplayStartAt] = useState<string>("");
-  const [displayEndAt, setDisplayEndAt] = useState<string>("");
 
   // ✅ 카테고리
   const [categories, setCategories] = useState<Category[]>([]);
@@ -75,7 +68,6 @@ export default function ResourceCreatePageClient() {
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canSubmit = useMemo(() => {
@@ -120,8 +112,6 @@ export default function ResourceCreatePageClient() {
           categoryId: categoryId ? Number(categoryId) : null,
           title: t,
           content: c,
-          displayStartAt: toMidnightLocalDateTime(displayStartAt),
-          displayEndAt: toMidnightLocalDateTime(displayEndAt),
         };
 
         // 핵심: JSON 파트를 application/json Blob으로
@@ -152,15 +142,12 @@ export default function ResourceCreatePageClient() {
           title: t,
           content: c,
           categoryId: categoryId ? Number(categoryId) : undefined,
-          displayStartAt: toMidnightLocalDateTime(displayStartAt),
-          displayEndAt: toMidnightLocalDateTime(displayEndAt),
         };
 
         await createResource(body);
       }
 
       router.push(LIST_PATH);
-      
     } catch (e: any) {
       setError(e?.message ?? "등록에 실패했습니다.");
     } finally {
@@ -220,29 +207,7 @@ export default function ResourceCreatePageClient() {
             </div>
           </div>
 
-          {/* 게시기간 row */}
-          <div className={styles.row}>
-            <div className={styles.labelCell}>게시기간</div>
-            <div className={styles.contentCell}>
-              <div className={styles.periodRow}>
-                <input
-                  type="date"
-                  className={styles.date}
-                  value={displayStartAt}
-                  onChange={(e) => setDisplayStartAt(e.target.value)}
-                  disabled={saving}
-                />
-                <span className={styles.tilde}>~</span>
-                <input
-                  type="date"
-                  className={styles.date}
-                  value={displayEndAt}
-                  onChange={(e) => setDisplayEndAt(e.target.value)}
-                  disabled={saving}
-                />
-              </div>
-            </div>
-          </div>
+          {/* ✅ 게시기간 row 제거됨 */}
 
           {/* 내용 row */}
           <div className={styles.row}>

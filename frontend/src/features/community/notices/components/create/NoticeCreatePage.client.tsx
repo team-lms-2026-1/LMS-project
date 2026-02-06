@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, forwardRef } from "react";
 import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./NoticeCreatePage.module.css";
 import type { Category, CreateNoticeRequestDto } from "../../api/types";
 import { createNotice, fetchNoticeCategories } from "../../api/NoticesApi";
 import { Button } from "@/components/button";
+
+import DatePicker from "react-datepicker";
 
 const LIST_PATH = "/admin/community/notices";
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
@@ -27,27 +29,38 @@ function formatBytes(bytes: number) {
   return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
+function formatYmd(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+const DateTextInput = forwardRef<HTMLInputElement, any>(function DateTextInput(props, ref) {
+  return <input ref={ref} {...props} className={styles.date} readOnly />;
+});
+
 export default function NoticeCreatePageClient() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [displayStartAt, setDisplayStartAt] = useState<string>("");
-  const [displayEndAt, setDisplayEndAt] = useState<string>("");
+
+  const [displayStartAt, setDisplayStartAt] = useState<Date | null>(null);
+  const [displayEndAt, setDisplayEndAt] = useState<Date | null>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
 
-  // ✅ 파일 상태
   const [files, setFiles] = useState<File[]>([]);
-
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
     let alive = true;
+
     (async () => {
       setLoadingCats(true);
       try {
@@ -68,7 +81,6 @@ export default function NoticeCreatePageClient() {
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canSubmit = useMemo(() => {
@@ -88,7 +100,7 @@ export default function NoticeCreatePageClient() {
   const onFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const list = Array.from(e.target.files ?? []);
     addFiles(list);
-    e.target.value = ""; // 같은 파일 재선택 가능하게
+    e.target.value = "";
   };
 
   const removeFile = (key: string) => {
@@ -103,9 +115,16 @@ export default function NoticeCreatePageClient() {
     if (!t) return setError("제목을 입력하세요.");
     if (!c) return setError("내용을 입력하세요.");
 
+    const displayStartAtIso = displayStartAt
+      ? toMidnightLocalDateTime(formatYmd(displayStartAt))
+      : null;
+
+    const displayEndAtIso = displayEndAt
+      ? toMidnightLocalDateTime(formatYmd(displayEndAt))
+      : null;
+
     setSaving(true);
     try {
-      // ✅ 파일 있으면: request(JSON) + files 로 multipart 전송 (Postman과 동일)
       if (files.length > 0) {
         const fd = new FormData();
 
@@ -113,13 +132,11 @@ export default function NoticeCreatePageClient() {
           categoryId: categoryId ? Number(categoryId) : null,
           title: t,
           content: c,
-          displayStartAt: toMidnightLocalDateTime(displayStartAt),
-          displayEndAt: toMidnightLocalDateTime(displayEndAt),
+          displayStartAt: displayStartAtIso,
+          displayEndAt: displayEndAtIso,
         };
 
-        // 핵심: "request" 파트로 JSON을 application/json으로 넣기
         fd.append("request", new Blob([JSON.stringify(payload)], { type: "application/json" }));
-
         for (const f of files) fd.append("files", f);
 
         const res = await fetch("/api/admin/community/notices", {
@@ -139,13 +156,12 @@ export default function NoticeCreatePageClient() {
           throw new Error(msg);
         }
       } else {
-        // ✅ 파일 없으면: 기존 JSON 등록 API 사용
         const body: CreateNoticeRequestDto = {
           title: t,
           content: c,
           categoryId: categoryId ? Number(categoryId) : undefined,
-          displayStartAt: toMidnightLocalDateTime(displayStartAt),
-          displayEndAt: toMidnightLocalDateTime(displayEndAt),
+          displayStartAt: displayStartAtIso,
+          displayEndAt: displayEndAtIso,
         };
 
         await createNotice(body);
@@ -214,20 +230,32 @@ export default function NoticeCreatePageClient() {
             <div className={styles.labelCell}>게시기간</div>
             <div className={styles.contentCell}>
               <div className={styles.periodRow}>
-                <input
-                  type="date"
-                  className={styles.date}
-                  value={displayStartAt}
-                  onChange={(e) => setDisplayStartAt(e.target.value)}
+                <DatePicker
+                  selected={displayStartAt}
+                  onChange={(d: Date | null) => {
+                    setDisplayStartAt(d);
+                    if (d && displayEndAt && displayEndAt < d) setDisplayEndAt(d);
+                  }}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="시작일"
+                  customInput={<DateTextInput />}
                   disabled={saving}
+                  isClearable
+                  popperPlacement="bottom-start"
                 />
+
                 <span className={styles.tilde}>~</span>
-                <input
-                  type="date"
-                  className={styles.date}
-                  value={displayEndAt}
-                  onChange={(e) => setDisplayEndAt(e.target.value)}
+
+                <DatePicker
+                  selected={displayEndAt}
+                  onChange={(d: Date | null) => setDisplayEndAt(d)}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="종료일"
+                  customInput={<DateTextInput />}
                   disabled={saving}
+                  minDate={displayStartAt ?? undefined}
+                  isClearable
+                  popperPlacement="bottom-start"
                 />
               </div>
             </div>
@@ -302,7 +330,6 @@ export default function NoticeCreatePageClient() {
                   />
                 </div>
 
-                {/* ✅ 선택된 파일 목록 표시 */}
                 {files.length > 0 && (
                   <div className={styles.fileList}>
                     {files.map((f) => {

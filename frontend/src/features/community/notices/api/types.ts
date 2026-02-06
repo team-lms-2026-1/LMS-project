@@ -37,6 +37,13 @@
     createdAt: string;
     status: string;
     files: any[]; 
+    displayStartAt?: string | null;
+    displayEndAt?: string | null;
+  };
+
+  export type NoticeDetailDto = NoticeListItemDto & {
+    displayStartAt?: string | null;
+    displayEndAt?: string | null;
   };
 
   export type CreateNoticeRequestDto = {
@@ -52,24 +59,19 @@
     content: string;
     categoryId?: number;
     deleteFileIds?: number[];
+    displayStartAt?: string | null;
+    displayEndAt?: string | null;
   };
 
   export type NoticeFileDto = {
-    // 삭제 식별자 후보 (백엔드가 둘 중 하나라도 내려줘야 삭제 가능)
     fileId?: number;
-    id?: number; // 일부 백엔드가 id로 주는 경우 대비
+    id?: number; 
     storageKey?: string;
-
-    // 표시용 이름 후보
     fileName?: string;
     originalName?: string;
     name?: string;
-
-    // 링크 후보
     url?: string;
     downloadUrl?: string;
-
-    // 부가 메타(있으면 활용)
     fileType?: FileType;
     size?: number;
   };

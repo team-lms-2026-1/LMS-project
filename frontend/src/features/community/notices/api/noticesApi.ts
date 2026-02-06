@@ -12,7 +12,7 @@ export type NoticesListQuery = {
   page?: number;
   size?: number;
   keyword?: string;
-  categoryId?: number; // ✅ 추가
+  categoryId?: number;
 };
 
 export async function fetchNoticesList(query: NoticesListQuery) {
@@ -20,13 +20,10 @@ export async function fetchNoticesList(query: NoticesListQuery) {
   if (query.page) sp.set("page", String(query.page));
   if (query.size) sp.set("size", String(query.size));
   if (query.keyword) sp.set("keyword", query.keyword);
-
-  // ✅ 추가: categoryId
   if (typeof query.categoryId === "number") sp.set("categoryId", String(query.categoryId));
 
   const qs = sp.toString();
   const url = qs ? `/api/admin/community/notices?${qs}` : `/api/admin/community/notices`;
-
   return getJson<NoticeListResponse>(url);
 }
 
@@ -38,7 +35,35 @@ export async function fetchNoticeCategories() {
   return getJson<NoticeCategoryListResponse>(`/api/admin/community/notices/categories`);
 }
 
-/** ✅ 등록: multipart(form-data) */
+async function readJsonMaybe(res: Response): Promise<any | null> {
+  try {
+    const text = await res.text();
+    if (!text) return null;
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function extractIdFromLocation(res: Response): number | null {
+  const loc = res.headers.get("location") || res.headers.get("content-location");
+  if (!loc) return null;
+  const m = loc.match(/(\d+)(?:\D*)$/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+}
+
+function normalizeNoticeEnvelope(payload: any, fallbackId: number) {
+  if (payload && typeof payload === "object") {
+    if ("data" in payload) return payload;
+    if (typeof payload.noticeId === "number") return { data: { noticeId: payload.noticeId }, meta: payload.meta ?? null };
+    if (typeof payload.id === "number") return { data: { noticeId: payload.id }, meta: payload.meta ?? null };
+  }
+  if (typeof payload === "number") return { data: { noticeId: payload }, meta: null };
+  return { data: { noticeId: fallbackId }, meta: null };
+}
+
 export async function createNotice(body: CreateNoticeRequestDto, files?: File[]) {
   const fd = new FormData();
   fd.append("request", new Blob([JSON.stringify(body)], { type: "application/json" }));
@@ -59,19 +84,12 @@ export async function createNotice(body: CreateNoticeRequestDto, files?: File[])
     throw new Error(msg);
   }
 
-  try {
-    return (await res.json()) as CreateNoticeResponse;
-  } catch {
-    return { data: { noticeId: 0 }, meta: null } as any;
-  }
+  const payload = await readJsonMaybe(res);
+  const idFromLoc = extractIdFromLocation(res) ?? 0;
+  return normalizeNoticeEnvelope(payload, idFromLoc) as CreateNoticeResponse;
 }
 
-/** ✅ 수정: (1) 파일 변경 있으면 multipart(form-data), (2) 없으면 application/json */
-export async function updateNotice(
-  noticeId: number,
-  body: UpdateNoticeRequestDto,
-  files?: File[]
-) {
+export async function updateNotice(noticeId: number, body: UpdateNoticeRequestDto, files?: File[]) {
   const deleteIds = body.deleteFileIds ?? [];
   const hasFiles = (files?.length ?? 0) > 0;
   const hasDeletes = deleteIds.length > 0;
@@ -88,8 +106,6 @@ export async function updateNotice(
     };
 
     fd.append("request", new Blob([JSON.stringify(requestPayload)], { type: "application/json" }));
-
-    for (const id of deleteIds) fd.append("deleteFileIds", String(id));
     (files ?? []).forEach((f) => fd.append("files", f));
 
     const res = await fetch(`/api/admin/community/notices/${noticeId}`, {
@@ -107,11 +123,8 @@ export async function updateNotice(
       throw new Error(msg);
     }
 
-    try {
-      return (await res.json()) as UpdateNoticeResponse;
-    } catch {
-      return { data: { noticeId }, meta: null } as any;
-    }
+    const payload = await readJsonMaybe(res);
+    return normalizeNoticeEnvelope(payload, noticeId) as UpdateNoticeResponse;
   }
 
   const res = await fetch(`/api/admin/community/notices/${noticeId}`, {
@@ -121,7 +134,7 @@ export async function updateNotice(
       title: body.title,
       content: body.content,
       categoryId: body.categoryId,
-      deleteFileIds: body.deleteFileIds ?? [],
+      deleteFileIds: deleteIds,
     }),
     cache: "no-store",
   });
@@ -135,9 +148,6 @@ export async function updateNotice(
     throw new Error(msg);
   }
 
-  try {
-    return (await res.json()) as UpdateNoticeResponse;
-  } catch {
-    return { data: { noticeId }, meta: null } as any;
-  }
+  const payload = await readJsonMaybe(res);
+  return normalizeNoticeEnvelope(payload, noticeId) as UpdateNoticeResponse;
 }

@@ -1,30 +1,52 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, forwardRef } from "react";
 import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./NoticeEditPage.module.css";
-import type { Category, NoticeListItemDto } from "../../api/types";
+
+import type { Category, NoticeDetailDto, UpdateNoticeRequestDto, ExistingFile } from "../../api/types";
 import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/NoticesApi";
 import { Button } from "@/components/button";
-
-/** ✅ 이 화면 내부에서만 쓰는 "기존 첨부" 타입: attachmentId 기반 */
-type ExistingAttachment = {
-  attachmentId?: number;
-  fileName: string;
-  url?: string;
-};
+import DatePicker from "react-datepicker";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: NoticeListItemDto | null };
+  | { loading: false; error: string | null; data: NoticeDetailDto | null };
 
-function normalizeDetail(payload: any): NoticeListItemDto {
+function toMidnightLocalDateTime(dateOnly: string) {
+  if (!dateOnly) return null;
+  return `${dateOnly}T00:00:00`;
+}
+
+function formatYmd(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// "YYYY-MM-DD" or "YYYY-MM-DDTHH:mm:ss" -> Date(로컬) : 타임존 밀림 방지
+function parseYmdToDate(s?: string | null): Date | null {
+  if (!s) return null;
+  const ymd = String(s).slice(0, 10);
+  const [y, m, d] = ymd.split("-").map((v) => Number(v));
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+
+function normalizeDetail(payload: any): NoticeDetailDto {
   const raw = payload?.data ?? payload;
   const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
 
+  const displayStartAt =
+    raw?.displayStartAt ?? raw?.display_start_at ?? raw?.displayStart ?? raw?.startAt ?? null;
+
+  const displayEndAt =
+    raw?.displayEndAt ?? raw?.display_end_at ?? raw?.displayEnd ?? raw?.endAt ?? null;
+
   return {
-    noticeId: Number(raw?.noticeId ?? raw?.noticeId ?? raw?.noticeId ?? 0),
+    noticeId: Number(raw?.noticeId ?? 0),
     category: raw?.category ?? null,
     title: String(raw?.title ?? ""),
     content: String(raw?.content ?? ""),
@@ -33,20 +55,20 @@ function normalizeDetail(payload: any): NoticeListItemDto {
     createdAt: String(created),
     status: String(raw?.status ?? ""),
     files: Array.isArray(raw?.files) ? raw.files : [],
+    displayStartAt: displayStartAt ? String(displayStartAt) : null,
+    displayEndAt: displayEndAt ? String(displayEndAt) : null,
   };
 }
 
-/** ✅ 백엔드 files 항목에서 attachmentId 추출 */
-function normalizeExistingAttachments(files: any[]): ExistingAttachment[] {
+/** ✅ 백엔드 files 항목에서 attachmentId 추출 -> ExistingFile 로 통일 */
+function normalizeExistingAttachments(files: any[]): ExistingFile[] {
   if (!Array.isArray(files)) return [];
 
   return files.map((f: any, idx: number) => {
-    // ✅ attachmentId가 number/string 어떤 타입이든 숫자로 강제 변환
     const rawId = f?.attachmentId ?? f?.id ?? f?.fileId;
     const attachmentId = rawId == null ? undefined : Number(rawId);
     const safeAttachmentId = Number.isFinite(attachmentId) ? attachmentId : undefined;
 
-    // ✅ 백엔드 오타(originaName)까지 흡수
     const fileName = String(
       f?.originalName ?? f?.originaName ?? f?.fileName ?? f?.name ?? `첨부파일 ${idx + 1}`
     );
@@ -64,7 +86,6 @@ function normalizeExistingAttachments(files: any[]): ExistingAttachment[] {
   });
 }
 
-
 function formatBytes(bytes: number) {
   const units = ["B", "KB", "MB", "GB"];
   let v = bytes;
@@ -76,10 +97,18 @@ function formatBytes(bytes: number) {
   return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
+/** ✅ DatePicker input을 기존 input 스타일로 */
+const DateTextInput = forwardRef<HTMLInputElement, any>(function DateTextInput(props, ref) {
+  return <input ref={ref} {...props} className={styles.date} readOnly />;
+});
+
 export default function NoticeEditPageClient() {
   const router = useRouter();
   const params = useParams<{ noticeId?: string }>();
-  const noticeId = useMemo(() => Number(params?.noticeId ?? 0), [params]);
+
+  // ✅ params 객체 자체를 dep로 두면 불필요한 재실행이 생길 수 있어서 noticeId만 잡음
+  const noticeIdParam = params?.noticeId;
+  const noticeId = useMemo(() => Number(noticeIdParam ?? 0), [noticeIdParam]);
 
   const LIST_PATH = "/admin/community/notices";
   const DETAIL_PATH = `/admin/community/notices/${noticeId}`;
@@ -92,13 +121,17 @@ export default function NoticeEditPageClient() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
+  // ✅ 게시기간(DatePicker)
+  const [displayStartAt, setDisplayStartAt] = useState<Date | null>(null);
+  const [displayEndAt, setDisplayEndAt] = useState<Date | null>(null);
+
   // 카테고리
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
 
   // ✅ 첨부 관련 상태 (attachmentId 기반)
-  const [existingFiles, setExistingFiles] = useState<ExistingAttachment[]>([]);
+  const [existingFiles, setExistingFiles] = useState<ExistingFile[]>([]);
   const [deletedAttachmentIds, setDeletedAttachmentIds] = useState<number[]>([]);
   const [newFiles, setNewFiles] = useState<File[]>([]);
 
@@ -126,6 +159,10 @@ export default function NoticeEditPageClient() {
         setTitle(data.title ?? "");
         setContent(data.content ?? "");
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
+
+        // ✅ 게시기간 초기값 세팅
+        setDisplayStartAt(parseYmdToDate(data.displayStartAt));
+        setDisplayEndAt(parseYmdToDate(data.displayEndAt));
 
         // ✅ 기존 첨부 세팅 + 변경 상태 초기화
         setExistingFiles(normalizeExistingAttachments(data.files ?? []));
@@ -169,9 +206,21 @@ export default function NoticeEditPageClient() {
     };
   }, []);
 
+  // ✅ 기간 유효성(혹시나) 체크
+  const isPeriodValid = useMemo(() => {
+    if (displayStartAt && displayEndAt) return displayEndAt >= displayStartAt;
+    return true;
+  }, [displayStartAt, displayEndAt]);
+
   const canSubmit = useMemo(() => {
-    return title.trim().length > 0 && content.trim().length > 0 && !saving && !load.loading;
-  }, [title, content, saving, load.loading]);
+    return (
+      title.trim().length > 0 &&
+      content.trim().length > 0 &&
+      !saving &&
+      !load.loading &&
+      isPeriodValid
+    );
+  }, [title, content, saving, load.loading, isPeriodValid]);
 
   const onCancel = () => {
     router.push(DETAIL_PATH);
@@ -199,19 +248,21 @@ export default function NoticeEditPageClient() {
   };
 
   // ===== ✅ 기존 파일 삭제 토글 (attachmentId 기반) =====
-  const isDeletedExisting = (f: ExistingAttachment) => {
+  const isDeletedExisting = (f: ExistingFile) => {
     if (typeof f.attachmentId === "number") return deletedAttachmentIds.includes(f.attachmentId);
     return false;
   };
 
-  const toggleDeleteExisting = (f: ExistingAttachment) => {
+  const toggleDeleteExisting = (f: ExistingFile) => {
     if (typeof f.attachmentId !== "number") {
       alert("이 첨부파일은 attachmentId가 없어 삭제할 수 없습니다. 백엔드 응답에 attachmentId가 필요합니다.");
       return;
     }
 
     setDeletedAttachmentIds((prev) =>
-      prev.includes(f.attachmentId!) ? prev.filter((x) => x !== f.attachmentId) : [...prev, f.attachmentId!]
+      prev.includes(f.attachmentId!)
+        ? prev.filter((x) => x !== f.attachmentId)
+        : [...prev, f.attachmentId!]
     );
   };
 
@@ -222,23 +273,30 @@ export default function NoticeEditPageClient() {
     const c = content.trim();
     if (!t) return setFormError("제목을 입력하세요.");
     if (!c) return setFormError("내용을 입력하세요.");
+    if (!isPeriodValid) return setFormError("게시기간이 올바르지 않습니다. 종료일은 시작일 이후여야 합니다.");
 
     const hasFileChanges = newFiles.length > 0 || deletedAttachmentIds.length > 0;
 
+    const displayStartAtIso = displayStartAt
+      ? toMidnightLocalDateTime(formatYmd(displayStartAt))
+      : null;
+
+    const displayEndAtIso = displayEndAt
+      ? toMidnightLocalDateTime(formatYmd(displayEndAt))
+      : null;
+
+    const body: UpdateNoticeRequestDto = {
+      title: t,
+      content: c,
+      categoryId: categoryId ? Number(categoryId) : undefined,
+      displayStartAt: displayStartAtIso,
+      displayEndAt: displayEndAtIso,
+      deleteFileIds: deletedAttachmentIds,
+    };
+
     setSaving(true);
     try {
-      // ✅ 백엔드가 deleteFileIds로 받으니까 attachmentId 값을 그대로 넣어준다
-      await updateNotice(
-        noticeId,
-        {
-          title: t,
-          content: c,
-          categoryId: categoryId ? Number(categoryId) : undefined,
-          deleteFileIds: deletedAttachmentIds,
-        } as any,
-        hasFileChanges ? newFiles : undefined
-      );
-
+      await updateNotice(noticeId, body, hasFileChanges ? newFiles : undefined);
       router.push(DETAIL_PATH);
     } catch (e: any) {
       setFormError(e?.message ?? "수정에 실패했습니다.");
@@ -249,11 +307,24 @@ export default function NoticeEditPageClient() {
 
   const data = load.data;
 
+  // ✅ 선택한 카테고리(배지 표시용): 사용자가 셀렉트 바꾸면 즉시 반영
+  const selectedCategory = useMemo(() => {
+    const fromList =
+      categoryId && categories.length
+        ? categories.find((c) => String(c.categoryId) === categoryId) ?? null
+        : null;
+
+    // 카테고리 리스트가 아직 없거나, 미분류면 기존 data.category로 fallback
+    return fromList ?? data?.category ?? null;
+  }, [categoryId, categories, data?.category]);
+
   const badgeStyle = useMemo(() => {
-    const bg = data?.category?.bgColorHex ?? "#EEF2F7";
-    const fg = data?.category?.textColorHex ?? "#334155";
+    const bg = selectedCategory?.bgColorHex ?? "#EEF2F7";
+    const fg = selectedCategory?.textColorHex ?? "#334155";
     return { backgroundColor: bg, color: fg };
-  }, [data?.category?.bgColorHex, data?.category?.textColorHex]);
+  }, [selectedCategory?.bgColorHex, selectedCategory?.textColorHex]);
+
+  const badgeLabel = selectedCategory?.name ?? "미분류";
 
   return (
     <div className={styles.page}>
@@ -283,7 +354,7 @@ export default function NoticeEditPageClient() {
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {badgeLabel}
               </span>
 
               <input
@@ -301,10 +372,12 @@ export default function NoticeEditPageClient() {
                 <span className={styles.metaLabel}>작성자</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
+
               <div className={styles.metaItem}>
                 <span className={styles.metaLabel}>작성일</span>
                 <span className={styles.metaValue}>{data.createdAt || "-"}</span>
               </div>
+
               <div className={styles.metaItem}>
                 <span className={styles.metaLabel}>조회수</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
@@ -325,6 +398,40 @@ export default function NoticeEditPageClient() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* ✅ 게시기간 DatePicker */}
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>게시기간</span>
+                <div className={styles.periodRow}>
+                  <DatePicker
+                    selected={displayStartAt}
+                    onChange={(d: Date | null) => {
+                      setDisplayStartAt(d);
+                      if (d && displayEndAt && displayEndAt < d) setDisplayEndAt(d);
+                    }}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="시작일"
+                    customInput={<DateTextInput />}
+                    disabled={saving}
+                    isClearable
+                    wrapperClassName={styles.dpWrap}
+                    popperPlacement="bottom-start"
+                  />
+                  <span className={styles.tilde}>~</span>
+                  <DatePicker
+                    selected={displayEndAt}
+                    onChange={(d: Date | null) => setDisplayEndAt(d)}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="종료일"
+                    customInput={<DateTextInput />}
+                    disabled={saving}
+                    minDate={displayStartAt ?? undefined}
+                    isClearable
+                    wrapperClassName={styles.dpWrap}
+                    popperPlacement="bottom-start"
+                  />
+                </div>
               </div>
             </div>
 

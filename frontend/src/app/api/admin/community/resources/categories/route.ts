@@ -1,18 +1,17 @@
 import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 const UPSTREAM = "/api/v1/admin/community/resources/categories";
-const TAG = "admin:resources:categories";
+
+const TAG_CATEGORIES = "admin:resources:categories";
+const TAG_RESOURCES = "admin:resources";
 
 export async function GET(req: Request) {
   return proxyToBackend(req, UPSTREAM, {
     method: "GET",
     forwardQuery: true,
     cache: "force-cache",
-    next: { revalidate: 600, tags: [TAG] },
+    next: { revalidate: 600, tags: [TAG_CATEGORIES] },
   });
 }
 
@@ -26,6 +25,9 @@ export async function POST(req: Request) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG_CATEGORIES);
+    revalidateTag(TAG_RESOURCES); 
+  }
   return res;
 }

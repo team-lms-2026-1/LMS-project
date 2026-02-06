@@ -9,7 +9,6 @@ import { SearchBar } from "@/components/searchbar";
 import { Button } from "@/components/button";
 import { useRouter } from "next/navigation";
 
-// ✅ FAQ/공지사항/QnA와 동일
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
@@ -22,13 +21,11 @@ export default function ResourcePageClient() {
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
-  // ✅ URL filter
   const { get, setFilters } = useFilterQuery(["categoryId"]);
   const categoryIdQs = get("categoryId");
 
   const [inputKeyword, setInputKeyword] = useState("");
 
-  // ✅ 카테고리 드롭다운 데이터
   const [categories, setCategories] = useState<Category[]>([]);
   const [catsLoading, setCatsLoading] = useState(false);
 
@@ -76,7 +73,6 @@ export default function ResourcePageClient() {
   }, [categories]);
 
   const onChangeCategory = (nextValue: string) => {
-    // ✅ 필터 변경 시 page=1로 리셋(중요)
     setPage(1);
     setFilters({ categoryId: nextValue || null });
   };

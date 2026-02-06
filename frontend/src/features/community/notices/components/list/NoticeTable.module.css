@@ -40,3 +40,60 @@
 .titleLink:hover {
   text-decoration: underline;
 }
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background: #f9fafb;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  top: 24px;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px; 
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  padding: 12px 14px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+
+  max-width: min(520px, calc(100vw - 32px));
+}
+
+.toastIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #22c55e;
+  color: #ffffff;
+  line-height: 0;
+  flex: 0 0 auto;
+}
+
+.toastIconSvg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.toastText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+

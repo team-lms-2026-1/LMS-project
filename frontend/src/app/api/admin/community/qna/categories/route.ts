@@ -1,18 +1,17 @@
 import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 const BACKEND_PATH = "/api/v1/admin/community/qna/categories";
-const TAG = "admin:qna:categories";
+
+const TAG_CATEGORIES = "admin:qna:categories";
+const TAG_QNA = "admin:qna"; 
 
 export async function GET(req: Request) {
   return proxyToBackend(req, BACKEND_PATH, {
     method: "GET",
     forwardQuery: true,
     cache: "force-cache",
-    next: { revalidate: 600, tags: [TAG] },
+    next: { revalidate: 600, tags: [TAG_CATEGORIES] },
   });
 }
 
@@ -26,6 +25,9 @@ export async function POST(req: Request) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG_CATEGORIES);
+    revalidateTag(TAG_QNA); 
+  }
   return res;
 }

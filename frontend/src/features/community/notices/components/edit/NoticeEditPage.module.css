@@ -388,3 +388,52 @@
     max-width: 100%;
   }
 }
+
+.periodRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tilde {
+  color: #94a3b8;
+}
+
+/* DateTextInput이 쓰는 input */
+.date {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+}
+
+/* (선택) X 버튼 크기/배경 커스텀 */
+.dpWrap :global(.react-datepicker__close-icon) {
+  padding: 0 !important;
+  height: auto !important;
+  width: 16px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  top: 50% !important;
+  right: 8px !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.dpWrap :global(.react-datepicker__close-icon::after) {
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  width: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  font-size: 10px !important;
+  background: #fff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+}
