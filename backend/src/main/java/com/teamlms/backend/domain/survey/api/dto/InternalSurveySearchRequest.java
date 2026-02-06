@@ -1,4 +1,4 @@
-package com.teamlms.backend.domain.survey.dto;
+package com.teamlms.backend.domain.survey.api.dto;
 
 import com.teamlms.backend.domain.survey.enums.SurveyStatus;
 import com.teamlms.backend.domain.survey.enums.SurveyType;

@@ -4,43 +4,35 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.teamlms.backend.domain.survey.enums.SurveyStatus;
 import com.teamlms.backend.domain.survey.enums.SurveyType;
 import lombok.Builder;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-// 2. 상세 조회
-@Getter
 @Builder
-public class SurveyDetailResponse {
-    private Long surveyId;
-    private SurveyType type;
-    private String title;
-    private String description;
-    private SurveyStatus status;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime startAt;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime endAt;
-
-    private List<QuestionResponseDto> questions;
-
-    @Getter
+public record SurveyDetailResponse(
+        Long surveyId,
+        SurveyType type,
+        String title,
+        String description,
+        SurveyStatus status,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+        LocalDateTime startAt,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+        LocalDateTime endAt,
+        List<QuestionResponseDto> questions
+) {
     @Builder
-    public static class QuestionResponseDto {
-        private Long questionId;
-        private String questionText;
-        private Integer sortOrder;
-        private Integer minVal;
-        private Integer maxVal;
-        private String minLabel;
-        private String maxLabel;
-
-        private Boolean isRequired;
-
-        // [New]
-        private com.teamlms.backend.domain.survey.enums.SurveyQuestionType questionType;
-        private List<String> options;
+    public record QuestionResponseDto(
+            Long questionId,
+            String questionText,
+            Integer sortOrder,
+            Integer minVal,
+            Integer maxVal,
+            String minLabel,
+            String maxLabel,
+            Boolean isRequired,
+            com.teamlms.backend.domain.survey.enums.SurveyQuestionType questionType,
+            List<String> options
+    ) {
     }
 }

@@ -4,6 +4,8 @@ import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.survey.api.dto.SurveyCreateRequest;
+import com.teamlms.backend.domain.survey.api.dto.SurveyQuestionDto;
+import com.teamlms.backend.domain.survey.api.dto.SurveyTargetFilterDto;
 import com.teamlms.backend.domain.survey.api.dto.SurveyUpdateRequest;
 import com.teamlms.backend.domain.survey.entity.*;
 import com.teamlms.backend.domain.survey.enums.*;
@@ -11,6 +13,7 @@ import com.teamlms.backend.domain.survey.repository.*;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,56 +36,42 @@ public class SurveyCommandService {
 
     // 1. 설문 생성
     public Long createAndPublishSurvey(Long adminId, SurveyCreateRequest request) {
-        try {
-            System.out.println("DEBUG: createAndPublishSurvey called. Request: " + request);
-            if (request.getTargetFilter() != null) {
-                System.out.println("DEBUG: TargetFilter: " + request.getTargetFilter());
-            }
+        validateAdmin(adminId);
+        validateQuestionOptions(request.getQuestions());
 
-            validateAdmin(adminId);
-            validateQuestionOptions(request.getQuestions());
+        Survey survey = Survey.builder()
+                .type(request.getType())
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .startAt(request.getStartAt())
+                .endAt(request.getEndAt())
+                .status(SurveyStatus.OPEN)
+                .targetGenType(SurveyTargetGenType.valueOf(request.getTargetFilter() != null ? request.getTargetFilter().getGenType() : "ALL"))
+                .build();
 
-            Survey survey = Survey.builder()
-                    .type(request.getType())
-                    .title(request.getTitle())
-                    .description(request.getDescription())
-                    .startAt(request.getStartAt())
-                    .endAt(request.getEndAt())
-                    .status(SurveyStatus.OPEN)
-                    .targetGenType(request.getTargetFilter().getGenType())
-                    .build();
+        Survey savedSurvey = surveyRepository.save(survey);
 
-            Survey savedSurvey = surveyRepository.save(survey);
+        List<SurveyQuestion> questions = request.getQuestions().stream()
+                .map(q -> SurveyQuestion.builder()
+                        .surveyId(savedSurvey.getId())
+                        .questionText(q.getQuestionText())
+                        .sortOrder(q.getSortOrder())
+                        .minVal(q.getMinVal())
+                        .maxVal(q.getMaxVal())
+                        .minLabel(q.getMinLabel())
+                        .maxLabel(q.getMaxLabel())
+                        .isRequired(q.getIsRequired())
+                        .questionType(q.getQuestionType() != null ? q.getQuestionType() : SurveyQuestionType.RATING)
+                        .options(q.getOptions())
+                        .build())
+                .collect(Collectors.toList());
 
-            List<SurveyQuestion> questions = request.getQuestions().stream()
-                    .map(q -> SurveyQuestion.builder()
-                            .surveyId(savedSurvey.getId())
-                            .questionText(q.getQuestionText())
-                            .sortOrder(q.getSortOrder())
-                            .minVal(q.getMinVal())
-                            .maxVal(q.getMaxVal())
-
-                            .minLabel(q.getMinLabel())
-                            .maxLabel(q.getMaxLabel())
-                            .isRequired(q.getIsRequired())
-                            // [New]
-                            .questionType(q.getQuestionType() != null ? q.getQuestionType() : SurveyQuestionType.RATING) // Default
-                            .options(q.getOptions())
-                            .build())
-                    .collect(Collectors.toList());
-
-            questionRepository.saveAll(questions);
+        questionRepository.saveAll(questions);
+        if (request.getTargetFilter() != null) {
             createTargetSnapshot(savedSurvey, request.getTargetFilter());
-
-            return savedSurvey.getId();
-        } catch (Exception e) {
-            e.printStackTrace(); // Log the full stack trace
-            // Re-throw if it's already a BusinessException, or wrap
-            if (e instanceof BusinessException) {
-                throw e;
-            }
-            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
         }
+
+        return savedSurvey.getId();
     }
 
     // 2. 설문 수정
@@ -106,16 +96,14 @@ public class SurveyCommandService {
             List<SurveyQuestion> newQuestions = new ArrayList<>();
             int order = 1;
 
-            for (SurveyCreateRequest.QuestionDto q : request.getQuestions()) {
+            for (SurveyQuestionDto q : request.getQuestions()) {
                 newQuestions.add(SurveyQuestion.builder()
                         .surveyId(survey.getId())
                         .questionText(q.getQuestionText())
                         .sortOrder(order++)
                         .minVal(q.getMinVal()).maxVal(q.getMaxVal())
-
                         .minLabel(q.getMinLabel()).maxLabel(q.getMaxLabel())
                         .isRequired(q.getIsRequired())
-                        // [New]
                         .questionType(q.getQuestionType() != null ? q.getQuestionType() : SurveyQuestionType.RATING)
                         .options(q.getOptions())
                         .build());
@@ -136,22 +124,17 @@ public class SurveyCommandService {
         surveyRepository.delete(survey);
     }
 
-    private void createTargetSnapshot(Survey survey, SurveyCreateRequest.TargetFilterDto filter) {
+    private void createTargetSnapshot(Survey survey, SurveyTargetFilterDto filter) {
         List<Account> targets;
-        String type = filter.getGenType(); // ALL, DEPT, GRADE, DEPT_GRADE
-
-        System.out.println("DEBUG: GenType: " + type);
+        String type = filter.getGenType(); // ALL, DEPT, GRADE, DEPT_GRADE, USER
 
         if ("ALL".equals(type)) {
             targets = accountRepository.findAllByAccountType(AccountType.STUDENT);
         } else if ("DEPT".equals(type)) {
-            // 학과별
             targets = selectByDepts(filter.getDeptIds());
         } else if ("GRADE".equals(type)) {
-            // 학년별
             targets = selectByGrades(filter.getGradeLevels());
         } else if ("DEPT_GRADE".equals(type)) {
-            // [추가] 복합 조건 (학과 AND 학년)
             targets = selectByDeptAndGrades(filter.getDeptIds(), filter.getGradeLevels());
         } else {
             // USER (직접 개별 선택)
@@ -162,10 +145,7 @@ public class SurveyCommandService {
             }
         }
 
-        System.out.println("DEBUG: Found targets count: " + targets.size());
-
-        if (targets.isEmpty())
-            return;
+        if (targets.isEmpty()) return;
 
         List<SurveyTarget> surveyTargets = targets.stream()
                 .map(account -> SurveyTarget.builder()
@@ -176,40 +156,31 @@ public class SurveyCommandService {
                         .build())
                 .collect(Collectors.toList());
 
-        System.out.println("DEBUG: Saving targets...");
         targetRepository.saveAll(surveyTargets);
-        System.out.println("DEBUG: Targets saved.");
     }
 
     private List<Account> selectByDepts(List<Long> deptIds) {
-        if (deptIds == null || deptIds.isEmpty())
-            return Collections.emptyList();
+        if (deptIds == null || deptIds.isEmpty()) return Collections.emptyList();
         return accountRepository.findAllByDeptIdIn(deptIds);
     }
 
     private List<Account> selectByGrades(List<Integer> grades) {
-        if (grades == null || grades.isEmpty())
-            return Collections.emptyList();
+        if (grades == null || grades.isEmpty()) return Collections.emptyList();
         return accountRepository.findAllByGradeLevelIn(grades);
     }
 
     private List<Account> selectByDeptAndGrades(List<Long> deptIds, List<Integer> grades) {
-        if (deptIds == null || deptIds.isEmpty())
-            return Collections.emptyList();
-        if (grades == null || grades.isEmpty())
-            return Collections.emptyList();
-        System.out.println("DEBUG: Querying depts=" + deptIds + ", grades=" + grades);
+        if (deptIds == null || deptIds.isEmpty()) return Collections.emptyList();
+        if (grades == null || grades.isEmpty()) return Collections.emptyList();
         return accountRepository.findAllByDeptIdInAndGradeLevelIn(deptIds, grades);
     }
 
-    private void validateQuestionOptions(List<SurveyCreateRequest.QuestionDto> questions) {
+    private void validateQuestionOptions(List<SurveyQuestionDto> questions) {
         if (questions == null || questions.isEmpty()) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
         }
 
-        for (int i = 0; i < questions.size(); i++) {
-            SurveyCreateRequest.QuestionDto q = questions.get(i);
-
+        for (SurveyQuestionDto q : questions) {
             // 객관식 질문인 경우 옵션 검증
             if (q.getQuestionType() == SurveyQuestionType.MULTIPLE_CHOICE ||
                     q.getQuestionType() == SurveyQuestionType.SINGLE_CHOICE) {
@@ -220,8 +191,7 @@ public class SurveyCommandService {
                 }
 
                 // 빈 옵션이 있는지 확인
-                for (int j = 0; j < q.getOptions().size(); j++) {
-                    String option = q.getOptions().get(j);
+                for (String option : q.getOptions()) {
                     if (option == null || option.trim().isEmpty()) {
                         throw new BusinessException(ErrorCode.VALIDATION_ERROR);
                     }
@@ -234,7 +204,7 @@ public class SurveyCommandService {
         Account admin = accountRepository.findById(adminId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-        if (!"ADMIN".equals(admin.getAccountType().name())) {
+        if (admin.getAccountType() != AccountType.ADMIN) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
     }

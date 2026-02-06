@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.survey.entity;
 
 import com.teamlms.backend.domain.survey.enums.SurveyStatus;
+import com.teamlms.backend.domain.survey.enums.SurveyTargetGenType;
 import com.teamlms.backend.domain.survey.enums.SurveyType;
 import com.teamlms.backend.global.audit.BaseEntity;
 import jakarta.persistence.*;
@@ -28,7 +29,7 @@ public class Survey extends BaseEntity {
     @Column(name = "survey_type", nullable = false)
     private SurveyType type;
 
-    @Column(nullable = false)
+    @Column(length = 100, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -44,9 +45,10 @@ public class Survey extends BaseEntity {
     @Column(nullable = false)
     private SurveyStatus status;
 
-    // 대상자 생성 방식 메타데이터 (ALL, DEPT, USER 등)
-    @Column(name = "target_gen_type", nullable = false)
-    private String targetGenType;
+    // 대상자 생성 방식 메타데이터
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_gen_type", length = 20, nullable = false)
+    private SurveyTargetGenType targetGenType;
 
     @Column(name = "view_count", nullable = false)
     @Builder.Default

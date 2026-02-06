@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "survey_question", indexes = @Index(name = "idx_question_order", columnList = "survey_id, sort_order"))
-public class SurveyQuestion {
+public class SurveyQuestion extends com.teamlms.backend.global.audit.BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
