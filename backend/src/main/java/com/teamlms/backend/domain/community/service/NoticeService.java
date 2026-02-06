@@ -80,7 +80,7 @@ public class NoticeService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
 
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Notice notice = Notice.builder()
                 .title(request.getTitle())
@@ -125,7 +125,7 @@ public class NoticeService {
         // 4-1. 기본 정보 수정
         if (request.getCategoryId() != null) {
             NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
             notice.changeCategory(category);
         }
 
