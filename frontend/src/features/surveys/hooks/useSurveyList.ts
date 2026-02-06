@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { fetchSurveysList } from "../api/surveysApi";
 import { SurveyListItemDto } from "../api/types";
 import { PageMeta } from "../../curricular/api/types";
@@ -22,29 +23,28 @@ export function useSurveyList() {
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
     const [keyword, setKeyword] = useState("");
+    const [type, setType] = useState("");
 
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         try {
             setLoading(true);
-            setError(null);
 
-            const res = await fetchSurveysList(page, size, keyword);
+            const res = await fetchSurveysList(page, size, keyword, type);
             setItems(res.data);
             if (res.meta) {
                 setMeta(res.meta);
             }
         } catch (e: any) {
             console.error("[useSurveyList]", e);
-            setError(e.message ?? "설문 목록 조회 실패");
+            toast.error(e.message ?? "설문 목록 조회 실패");
             setItems([]);
             setMeta(defaultMeta);
         } finally {
             setLoading(false);
         }
-    }, [page, size, keyword]);
+    }, [page, size, keyword, type]);
 
     useEffect(() => {
         load();
@@ -57,11 +57,12 @@ export function useSurveyList() {
             page,
             size,
             keyword,
+            type,
             loading,
-            error,
         },
         actions: {
             setKeyword,
+            setType,
             search: () => setPage(1),
             goPage: (p: number) => setPage(p),
             setSize: (s: number) => {

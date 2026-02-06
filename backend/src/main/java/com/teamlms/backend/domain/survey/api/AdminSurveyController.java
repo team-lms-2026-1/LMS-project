@@ -30,6 +30,12 @@ public class AdminSurveyController {
     private final SurveyCommandService commandService;
     private final SurveyQueryService queryService;
 
+    // 설문 유형 목록 조회
+    @GetMapping("/types")
+    public ApiResponse<List<SurveyTypeResponse>> getTypes() {
+        return ApiResponse.ok(queryService.getSurveyTypes());
+    }
+
     // 설문 목록 조회
     @GetMapping
     public ApiResponse<List<SurveyListResponse>> list(
@@ -72,6 +78,14 @@ public class AdminSurveyController {
             @RequestBody @Valid SurveyPatchRequest request) {
         commandService.patchSurvey(user.getAccountId(), surveyId, request);
         return ApiResponse.ok(new SuccessResponse());
+    }
+
+    // 설문 상세 조회
+    @GetMapping("/{surveyId}")
+    public ApiResponse<SurveyDetailResponse> detail(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long surveyId) {
+        return ApiResponse.ok(queryService.getSurveyDetail(surveyId, user.getAccountId()));
     }
 
     // 설문 삭제

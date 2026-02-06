@@ -19,5 +19,6 @@ public record SurveyListResponse(
     LocalDateTime endAt,
     Long viewCount,
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    Boolean isSubmitted
 ) {}

@@ -25,9 +25,9 @@ public enum ErrorCode {
     DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "DUPLICATE_LOGIN_ID", "이미 사용 중인 로그인 아이디입니다.", "account.loginId.duplicate"),
     INVALID_HEAD_PROFESSOR(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "담당 교수는 해당 학과 소속 교수만 지정할 수 있습니다.",
             "dept.head.affiliationMismatch"),
-    INVALID_PROFESSOR_ACCOUNT(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "유효하지않은 교수아이디입니다.",
+    INVALID_PROFESSOR_ACCOUNT(HttpStatus.CONFLICT, "INVALID_PROFESSOR_ACCOUNT", "유효하지않은 교수아이디입니다.",
             "professor.id.invalid"),
-    PROFESSOR_PROFILE_NOT_FOUND(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "유효하지않은 교수아이디를 찾을 수 없습니다.",
+    PROFESSOR_PROFILE_NOT_FOUND(HttpStatus.CONFLICT, "PROFESSOR_PROFILE_NOT_FOUND", "유효하지않은 교수아이디를 찾을 수 없습니다.",
             "professor.notFound"),
     STUDENT_PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDENT_PROFILE_NOT_FOUND", "학생 계정을 찾을 수 없습니다.",
             "student.account.notFound"),
@@ -258,7 +258,9 @@ public enum ErrorCode {
     SURVEY_NOT_OPEN(HttpStatus.BAD_REQUEST, "SURVEY_NOT_OPEN", "현재 진행 중인 설문이 아닙니다.", "survey.notOpen"),
     SURVEY_QUESTIONS_EMPTY(HttpStatus.BAD_REQUEST, "SURVEY_QUESTIONS_EMPTY", "질문을 하나 이상 추가해주세요.", "survey.questions.empty"),
     SURVEY_TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_TITLE_REQUIRED", "설문 제목은 필수입니다.", "survey.title.required"),
-    SURVEY_OPTIONS_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_OPTIONS_REQUIRED", "선택지 옵션을 입력해주세요.", "survey.options.required");
+    SURVEY_OPTIONS_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_OPTIONS_REQUIRED", "선택지 옵션을 입력해주세요.", "survey.options.required"),
+    SURVEY_DATE_INVALID(HttpStatus.BAD_REQUEST, "SURVEY_DATE_INVALID", "종료일은 시작일보다 빨라야 합니다.", "survey.date.invalid"),
+    SURVEY_HAS_RESPONSES(HttpStatus.CONFLICT, "SURVEY_HAS_RESPONSES", "이미 응답이 존재하여 수정할 수 없습니다.", "survey.hasResponses");
 
     private final HttpStatus httpStatus;
     private final String code;

@@ -22,7 +22,6 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
     const [responses, setResponses] = useState<Record<string, any>>({});
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [errorCode, setErrorCode] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -31,15 +30,14 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
             setSurvey(res.data);
         } catch (e: any) {
             console.error(e);
-            if (e.body?.code) {
-                setErrorCode(e.body.code);
-            } else {
-                toast.error(e.message ?? "설문을 불러올 수 없습니다.");
+            toast.error(e.message ?? "설문을 불러올 수 없습니다.");
+            if (e.body?.code === "SURVEY_NOT_OPEN" || e.body?.code === "SURVEY_ALREADY_SUBMITTED") {
+                router.push("/student/surveys");
             }
         } finally {
             setLoading(false);
         }
-    }, [id]);
+    }, [id, router]);
 
     useEffect(() => {
         load();
@@ -79,30 +77,6 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
     };
 
     if (loading) return <div className={styles.loading}>설문 정보를 불러오는 중...</div>;
-
-    if (errorCode === "SURVEY_NOT_OPEN") {
-        return (
-            <div className={styles.errorContainer}>
-                <div className={styles.errorCard}>
-                    <h2>설문 기간이 아닙니다</h2>
-                    <p>현재 진행 중인 설문이 아니거나 종료되었습니다.</p>
-                    <Button onClick={() => router.back()}>목록으로</Button>
-                </div>
-            </div>
-        );
-    }
-
-    if (errorCode === "SURVEY_ALREADY_SUBMITTED") {
-        return (
-            <div className={styles.errorContainer}>
-                <div className={styles.errorCard}>
-                    <h2>이미 참여한 설문입니다</h2>
-                    <p>본 설문은 아이디당 1회만 참여 가능합니다.</p>
-                    <Button onClick={() => router.back()}>목록으로</Button>
-                </div>
-            </div>
-        );
-    }
 
     if (!survey) return <div className={styles.errorContainer}>설문 정보를 찾을 수 없습니다.</div>;
 

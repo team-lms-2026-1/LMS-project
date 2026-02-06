@@ -39,6 +39,10 @@ public class SurveyCommandService {
         validateAdmin(adminId);
         validateQuestionOptions(request.questions());
 
+        if (request.endAt().isBefore(request.startAt())) {
+            throw new BusinessException(ErrorCode.SURVEY_DATE_INVALID);
+        }
+
         Survey survey = Survey.builder()
                 .type(request.type())
                 .title(request.title())
@@ -81,11 +85,23 @@ public class SurveyCommandService {
         Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId));
 
+        if (request.endAt().isBefore(request.startAt())) {
+            throw new BusinessException(ErrorCode.SURVEY_DATE_INVALID);
+        }
+
+        if (targetRepository.countBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED) > 0) {
+            // 제목이나 기간은 수정할 수 있어도 질문을 삭제/재생성하는 것은 문제될 수 있음.
+            // 여기서는 전체 수정 시 질문 삭제 로직이 있으므로, 응답이 있으면 전체 수정을 막거나 질문 부분만 제한해야 함.
+            // 일단 질문 목록이 바뀌었는지 체크하고 바뀌었으면 막는 것이 좋으나, 간단히 응답 있으면 수정 불가로 처리.
+            throw new BusinessException(ErrorCode.SURVEY_HAS_RESPONSES);
+        }
+
         survey.update(
                 request.title(),
                 request.description(),
                 request.startAt(),
-                request.endAt());
+                request.endAt(),
+                request.type());
 
         // 기존 질문 삭제
         questionRepository.deleteAllBySurveyId(surveyId);

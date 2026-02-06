@@ -1,7 +1,7 @@
 .page {
-    padding: 24px;
-    background: #f7f8fa;
-    min-height: 100vh;
+    padding: 0;
+    background: transparent;
+    min-height: auto;
 }
 
 .topBar {
@@ -12,20 +12,20 @@
 }
 
 .title {
-    font-size: 26px;
-    font-weight: 800;
-    color: #101828;
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
 }
 
 .backBtn {
-    height: 40px;
-    padding: 0 16px;
-    border-radius: 12px;
-    border: 1px solid #e4e7ec;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d5dd;
     background: #fff;
     cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: #344054;
 }
 
@@ -36,29 +36,30 @@
 .body {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 0;
 }
 
 .sectionCard {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #e1e7f0;
-    padding: 24px;
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    padding: 0;
+    margin-bottom: 48px;
 }
 
 .sectionHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .sectionTitle {
     font-size: 18px;
     font-weight: 700;
-    color: #1a202c;
+    color: #111827;
     margin: 0;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .sectionHeader .sectionTitle {
@@ -88,10 +89,11 @@
     height: 44px;
     padding: 0 14px;
     border: 1px solid #d0d5dd;
-    border-radius: 12px;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 15px;
     transition: all 0.2s;
     outline: none;
+    box-sizing: border-box;
 }
 
 .input:focus {

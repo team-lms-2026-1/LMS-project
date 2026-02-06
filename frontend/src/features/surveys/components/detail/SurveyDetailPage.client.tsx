@@ -46,6 +46,20 @@ export default function SurveyDetailPageClient({ id }: Props) {
                 <section className={styles.sectionCard}>
                     <h2 className={styles.sectionTitle}>기본 정보</h2>
                     <div className={styles.formGrid}>
+                        <div className={styles.formGroup}>
+                            <label className={styles.label}>설문 유형</label>
+                            <select
+                                className={styles.input}
+                                value={state.surveyType}
+                                onChange={(e) => actions.setSurveyType(e.target.value)}
+                            >
+                                {state.surveyTypes.map((t) => (
+                                    <option key={t.typeCode} value={t.typeCode}>
+                                        {t.typeName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div className={styles.formGroupFull}>
                             <label className={styles.label}>설문 제목</label>
                             <input

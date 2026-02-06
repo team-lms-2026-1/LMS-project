@@ -206,7 +206,7 @@ public void updateRoom(Long roomId, RoomRequest request) {
 
     private void validateRoomRequest(RoomRequest req) {
         if (req.getOperationStartDate().isAfter(req.getOperationEndDate())) {
-            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "운영 종료일은 시작일보다 빨라야 합니다.");
+            throw new BusinessException(ErrorCode.SURVEY_DATE_INVALID);
         }
         if (req.getAvailableStartTime().isAfter(req.getAvailableEndTime())) {
             throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_ST_TIME);

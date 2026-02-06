@@ -3,6 +3,7 @@ package com.teamlms.backend.domain.survey.repository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.teamlms.backend.domain.survey.api.dto.SurveyListResponse;
@@ -50,8 +51,9 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                         s.startAt,
                         s.endAt,
                         s.viewCount,
-                        s.createdAt
-                ))
+                        s.createdAt,
+                        Expressions.constant(false)
+                    ))
                 .from(s)
                 .where(
                         typeEq(type),
@@ -76,7 +78,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
     }
 
     @Override
-    public List<SurveyListResponse> findAvailableSurveysForUser(Long userId, String keyword) {
+    public List<SurveyListResponse> findAvailableSurveysForUser(Long userId, String keyword, SurveyType type) {
         QSurvey s = QSurvey.survey;
         QSurveyTarget t = QSurveyTarget.surveyTarget;
         LocalDateTime now = LocalDateTime.now();
@@ -93,14 +95,15 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                         s.startAt,
                         s.endAt,
                         s.viewCount,
-                        s.createdAt
+                        s.createdAt,
+                        t.status.eq(SurveyTargetStatus.SUBMITTED)
                 ))
                 .from(s)
                 .join(t).on(t.surveyId.eq(s.surveyId))
                 .where(
                         t.targetAccountId.eq(userId),
-                        t.status.eq(SurveyTargetStatus.PENDING),
-                        titleLike(keyword)
+                        titleLike(keyword),
+                        typeEq(type)
                 )
                 .orderBy(s.surveyId.desc())
                 .fetch();

@@ -1,4 +1,5 @@
 import { ApiResponse, PageMeta } from "../../curricular/api/types";
+export type { ApiResponse, PageMeta };
 
 export type SurveyStatus = "DRAFT" | "OPEN" | "CLOSED";
 export type SurveyType = "SATISFACTION" | "COURSE" | "SERVICE" | "ETC";
@@ -25,6 +26,12 @@ export interface SurveyListItemDto {
   endAt: string; // yyyy-MM-dd HH:mm
   viewCount?: number;
   createdAt: string;
+  isSubmitted: boolean;
+}
+
+export interface SurveyTypeResponse {
+  typeCode: string;
+  typeName: string;
 }
 
 export type SurveyListResponse = ApiResponse<SurveyListItemDto[], PageMeta>;
@@ -120,6 +127,7 @@ export interface SurveyCreateRequest {
 }
 
 export interface SurveyPatchRequest {
+  type?: SurveyType;
   title?: string;
   description?: string;
   startAt?: string;

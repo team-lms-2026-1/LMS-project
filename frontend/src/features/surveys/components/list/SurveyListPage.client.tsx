@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./SurveyListPage.client.module.css";
 import { SurveysTable } from "./SurveysTable";
 import { OutButton } from "@/components/button";
 import { useSurveyList } from "../../hooks/useSurveyList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
-import { deleteSurvey } from "../../api/surveysApi";
+import { deleteSurvey, fetchSurveyTypes } from "../../api/surveysApi";
+import { SurveyTypeResponse } from "../../api/types";
+import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal";
 import { useRouter } from "next/navigation";
@@ -23,6 +25,30 @@ export default function SurveyListPageClient() {
     });
 
     const [inputKeyword, setInputKeyword] = useState(keyword || "");
+    const [types, setTypes] = useState<SurveyTypeResponse[]>([]);
+    const [typesLoading, setTypesLoading] = useState(false);
+
+    useEffect(() => {
+        const loadTypes = async () => {
+            setTypesLoading(true);
+            try {
+                const res = await fetchSurveyTypes();
+                setTypes(res.data);
+            } catch (e) {
+                console.error("Failed to load survey types", e);
+            } finally {
+                setTypesLoading(false);
+            }
+        };
+        loadTypes();
+    }, []);
+
+    const typeOptions = useMemo(() => {
+        return types.map(t => ({
+            value: t.typeCode,
+            label: t.typeName
+        }));
+    }, [types]);
 
     useEffect(() => {
         actions.goPage(page);
@@ -66,17 +92,30 @@ export default function SurveyListPageClient() {
                 <h1 className={styles.title}>설문 통합 관리</h1>
 
                 <div className={styles.searchRow}>
-                    <div className={styles.searchBarWrap}>
-                        <SearchBar
-                            value={inputKeyword}
-                            onChange={setInputKeyword}
-                            onSearch={handleSearch}
-                            placeholder="설문 제목 검색"
-                        />
+                    <div className={styles.searchGroup}>
+                        <div className={styles.dropdownWrap}>
+                            <Dropdown
+                                value={state.type}
+                                options={typeOptions}
+                                onChange={(val) => {
+                                    setPage(1);
+                                    actions.setType(val);
+                                }}
+                                placeholder="전체 유형"
+                                loading={typesLoading}
+                            />
+                        </div>
+                        <div className={styles.searchBarWrap}>
+                            <SearchBar
+                                value={inputKeyword}
+                                onChange={setInputKeyword}
+                                onSearch={handleSearch}
+                                placeholder="설문 제목 검색"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
                 <div className={styles.tableWrap}>
                     <SurveysTable

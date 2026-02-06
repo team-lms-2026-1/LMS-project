@@ -1,22 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchAvailableSurveys } from "@/features/surveys/api/studentSurveysApi";
-import { SurveyListItemDto } from "@/features/surveys/api/types";
+import { fetchAvailableSurveys, fetchSurveyTypes } from "@/features/surveys/api/studentSurveysApi";
+import { SurveyListItemDto, SurveyTypeResponse } from "@/features/surveys/api/types";
 import styles from "./SurveyListPage.client.module.css";
 import { Table } from "@/components/table";
 import { TableColumn } from "@/components/table/types";
 import { SearchBar } from "@/components/searchbar";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { Button } from "@/components/button";
+import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
+import toast from "react-hot-toast";
 
 export default function StudentSurveyListPageClient() {
     const router = useRouter();
     const [items, setItems] = useState<SurveyListItemDto[]>([]);
     const [loading, setLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [totalPages, setTotalPages] = useState(1);
+    const [type, setType] = useState("");
+    const [types, setTypes] = useState<SurveyTypeResponse[]>([]);
+    const [typesLoading, setTypesLoading] = useState(false);
 
     const { page, setPage, keyword, setKeyword } = useListQuery({
         defaultPage: 1,
@@ -25,21 +29,43 @@ export default function StudentSurveyListPageClient() {
 
     const [inputKeyword, setInputKeyword] = useState(keyword || "");
 
+    useEffect(() => {
+        const loadTypes = async () => {
+            setTypesLoading(true);
+            try {
+                const res = await fetchSurveyTypes();
+                setTypes(res.data);
+            } catch (e) {
+                console.error("Failed to load types", e);
+            } finally {
+                setTypesLoading(false);
+            }
+        };
+        loadTypes();
+    }, []);
+
+    const typeOptions = useMemo(() => {
+        return types.map(t => ({
+            value: t.typeCode,
+            label: t.typeName
+        }));
+    }, [types]);
+
     const load = useCallback(async () => {
         try {
-            setErrorMsg(null);
-            const res = await fetchAvailableSurveys(page, 10, keyword);
+            setLoading(true);
+            const res = await fetchAvailableSurveys(page, 10, keyword, type);
             setItems(res.data);
             if (res.meta) {
                 setTotalPages(res.meta.totalPages);
             }
         } catch (e: any) {
             console.error(e);
-            setErrorMsg(e.message || "설문 목록을 불러오는데 실패했습니다.");
+            toast.error(e.message || "설문 목록을 불러오는데 실패했습니다.");
         } finally {
             setLoading(false);
         }
-    }, [page, keyword]);
+    }, [page, keyword, type]);
 
     useEffect(() => {
         load();
@@ -47,9 +73,8 @@ export default function StudentSurveyListPageClient() {
 
     const handleSearch = useCallback(() => {
         setPage(1);
-        load(); // Force reload if needed, though useListQuery usually handles URL change
         setKeyword(inputKeyword);
-    }, [inputKeyword, setPage, setKeyword, load]);
+    }, [inputKeyword, setPage, setKeyword]);
 
     const columns: TableColumn<SurveyListItemDto>[] = [
         {
@@ -67,8 +92,8 @@ export default function StudentSurveyListPageClient() {
             render: (row) => {
                 switch (row.type) {
                     case "SATISFACTION": return "만족도 조사";
-                    case "COURSE": return "강의 설문";
-                    case "SERVICE": return "서비스 조사";
+                    case "COURSE": return "수강 설문";
+                    case "SERVICE": return "서비스 이용 조사";
                     default: return "기타";
                 }
             }
@@ -94,10 +119,11 @@ export default function StudentSurveyListPageClient() {
             stopRowClick: true,
             render: (row) => (
                 <Button
-                    variant="primary"
-                    onClick={() => router.push(`/student/surveys/${row.surveyId}`)}
+                    variant={row.isSubmitted ? "secondary" : "primary"}
+                    onClick={() => !row.isSubmitted && router.push(`/student/surveys/${row.surveyId}`)}
+                    disabled={row.isSubmitted}
                 >
-                    참여하기
+                    {row.isSubmitted ? "완료" : "참여하기"}
                 </Button>
             )
         },
@@ -109,17 +135,30 @@ export default function StudentSurveyListPageClient() {
                 <h1 className={styles.title}>진행 중인 설문</h1>
 
                 <div className={styles.searchRow}>
-                    <div className={styles.searchBarWrap}>
-                        <SearchBar
-                            value={inputKeyword}
-                            onChange={setInputKeyword}
-                            onSearch={handleSearch}
-                            placeholder="설문 제목 검색"
-                        />
+                    <div className={styles.searchGroup}>
+                        <div className={styles.dropdownWrap}>
+                            <Dropdown
+                                value={type}
+                                options={typeOptions}
+                                onChange={(val) => {
+                                    setPage(1);
+                                    setType(val);
+                                }}
+                                placeholder="전체 유형"
+                                loading={typesLoading}
+                            />
+                        </div>
+                        <div className={styles.searchBarWrap}>
+                            <SearchBar
+                                value={inputKeyword}
+                                onChange={setInputKeyword}
+                                onSearch={handleSearch}
+                                placeholder="설문 제목 검색"
+                            />
+                        </div>
                     </div>
                 </div>
 
-                {errorMsg && <div className={styles.errorMessage}>{errorMsg}</div>}
 
                 <div className={styles.tableWrap}>
                     <Table
@@ -128,7 +167,7 @@ export default function StudentSurveyListPageClient() {
                         rowKey={(row) => row.surveyId}
                         loading={loading}
                         skeletonRowCount={10}
-                        onRowClick={(row) => router.push(`/student/surveys/${row.surveyId}`)}
+                        onRowClick={(row) => !row.isSubmitted && router.push(`/student/surveys/${row.surveyId}`)}
                     />
                 </div>
 

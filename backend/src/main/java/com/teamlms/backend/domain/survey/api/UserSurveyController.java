@@ -3,6 +3,7 @@ package com.teamlms.backend.domain.survey.api;
 import com.teamlms.backend.domain.survey.api.dto.SurveyDetailResponse;
 import com.teamlms.backend.domain.survey.api.dto.SurveyListResponse;
 import com.teamlms.backend.domain.survey.api.dto.SurveySubmitRequest;
+import com.teamlms.backend.domain.survey.api.dto.SurveyTypeResponse;
 import com.teamlms.backend.domain.survey.service.SurveyQueryService;
 import com.teamlms.backend.domain.survey.service.SurveyResponseService;
 import com.teamlms.backend.global.api.ApiResponse;
@@ -26,14 +27,21 @@ public class UserSurveyController {
     private final SurveyQueryService queryService;
     private final SurveyResponseService responseService;
 
+    // 설문 유형 목록 조회
+    @GetMapping("/types")
+    public ApiResponse<List<SurveyTypeResponse>> getTypes() {
+        return ApiResponse.ok(queryService.getSurveyTypes());
+    }
+
     // 참여 가능 설문 조회
     @GetMapping("/available")
     public ApiResponse<List<SurveyListResponse>> listAvailable(
             @AuthenticationPrincipal AuthUser user,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) com.teamlms.backend.domain.survey.enums.SurveyType type) {
         
         // Note: original endpoint was /api/v1/surveys/available
-        return ApiResponse.ok(queryService.getAvailableSurveys(user.getAccountId(), keyword));
+        return ApiResponse.ok(queryService.getAvailableSurveys(user.getAccountId(), keyword, type));
     }
 
     // 설문 상세 조회

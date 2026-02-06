@@ -63,19 +63,21 @@ public class Survey extends BaseEntity {
         this.status = SurveyStatus.CLOSED;
     }
 
-    public void patch(String title, String description, LocalDateTime startAt, LocalDateTime endAt, SurveyStatus status) {
+    public void patch(String title, String description, LocalDateTime startAt, LocalDateTime endAt, SurveyStatus status, SurveyType type) {
         if (title != null) this.title = title;
         if (description != null) this.description = description;
         if (startAt != null) this.startAt = startAt;
         if (endAt != null) this.endAt = endAt;
         if (status != null) this.status = status;
+        if (type != null) this.type = type;
     }
 
-    public void update(String title, String description, LocalDateTime startAt, LocalDateTime endAt) {
+    public void update(String title, String description, LocalDateTime startAt, LocalDateTime endAt, SurveyType type) {
         this.title = title;
         this.description = description;
         this.startAt = startAt;
         this.endAt = endAt;
+        if (type != null) this.type = type;
     }
 
     public void increaseViewCount() {

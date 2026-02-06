@@ -14,6 +14,7 @@ import com.teamlms.backend.domain.survey.enums.SurveyTargetStatus;
 import com.teamlms.backend.domain.survey.repository.SurveyQuestionRepository;
 import com.teamlms.backend.domain.survey.repository.SurveyRepository;
 import com.teamlms.backend.domain.survey.repository.SurveyTargetRepository;
+import com.teamlms.backend.domain.survey.repository.SurveyTypeConfigRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class SurveyQueryService {
     private final AccountRepository accountRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final DeptRepository deptRepository;
+    private final SurveyTypeConfigRepository typeConfigRepository;
 
     // 관리자 목록 조회
     public Page<SurveyListResponse> getSurveyList(Long adminId, InternalSurveySearchRequest request, Pageable pageable) {
@@ -53,8 +55,18 @@ public class SurveyQueryService {
         );
     }
 
+    // 설문 유형 목록 조회
+    public List<SurveyTypeResponse> getSurveyTypes() {
+        return typeConfigRepository.findAllByIsActiveTrueOrderBySortOrderAsc().stream()
+                .map(t -> SurveyTypeResponse.builder()
+                        .typeCode(t.getTypeCode())
+                        .typeName(t.getTypeName())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     // 사용자 참여 가능 목록
-    public List<SurveyListResponse> getAvailableSurveys(Long userId, String keyword) {
+    public List<SurveyListResponse> getAvailableSurveys(Long userId, String keyword, com.teamlms.backend.domain.survey.enums.SurveyType type) {
         Account user = accountRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, userId));
 
@@ -63,7 +75,7 @@ public class SurveyQueryService {
         }
 
         // Using custom repository method
-        return surveyRepository.findAvailableSurveysForUser(userId, keyword);
+        return surveyRepository.findAvailableSurveysForUser(userId, keyword, type);
     }
 
     // 상세 조회

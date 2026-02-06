@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { createSurvey, fetchSurveyDetail, patchSurvey } from "../api/surveysApi";
+import { createSurvey, fetchSurveyDetail, patchSurvey, fetchSurveyTypes } from "../api/surveysApi";
 import {
     QuestionResponseDto,
     SurveyCreateRequest,
     SurveyPatchRequest,
+    SurveyType,
+    SurveyTypeResponse,
     TargetFilterDto as FilterDto
 } from "../api/types";
 
@@ -23,6 +25,8 @@ export function useSurveyDetail(idStr: string | undefined) {
     const [targetType, setTargetType] = useState<"ALL" | "DEPT" | "GRADE" | "DEPT_GRADE">("ALL");
     const [selectedDeptIds, setSelectedDeptIds] = useState<number[]>([]);
     const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
+    const [surveyType, setSurveyType] = useState<string>("ETC");
+    const [surveyTypes, setSurveyTypes] = useState<SurveyTypeResponse[]>([]);
 
     const createNewQuestion = useCallback((order: number): QuestionResponseDto => ({
         questionId: -Date.now() - Math.random(),
@@ -43,6 +47,7 @@ export function useSurveyDetail(idStr: string | undefined) {
             const res = await fetchSurveyDetail(id);
             const data = res.data;
             setTitle(data.title);
+            setSurveyType(data.type);
             setQuestions(data.questions || []);
 
             const fmt = (s: string) => s.replace(" ", "T");
@@ -73,7 +78,12 @@ export function useSurveyDetail(idStr: string | undefined) {
 
             setDates({ startAt: fmt(n), endAt: fmt(next) });
             setTargetType("ALL");
+            setSurveyType("ETC");
         }
+
+        fetchSurveyTypes().then(res => {
+            if (res.data) setSurveyTypes(res.data);
+        }).catch(console.error);
     }, [idStr, isNew, createNewQuestion, load]);
 
     const addQuestion = useCallback(() => {
@@ -176,7 +186,7 @@ export function useSurveyDetail(idStr: string | undefined) {
                 };
 
                 const payload: SurveyCreateRequest = {
-                    type: "ETC",
+                    type: surveyType as SurveyType,
                     title,
                     description: title,
                     startAt,
@@ -187,6 +197,7 @@ export function useSurveyDetail(idStr: string | undefined) {
                 await createSurvey(payload);
             } else {
                 const payload: SurveyPatchRequest = {
+                    type: surveyType as SurveyType,
                     title,
                     description: title,
                     startAt,
@@ -216,6 +227,8 @@ export function useSurveyDetail(idStr: string | undefined) {
             targetType,
             selectedDeptIds,
             selectedGrades,
+            surveyType,
+            surveyTypes,
         },
         actions: {
             setTitle,
@@ -224,6 +237,7 @@ export function useSurveyDetail(idStr: string | undefined) {
             setTargetType,
             setSelectedDeptIds,
             setSelectedGrades,
+            setSurveyType,
             addQuestion,
             removeQuestion,
             updateQuestion,

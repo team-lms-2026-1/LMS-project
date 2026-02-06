@@ -4,16 +4,22 @@ import {
     SurveyDetailResponse,
     SurveySubmitRequest,
     SurveyListResponse,
+    SurveyTypeResponse,
 } from "./types";
 import { SuccessResponse } from "@/features/curricular/api/types";
 
 const BASE_URL = "/api/student/surveys";
 
-export async function fetchAvailableSurveys(page: number, size: number, keyword?: string) {
+export async function fetchSurveyTypes() {
+    return getJson<import("./types").ApiResponse<SurveyTypeResponse[], null>>(`${BASE_URL}/types`);
+}
+
+export async function fetchAvailableSurveys(page: number, size: number, keyword?: string, type?: string) {
     const params = new URLSearchParams({
         page: String(page),
         size: String(size),
         ...(keyword ? { keyword } : {}),
+        ...(type ? { type } : {}),
     });
 
     return getJson<SurveyListResponse>(`${BASE_URL}/available?${params.toString()}`);

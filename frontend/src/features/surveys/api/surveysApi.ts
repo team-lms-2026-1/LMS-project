@@ -11,11 +11,16 @@ import { SuccessResponse } from "@/features/curricular/api/types";
 
 const BASE_URL = "/api/admin/surveys";
 
-export async function fetchSurveysList(page: number, size: number, keyword?: string) {
+export async function fetchSurveyTypes() {
+    return getJson<import("./types").ApiResponse<import("./types").SurveyTypeResponse[], null>>(`${BASE_URL}/types`);
+}
+
+export async function fetchSurveysList(page: number, size: number, keyword?: string, type?: string) {
     const params = new URLSearchParams({
         page: String(page),
         size: String(size),
         ...(keyword ? { keyword } : {}),
+        ...(type ? { type } : {}),
     });
 
     return getJson<SurveyListResponse>(`${BASE_URL}?${params.toString()}`);

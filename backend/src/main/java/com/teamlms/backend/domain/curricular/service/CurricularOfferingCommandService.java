@@ -301,7 +301,7 @@ public class CurricularOfferingCommandService {
         var ids = reqs.stream().map(OfferingCompetencyMappingPatchRequest::competencyId).distinct().toList();
         long existCount = competencyRepository.countByCompetencyIdIn(ids); // 이런 메서드 하나 추가 추천
         if (existCount != ids.size()) {
-            throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, "some competencyId not found");
+            throw new BusinessException(ErrorCode.COMPETENCY_ID_INVALID);
         }
 
         // ✅ 핵심: 기존 맵핑 전부 삭제 후 재생성
