@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamlms.backend.domain.log.api.dto.LogExportRequest;
 import com.teamlms.backend.domain.log.entity.AccountAccessLog;
 import com.teamlms.backend.domain.log.repository.AccountAccessLogRepository;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,18 +64,18 @@ public class ExcelDownloadService {
 
     private void validate(LogExportRequest req) {
         if (req.getFilter() == null) {
-            throw new IllegalArgumentException("filter is required");
+            throw new BusinessException(ErrorCode.LOG_EXPORT_FILTER_REQUIRED);
         }
         LocalDateTime from = req.getFilter().getFrom();
         LocalDateTime to = req.getFilter().getTo();
 
         if (from != null && to != null && from.isAfter(to)) {
-            throw new IllegalArgumentException("from must be before or equal to to");
+            throw new BusinessException(ErrorCode.LOG_DATE_RANGE_INVALID);
         }
 
         // 지금은 로그 도메인만: ACCESS_LOG만 지원
         if (!"ACCESS_LOG".equals(req.getResourceCode())) {
-            throw new IllegalArgumentException("unsupported resourceCode: " + req.getResourceCode());
+            throw new BusinessException(ErrorCode.LOG_RESOURCE_NOT_SUPPORTED);
         }
     }
 
@@ -85,7 +87,7 @@ public class ExcelDownloadService {
         // 기간이 없으면 너무 커질 수 있어서 기본 기간을 잡아도 됨(정책 선택)
         // 여기선 "둘 다 null 가능"로 두고 전체 조회는 금지 -> 필요하면 막자.
         if (from == null && to == null) {
-            throw new IllegalArgumentException("from/to is required for export (to prevent huge downloads)");
+             throw new BusinessException(ErrorCode.LOG_EXPORT_PERIOD_REQUIRED);
         }
 
         // to만 없으면 "현재"까지
@@ -93,7 +95,7 @@ public class ExcelDownloadService {
             to = LocalDateTime.now();
         // from만 없으면 "과거 무한"이 되므로 금지(정책)
         if (from == null) {
-            throw new IllegalArgumentException("from is required when to is provided");
+            throw new BusinessException(ErrorCode.LOG_EXPORT_PERIOD_REQUIRED);
         }
 
         if (targetAccountId != null) {

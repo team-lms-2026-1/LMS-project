@@ -48,42 +48,50 @@
 /* --- 초기 / 비활성 / 대기 --- */
 .status_PLANNED,
 .status_DRAFT,
-.status_INACTIVE {
-  background: #6b7280; /* gray-500 */
+.status_INACTIVE,
+.status_PENDING {
+  background: #6b7280;
+  /* gray-500 */
 }
 
 /* --- 활성 / 운영 / 진행중 (행위) --- */
 .status_OPEN,
 .status_ACTIVE {
-  background: #2563eb; /* blue-600 */
+  background: #2563eb;
+  /* blue-600 */
 }
 
 /* --- 진행중 (프로세스/이수) --- */
 .status_PROGRESS,
 .status_IN_PROGRESS {
-  background: #f59e0b; /* amber-500 */
+  background: #f59e0b;
+  /* amber-500 */
 }
 
 /* --- 완료 / 성공 --- */
 .status_COMPLETED,
 .status_PASSED {
-  background: #16a34a; /* green-600 */
+  background: #16a34a;
+  /* green-600 */
 }
 
 /* --- 수강중 (활성 상태지만 완료 전) --- */
 .status_ENROLLED {
-  background: #2563eb; /* blue-600 (ACTIVE 계열과 통일) */
+  background: #2563eb;
+  /* blue-600 (ACTIVE 계열과 통일) */
 }
 
 /* --- 마감 / 종료(정상 종료) --- */
 .status_ENROLL_CLOSED,
 .status_ENROLLMENT_CLOSED,
 .status_CLOSED {
-  background: #374151; /* gray-700 */
+  background: #374151;
+  /* gray-700 */
 }
 
 /* --- 취소 / 실패 / 중단 --- */
 .status_CANCELED,
 .status_FAILED {
-  background: #dc2626; /* red-600 */
+  background: #dc2626;
+  /* red-600 */
 }

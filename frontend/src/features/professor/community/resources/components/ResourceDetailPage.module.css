@@ -1,0 +1,201 @@
+.page {
+    padding: 24px;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.crumb {
+    cursor: pointer;
+}
+
+.crumb:hover {
+    text-decoration: underline;
+}
+
+.sep {
+    color: #9ca3af;
+}
+
+.current {
+    color: #111827;
+    font-weight: 700;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+    margin: 0 0 14px 0;
+}
+
+.errorMessage {
+    margin: 10px 0;
+    padding: 10px 12px;
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #b91c1c;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.loadingBox {
+    padding: 18px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.detailBox {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.headRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.headTitle {
+    font-size: 14px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.metaRow {
+    display: flex;
+    gap: 18px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    flex-wrap: wrap;
+}
+
+.metaItem {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.metaLabel {
+    color: #6b7280;
+    font-weight: 700;
+}
+
+.metaValue {
+    color: #111827;
+    font-weight: 700;
+}
+
+.contentBox {
+    padding: 14px;
+    background: #fff;
+    min-height: 220px;
+}
+
+.contentText {
+    white-space: pre-wrap;
+    line-height: 1.7;
+    font-size: 13px;
+    color: #111827;
+}
+
+.attachBox {
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+}
+
+.attachRow {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px;
+    padding: 12px 14px;
+    align-items: start;
+}
+
+.attachLabel {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 800;
+}
+
+.attachList {
+    font-size: 13px;
+    color: #111827;
+}
+
+.attachUl {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.attachLi {
+    margin: 4px 0;
+}
+
+.attachLink {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.attachLink:hover {
+    text-decoration: underline;
+}
+
+.attachName {
+    color: #111827;
+}
+
+.attachEmpty {
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+.footerRow {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 14px;
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+}
+
+.backBtn {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #111827;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.backBtn:hover {
+    background: #f9fafb;
+}

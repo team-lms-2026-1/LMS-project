@@ -12,6 +12,9 @@ public interface NoticeCategoryRepository extends JpaRepository<NoticeCategory, 
     // 이름 중복 검사 및 조회를 위한 메서드
     Optional<NoticeCategory> findByName(String name);
 
-    // 추가: 검색 기능 (이름에 키워드가 포함된 경우 페이징 조회)
+    // 이름 존재 여부 확인 (중복 검사용)
+    boolean existsByName(String name);
+
+    // 검색 기능 (이름에 키워드가 포함된 경우 페이징 조회)
     Page<NoticeCategory> findByNameContaining(String keyword, Pageable pageable);
 }

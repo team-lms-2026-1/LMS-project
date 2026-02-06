@@ -1,0 +1,41 @@
+.page {
+    padding: 0;
+    min-height: 100vh;
+    background-color: transparent;
+}
+
+.card {
+    background: transparent;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+
+.footerRow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* 버튼은 오른쪽 */
+    margin-top: 20px;
+    height: 40px;
+}
+
+/* PaginationSimple을 가운데 고정 */
+.footerRow> :first-child {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.searchRow {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 16px;
+}

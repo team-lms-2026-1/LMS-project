@@ -47,8 +47,8 @@ const SECTIONS: NavSection[] = [
     key: "mentoring",
     title: "멘토링",
     items: [
-      { label: "멘토링 신청", href: "/student/mentoring/apply" },
-      { label: "질문", href: "/student/mentoring/questions" },
+      { label: "멘티 신청", href: "/student/mentoring/apply" },
+      { label: "멘토링 채팅", href: "/student/mentoring/chat" },
     ],
   },
   {
@@ -61,16 +61,21 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
+    key: "survey",
+    title: "설문",
+    items: [
+      { label: "설문 목록", href: "/student/surveys" },
+    ],
+  },
+  {
     key: "space",
     title: "학습공간대여",
     items: [
-      { label: "학습공간대여 및 신청", href: "/student/space" },
-      { label: "신청내역확인", href: "/student/space/history" },
+      { label: "학습공간대여 및 신청", href: "/student/study-space/spaces" },
+      { label: "신청내역확인", href: "/student/study-space/spaces-rentals" },
     ],
   },
 ];
-
-
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");

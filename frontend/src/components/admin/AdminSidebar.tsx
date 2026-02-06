@@ -72,7 +72,11 @@ const SECTIONS: NavSection[] = [
   {
     key: "mentoring",
     title: "멘토링",
-    items: [{ label: "멘토링 관리", href: "/competencies" }],
+    items: [
+      { label: "모집 공고 등록", href: "/admin/mentoring/recruitments" },
+      { label: "신청 승인", href: "/admin/mentoring/applications" },
+      { label: "멘토-멘티 매칭", href: "/admin/mentoring/matching" },
+    ],
   },
   {
     key: "counsel",
@@ -82,7 +86,10 @@ const SECTIONS: NavSection[] = [
   {
     key: "space",
     title: "학습 공간 대여",
-    items: [{ label: "대여 현황", href: "/competencies" }],
+    items: [
+      { label: "학습공간 목록", href: "/admin/study-space/spaces" },
+      { label: "학습공간 신청 목록", href: "/admin/study-space/spaces-rentals" },
+    ],
   },
 ];
 

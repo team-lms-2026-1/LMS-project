@@ -97,34 +97,40 @@ export async function getJson<T>(input: string, init: JsonFetchOptions = {}): Pr
     throw new ApiError(msg, res.status, body);
   }
 
-  // 성공이지만 JSON이 아니고 내용도 있는 경우 (HTML 에러 페이지 등)
-  if (!isJson && body && typeof body === 'string' && body.trim().length > 0) {
-    // 단, 우리가 명시적으로 void를 기대하거나 하지 않는 이상, 
-    // 200 OK에 일반 텍스트가 왔다면 에러로 칠지 말지는 비즈니스 로직에 따르지만
-    // 여기서는 "엄격한 JSON 클라이언트"로서 경고 혹은 에러를 냅니다.
-
-    // 하지만 백엔드가 간혹 text/plain으로 "OK" 만 보내는 경우도 있으므로
-    // 무작정 에러를 내기보다, 파싱된 body를 반환하는게 안전할 수 있습니다.
-    // 기존 로직 유지: NON_JSON 에러 발생 시키되, 디버깅 정보 제공
-
-    // *수정*: 사용자가 "저장 실패"라고 느끼는 원인이 200 OK일때 빈 스트링이 와서 
-    // isJson=false -> NON_JSON 에러 타는 케이스일 확률 높음.
-    // 따라서 내용이 비어있다면 통과시킵니다.
-  }
-
-  // body가 빈 문자열("")이고 isJson이 false인 경우 -> 성공으로 취급
-  if (!isJson && (!body || (typeof body === 'string' && body.trim() === ""))) {
-    return null as T;
-  }
-
-  // 진짜 HTML이나 이상한 텍스트가 온 경우
-  if (!isJson) {
-    console.warn("[getJson] Received Non-JSON successful response:", body);
-    // 필요하다면 에러를 던지지 않고 그냥 리턴하거나, 
-    // 프로젝트 룰에 따라 ApiError를 던짐.
-    // 지금 문제는 '성공했음에도 실패' 뜨는 것이므로, 일단 넘겨주는게 낫습니다.
-    // throw new ApiError(...) -> 제거 또는 완화
-  }
-
   return body as T;
+}
+
+export async function postJson<T>(input: string, bodyObj: any, init: JsonFetchOptions = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  return getJson<T>(input, {
+    ...init,
+    method: "POST",
+    headers,
+    body: JSON.stringify(bodyObj),
+  });
+}
+
+export async function patchJson<T>(input: string, bodyObj: any, init: JsonFetchOptions = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  return getJson<T>(input, {
+    ...init,
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(bodyObj),
+  });
+}
+
+export async function deleteJson<T>(input: string, init: JsonFetchOptions = {}): Promise<T> {
+  return getJson<T>(input, {
+    ...init,
+    method: "DELETE",
+  });
 }

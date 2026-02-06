@@ -1,0 +1,57 @@
+/* Table Card */
+.tableCard {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 파란색 테두리 래퍼 (디자인 반영) */
+.tableBorderWrap {
+    border: 2px solid #3b82f6;
+    border-radius: 6px;
+    margin: 0;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.thead {
+    background-color: #fafafa;
+    border-bottom: 1px solid #eee;
+}
+
+.th {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+
+.tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.tbody tr:last-child {
+    border-bottom: none;
+}
+
+.td {
+    padding: 16px;
+    font-size: 14px;
+    color: #444;
+    vertical-align: middle;
+}
+
+/* Status Buttons */
+.btnGroup {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}

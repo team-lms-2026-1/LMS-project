@@ -1,75 +1,57 @@
-.container {
-    padding: 24px;
+.page {
+    padding: 0;
 }
 
-.header {
+.card {
+    background: transparent;
+}
+
+.headerRow {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 24px;
 }
 
 .title {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
 }
 
-.searchWrapper {
-    width: 300px;
+.searchRow {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
+.footerRow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.footerLeft {
+    justify-self: start;
+}
+
+.footerCenter {
+    justify-self: center;
+}
+
+.footerRight {
+    justify-self: end;
+}
+
+.tableWrap {
+    margin-bottom: 16px;
     background: white;
     border-radius: 8px;
-    overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.table th,
-.table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.table th {
-    background-color: #f9fafb;
-    font-weight: 600;
-    color: #374151;
-}
-
-.table tr:hover {
-    background-color: #f3f4f6;
-}
-
-.statusBadge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.statusOpen {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-
-.statusClosed {
-    background-color: #f3f4f6;
-    color: #374151;
-}
-
-.link {
-    color: #2563eb;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.link:hover {
-    text-decoration: underline;
+    overflow: hidden;
 }
 
 .titleLink {

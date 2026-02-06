@@ -40,16 +40,26 @@ public class StudentProfile extends BaseEntity {
     @Column(name = "grade_level", nullable = false)
     private Integer gradeLevel;
 
-    @Column(name= "dept_id", nullable = false)
+    @Column(name = "dept_id", nullable = false)
     private Long deptId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "academic_status", nullable = false, length = 20)
     private AcademicStatus academicStatus; // ENROLLED | DROPPED | LEAVE | GRADUATED
-    
-    /* =========================
-       domain update methods
-       ========================= */
+
+    // 추가
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
+    /*
+     * =========================
+     * domain update methods
+     * =========================
+     */
+    // 추가
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 
     public void updateName(String name) {
         this.name = name;
@@ -62,7 +72,6 @@ public class StudentProfile extends BaseEntity {
     public void updateDeptId(Long deptId) {
         this.deptId = deptId;
     }
-
 
     public void updatePhone(String phone) {
         this.phone = phone;

@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.account.repository;
 
 import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,8 @@ import java.util.Optional;
 public interface AccountRepository extends JpaRepository<Account, Long>, AccountRepositoryCustom {
 
     Optional<Account> findByLoginId(String string);
+
+    List<Account> findAllByAccountType(AccountType accountType);
 
     boolean existsByLoginId(String loginId);
 

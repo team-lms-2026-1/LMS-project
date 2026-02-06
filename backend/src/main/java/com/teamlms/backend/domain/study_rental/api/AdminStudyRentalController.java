@@ -1,6 +1,5 @@
 package com.teamlms.backend.domain.study_rental.api;
 
-import com.teamlms.backend.domain.account.entity.Account; // 
 import com.teamlms.backend.domain.study_rental.api.dto.RentalProcessRequest;
 import com.teamlms.backend.domain.study_rental.api.dto.RentalResponse;
 import com.teamlms.backend.domain.study_rental.dto.RentalSearchCondition;
@@ -10,9 +9,6 @@ import com.teamlms.backend.domain.study_rental.service.StudyRentalQueryService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
 import com.teamlms.backend.global.api.dto.SuccessResponse;
-import com.teamlms.backend.global.exception.base.BusinessException;
-import com.teamlms.backend.global.exception.code.ErrorCode;
-import com.teamlms.backend.global.security.principal.AuthUser;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +40,9 @@ public class AdminStudyRentalController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long spaceId,
-            @RequestParam(required = false) RentalStatus status
-    ) {
+            @RequestParam(required = false) RentalStatus status) {
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by(Sort.Direction.DESC, "appliedAt"));
-        
+
         RentalSearchCondition condition = RentalSearchCondition.builder()
                 .keyword(keyword)
                 .spaceId(spaceId)
@@ -64,29 +59,10 @@ public class AdminStudyRentalController {
     public ApiResponse<SuccessResponse> processRental(
             @PathVariable Long rentalId,
             @Valid @RequestBody RentalProcessRequest req,
-            @AuthenticationPrincipal Object principal // Object로 받음
-    ) {
-        Long accountId;
+            @AuthenticationPrincipal Object principal) {
 
-   
-        if (principal instanceof AuthUser) {
-            accountId = ((AuthUser) principal).getAccountId();
-        } 
-        else if (principal instanceof Account) {
-            accountId = ((Account) principal).getAccountId();
-        } 
-        else if (principal instanceof Long) {
-            accountId = (Long) principal;
-        } 
-        else {
-            throw new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND);
-        }
+        commandService.processRental(principal, rentalId, req);
 
-
-        log.info("Rental Process - Admin Account ID: {}", accountId);
-
-        commandService.processRental(accountId, rentalId, req);
-        
         return ApiResponse.ok(new SuccessResponse());
     }
 }

@@ -1,0 +1,258 @@
+.page {
+  padding: 24px;
+}
+
+.breadcrumb {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.08);
+}
+
+/* 상단: 이미지 / 폼 */
+.topGrid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 22px;
+}
+
+.imagePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.imageBox {
+  border: 2px dashed #d1d5db;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f9fafb;
+  aspect-ratio: 16 / 10;
+  position: relative;
+  cursor: pointer;
+  display: block;
+}
+
+.fileInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dropText {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 6px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.dropTitle {
+  font-weight: 800;
+  color: #6b7280;
+}
+
+.dropHint {
+  font-size: 12px;
+}
+
+.imageActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.imageRule {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.formPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nameRow {
+  display: flex;
+}
+
+.nameInput {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-weight: 900;
+  outline: none;
+}
+
+.locationRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.locationInput {
+  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.checkRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.descTextarea {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-height: 140px;
+  font-size: 13px;
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+}
+
+.divider {
+  margin: 18px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* 룰 */
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ruleRow {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ruleIndex {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+}
+
+.ruleContent {
+  min-width: 0;
+}
+
+.ruleText {
+  font-size: 13px;
+  color: #111827;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.ruleInput {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.ruleActions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.addRow {
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 6px 0;
+}
+
+.addBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addBtn:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+}
+
+/* 하단 버튼 */
+.bottomActions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.dangerBtn {
+  border-color: #fecaca !important;
+  color: #b91c1c !important;
+}
+
+@media (max-width: 980px) {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+  .bottomActions {
+    justify-content: flex-start;
+  }
+  .ruleRow {
+    grid-template-columns: 42px 1fr;
+    align-items: start;
+  }
+  .ruleActions {
+    grid-column: 2 / 3;
+    margin-top: 8px;
+  }
+}

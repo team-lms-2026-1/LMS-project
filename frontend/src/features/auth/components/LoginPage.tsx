@@ -18,7 +18,7 @@ export default function LoginPage() {
     const prefix = (loginId?.trim()?.[0] ?? "").toLowerCase();
     if (prefix === "a") return "/admin";
     if (prefix === "s") return "/";
-    if (prefix === "p") return "/pro";
+    if (prefix === "p") return "/professor";
     // 예외: 규칙 밖이면 기본값(원하면 변경)
     return "/";
   }

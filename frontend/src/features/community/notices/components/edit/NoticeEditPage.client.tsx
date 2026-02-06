@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./NoticeEditPage.module.css";
 import type { Category, NoticeListItemDto } from "../../api/types";
-import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/noticesApi";
+import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/NoticesApi";
 import { Button } from "@/components/button";
 
 /** ✅ 이 화면 내부에서만 쓰는 "기존 첨부" 타입: attachmentId 기반 */
