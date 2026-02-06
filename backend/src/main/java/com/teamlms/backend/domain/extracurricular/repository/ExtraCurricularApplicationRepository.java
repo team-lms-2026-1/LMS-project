@@ -34,7 +34,7 @@ public interface ExtraCurricularApplicationRepository
     /**
      * 이수 결과 확정
      */
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("""
         update ExtraCurricularApplication a
         set a.completionStatus = :completionStatus,
@@ -50,7 +50,13 @@ public interface ExtraCurricularApplicationRepository
     Optional<ExtraCurricularApplication> findByExtraOfferingIdAndStudentAccountId(Long extraOfferingId, Long studentAccountId);
 
     boolean existsByExtraOfferingIdAndStudentAccountId(Long extraOfferingId, Long studentAccountId);
-    
+
+    boolean existsByExtraOfferingIdAndStudentAccountIdAndApplyStatus(
+        Long extraOfferingId,
+        Long studentAccountId,
+        ExtraApplicationApplyStatus applyStatus
+    );    
+
     @Query("""
         select a
           from ExtraCurricularApplication a
@@ -63,4 +69,13 @@ public interface ExtraCurricularApplicationRepository
         @Param("studentAccountId") Long studentAccountId,
         @Param("semesterId") Long semesterId
     );
+    
+    @Query("""
+        select a.applicationId
+        from ExtraCurricularApplication a
+        where a.extraOfferingId = :extraOfferingId
+        and a.studentAccountId = :studentAccountId
+        and a.applyStatus = com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus.APPLIED
+    """)
+    Optional<Long> findAppliedApplicationId(Long extraOfferingId, Long studentAccountId);
 }

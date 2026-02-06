@@ -166,6 +166,90 @@ public enum ErrorCode {
         "extra.application.status.conflict"
     ),
 
+    EXTRA_SESSION_VIDEO_UPLOAD_NOT_ALLOWED_STATUS(
+        HttpStatus.CONFLICT,
+        "EXTRA_SESSION_VIDEO_UPLOAD_NOT_ALLOWED_STATUS",
+        "현재 운영 상태에서는 회차 동영상 업로드가 불가합니다.",
+        "extra.session.video.upload.notAllowedStatus"
+    ),
+
+    EXTRA_SESSION_VIDEO_CONTENT_TYPE_NOT_ALLOWED(
+        HttpStatus.BAD_REQUEST,
+        "EXTRA_SESSION_VIDEO_CONTENT_TYPE_NOT_ALLOWED",
+        "허용되지 않은 동영상 형식입니다.",
+        "extra.session.video.contentType.notAllowed"
+    ),
+
+    EXTRA_SESSION_NOT_ALLOWED_IN_CURRENT_OFFERING_STATUS(
+        HttpStatus.CONFLICT,
+        "EXTRA_SESSION_NOT_ALLOWED_IN_CURRENT_OFFERING_STATUS",
+        "현재 운영 상태에서는 세션을 추가하거나 수정할 수 없습니다.",
+        "extra.session.notAllowedInCurrentOfferingStatus"
+    ),
+
+    EXTRA_SESSION_REWARD_POINT_EXCEEDS_OFFERING_CAP(
+        HttpStatus.CONFLICT,
+        "EXTRA_SESSION_REWARD_POINT_EXCEEDS_OFFERING_CAP",
+        "세션 포인트 합계가 운영에 설정된 총 포인트를 초과할 수 없습니다.",
+        "extra.session.rewardPoint.exceedsOfferingCap"
+    ),
+
+    EXTRA_SESSION_RECOGNIZED_HOURS_EXCEEDS_OFFERING_CAP(
+        HttpStatus.CONFLICT,
+        "EXTRA_SESSION_RECOGNIZED_HOURS_EXCEEDS_OFFERING_CAP",
+        "세션 인정시간 합계가 운영에 설정된 총 인정시간을 초과할 수 없습니다.",
+        "extra.session.recognizedHours.exceedsOfferingCap"
+    ),
+
+    EXTRA_CURRICULAR_OFFERING_REWARD_POINT_NOT_MATCHED_WITH_SESSIONS(
+        HttpStatus.CONFLICT,
+        "EXTRA_CURRICULAR_OFFERING_REWARD_POINT_NOT_MATCHED_WITH_SESSIONS",
+        "운영의 총 포인트와 세션 포인트 합계가 일치하지 않습니다.",
+        "extra.offering.rewardPoint.notMatchedWithSessions"
+    ),
+
+    EXTRA_CURRICULAR_OFFERING_RECOGNIZED_HOURS_NOT_MATCHED_WITH_SESSIONS(
+        HttpStatus.CONFLICT,
+        "EXTRA_CURRICULAR_OFFERING_RECOGNIZED_HOURS_NOT_MATCHED_WITH_SESSIONS",
+        "운영의 총 인정시간과 세션 인정시간 합계가 일치하지 않습니다.",
+        "extra.offering.recognizedHours.notMatchedWithSessions"
+    ),
+
+    EXTRA_SESSION_WATCH_NOT_COMPLETED(
+        HttpStatus.CONFLICT,
+        "EXTRA_SESSION_WATCH_NOT_COMPLETED",
+        "동영상 시청이 완료되지 않았습니다.",
+        "extra.session.watch.notCompleted"
+    ),
+
+    EXTRA_SESSION_VIDEO_NOT_FOUND(
+        HttpStatus.NOT_FOUND,
+        "EXTRA_SESSION_VIDEO_NOT_FOUND",
+        "세션에 연결된 동영상 정보를 찾을 수 없습니다.",
+        "extra.session.video.notFound"
+    ),
+
+    EXTRA_SESSION_TIME_INVALID(
+        HttpStatus.BAD_REQUEST,
+        "EXTRA_SESSION_TIME_INVALID",
+        "세션 시작/종료 시간이 올바르지 않습니다.",
+        "extra.session.time.invalid"
+    ),
+
+    EXTRA_SESSION_STATUS_LOCKED(
+        HttpStatus.CONFLICT,
+        "EXTRA_SESSION_STATUS_LOCKED",
+        "OPEN 상태의 세션만 수정할 수 있습니다.",
+        "extra.session.status.locked"
+    ),
+    
+    EXTRA_SESSION_STATUS_TRANSITION_NOT_ALLOWED(
+        HttpStatus.CONFLICT,
+        "EXTRA_SESSION_STATUS_TRANSITION_NOT_ALLOWED",
+        "허용되지 않는 세션 상태 변경입니다.",
+        "extra.session.status.transition.notAllowed"
+    ),
+
     // =========================
     // Domain: Competency
     // =========================

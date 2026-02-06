@@ -28,6 +28,7 @@ import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferin
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferingPatchRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionCreateRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionDetailResponse;
+import com.teamlms.backend.domain.extracurricular.api.dto.AdminExtraCurricularSessionDetailRow;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionListItem;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingBulkUpdateRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingItem;
@@ -105,7 +106,7 @@ public class AdminExtraCurricularOfferingController {
             @PathVariable Long extraOfferingId,
             @Validated @RequestBody ExtraOfferingStatusChangeRequest req
     ) {
-        extraCurricularOfferingCommandService.changeStatus(extraOfferingId, req.targetStatus());
+        extraCurricularOfferingCommandService.changeStatus(extraOfferingId, req.status());
         return ApiResponse.ok(new SuccessResponse());
     }
 
@@ -117,15 +118,6 @@ public class AdminExtraCurricularOfferingController {
         return ApiResponse.ok(extracurricularOfferingQueryService.getBasicDetail(extraOfferingId));
     }
 
-    // 세션 생성
-    @PostMapping("/{extraOfferingId}/sessions")
-    public ApiResponse<SuccessResponse> createSession(
-        @PathVariable Long extraOfferingId,
-        @Valid @RequestBody ExtraCurricularSessionCreateRequest req
-    ) {
-        adminSessionCommandService.create(extraOfferingId, req);
-        return ApiResponse.ok(new SuccessResponse());
-    }
 
     // 세션 목록
     @GetMapping("/{extraOfferingId}/sessions")
@@ -151,7 +143,7 @@ public class AdminExtraCurricularOfferingController {
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 세션 상세
+    // 3) 세션 상세 (previewUrl 포함)
     @GetMapping("/{extraOfferingId}/sessions/{sessionId}")
     public ApiResponse<ExtraCurricularSessionDetailResponse> getSessionDetail(
         @PathVariable Long extraOfferingId,

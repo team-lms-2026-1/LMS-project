@@ -17,8 +17,12 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
 
-      AWS_ACCESS_KEY: ${MY_AWS_ACCESS_KEY}
-      AWS_SECRET_KEY: ${MY_AWS_SECRET_KEY}
+
+      APP_S3_PRESIGN_PUT_EXPIRES_SECONDS: "300"
+      APP_S3_PRESIGN_KEY_PREFIX: "lms/extra-session-videos"
+
+      AWS_ACCESS_KEY_ID: ${MY_AWS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${MY_AWS_SECRET_KEY}
       TZ: Asia/Seoul
     ports:
       - "8080:8080"
