@@ -1,3 +1,5 @@
+import { ApiResponse, PageMeta } from "../../curricular/api/types";
+
 export type SurveyStatus = "DRAFT" | "OPEN" | "CLOSED";
 export type SurveyType = "SATISFACTION" | "COURSE" | "SERVICE" | "ETC";
 
@@ -14,7 +16,7 @@ export const SurveyTypeLabel: Record<SurveyType, string> = {
   ETC: "기타",
 };
 
-export interface SurveyListResponse {
+export interface SurveyListItemDto {
   surveyId: number;
   type: SurveyType;
   title: string;
@@ -25,7 +27,7 @@ export interface SurveyListResponse {
   createdAt: string;
 }
 
-
+export type SurveyListResponse = ApiResponse<SurveyListItemDto[], PageMeta>;
 
 export type SurveyQuestionType = "RATING" | "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "ESSAY";
 
@@ -45,11 +47,11 @@ export interface QuestionResponseDto {
   minLabel: string;
   maxLabel: string;
   isRequired: boolean;
-  questionType?: SurveyQuestionType;
+  questionType: SurveyQuestionType;
   options?: string[];
 }
 
-export interface SurveyDetailResponse {
+export interface SurveyDetailDto {
   surveyId: number;
   type: SurveyType;
   title: string;
@@ -60,7 +62,9 @@ export interface SurveyDetailResponse {
   questions: QuestionResponseDto[];
 }
 
-export interface QuestionStats {
+export type SurveyDetailResponse = ApiResponse<SurveyDetailDto, null>;
+
+export interface QuestionStatsDto {
   questionId: number;
   title: string;
   type: SurveyQuestionType;
@@ -68,7 +72,7 @@ export interface QuestionStats {
   essayAnswers: string[];
 }
 
-export interface SurveyStatsResponse {
+export interface SurveyStatsDto {
   surveyId: number;
   title: string;
   description: string;
@@ -80,8 +84,10 @@ export interface SurveyStatsResponse {
   responseByDept: Record<string, number>;
   responseByGrade: Record<string, number>;
   createdAt: string;
-  questions: QuestionStats[];
+  questions: QuestionStatsDto[];
 }
+
+export type SurveyStatsResponse = ApiResponse<SurveyStatsDto, null>;
 
 // Request DTOs
 export interface QuestionDto {
@@ -97,7 +103,7 @@ export interface QuestionDto {
 }
 
 export interface TargetFilterDto {
-  genType: "ALL" | "DEPT" | "GRADE" | "DEPT_GRADE"; // [추가] DEPT_GRADE
+  genType: "ALL" | "DEPT" | "GRADE" | "DEPT_GRADE";
   deptIds?: number[];
   userIds?: number[];
   gradeLevels?: number[];
@@ -113,16 +119,25 @@ export interface SurveyCreateRequest {
   targetFilter?: TargetFilterDto;
 }
 
-
-export interface SurveyUpdateRequest {
-  title: string;
+export interface SurveyPatchRequest {
+  title?: string;
   description?: string;
-  startAt: string;
-  endAt: string;
-  questions: QuestionDto[];
+  startAt?: string;
+  endAt?: string;
+  questions?: QuestionDto[];
 }
 
 export interface SurveySubmitRequest {
   surveyId: number;
   responses: Record<string, any>; // key: questionId, value: score | text | string[]
 }
+
+export interface SurveyParticipantDto {
+  targetId: number;
+  accountId: number;
+  loginId: string;
+  status: string;
+  submittedAt: string | null;
+}
+
+export type SurveyParticipantResponse = ApiResponse<SurveyParticipantDto[], PageMeta>;

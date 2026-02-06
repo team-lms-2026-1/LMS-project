@@ -3,3 +3,5 @@ export type { ButtonProps, ButtonVariant } from "./Button";
 
 export { DeleteActionButton } from "./DeleteActionButton";
 export type { DeleteActionButtonProps } from "./DeleteActionButton";
+
+export { OutButton } from "./OutButton";

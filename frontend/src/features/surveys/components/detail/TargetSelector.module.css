@@ -1,0 +1,74 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.typeSelector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 16px;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e1e7f0;
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+}
+
+.radioLabel input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.selectionArea {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.guideText {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.chipGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background-color: #fff;
+    font-size: 13px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chip:hover {
+    background-color: #f1f5f9;
+}
+
+.chipActive {
+    background-color: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.chipActive:hover {
+    background-color: #1d4ed8;
+}

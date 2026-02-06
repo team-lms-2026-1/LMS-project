@@ -255,7 +255,10 @@ public enum ErrorCode {
     SURVEY_NOT_TARGET(HttpStatus.FORBIDDEN, "SURVEY_NOT_TARGET", "해당 설문의 대상자가 아닙니다.", "survey.notTarget"),
     SURVEY_ALREADY_SUBMITTED(HttpStatus.CONFLICT, "SURVEY_ALREADY_SUBMITTED", "이미 응답을 제출한 설문입니다.",
             "survey.alreadySubmitted"),
-    SURVEY_NOT_OPEN(HttpStatus.BAD_REQUEST, "SURVEY_NOT_OPEN", "현재 진행 중인 설문이 아닙니다.", "survey.notOpen");
+    SURVEY_NOT_OPEN(HttpStatus.BAD_REQUEST, "SURVEY_NOT_OPEN", "현재 진행 중인 설문이 아닙니다.", "survey.notOpen"),
+    SURVEY_QUESTIONS_EMPTY(HttpStatus.BAD_REQUEST, "SURVEY_QUESTIONS_EMPTY", "질문을 하나 이상 추가해주세요.", "survey.questions.empty"),
+    SURVEY_TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_TITLE_REQUIRED", "설문 제목은 필수입니다.", "survey.title.required"),
+    SURVEY_OPTIONS_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_OPTIONS_REQUIRED", "선택지 옵션을 입력해주세요.", "survey.options.required");
 
     private final HttpStatus httpStatus;
     private final String code;

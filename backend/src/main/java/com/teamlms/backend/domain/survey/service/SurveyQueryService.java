@@ -46,9 +46,9 @@ public class SurveyQueryService {
         validateAdmin(adminId);
         // Using custom repository method
         return surveyRepository.findSurveyAdminList(
-                request.getType(),
-                request.getStatus(),
-                request.getKeyword(),
+                request.type(),
+                request.status(),
+                request.keyword(),
                 pageable
         );
     }
@@ -56,9 +56,9 @@ public class SurveyQueryService {
     // 사용자 참여 가능 목록
     public List<SurveyListResponse> getAvailableSurveys(Long userId, String keyword) {
         Account user = accountRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, userId));
 
-        if ("PROFESSOR".equals(user.getAccountType().name())) {
+        if (user.getAccountType() == com.teamlms.backend.domain.account.enums.AccountType.PROFESSOR) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
@@ -70,17 +70,17 @@ public class SurveyQueryService {
     @Transactional
     public SurveyDetailResponse getSurveyDetail(Long surveyId, Long userId) {
         Account user = accountRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, userId));
         String role = user.getAccountType().name();
 
-        if ("PROFESSOR".equals(role)) {
+        if (user.getAccountType() == com.teamlms.backend.domain.account.enums.AccountType.PROFESSOR) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
         Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId));
 
-        if ("STUDENT".equals(role)) {
+        if (user.getAccountType() == com.teamlms.backend.domain.account.enums.AccountType.STUDENT) {
             boolean isTarget = targetRepository.findBySurveyIdAndTargetAccountId(surveyId, userId).isPresent();
             if (!isTarget) {
                 throw new BusinessException(ErrorCode.SURVEY_NOT_TARGET);
@@ -103,7 +103,7 @@ public class SurveyQueryService {
         validateAdmin(adminId);
 
         Survey survey = surveyRepository.findById(surveyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId));
 
         long total = targetRepository.countBySurveyId(surveyId);
         long submitted = targetRepository.countBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED);
@@ -147,7 +147,7 @@ public class SurveyQueryService {
                 Map<String, Object> responses = t.getResponseJson();
                 if (responses == null) continue;
 
-                Object answer = responses.get(String.valueOf(q.getId()));
+                Object answer = responses.get(String.valueOf(q.getQuestionId()));
                 if (answer == null) continue;
 
                 if (q.getQuestionType() == com.teamlms.backend.domain.survey.enums.SurveyQuestionType.ESSAY) {
@@ -167,7 +167,7 @@ public class SurveyQueryService {
             }
 
             questionStatsList.add(SurveyStatsResponse.QuestionStats.builder()
-                    .questionId(q.getId())
+                    .questionId(q.getQuestionId())
                     .title(q.getQuestionText())
                     .type(q.getQuestionType())
                     .answerCounts(answerCounts)
@@ -194,13 +194,17 @@ public class SurveyQueryService {
     public Page<SurveyParticipantResponse> getSurveyParticipants(Long adminId, Long surveyId, Pageable pageable) {
         validateAdmin(adminId);
         if (!surveyRepository.existsById(surveyId)) {
-            throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND);
+            throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId);
         }
         Page<SurveyTarget> targets = targetRepository.findBySurveyId(surveyId, pageable);
+        List<Long> accountIds = targets.getContent().stream().map(SurveyTarget::getTargetAccountId).toList();
+        List<Account> accounts = accountRepository.findAllById(accountIds);
+        Map<Long, Account> accountMap = accounts.stream().collect(Collectors.toMap(Account::getAccountId, a -> a));
+
         return targets.map(target -> {
-            Account user = accountRepository.findById(target.getTargetAccountId()).orElse(null);
+            Account user = accountMap.get(target.getTargetAccountId());
             return SurveyParticipantResponse.builder()
-                    .targetId(target.getId())
+                    .targetId(target.getTargetId())
                     .accountId(target.getTargetAccountId())
                     .loginId(user != null ? user.getLoginId() : "Unknown")
                     .status(target.getStatus())
@@ -211,15 +215,15 @@ public class SurveyQueryService {
 
     private void validateAdmin(Long adminId) {
         Account admin = accountRepository.findById(adminId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
-        if (!"ADMIN".equals(admin.getAccountType().name())) {
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, adminId));
+        if (admin.getAccountType() != com.teamlms.backend.domain.account.enums.AccountType.ADMIN) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
     }
 
     private SurveyDetailResponse toSurveyDetailResponse(Survey survey, List<SurveyQuestion> questions) {
         return SurveyDetailResponse.builder()
-                .surveyId(survey.getId())
+                .surveyId(survey.getSurveyId())
                 .type(survey.getType())
                 .title(survey.getTitle())
                 .description(survey.getDescription())
@@ -232,7 +236,7 @@ public class SurveyQueryService {
 
     private SurveyDetailResponse.QuestionResponseDto toQuestionResponse(SurveyQuestion question) {
         return SurveyDetailResponse.QuestionResponseDto.builder()
-                .questionId(question.getId())
+                .questionId(question.getQuestionId())
                 .questionText(question.getQuestionText())
                 .sortOrder(question.getSortOrder())
                 .minVal(question.getMinVal())

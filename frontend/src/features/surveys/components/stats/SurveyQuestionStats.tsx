@@ -11,13 +11,13 @@ import {
     ChartData,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-import { QuestionStats } from "../types";
+import { QuestionStatsDto } from "../../api/types";
 import styles from "./SurveyQuestionStats.module.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface Props {
-    questions: QuestionStats[];
+    questions: QuestionStatsDto[];
 }
 
 export function SurveyQuestionStats({ questions }: Props) {
@@ -39,7 +39,7 @@ export function SurveyQuestionStats({ questions }: Props) {
                         {q.type === "ESSAY" ? (
                             <div className={styles.essayList}>
                                 {q.essayAnswers.length > 0 ? (
-                                    q.essayAnswers.map((ans, i) => (
+                                    q.essayAnswers.map((ans: string, i: number) => (
                                         <div key={i} className={styles.essayItem}>
                                             {ans}
                                         </div>
@@ -61,18 +61,17 @@ export function SurveyQuestionStats({ questions }: Props) {
 }
 
 const COLORS = [
-    '#FF6384',
-    '#36A2EB',
-    '#FFCE56',
-    '#4BC0C0',
-    '#9966FF',
-    '#FF9F40',
-    '#C9CBCF',
+    '#3b82f6', // blue-500
+    '#60a5fa', // blue-400
+    '#93c5fd', // blue-300
+    '#bfdbfe', // blue-200
+    '#dbeafe', // blue-100
+    '#1d4ed8', // blue-700
+    '#1e40af', // blue-800
 ];
 
 function BarChart({ data }: { data: Record<string, number> }) {
     const labels = Object.keys(data).sort((a, b) => {
-        // Handle numeric keys (Rating)
         if (!isNaN(Number(a)) && !isNaN(Number(b))) {
             return Number(a) - Number(b);
         }
@@ -87,7 +86,8 @@ function BarChart({ data }: { data: Record<string, number> }) {
                 label: "응답 수",
                 data: values,
                 backgroundColor: labels.map((_, i) => COLORS[i % COLORS.length]),
-                borderRadius: 4,
+                borderRadius: 6,
+                barThickness: 20,
             },
         ],
     };
@@ -103,14 +103,34 @@ function BarChart({ data }: { data: Record<string, number> }) {
                     legend: {
                         display: false,
                     },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        cornerRadius: 8,
+                    }
                 },
                 scales: {
                     x: {
                         beginAtZero: true,
+                        grid: {
+                            display: false,
+                        },
                         ticks: {
                             stepSize: 1,
+                            color: '#64748b',
                         },
                     },
+                    y: {
+                        grid: {
+                            display: false,
+                        },
+                        ticks: {
+                            color: '#475569',
+                            font: { weight: 600 }
+                        }
+                    }
                 },
             }}
         />

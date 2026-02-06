@@ -6,6 +6,7 @@ import com.teamlms.backend.domain.survey.api.dto.SurveySubmitRequest;
 import com.teamlms.backend.domain.survey.service.SurveyQueryService;
 import com.teamlms.backend.domain.survey.service.SurveyResponseService;
 import com.teamlms.backend.global.api.ApiResponse;
+import com.teamlms.backend.global.api.dto.SuccessResponse;
 import com.teamlms.backend.global.security.principal.AuthUser;
 
 import jakarta.validation.Valid;
@@ -45,10 +46,10 @@ public class UserSurveyController {
 
     // 응답 제출
     @PostMapping("/submit")
-    public ApiResponse<Void> submit(
+    public ApiResponse<SuccessResponse> submit(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid SurveySubmitRequest request) {
         responseService.submitResponse(user.getAccountId(), request);
-        return ApiResponse.ok(null);
+        return ApiResponse.ok(new SuccessResponse());
     }
 }

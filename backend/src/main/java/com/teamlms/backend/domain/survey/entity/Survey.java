@@ -23,7 +23,7 @@ public class Survey extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_id")
-    private Long id;
+    private Long surveyId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "survey_type", nullable = false)
@@ -61,6 +61,14 @@ public class Survey extends BaseEntity {
 
     public void close() {
         this.status = SurveyStatus.CLOSED;
+    }
+
+    public void patch(String title, String description, LocalDateTime startAt, LocalDateTime endAt, SurveyStatus status) {
+        if (title != null) this.title = title;
+        if (description != null) this.description = description;
+        if (startAt != null) this.startAt = startAt;
+        if (endAt != null) this.endAt = endAt;
+        if (status != null) this.status = status;
     }
 
     public void update(String title, String description, LocalDateTime startAt, LocalDateTime endAt) {

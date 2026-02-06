@@ -1,65 +1,8 @@
+import { proxyToBackend } from "@/lib/bff";
 
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-
-export const runtime = "nodejs";
-
-const BASE_UPSTREAM = "/api/v1/surveys/submit";
-
-function getBaseUrl() {
-    return process.env.API_BASE_URL ?? "http://localhost:8080";
-}
-
-function getAccessToken() {
-    const cookieStore = cookies();
-    return cookieStore.get("access_token")?.value;
-}
-
-function buildUpstreamHeaders(req: Request) {
-    const headers = new Headers(req.headers);
-    headers.delete("host");
-    headers.delete("connection");
-    headers.delete("content-length");
-    headers.delete("cookie");
-    headers.delete("accept-encoding");
-
-    const token = getAccessToken();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-
-    return headers;
-}
-
-async function proxy(req: Request, upstreamUrl: string, method: string) {
-    const headers = buildUpstreamHeaders(req);
-    const init: RequestInit = {
-        method,
-        headers,
-        cache: "no-store",
-    };
-
-    try {
-        // Read body
-        const bodyText = await req.text();
-        if (bodyText) {
-            init.body = bodyText;
-            headers.set("Content-Type", "application/json");
-        }
-
-        const res = await fetch(upstreamUrl, init);
-        const outHeaders = new Headers(res.headers);
-        outHeaders.delete("transfer-encoding");
-
-        return new NextResponse(res.body, {
-            status: res.status,
-            headers: outHeaders,
-        });
-    } catch (e) {
-        console.error(`Proxy Error [${method} ${upstreamUrl}]`, e);
-        return NextResponse.json({ message: "Proxy Error" }, { status: 500 });
-    }
-}
+const BASE_UPSTREAM = "/api/v1/student/surveys/submit";
 
 export async function POST(req: Request) {
-    const upstreamUrl = `${getBaseUrl()}${BASE_UPSTREAM}`;
-    return proxy(req, upstreamUrl, "POST");
+    const body = await req.json();
+    return proxyToBackend(req, BASE_UPSTREAM, { method: "POST", body });
 }

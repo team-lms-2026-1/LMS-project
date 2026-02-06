@@ -23,7 +23,7 @@ public class SurveyTarget extends com.teamlms.backend.global.audit.BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "target_id")
-    private Long id;
+    private Long targetId;
 
     @Column(name = "survey_id", nullable = false)
     private Long surveyId;

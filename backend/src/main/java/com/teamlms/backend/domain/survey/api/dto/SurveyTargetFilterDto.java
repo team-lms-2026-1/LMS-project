@@ -1,19 +1,11 @@
 package com.teamlms.backend.domain.survey.api.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
+import com.teamlms.backend.domain.survey.enums.SurveyTargetGenType;
 import java.util.List;
 
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
-public class SurveyTargetFilterDto {
-    private String genType; // ALL, DEPT, USER, GRADE, DEPT_GRADE
-    private List<Long> deptIds;
-    private List<Long> userIds;
-    private List<Integer> gradeLevels;
-}
+public record SurveyTargetFilterDto(
+    SurveyTargetGenType genType,
+    List<Long> deptIds,
+    List<Long> userIds,
+    List<Integer> gradeLevels
+) {}

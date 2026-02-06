@@ -14,7 +14,7 @@ public class SurveyQuestion extends com.teamlms.backend.global.audit.BaseEntity 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "question_id")
-    private Long id;
+    private Long questionId;
 
     // 연관관계 매핑 없이 ID만 참조 (ID-only Strategy)
     @Column(name = "survey_id", nullable = false)
@@ -45,15 +45,6 @@ public class SurveyQuestion extends com.teamlms.backend.global.audit.BaseEntity 
     @Enumerated(EnumType.STRING)
     @Column(name = "question_type", nullable = false)
     private com.teamlms.backend.domain.survey.enums.SurveyQuestionType questionType;
-
-    // [New] Options for Multiple Choice (Stored as JSON/Text)
-    // MySQL/PostgreSQL compatibility advice: Use TEXT or JSON column.
-    // Here we use simple formatting or assume converting to JSON string in service
-    // layer if needed.
-    // implementation simplification: Store as comma-separated or JSON string.
-    // Ideally use @JdbcTypeCode(SqlTypes.JSON) like SurveyTarget, but let's check
-    // needed dependencies.
-    // We already saw @JdbcTypeCode used in SurveyTarget, so we can use it here too.
 
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(name = "options_json", columnDefinition = "jsonb")

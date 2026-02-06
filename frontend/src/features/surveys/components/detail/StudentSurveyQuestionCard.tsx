@@ -1,4 +1,6 @@
-import { QuestionResponseDto } from "../types";
+"use client";
+
+import { QuestionResponseDto } from "../../api/types";
 import styles from "./StudentSurveyQuestionCard.module.css";
 
 type Props = {
@@ -11,7 +13,6 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
     const type = question.questionType || "RATING";
     const q = question;
 
-    // Helper for checkbox handling
     const handleCheckboxChange = (option: string, checked: boolean) => {
         const current: string[] = Array.isArray(response) ? response : [];
         if (checked) {
@@ -24,12 +25,15 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
     return (
         <div className={styles.questionCard}>
             <div className={styles.questionText}>
-                <span style={{ color: "red", marginRight: "4px" }}>{q.isRequired ? "*" : ""}</span>
+                {q.isRequired && <span className={styles.required}>*</span>}
                 {q.questionText}
             </div>
-            <div className={styles.questionTypeLabel}>
-                {type === "MULTIPLE_CHOICE" && "(중복 선택 가능)"}
-            </div>
+
+            {type === "MULTIPLE_CHOICE" && (
+                <div className={styles.questionTypeLabel}>
+                    (중복 선택 가능)
+                </div>
+            )}
 
             {/* RATING */}
             {type === "RATING" && (
@@ -45,7 +49,7 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
                                     checked={Number(response) === val}
                                     onChange={() => onResponseChange(val)}
                                 />
-                                <span style={{ marginTop: "4px" }}>{val}</span>
+                                <span>{val}</span>
                             </label>
                         ))}
                     </div>
@@ -63,7 +67,6 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
                                 name={`q-${q.questionId}`}
                                 checked={response === opt}
                                 onChange={() => onResponseChange(opt)}
-                                style={{ width: "1.2rem", height: "1.2rem" }}
                             />
                             <span>{opt}</span>
                         </label>
@@ -80,7 +83,6 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
                                 type="checkbox"
                                 checked={(Array.isArray(response) ? response : []).includes(opt)}
                                 onChange={(e) => handleCheckboxChange(opt, e.target.checked)}
-                                style={{ width: "1.2rem", height: "1.2rem" }}
                             />
                             <span>{opt}</span>
                         </label>
@@ -90,7 +92,7 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
 
             {/* ESSAY */}
             {type === "ESSAY" && (
-                <div style={{ padding: "0 1rem" }}>
+                <div className={styles.essayGroup}>
                     <textarea
                         className={styles.textInput}
                         value={response || ""}

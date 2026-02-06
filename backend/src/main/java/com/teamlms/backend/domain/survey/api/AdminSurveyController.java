@@ -7,6 +7,7 @@ import com.teamlms.backend.domain.survey.service.SurveyCommandService;
 import com.teamlms.backend.domain.survey.service.SurveyQueryService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
+import com.teamlms.backend.global.api.dto.SuccessResponse;
 import com.teamlms.backend.global.security.principal.AuthUser;
 
 import jakarta.validation.Valid;
@@ -33,13 +34,22 @@ public class AdminSurveyController {
     @GetMapping
     public ApiResponse<List<SurveyListResponse>> list(
             @AuthenticationPrincipal AuthUser user,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) SurveyType type,
             @RequestParam(required = false) SurveyStatus status,
-            @RequestParam(required = false) String keyword,
-            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+            @RequestParam(required = false) String keyword) {
 
-        InternalSurveySearchRequest searchRequest = InternalSurveySearchRequest.builder()
-                .type(type).status(status).keyword(keyword).build();
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                safePage - 1,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "surveyId")
+        );
+
+        InternalSurveySearchRequest searchRequest = new InternalSurveySearchRequest(type, status, keyword);
 
         Page<SurveyListResponse> result = queryService.getSurveyList(user.getAccountId(), searchRequest, pageable);
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
@@ -47,31 +57,30 @@ public class AdminSurveyController {
 
     // 설문 생성
     @PostMapping
-    public ApiResponse<Long> create(
+    public ApiResponse<SuccessResponse> create(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid SurveyCreateRequest request) {
         
-        Long surveyId = commandService.createAndPublishSurvey(user.getAccountId(), request);
-        return ApiResponse.ok(surveyId);
+        commandService.createAndPublishSurvey(user.getAccountId(), request);
+        return ApiResponse.ok(new SuccessResponse());
     }
 
-    // 설문 수정
-    @PutMapping("/{surveyId}")
-    public ApiResponse<Void> update(
+    @PatchMapping("/{surveyId}")
+    public ApiResponse<SuccessResponse> patch(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId,
-            @RequestBody @Valid SurveyUpdateRequest request) {
-        commandService.updateSurvey(user.getAccountId(), surveyId, request);
-        return ApiResponse.ok(null);
+            @RequestBody @Valid SurveyPatchRequest request) {
+        commandService.patchSurvey(user.getAccountId(), surveyId, request);
+        return ApiResponse.ok(new SuccessResponse());
     }
 
     // 설문 삭제
     @DeleteMapping("/{surveyId}")
-    public ApiResponse<Void> delete(
+    public ApiResponse<SuccessResponse> delete(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId) {
         commandService.deleteSurvey(user.getAccountId(), surveyId);
-        return ApiResponse.ok(null);
+        return ApiResponse.ok(new SuccessResponse());
     }
 
     // 설문 통계 조회

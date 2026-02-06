@@ -37,7 +37,6 @@ export function TargetSelector({
                     deptId: d.deptId,
                     deptName: d.deptName
                 }));
-                const activeDepts = list.filter((d: any) => d.isActive !== false); // inactive check if needed, though API returns boolean
                 setDepts(list);
             }
         }).catch(err => {

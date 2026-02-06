@@ -29,14 +29,14 @@ public class SurveyResponseService {
     public void submitResponse(Long userId, SurveySubmitRequest request) {
         // 학생 권한 체크
         Account user = accountRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, userId));
 
         if (user.getAccountType() != AccountType.STUDENT) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
         // 대상자인지 확인
-        SurveyTarget target = targetRepository.findBySurveyIdAndTargetAccountId(request.getSurveyId(), userId)
+        SurveyTarget target = targetRepository.findBySurveyIdAndTargetAccountId(request.surveyId(), userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_TARGET));
 
         if (target.getStatus() == SurveyTargetStatus.SUBMITTED) {
@@ -44,14 +44,14 @@ public class SurveyResponseService {
         }
 
         // [추가] 기간 체크
-        Survey survey = surveyRepository.findById(request.getSurveyId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND));
+        Survey survey = surveyRepository.findById(request.surveyId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND, request.surveyId()));
 
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(survey.getStartAt()) || now.isAfter(survey.getEndAt())) {
             throw new BusinessException(ErrorCode.SURVEY_NOT_OPEN);
         }
 
-        target.submit(request.getResponses());
+        target.submit(request.responses());
     }
 }

@@ -7,5 +7,5 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     const { id } = params;
-    return proxyToBackend(req, `${BASE_UPSTREAM}/${id}/stats`);
+    return proxyToBackend(req, `${BASE_UPSTREAM}/${id}/participants`);
 }
