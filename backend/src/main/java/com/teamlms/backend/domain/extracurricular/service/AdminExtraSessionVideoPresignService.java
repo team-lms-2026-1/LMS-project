@@ -35,8 +35,8 @@ public class AdminExtraSessionVideoPresignService {
         ExtraCurricularOffering offering = offeringRepository.findById(extraOfferingId)
             .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND));
 
-        // 정책: DRAFT/OPEN 에서만 업로드 허용 (필요없으면 제거)
-        if (!(offering.getStatus() == ExtraOfferingStatus.IN_PROGRESS)) {
+        // 정책: IN_PROGRESS에서만 업로드 허용
+        if (offering.getStatus() != ExtraOfferingStatus.IN_PROGRESS) {
             throw new BusinessException(ErrorCode.EXTRA_SESSION_VIDEO_UPLOAD_NOT_ALLOWED_STATUS);
         }
 
@@ -45,7 +45,6 @@ public class AdminExtraSessionVideoPresignService {
             throw new BusinessException(ErrorCode.EXTRA_SESSION_VIDEO_CONTENT_TYPE_NOT_ALLOWED);
         }
 
-        // storageKey 생성 + presigned url 생성은 global presign 서비스에 위임
         var presigned = s3PresignService.presignPutExtraSessionVideo(extraOfferingId, contentType);
 
         return new ExtraSessionVideoPresignResponse(
