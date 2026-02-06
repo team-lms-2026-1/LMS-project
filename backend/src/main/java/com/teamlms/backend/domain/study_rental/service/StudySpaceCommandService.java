@@ -15,8 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,7 +23,7 @@ public class StudySpaceCommandService {
     private final StudySpaceRepository spaceRepository;
     private final StudyRoomRepository roomRepository;
     private final StudySpaceRuleRepository ruleRepository;
-    private final StudySpaceImageRepository imageRepository; 
+    private final StudySpaceImageRepository imageRepository;
     private final S3Service s3Service;
 
     // =======================================================
@@ -33,6 +31,11 @@ public class StudySpaceCommandService {
     // =======================================================
 
     public Long createSpace(SpaceRequest request, MultipartFile image) {
+
+        // 공간 이름 중복 검사
+        if (spaceRepository.existsBySpaceName(request.getSpaceName())) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        }
         // 1. 공간 저장
         StudySpace space = StudySpace.builder()
                 .spaceName(request.getSpaceName())
@@ -71,8 +74,8 @@ public class StudySpaceCommandService {
             // 기존 이미지 삭제 (DB + S3)
             List<StudySpaceImage> oldImages = imageRepository.findByStudySpaceIdOrderBySortOrderAsc(spaceId);
             for (StudySpaceImage oldImg : oldImages) {
-                s3Service.delete(parseKeyFromUrl(oldImg.getImageUrl())); 
-                imageRepository.delete(oldImg); 
+                s3Service.delete(parseKeyFromUrl(oldImg.getImageUrl()));
+                imageRepository.delete(oldImg);
             }
             // 새 이미지 저장
             uploadAndSaveSpaceImage(space, newImage);
@@ -82,8 +85,7 @@ public class StudySpaceCommandService {
         space.update(
                 request.getSpaceName(),
                 request.getLocation(),
-                request.getDescription()
-        );
+                request.getDescription());
         // 3. 규칙 교체 (기존 삭제 -> 재생성)
         ruleRepository.deleteByStudySpaceId(spaceId);
         if (request.getRules() != null) {
@@ -97,6 +99,7 @@ public class StudySpaceCommandService {
             });
         }
     }
+
     public void deleteSpace(Long spaceId) {
         if (!spaceRepository.existsById(spaceId)) {
             throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_DELETE);
@@ -104,11 +107,10 @@ public class StudySpaceCommandService {
 
         // 1. 부가 정보 삭제 (규칙, 이미지)
         ruleRepository.deleteByStudySpaceId(spaceId);
-        
-       
-         List<StudySpaceImage> images = imageRepository.findByStudySpaceIdOrderBySortOrderAsc(spaceId);
-         images.forEach(img -> s3Service.delete(parseKeyFromUrl(img.getImageUrl())));
-        
+
+        List<StudySpaceImage> images = imageRepository.findByStudySpaceIdOrderBySortOrderAsc(spaceId);
+        images.forEach(img -> s3Service.delete(parseKeyFromUrl(img.getImageUrl())));
+
         imageRepository.deleteByStudySpaceId(spaceId);
 
         // 2. 룸과 예약 내역 삭제 (순서 중요: 예약 -> 룸)
@@ -136,6 +138,12 @@ public class StudySpaceCommandService {
 
         validateRoomRequest(request);
 
+        // [추가된 부분] 해당 공간 내 룸 이름 중복 검사
+        if (roomRepository.existsByStudySpaceIdAndRoomName(spaceId, request.getRoomName())) {
+            // ErrorCode는 상황에 맞게 정의해서 사용하세요 (예: ROOM_NAME_DUPLICATE)
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        }
+
         StudyRoom room = StudyRoom.builder()
                 .studySpace(space)
                 .roomName(request.getRoomName())
@@ -152,7 +160,7 @@ public class StudySpaceCommandService {
         roomRepository.save(room);
     }
 
-public void updateRoom(Long roomId, RoomRequest request) {
+    public void updateRoom(Long roomId, RoomRequest request) {
         // 1. 조회 (room 변수 선언)
         StudyRoom room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_NOT_UPDATE));
@@ -161,7 +169,7 @@ public void updateRoom(Long roomId, RoomRequest request) {
         validateRoomRequest(request);
 
         // 3. 엔티티 업데이트 메서드 호출 (room 변수 사용됨 -> 노란줄 해결)
-       
+
         room.update(
                 request.getRoomName(),
                 request.getMinPeople(),
@@ -169,10 +177,9 @@ public void updateRoom(Long roomId, RoomRequest request) {
                 request.getDescription(),
                 request.getOperationStartDate(),
                 request.getOperationEndDate(),
-                request.getAvailableStartTime(), 
-                request.getAvailableEndTime()
-        );
-    
+                request.getAvailableStartTime(),
+                request.getAvailableEndTime());
+
     }
 
     private final StudyRoomRentalRepository rentalRepository;
@@ -182,7 +189,7 @@ public void updateRoom(Long roomId, RoomRequest request) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
-        rentalRepository.deleteByStudyRoomId(roomId); 
+        rentalRepository.deleteByStudyRoomId(roomId);
         roomRepository.deleteById(roomId);
     }
 
@@ -206,7 +213,7 @@ public void updateRoom(Long roomId, RoomRequest request) {
 
     private void validateRoomRequest(RoomRequest req) {
         if (req.getOperationStartDate().isAfter(req.getOperationEndDate())) {
-            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "운영 종료일은 시작일보다 빨라야 합니다.");
+            throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_EN_TIME);
         }
         if (req.getAvailableStartTime().isAfter(req.getAvailableEndTime())) {
             throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_ST_TIME);
@@ -218,7 +225,8 @@ public void updateRoom(Long roomId, RoomRequest request) {
 
     private String parseKeyFromUrl(String url) {
         // S3 Key 파싱 로직 (예: https://.../spaces/abc.jpg -> spaces/abc.jpg)
-        if (url.contains("spaces/")) return url.substring(url.indexOf("spaces/"));
+        if (url.contains("spaces/"))
+            return url.substring(url.indexOf("spaces/"));
         return url;
     }
 }

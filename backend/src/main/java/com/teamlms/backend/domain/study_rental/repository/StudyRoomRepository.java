@@ -15,7 +15,7 @@ public interface StudyRoomRepository extends JpaRepository<StudyRoom, Long> {
 
     // // 3. 공간 삭제 시 연관된 룸 일괄 삭제
     void deleteByStudySpaceId(Long spaceId);
-    
 
+    boolean existsByStudySpaceIdAndRoomName(Long studySpaceId, String roomName);
 
 }
