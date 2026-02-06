@@ -33,7 +33,7 @@ public class AdminCompetencyController {
     public ApiResponse<List<CompetencyStudentListItem>> listStudents(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "20") int size) {
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.ASC, "studentNo"));
         Page<CompetencyStudentListItem> result = competencyQueryService.searchCompetencyStudents(keyword, pageable);
