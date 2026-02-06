@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Dropdown } from "@/features/dropdowns/_shared";
 import { Button } from "@/components/button";
 import { Modal } from "@/components/modal/Modal";
-import { OfferingStatus } from "@/features/curricular-offering/api/types";
-import { updateCurricularOfferingStatus } from "@/features/curricular-offering/api/curricularOfferingsApi";
 import styles from "./ExtraOfferingStatusDropdown.module.css";
+import { ExtraOfferingStatus } from "../../../api/types";
+import { updateExtraCurricularOfferingStatus } from "../../../api/extraCurricularOfferingApi";
 
 type Props = {
   offeringId: number;
-  status: OfferingStatus;
+  status: ExtraOfferingStatus;
   onChanged?: () => void | Promise<void>;
   disabled?: boolean;
 };
@@ -26,10 +26,10 @@ const OPTIONS = [
 
 
 export function ExtraOfferingStatusDropdown({ offeringId, status, onChanged, disabled = false }: Props) {
-  const [value, setValue] = useState<OfferingStatus>(status);
+  const [value, setValue] = useState<ExtraOfferingStatus>(status);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pending, setPending] = useState<OfferingStatus | null>(null);
+  const [pending, setPending] = useState<ExtraOfferingStatus | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export function ExtraOfferingStatusDropdown({ offeringId, status, onChanged, dis
   }, [status]);
 
   const handleSelect = (next: string) => {
-    const nextStatus = next as OfferingStatus;
+    const nextStatus = next as ExtraOfferingStatus;
     if (nextStatus === status) return;
 
     setValue(nextStatus);
@@ -65,7 +65,7 @@ export function ExtraOfferingStatusDropdown({ offeringId, status, onChanged, dis
     setSubmitError(null);
 
     try {
-      await updateCurricularOfferingStatus(offeringId, { status: pending });
+      await updateExtraCurricularOfferingStatus(offeringId, { status: pending });
 
       // 성공
       setConfirmOpen(false);

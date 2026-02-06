@@ -133,14 +133,33 @@ public class ExtraCurricularOfferingCommandService {
     public void changeStatus(Long extraOfferingId, ExtraOfferingStatus targetStatus) {
 
         ExtraCurricularOffering offering = offeringRepository.findById(extraOfferingId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, extraOfferingId));
+            .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, extraOfferingId));
 
         ExtraOfferingStatus current = offering.getStatus();
 
         validateTransitionOneStepForward(current, targetStatus);
 
-        // ✅ IN_PROGRESS -> COMPLETED 전환 시 이수 확정
         if (current == ExtraOfferingStatus.IN_PROGRESS && targetStatus == ExtraOfferingStatus.COMPLETED) {
+
+            // ✅ 1) 세션 합계 == 운영 캡 정합성 검증
+            Long sumPoint = sessionRepository.sumRewardPointByOfferingId(extraOfferingId);
+            Long sumHours = sessionRepository.sumRecognizedHoursByOfferingId(extraOfferingId);
+
+            if (!sumPoint.equals(offering.getRewardPointDefault())) {
+                throw new BusinessException(
+                    ErrorCode.EXTRA_CURRICULAR_OFFERING_REWARD_POINT_NOT_MATCHED_WITH_SESSIONS,
+                    extraOfferingId, offering.getRewardPointDefault(), sumPoint
+                );
+            }
+            if (!sumHours.equals(offering.getRecognizedHoursDefault())) {
+                throw new BusinessException(
+                    ErrorCode.EXTRA_CURRICULAR_OFFERING_RECOGNIZED_HOURS_NOT_MATCHED_WITH_SESSIONS,
+                    extraOfferingId, offering.getRecognizedHoursDefault(), sumHours
+                );
+            }
+
+            validateCompetencyMappingCompleted(extraOfferingId);
+            // ✅ 2) 그 다음에 이수 확정
             confirmExtraCompletions(extraOfferingId);
         }
 
@@ -164,6 +183,28 @@ public class ExtraCurricularOfferingCommandService {
         if (from == ExtraOfferingStatus.IN_PROGRESS && to == ExtraOfferingStatus.COMPLETED) return;
 
         throw new BusinessException(ErrorCode.INVALID_EXTRA_CURRICULAR_OFFERING_STATUS_TRANSITION, from, to);
+    }
+
+    // =====================
+    // COMPLETED 전환 조건: 역량 매핑 6개(1~6) 완성 여부
+    // =====================
+    private void validateCompetencyMappingCompleted(Long extraOfferingId) {
+
+        long total = competencyMapRepository.countByIdExtraOfferingId(extraOfferingId);
+        if (total != 6) {
+            throw new BusinessException(
+                    ErrorCode.OFFERING_COMPETENCY_MAPPING_INCOMPLETE,
+                    extraOfferingId
+            );
+        }
+
+        long distinctWeights = competencyMapRepository.countDistinctWeight1to6(extraOfferingId);
+        if (distinctWeights != 6) {
+            throw new BusinessException(
+                    ErrorCode.OFFERING_COMPETENCY_MAPPING_INCOMPLETE,
+                    extraOfferingId
+            );
+        }
     }
 
     // =====================
@@ -207,25 +248,7 @@ public class ExtraCurricularOfferingCommandService {
             }
         }
     }
-
-    // =====================
-    // 세션 수정/취소(OPEN에서만) 시 completion 전부 삭제
-    // =====================
-    public void invalidateSessionCompletions(Long extraOfferingId, Long sessionId) {
-
-        ExtraCurricularOffering offering = offeringRepository.findById(extraOfferingId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, extraOfferingId));
-
-        if (offering.getStatus() != ExtraOfferingStatus.OPEN) {
-            throw new BusinessException(
-                    ErrorCode.EXTRA_CURRICULAR_SESSION_NOT_EDITABLE,
-                    extraOfferingId, offering.getStatus()
-            );
-        }
-
-        completionRepository.deleteBySessionId(sessionId);
-    }
-
+    
     // =====================
     // 역량 맵핑 (Offering 기준)
     // =====================

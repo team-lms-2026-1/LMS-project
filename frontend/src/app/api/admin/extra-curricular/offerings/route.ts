@@ -1,7 +1,7 @@
 import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
-const TAG = "admin:extra-curriculars-offerings";
+const TAG = "admin:extra-curricular-offering";
 
 export async function GET(req: Request) {
   return proxyToBackend(req, "/api/v1/admin/extra-curricular/offerings", { 

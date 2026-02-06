@@ -7,6 +7,8 @@ import { useExtraCurricularDetail } from "../../hooks/useExtraCurricularOffering
 import { ExtraOfferingDetailTabBar } from "./components/ExtraOfferingDetailTabBar";
 import { ExtraOfferingStatusDropdown } from "./components/ExtraOfferingStatusDropdown";
 import { ExtraOfferingDetailSection } from "./ExtraOfferingDetailSection";
+import { ExtraOfferingCompetenciesSection } from "./ExtraOfferingCompetenciesSection";
+import ExtraOfferingSessionSection from "./ExtraOfferingSessionSection";
 
 // import { OfferingDetailTabBar } from "./components/OfferingDetailTabBar";
 // import { OfferingDetailSection } from "./OfferingDetailSection";
@@ -32,7 +34,7 @@ export function ExtraCurricularOfferingDetailPage() {
     <div className={styles.page}>
       {/* 상단 바: 왼쪽 제목 / 오른쪽 목록 화살표 */}
       <div className={styles.topBar}>
-        <div className={styles.title}>교과운영 운영관리</div>
+        <div className={styles.title}>비교과운영 운영관리</div>
         <button className={styles.backBtn} type="button" onClick={() => router.back()}>
           목록 →
         </button>
@@ -49,8 +51,9 @@ export function ExtraCurricularOfferingDetailPage() {
       {/* 본문 */}
       <div className={styles.body}>
         {tab === "detail" && <ExtraOfferingDetailSection offeringId={offeringId} data={data} onReload={() => actions.reload?.()}/>}
+        {tab === "session" && <ExtraOfferingSessionSection offeringId={offeringId} offeringStatus={data.status} />}
         {/* {tab === "students" && <ExtraOfferingStudentsSection offeringId={offeringId} offeringStatus={data.status} />} */}
-        {/* {tab === "competencies" && <ExtraOfferingCompetenciesSection offeringId={offeringId} data={data} />} */}
+        {tab === "competencies" && <ExtraOfferingCompetenciesSection offeringId={offeringId} data={data} />}
       </div>
     </div>
   );
