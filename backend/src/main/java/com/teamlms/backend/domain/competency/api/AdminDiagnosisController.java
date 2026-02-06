@@ -40,7 +40,7 @@ public class AdminDiagnosisController {
         @PreAuthorize("hasAuthority('DIAGNOSIS_READ')")
         public ApiResponse<List<DiagnosisListItem>> listDiagnoses(
                         @RequestParam(defaultValue = "1") int page,
-                        @RequestParam(defaultValue = "10") int size) {
+                        @RequestParam(defaultValue = "20") int size) {
 
                 Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
                 Page<DiagnosisListItem> result = diagnosisQueryService.listDiagnoses(pageable);
@@ -174,7 +174,7 @@ public class AdminDiagnosisController {
         public ApiResponse<List<DiagnosisParticipantItem>> getParticipants(
                         @PathVariable Long diagnosisId,
                         @RequestParam(defaultValue = "1") int page,
-                        @RequestParam(defaultValue = "10") int size) {
+                        @RequestParam(defaultValue = "20") int size) {
 
                 Pageable pageable = PageRequest.of(page - 1, size);
                 Page<DiagnosisParticipantItem> result = diagnosisQueryService.getParticipants(diagnosisId, pageable);
