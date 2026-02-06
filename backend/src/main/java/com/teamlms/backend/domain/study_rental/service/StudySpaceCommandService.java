@@ -69,6 +69,13 @@ public class StudySpaceCommandService {
         StudySpace space = spaceRepository.findById(spaceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_NOT_UPDATE));
 
+        // 이름이 변경되었고, 변경하려는 이름이 이미 존재한다면 예외 발생
+        if (!space.getSpaceName().equals(request.getSpaceName())
+                && spaceRepository.existsBySpaceName(request.getSpaceName())) {
+            // 적절한 ErrorCode 사용 (예: DUPLICATE_SPACE_NAME 등)
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        }
+
         // 1. 이미지 교체 로직
         if (newImage != null && !newImage.isEmpty()) {
             // 기존 이미지 삭제 (DB + S3)
@@ -167,6 +174,13 @@ public class StudySpaceCommandService {
 
         // 2. 유효성 검증
         validateRoomRequest(request);
+
+        // 이름이 변경되었고, 해당 공간 내에 변경하려는 룸 이름이 이미 존재한다면 예외 발생
+        if (!room.getRoomName().equals(request.getRoomName())
+                && roomRepository.existsByStudySpaceIdAndRoomName(room.getStudySpace().getId(),
+                        request.getRoomName())) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        }
 
         // 3. 엔티티 업데이트 메서드 호출 (room 변수 사용됨 -> 노란줄 해결)
 
