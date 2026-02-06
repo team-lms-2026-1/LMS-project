@@ -1,7 +1,5 @@
 package com.teamlms.backend.domain.study_rental.api;
 
-import com.teamlms.backend.global.security.principal.AuthUser;
-import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.study_rental.api.dto.RentalApplyRequest;
 import com.teamlms.backend.domain.study_rental.api.dto.RoomDetailResponse;
 import com.teamlms.backend.domain.study_rental.api.dto.SpaceDetailResponse;
@@ -12,8 +10,6 @@ import com.teamlms.backend.domain.study_rental.service.StudySpaceQueryService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
 import com.teamlms.backend.global.api.dto.SuccessResponse;
-import com.teamlms.backend.global.exception.base.BusinessException;
-import com.teamlms.backend.global.exception.code.ErrorCode;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -77,26 +73,7 @@ public class StudySpaceController {
             @Valid @RequestBody RentalApplyRequest req,
             @AuthenticationPrincipal Object principal // Object로 받음
     ) {
-        Long accountId;
-
-        if (principal == null) {
-            throw new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND);
-        }
-
-        if (principal instanceof AuthUser) {
-            accountId = ((AuthUser) principal).getAccountId();
-        } else if (principal instanceof Account) {
-            accountId = ((Account) principal).getAccountId();
-        } else if (principal instanceof Long) {
-            accountId = (Long) principal;
-        } else {
-            log.error("Principal Type Mismatch: {}", principal.getClass().getName());
-            throw new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND);
-        }
-
-        log.info("Rental Request - Account ID: {}", accountId);
-
-        rentalCommandService.applyRental(accountId, req);
+        rentalCommandService.applyRental(principal, req);
 
         return ApiResponse.ok(new SuccessResponse());
     }
