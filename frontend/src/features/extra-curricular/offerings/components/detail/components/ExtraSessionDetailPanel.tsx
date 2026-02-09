@@ -4,12 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 
-import styles from "./ExtraSessionDetailPanel.module.css";
-import { useExtraSessionDetail } from "../../../hooks/useExtraCurricularOfferingList";
+import styles from "./ExtraSessionDetailPanel.module.css"
 
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { Dropdown, type DropdownOption } from "@/features/dropdowns/_shared/Dropdown";
-import { ConfirmDialog } from "@/components/modal/ConfirmDialog"; // ✅ 너희 경로에 맞게 조정
+import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
 
 import type {
   ExtraSessionDetailDto,
@@ -24,6 +23,7 @@ import {
 } from "../../../api/extraCurricularOfferingApi";
 
 import { uploadToS3PresignedUrl } from "../../../utils/s3Upload";
+import { useExtraSessionDetail } from "../../../hooks/useExtraCurricularOfferingList";
 
 type Props = {
   offeringId: number;
