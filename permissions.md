@@ -37,6 +37,11 @@
 | QNA_ANSWER | QnA 답변 등록 | ADMIN/PROFESSOR | QnA 답변 작성/수정/삭제 | “질문당 답변 1개” 정책은 DB/서비스 룰로 처리 |
 | QNA_MANAGE | QnA 관리(관리자) | ADMIN | QnA 전체 관리(숨김/삭제/카테고리 관리 등) | 운영상 필요할 때만 사용. 기본은 ASK/ANSWER로 충분 |
 
+| code | name(설명) | scope | used_in(예시) | notes |
+|---|---|---|---|---|
+| NOTIFICATION_READ | 알림 조회 | COMMON | 알림 목록, 상세 조회 | |
+| TODO_MANAGE | 해야할 것 관리 | COMMON | 해야할 것 등록/수정/삭제/조회 | 본인 데이터 전용 |
+
 ---
 
 ## 2. 권장 최소 세트 (초기 버전)
