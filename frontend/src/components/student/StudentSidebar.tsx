@@ -38,7 +38,7 @@ const SECTIONS: NavSection[] = [
     key: "extra",
     title: "비교과",
     items: [
-      { label: "비교과 프로그램 신청", href: "/student/extra/apply" },
+      { label: "비교과 프로그램 신청", href: "/student/extra-curricular/offerings" },
       { label: "비교과 목록 조회", href: "/student/extra" },
       { label: "비교과 수료 항목", href: "/student/extra/completions" },
     ],

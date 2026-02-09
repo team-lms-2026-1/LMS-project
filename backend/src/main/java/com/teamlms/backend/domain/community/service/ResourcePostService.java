@@ -78,7 +78,7 @@ public class ResourcePostService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
 
         ResourceCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_CATEGORY));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         ResourcePost post = ResourcePost.builder()
                 .title(request.getTitle())
@@ -106,7 +106,7 @@ public class ResourcePostService {
         // 4-1. 텍스트 정보 수정
         if (request.getCategoryId() != null) {
             ResourceCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_CATEGORY));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
             post.changeCategory(category);
         }
         if (request.getTitle() != null)

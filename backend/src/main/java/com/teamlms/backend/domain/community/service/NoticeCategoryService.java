@@ -70,7 +70,7 @@ public class NoticeCategoryService {
     @Transactional
     public void updateCategory(Long categoryId, ExternalCategoryRequest request) {
         NoticeCategory category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // 이름 변경 시 중복 검사 (자기 자신은 제외)
         if (!category.getName().equals(request.getName())
@@ -85,7 +85,7 @@ public class NoticeCategoryService {
     @Transactional
     public void deleteCategory(Long categoryId) {
         NoticeCategory category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         // (선택사항) 해당 카테고리에 글이 있으면 삭제 막기
         if (noticeRepository.countByCategory(category) > 0) {

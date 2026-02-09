@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.extracurricular.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionDetailResponse;
+import com.teamlms.backend.domain.extracurricular.api.dto.AdminExtraCurricularSessionDetailRow;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionListItem;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSession;
 
@@ -22,7 +23,7 @@ public interface ExtraCurricularSessionRepository extends JpaRepository<ExtraCur
         Pageable pageable
     );
 
-    ExtraCurricularSessionDetailResponse findAdminSessionDetail(
+    AdminExtraCurricularSessionDetailRow findAdminSessionDetail(
         Long extraOfferingId,
         Long sessionId
     );
@@ -37,4 +38,13 @@ public interface ExtraCurricularSessionRepository extends JpaRepository<ExtraCur
           and s.status <> 'CANCELED'
     """)
     List<Long> findValidSessionIds(@Param("extraOfferingId") Long extraOfferingId);
+
+    @Query("""
+        select v.durationSeconds
+        from ExtraCurricularSessionVideo v
+        where v.sessionId = :sessionId
+    """)
+    Integer findVideoDurationSeconds(Long sessionId);
+
+    Optional<ExtraCurricularSession> findBySessionIdAndExtraOfferingId(Long sessionId, Long extraOfferingId);
 }

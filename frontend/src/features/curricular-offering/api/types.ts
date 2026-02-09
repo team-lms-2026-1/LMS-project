@@ -168,6 +168,7 @@ export type OfferingScorePatchRequest = {
   rawScore: number;
 };
 
+// 상태변경
 export type CurricularOfferingStatusUpdateRequest = {
   status: OfferingStatus;
 }

@@ -55,3 +55,19 @@ export type ExtraCurricularPatchRequest = {
   hostOrgName: string;
   isActive: boolean;
 }
+
+export type ExtraSessionVideoPatchRequest = {
+  title?: string | null;
+  videoUrl?: string | null;     // 보통은 안 보냄(undefined)
+  storageKey?: string | null;
+  durationSeconds?: number | null;
+};
+
+export type ExtraSessionUpdateRequest = {
+  sessionName?: string | null;
+  startAt?: string | null;       // ISO-8601 "2026-02-06T00:00:00"
+  endAt?: string | null;
+  rewardPoint?: number | null;
+  recognizedHours?: number | null;
+  video?: ExtraSessionVideoPatchRequest | null;
+};
