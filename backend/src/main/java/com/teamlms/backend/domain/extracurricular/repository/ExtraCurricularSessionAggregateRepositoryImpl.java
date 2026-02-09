@@ -14,6 +14,7 @@ public class ExtraCurricularSessionAggregateRepositoryImpl implements ExtraCurri
             select coalesce(sum(s.rewardPoint), 0)
             from ExtraCurricularSession s
             where s.extraOfferingId = :extraOfferingId
+              and s.status <> com.teamlms.backend.domain.extracurricular.enums.ExtraSessionStatus.CANCELED
         """;
         return em.createQuery(jpql, Long.class)
             .setParameter("extraOfferingId", extraOfferingId)
@@ -26,6 +27,7 @@ public class ExtraCurricularSessionAggregateRepositoryImpl implements ExtraCurri
             select coalesce(sum(s.recognizedHours), 0)
             from ExtraCurricularSession s
             where s.extraOfferingId = :extraOfferingId
+              and s.status <> com.teamlms.backend.domain.extracurricular.enums.ExtraSessionStatus.CANCELED
         """;
         return em.createQuery(jpql, Long.class)
             .setParameter("extraOfferingId", extraOfferingId)

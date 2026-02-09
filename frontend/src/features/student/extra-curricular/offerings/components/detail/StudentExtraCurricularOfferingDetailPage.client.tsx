@@ -7,6 +7,8 @@ import { useExtraCurricularDetail } from "../../hooks/useExtraCurricularOffering
 import { ExtraOfferingDetailTabBar } from "./components/ExtraOfferingDetailTabBar";
 import { ExtraOfferingStatusDropdown } from "./components/ExtraOfferingStatusDropdown";
 import { StudentExtraOfferingDetailSection } from "./StudentExtraOfferingDetailSection";
+import { StudentExtraOfferingCompetenciesSection } from "./StudentExtraOfferingCompetenciesSection";
+import { StudentExtraOfferingSessionSection } from "./StudentExtraOfferingSessionSection";
 
 export function StudentExtraCurricularOfferingDetailPage() {
   const params = useParams<{ id: string }>();
@@ -42,8 +44,11 @@ export function StudentExtraCurricularOfferingDetailPage() {
       {/* 본문 */}
       <div className={styles.body}>
         {tab === "detail" && <StudentExtraOfferingDetailSection offeringId={offeringId} data={data} />}
+        {tab === "session" && <StudentExtraOfferingSessionSection offeringId={offeringId} />}
         {/* {tab === "students" && <ExtraOfferingStudentsSection offeringId={offeringId} offeringStatus={data.status} />} */}
-        {/* {tab === "competencies" && <ExtraOfferingCompetenciesSection offeringId={offeringId} data={data} />} */}
+        {tab === "competencies" && (
+          <StudentExtraOfferingCompetenciesSection offeringId={offeringId} data={data} />
+        )}
       </div>
     </div>
   );
