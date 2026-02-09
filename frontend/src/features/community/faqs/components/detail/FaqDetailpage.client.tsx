@@ -3,13 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./FaqDetailPage.module.css";
-import type { FaqListItemDto } from "../../api/types";
+import type { FaqListItemDto, LoadState } from "../../api/types";
 import { fetchFaqDetail } from "../../api/FaqsApi";
 import { Button } from "@/components/button";
-
-type LoadState =
-  | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: FaqListItemDto | null };
+import toast from "react-hot-toast";
+import DeleteModal from "../modal/DeleteModal.client";
 
 function normalizeDetail(payload: any): FaqListItemDto {
   // 응답 형태가 {data:{...}} / {...} 섞여도 동작하게 방어
@@ -50,7 +48,7 @@ export default function FaqDetailpageClient() {
   const params = useParams<{ faqId?: string }>();
   const faqId = useMemo(() => Number(params?.faqId ?? 0), [params]);
 
-  const [state, setState] = useState<LoadState>({
+  const [state, setState] = useState<LoadState<FaqListItemDto>>({
     loading: true,
     error: null,
     data: null,
@@ -84,6 +82,30 @@ export default function FaqDetailpageClient() {
       alive = false;
     };
   }, [faqId]);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!faqId || Number.isNaN(faqId)) return;
+
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/admin/community/faqs/${faqId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(t || `?? ?? (${res.status})`);
+      }
+
+      toast.success("FAQ가 삭제되었습니다.");
+      router.push("/admin/community/faqs");
+    } catch (e: any) {
+      toast.error(e?.message ?? "삭제 실패");
+    } finally {
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
 
   const data = state.data;
 
@@ -155,34 +177,31 @@ export default function FaqDetailpageClient() {
               <Button
                 variant="primary"
                 onClick={() => router.push(`/admin/community/faqs/${faqId}/edit`)}
-                disabled={state.loading || !faqId}
+                disabled={state.loading || !faqId || deleting}
               >
                 수정
               </Button>
 
               <Button
                 variant="danger"
-                disabled={state.loading || !faqId}
-                onClick={async () => {
-                  const ok = confirm("정말 삭제하시겠습니까?");
-                  if (!ok) return;
-
-                  try {
-                    const res = await fetch(`/api/admin/community/faqs/${faqId}`, { method: "DELETE" });
-                    if (!res.ok) {
-                      const t = await res.text().catch(() => "");
-                      throw new Error(t || `삭제 실패 (${res.status})`);
-                    }
-                    alert("삭제되었습니다.");
-                    router.push("/admin/community/faqs");
-                  } catch (e: any) {
-                    alert(e?.message ?? "삭제에 실패했습니다.");
-                  }
-                }}
+                disabled={state.loading || !faqId || deleting}
+                onClick={() => setDeleteOpen(true)}
               >
                 삭제
               </Button>
             </div>
+
+      <DeleteModal
+        open={deleteOpen}
+        targetLabel="FAQ"
+        targetTitle={data?.title}
+        loading={deleting}
+        onClose={() => {
+          if (deleting) return;
+          setDeleteOpen(false);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

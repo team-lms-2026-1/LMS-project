@@ -1,23 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import styles from "./ResourceDetailPage.module.css";
-import type { ResourceListItemDto } from "../../api/types";
+import type { ResourceListItemDto, LoadState } from "../../api/types";
 import { fetchResourceDetail } from "../../api/ResourcesApi";
 import { Button } from "@/components/button";
-
-type LoadState =
-  | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: ResourceListItemDto | null };
+import toast from "react-hot-toast";
+import DeleteModal from "../modal/DeleteModal.client";
 
 function normalizeDetail(payload: any): ResourceListItemDto {
-  // 응답 형태가 {data:{...}} / {...} 섞여도 동작하게 방어
   const raw = payload?.data ?? payload;
-
-  // 최소 필드 보정(백엔드가 createdAt/cerateAt 등 오타 섞이는 경우 대비)
-  const created =
-    raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+  const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
 
   return {
     resourceId: Number(raw?.resourceId ?? 0),
@@ -49,31 +43,86 @@ export default function ResourceDetailpageClient() {
   const params = useParams<{ resourceId?: string }>();
   const resourceId = useMemo(() => Number(params?.resourceId ?? 0), [params]);
 
-  const [state, setState] = useState<LoadState>({
+  const [load, setLoad] = useState<LoadState<ResourceListItemDto>>({
     loading: true,
     error: null,
     data: null,
   });
 
+  const sp = useSearchParams();
+  const toastOnceRef = useRef<string | null>(null);
+
+  // ✅ toast=updated/created/deleted 처리
+  useEffect(() => {
+    if (!resourceId || Number.isNaN(resourceId)) return;
+
+    const t = sp.get("toast");
+    if (!t) return;
+
+    // ✅ StrictMode 중복 방지
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+
+    if (t === "updated") toast.success("자료가 수정되었습니다.", { id: "resource-updated" });
+    if (t === "created") toast.success("자료가 등록되었습니다.", { id: "resource-created" });
+    if (t === "deleted") toast.success("자료가 삭제되었습니다.", { id: "resource-deleted" });
+
+    // ✅ toast query 제거
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+    const qs = next.toString();
+    router.replace(qs ? `/admin/community/resources/${resourceId}?${qs}` : `/admin/community/resources/${resourceId}`);
+  }, [sp, router, resourceId]);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const openDelete = () => setDeleteOpen(true);
+  const closeDelete = () => {
+    if (deleteLoading) return;
+    setDeleteOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!resourceId || Number.isNaN(resourceId)) return;
+
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/admin/community/resources/${resourceId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `삭제 실패 (${res.status})`);
+      }
+
+      setDeleteOpen(false);
+      router.push("/admin/community/resources?toast=deleted");
+    } catch (e: any) {
+      toast.error(e?.message ?? "삭제에 실패했습니다.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // ✅ 상세 로드
   useEffect(() => {
     if (!resourceId || Number.isNaN(resourceId)) {
-      setState({ loading: false, error: "잘못된 공지사항 ID입니다.", data: null });
+      setLoad({ loading: false, error: "잘못된 자료실 ID입니다.", data: null });
       return;
     }
 
     let alive = true;
     (async () => {
       try {
-        setState({ loading: true, error: null, data: null });
+        setLoad({ loading: true, error: null, data: null });
         const res = await fetchResourceDetail(resourceId);
         const data = normalizeDetail(res);
         if (!alive) return;
-        setState({ loading: false, error: null, data });
+        setLoad({ loading: false, error: null, data });
       } catch (e: any) {
         if (!alive) return;
-        setState({
+        setLoad({
           loading: false,
-          error: e?.message ?? "공지사항을 불러오지 못했습니다.",
+          error: e?.message ?? "자료실을 불러오지 못했습니다.",
           data: null,
         });
       }
@@ -84,7 +133,7 @@ export default function ResourceDetailpageClient() {
     };
   }, [resourceId]);
 
-  const data = state.data;
+  const data = load.data;
 
   const badgeStyle = useMemo(() => {
     const bg = data?.category?.bgColorHex ?? "#EEF2F7";
@@ -95,7 +144,6 @@ export default function ResourceDetailpageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        {/* ✅ 상단: breadcrumb(좌) + 목록으로(우) */}
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
             <span className={styles.crumb} onClick={() => router.push("/admin/community/resources")}>
@@ -104,8 +152,6 @@ export default function ResourceDetailpageClient() {
             <span className={styles.sep}>›</span>
             <span className={styles.current}>상세페이지</span>
           </div>
-
-          {/* ✅ 여기엔 목록으로만 */}
           <div className={styles.breadcrumbActions}>
             <Button variant="secondary" onClick={() => router.push("/admin/community/resources")}>
               목록으로
@@ -115,10 +161,10 @@ export default function ResourceDetailpageClient() {
 
         <h1 className={styles.title}>자료실</h1>
 
-        {state.error && <div className={styles.errorMessage}>{state.error}</div>}
-        {state.loading && <div className={styles.loadingBox}>불러오는 중...</div>}
+        {load.error && <div className={styles.errorMessage}>{load.error}</div>}
+        {load.loading && <div className={styles.loadingBox}>불러오는 중...</div>}
 
-        {!state.loading && data && (
+        {!load.loading && data && (
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
@@ -159,8 +205,7 @@ export default function ResourceDetailpageClient() {
                             ? f
                             : String(f?.fileName ?? f?.name ?? f?.originalName ?? `첨부파일 ${idx + 1}`);
 
-                        const url =
-                          typeof f === "object" ? (f?.url ?? f?.downloadUrl ?? f?.path ?? "") : "";
+                        const url = typeof f === "object" ? f?.url ?? f?.downloadUrl ?? f?.path ?? "" : "";
 
                         return (
                           <li key={idx} className={styles.attachLi}>
@@ -183,39 +228,30 @@ export default function ResourceDetailpageClient() {
             </div>
           </div>
         )}
-        </div>
-        <div className={styles.bottomActions}>
-          <Button
-            variant="primary"
-            onClick={() => router.push(`/admin/community/resources/${resourceId}/edit`)}
-            disabled={state.loading || !resourceId}
-          >
-            수정
-          </Button>
+      </div>
 
-          <Button
-            variant="danger"
-            disabled={state.loading || !resourceId}
-            onClick={async () => {
-              const ok = confirm("정말 삭제하시겠습니까?");
-              if (!ok) return;
+      <div className={styles.bottomActions}>
+        <Button
+          variant="primary"
+          onClick={() => router.push(`/admin/community/resources/${resourceId}/edit`)}
+          disabled={load.loading || !resourceId}
+        >
+          수정
+        </Button>
 
-              try {
-                const res = await fetch(`/api/admin/community/resources/${resourceId}`, { method: "DELETE" });
-                if (!res.ok) {
-                  const t = await res.text().catch(() => "");
-                  throw new Error(t || `삭제 실패 (${res.status})`);
-                }
-                alert("삭제되었습니다.");
-                router.push("/admin/community/resources");
-              } catch (e: any) {
-                alert(e?.message ?? "삭제에 실패했습니다.");
-              }
-            }}
-          >
-            삭제
-          </Button>
-        </div>
+        <Button variant="danger" disabled={load.loading || !resourceId} onClick={openDelete}>
+          삭제
+        </Button>
+      </div>
+
+      <DeleteModal
+        open={deleteOpen}
+        targetLabel="자료"
+        targetTitle={load.data?.title}
+        loading={deleteLoading}
+        onClose={closeDelete}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

@@ -1,19 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { Table, type TableColumn } from "@/components/table";
-import { FaqListItemDto } from "../../api/types";
+import { FaqListItemDto, type FaqsTableProps } from "../../api/types";
 import styles from "./FaqTable.module.css";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
+import toast from "react-hot-toast";
+import DeleteModal from "../modal/DeleteModal.client";
 
-type Props = {
-  items: FaqListItemDto[];
-  loading: boolean;
-  onReload : () => void;
-};
-
-export function FaqsTable({ items, loading, onReload  }: Props) {
+export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
   const router = useRouter();
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; title?: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const goDetail = (id: number) => {
+    router.push(`/admin/community/faqs/${id}`);
+  };
 
   const goEdit = (id: number) => {
     // ✅ FaqEditPage.client.tsx가 연결된 라우트로 맞춰줘
@@ -21,28 +25,29 @@ export function FaqsTable({ items, loading, onReload  }: Props) {
     router.push(EDIT_PATH);
   };
 
-  const onDelete = async (id: number) => {
-    const ok = confirm("정말 삭제하시겠습니까?");
-    if (!ok) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      const res = await fetch(`/api/admin/community/faqs/${id}`, {
+      setDeleting(true);
+
+      const res = await fetch(`/api/admin/community/faqs/${deleteTarget.id}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        // 백엔드/프록시가 에러 메시지를 주는 경우를 대비
         const text = await res.text().catch(() => "");
         throw new Error(text || `DELETE failed (${res.status})`);
       }
 
-      alert("삭제되었습니다.");
-      // ✅ 현재 페이지 데이터 갱신
+      setDeleteTarget(null);
+      toast.success("FAQ가 삭제되었습니다.");
       router.refresh();
-      onReload ?.();
+      onReload?.();
     } catch (e: any) {
-      console.error(e);
-      alert(`삭제 실패: ${e?.message ?? "알 수 없는 오류"}`);
+      toast.error(e?.message ?? "삭제 실패");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -66,7 +71,10 @@ export function FaqsTable({ items, loading, onReload  }: Props) {
         <button
           type="button"
           className={styles.titleLink}
-          onClick={() => router.push(`/admin/community/faqs/${r.faqId}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            goDetail(r.faqId);
+          }}
         >
           {r.title}
         </button>
@@ -81,11 +89,23 @@ export function FaqsTable({ items, loading, onReload  }: Props) {
       stopRowClick: true,
       render: (r) => (
         <div className={styles.manageCell}>
-          <Button variant="secondary" onClick={() => goEdit(r.faqId)}>
+          <Button
+            variant="secondary"
+            onClick={(e: any) => {
+              e?.stopPropagation?.();
+              goEdit(r.faqId);
+            }}
+          >
             수정
           </Button>
           <div className={styles.manageCell}>
-          <Button variant="danger" onClick={() => onDelete(r.faqId)}>
+          <Button
+            variant="danger"
+            onClick={(e: any) => {
+              e?.stopPropagation?.();
+              setDeleteTarget({ id: r.faqId, title: r.title });
+            }}
+          >
             삭제
           </Button>
         </div>
@@ -96,13 +116,28 @@ export function FaqsTable({ items, loading, onReload  }: Props) {
   ];
 
   return (
-    <Table<FaqListItemDto>
-      columns={columns}
-      items={items}
-      loading={loading}
-      skeletonRowCount={10}
-      rowKey={(r) => r.faqId}
-      emptyText="FAQ가 없습니다."
-    />
+    <>
+      <Table<FaqListItemDto>
+        columns={columns}
+        items={items}
+        loading={loading}
+        skeletonRowCount={10}
+        rowKey={(r) => r.faqId}
+        emptyText="FAQ? ????."
+        onRowClick={(r) => goDetail(r.faqId)}
+      />
+
+      <DeleteModal
+        open={!!deleteTarget}
+        targetLabel="FAQ"
+        targetTitle={deleteTarget?.title}
+        loading={deleting}
+        onClose={() => {
+          if (deleting) return;
+          setDeleteTarget(null);
+        }}
+        onConfirm={confirmDelete}
+      />
+    </>
   );
 }

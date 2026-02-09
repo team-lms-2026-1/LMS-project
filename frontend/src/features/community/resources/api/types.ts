@@ -17,14 +17,14 @@ export type FileType = "IMAGE" | "DOCUMENT" | "VIDEO" | "ETC" | string;
 export type NoticeStatus = "SCHEDULED" | "ONGOING" | "ENDED" | string;
 export type SearchType = "TITLE" | "CONTENT" | "TITLE_OR_CONTENT" | "WRITER" | string;
 
-  export type HexColor = `#${string}`;
+export type HexColor = `#${string}`;
 
-  export type Category = {
-    categoryId: number;
-    name: string;
-    bgColorHex: HexColor;
-    textColorHex: HexColor;
-  };
+export type Category = {
+  categoryId: number;
+  name: string;
+  bgColorHex: HexColor;
+  textColorHex: HexColor;
+};
 
 /** DTO */
 export type ResourceListItemDto={
@@ -54,21 +54,14 @@ export type UpdateResourceRequestDto = {
 };
 
 export type ResourceFileDto = {
-  // 삭제 식별자 후보 (백엔드가 둘 중 하나라도 내려줘야 삭제 가능)
   fileId?: number;
-  id?: number; // 일부 백엔드가 id로 주는 경우 대비
+  id?: number; 
   storageKey?: string;
-
-  // 표시용 이름 후보
   fileName?: string;
   originalName?: string;
   name?: string;
-
-  // 링크 후보
   url?: string;
   downloadUrl?: string;
-
-  // 부가 메타(있으면 활용)
   fileType?: FileType;
   size?: number;
 };
@@ -80,16 +73,33 @@ export type ExistingFile = {
   url?: string;
 };
 
-// ✅ 수정 응답 (백엔드가 success만 주면 SuccessResponse 쓰면 됨)
+export type LoadState<T> =
+  | { loading: true; error: string | null; data: null }
+  | { loading: false; error: string | null; data: T | null };
+
 export type UpdateResourceResponse = ApiResponse<{ resourceId: number }, null>;
 
 /** Response */
 export type ResourceListResponse = ApiResponse<ResourceListItemDto[], PageMeta>;
 export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
 
-export type CreateResourceResponseDto = {
-  resourceId: number;
-};
+export type CreateResourceResponseDto = {resourceId: number;};
 export type CreateResourceResponse = ApiResponse<CreateResourceResponseDto, null>;
 
 export type ResourceCategoryListResponse = ApiResponse<Category[], null>;
+
+// Component types
+export type ResourceTableProps = {
+  items: ResourceListItemDto[];
+  loading: boolean;
+  onReload: () => void;
+};
+
+export type ResourceDeleteModalProps = {
+  open: boolean;
+  targetLabel?: string;
+  targetTitle?: string;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+  loading?: boolean;
+};

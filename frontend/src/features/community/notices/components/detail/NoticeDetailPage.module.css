@@ -218,3 +218,26 @@
   gap: 10px;
   margin-top: 14px;
 }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(20, 20, 20, 0.92);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+
+  min-width: 240px;
+  max-width: min(520px, calc(100vw - 32px));
+}
+
+.toastText {
+  font-size: 14px;
+  line-height: 1.2;
+  word-break: break-word;
+}

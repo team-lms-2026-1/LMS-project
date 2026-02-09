@@ -2,22 +2,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
 import styles from "./NoticeDetailPage.module.css";
-import type { NoticeListItemDto } from "../../api/types";
+import type { LoadState, NoticeListItemDto } from "../../api/types";
 import { fetchNoticeDetail } from "../../api/NoticesApi";
 import { Button } from "@/components/button";
-
-type LoadState =
-  | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: NoticeListItemDto | null };
+import DeleteModal from "../modal/DeleteModal.client";
 
 function normalizeDetail(payload: any): NoticeListItemDto {
-  // 응답 형태가 {data:{...}} / {...} 섞여도 동작하게 방어
   const raw = payload?.data ?? payload;
 
-  // 최소 필드 보정(백엔드가 createdAt/cerateAt 등 오타 섞이는 경우 대비)
-  const created =
-    raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+  const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+
+  const displayStartAt =
+    raw?.displayStartAt ?? raw?.display_start_at ?? raw?.displayStart ?? raw?.startAt ?? "";
+
+  const displayEndAt =
+    raw?.displayEndAt ?? raw?.display_end_at ?? raw?.displayEnd ?? raw?.endAt ?? "";
 
   return {
     noticeId: Number(raw?.noticeId ?? 0),
@@ -29,15 +31,27 @@ function normalizeDetail(payload: any): NoticeListItemDto {
     createdAt: String(created),
     status: String(raw?.status ?? ""),
     files: Array.isArray(raw?.files) ? raw.files : [],
+    displayStartAt: displayStartAt ? String(displayStartAt) : "",
+    displayEndAt: displayEndAt ? String(displayEndAt) : "",
   };
 }
 
+function formatPeriod(start?: string, end?: string) {
+  const s = start ? String(start).slice(0, 10) : "";
+  const e = end ? String(end).slice(0, 10) : "";
+  if (!s && !e) return "-";
+  if (s && !e) return `${s} ~`;
+  if (!s && e) return `~ ${e}`;
+  return `${s} ~ ${e}`;
+}
+
 function formatDateTime(v: string) {
-  // "2026-01-21 08:13" 같이 이미 포맷이면 그대로, ISO면 간단 변환
   if (!v) return "-";
   if (v.includes(" ")) return v;
+
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return v;
+
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
@@ -49,9 +63,11 @@ function formatDateTime(v: string) {
 export default function NoticeDetailpageClient() {
   const router = useRouter();
   const params = useParams<{ noticeId?: string }>();
-  const noticeId = useMemo(() => Number(params?.noticeId ?? 0), [params]);
 
-  const [state, setState] = useState<LoadState>({
+  const noticeIdParam = params?.noticeId;
+  const noticeId = useMemo(() => Number(noticeIdParam ?? 0), [noticeIdParam]);
+
+  const [state, setState] = useState<LoadState<NoticeListItemDto>>({
     loading: true,
     error: null,
     data: null,
@@ -86,6 +102,31 @@ export default function NoticeDetailpageClient() {
     };
   }, [noticeId]);
 
+  // ✅ 삭제 모달
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!noticeId || Number.isNaN(noticeId)) return;
+
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/admin/community/notices/${noticeId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error(t || `삭제 실패 (${res.status})`);
+      }
+
+      toast.success("공지사항이 삭제되었습니다.");
+      router.push(`/admin/community/notices`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "삭제 실패");
+    } finally {
+      setDeleting(false);
+      setDeleteOpen(false);
+    }
+  };
+
   const data = state.data;
 
   const badgeStyle = useMemo(() => {
@@ -97,7 +138,6 @@ export default function NoticeDetailpageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        {/* ✅ 상단: breadcrumb(좌) + 목록으로(우) */}
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
             <span className={styles.crumb} onClick={() => router.push("/admin/community/notices")}>
@@ -107,7 +147,6 @@ export default function NoticeDetailpageClient() {
             <span className={styles.current}>상세페이지</span>
           </div>
 
-          {/* ✅ 여기엔 목록으로만 */}
           <div className={styles.breadcrumbActions}>
             <Button variant="secondary" onClick={() => router.push("/admin/community/notices")}>
               목록으로
@@ -134,13 +173,20 @@ export default function NoticeDetailpageClient() {
                 <span className={styles.metaLabel}>작성자</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
+
               <div className={styles.metaItem}>
                 <span className={styles.metaLabel}>작성일</span>
                 <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
               </div>
+
               <div className={styles.metaItem}>
                 <span className={styles.metaLabel}>조회수</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
+              </div>
+
+              <div className={styles.metaItem}>
+                <span className={styles.metaLabel}>게시기간</span>
+                <span className={styles.metaValue}>{formatPeriod(data.displayStartAt, data.displayEndAt)}</span>
               </div>
             </div>
 
@@ -161,8 +207,7 @@ export default function NoticeDetailpageClient() {
                             ? f
                             : String(f?.fileName ?? f?.name ?? f?.originalName ?? `첨부파일 ${idx + 1}`);
 
-                        const url =
-                          typeof f === "object" ? (f?.url ?? f?.downloadUrl ?? f?.path ?? "") : "";
+                        const url = typeof f === "object" ? (f?.url ?? f?.downloadUrl ?? f?.path ?? "") : "";
 
                         return (
                           <li key={idx} className={styles.attachLi}>
@@ -183,45 +228,35 @@ export default function NoticeDetailpageClient() {
                 </div>
               </div>
             </div>
-
-            {/* ✅ 하단 우측: 수정/삭제 버튼 */}
-            
           </div>
         )}
-        
       </div>
+
       <div className={styles.bottomActions}>
-              <Button
-                variant="primary"
-                onClick={() => router.push(`/admin/community/notices/${noticeId}/edit`)}
-                disabled={state.loading || !noticeId}
-              >
-                수정
-              </Button>
+        <Button
+          variant="primary"
+          onClick={() => router.push(`/admin/community/notices/${noticeId}/edit`)}
+          disabled={state.loading || !noticeId}
+        >
+          수정
+        </Button>
 
-              <Button
-                variant="danger"
-                disabled={state.loading || !noticeId}
-                onClick={async () => {
-                  const ok = confirm("정말 삭제하시겠습니까?");
-                  if (!ok) return;
+        <Button variant="danger" disabled={state.loading || !noticeId} onClick={() => setDeleteOpen(true)}>
+          삭제
+        </Button>
+      </div>
 
-                  try {
-                    const res = await fetch(`/api/admin/community/notices/${noticeId}`, { method: "DELETE" });
-                    if (!res.ok) {
-                      const t = await res.text().catch(() => "");
-                      throw new Error(t || `삭제 실패 (${res.status})`);
-                    }
-                    alert("삭제되었습니다.");
-                    router.push("/admin/community/notices");
-                  } catch (e: any) {
-                    alert(e?.message ?? "삭제에 실패했습니다.");
-                  }
-                }}
-              >
-                삭제
-              </Button>
-            </div>
+      <DeleteModal
+        open={deleteOpen}
+        targetLabel="공지사항"
+        targetTitle={state.data?.title}
+        loading={deleting}
+        onClose={() => {
+          if (deleting) return;
+          setDeleteOpen(false);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

@@ -1,20 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./FaqPage.module.css";
 import { FaqsTable } from "./FaqTablePage";
 import { useFaqsList } from "../../hooks/useFaqList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { Button } from "@/components/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { fetchFaqCategories } from "../../api/FaqsApi";
 import type { Category } from "../../api/types";
+import toast from "react-hot-toast";
 
 export default function FaqPageClient() {
   const router = useRouter();
+  const sp = useSearchParams();
   const { state, actions } = useFaqsList();
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
@@ -22,6 +24,25 @@ export default function FaqPageClient() {
   const categoryIdQs = get("categoryId"); 
   const [categories, setCategories] = useState<Category[]>([]);
   const [catsLoading, setCatsLoading] = useState(false);
+  const toastOnceRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const t = sp.get("toast");
+    if (!t) return;
+
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+
+    if (t === "created") toast.success("FAQ가 등록되었습니다.", { id: "faq-toast-created" });
+    else if (t === "updated") toast.success("FAQ가 수정되었습니다.", { id: "faq-toast-updated" });
+    else if (t === "deleted") toast.success("FAQ가 삭제되었습니다.", { id: "faq-toast-deleted" });
+
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+
+    const qs = next.toString();
+    router.replace(qs ? `/admin/community/faqs?${qs}` : "/admin/community/faqs");
+  }, [sp, router]);
 
   useEffect(() => {
     let alive = true;

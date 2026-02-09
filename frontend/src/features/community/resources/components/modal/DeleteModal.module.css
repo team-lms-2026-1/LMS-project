@@ -1,0 +1,24 @@
+.desc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.main {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #111827;
+  margin: 0;
+}
+
+.emph {
+  font-weight: 700;
+}
+
+.sub {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7280;
+  margin: 0;
+}

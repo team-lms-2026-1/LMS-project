@@ -7,6 +7,7 @@ import styles from "./SpacesEditPage.module.css";
 import { spacesApi } from "../../api/SpacesApi";
 import type { SpaceDetailDto, SpaceRuleUpsertDto, UpdateSpaceDetailRequestDto } from "../../api/types";
 import { Button } from "@/components/button";
+import toast from "react-hot-toast";
 
 type Props = { spaceId: number };
 
@@ -206,12 +207,11 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
 
       await spacesApi.updateDetailMultipart(spaceId, dto, imageFile);
 
-      alert("수정되었습니다.");
-      router.push(`/admin/study-space/spaces/${spaceId}`);
+      router.push(`/admin/study-space/spaces/${spaceId}?toast=updated`);
       router.refresh();
     } catch (e: any) {
       console.error("[SpacesEdit submit]", e);
-      alert(e?.message || "수정 중 오류가 발생했습니다.");
+      toast.error(e?.message || "수정 중 오류가 발생했습니다.");
     } finally {
       setSaving(false);
     }

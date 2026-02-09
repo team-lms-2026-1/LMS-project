@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { spacesApi } from "../../api/SpacesApi";
@@ -9,9 +9,12 @@ import type { PageMeta, SpaceListItemDto } from "../../api/types";
 import { SpacesTable } from "./SpacesTable";
 import styles from "./SpacesPage.module.css";
 import { Button } from "@/components/button";
+import toast from "react-hot-toast";
 
 export default function SpacesPageClient() {
   const router = useRouter();
+  const sp = useSearchParams();
+  const toastOnceRef = useRef<string | null>(null);
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 8 });
 
@@ -19,6 +22,24 @@ export default function SpacesPageClient() {
   const [meta, setMeta] = useState<PageMeta | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    const t = sp.get("toast");
+    if (!t) return;
+
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+
+    if (t === "created") toast.success("학습공간이 등록되었습니다.", { id: "spaces-toast-created" });
+    else if (t === "updated") toast.success("학습공간이 수정되었습니다.", { id: "spaces-toast-updated" });
+    else if (t === "deleted") toast.success("학습공간이 삭제되었습니다.", { id: "spaces-toast-deleted" });
+
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+
+    const qs = next.toString();
+    router.replace(qs ? `/admin/study-space/spaces?${qs}` : "/admin/study-space/spaces");
+  }, [sp, router]);
 
   useEffect(() => {
     let alive = true;
