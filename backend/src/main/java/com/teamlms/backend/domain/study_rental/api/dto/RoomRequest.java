@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @Getter
 @NoArgsConstructor
 public class RoomRequest {
-    @NotBlank(message = "룸 이름은 필수입니다.")
+    @NotBlank(message = "{validation.study.room.name.required}")
     private String roomName;
 
     @Min(1)

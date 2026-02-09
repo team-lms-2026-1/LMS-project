@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 @Getter @NoArgsConstructor
 public class ExternalResourceRequest {
 
-    @NotNull(message = "카테고리 ID는 필수입니다.")
+    @NotNull(message = "{validation.community.externalResource.categoryId.required}")
     private Long categoryId;
 
-    @NotBlank(message = "제목은 필수입니다.")
+    @NotBlank(message = "{validation.community.externalResource.title.required}")
     private String title;
 
-    @NotBlank(message = "내용은 필수입니다.")
+    @NotBlank(message = "{validation.community.externalResource.content.required}")
     private String content;
 }
