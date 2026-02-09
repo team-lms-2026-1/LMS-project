@@ -18,21 +18,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class AdminStudentDetailResponse {
-    
+
     private Long accountId;
     private String loginId;
     private AccountType accountType; // student
     private AccountStatus status;
     private LocalDateTime createdAt;
-    
+
     private Profile profile;
 
-    @Getter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class Profile {
         private String name;
         private String email;
         private String phone;
-        
+
         private Integer gradeLevel;
         private AcademicStatus academicStatus;
 
@@ -43,19 +46,28 @@ public class AdminStudentDetailResponse {
         private List<MajorItem> majors = List.of();
     }
 
-    @Getter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class DeptSimple {
         private Long deptId;
         private String deptName;
     }
 
-    @Getter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MajorSimple {
         private Long majorId;
         private String majorName;
     }
 
-    @Getter @NoArgsConstructor @AllArgsConstructor @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class MajorItem {
         private Long majorId;
         private String majorName;

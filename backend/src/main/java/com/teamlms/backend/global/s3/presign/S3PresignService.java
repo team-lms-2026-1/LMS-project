@@ -35,38 +35,37 @@ public class S3PresignService {
         };
 
         String storageKey = props.resolvedKeyPrefix()
-            + "/offering-" + extraOfferingId
-            + "/" + UUID.randomUUID()
-            + "." + ext;
+                + "/offering-" + extraOfferingId
+                + "/" + UUID.randomUUID()
+                + "." + ext;
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-            .bucket(bucket) // ✅ props.bucket() 대신 spring.cloud.aws.s3.bucket 사용
-            .key(storageKey)
-            .contentType(normalizedContentType.isBlank() ? null : normalizedContentType)
-            .build();
+                .bucket(bucket) // ✅ props.bucket() 대신 spring.cloud.aws.s3.bucket 사용
+                .key(storageKey)
+                .contentType(normalizedContentType.isBlank() ? null : normalizedContentType)
+                .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofSeconds(props.putExpiresSeconds()))
-            .putObjectRequest(putObjectRequest)
-            .build();
+                .signatureDuration(Duration.ofSeconds(props.putExpiresSeconds()))
+                .putObjectRequest(putObjectRequest)
+                .build();
 
         var presigned = presigner.presignPutObject(presignRequest);
 
         LocalDateTime expiresAt = LocalDateTime.ofInstant(
-            java.time.Instant.now().plusSeconds(props.putExpiresSeconds()),
-            ZoneOffset.UTC
-        );
+                java.time.Instant.now().plusSeconds(props.putExpiresSeconds()),
+                ZoneOffset.UTC);
 
-        Map<String, String> requiredHeaders =
-            normalizedContentType.isBlank() ? Map.of() : Map.of("Content-Type", normalizedContentType);
+        Map<String, String> requiredHeaders = normalizedContentType.isBlank() ? Map.of()
+                : Map.of("Content-Type", normalizedContentType);
 
         return new PresignPutResult(storageKey, presigned.url().toString(), expiresAt, requiredHeaders);
     }
 
     public record PresignPutResult(
-        String storageKey,
-        String uploadUrl,
-        LocalDateTime expiresAt,
-        Map<String, String> requiredHeaders
-    ) {}
+            String storageKey,
+            String uploadUrl,
+            LocalDateTime expiresAt,
+            Map<String, String> requiredHeaders) {
+    }
 }

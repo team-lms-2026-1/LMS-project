@@ -1,7 +1,6 @@
 package com.teamlms.backend.domain.account.api;
 
 import com.teamlms.backend.domain.account.api.dto.AdminAccountCreateRequest;
-import com.teamlms.backend.domain.account.api.dto.AdminAccountCreateResponse;
 import com.teamlms.backend.domain.account.api.dto.AdminAccountStatusUpdateRequest;
 import com.teamlms.backend.domain.account.api.dto.AdminAccountStatusUpdateResponse;
 import com.teamlms.backend.domain.account.api.dto.AdminAccountUpdateRequest;

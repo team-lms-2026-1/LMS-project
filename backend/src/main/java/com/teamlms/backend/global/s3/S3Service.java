@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,15 @@ public class S3Service {
         // 업로드된 파일의 URL 반환
         return s3Template.download(bucket, key).getURL().toString();
     }
-    
+
+    public io.awspring.cloud.s3.S3Resource download(String key) {
+        return s3Template.download(bucket, key);
+    }
+
+    public String createPresignedGetUrl(String key) {
+        return s3Template.createSignedGetURL(bucket, key, Duration.ofHours(1)).toString();
+    }
+
     public void delete(String key) {
         // key는 전체 URL이 아니라 "notices/파일명.jpg" 형태여야 함
         s3Template.deleteObject(bucket, key);
