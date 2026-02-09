@@ -19,6 +19,10 @@ export type ExtraOfferingStatus = "DRAFT" | "OPEN" | "ENROLLMENT_CLOSED" | "IN_P
 
 export type ExtraSessionStatus = "OPEN" | "CLOSED" | "CANCELED" | string;
 
+export type ExtraApplicationApplyStatus = "APPLIED" | "CANCELED" | string;
+
+export type CompletionStatus = "IN_PROGRESS" | "PASSED" | "FAILED" | string;
+
 export type CompetencyCode = "C1" | "C2" | "C3" | "C4" | "C5" | "C6" | string;
 
 
@@ -106,6 +110,65 @@ export type ExtraSessionDetailDto = {
   video: ExtraSessionVideoDetailDto;
 };
 
+export type ExtraOfferingApplicantSessionDto = {
+  sessionId: number;
+  sessionTitle: string;
+  sessionStatus: ExtraSessionStatus;
+  isAttended: boolean;
+};
+
+export type ExtraOfferingApplicantRowDto = {
+  applicationId: number;
+  studentAccountId: number;
+  studentNo: string;
+  studentName: string;
+  deptName: string;
+  gradeLevel: string;
+  applyStatus: ExtraApplicationApplyStatus;
+  completionStatus: CompletionStatus;
+  sessions: ExtraOfferingApplicantSessionDto[];
+};
+
+export type ExtraCurricularGradeListItemDto = {
+  studentAccountId: number;
+  studentNo: string;
+  deptName: string;
+  gradeLevel: number;
+  name: string;
+  totalEarnedPoints: number;
+  totalEarnedHours: number;
+};
+
+export type ExtraGradeTrendItemDto = {
+  semesterId: number;
+  semesterName: string;
+  semesterEarnedPoints: number;
+  semesterEarnedHours: number;
+};
+
+export type ExtraGradeDetailHeaderDto = {
+  studentAccountId: number;
+  studentName: string;
+  studentNo: string;
+  deptId: number;
+  deptName: string;
+  gradeLevel: number;
+  totalEarnedPoints: number;
+  totalEarnedHours: number;
+  trend: ExtraGradeTrendItemDto[];
+};
+
+export type ExtraCompletionListItemDto = {
+  applicationId: number;
+  semesterId: number;
+  semesterName: string;
+  extraOfferingCode: string;
+  extraOfferingName: string;
+  rewardPointDefault: number;
+  recognizedHoursDefault: number;
+  completionStatus: CompletionStatus;
+};
+
 /** Response */
 export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
 export type ExtraCurricularOfferingListResponsee = ApiResponse<ExtraCurricularOfferingListItemDto[], PageMeta>;
@@ -113,6 +176,10 @@ export type ExtraCurricularOfferingDetailResponse = ApiResponse<ExtraCurricularO
 export type ExtraCurricularOfferingCompetencyResponse = ApiResponse<ExtraCurricularOfferingCompetencyDto[], null>;
 export type ExtraSessionListResponse = ApiResponse<ExtraSessionListItemDto[], PageMeta>;
 export type ExtraSessionDetailResponse = ApiResponse<ExtraSessionDetailDto, null>
+export type ExtraOfferingApplicantListResponse = ApiResponse<ExtraOfferingApplicantRowDto[], PageMeta>;
+export type ExtraCurricularGradeListResponse = ApiResponse<ExtraCurricularGradeListItemDto[], PageMeta>;
+export type ExtraGradeDetailHeaderResponse = ApiResponse<ExtraGradeDetailHeaderDto, null>;
+export type ExtraCompletionListResponse = ApiResponse<ExtraCompletionListItemDto[], PageMeta>;
 
 /** Request */
 export type ExtraCurricularOfferingCreateRequest = {

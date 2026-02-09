@@ -29,8 +29,8 @@ public class SurveyUpdateRequest {
     private LocalDateTime endAt;
 
     // 질문 목록을 아예 새로 받아와서 교체하는 방식 (간편함)
-    @NotNull(message = "질문 목록은 필수입니다")
-    @NotEmpty(message = "질문을 하나 이상 추가해주세요")
+    @NotNull(message = "{validation.survey.questions.required}")
+    @NotEmpty(message = "{validation.survey.questions.notEmpty}")
     @Valid
     private List<QuestionDto> questions;
 }

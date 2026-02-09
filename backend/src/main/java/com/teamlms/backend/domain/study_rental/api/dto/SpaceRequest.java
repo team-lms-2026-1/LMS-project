@@ -11,10 +11,10 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class SpaceRequest {
-    @NotBlank(message = "공간 이름은 필수입니다.")
+    @NotBlank(message = "{validation.study.space.name.required}")
     private String spaceName;
 
-    @NotBlank(message = "위치 정보는 필수입니다.")
+    @NotBlank(message = "{validation.study.space.location.required}")
     private String location;
 
     private String description;

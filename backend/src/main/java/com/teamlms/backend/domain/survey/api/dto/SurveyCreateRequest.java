@@ -31,8 +31,8 @@ public class SurveyCreateRequest {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime endAt;
 
-    @NotNull(message = "질문 목록은 필수입니다")
-    @jakarta.validation.constraints.NotEmpty(message = "질문을 하나 이상 추가해주세요")
+    @NotNull(message = "{validation.survey.questions.required}")
+    @jakarta.validation.constraints.NotEmpty(message = "{validation.survey.questions.notEmpty}")
     @jakarta.validation.Valid
     private List<QuestionDto> questions;
     private TargetFilterDto targetFilter;
@@ -43,7 +43,7 @@ public class SurveyCreateRequest {
     @ToString
     @NoArgsConstructor
     public static class QuestionDto {
-        @NotBlank(message = "질문 내용을 입력해주세요")
+        @NotBlank(message = "{validation.survey.questionText.required}")
         private String questionText;
         private Integer sortOrder;
         private Integer minVal = 1;

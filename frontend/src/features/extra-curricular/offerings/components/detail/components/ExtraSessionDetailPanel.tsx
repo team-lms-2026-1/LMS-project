@@ -132,9 +132,9 @@ export function ExtraSessionDetailPanel({
 }: Props) {
   const { state, actions } = useExtraSessionDetail(offeringId, sessionId, true);
 
-  // ✅ 수정은 offeringStatus === "OPEN" 일 때만
-  const isEditable = offeringStatus === "OPEN";
-  const editDisabledReason = !isEditable ? "운영 상태가 OPEN일 때만 수정할 수 있습니다." : "";
+  // ✅ 수정은 offeringStatus === "IN_PROGRESS" 일 때만
+  const isEditable = offeringStatus === "IN_PROGRESS";
+  const editDisabledReason = !isEditable ? "운영 상태가 IN_PROGRESS일 때만 수정할 수 있습니다." : "";
 
   // ✅ 상태변경은 offeringStatus === "IN_PROGRESS" 일 때만
   const isStatusChangeable = offeringStatus === "IN_PROGRESS";

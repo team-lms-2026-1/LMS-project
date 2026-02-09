@@ -19,7 +19,7 @@ export default function LoginPage() {
     if (prefix === "a") return "/admin";
     if (prefix === "s") return "/student/main";
     if (prefix === "p") return "/professor";
-    // 예외: 규칙 밖이면 기본값(원하면 변경)
+    // 예외: 규칙 밖이면 기본값으로 변경
     return "/";
   }
 
@@ -28,7 +28,7 @@ export default function LoginPage() {
 
     const trimmedId = id.trim();
 
-    // ✅ ID 규칙: 문자 1개 + 숫자 8자리 (총 9자리) + 앞문자 a/s/p
+    // ID 규칙: 문자 1개 + 숫자 8자리 (총 9자리) + 영문 a/s/p
     const ok = /^[asp][0-9]{8}$/i.test(trimmedId);
     if (!ok) {
       alert("아이디 형식이 올바르지 않습니다. (a|s|p + 숫자 8자리, 예: a12345678)");
@@ -38,10 +38,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // ✅ 로그인은 1번만 호출
+      // 로그인은 1번만 호출
       const res = await loginViaBff({ id: trimmedId, password: pw });
 
-      // ✅ expiresAt이 있으면 자동 로그아웃 스케줄링
+      // expiresAt이 있으면 자동 로그아웃 스케줄링
       const expiresAt = (res as any)?.expiresAt;
       if (expiresAt) {
         scheduleAutoLogout(expiresAt, async () => {
@@ -50,7 +50,7 @@ export default function LoginPage() {
         });
       }
 
-      // ✅ 역할(prefix) 기반 라우팅
+      // 아이디 prefix 기반 라우팅
       router.replace(resolveRedirectPath(trimmedId));
     } catch (err) {
       const message = err instanceof Error ? err.message : "로그인에 실패했습니다.";
@@ -102,7 +102,7 @@ export default function LoginPage() {
             </div>
 
             <button className={styles.button} type="submit" disabled={loading || !id || !pw}>
-              {loading ? "로그인 중..." : "Login"}
+              {loading ? "로그인 중.." : "Login"}
             </button>
           </form>
         </section>
@@ -110,7 +110,7 @@ export default function LoginPage() {
         <section className={styles.right}>
           <img className={styles.heroImg} src="/campus.jpg" alt="캠퍼스" />
           <div className={styles.heroOverlay} />
-          <div className={styles.heroText}>장로회신대학교</div>
+          <div className={styles.heroText}>미래를 여는 대학</div>
         </section>
       </div>
     </div>

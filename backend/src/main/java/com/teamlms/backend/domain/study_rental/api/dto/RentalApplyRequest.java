@@ -16,7 +16,7 @@ public class RentalApplyRequest {
     private Long roomId;
 
     @NotNull
-    @FutureOrPresent(message = "예약 날짜는 과거일 수 없습니다.")
+    @FutureOrPresent(message = "{validation.study.rental.date.futureOrPresent}")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate rentalDate;
 
