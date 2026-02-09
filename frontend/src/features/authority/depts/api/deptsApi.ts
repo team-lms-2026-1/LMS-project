@@ -3,9 +3,10 @@
 import { getJson } from "@/lib/http";
 import {
   DeptListResponse,
+  DeptListItemDto, // Imported for explicit mapping
   SuccessResponse,
   PageMeta,
-
+  BackendDeptListResponse,
   // 교수
   BackendProfessorListResponse,
   DeptProfessorListItemDto,
@@ -22,6 +23,8 @@ import {
   MajorCreateRequest,
   DeptCreateRequest,
   MajorCreateResponse,
+  DeptEditResponse,
+  DeptUpdateRequest,
 } from "./types";
 
 export type DeptListQuery = {
@@ -34,7 +37,9 @@ export type DeptListQuery = {
  *  학과 목록
  * ========================= */
 
-export async function fetchDeptList(query: DeptListQuery) {
+export async function fetchDeptList(
+  query: DeptListQuery
+): Promise<DeptListResponse> {
   const sp = new URLSearchParams();
   if (query.page) sp.set("page", String(query.page));
   if (query.size) sp.set("size", String(query.size));
@@ -45,7 +50,20 @@ export async function fetchDeptList(query: DeptListQuery) {
     ? `/api/admin/authority/depts?${qs}`
     : `/api/admin/authority/depts`;
 
-  return getJson<DeptListResponse>(url);
+  const res = await getJson<BackendDeptListResponse>(url);
+
+  return {
+    data: res.data.map<DeptListItemDto>((item) => ({
+      deptId: item.deptId,
+      deptCode: item.deptCode,
+      deptName: item.deptName,
+      headProfessorName: item.headProfessorName ?? "",
+      studentCount: item.studentCount,
+      professorCount: item.professorCount,
+      isActive: item.isActive, // Map isActive -> isActive
+    })),
+    meta: res.meta,
+  };
 }
 
 /* =========================
@@ -73,7 +91,7 @@ function buildDetailQuery(query?: DeptDetailListQuery) {
 
 export async function fetchDeptProfessorList(
   deptId: string | number,
-  query?: DeptDetailListQuery,
+  query?: DeptDetailListQuery
 ): Promise<DeptProfessorListItemDtoResponse> {
   const qs = buildDetailQuery(query);
   const url = `/api/admin/authority/depts/${deptId}/professors${qs}`;
@@ -101,7 +119,7 @@ export async function fetchDeptProfessorList(
 
 export async function fetchDeptStudentList(
   deptId: string | number,
-  query?: DeptDetailListQuery,
+  query?: DeptDetailListQuery
 ): Promise<DeptStudentListItemDtoResponse> {
   const qs = buildDetailQuery(query);
   const url = `/api/admin/authority/depts/${deptId}/students${qs}`;
@@ -128,7 +146,7 @@ export async function fetchDeptStudentList(
 
 export async function fetchDeptMajorList(
   deptId: string | number,
-  query?: DeptDetailListQuery,
+  query?: DeptDetailListQuery
 ): Promise<DeptmajorListItemDtoResponse> {
   const qs = buildDetailQuery(query);
   const url = `/api/admin/authority/depts/${deptId}/majors${qs}`;
@@ -146,10 +164,10 @@ export async function fetchDeptMajorList(
   return mapped;
 }
 export async function updateDeptStatus(deptId: number, active: boolean) {
-  return getJson(`/api/admin/authority/depts/${deptId}/status`, {
+  return getJson(`/api/admin/authority/depts/${deptId}/active`, {
     method: "PATCH",
     body: JSON.stringify({
-      status: active ? "ACTIVE" : "INACTIVE",
+      isActive: active,
     }),
   });
 }
@@ -157,7 +175,7 @@ export async function updateDeptStatus(deptId: number, active: boolean) {
 export async function createDept(body: DeptCreateRequest) {
   return getJson<SuccessResponse<null>>(`/api/admin/authority/depts`, {
     method: "POST",
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ ...body, status: body.active ? "ACTIVE" : "INACTIVE" }),
   });
 }
 
@@ -165,8 +183,24 @@ export async function createMajor(
   deptId: number,
   body: MajorCreateRequest
 ) {
-  return getJson<MajorCreateResponse>(`/api/admin/authority/depts/${deptId}/majors`, {
-    method: "POST",
+  return getJson<MajorCreateResponse>(
+    `/api/admin/authority/depts/${deptId}/majors`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    }
+  );
+}
+
+export async function getDeptEdit(deptId: number) {
+  return getJson<SuccessResponse<DeptEditResponse>>(
+    `/api/admin/authority/depts/${deptId}/edit`
+  );
+}
+
+export async function updateDept(deptId: number, body: DeptUpdateRequest) {
+  return getJson<SuccessResponse<null>>(`/api/admin/authority/depts/${deptId}/edit`, {
+    method: "PATCH",
     body: JSON.stringify(body),
   });
 }

@@ -27,7 +27,7 @@ export function DeptsTable({ items, loading, onEditClick, onToggleStatus }: Prop
       align: "center",
       render: (r) => (
         <Link
-          href={`/admin/depts/${r.deptId}`}
+          href={`/admin/authority/departments/${r.deptId}`}
           style={{
             textDecoration: "underline",
             color: "#0070f3",
@@ -57,19 +57,21 @@ export function DeptsTable({ items, loading, onEditClick, onToggleStatus }: Prop
     {
       header: "사용여부",
       align: "center",
-      render: (r) => (
-        <ToggleSwitch
-          checked={r.isActive}
-          onChange={(next) => onToggleStatus?.(r.deptId, next)}
-          onLabel="on"
-          offLabel="off"
-          disabled={loading}
-        />
-      ),
+      render: (r) => {
+        const hasMembers = r.studentCount > 0 || r.professorCount > 0;
+
+        return (
+          <ToggleSwitch
+            checked={r.isActive}
+            onChange={(next) => onToggleStatus?.(r.deptId, next)}
+            onLabel="on"
+            offLabel="off"
+            disabled={loading || hasMembers}
+
+          />
+        );
+      },
     },
-
-
-
     {
       header: "관리",
       width: 140,
@@ -84,6 +86,7 @@ export function DeptsTable({ items, loading, onEditClick, onToggleStatus }: Prop
       ),
     },
   ];
+
 
   return (
     <Table<DeptListItemDto>

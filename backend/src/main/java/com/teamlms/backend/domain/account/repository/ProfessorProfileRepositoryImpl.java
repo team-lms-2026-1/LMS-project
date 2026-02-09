@@ -28,9 +28,8 @@ public class ProfessorProfileRepositoryImpl implements ProfessorProfileRepositor
                 .join(account).on(account.accountId.eq(prof.accountId))
                 .where(
                         prof.deptId.eq(deptId),
-                        account.accountType.eq(AccountType.PROFESSOR),
-                        account.status.eq(AccountStatus.ACTIVE)
-                )
+                        account.accountType.eq(AccountType.PROFESSOR)
+                )       
                 .orderBy(prof.name.asc())
                 .fetch();
     }

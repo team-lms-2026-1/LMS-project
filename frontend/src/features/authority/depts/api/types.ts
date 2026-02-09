@@ -14,7 +14,7 @@ export type PageMeta = {
 };
 
 
-export type MajorType = "PRIMARY" | "DOUBLE" | "MINOR" | string;
+export type MajorType = "PRIMARY" | "DOUBLE" | "MINOR";
 
 /** DTO */
 export type DeptListItemDto = {
@@ -104,3 +104,39 @@ export type MajorCreateRequest = {
 };
 
 export type MajorCreateResponse = SuccessResponse<null>;
+// 백엔드에서 오는 학과 리스트 아이템
+export type BackendDeptItem = {
+  deptId: number;
+  deptCode: string;
+  deptName: string;
+  headProfessorName: string | null;  // 백엔드 필드 이름에 맞춰!
+  studentCount: number;
+  professorCount: number;
+  isActive: boolean;
+};
+
+export type BackendDeptListResponse = ApiResponse<BackendDeptItem[], PageMeta>;
+
+export type DeptUpdateForm = {
+  deptId: number;
+  deptCode: string;
+  deptName: string;
+  headProfessorAccountId: number | null;
+  description: string;
+};
+
+export type ProfessorDropdownItem = {
+  accountId: number;
+  name: string;
+};
+
+export type DeptEditResponse = {
+  dept: DeptUpdateForm;
+  professors: ProfessorDropdownItem[];
+};
+
+export type DeptUpdateRequest = {
+  deptName: string;
+  headProfessorAccountId: number | null;
+  description: string;
+};

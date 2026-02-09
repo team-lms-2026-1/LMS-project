@@ -7,9 +7,9 @@ import { OutButton } from "@/components/button/OutButton";
 import { useDeptList } from "../../hooks/useDeptList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
-import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
-import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
+
 import DeptCreatePage from "../modal/DeptCreatePage";
+import DeptEditPage from "../modal/DeptEditPage";
 import { updateDeptStatus } from "../../api/deptsApi";
 
 export default function DeptPageClient() {
@@ -21,12 +21,25 @@ export default function DeptPageClient() {
     await actions.reload();
     setPage(1);
   };
+  const handleUpdated = async () => {
+    await actions.reload();
+  };
   const handleToggleStatus = async (deptId: number, nextActive: boolean) => {
     try {
       await updateDeptStatus(deptId, nextActive);
       await actions.reload();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      // 백엔드에서 409 Conflict (연관 데이터 존재 시 비활성 불가) 반환 시 처리
+      if (e?.response?.status === 409 || e?.status === 409 || e?.statusCode === 409) {
+        alert("교수, 학생, 전공 등 연관 데이터가 존재하는 학과는 사용을 중지할 수 없습니다.");
+      } else {
+        // 기타 오류
+        alert("상태 변경 중 오류가 발생했습니다.");
+      }
+      // 상태 롤백(UI 리로드) - 이미 catch 전에 await updateDeptStatus가 실패하면 reload 안되지만
+      // UI상 토글이 멋대로 바뀌어 있을 수 있으므로 reload 호출 추천, 하지만 await 필요하므로 여기서 호출
+      await actions.reload();
     }
   };
 
@@ -52,10 +65,9 @@ export default function DeptPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>교과 관리</h1>
+        <h1 className={styles.title}>학과 관리</h1>
 
         <div className={styles.searchRow}>
-          <DeptFilterDropdown />
           <div className={styles.searchBarWrap}>
             <SearchBar
               value={inputKeyword}
@@ -83,7 +95,7 @@ export default function DeptPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            교과등록
+            학과등록
           </OutButton>
         </div>
       </div>
@@ -91,6 +103,13 @@ export default function DeptPageClient() {
         <DeptCreatePage
           onClose={() => setIsModalOpen(false)}
           onCreated={handleCreated}
+        />
+      )}
+      {editId !== null && (
+        <DeptEditPage
+          deptId={editId}
+          onClose={() => setEditId(null)}
+          onUpdated={handleUpdated}
         />
       )}
     </div>

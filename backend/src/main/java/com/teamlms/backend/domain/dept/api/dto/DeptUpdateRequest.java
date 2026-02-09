@@ -5,5 +5,5 @@ import jakarta.validation.constraints.NotBlank;
 public record DeptUpdateRequest(
         @NotBlank String deptName,
         Long headProfessorAccountId,
-        @NotBlank String description
+        String description
 ) {}
