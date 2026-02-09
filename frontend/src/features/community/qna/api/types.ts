@@ -25,6 +25,10 @@ export type Category = {
   textColorHex: string;
 };
 
+export type LoadState<T> =
+  | { loading: true; error: string | null; data: null }
+  | { loading: false; error: string | null; data: T | null };
+
 /* =========================
  *  답변(Answer) - 상세에 포함
  * ========================= */
@@ -94,4 +98,20 @@ export type AnswerWriteResponse = SuccessResponse;
 
 export type CreateQnaAnswerRequestDto = {
   content: string;
+};
+
+// Component types
+export type QnaTableProps = {
+  items: QnaListItemDto[];
+  loading: boolean;
+  onDeleteClick: (questionId: number) => void;
+};
+
+export type QnaDeleteModalProps = {
+  open: boolean;
+  targetLabel?: string;
+  targetTitle?: string;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+  loading?: boolean;
 };

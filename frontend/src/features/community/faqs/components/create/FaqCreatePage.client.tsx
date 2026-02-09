@@ -74,9 +74,9 @@ export default function FaqCreatePageClient() {
     setSaving(true);
     try {
       await createFaq(body);
-      router.push(LIST_PATH);
+      router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
-      setError(e?.message ?? "등록에 실패했습니다.");
+      setError(e?.message ?? "??? ??????.");
     } finally {
       setSaving(false);
     }

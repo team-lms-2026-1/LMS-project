@@ -26,6 +26,10 @@ export type Category = {
   textColorHex : string;
 }
 
+export type LoadState<T> =
+  | { loading: true; error: string | null; data: null }
+  | { loading: false; error: string | null; data: T | null };
+
 /** DTO */
 export type FaqListItemDto={
     faqId : number;
@@ -66,3 +70,19 @@ export type CreateFaqResponseDto = {
 export type CreateFaqResponse = ApiResponse<CreateFaqResponseDto, null>;
 
 export type FaqCategoryListResponse = ApiResponse<Category[], null>;
+
+// Component types
+export type FaqsTableProps = {
+  items: FaqListItemDto[];
+  loading: boolean;
+  onReload: () => void;
+};
+
+export type FaqDeleteModalProps = {
+  open: boolean;
+  targetLabel?: string;
+  targetTitle?: string;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+  loading?: boolean;
+};

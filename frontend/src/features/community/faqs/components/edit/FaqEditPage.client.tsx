@@ -3,13 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./FaqEditPage.module.css";
-import type { Category, FaqListItemDto, UpdateFaqRequestDto } from "../../api/types";
+import type { Category, FaqListItemDto, LoadState, UpdateFaqRequestDto } from "../../api/types";
 import { fetchFaqCategories, fetchFaqDetail, updateFaq } from "../../api/FaqsApi";
 import { Button } from "@/components/button";
-
-type LoadState =
-  | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: FaqListItemDto | null };
+import toast from "react-hot-toast";
 
 function normalizeDetail(payload: any): FaqListItemDto {
   const raw = payload?.data ?? payload;
@@ -35,7 +32,7 @@ export default function FaqEditPageClient() {
   const LIST_PATH = "/admin/community/faqs";
   const DETAIL_PATH = `/admin/community/faqs/${faqId}`;
 
-  const [load, setLoad] = useState<LoadState>({ loading: true, error: null, data: null });
+  const [load, setLoad] = useState<LoadState<FaqListItemDto>>({ loading: true, error: null, data: null });
 
   // 폼 상태
   const [title, setTitle] = useState("");
@@ -52,7 +49,7 @@ export default function FaqEditPageClient() {
   // 상세 로드
   useEffect(() => {
     if (!faqId || Number.isNaN(faqId)) {
-      setLoad({ loading: false, error: "잘못된 공지사항 ID입니다.", data: null });
+      setLoad({ loading: false, error: "잘못된 FAQ ID입니다.", data: null });
       return;
     }
 
@@ -74,7 +71,7 @@ export default function FaqEditPageClient() {
         if (!alive) return;
         setLoad({
           loading: false,
-          error: e?.message ?? "공지사항을 불러오지 못했습니다.",
+          error: e?.message ?? "FAQ를 불러오지 못했습니다.",
           data: null,
         });
       }
@@ -133,6 +130,7 @@ export default function FaqEditPageClient() {
     setSaving(true);
     try {
       await updateFaq(faqId, body);
+      toast.success("FAQ가 수정되었습니다.");
       router.push(DETAIL_PATH);
     } catch (e: any) {
       setFormError(e?.message ?? "수정에 실패했습니다.");

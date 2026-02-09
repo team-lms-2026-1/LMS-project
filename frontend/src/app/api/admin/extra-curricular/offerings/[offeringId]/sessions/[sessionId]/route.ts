@@ -3,6 +3,7 @@ import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "admin:extra-curricular-session";
+const STUDENT_TAG = "student:extra-curricular-session";
 
 export async function GET(
   req: Request,
@@ -36,6 +37,9 @@ export async function PATCH(
     }
   );
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }

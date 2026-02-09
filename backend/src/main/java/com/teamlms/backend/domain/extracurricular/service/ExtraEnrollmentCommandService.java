@@ -31,8 +31,13 @@ public class ExtraEnrollmentCommandService {
             .orElseThrow(() -> new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND, offeringId));
 
         // OPEN만 신청 가능
-        if (offering.getStatus() != ExtraOfferingStatus.OPEN) {
-            throw new BusinessException(ErrorCode.OFFERING_NOT_ENROLLABLE, offeringId, offering.getStatus());
+        if (!(offering.getStatus() == ExtraOfferingStatus.OPEN
+                || offering.getStatus() == ExtraOfferingStatus.ENROLLMENT_CLOSED)) {
+            throw new BusinessException(
+                ErrorCode.ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS,
+                offeringId,
+                offering.getStatus()
+            );
         }
 
         applicationRepository.findByExtraOfferingIdAndStudentAccountId(offeringId, studentAccountId)
@@ -87,5 +92,10 @@ public class ExtraEnrollmentCommandService {
         }
 
         app.cancel(now);
+
+        // 교과와 동일하게: ENROLLMENT_CLOSED 상태에서 취소 시 OPEN으로 복구
+        if (offering.getStatus() == ExtraOfferingStatus.ENROLLMENT_CLOSED) {
+            offering.changeStatus(ExtraOfferingStatus.OPEN);
+        }
     }
 }

@@ -1,17 +1,16 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import styles from "./CategoryPage.module.css";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import type { Category, CategoryScope, CreateCategoryRequestDto, UpdateCategoryRequestDto } from "../../api/types";
-import { categoriesApi } from "../../api/CategoriesApi";
+import styles from "./CategoryPage.module.css";
+import type { CategoryScope } from "../../api/types";
 import { useCategoryList } from "../../hooks/useCategoryList";
 
 import { SearchBar } from "@/components/searchbar";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { Button } from "@/components/button";
-import { useRouter } from "next/navigation";
-import { CategoryTablePage } from "./CategoryTablePage";
+import { CategoryTablePage, type CategoryTablePageHandle } from "./CategoryTablePage";
 
 const SCOPE_LABEL: Record<CategoryScope, string> = {
   notices: "공지사항",
@@ -20,7 +19,6 @@ const SCOPE_LABEL: Record<CategoryScope, string> = {
   qna: "Q&A",
 };
 
-// “확인” 눌렀을 때 돌아갈 경로 (너 라우트에 맞게 수정 가능)
 const BACK_PATH: Record<CategoryScope, string> = {
   notices: "/admin/community/notices",
   resources: "/admin/community/resources",
@@ -28,27 +26,20 @@ const BACK_PATH: Record<CategoryScope, string> = {
   qna: "/admin/community/qna",
 };
 
-function normalizeHex(v: string) {
-  const s = v.trim();
-  if (!s) return "";
-  return s.startsWith("#") ? s : `#${s}`;
-}
-
 export default function CategoryPageClient({ scope }: { scope: CategoryScope }) {
   const router = useRouter();
 
   const { state, actions } = useCategoryList(scope);
 
-  // pagination + search (공용 pagination 컴포넌트와 연결)
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
 
-  // 외부 pagination 상태 -> hook 상태 동기화
-  // (useCategoryList가 내부 page/size를 가지고 있으니 actions로 반영)
-  useMemo(() => {
+  // ✅ 테이블(자식)에서 편집중 여부/토스트를 호출하기 위한 ref
+  const tableRef = useRef<CategoryTablePageHandle | null>(null);
+
+  useEffect(() => {
     actions.goPage(page);
     if (state.size !== size) actions.setSize(size);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, size]);
 
   const handleSearch = useCallback(() => {
@@ -57,77 +48,23 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
     actions.setKeyword(inputKeyword);
   }, [inputKeyword, setPage, actions]);
 
-  const onAddClick = useCallback(async () => {
-    const name = prompt("카테고리 이름을 입력하세요.");
-    if (!name?.trim()) return;
-
-    const bg = normalizeHex(prompt("배경색 HEX를 입력하세요. 예) #F3F4F6") ?? "");
-    if (!bg) return;
-
-    const text = normalizeHex(prompt("글자색 HEX를 입력하세요. 예) #111827") ?? "");
-    if (!text) return;
-
-    const body: CreateCategoryRequestDto = {
-      name: name.trim(),
-      bgColorHex: bg,
-      textColorHex: text,
-    };
-
-    try {
-      await categoriesApi.create(scope, body);
-      await actions.reload();
-    } catch (e: any) {
-      alert(e?.message ?? "카테고리 생성 실패");
-    }
-  }, [scope, actions]);
-
-  const onEditClick = useCallback(
-    async (item: Category) => {
-      const name = prompt("카테고리 이름", item.name);
-      if (!name?.trim()) return;
-
-      const bg = normalizeHex(prompt("배경색 HEX", item.bgColorHex) ?? "");
-      if (!bg) return;
-
-      const text = normalizeHex(prompt("글자색 HEX", item.textColorHex) ?? "");
-      if (!text) return;
-
-      const body: UpdateCategoryRequestDto = {
-        name: name.trim(),
-        bgColorHex: bg,
-        textColorHex: text,
-      };
-
-      try {
-        await categoriesApi.update(scope, item.categoryId, body);
-        await actions.reload();
-      } catch (e: any) {
-        alert(e?.message ?? "카테고리 수정 실패");
-      }
-    },
-    [scope, actions]
-  );
-
-  const onDeleteClick = useCallback(
-    async (item: Category) => {
-      const ok = confirm(`"${item.name}" 카테고리를 삭제할까요?`);
-      if (!ok) return;
-
-      try {
-        await categoriesApi.remove(scope, item.categoryId);
-        await actions.reload();
-      } catch (e: any) {
-        alert(e?.message ?? "카테고리 삭제 실패");
-      }
-    },
-    [scope, actions]
-  );
-
   const title = `${SCOPE_LABEL[scope]} 관리`;
 
-  const onConfirm = () => {
-    router.push(BACK_PATH[scope]);
-  };
+  const onConfirm = useCallback(() => {
+    // ✅ 편집중이면: 이동 막고 토스트
+    if (tableRef.current?.isDirty()) {
+      tableRef.current.showLeaveToast();
+      return;
+    }
+
+    const url = `${BACK_PATH[scope]}?categoriesUpdated=1&ts=${Date.now()}`;
+
+    router.push(url);
+
+    setTimeout(() => {
+      router.refresh();
+    }, 0);
+  }, [router, scope]);
 
   return (
     <div className={styles.page}>
@@ -154,6 +91,7 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
         <CategoryTablePage
+          ref={tableRef}   
           scope={scope}
           items={state.items}
           loading={state.loading}
@@ -164,7 +102,7 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
           <div className={styles.pagination}>
             <PaginationSimple
               page={page}
-              totalPages={state.meta.totalPages}
+              totalPages={state.meta?.totalPages ?? 1}
               onChange={setPage}
               disabled={state.loading}
             />

@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./QnaPage.module.css";
 import { QnaTable } from "./QnaTablePage";
 import { useQnaList } from "../../hooks/useQnaList";
@@ -13,9 +13,12 @@ import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
 import { fetchQnaCategories } from "../../api/QnasApi";
 import type { Category } from "../../api/types";
+import toast from "react-hot-toast";
+import DeleteModal from "../modal/DeleteModal.client";
 
 export default function QnaPageClient() {
   const router = useRouter();
+  const sp = useSearchParams();
   const { state, actions } = useQnaList();
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
@@ -26,6 +29,28 @@ export default function QnaPageClient() {
   const [inputKeyword, setInputKeyword] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [catsLoading, setCatsLoading] = useState(false);
+  const toastOnceRef = useRef<string | null>(null);
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; title?: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const t = sp.get("toast");
+    if (!t) return;
+
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+
+    if (t === "created") toast.success("Q&A가 등록되었습니다.", { id: "qna-toast-created" });
+    else if (t === "updated") toast.success("Q&A가 수정되었습니다.", { id: "qna-toast-updated" });
+    else if (t === "deleted") toast.success("Q&A가 삭제되었습니다.", { id: "qna-toast-deleted" });
+
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+
+    const qs = next.toString();
+    router.replace(qs ? `/admin/community/qna?${qs}` : "/admin/community/qna");
+  }, [sp, router]);
 
   useEffect(() => {
     let alive = true;
@@ -78,20 +103,25 @@ export default function QnaPageClient() {
     router.push("/admin/community/qna/categories");
   };
 
-  const handleDelete = useCallback(
-    async (questionId: number) => {
-      const ok = confirm("이 질문을 삭제할까요?");
-      if (!ok) return;
+  const handleDelete = useCallback((questionId: number) => {
+    const target = state.items.find((q) => q.questionId === questionId);
+    setDeleteTarget({ id: questionId, title: target?.title });
+  }, [state.items]);
 
-      try {
-        await actions.deleteQuestion(questionId);
-        await actions.reload();
-      } catch (e: any) {
-        alert(e?.message ?? "삭제 중 오류가 발생했습니다.");
-      }
-    },
-    [actions]
-  );
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setDeleting(true);
+      await actions.deleteQuestion(deleteTarget.id);
+      toast.success("Q&A가 삭제되었습니다.");
+      setDeleteTarget(null);
+    } catch (e: any) {
+      toast.error(e?.message ?? "삭제 실패");
+    } finally {
+      setDeleting(false);
+    }
+  }, [deleteTarget, actions]);
 
   return (
     <div className={styles.page}>
@@ -145,6 +175,18 @@ export default function QnaPageClient() {
           <div className={styles.footerRight} />
         </div>
       </div>
+
+      <DeleteModal
+        open={!!deleteTarget}
+        targetLabel="Q&A"
+        targetTitle={deleteTarget?.title}
+        loading={deleting}
+        onClose={() => {
+          if (deleting) return;
+          setDeleteTarget(null);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

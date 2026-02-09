@@ -1,11 +1,10 @@
 import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 const BACKEND_BASE = "/api/v1/admin/community/resources/categories";
-const TAG = "admin:resources:categories";
+
+const TAG_CATEGORIES = "admin:resources:categories";
+const TAG_RESOURCES = "admin:resources";
 
 type Ctx = { params: { categoryId: string } };
 
@@ -18,6 +17,9 @@ export async function GET(req: Request, ctx: Ctx) {
   return proxyToBackend(req, withId(ctx), {
     method: "GET",
     forwardQuery: true,
+
+    cache: "force-cache",
+    next: { revalidate: 600, tags: [TAG_CATEGORIES] },
   });
 }
 
@@ -32,7 +34,10 @@ export async function PUT(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG_CATEGORIES);
+    revalidateTag(TAG_RESOURCES); 
+  }
   return res;
 }
 
@@ -47,7 +52,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG_CATEGORIES);
+    revalidateTag(TAG_RESOURCES); 
+  }
   return res;
 }
 
@@ -59,6 +67,9 @@ export async function DELETE(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG_CATEGORIES);
+    revalidateTag(TAG_RESOURCES); 
+  }
   return res;
 }

@@ -3,17 +3,15 @@
 import { useRouter } from "next/navigation";
 import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
-import type { QnaListItemDto } from "../../api/types";
+import type { QnaListItemDto, QnaTableProps } from "../../api/types";
 import styles from "./QnaTable.module.css";
 
-type Props = {
-  items: QnaListItemDto[];
-  loading: boolean;
-  onDeleteClick: (questionId: number) => void;
-};
-
-export function QnaTable({ items, loading, onDeleteClick }: Props) {
+export function QnaTable({ items, loading, onDeleteClick }: QnaTableProps) {
   const router = useRouter();
+
+  const goDetail = (id: number) => {
+    router.push(`/admin/community/qna/questions/${id}`);
+  };
 
   const columns: Array<TableColumn<QnaListItemDto>> = [
     { header: "번호", align: "center", render: (r) => r.questionId },
@@ -37,7 +35,10 @@ export function QnaTable({ items, loading, onDeleteClick }: Props) {
         <button
           type="button"
           className={styles.titleLink}
-          onClick={() => router.push(`/admin/community/qna/questions/${r.questionId}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            goDetail(r.questionId);
+          }}
         >
           {r.title}
         </button>
@@ -61,7 +62,13 @@ export function QnaTable({ items, loading, onDeleteClick }: Props) {
       stopRowClick: true,
       render: (r) => (
         <div className={styles.manageCell}>
-          <Button variant="danger" onClick={() => onDeleteClick(r.questionId)}>
+          <Button
+            variant="danger"
+            onClick={(e: any) => {
+              e?.stopPropagation?.();
+              onDeleteClick(r.questionId);
+            }}
+          >
             삭제
           </Button>
         </div>
@@ -77,6 +84,7 @@ export function QnaTable({ items, loading, onDeleteClick }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.questionId}
       emptyText="Q&A가 없습니다."
+      onRowClick={(r) => goDetail(r.questionId)}
     />
   );
 }

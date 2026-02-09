@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { rentalsApi } from "../api/RentalsApi";
 import type { RentalDto, RentalListParams, PageMeta } from "../api/types";
+import toast from "react-hot-toast";
 
 export function useRentalsList(initialParams: RentalListParams = { page: 1, size: 10 }) {
   const [data, setData] = useState<RentalDto[]>([]);
@@ -44,26 +45,24 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
   };
 
   const approveRental = async (id: number) => {
-    if (!confirm("승인하시겠습니까?")) return;
-
     try {
       await rentalsApi.approve(id);
-      alert("승인되었습니다.");
+      toast.success("승인되었습니다.");
       fetchList();
     } catch (e: any) {
       console.error(e);
-      alert(e?.status ? `처리 중 오류가 발생했습니다. (HTTP ${e.status})` : "처리 중 오류가 발생했습니다.");
+      toast.error(e?.status ? `처리 중 오류가 발생했습니다. (HTTP ${e.status})` : "처리 중 오류가 발생했습니다.");
     }
   };
 
   const rejectRental = async (id: number, reason: string) => {
     try {
         await rentalsApi.reject(id, reason);
-        alert("반려되었습니다.");
+        toast.success("반려되었습니다.");
         fetchList();
     } catch (e: any) {
         console.error(e);
-        alert("처리 중 오류가 발생했습니다.");
+        toast.error("처리 중 오류가 발생했습니다.");
     }
     };
 

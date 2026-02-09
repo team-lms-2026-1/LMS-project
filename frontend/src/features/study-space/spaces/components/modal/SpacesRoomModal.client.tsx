@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SpacesRoomModal.module.css";
 import { Button } from "@/components/button";
 import { roomsApi } from "../../api/SpacesApi";
+import toast from "react-hot-toast";
 import type {
   AdminRoomDto,
   CreateAdminRoomRequestDto,
@@ -225,6 +226,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
 
     try {
       setSaving(true);
+      const isCreate = !r.roomId;
 
       // ✅ 1) UI 먼저 편집 종료 + isNew 해제 (사용자 체감 개선)
       setRows(prev =>
@@ -258,9 +260,10 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
           return newData;
         })
       );
+      toast.success(isCreate ? "스터디룸이 등록되었습니다." : "스터디룸이 수정되었습니다.");
     } catch (e: any) {
       console.error("[RoomsModal saveRow]", e);
-      alert(e?.message || "저장 중 오류가 발생했습니다.");
+      toast.error(e?.message || "저장 중 오류가 발생했습니다.");
     } finally {
       setSaving(false);
     }
@@ -280,9 +283,10 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
       }
 
       setRows((prev) => prev.filter((_, i) => i !== idx));
+      toast.success("스터디룸이 삭제되었습니다.");
     } catch (e: any) {
       console.error("[RoomsModal removeRow]", e);
-      alert(e?.message || "삭제 중 오류가 발생했습니다.");
+      toast.error(e?.message || "삭제 중 오류가 발생했습니다.");
     } finally {
       setSaving(false);
     }

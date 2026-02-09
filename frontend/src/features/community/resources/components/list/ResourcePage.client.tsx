@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef  } from "react";
+import toast from "react-hot-toast";
 import styles from "./ResourcePage.module.css";
 import { ResourcesTable } from "./ResourceTablePage";
 import { useResourcesList } from "../../hooks/useResourceList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { Button } from "@/components/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams  } from "next/navigation";
 
-// ✅ FAQ/공지사항/QnA와 동일
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
@@ -22,15 +22,29 @@ export default function ResourcePageClient() {
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
-  // ✅ URL filter
   const { get, setFilters } = useFilterQuery(["categoryId"]);
   const categoryIdQs = get("categoryId");
 
   const [inputKeyword, setInputKeyword] = useState("");
 
-  // ✅ 카테고리 드롭다운 데이터
   const [categories, setCategories] = useState<Category[]>([]);
   const [catsLoading, setCatsLoading] = useState(false);
+  const sp = useSearchParams();
+  const toastOnceRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const t = sp.get("toast");
+    if (!t) return;
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+    if (t === "created") toast.success("자료가 등록되었습니다.", { id: "resource-toast-created" });
+    else if (t === "updated") toast.success("자료가 수정되었습니다.", { id: "resource-toast-updated" });
+    else if (t === "deleted") toast.success("자료가 삭제되었습니다.", { id: "resource-toast-deleted" });
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+    const qs = next.toString();
+    router.replace(qs ? `/admin/community/resources?${qs}` : "/admin/community/resources");
+  }, [sp, router]);
 
   useEffect(() => {
     let alive = true;
@@ -76,7 +90,6 @@ export default function ResourcePageClient() {
   }, [categories]);
 
   const onChangeCategory = (nextValue: string) => {
-    // ✅ 필터 변경 시 page=1로 리셋(중요)
     setPage(1);
     setFilters({ categoryId: nextValue || null });
   };
