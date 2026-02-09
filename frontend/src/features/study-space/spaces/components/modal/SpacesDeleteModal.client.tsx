@@ -1,23 +1,28 @@
 "use client";
 
 import React from "react";
-import styles from "./DeleteModal.module.css";
+import styles from "./SpacesDeleteModal.module.css";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
-import type { NoticeDeleteModalProps } from "../../api/types";
 
+type Props = {
+  open: boolean;
+  targetTitle?: string;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+  loading?: boolean;
+};
 
-export default function DeleteModal({
+export default function SpacesDeleteModal({
   open,
-  targetLabel = "공지사항",
   targetTitle,
   onConfirm,
   onClose,
   loading = false,
-}: NoticeDeleteModalProps) {
+}: Props) {
   return (
     <ConfirmDialog
       open={open}
-      title={`${targetLabel} 삭제`}
+      title="학습공간 삭제"
       danger
       loading={loading}
       confirmText="삭제"
@@ -31,16 +36,14 @@ export default function DeleteModal({
               <>
                 <b className={styles.emph}>&quot;{targetTitle}&quot;</b>
                 <br />
-                {targetLabel}을(를) 삭제할까요?
+                학습공간을 삭제하시겠습니까?
               </>
             ) : (
-              <>{targetLabel}을(를) 삭제할까요?</>
+              <>학습공간을 삭제하시겠습니까?</>
             )}
           </p>
-
-          <p className={styles.sub}>
-            삭제한 데이터는 복구할 수 없습니다.
-          </p>
+          <p className={styles.sub}>해당 학습공간에 포함된 스터디룸도 삭제됩니다.</p>
+          <p className={styles.sub}>삭제한 데이터는 복구할 수 없습니다.</p>
         </div>
       }
     />

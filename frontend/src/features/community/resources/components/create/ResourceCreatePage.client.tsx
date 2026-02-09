@@ -16,6 +16,8 @@ const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "�
 const REQUEST_PART_NAME = "request";
 const FILE_PART_NAME = "files";
 
+
+
 function formatBytes(bytes: number) {
   const units = ["B", "KB", "MB", "GB"];
   let v = bytes;
@@ -147,9 +149,9 @@ export default function ResourceCreatePageClient() {
         await createResource(body);
       }
 
-      router.push(LIST_PATH);
+      router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
-      setError(e?.message ?? "등록에 실패했습니다.");
+      setError(e?.message ?? "??? ??????.");
     } finally {
       setSaving(false);
     }

@@ -3,12 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./QnaDetailPage.module.css";
-import type { QnaDetailDto } from "../../api/types";
+import toast from "react-hot-toast";
+import DeleteModal from "../modal/DeleteModal.client";
+import type { LoadState, QnaDetailDto } from "../../api/types";
 import { fetchQnaDetail, deleteQnaQuestion, createQnaAnswer, updateQnaAnswer, deleteQnaAnswer } from "../../api/QnasApi";
-
-type LoadState =
-  | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: QnaDetailDto | null };
 
 function pickCreatedAt(raw: any) {
   return raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
@@ -58,12 +56,19 @@ export default function QnaDetailPageClient() {
   const params = useParams<{ questionId?: string }>();
   const questionId = useMemo(() => Number(params?.questionId ?? 0), [params]);
 
-  const [state, setState] = useState<LoadState>({ loading: true, error: null, data: null });
+  const [state, setState] = useState<LoadState<QnaDetailDto>>({
+    loading: true,
+    error: null,
+    data: null,
+  });
 
   const [answerText, setAnswerText] = useState("");
   const [answerInit, setAnswerInit] = useState("");
   const [savingAnswer, setSavingAnswer] = useState(false);
   const [editingAnswer, setEditingAnswer] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<{ kind: "question" | "answer" } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const goList = useCallback(() => {
     router.push("/admin/community/qna"); // ✅ 목록 경로 통일(테이블과 동일 계열)
@@ -106,34 +111,50 @@ export default function QnaDetailPageClient() {
 
   const hasAnswer = Boolean(answer?.answerId) || Boolean(answer?.content?.trim());
 
-  const onDeleteQuestion = useCallback(async () => {
+  const onDeleteQuestion = useCallback(() => {
     if (!questionId) return;
-    if (!confirm("이 질문을 삭제할까요?")) return;
+    setDeleteTarget({ kind: "question" });
+  }, [questionId]);
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget || !questionId) return;
 
     try {
-      await deleteQnaQuestion(questionId);
-      goList();
+      setDeleting(true);
+      if (deleteTarget.kind === "question") {
+        await deleteQnaQuestion(questionId);
+        router.push("/admin/community/qna?toast=deleted");
+        return;
+      }
+
+      await deleteQnaAnswer(questionId);
+      toast.success("답변이 삭제되었습니다.");
+      await loadDetail();
     } catch (e: any) {
-      alert(e?.message ?? "삭제 중 오류가 발생했습니다.");
+      toast.error(e?.message ?? "삭제 실패");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
-  }, [questionId, goList]);
+  }, [deleteTarget, questionId, loadDetail, router]);
 
   const onSubmitAnswer = useCallback(async () => {
     if (!questionId) return;
-    if (!answerText.trim()) return alert("답변 내용을 입력하세요.");
+    if (!answerText.trim()) return toast.error("답변 내용을 입력하세요.");
 
     setSavingAnswer(true);
     try {
       if (hasAnswer) {
-        // ✅ 수정: answerId 없이
+        // ?? ??: answerId ??
         await updateQnaAnswer(questionId, { content: answerText });
       } else {
         await createQnaAnswer(questionId, { content: answerText });
       }
 
       await loadDetail();
+      toast.success(hasAnswer ? "답변이 수정되었습니다." : "답변이 등록되었습니다.");
     } catch (e: any) {
-      alert(e?.message ?? "답변 저장 중 오류가 발생했습니다.");
+      toast.error(e?.message ?? "답변 저장에 실패했습니다.");
     } finally {
       setSavingAnswer(false);
     }
@@ -146,22 +167,11 @@ export default function QnaDetailPageClient() {
     setEditingAnswer(false);
   }, [answerInit]);
 
-  const onDeleteAnswer = useCallback(async () => {
+  const onDeleteAnswer = useCallback(() => {
     if (!questionId) return;
     if (!hasAnswer) return;
-    if (!confirm("이 답변을 삭제할까요?")) return;
-
-    setSavingAnswer(true);
-    try {
-      // ✅ 삭제: answerId 없이
-      await deleteQnaAnswer(questionId);
-      await loadDetail();
-    } catch (e: any) {
-      alert(e?.message ?? "답변 삭제 중 오류가 발생했습니다.");
-    } finally {
-      setSavingAnswer(false);
-    }
-  }, [questionId, hasAnswer, loadDetail]);
+    setDeleteTarget({ kind: "answer" });
+  }, [questionId, hasAnswer]);
 
   return (
     <div className={styles.page}>
@@ -208,7 +218,7 @@ export default function QnaDetailPageClient() {
               </div>
 
               <div className={styles.actionsRow}>
-                <button type="button" className={styles.deleteBtn} onClick={onDeleteQuestion}>
+                <button type="button" className={styles.deleteBtn} onClick={onDeleteQuestion} disabled={deleting}>
                   질문삭제
                 </button>
               </div>
@@ -220,10 +230,10 @@ export default function QnaDetailPageClient() {
 
                 {hasAnswer && !editingAnswer && (
                   <div className={styles.answerHeaderActions}>
-                    <button type="button" className={styles.answerEditBtn} onClick={onClickEdit} disabled={savingAnswer}>
+                    <button type="button" className={styles.answerEditBtn} onClick={onClickEdit} disabled={savingAnswer || deleting}>
                       수정
                     </button>
-                    <button type="button" className={styles.answerDeleteBtn} onClick={onDeleteAnswer} disabled={savingAnswer}>
+                    <button type="button" className={styles.answerDeleteBtn} onClick={onDeleteAnswer} disabled={savingAnswer || deleting}>
                       삭제
                     </button>
                   </div>
@@ -240,7 +250,7 @@ export default function QnaDetailPageClient() {
                     disabled={savingAnswer}
                   />
                   <div className={styles.answerActions}>
-                    <button type="button" className={styles.answerSubmitBtn} onClick={onSubmitAnswer} disabled={savingAnswer}>
+                    <button type="button" className={styles.answerSubmitBtn} onClick={onSubmitAnswer} disabled={savingAnswer || deleting}>
                       {hasAnswer ? "저장" : "답변"}
                     </button>
                     <button type="button" className={styles.answerCancelBtn} onClick={onCancelEdit} disabled={savingAnswer}>
@@ -263,6 +273,18 @@ export default function QnaDetailPageClient() {
           </>
         )}
       </div>
+
+      <DeleteModal
+        open={!!deleteTarget}
+        targetLabel={deleteTarget?.kind === "answer" ? "??" : "Q&A"}
+        targetTitle={deleteTarget?.kind === "question" ? data?.title : undefined}
+        loading={deleting}
+        onClose={() => {
+          if (deleting) return;
+          setDeleteTarget(null);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

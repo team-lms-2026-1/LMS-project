@@ -91,51 +91,32 @@ export async function createNotice(body: CreateNoticeRequestDto, files?: File[])
 
 export async function updateNotice(noticeId: number, body: UpdateNoticeRequestDto, files?: File[]) {
   const deleteIds = body.deleteFileIds ?? [];
-  const hasFiles = (files?.length ?? 0) > 0;
-  const hasDeletes = deleteIds.length > 0;
-  const useMultipart = hasFiles || hasDeletes;
 
-  if (useMultipart) {
-    const fd = new FormData();
+  const displayStartAt = body.displayStartAt ?? "";
+  const displayEndAt = body.displayEndAt ?? "";
 
-    const requestPayload = {
-      title: body.title,
-      content: body.content,
-      categoryId: body.categoryId,
-      deleteFileIds: deleteIds,
-    };
+  // ✅ 백엔드가 기대하는 엔벨로프: { data, meta }
+  const dataPayload = {
+    title: body.title,
+    content: body.content,
+    categoryId: body.categoryId ?? null,
+    displayStartAt,
+    displayEndAt,
+    deleteFileIds: deleteIds,
+  };
 
-    fd.append("request", new Blob([JSON.stringify(requestPayload)], { type: "application/json" }));
-    (files ?? []).forEach((f) => fd.append("files", f));
+  const envelope = { data: dataPayload, meta: null };
 
-    const res = await fetch(`/api/admin/community/notices/${noticeId}`, {
-      method: "PATCH",
-      body: fd,
-      cache: "no-store",
-    });
+  // ✅ 파일 유무와 관계없이 항상 multipart로 통일
+  const fd = new FormData();
+  fd.append("request", new Blob([JSON.stringify(envelope)], { type: "application/json" }));
 
-    if (!res.ok) {
-      let msg = `요청 실패 (${res.status})`;
-      try {
-        const text = await res.text();
-        if (text) msg = text;
-      } catch {}
-      throw new Error(msg);
-    }
-
-    const payload = await readJsonMaybe(res);
-    return normalizeNoticeEnvelope(payload, noticeId) as UpdateNoticeResponse;
-  }
+  // ✅ files는 있을 때만 append (없어도 정상)
+  (files ?? []).forEach((f) => fd.append("files", f));
 
   const res = await fetch(`/api/admin/community/notices/${noticeId}`, {
     method: "PATCH",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      title: body.title,
-      content: body.content,
-      categoryId: body.categoryId,
-      deleteFileIds: deleteIds,
-    }),
+    body: fd,
     cache: "no-store",
   });
 

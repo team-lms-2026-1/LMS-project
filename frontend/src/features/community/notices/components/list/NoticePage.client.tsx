@@ -1,33 +1,52 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import styles from "./NoticePage.module.css";
 import { NoticesTable } from "./NoticeTablePage";
 import { useNoticesList } from "../../hooks/useNoticeList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { Button } from "@/components/button";
-import { useRouter } from "next/navigation";
-
+import { useRouter, useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
-
 import { fetchNoticeCategories } from "../../api/NoticesApi";
 import type { Category } from "../../api/types";
 
 export default function NoticePageClient() {
   const router = useRouter();
+  const sp = useSearchParams();
+
   const { state, actions } = useNoticesList();
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
   const { get, setFilters } = useFilterQuery(["categoryId"]);
-  const categoryIdQs = get("categoryId"); 
+  const categoryIdQs = get("categoryId");
 
   const [inputKeyword, setInputKeyword] = useState("");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [catsLoading, setCatsLoading] = useState(false);
+  const toastOnceRef = useRef<string | null>(null);
+  useEffect(() => {
+    const t = sp.get("toast");
+    if (!t) return;
+
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+
+    if (t === "created") toast.success("공지사항이 등록되었습니다.", { id: "notice-toast-created" });
+    else if (t === "updated") toast.success("공지사항이 수정되었습니다.", { id: "notice-toast-updated" });
+    else if (t === "deleted") toast.success("공지사항이 삭제되었습니다.", { id: "notice-toast-deleted" });
+
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+
+    const qs = next.toString();
+    router.replace(qs ? `/admin/community/notices?${qs}` : "/admin/community/notices");
+  }, [sp, router]);
 
   useEffect(() => {
     let alive = true;

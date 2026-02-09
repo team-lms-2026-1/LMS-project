@@ -3,17 +3,17 @@
 import React from "react";
 import styles from "./DeleteModal.module.css";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
-import type { NoticeDeleteModalProps } from "../../api/types";
+import type { ResourceDeleteModalProps } from "../../api/types";
 
 
 export default function DeleteModal({
   open,
-  targetLabel = "공지사항",
+  targetLabel = "자료",
   targetTitle,
   onConfirm,
   onClose,
   loading = false,
-}: NoticeDeleteModalProps) {
+}: ResourceDeleteModalProps) {
   return (
     <ConfirmDialog
       open={open}

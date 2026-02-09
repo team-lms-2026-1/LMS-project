@@ -60,6 +60,15 @@ async function requestMultipart<T>(url: string, method: "POST" | "PATCH" | "PUT"
   return (await res.json()) as T;
 }
 
+function appendRequiredImage(fd: FormData, imageFile?: File | null) {
+  if (imageFile) {
+    fd.append("image", imageFile);
+    return;
+  }
+  // Backend requires an "image" part even when not changing the image.
+  fd.append("image", new Blob([], { type: "application/octet-stream" }), "empty");
+}
+
 export const spacesApi = {
   /** 목록 */
   async list(params: SpaceListParams = {}): Promise<SpaceListResponse> {
@@ -85,7 +94,7 @@ export const spacesApi = {
   ): Promise<UpdateSpaceDetailResponse> {
     const fd = new FormData();
     fd.append("data", new Blob([JSON.stringify(dto)], { type: "application/json" }));
-    if (imageFile) fd.append("image", imageFile);
+    appendRequiredImage(fd, imageFile);
     return requestMultipart<UpdateSpaceDetailResponse>(`${BASE}/${spaceId}/edit`, "PATCH", fd);
   },
 
@@ -96,7 +105,7 @@ export const spacesApi = {
   ): Promise<CreateSpaceDetailResponse> {
     const fd = new FormData();
     fd.append("data", new Blob([JSON.stringify(dto)], { type: "application/json" }));
-    if (imageFile) fd.append("image", imageFile);
+    appendRequiredImage(fd, imageFile);
     return requestMultipart<CreateSpaceDetailResponse>(`${BASE}/new`, "POST", fd);
   },
 } as const;

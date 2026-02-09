@@ -399,7 +399,6 @@
   color: #94a3b8;
 }
 
-/* DateTextInput이 쓰는 input */
 .date {
   height: 34px;
   padding: 0 10px;
@@ -409,7 +408,6 @@
   font-size: 14px;
 }
 
-/* (선택) X 버튼 크기/배경 커스텀 */
 .dpWrap :global(.react-datepicker__close-icon) {
   padding: 0 !important;
   height: auto !important;

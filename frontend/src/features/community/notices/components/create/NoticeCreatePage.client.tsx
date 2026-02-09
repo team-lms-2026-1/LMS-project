@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, forwardRef } from "react";
+import { useEffect, useMemo, useRef, useState, forwardRef, useCallback } from "react";
 import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
 import styles from "./NoticeCreatePage.module.css";
 import type { Category, CreateNoticeRequestDto } from "../../api/types";
 import { createNotice, fetchNoticeCategories } from "../../api/NoticesApi";
 import { Button } from "@/components/button";
-
 import DatePicker from "react-datepicker";
 
 const LIST_PATH = "/admin/community/notices";
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
 
 function toMidnightLocalDateTime(dateOnly: string) {
-  if (!dateOnly) return null;
+  if (!dateOnly) return "";
   return `${dateOnly}T00:00:00`;
 }
 
@@ -56,7 +57,25 @@ export default function NoticeCreatePageClient() {
 
   const [files, setFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string>("");
+
+  // ✅ “성공 이동”은 가드에 막히지 않도록 플래그
+  const allowLeaveRef = useRef(false);
+
+  // ✅ 등록 작성 중(이동 가드)
+  const isDirty = useMemo(() => {
+    return (
+      title.trim().length > 0 ||
+      content.trim().length > 0 ||
+      files.length > 0 ||
+      !!displayStartAt ||
+      !!displayEndAt ||
+      !!categoryId
+    );
+  }, [title, content, files.length, displayStartAt, displayEndAt, categoryId]);
+
+  const toastLeave = useCallback(() => {
+    toast.error("등록 작성 중입니다.");
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -81,7 +100,76 @@ export default function NoticeCreatePageClient() {
     return () => {
       alive = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ✅ 새로고침/탭 닫기 경고
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+    if (!isDirty || saving) return;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty, saving]);
+
+  // ✅ 뒤로가기(popstate) 막고 토스트
+  const pushedRef = useRef(false);
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+
+    if (!isDirty || saving) {
+      pushedRef.current = false;
+      return;
+    }
+
+    if (!pushedRef.current) {
+      history.pushState(null, "", location.href);
+      pushedRef.current = true;
+    }
+
+    const onPopState = () => {
+      if (allowLeaveRef.current) return;
+      history.pushState(null, "", location.href);
+      toastLeave();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isDirty, saving, toastLeave]);
+
+  // ✅ 링크(<a>) 클릭 가드
+  useEffect(() => {
+    const onClickCapture = (e: MouseEvent) => {
+      if (allowLeaveRef.current) return;
+      if (!isDirty || saving) return;
+
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a) return;
+
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== "_self") return;
+
+      const hrefAttr = a.getAttribute("href") ?? "";
+      if (hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) return;
+      if (a.hasAttribute("download")) return;
+
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      toastLeave();
+    };
+
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, [isDirty, saving, toastLeave]);
 
   const canSubmit = useMemo(() => {
     return title.trim().length > 0 && content.trim().length > 0 && !saving;
@@ -108,26 +196,20 @@ export default function NoticeCreatePageClient() {
   };
 
   const onSubmit = async () => {
-    setError("");
-
     const t = title.trim();
     const c = content.trim();
-    if (!t) return setError("제목을 입력하세요.");
-    if (!c) return setError("내용을 입력하세요.");
 
-    const displayStartAtIso = displayStartAt
-      ? toMidnightLocalDateTime(formatYmd(displayStartAt))
-      : null;
+    if (!t) return toast.error("제목을 입력하세요.");
+    if (!c) return toast.error("내용을 입력하세요.");
+    if (!displayStartAt && !displayEndAt) return toast.error("게시기간을 정해 주세요.");
 
-    const displayEndAtIso = displayEndAt
-      ? toMidnightLocalDateTime(formatYmd(displayEndAt))
-      : null;
+    const displayStartAtIso = displayStartAt ? toMidnightLocalDateTime(formatYmd(displayStartAt)) : "";
+    const displayEndAtIso = displayEndAt ? toMidnightLocalDateTime(formatYmd(displayEndAt)) : "";
 
     setSaving(true);
     try {
       if (files.length > 0) {
         const fd = new FormData();
-
         const payload = {
           categoryId: categoryId ? Number(categoryId) : null,
           title: t,
@@ -139,10 +221,7 @@ export default function NoticeCreatePageClient() {
         fd.append("request", new Blob([JSON.stringify(payload)], { type: "application/json" }));
         for (const f of files) fd.append("files", f);
 
-        const res = await fetch("/api/admin/community/notices", {
-          method: "POST",
-          body: fd,
-        });
+        const res = await fetch("/api/admin/community/notices", { method: "POST", body: fd });
 
         if (!res.ok) {
           let msg = `등록 실패 (${res.status})`;
@@ -155,6 +234,9 @@ export default function NoticeCreatePageClient() {
           }
           throw new Error(msg);
         }
+
+        // ✅ 성공 응답이 JSON/텍스트여도 문제 없게 한번 소진(선택)
+        // await res.text().catch(() => {});
       } else {
         const body: CreateNoticeRequestDto = {
           title: t,
@@ -163,19 +245,26 @@ export default function NoticeCreatePageClient() {
           displayStartAt: displayStartAtIso,
           displayEndAt: displayEndAtIso,
         };
-
         await createNotice(body);
       }
 
-      router.push(LIST_PATH);
+      // ✅ 성공 이동은 가드 무력화
+      allowLeaveRef.current = true;
+
+      // ✅ 토스트는 "목록"에서 query로 처리
+      router.push(`${LIST_PATH}?toast=created`);
+      return;
     } catch (e: any) {
-      setError(e?.message ?? "등록에 실패했습니다.");
+      toast.error(e?.message ?? "??? ??????.");
     } finally {
       setSaving(false);
     }
   };
 
-  const onCancel = () => router.push(LIST_PATH);
+  const onCancel = () => {
+    if (isDirty && !saving) toastLeave();
+    router.push(LIST_PATH);
+  };
 
   return (
     <div className={styles.page}>
@@ -192,8 +281,6 @@ export default function NoticeCreatePageClient() {
             목록으로
           </Button>
         </div>
-
-        {error && <div className={styles.errorMessage}>{error}</div>}
 
         <div className={styles.formTable}>
           <div className={styles.row}>

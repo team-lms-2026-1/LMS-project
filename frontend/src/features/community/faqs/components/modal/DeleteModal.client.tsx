@@ -3,17 +3,16 @@
 import React from "react";
 import styles from "./DeleteModal.module.css";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
-import type { NoticeDeleteModalProps } from "../../api/types";
-
+import type { FaqDeleteModalProps } from "../../api/types";
 
 export default function DeleteModal({
   open,
-  targetLabel = "공지사항",
+  targetLabel = "FAQ",
   targetTitle,
   onConfirm,
   onClose,
   loading = false,
-}: NoticeDeleteModalProps) {
+}: FaqDeleteModalProps) {
   return (
     <ConfirmDialog
       open={open}
@@ -38,9 +37,7 @@ export default function DeleteModal({
             )}
           </p>
 
-          <p className={styles.sub}>
-            삭제한 데이터는 복구할 수 없습니다.
-          </p>
+          <p className={styles.sub}>삭제한 데이터는 복구할 수 없습니다.</p>
         </div>
       }
     />
