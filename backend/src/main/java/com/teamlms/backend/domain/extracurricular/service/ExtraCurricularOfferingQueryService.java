@@ -68,4 +68,6 @@ public class ExtraCurricularOfferingQueryService {
 
         return offeringCompetencyMapRepository.findOfferingCompetencyMapping(extraOfferingId);
     }
+    // 학생 출석
+
 }
