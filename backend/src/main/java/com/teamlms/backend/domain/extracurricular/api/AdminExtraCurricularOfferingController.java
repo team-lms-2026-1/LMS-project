@@ -173,29 +173,29 @@ public class AdminExtraCurricularOfferingController {
         return ApiResponse.ok(new SuccessResponse());
     }
 
-    // // 학생출석
-    // @GetMapping("/{extraOfferingId}/applications")
-    // public ApiResponse<List<AdminExtraOfferingApplicantRow>> getApplicantList(
-    //     @PathVariable Long extraOfferingId,
-    //     @RequestParam(defaultValue = "1") int page,
-    //     @RequestParam(defaultValue = "20") int size,
-    //     @RequestParam(required = false) String keyword
-    // ) {
-    //     int safePage = Math.max(page, 1);
-    //     int safeSize = Math.min(Math.max(size, 1), 100);
+    // 학생출석
+    @GetMapping("/{extraOfferingId}/applications")
+    public ApiResponse<List<AdminExtraOfferingApplicantRow>> getApplicantList(
+        @PathVariable Long extraOfferingId,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(required = false) String keyword
+    ) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
 
-    //     Pageable pageable = PageRequest.of(
-    //         safePage - 1,
-    //         safeSize,
-    //         Sort.by(Sort.Direction.ASC, "applicationId") // 필요하면 studentName 등으로 바꿔도 됨
-    //     );
+        Pageable pageable = PageRequest.of(
+            safePage - 1,
+            safeSize,
+            Sort.by(Sort.Direction.ASC, "applicationId") // 필요하면 studentName 등으로 바꿔도 됨
+        );
 
-    //     Page<AdminExtraOfferingApplicantRow> result =
-    //         extracurricularOfferingQueryService.listApplicants(extraOfferingId, keyword, pageable);
+        Page<AdminExtraOfferingApplicantRow> result =
+            extracurricularOfferingQueryService.listApplicants(extraOfferingId, keyword, pageable);
 
-    //     return ApiResponse.of(
-    //         result.getContent(),
-    //         PageMeta.from(result)
-    //     );
-    // }
+        return ApiResponse.of(
+            result.getContent(),
+            PageMeta.from(result)
+        );
+    }
 }

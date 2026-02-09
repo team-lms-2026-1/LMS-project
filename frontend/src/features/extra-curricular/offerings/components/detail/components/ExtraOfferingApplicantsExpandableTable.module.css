@@ -1,0 +1,111 @@
+.wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thead {
+  background: #f8fafc;
+}
+
+.th {
+  padding: 12px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #344054;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tr {
+  cursor: pointer;
+}
+
+.tr:hover {
+  background: #f9fafb;
+}
+
+.trExpanded {
+  background: #f3f6ff;
+}
+
+.tdCenter {
+  padding: 12px 10px;
+  font-size: 13px;
+  color: #101828;
+  text-align: center;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.expandTr {
+  background: #ffffff;
+}
+
+.expandTd {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f2f5;
+  background: #fbfcff;
+}
+
+.empty {
+  padding: 16px 10px;
+  text-align: center;
+  color: #667085;
+}
+
+.skeletonRow td {
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.td {
+  padding: 12px 10px;
+}
+
+.skeleton {
+  height: 14px;
+  border-radius: 6px;
+  background: #eef2f6;
+}
+
+.innerTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.innerThead {
+  background: #f8fafc;
+}
+
+.innerTh {
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #344054;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.innerTd {
+  padding: 10px 8px;
+  font-size: 12px;
+  color: #101828;
+  text-align: center;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.emptyInner {
+  padding: 12px 8px;
+  font-size: 12px;
+  color: #667085;
+  text-align: center;
+}

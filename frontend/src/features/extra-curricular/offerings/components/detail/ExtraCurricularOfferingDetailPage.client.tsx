@@ -9,6 +9,7 @@ import { ExtraOfferingStatusDropdown } from "./components/ExtraOfferingStatusDro
 import { ExtraOfferingDetailSection } from "./ExtraOfferingDetailSection";
 import { ExtraOfferingCompetenciesSection } from "./ExtraOfferingCompetenciesSection";
 import ExtraOfferingSessionSection from "./ExtraOfferingSessionSection";
+import { ExtraOfferingStudentsSection } from "./ExtraOfferingStudentsSection";
 
 // import { OfferingDetailTabBar } from "./components/OfferingDetailTabBar";
 // import { OfferingDetailSection } from "./OfferingDetailSection";
@@ -52,7 +53,7 @@ export function ExtraCurricularOfferingDetailPage() {
       <div className={styles.body}>
         {tab === "detail" && <ExtraOfferingDetailSection offeringId={offeringId} data={data} onReload={() => actions.reload?.()}/>}
         {tab === "session" && <ExtraOfferingSessionSection offeringId={offeringId} offeringStatus={data.status} />}
-        {/* {tab === "students" && <ExtraOfferingStudentsSection offeringId={offeringId} offeringStatus={data.status} />} */}
+        {tab === "students" && <ExtraOfferingStudentsSection offeringId={offeringId} />}
         {tab === "competencies" && <ExtraOfferingCompetenciesSection offeringId={offeringId} data={data} />}
       </div>
     </div>
