@@ -9,13 +9,16 @@ export const useMentoringRecruitmentList = (pageSize: number = 10) => {
     const [loading, setLoading] = useState(true);
     const [searchKeyword, setSearchKeyword] = useState("");
 
+    const [status, setStatus] = useState("ALL");
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetchRecruitments({
                 page: page - 1,
                 size: pageSize,
-                keyword: searchKeyword
+                keyword: searchKeyword,
+                status: status !== "ALL" ? status : undefined
             });
             setItems(res.data || []);
             setMeta(res.meta);
@@ -24,7 +27,7 @@ export const useMentoringRecruitmentList = (pageSize: number = 10) => {
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize, searchKeyword]);
+    }, [page, pageSize, searchKeyword, status]);
 
     useEffect(() => {
         fetchData();
@@ -43,6 +46,8 @@ export const useMentoringRecruitmentList = (pageSize: number = 10) => {
         setPage,
         searchKeyword,
         setSearchKeyword,
+        status,
+        setStatus,
         handleSearch,
         refresh: fetchData
     };

@@ -16,11 +16,12 @@ import {
 /** Admin API */
 
 // 모집 공고 목록 조회
-export async function fetchAdminRecruitments(params: { page?: number; size?: number; keyword?: string }) {
+export async function fetchAdminRecruitments(params: { page?: number; size?: number; keyword?: string; status?: string }) {
     const qs = new URLSearchParams();
     if (params.page !== undefined) qs.set("page", String(params.page));
     if (params.size) qs.set("size", String(params.size));
     if (params.keyword) qs.set("keyword", params.keyword);
+    if (params.status && params.status !== "ALL") qs.set("status", params.status);
 
     return getJson<MentoringRecruitmentListResponse>(`/api/admin/mentoring/recruitments?${qs.toString()}`);
 }

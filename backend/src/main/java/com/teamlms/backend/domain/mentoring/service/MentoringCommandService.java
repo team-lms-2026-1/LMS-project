@@ -35,13 +35,24 @@ public class MentoringCommandService {
     private final MentoringApplicationRepository applicationRepository;
 
     public Long createRecruitment(Long adminId, MentoringRecruitmentCreateRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        MentoringRecruitmentStatus status;
+
+        if (now.isBefore(request.getRecruitStartAt())) {
+            status = MentoringRecruitmentStatus.DRAFT;
+        } else if (now.isAfter(request.getRecruitEndAt())) {
+            status = MentoringRecruitmentStatus.CLOSED;
+        } else {
+            status = MentoringRecruitmentStatus.OPEN;
+        }
+
         MentoringRecruitment recruitment = MentoringRecruitment.builder()
                 .semesterId(request.getSemesterId())
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .recruitStartAt(request.getRecruitStartAt())
                 .recruitEndAt(request.getRecruitEndAt())
-                .status(MentoringRecruitmentStatus.DRAFT) // Default to DRAFT
+                .status(status)
                 .build();
 
         return recruitmentRepository.save(recruitment).getRecruitmentId();
@@ -52,13 +63,24 @@ public class MentoringCommandService {
         MentoringRecruitment recruitment = recruitmentRepository.findById(recruitmentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
 
+        LocalDateTime now = LocalDateTime.now();
+        MentoringRecruitmentStatus status;
+
+        if (now.isBefore(request.getRecruitStartAt())) {
+            status = MentoringRecruitmentStatus.DRAFT;
+        } else if (now.isAfter(request.getRecruitEndAt())) {
+            status = MentoringRecruitmentStatus.CLOSED;
+        } else {
+            status = MentoringRecruitmentStatus.OPEN;
+        }
+
         recruitment.update(
                 request.getSemesterId(),
                 request.getTitle(),
                 request.getDescription(),
                 request.getRecruitStartAt(),
                 request.getRecruitEndAt(),
-                request.getStatus());
+                status);
     }
 
     public void deleteRecruitment(Long adminId, Long recruitmentId) {

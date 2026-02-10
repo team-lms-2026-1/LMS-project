@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
+import { Dropdown } from "@/features/dropdowns/_shared";
 
 const PAGE_SIZE = 10;
 
@@ -31,7 +32,9 @@ export default function MentoringRecruitmentList() {
         searchKeyword,
         setSearchKeyword,
         handleSearch,
-        refresh
+        refresh,
+        status,
+        setStatus
     } = useMentoringRecruitmentList(PAGE_SIZE);
 
     const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
@@ -148,18 +151,42 @@ export default function MentoringRecruitmentList() {
 
     const totalPages = meta?.totalPages || 1;
 
+    const STATUS_OPTIONS = [
+        { value: "ALL", label: "전체 상태" },
+        { value: "DRAFT", label: "작성중 (DRAFT)" },
+        { value: "OPEN", label: "모집중 (OPEN)" },
+        { value: "CLOSED", label: "마감 (CLOSED)" },
+    ];
+
     return (
         <div className={styles.page}>
             <div className={styles.card}>
                 <h1 className={styles.title}>멘토링 모집 공고 등록</h1>
 
                 <div className={styles.searchRow}>
-                    <SearchBar
-                        value={searchKeyword}
-                        onChange={setSearchKeyword}
-                        onSearch={() => handleSearch(searchKeyword)}
-                        placeholder="모집 공고 검색..."
-                    />
+                    <div className={styles.searchGroup}>
+                        <div className={styles.dropdownWrap}>
+                            <Dropdown
+                                value={status}
+                                onChange={(val) => {
+                                    setStatus(val);
+                                    setPage(1);
+                                }}
+                                options={STATUS_OPTIONS}
+                                placeholder="상태 선택"
+                                clearable={false}
+                                showPlaceholder={false}
+                            />
+                        </div>
+                        <div className={styles.searchBarWrap}>
+                            <SearchBar
+                                value={searchKeyword}
+                                onChange={setSearchKeyword}
+                                onSearch={() => handleSearch(searchKeyword)}
+                                placeholder="모집 공고 검색..."
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className={styles.tableWrap}>
@@ -270,7 +297,3 @@ export default function MentoringRecruitmentList() {
         </div>
     );
 }
-
-
-
-

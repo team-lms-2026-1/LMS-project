@@ -14,9 +14,9 @@ import { Modal } from "@/components/modal/Modal";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
+import { Dropdown } from "@/features/dropdowns/_shared";
 
 const PAGE_SIZE = 10;
-
 
 export default function AdminApplicationApprovalPage() {
     const [page, setPage] = useState(1);
@@ -32,13 +32,19 @@ export default function AdminApplicationApprovalPage() {
     const [confirmApproveId, setConfirmApproveId] = useState<number | null>(null);
     const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
     const [rejectReason, setRejectReason] = useState("");
+    const [statusFilter, setStatusFilter] = useState("ALL");
 
     const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
 
     const fetchRecruitList = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetchAdminRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
+            const res = await fetchAdminRecruitments({
+                page: page - 1,
+                size: PAGE_SIZE,
+                keyword: keywordInput,
+                status: statusFilter
+            });
             setRecruitments(res.data || []);
             setTotalElements(res.meta?.totalElements || 0);
         } catch (e: any) {
@@ -47,7 +53,7 @@ export default function AdminApplicationApprovalPage() {
         } finally {
             setLoading(false);
         }
-    }, [page, keywordInput]);
+    }, [page, keywordInput, statusFilter]);
 
     const fetchAppList = useCallback(async (recruitmentId: number) => {
         setLoadingApplications(true);
@@ -153,12 +159,15 @@ export default function AdminApplicationApprovalPage() {
                 header: "상태",
                 field: "status",
                 render: (r) => {
+                    if (r.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
+                    if (r.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+
                     const now = new Date();
                     const start = new Date(r.recruitStartAt);
                     const end = new Date(r.recruitEndAt);
 
                     if (now < start) {
-                        return <StatusPill status="PENDING" label="PENDING" />;
+                        return <StatusPill status="DRAFT" label="DRAFT" />;
                     } else if (now >= start && now <= end) {
                         return <StatusPill status="ACTIVE" label="OPEN" />;
                     } else {
@@ -239,23 +248,46 @@ export default function AdminApplicationApprovalPage() {
         [processingId]
     );
 
+    const STATUS_OPTIONS = [
+        { value: "ALL", label: "전체 상태" },
+        { value: "DRAFT", label: "작성중 (DRAFT)" },
+        { value: "OPEN", label: "모집중 (OPEN)" },
+        { value: "CLOSED", label: "마감 (CLOSED)" },
+    ];
+
     return (
         <div className={styles.page}>
             <div className={styles.card}>
                 <h1 className={styles.title}>멘토링 신청 승인</h1>
 
                 <div className={styles.searchRow}>
-                    <SearchBar
-                        value={keywordInput}
-                        onChange={setKeywordInput}
-                        onSearch={fetchRecruitList}
-                        placeholder="모집 공고 제목 검색"
-                        className={styles.searchBox}
-                    />
+                    <div className={styles.searchGroup}>
+                        <div className={styles.dropdownWrap}>
+                            <Dropdown
+                                value={statusFilter}
+                                onChange={(val) => {
+                                    setStatusFilter(val);
+                                    setPage(1);
+                                }}
+                                options={STATUS_OPTIONS}
+                                placeholder="상태 선택"
+                                clearable={false}
+                                showPlaceholder={false}
+                            />
+                        </div>
+                        <div className={styles.searchBarWrap}>
+                            <SearchBar
+                                value={keywordInput}
+                                onChange={setKeywordInput}
+                                onSearch={fetchRecruitList}
+                                placeholder="모집 공고 제목 검색"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>모집 공고 목록</h2>
+
                     <div className={styles.tableWrap}>
                         <Table
                             columns={recruitmentColumns}
@@ -369,4 +401,3 @@ export default function AdminApplicationApprovalPage() {
         </div>
     );
 }
-

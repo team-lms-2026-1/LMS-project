@@ -22,6 +22,7 @@ export type RecruitmentStatus = "DRAFT" | "OPEN" | "CLOSED";
 export interface MentoringRecruitment {
     recruitmentId: number;
     semesterId: number;
+    semesterName: string;
     title: string;
     description: string;
     recruitStartAt: string;

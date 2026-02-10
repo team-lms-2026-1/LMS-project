@@ -21,7 +21,7 @@ export function MentoringRecruitmentsTable({ items, loading, onEdit, onDelete, s
 
     const columns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (row) => getSemesterLabel(row.semesterId) },
+            { header: "학기", field: "semesterId", render: (row) => row.semesterName || getSemesterLabel(row.semesterId) },
             { header: "제목", field: "title" },
             {
                 header: "모집기간",
@@ -36,12 +36,15 @@ export function MentoringRecruitmentsTable({ items, loading, onEdit, onDelete, s
                 field: "status",
                 align: "center",
                 render: (row) => {
+                    if (row.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
+                    if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+
                     const now = new Date();
                     const start = new Date(row.recruitStartAt);
                     const end = new Date(row.recruitEndAt);
 
                     if (now < start) {
-                        return <StatusPill status="PENDING" label="PENDING" />;
+                        return <StatusPill status="DRAFT" label="DRAFT" />;
                     } else if (now >= start && now <= end) {
                         return <StatusPill status="ACTIVE" label="OPEN" />;
                     } else {
