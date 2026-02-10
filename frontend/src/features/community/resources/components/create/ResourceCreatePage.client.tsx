@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./ResourceCreatePage.module.css";
 import type { Category, CreateResourceRequestDto } from "../../api/types";
-import { createResource, fetchResourceCategories } from "../../api/ResourcesApi";
+import { createResource, fetchResourceCategories } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
 
 const LIST_PATH = "/admin/community/resources";
@@ -222,7 +222,7 @@ export default function ResourceCreatePageClient() {
                       key={t}
                       type="button"
                       className={styles.toolBtn}
-                      onClick={() => {}}
+                      onClick={() => { }}
                       disabled={saving}
                       aria-label={t}
                       title={t}
