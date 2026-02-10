@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import styles from "../styles/studentMentoring.module.css";
-import { fetchStudentRecruitments } from "@/features/mentoring/lib/studentApi";
-import { MentoringRecruitment } from "@/features/mentoring/types";
+import { fetchRecruitments } from "@/features/mentoring/api/mentoringApi";
+import { MentoringRecruitment } from "@/features/mentoring/api/types";
 import toast from "react-hot-toast";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
@@ -36,13 +36,12 @@ export default function StudentMentoringList() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await fetchStudentRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
-            if (res && res.content) {
-                setItems(res.content);
-                setTotalElements(res.totalElements);
+            const res = await fetchRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput, status: "OPEN" });
+            if (res && res.data) {
+                setItems(res.data);
+                setTotalElements(res.meta?.totalElements || 0);
             } else {
                 console.warn("No content in response", res);
-                // alert("데이터가 없습니다. (Response empty)");
             }
         } catch (e: any) {
             console.error(e);

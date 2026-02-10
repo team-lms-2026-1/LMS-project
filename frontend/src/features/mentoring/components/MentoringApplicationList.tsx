@@ -1,18 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import styles from "../styles/mentoring.module.css";
-import {
-    fetchApplications,
-    updateApplicationStatus,
-} from "../lib/api";
-import type { MentoringApplication, MentoringStatus } from "../types";
-import { Table } from "@/components/table/Table";
-import { StatusPill } from "@/components/status/StatusPill";
+import { updateApplicationStatus } from "../api/mentoringApi";
+import { useMentoringApplicationList } from "../hooks/useMentoringApplicationList";
+import { MentoringApplicationsTable } from "./MentoringApplicationsTable";
+import type { MentoringApplication, MentoringStatus } from "../api/types";
 import { Modal } from "@/components/modal/Modal";
-import { Button } from "@/components/button/Button";
-import type { TableColumn } from "@/components/table/types";
+import { Button } from "@/components/button";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
 
@@ -21,46 +16,25 @@ type Props = {
 };
 
 export default function MentoringApplicationList({ recruitmentId }: Props) {
-    const router = useRouter();
-    const [items, setItems] = useState<MentoringApplication[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { items, loading, refresh } = useMentoringApplicationList(recruitmentId);
 
-    // Reject Modal
-    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [processing, setProcessing] = useState(false);
+    const [selectedApp, setSelectedApp] = useState<MentoringApplication | null>(null);
+    const [approveTargetId, setApproveTargetId] = useState<number | null>(null);
     const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
     const [rejectReason, setRejectReason] = useState("");
-
-    // Approve Modal
-    const [approveTargetId, setApproveTargetId] = useState<number | null>(null);
-    const [processing, setProcessing] = useState(false);
-
-    const fetchData = () => {
-        setLoading(true);
-        fetchApplications(recruitmentId)
-            .then((res) => setItems(res))
-            .catch((err) => console.error(err))
-            .finally(() => setLoading(false));
-    };
-
-    useEffect(() => {
-        if (recruitmentId) fetchData();
-    }, [recruitmentId]);
 
     const handleStatusUpdate = async (id: number, status: MentoringStatus, reason?: string) => {
         try {
             setProcessing(true);
             await updateApplicationStatus(id, { status, rejectReason: reason });
             toast.success(status === "APPROVED" ? "승인되었습니다." : "반려되었습니다.");
-            fetchData();
-        } catch (e) {
-            toast.error("처리 실패");
+            refresh();
+        } catch (e: any) {
+            toast.error("처리 실패: " + (e.message || "Unknown error"));
         } finally {
             setProcessing(false);
         }
-    };
-
-    const openApproveModal = (id: number) => {
-        setApproveTargetId(id);
     };
 
     const handleApproveConfirm = async () => {
@@ -70,83 +44,86 @@ export default function MentoringApplicationList({ recruitmentId }: Props) {
         }
     };
 
-    const openRejectModal = (id: number) => {
-        setRejectTargetId(id);
-        setRejectReason("");
-        setRejectModalOpen(true);
-    };
-
     const handleRejectConfirm = async () => {
+        if (!rejectReason.trim()) {
+            toast.error("반려 사유를 입력해주세요.");
+            return;
+        }
         if (rejectTargetId) {
             await handleStatusUpdate(rejectTargetId, "REJECTED", rejectReason);
-            setRejectModalOpen(false);
+            setRejectTargetId(null);
+            setRejectReason("");
         }
     };
-
-    const columns = useMemo<TableColumn<MentoringApplication>[]>(
-        () => [
-            { header: "역할", field: "role", width: "100px" },
-            { header: "이름", field: "name", render: (row) => `${row.name} (${row.loginId})` },
-            { header: "신청일시", field: "appliedAt", render: (row) => new Date(row.appliedAt).toLocaleString() },
-            { header: "상태", field: "status", align: "center", render: (row) => <StatusPill status={row.status === "APPROVED" ? "ACTIVE" : row.status === "REJECTED" ? "INACTIVE" : "PENDING"} label={row.status} /> },
-            {
-                header: "관리",
-                field: "applicationId",
-                align: "right",
-                render: (row) => (
-                    <div className={styles.actions}>
-                        {row.status === "APPLIED" && (
-                            <>
-                                <Button className={styles.smBtn} onClick={() => openApproveModal(row.applicationId)}>승인</Button>
-                                <Button className={styles.smBtn} variant="secondary" onClick={() => openRejectModal(row.applicationId)}>반려</Button>
-                            </>
-                        )}
-                    </div>
-                )
-            }
-        ],
-        []
-    );
 
     return (
         <div className={styles.page}>
             <div className={styles.headerRow}>
-                <div className={styles.title}>신청 결과 조회</div>
-                <Button variant="secondary" onClick={() => router.back()}>뒤로가기</Button>
+                <h1 className={styles.title}>신청 내역 관리</h1>
             </div>
 
             <div className={styles.tableWrap}>
-                <Table
-                    columns={columns}
+                <MentoringApplicationsTable
                     items={items}
-                    rowKey={(r) => r.applicationId}
                     loading={loading}
-                    emptyText="신청 내역이 없습니다."
+                    onRowClick={(a) => setSelectedApp(a)}
                 />
             </div>
 
-            {/* Reject Modal */}
+            {/* Application Detail Modal */}
             <Modal
-                open={rejectModalOpen}
-                onClose={() => setRejectModalOpen(false)}
-                title="반려 사유"
+                open={!!selectedApp}
+                title="신청 정보 상세"
+                onClose={() => setSelectedApp(null)}
                 footer={
-                    <>
-                        <Button variant="secondary" onClick={() => setRejectModalOpen(false)}>취소</Button>
-                        <Button onClick={handleRejectConfirm} variant="danger">반려</Button>
-                    </>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
+                        {selectedApp?.status === "APPLIED" && (
+                            <>
+                                <Button onClick={() => { setApproveTargetId(selectedApp.applicationId); setSelectedApp(null); }}>승인</Button>
+                                <Button variant="secondary" onClick={() => { setRejectTargetId(selectedApp.applicationId); setRejectReason(""); setSelectedApp(null); }}>반려</Button>
+                            </>
+                        )}
+                        <Button variant="secondary" onClick={() => setSelectedApp(null)}>닫기</Button>
+                    </div>
                 }
             >
-                <textarea
-                    className={styles.textarea}
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                    placeholder="반려 사유를 입력해주세요"
-                    style={{ width: "100%" }}
-                />
+                {selectedApp && (
+                    <div className={styles.form}>
+                        <div className={styles.grid2}>
+                            <label className={styles.field}>
+                                <div className={styles.label}>이름</div>
+                                <div className={styles.input}>{selectedApp.name} ({selectedApp.loginId})</div>
+                            </label>
+                            <label className={styles.field}>
+                                <div className={styles.label}>학과</div>
+                                <div className={styles.input}>{selectedApp.deptName || "-"}</div>
+                            </label>
+                        </div>
+                        <div className={styles.grid2}>
+                            <label className={styles.field}>
+                                <div className={styles.label}>연락처</div>
+                                <div className={styles.input}>{selectedApp.phone || "-"}</div>
+                            </label>
+                            <label className={styles.field}>
+                                <div className={styles.label}>이메일</div>
+                                <div className={styles.input}>{selectedApp.email || "-"}</div>
+                            </label>
+                        </div>
+                        <label className={styles.field}>
+                            <div className={styles.label}>신청 역할</div>
+                            <div className={styles.input}>{selectedApp.role === "MENTOR" ? "멘토" : "멘티"}</div>
+                        </label>
+                        <label className={styles.field}>
+                            <div className={styles.label}>신청 사유</div>
+                            <div className={styles.textarea} style={{ backgroundColor: "#f9fafb" }}>
+                                {selectedApp.applyReason || "내용 없음"}
+                            </div>
+                        </label>
+                    </div>
+                )}
             </Modal>
 
-            {/* Approve Confirm Modal */}
+            {/* Approval Confirm Modal */}
             <ConfirmModal
                 open={!!approveTargetId}
                 message="이 신청을 승인하시겠습니까?"
@@ -154,6 +131,31 @@ export default function MentoringApplicationList({ recruitmentId }: Props) {
                 onCancel={() => setApproveTargetId(null)}
                 loading={processing}
             />
+
+            {/* Rejection Modal */}
+            <Modal
+                open={!!rejectTargetId}
+                onClose={() => setRejectTargetId(null)}
+                title="반려 사유 입력"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setRejectTargetId(null)}>취소</Button>
+                        <Button onClick={handleRejectConfirm} variant="danger" loading={processing}>반려 처리</Button>
+                    </>
+                }
+            >
+                <label className={styles.field}>
+                    <div className={styles.label}>반려 사유</div>
+                    <textarea
+                        className={styles.textarea}
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="반려 사유를 입력해주세요"
+                    />
+                </label>
+            </Modal>
         </div>
     );
 }
+
+

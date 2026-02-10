@@ -145,6 +145,7 @@ public enum ErrorCode {
     MENTORING_APPLICATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "MENTORING_APPLICATION_ALREADY_EXISTS", "이미 해당 공고에 신청하셨습니다.", "mentoring.application.alreadyExists"),
     MENTORING_ALREADY_MATCHED(HttpStatus.CONFLICT, "MENTORING_ALREADY_MATCHED", "이미 매칭된 신청자입니다.", "mentoring.alreadyMatched"),
     MENTORING_NOT_OPEN(HttpStatus.BAD_REQUEST, "MENTORING_NOT_OPEN", "현재 멘토링 모집 기간이 아닙니다.", "mentoring.notOpen"),
+    MENTORING_REJECT_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "MENTORING_REJECT_REASON_REQUIRED", "반려 사유는 필수입니다.", "mentoring.reject.reasonRequired"),
 
     // =========================
     // Domain: Competency / Diagnosis

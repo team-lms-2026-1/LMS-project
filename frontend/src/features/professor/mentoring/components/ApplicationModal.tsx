@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import styles from "./ProfessorMentoring.module.css";
-import { MentoringRecruitment, MentoringApplication } from "@/features/mentoring/types";
-import { fetchRecruitmentApplications } from "@/features/mentoring/lib/professorApi";
+import { MentoringRecruitment, MentoringApplication } from "@/features/mentoring/api/types";
+import { fetchAdminApplications as fetchRecruitmentApplications } from "@/features/mentoring/api/mentoringApi";
 
 interface ApplicationModalProps {
     recruitment: MentoringRecruitment;
@@ -18,8 +18,8 @@ export function ApplicationModal({ recruitment, onClose }: ApplicationModalProps
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await fetchRecruitmentApplications(recruitment.recruitmentId);
-                setApplications(data || []);
+                const res = await fetchRecruitmentApplications(recruitment.recruitmentId);
+                setApplications(res.data || []);
             } catch (e: any) {
                 console.error(e);
                 alert("신청자 목록 조회 실패: " + (e.message || ""));

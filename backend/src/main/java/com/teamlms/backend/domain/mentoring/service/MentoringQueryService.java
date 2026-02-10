@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.function.Function;
+import com.teamlms.backend.domain.mentoring.enums.MentoringRecruitmentStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -101,8 +102,8 @@ public class MentoringQueryService {
         List<MentoringAnswer> answers = answerRepository.findAllByQuestionIdIn(qIds);
 
         List<Long> writerIds = new ArrayList<>();
-        questions.forEach(q -> writerIds.add(q.getWriterId()));
-        answers.forEach(a -> writerIds.add(a.getWriterId()));
+        questions.forEach(q -> writerIds.add(q.getCreatedBy()));
+        answers.forEach(a -> writerIds.add(a.getCreatedBy()));
 
         if (writerIds.isEmpty())
             return new ArrayList<>();
@@ -121,12 +122,12 @@ public class MentoringQueryService {
         List<MentoringChatMessageResponse> chat = new ArrayList<>();
 
         for (MentoringQuestion q : questions) {
-            String senderName = nameMap.getOrDefault(q.getWriterId(), 
-                accountMap.containsKey(q.getWriterId()) ? accountMap.get(q.getWriterId()).getLoginId() : "Unknown");
+            String senderName = nameMap.getOrDefault(q.getCreatedBy(), 
+                accountMap.containsKey(q.getCreatedBy()) ? accountMap.get(q.getCreatedBy()).getLoginId() : "Unknown");
             
             chat.add(MentoringChatMessageResponse.builder()
                     .id(q.getQuestionId())
-                    .senderId(q.getWriterId())
+                    .senderId(q.getCreatedBy())
                     .senderName(senderName)
                     .content(q.getContent())
                     .type("QUESTION")
@@ -135,12 +136,12 @@ public class MentoringQueryService {
         }
 
         for (MentoringAnswer a : answers) {
-            String senderName = nameMap.getOrDefault(a.getWriterId(), 
-                accountMap.containsKey(a.getWriterId()) ? accountMap.get(a.getWriterId()).getLoginId() : "Unknown");
+            String senderName = nameMap.getOrDefault(a.getCreatedBy(), 
+                accountMap.containsKey(a.getCreatedBy()) ? accountMap.get(a.getCreatedBy()).getLoginId() : "Unknown");
 
             chat.add(MentoringChatMessageResponse.builder()
                     .id(a.getAnswerId())
-                    .senderId(a.getWriterId())
+                    .senderId(a.getCreatedBy())
                     .senderName(senderName)
                     .content(a.getContent())
                     .type("ANSWER")
@@ -152,12 +153,20 @@ public class MentoringQueryService {
         return chat;
     }
 
-    public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable, Long currentAccountId, String keyword) {
+    public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable, Long currentAccountId, String keyword, MentoringRecruitmentStatus status) {
         Page<MentoringRecruitment> recruitments;
-        if (keyword != null && !keyword.isBlank()) {
-            recruitments = recruitmentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+        if (status != null) {
+            if (keyword != null && !keyword.isBlank()) {
+                recruitments = recruitmentRepository.findByStatusAndTitleContainingIgnoreCase(status, keyword, pageable);
+            } else {
+                recruitments = recruitmentRepository.findByStatus(status, pageable);
+            }
         } else {
-            recruitments = recruitmentRepository.findAll(pageable);
+            if (keyword != null && !keyword.isBlank()) {
+                recruitments = recruitmentRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+            } else {
+                recruitments = recruitmentRepository.findAll(pageable);
+            }
         }
         
         if (currentAccountId == null || recruitments.isEmpty()) {
@@ -173,8 +182,6 @@ public class MentoringQueryService {
             MentoringRecruitmentResponse res = MentoringRecruitmentResponse.from(entity);
             MentoringApplication myApp = myAppMap.get(entity.getRecruitmentId());
             if (myApp != null) {
-                // Use reflection or copy to new builder because from() returns built object
-                // Let's modify MentoringRecruitmentResponse to have a better way or just rebuild here.
                 return MentoringRecruitmentResponse.builder()
                         .recruitmentId(entity.getRecruitmentId())
                         .semesterId(entity.getSemesterId())

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import styles from "./adminMentoring.module.css";
-import { fetchAdminRecruitments, fetchAdminApplications, matchMentoring } from "@/features/mentoring/lib/adminApi";
-import { MentoringRecruitment, MentoringApplication } from "@/features/mentoring/types";
+import { fetchAdminRecruitments, fetchAdminApplications, matchMentoring } from "../../api/mentoringApi";
+import { MentoringRecruitment, MentoringApplication } from "../../api/types";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
 import { StatusPill } from "@/components/status/StatusPill";
@@ -12,19 +12,9 @@ import { SearchBar } from "@/components/searchbar/SearchBar";
 import { Button } from "@/components/button/Button";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
+import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 
 const PAGE_SIZE = 10;
-
-const SEMESTER_OPTIONS = [
-    { label: "1학기", value: 1 },
-    { label: "여름학기", value: 2 },
-    { label: "2학기", value: 3 },
-    { label: "겨울학기", value: 4 },
-];
-
-const getSemesterLabel = (id: number) => {
-    return SEMESTER_OPTIONS.find(opt => opt.value === id)?.label || `${id}학기`;
-};
 
 export default function AdminMentoringMatchingPage() {
     const [page, setPage] = useState(1);
@@ -40,27 +30,27 @@ export default function AdminMentoringMatchingPage() {
     const [matching, setMatching] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-    const fetchRecruitments = async () => {
+    const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
+
+    const fetchRecruitList = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetchAdminRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
-            if (res && res.content) {
-                setRecruitments(res.content);
-                setTotalElements(res.totalElements);
-            }
+            setRecruitments(res.data || []);
+            setTotalElements(res.meta?.totalElements || 0);
         } catch (e: any) {
             console.error(e);
             toast.error("모집 공고 조회 실패: " + (e.message || ""));
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, keywordInput]);
 
-    const fetchApplications = async (recruitmentId: number) => {
+    const fetchAppList = useCallback(async (recruitmentId: number) => {
         setLoadingApplications(true);
         try {
-            const data = await fetchAdminApplications(recruitmentId);
-            setApplications(data || []);
+            const res = await fetchAdminApplications(recruitmentId);
+            setApplications(res.data || []);
             setSelectedMentor(null);
             setSelectedMentee(null);
         } catch (e: any) {
@@ -69,17 +59,17 @@ export default function AdminMentoringMatchingPage() {
         } finally {
             setLoadingApplications(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchRecruitments();
-    }, [page]);
+        fetchRecruitList();
+    }, [fetchRecruitList]);
 
     useEffect(() => {
         if (selectedRecruitment) {
-            fetchApplications(selectedRecruitment.recruitmentId);
+            fetchAppList(selectedRecruitment.recruitmentId);
         }
-    }, [selectedRecruitment]);
+    }, [selectedRecruitment, fetchAppList]);
 
     const handleMatch = () => {
         if (!selectedRecruitment || !selectedMentor || !selectedMentee) {
@@ -99,10 +89,11 @@ export default function AdminMentoringMatchingPage() {
                 menteeApplicationId: selectedMentee!
             });
             toast.success("매칭이 완료되었습니다.");
-            fetchApplications(selectedRecruitment!.recruitmentId);
+            if (selectedRecruitment) {
+                fetchAppList(selectedRecruitment.recruitmentId);
+            }
         } catch (e: any) {
             console.error(e);
-            // 만약 ApiError라면 e.message가 이미 정제된 메시지임
             toast.error("매칭 실패: " + (e.message || "서버 오류가 발생했습니다."));
         } finally {
             setMatching(false);
@@ -113,7 +104,11 @@ export default function AdminMentoringMatchingPage() {
 
     const recruitmentColumns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (r) => getSemesterLabel(r.semesterId) },
+            {
+                header: "학기",
+                field: "semesterId",
+                render: (r) => semesterOptions.find(opt => opt.value === String(r.semesterId))?.label || `${r.semesterId}학기`
+            },
             { header: "제목", field: "title" },
             {
                 header: "모집기간",
@@ -132,7 +127,7 @@ export default function AdminMentoringMatchingPage() {
                     const end = new Date(r.recruitEndAt);
 
                     if (now < start) {
-                        return <StatusPill status="PENDING" label="대기" />;
+                        return <StatusPill status="PENDING" label="PENDING" />;
                     } else if (now >= start && now <= end) {
                         return <StatusPill status="ACTIVE" label="OPEN" />;
                     } else {
@@ -141,8 +136,9 @@ export default function AdminMentoringMatchingPage() {
                 }
             },
         ],
-        []
+        [semesterOptions]
     );
+
 
     const allMentors = applications.filter(app => app.role === "MENTOR" && (app.status === "APPROVED" || app.status === "MATCHED"));
     const availableMentees = applications.filter(app => app.role === "MENTEE" && app.status === "APPROVED");
@@ -157,7 +153,7 @@ export default function AdminMentoringMatchingPage() {
                     <SearchBar
                         value={keywordInput}
                         onChange={setKeywordInput}
-                        onSearch={fetchRecruitments}
+                        onSearch={fetchRecruitList}
                         placeholder="모집 공고 제목 검색"
                         className={styles.searchBox}
                     />
@@ -170,7 +166,7 @@ export default function AdminMentoringMatchingPage() {
                             columns={recruitmentColumns}
                             items={recruitments}
                             rowKey={(r) => r.recruitmentId}
-                            loading={loading}
+                            loading={loading || semesterLoading}
                             skeletonRowCount={5}
                             emptyText="모집 공고가 없습니다."
                             onRowClick={(row) => setSelectedRecruitment(row)}
@@ -201,7 +197,6 @@ export default function AdminMentoringMatchingPage() {
                                 <div className={styles.matchingColumn}>
                                     <h3 className={styles.columnTitle}>멘토 신청 현황</h3>
 
-                                    {/* 수정: 멘토 신청 현황 - 통합된 리스트 */}
                                     <div className={styles.subSection}>
                                         <h4 className={styles.subTitle}>전체 멘토 ({allMentors.length}명)</h4>
                                         <div className={styles.applicationList}>
@@ -216,7 +211,6 @@ export default function AdminMentoringMatchingPage() {
                                                     >
                                                         <div className={styles.cardHeader}>
                                                             <span className={styles.cardName}>{mentor.name || mentor.loginId}</span>
-                                                            {/* 매칭된 수 표시 */}
                                                             {(mentor.matchedCount || 0) > 0 && (
                                                                 <span className={styles.matchedCountBadge}>
                                                                     {mentor.matchedCount}명 매칭
@@ -307,3 +301,4 @@ export default function AdminMentoringMatchingPage() {
         </div>
     );
 }
+

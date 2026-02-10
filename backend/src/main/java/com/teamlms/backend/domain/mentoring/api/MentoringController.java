@@ -7,6 +7,9 @@ import com.teamlms.backend.domain.mentoring.api.dto.MentoringQuestionRequest;
 import com.teamlms.backend.domain.mentoring.api.dto.MentoringAnswerRequest;
 import com.teamlms.backend.domain.mentoring.service.MentoringCommandService;
 import com.teamlms.backend.domain.mentoring.service.MentoringQueryService;
+import com.teamlms.backend.global.api.ApiResponse;
+import com.teamlms.backend.global.api.PageMeta;
+import com.teamlms.backend.global.api.dto.SuccessResponse;
 import com.teamlms.backend.global.security.principal.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,59 +30,61 @@ public class MentoringController {
 
     // [Admin/User] 멘토링 모집 목록 조회
     @GetMapping("/mentoring/recruitments")
-    public ResponseEntity<Page<MentoringRecruitmentResponse>> getRecruitments(
+    public ApiResponse<java.util.List<MentoringRecruitmentResponse>> getRecruitments(
             @AuthenticationPrincipal AuthUser user,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) com.teamlms.backend.domain.mentoring.enums.MentoringRecruitmentStatus status,
             @PageableDefault(sort = "recruitmentId", direction = Sort.Direction.DESC) Pageable pageable) {
         Long accountId = (user != null) ? user.getAccountId() : null;
-        return ResponseEntity.ok(queryService.getRecruitments(pageable, accountId, keyword));
+        Page<MentoringRecruitmentResponse> result = queryService.getRecruitments(pageable, accountId, keyword, status);
+        return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
     // [Admin/User] 멘토링 모집 상세 조회
     @GetMapping("/mentoring/recruitments/{id}")
-    public ResponseEntity<MentoringRecruitmentResponse> getRecruitment(@PathVariable Long id) {
-        return ResponseEntity.ok(queryService.getRecruitment(id));
+    public ApiResponse<MentoringRecruitmentResponse> getRecruitment(@PathVariable Long id) {
+        return ApiResponse.ok(queryService.getRecruitment(id));
     }
 
     // [User] 멘토링 신청 (멘토/멘티)
     @PostMapping("/mentoring/applications")
-    public ResponseEntity<Void> applyMentoring(
+    public ApiResponse<SuccessResponse> applyMentoring(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid MentoringApplicationRequest request) {
         commandService.applyMentoring(user.getAccountId(), request);
-        return ResponseEntity.ok().build();
+        return ApiResponse.ok(new SuccessResponse());
     }
 
     // [User] 멘토링 질문 등록
     @PostMapping("/mentoring/questions")
-    public ResponseEntity<Void> createQuestion(
+    public ApiResponse<SuccessResponse> createQuestion(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid MentoringQuestionRequest request) {
         commandService.createQuestion(user.getAccountId(), request);
-        return ResponseEntity.ok().build();
+        return ApiResponse.ok(new SuccessResponse());
     }
 
     // [User] 내 멘토링 매칭 목록 조회
     @GetMapping("/mentoring/matchings")
-    public ResponseEntity<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringMatchingResponse>> getMyMatchings(
+    public ApiResponse<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringMatchingResponse>> getMyMatchings(
             @AuthenticationPrincipal AuthUser user) {
-        return ResponseEntity.ok(queryService.getMyMatchings(user.getAccountId()));
+        return ApiResponse.ok(queryService.getMyMatchings(user.getAccountId()));
     }
 
     // [User] 멘토링 채팅 내역 조회
     @GetMapping("/mentoring/matchings/{id}/chat")
-    public ResponseEntity<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse>> getChatHistory(
+    public ApiResponse<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse>> getChatHistory(
             @PathVariable Long id) {
-        return ResponseEntity.ok(queryService.getChatHistory(id));
+        return ApiResponse.ok(queryService.getChatHistory(id));
     }
 
     // [User] 멘토링 답변 등록
     @PostMapping("/mentoring/answers")
-    public ResponseEntity<Void> createAnswer(
+    public ApiResponse<SuccessResponse> createAnswer(
             @AuthenticationPrincipal AuthUser user,
             @RequestBody @Valid MentoringAnswerRequest request) {
         commandService.createAnswer(user.getAccountId(), request);
-        return ResponseEntity.ok().build();
+        return ApiResponse.ok(new SuccessResponse());
     }
 
     // [Admin] endpoints removed (moved to MentoringAdminController)

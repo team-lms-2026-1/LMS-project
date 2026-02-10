@@ -169,7 +169,7 @@ public class MentoringCommandService {
         MentoringApplicationStatus newStatus = request.getStatus();
         if (newStatus == MentoringApplicationStatus.REJECTED
                 && (request.getRejectReason() == null || request.getRejectReason().isBlank())) {
-            throw new IllegalArgumentException("Reject reason is required for rejection.");
+            throw new BusinessException(ErrorCode.MENTORING_REJECT_REASON_REQUIRED);
         }
 
         application.updateStatus(newStatus, request.getRejectReason(), adminId);
@@ -191,9 +191,7 @@ public class MentoringCommandService {
 
         MentoringQuestion question = MentoringQuestion.builder()
                 .matchingId(request.getMatchingId())
-                .writerId(writerId)
                 .content(request.getContent())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         questionRepository.save(question);
@@ -216,9 +214,7 @@ public class MentoringCommandService {
 
         MentoringAnswer answer = MentoringAnswer.builder()
                 .questionId(request.getQuestionId())
-                .writerId(writerId)
                 .content(request.getContent())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         answerRepository.save(answer);

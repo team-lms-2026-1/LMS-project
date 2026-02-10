@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import styles from "./ProfessorMentoring.module.css";
-import { fetchProfessorRecruitments } from "@/features/mentoring/lib/professorApi";
-import { MentoringRecruitment } from "@/features/mentoring/types";
+import { fetchRecruitments } from "@/features/mentoring/api/mentoringApi";
+import { MentoringRecruitment } from "@/features/mentoring/api/types";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
 import { StatusPill } from "@/components/status/StatusPill";
@@ -36,10 +36,10 @@ export default function ProfessorMentoringList() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await fetchProfessorRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
-            if (res && res.content) {
-                setItems(res.content);
-                setTotalElements(res.totalElements);
+            const res = await fetchRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput, status: "OPEN" });
+            if (res && res.data) {
+                setItems(res.data);
+                setTotalElements(res.meta?.totalElements || 0);
             } else {
                 console.warn("No content in response", res);
             }
