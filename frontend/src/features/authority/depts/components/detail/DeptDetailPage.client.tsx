@@ -33,11 +33,9 @@ import MajorCreateModal from "../modal/MajorCreateModal";
 type Tab = "PROFESSOR" | "STUDENT" | "MAJOR";
 
 type Props = {
-  // page.tsx에서 params.departmentId 넘겨줄 것
   deptId: string;
 };
 
-// 헤더에 쓸 학과 정보
 type DeptHeader = {
   deptName: string;
   deptCode: string;
@@ -53,26 +51,17 @@ export default function DeptDetailPageClient({ deptId }: Props) {
   const [majors, setMajors] = useState<DeptMajorListItemDto[]>([]);
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState<PageMeta | null>(null);
-
   const [isMajorModalOpen, setIsMajorModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-
   const [loading, setLoading] = useState(false);
-
   const [keywordInput, setKeywordInput] = useState("");
   const [keyword, setKeyword] = useState("");
-
-  // 🔹 헤더 상태
   const [header, setHeader] = useState<DeptHeader | null>(null);
-
   const handleSearch = () => {
     setPage(1);
     setKeyword(keywordInput.trim());
   };
 
-  /* =========================
-   * 1) 헤더 정보 불러오기
-   * ========================= */
   useEffect(() => {
     const loadHeader = async () => {
       try {
@@ -103,9 +92,6 @@ export default function DeptDetailPageClient({ deptId }: Props) {
     loadHeader();
   }, [deptId]);
 
-  /* =========================
-   * 2) 탭별 목록 불러오기
-   * ========================= */
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -139,7 +125,6 @@ export default function DeptDetailPageClient({ deptId }: Props) {
     load();
   }, [tab, deptId, keyword, page, refreshKey]);
 
-  // 탭별 수량 표시용
   const currentCount =
     tab === "PROFESSOR"
       ? professors.length
@@ -147,7 +132,6 @@ export default function DeptDetailPageClient({ deptId }: Props) {
         ? students.length
         : majors.length;
 
-  // 헤더 표시용 값
   const deptName = header?.deptName ?? "학과";
   const deptCode = header?.deptCode ?? "-";
   const headProfessorName = header?.headProfessorName ?? "-";
@@ -157,9 +141,7 @@ export default function DeptDetailPageClient({ deptId }: Props) {
 
   return (
     <div className={styles.page}>
-      {/* ===== 상단 학과 헤더 ===== */}
       <div className={styles.header}>
-        {/* 왼쪽: 제목 + 코드/담당교수 */}
         <div className={styles.headerLeft}>
           <h1 className={styles.deptTitle}>{deptName} 관리</h1>
           <div className={styles.deptMeta}>
@@ -171,13 +153,11 @@ export default function DeptDetailPageClient({ deptId }: Props) {
           </div>
         </div>
 
-        {/* 오른쪽: 설명 */}
         <div className={styles.headerRight}>
           <p className={styles.deptDescription}>{description}</p>
         </div>
       </div>
 
-      {/* ===== 탭 버튼 (공통 UI 그대로) ===== */}
       <div className={styles.tabRow}>
         <Button
           className={
@@ -213,9 +193,7 @@ export default function DeptDetailPageClient({ deptId }: Props) {
         </Button>
       </div>
 
-      {/* ===== 검색 + 테이블 카드 ===== */}
       <div className={styles.card}>
-        {/* 검색 줄 – 공통 SearchBar 사용 */}
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>
             <SearchBar
@@ -232,7 +210,6 @@ export default function DeptDetailPageClient({ deptId }: Props) {
           </div>
         </div>
 
-        {/* 테이블 */}
         <div className={styles.tableWrap}>
           {tab === "PROFESSOR" && (
             <DeptDetailProfessorTable items={professors} loading={loading} />
@@ -247,7 +224,6 @@ export default function DeptDetailPageClient({ deptId }: Props) {
           )}
         </div>
 
-        {/* 페이지네이션 + 전공 생성 버튼 */}
         <div className={styles.footerRow}>
           <div className={styles.paginationRow}>
             {meta && (
@@ -271,7 +247,6 @@ export default function DeptDetailPageClient({ deptId }: Props) {
         </div>
       </div>
 
-      {/* 전공 생성 모달 */}
       {tab === "MAJOR" && isMajorModalOpen && (
         <MajorCreateModal
           deptId={deptId}

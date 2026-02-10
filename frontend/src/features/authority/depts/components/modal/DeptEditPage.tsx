@@ -17,11 +17,7 @@ export default function DeptEditPage({ deptId, onClose, onUpdated }: DeptEditPag
     const [deptName, setDeptName] = useState("");
     const [description, setDescription] = useState("");
     const [headProfId, setHeadProfId] = useState<number | null>(null);
-
-    // Data
     const [professors, setProfessors] = useState<ProfessorDropdownItem[]>([]);
-
-    // UI State
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
     const [error, setError] = useState<string | null>(null);

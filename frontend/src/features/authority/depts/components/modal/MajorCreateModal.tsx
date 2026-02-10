@@ -52,8 +52,6 @@ export default function MajorCreateModal({
         active: isActive,
       });
 
-
-      // 부모에게 "생성됨" 알리기
       onCreated?.();
       onClose();
     } catch (error) {
