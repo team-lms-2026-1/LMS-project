@@ -1,8 +1,8 @@
 package com.teamlms.backend.domain.survey.entity;
 
+import com.teamlms.backend.global.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "survey_type_config")
-public class SurveyTypeConfig {
+public class SurveyTypeConfig extends BaseEntity {
 
     @Id
     @Column(name = "type_code", length = 50)
@@ -26,12 +26,4 @@ public class SurveyTypeConfig {
     @Builder.Default
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder = 0;
-
-    @Builder.Default
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Builder.Default
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
 }

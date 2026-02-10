@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -110,7 +109,18 @@ public class AdminSurveyController {
     public ApiResponse<List<SurveyParticipantResponse>> participants(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                safePage - 1,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "targetId")
+        );
+
         Page<SurveyParticipantResponse> result = queryService.getSurveyParticipants(user.getAccountId(), surveyId, pageable);
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
