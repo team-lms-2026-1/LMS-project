@@ -106,11 +106,34 @@
   padding: 14px;
 }
 
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 10px;
+}
+
 .sidebarTitle {
   font-weight: 800;
   font-size: 15px;
   color: #111827;
-  margin-bottom: 10px;
+}
+
+.headerLogoLink {
+  display: block;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.headerLogoLink:hover {
+  transform: scale(1.1);
+}
+
+.headerLogoImage {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .sectionList {
@@ -143,7 +166,7 @@
   appearance: none;
   -webkit-appearance: none;
 
-  cursor: default; 
+  cursor: default;
   user-select: none;
 }
 

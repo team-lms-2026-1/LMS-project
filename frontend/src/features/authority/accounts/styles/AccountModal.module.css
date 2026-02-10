@@ -24,9 +24,18 @@
   padding: 28px 32px 22px;
 }
 
-.modal::-webkit-scrollbar { width: 10px; }
-.modal::-webkit-scrollbar-thumb { background: rgba(17, 24, 39, 0.18); border-radius: 999px; }
-.modal::-webkit-scrollbar-track { background: transparent; }
+.modal::-webkit-scrollbar {
+  width: 10px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background: rgba(17, 24, 39, 0.18);
+  border-radius: 999px;
+}
+
+.modal::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 /* ========= Header ========= */
 .header {
@@ -93,9 +102,13 @@
   align-items: start;
 }
 
-.col { min-width: 0; }
+.col {
+  min-width: 0;
+}
 
-.field { margin-bottom: 14px; }
+.field {
+  margin-bottom: 14px;
+}
 
 .label {
   display: block;
@@ -151,7 +164,11 @@
 }
 
 /* ========= Inline rows ========= */
-.inlineRow { display: flex; gap: 10px; align-items: center; }
+.inlineRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
 
 .subBtn {
   height: 40px;
@@ -172,9 +189,18 @@
 }
 
 /* ========= Checkbox + Notice ========= */
-.checkRow { display: flex; align-items: center; gap: 8px; margin: 6px 0 10px; }
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
 
-.checkText { font-size: 13px; font-weight: 800; color: #374151; }
+.checkText {
+  font-size: 13px;
+  font-weight: 800;
+  color: #374151;
+}
 
 .noticeBox {
   border: 1px solid #e5e7eb;
@@ -183,9 +209,18 @@
   background: #f9fafb;
 }
 
-.noticeTitle { font-size: 12px; font-weight: 900; color: #111827; margin-bottom: 6px; }
+.noticeTitle {
+  font-size: 12px;
+  font-weight: 900;
+  color: #111827;
+  margin-bottom: 6px;
+}
 
-.noticeText { font-size: 13px; color: #374151; line-height: 1.5; }
+.noticeText {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+}
 
 /* ========= Footer Actions ========= */
 .footer,
@@ -219,7 +254,10 @@
   cursor: pointer;
 }
 
-.primaryBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+.primaryBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 /* ========= ID Row ========= */
 .idRow {
@@ -241,11 +279,98 @@
   background: #f9fafb;
 }
 
-.idHint { margin-top: 6px; font-size: 12px; color: #6b7280; }
+.idHint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ========= Profile Image ========= */
+.imageSection {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.imageWrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.profileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholderIcon {
+  width: 48px;
+  height: 48px;
+  color: #9ca3af;
+}
+
+.imageActions {
+  display: flex;
+  gap: 8px;
+}
+
+.uploadBtn {
+  font-size: 13px;
+  font-weight: 800;
+  color: #2563eb;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.uploadBtn:hover {
+  background: #eff6ff;
+}
+
+.deleteBtn {
+  font-size: 13px;
+  font-weight: 800;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  background: none;
+  border: none;
+}
+
+.deleteBtn:hover {
+  background: #fef2f2;
+}
 
 /* ========= Responsive ========= */
 @media (max-width: 900px) {
-  .modal { width: 100%; padding: 22px 18px 16px; }
-  .grid { grid-template-columns: 1fr; gap: 18px; }
-  .row2 { grid-template-columns: 1fr 1fr; }
+  .modal {
+    width: 100%;
+    padding: 22px 18px 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .row2 {
+    grid-template-columns: 1fr 1fr;
+  }
 }
