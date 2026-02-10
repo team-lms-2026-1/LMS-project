@@ -20,11 +20,6 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "mypage",
-    title: "마이페이지",
-    items: [{ label: "마이 캘린더", href: "/student/mypage/calendar" }],
-  },
-  {
     key: "course",
     title: "교과",
     items: [

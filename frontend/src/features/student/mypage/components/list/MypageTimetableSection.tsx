@@ -12,9 +12,26 @@ interface Props {
 const DAYS = ["MON", "TUE", "WED", "THU", "FRI"];
 const PERIODS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
+const DAY_TO_FULL: Record<string, string> = {
+    MON: "MONDAY",
+    TUE: "TUESDAY",
+    WED: "WEDNESDAY",
+    THU: "THURSDAY",
+    FRI: "FRIDAY",
+};
+
 export default function MypageTimetableSection({ timetable }: Props) {
+    // Debug point: See what data is actually received
+    console.log("[MypageTimetableSection] Received Timetable Data:", timetable);
+
     const getCellData = (day: string, period: number) => {
-        return timetable.find((t) => t.day_of_week === day && t.period === period);
+        const fullDay = DAY_TO_FULL[day];
+        return (timetable || []).find((t) => {
+            if (!t.day_of_week) return false;
+            const targetDay = t.day_of_week.toUpperCase();
+            // Match if short code ('MON') or full name ('MONDAY') matches
+            return (targetDay === day || targetDay === fullDay) && t.period === period;
+        });
     };
 
     const columns: TableColumn<number>[] = [
