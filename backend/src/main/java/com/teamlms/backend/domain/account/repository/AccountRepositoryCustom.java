@@ -28,4 +28,7 @@ public interface AccountRepositoryCustom {
 
     AdminAdminAccountDetailResponse findAdminDetail(Long accountId);
 
+    // Email lookup (coalesced across profiles)
+    Long findAccountIdByEmail(String email);
+
 }
