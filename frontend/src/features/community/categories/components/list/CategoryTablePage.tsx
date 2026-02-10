@@ -21,7 +21,7 @@ import type {
   CreateCategoryRequestDto,
   UpdateCategoryRequestDto,
 } from "../../api/types";
-import { categoriesApi } from "../../api/CategoriesApi";
+import { categoriesApi } from "../../api/categoriesApi";
 
 import DeleteModal from "../modal/DeleteModal.client";
 

@@ -10,7 +10,7 @@ import type {
 import {
   fetchStudentExtraGradeMeHeader,
   fetchStudentExtraGradeMeList,
-} from "../api/extraCuccicularApi";
+} from "../api/extraCurricularApi";
 
 const defaultMeta: PageMeta = {
   page: 1,

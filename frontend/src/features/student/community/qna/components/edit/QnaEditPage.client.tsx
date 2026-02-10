@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./QnaEditPage.module.css";
 import type { Category, UpdateQnaQuestionRequestDto, QnaDetailDto } from "../../api/types";
-import { fetchQnaCategories, fetchQnaDetail, updateQnaQuestion } from "../../api/QnasApi";
+import { fetchQnaCategories, fetchQnaDetail, updateQnaQuestion } from "../../api/qnasApi";
 import { Button } from "@/components/button";
 import { useAuth } from "@/features/auth/AuthProvider";
 

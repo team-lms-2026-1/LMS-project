@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { PaginationSimple, useListQuery } from "@/components/pagination";
-import { spacesApi } from "../../api/SpacesApi";
+import { spacesApi } from "../../api/spacesApi";
 import type { PageMeta, SpaceListItemDto } from "../../api/types";
 import { SpacesTable } from "./SpacesTable";
 import styles from "./SpacesPage.module.css";
@@ -66,10 +66,10 @@ export default function SpacesPageClient() {
 
       <div className={styles.bottomRow}>
         <div className={styles.paginationWrap}>
-            <PaginationSimple page={page} totalPages={totalPages} onChange={(p) => setPage(p)} />
+          <PaginationSimple page={page} totalPages={totalPages} onChange={(p) => setPage(p)} />
         </div>
 
-        </div>
+      </div>
     </div>
   );
 }

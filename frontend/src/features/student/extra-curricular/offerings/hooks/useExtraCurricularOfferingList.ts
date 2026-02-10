@@ -18,7 +18,7 @@ import {
   fetchStudentExtraCurricularDetail,
   fetchStudentExtraSessionDetail,
   fetchStudentExtraSessionList,
-} from "../api/extraCuccicularApi";
+} from "../api/extraCurricularApi";
 
 
 const defaultMeta: PageMeta = {
@@ -93,7 +93,7 @@ export function useExtraCurricularOfferingList() {
 // 상세 기본
 export function useExtraCurricularDetail(offeringId?: number, enabled: boolean = true) {
   const [data, setData] = useState<ExtraCurricularOfferingDetailDto | null>(null);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,7 +110,7 @@ export function useExtraCurricularDetail(offeringId?: number, enabled: boolean =
       setLoading(false);
     }
   };
-  
+
   const reload = useCallback(async () => {
     if (!offeringId) return;
     await load(offeringId);
@@ -122,7 +122,7 @@ export function useExtraCurricularDetail(offeringId?: number, enabled: boolean =
     void load(offeringId);
   }, [offeringId, enabled]);
 
-  return { state : { data, loading, error }, actions: { load, reload, setData }};
+  return { state: { data, loading, error }, actions: { load, reload, setData } };
 }
 
 // session list (student)

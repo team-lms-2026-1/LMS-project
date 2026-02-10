@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./SpacesEditPage.module.css";
 
-import { spacesApi } from "../../api/SpacesApi";
+import { spacesApi } from "../../api/spacesApi";
 import type { SpaceDetailDto, SpaceRuleUpsertDto, UpdateSpaceDetailRequestDto } from "../../api/types";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
@@ -35,7 +35,7 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
   const [spaceName, setSpaceName] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
-  
+
   const [originImageUrl, setOriginImageUrl] = useState<string>(""); // 기존 대표 이미지(정렬 1)
   const [imageFile, setImageFile] = useState<File | null>(null);    // 새로 올린 이미지
   const [deleteOriginImage, setDeleteOriginImage] = useState(false); // 기존 이미지 삭제 의사
@@ -101,11 +101,11 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
       return;
     }
     setImageFile(file);
-    setDeleteOriginImage(false); 
+    setDeleteOriginImage(false);
   };
 
   const onRemoveImage = () => {
-    
+
     if (imageFile) {
       setImageFile(null);
       return;
@@ -142,7 +142,7 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
       prev.map((r, i) => {
         if (i !== idx) return r;
         if (!r.ruleId && (!r.content || r.content.trim() === "") && (r.draft ?? "").trim() === "") {
-          return r; 
+          return r;
         }
         return { ...r, isEditing: false, draft: r.content };
       })
