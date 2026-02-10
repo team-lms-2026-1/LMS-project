@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { NoticeListItemDto, PageMeta } from "../api/types";
-import { fetchNoticesList } from "../api/NoticesApi";
+import { fetchNoticesList } from "../api/noticesApi";
 
 
 const defaultMeta: PageMeta = {
@@ -60,8 +60,8 @@ export function useNoticesList() {
       items,
       meta,   // ✅ 항상 PageMeta
       page,
-      size, 
-      deptId,  
+      size,
+      deptId,
       keyword,
       loading,
       error,

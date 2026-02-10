@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SpacesModal.module.css";
 import { Button } from "@/components/button";
-import { roomsApi } from "../../api/SpacesApi";
+import { roomsApi } from "../../api/spacesApi";
 import type { RoomDto } from "../../api/types";
 
 type Props = {
@@ -200,7 +200,7 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
     try {
       setSubmittingRoomId(roomId);
 
-      await roomsApi.reserve(spaceId,{
+      await roomsApi.reserve(spaceId, {
         roomId,
         rentalDate,
         startTime,

@@ -6,7 +6,7 @@ import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
 import toast from "react-hot-toast";
 
 import styles from "@/features/extra-curricular/offerings/components/detail/components/ExtraSessionDetailPanel.module.css";
-import { markStudentExtraSessionAttendance } from "../../../api/extraCuccicularApi";
+import { markStudentExtraSessionAttendance } from "../../../api/extraCurricularApi";
 import { useStudentExtraSessionDetail } from "../../../hooks/useExtraCurricularOfferingList";
 import { extraSessionStatusLabel } from "../../../utils/extraStatusLabel";
 

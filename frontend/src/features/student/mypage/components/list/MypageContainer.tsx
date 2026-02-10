@@ -3,7 +3,7 @@ import styles from "./MypageContainer.module.css";
 import MypageProfile from "./MypageProfile";
 import MypageStats from "./MypageStats";
 import MypageTimetableSection from "./MypageTimetableSection";
-import { MypageApi } from "../../api/MypageApi";
+import { MypageApi } from "../../api/mypageApi";
 
 export default async function MypageContainer() {
     const data = await MypageApi.getStudentMypageServer();

@@ -7,7 +7,7 @@ import styles from "./StudentExtraOfferingDetailSection.module.css";
 import { Button } from "@/components/button";
 
 import type { ExtraCurricularOfferingDetailDto } from "../../api/types";
-import { enrollExtraCurricularOffering } from "../../api/extraCuccicularApi";
+import { enrollExtraCurricularOffering } from "../../api/extraCurricularApi";
 
 
 type Props = {
