@@ -1,0 +1,122 @@
+.page {
+    padding: 0;
+    background: transparent;
+    min-height: auto;
+}
+
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.backBtn {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #344054;
+}
+
+.backBtn:hover {
+    background: #f9fafb;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.sectionCard {
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    padding: 0;
+    margin-bottom: 48px;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    margin-bottom: 16px;
+}
+
+.sectionHeader .sectionTitle {
+    margin-bottom: 0;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.formGroupFull {
+    grid-column: span 2;
+}
+
+.label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #344054;
+    margin-bottom: 8px;
+}
+
+.input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: all 0.2s;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.input:focus {
+    border-color: #2563eb;
+    background: #fff;
+}
+
+.questionList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.bottomActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.submitBtn {
+    height: 48px;
+    min-width: 160px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 12px;
+}

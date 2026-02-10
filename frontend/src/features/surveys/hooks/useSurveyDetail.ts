@@ -1,16 +1,17 @@
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { createSurvey, getSurveyDetail, updateSurvey } from "../service";
+import { createSurvey, fetchSurveyDetail, patchSurvey, fetchSurveyTypes } from "../api/surveysApi";
 import {
     QuestionResponseDto,
     SurveyCreateRequest,
-    SurveyUpdateRequest,
+    SurveyPatchRequest,
+    SurveyType,
+    SurveyTypeResponse,
     TargetFilterDto as FilterDto
-} from "../types";
+} from "../api/types";
 
 export function useSurveyDetail(idStr: string | undefined) {
     const router = useRouter();
@@ -21,15 +22,13 @@ export function useSurveyDetail(idStr: string | undefined) {
     const [dates, setDates] = useState<{ startAt: string; endAt: string } | null>(null);
     const [loading, setLoading] = useState(false);
 
-    // Target Filtering State
-    // [수정] 복합 조건도 지원하기 위해 상태를 좀 더 유연하게 관리할 수도 있지만,
-    // 여기서는 UI상으로는 "직접 지정(DEPT+GRADE)" 옵션을 추가함
     const [targetType, setTargetType] = useState<"ALL" | "DEPT" | "GRADE" | "DEPT_GRADE">("ALL");
     const [selectedDeptIds, setSelectedDeptIds] = useState<number[]>([]);
     const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
+    const [surveyType, setSurveyType] = useState<string>("ETC");
+    const [surveyTypes, setSurveyTypes] = useState<SurveyTypeResponse[]>([]);
 
-
-    const createNewQuestion = (order: number): QuestionResponseDto => ({
+    const createNewQuestion = useCallback((order: number): QuestionResponseDto => ({
         questionId: -Date.now() - Math.random(),
         questionText: "",
         sortOrder: order,
@@ -40,94 +39,93 @@ export function useSurveyDetail(idStr: string | undefined) {
         isRequired: true,
         questionType: "RATING",
         options: []
-    });
+    }), []);
 
-    const loadData = async (id: number) => {
+    const load = useCallback(async (id: number) => {
         setLoading(true);
         try {
-            const data = await getSurveyDetail(id);
+            const res = await fetchSurveyDetail(id);
+            const data = res.data;
             setTitle(data.title);
+            setSurveyType(data.type);
             setQuestions(data.questions || []);
-            setDates({ startAt: data.startAt, endAt: data.endAt });
+
+            const fmt = (s: string) => s.replace(" ", "T");
+            setDates({ startAt: fmt(data.startAt), endAt: fmt(data.endAt) });
         } catch (e) {
             console.error(e);
-
             toast.error("데이터를 불러오는데 실패했습니다.");
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (!isNew && idStr) {
-            loadData(Number(idStr));
+            load(Number(idStr));
         } else {
             setTitle("");
             setQuestions([createNewQuestion(1)]);
 
             const n = new Date();
             const next = new Date();
-            next.setDate(n.getDate() + 7); // Default 7 days
+            next.setDate(n.getDate() + 7);
 
-            // Simple formatter for local datetime-local (YYYY-MM-DDTHH:mm)
             const fmt = (d: Date) => {
                 const pad = (num: number) => String(num).padStart(2, '0');
                 return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
             };
 
             setDates({ startAt: fmt(n), endAt: fmt(next) });
-
             setTargetType("ALL");
+            setSurveyType("ETC");
         }
-    }, [idStr, isNew]);
 
-    const addQuestion = () => {
+        fetchSurveyTypes().then(res => {
+            if (res.data) setSurveyTypes(res.data);
+        }).catch(console.error);
+    }, [idStr, isNew, createNewQuestion, load]);
+
+    const addQuestion = useCallback(() => {
         setQuestions((prev) => [...prev, createNewQuestion(prev.length + 1)]);
-    };
+    }, [createNewQuestion]);
 
-    const removeQuestion = (index: number) => {
+    const removeQuestion = useCallback((index: number) => {
         setQuestions((prev) => prev.filter((_, i) => i !== index));
-    };
+    }, []);
 
-    const updateQuestion = (index: number, updates: Partial<QuestionResponseDto>) => {
+    const updateQuestion = useCallback((index: number, updates: Partial<QuestionResponseDto>) => {
         setQuestions((prev) => {
             const next = [...prev];
             next[index] = { ...next[index], ...updates };
             return next;
         });
-    };
+    }, []);
 
-
-
-    const submitSurvey = async () => {
+    const submit = useCallback(async () => {
         if (!title.trim()) {
             toast.error("제목을 입력해주세요.");
             return;
         }
 
-        // 질문이 하나도 없는 경우
         if (questions.length === 0) {
             toast.error("질문을 하나 이상 추가해주세요.");
             return;
         }
 
-        // 빈 질문이 있는지 확인
         const emptyQuestionIndex = questions.findIndex(q => !q.questionText.trim());
         if (emptyQuestionIndex !== -1) {
             toast.error(`${emptyQuestionIndex + 1}번 질문의 내용을 입력해주세요.`);
             return;
         }
 
-        // 객관식 질문의 옵션 검증
         for (let i = 0; i < questions.length; i++) {
             const q = questions[i];
             if (q.questionType === "MULTIPLE_CHOICE" || q.questionType === "SINGLE_CHOICE") {
-                // 옵션이 없는 경우
                 if (!q.options || q.options.length === 0) {
                     toast.error(`${i + 1}번 질문에 옵션을 하나 이상 추가해주세요.`);
                     return;
                 }
-                // 빈 옵션이 있는지 확인
                 const emptyOptionIndex = q.options.findIndex(opt => !opt.trim());
                 if (emptyOptionIndex !== -1) {
                     toast.error(`${i + 1}번 질문의 ${emptyOptionIndex + 1}번 옵션 내용을 입력해주세요.`);
@@ -159,17 +157,13 @@ export function useSurveyDetail(idStr: string | undefined) {
 
         setLoading(true);
 
-        const now = new Date();
-        const nextWeek = new Date();
-        nextWeek.setDate(now.getDate() + 7);
-
-        const formatForBackend = (dString: string | undefined, defaultDate: Date) => {
-            if (!dString) return defaultDate.toISOString().slice(0, 16).replace("T", " ");
+        const formatForBackend = (dString: string | undefined) => {
+            if (!dString) return "";
             return dString.replace("T", " ");
         };
 
-        const startAt = formatForBackend(dates?.startAt, now);
-        const endAt = formatForBackend(dates?.endAt, nextWeek);
+        const startAt = formatForBackend(dates?.startAt);
+        const endAt = formatForBackend(dates?.endAt);
 
         const questionDtos = questions.map((q, idx) => ({
             questionText: q.questionText,
@@ -178,7 +172,6 @@ export function useSurveyDetail(idStr: string | undefined) {
             maxVal: q.maxVal,
             minLabel: q.minLabel,
             maxLabel: q.maxLabel,
-
             isRequired: q.isRequired,
             questionType: q.questionType,
             options: q.options,
@@ -193,7 +186,7 @@ export function useSurveyDetail(idStr: string | undefined) {
                 };
 
                 const payload: SurveyCreateRequest = {
-                    type: "ETC", // Default
+                    type: surveyType as SurveyType,
                     title,
                     description: title,
                     startAt,
@@ -203,46 +196,53 @@ export function useSurveyDetail(idStr: string | undefined) {
                 };
                 await createSurvey(payload);
             } else {
-                const payload: SurveyUpdateRequest = {
+                const payload: SurveyPatchRequest = {
+                    type: surveyType as SurveyType,
                     title,
                     description: title,
                     startAt,
                     endAt,
                     questions: questionDtos,
                 };
-                await updateSurvey(Number(idStr), payload);
+                await patchSurvey(Number(idStr), payload);
             }
 
             toast.success("저장되었습니다.");
             router.push("/admin/surveys");
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            toast.error("저장에 실패했습니다.");
+            toast.error(e.message ?? "저장에 실패했습니다.");
         } finally {
             setLoading(false);
         }
-    };
+    }, [isNew, idStr, title, questions, dates, targetType, selectedDeptIds, selectedGrades, router]);
 
     return {
-        isNew,
-        title,
-        setTitle,
-        questions,
-        loading,
-        addQuestion,
-        removeQuestion,
-        updateQuestion,
-        submitSurvey,
-        // Target Filter Props
-        targetType,
-
-        setTargetType,
-        selectedDeptIds,
-        setSelectedDeptIds,
-        selectedGrades,
-        setSelectedGrades,
-        // Date Props
-        dates,
-        setDates,
+        state: {
+            isNew,
+            title,
+            questions,
+            dates,
+            loading,
+            targetType,
+            selectedDeptIds,
+            selectedGrades,
+            surveyType,
+            surveyTypes,
+        },
+        actions: {
+            setTitle,
+            setQuestions,
+            setDates,
+            setTargetType,
+            setSelectedDeptIds,
+            setSelectedGrades,
+            setSurveyType,
+            addQuestion,
+            removeQuestion,
+            updateQuestion,
+            submit,
+            reload: () => idStr && !isNew && load(Number(idStr)),
+        }
     };
 }

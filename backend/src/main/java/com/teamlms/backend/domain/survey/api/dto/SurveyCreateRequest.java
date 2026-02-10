@@ -2,70 +2,38 @@ package com.teamlms.backend.domain.survey.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.teamlms.backend.domain.survey.enums.SurveyType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter; // Added
-import lombok.ToString; // Added
+import java.time.LocalDateTime;
+import java.util.List;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-// 1. 설문 생성
-@Getter
-@Setter // Added
-@ToString // Added
-@NoArgsConstructor
-public class SurveyCreateRequest {
+public record SurveyCreateRequest(
     @NotNull
-    private SurveyType type;
+    SurveyType type,
+    
     @NotBlank
-    private String title;
-    private String description;
+    String title,
+    
+    String description,
 
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime startAt;
+    LocalDateTime startAt,
+    
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime endAt;
+    LocalDateTime endAt,
 
     @NotNull(message = "{validation.survey.questions.required}")
-    @jakarta.validation.constraints.NotEmpty(message = "{validation.survey.questions.notEmpty}")
-    @jakarta.validation.Valid
-    private List<QuestionDto> questions;
-    private TargetFilterDto targetFilter;
+    @NotEmpty(message = "{validation.survey.questions.notEmpty}")
+    @Valid
+    List<SurveyQuestionDto> questions,
 
-    // Inner DTOs
-    @Getter
-    @Setter
-    @ToString
-    @NoArgsConstructor
-    public static class QuestionDto {
-        @NotBlank(message = "{validation.survey.questionText.required}")
-        private String questionText;
-        private Integer sortOrder;
-        private Integer minVal = 1;
-        private Integer maxVal = 5;
-        private String minLabel;
-        private String maxLabel;
-
-        private Boolean isRequired = true;
-
-        // [New]
-        private com.teamlms.backend.domain.survey.enums.SurveyQuestionType questionType;
-        private List<String> options;
-    }
-
-    @Getter
-    @Setter
-    @ToString
-    @NoArgsConstructor
-    public static class TargetFilterDto {
-        private String genType; // ALL, DEPT, USER, GRADE
-        private List<Long> deptIds;
-        private List<Long> userIds;
-        private List<Integer> gradeLevels; // [추가] 학년 대상
-    }
+    SurveyTargetFilterDto targetFilter
+) {
 }

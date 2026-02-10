@@ -24,6 +24,8 @@ public enum ErrorCode {
     AUTH_FAILED(HttpStatus.UNAUTHORIZED, "AUTH_FAILED", "아이디 또는 비밀번호가 올바르지 않습니다.", "auth.failed"),
     DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "DUPLICATE_LOGIN_ID", "이미 사용 중인 로그인 아이디입니다.", "account.loginId.duplicate"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "접근 권한이 없습니다.", "account.accessDenied"),
+    PASSWORD_RESET_TOKEN_INVALID(HttpStatus.BAD_REQUEST, "PASSWORD_RESET_TOKEN_INVALID", "비밀번호 재설정 링크가 유효하지 않습니다.", "password.reset.token.invalid"),
+    PASSWORD_RESET_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "PASSWORD_RESET_TOKEN_EXPIRED", "비밀번호 재설정 링크가 만료되었습니다.", "password.reset.token.expired"),
 
     INVALID_HEAD_PROFESSOR(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "담당 교수는 해당 학과 소속 교수만 지정할 수 있습니다.", "dept.headProfessor.affiliationMismatch"),
     INVALID_PROFESSOR_ACCOUNT(HttpStatus.CONFLICT, "INVALID_PROFESSOR_ACCOUNT", "유효하지 않은 교수 아이디입니다.", "professor.id.invalid"),
@@ -180,6 +182,11 @@ public enum ErrorCode {
     SURVEY_NOT_TARGET(HttpStatus.FORBIDDEN, "SURVEY_NOT_TARGET", "해당 설문의 대상자가 아닙니다.", "survey.notTarget"),
     SURVEY_ALREADY_SUBMITTED(HttpStatus.CONFLICT, "SURVEY_ALREADY_SUBMITTED", "이미 응답을 제출한 설문입니다.", "survey.alreadySubmitted"),
     SURVEY_NOT_OPEN(HttpStatus.BAD_REQUEST, "SURVEY_NOT_OPEN", "현재 진행 중인 설문이 아닙니다.", "survey.notOpen"),
+    SURVEY_QUESTIONS_EMPTY(HttpStatus.BAD_REQUEST, "SURVEY_QUESTIONS_EMPTY", "질문을 하나 이상 추가해주세요.", "survey.questions.empty"),
+    SURVEY_TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_TITLE_REQUIRED", "설문 제목은 필수입니다.", "survey.title.required"),
+    SURVEY_OPTIONS_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_OPTIONS_REQUIRED", "선택지 옵션을 입력해주세요.", "survey.options.required"),
+    SURVEY_DATE_INVALID(HttpStatus.BAD_REQUEST, "SURVEY_DATE_INVALID", "종료일은 시작일보다 빨라야 합니다.", "survey.date.invalid"),
+    SURVEY_HAS_RESPONSES(HttpStatus.CONFLICT, "SURVEY_HAS_RESPONSES", "이미 응답이 존재하여 수정할 수 없습니다.", "survey.hasResponses"),
 
     // =========================
     // Domain: Log
@@ -193,7 +200,13 @@ public enum ErrorCode {
     // =========================
     // Global: File & S3
     // =========================
-    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_UPLOAD_ERROR", "파일 업로드 중 오류가 발생했습니다.", "error.fileUpload");
+
+     FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_UPLOAD_ERROR", "파일 업로드 중 오류가 발생했습니다.", "error.fileUpload");
+
+
+
+   
+
 
     private final HttpStatus httpStatus;
     private final String code;

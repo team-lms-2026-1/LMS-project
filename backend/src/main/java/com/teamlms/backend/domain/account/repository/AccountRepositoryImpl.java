@@ -4,6 +4,7 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.teamlms.backend.domain.account.api.dto.AdminAccountListItem;
 import com.teamlms.backend.domain.account.api.dto.AdminAdminAccountDetailResponse;
@@ -47,7 +48,7 @@ public class AccountRepositoryImpl implements AccountRepositoryCustom {
                                 "coalesce({0},{1},{2})",
                                 sp.name, pp.name, ap.name);
 
-                Expression<String> emailExpr = Expressions.stringTemplate(
+                StringExpression emailExpr = Expressions.stringTemplate(
                                 "coalesce({0},{1},{2})",
                                 sp.email, pp.email, ap.email);
 
@@ -232,6 +233,33 @@ public class AccountRepositoryImpl implements AccountRepositoryCustom {
                                 .from(a)
                                 .join(ap).on(ap.account.accountId.eq(a.accountId))
                                 .where(a.accountId.eq(accountId))
+                                .fetchOne();
+        }
+
+        // =========================
+        // 5) Account by email (coalesced)
+        // =========================
+        @Override
+        public Long findAccountIdByEmail(String email) {
+                if (email == null || email.isBlank())
+                        return null;
+
+                QAccount a = QAccount.account;
+                QStudentProfile sp = QStudentProfile.studentProfile;
+                QProfessorProfile pp = QProfessorProfile.professorProfile;
+                QAdminProfile ap = QAdminProfile.adminProfile;
+
+                StringExpression emailExpr = Expressions.stringTemplate(
+                                "coalesce({0},{1},{2})",
+                                sp.email, pp.email, ap.email);
+
+                return queryFactory
+                                .select(a.accountId)
+                                .from(a)
+                                .leftJoin(sp).on(sp.account.accountId.eq(a.accountId))
+                                .leftJoin(pp).on(pp.account.accountId.eq(a.accountId))
+                                .leftJoin(ap).on(ap.account.accountId.eq(a.accountId))
+                                .where(emailExpr.eq(email))
                                 .fetchOne();
         }
 

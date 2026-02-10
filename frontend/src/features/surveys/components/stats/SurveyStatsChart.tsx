@@ -11,7 +11,7 @@ import {
 import { Doughnut } from "react-chartjs-2";
 import { useMemo, useState } from "react";
 import styles from "./SurveyStatsChart.module.css";
-import { SurveyStatsResponse } from "../types";
+import { SurveyStatsDto } from "../../api/types";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -28,7 +28,7 @@ const COLORS = [
 ];
 
 interface Props {
-    stats: SurveyStatsResponse;
+    stats: SurveyStatsDto;
 }
 
 type ViewMode = "DEPT" | "GRADE";
