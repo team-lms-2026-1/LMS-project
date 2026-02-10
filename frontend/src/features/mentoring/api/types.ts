@@ -1,3 +1,20 @@
+export type ApiResponse<T, M = null> = {
+    data: T;
+    meta: M;
+};
+
+export type PageMeta = {
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+    sort: string[];
+};
+
+export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
+
 export type MentoringRole = "MENTOR" | "MENTEE";
 export type MentoringStatus = "APPLIED" | "APPROVED" | "REJECTED" | "MATCHED" | "CANCELED";
 export type RecruitmentStatus = "DRAFT" | "OPEN" | "CLOSED";
@@ -5,6 +22,7 @@ export type RecruitmentStatus = "DRAFT" | "OPEN" | "CLOSED";
 export interface MentoringRecruitment {
     recruitmentId: number;
     semesterId: number;
+    semesterName: string;
     title: string;
     description: string;
     recruitStartAt: string;
@@ -53,7 +71,7 @@ export interface MentoringMatchingRequest {
 
 export interface MentoringApplicationRequest {
     recruitmentId: number;
-    role: MentoringRole; // "MENTOR" or "MENTEE"
+    role: MentoringRole;
     reason?: string;
 }
 
@@ -76,3 +94,11 @@ export interface ChatMessageResponse {
     type: "QUESTION" | "ANSWER";
     createdAt: string;
 }
+
+/** Response Types */
+export type MentoringRecruitmentListResponse = ApiResponse<MentoringRecruitment[], PageMeta>;
+export type MentoringRecruitmentDetailResponse = ApiResponse<MentoringRecruitment, null>;
+export type MentoringApplicationListResponse = ApiResponse<MentoringApplication[], null>;
+export type MentoringMatchingListResponse = ApiResponse<MentoringMatchingResponse[], null>;
+export type ChatHistoryResponse = ApiResponse<ChatMessageResponse[], null>;
+export type MentoringCreateResponse = ApiResponse<number, null>;

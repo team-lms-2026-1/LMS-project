@@ -22,6 +22,8 @@ public class MentoringRecruitmentResponse {
     private String appliedRole;   // "MENTOR" or "MENTEE"
     private com.teamlms.backend.domain.mentoring.enums.MentoringApplicationStatus applyStatus;
 
+    private String semesterName; // 학기명 (예: 2025-1학기)
+
     public static MentoringRecruitmentResponse from(MentoringRecruitment entity) {
         return MentoringRecruitmentResponse.builder()
                 .recruitmentId(entity.getRecruitmentId())
