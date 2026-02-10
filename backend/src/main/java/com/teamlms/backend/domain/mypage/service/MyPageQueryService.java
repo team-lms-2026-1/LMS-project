@@ -20,6 +20,7 @@ import java.util.List;
 public class MyPageQueryService {
 
     private final StudentMypageSummaryRepository studentMypageSummaryRepository;
+    private final com.teamlms.backend.global.s3.S3Service s3Service;
     private final MyPageTimetableRepository myPageTimetableRepository;
 
     /**
@@ -39,6 +40,21 @@ public class MyPageQueryService {
         return toResponse(summary, timetable);
     }
 
+    /**
+     * 관리자: 학생 프로필 이미지 URL 조회 (Presigned)
+     */
+    public String getStudentProfileImageUrl(Long accountId) {
+        StudentMypageSummary summary = studentMypageSummaryRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+
+        String key = extractKeyFromUrl(entityToUrl(summary));
+        return (key != null) ? s3Service.createPresignedGetUrl(key) : summary.getProfileImageUrl();
+    }
+
+    private String entityToUrl(StudentMypageSummary summary) {
+        return summary.getProfileImageUrl();
+    }
+
     private List<TimetableInfo> getTimetable(Long accountId, StudentMypageSummary summary, Integer year, String term) {
         if (year != null && term != null) {
             try {
@@ -55,6 +71,9 @@ public class MyPageQueryService {
     }
 
     private StudentMypageResponse toResponse(StudentMypageSummary entity, List<TimetableInfo> timetable) {
+        String key = extractKeyFromUrl(entity.getProfileImageUrl());
+        String presignedUrl = (key != null) ? s3Service.createPresignedGetUrl(key) : entity.getProfileImageUrl();
+
         return StudentMypageResponse.builder()
                 .accountId(entity.getAccountId())
                 .studentNo(entity.getStudentNo())
@@ -62,12 +81,24 @@ public class MyPageQueryService {
                 .deptName(entity.getDeptName())
                 .gradeLevel(entity.getGradeLevel())
                 .academicStatus(entity.getAcademicStatus())
-                .profileImageUrl(entity.getProfileImageUrl())
+                .profileImageUrl(presignedUrl)
+                .profileImageKey(key)
                 .totalCredits(entity.getTotalCredits())
                 .averageScore(entity.getAverageScore())
                 .totalExtraPoints(entity.getTotalExtraPoints())
                 .totalExtraHours(entity.getTotalExtraHours())
                 .currentTimetable(timetable)
                 .build();
+    }
+
+    private String extractKeyFromUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return null;
+        }
+        int index = url.indexOf("profiles/");
+        if (index != -1) {
+            return url.substring(index);
+        }
+        return null;
     }
 }

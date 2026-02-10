@@ -27,6 +27,20 @@ spring:
     baseline-on-migrate: true
     out-of-order: true # 마이그레이션 순서 유연하게 허용
 
+  # Mail (common defaults)
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASS:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:false}
+          starttls:
+            enable: ${SMTP_STARTTLS:false}
+            required: ${SMTP_STARTTLS_REQUIRED:false}
+
   # ★★★ [이동됨] AWS S3 설정 (모든 환경에서 사용) ★★★
   cloud:
     aws:
@@ -95,3 +109,8 @@ app:
     presign:
       put-expires-seconds: 300
       key-prefix: lms/extra-session-videos
+  password-reset:
+    link-template: ${PASSWORD_RESET_LINK_TEMPLATE:http://localhost:3000/password-reset?token=%s}
+    mail-subject: ${PASSWORD_RESET_MAIL_SUBJECT:Password Reset}
+    mail-from: ${PASSWORD_RESET_MAIL_FROM:no-reply@teamlms.local}
+    token-ttl-seconds: ${PASSWORD_RESET_TOKEN_TTL_SECONDS:1800}

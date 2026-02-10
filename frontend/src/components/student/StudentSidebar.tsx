@@ -20,11 +20,6 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "mypage",
-    title: "마이페이지",
-    items: [{ label: "마이 캘린더", href: "/student/mypage/calendar" }],
-  },
-  {
     key: "course",
     title: "교과",
     items: [
@@ -39,8 +34,9 @@ const SECTIONS: NavSection[] = [
     title: "비교과",
     items: [
       { label: "비교과 프로그램 신청", href: "/student/extra-curricular/offerings" },
-      { label: "비교과 목록 조회", href: "/student/extra" },
-      { label: "비교과 수료 항목", href: "/student/extra/completions" },
+      { label: "비교과 프로그램 신청현황", href: "/student/extra-curricular/enrollments" },
+      { label: "이수중 비교과", href: "/student/extra-curricular/current-enrollments" },
+      { label: "비교과 성적", href: "/student/extra-curricular/grade-reports" },
     ],
   },
   {
@@ -105,7 +101,16 @@ export default function StudentSidebar() {
 
   return (
     <div className={styles.sidebarInner}>
-      <div className={styles.sidebarTitle}>상세 메뉴</div>
+      <div className={styles.sidebarHeader}>
+        <div className={styles.sidebarTitle}>상세 메뉴</div>
+        <Link href="/student/main" className={styles.headerLogoLink}>
+          <img
+            src="/logo.png"
+            alt="메인 페이지로 이동"
+            className={styles.headerLogoImage}
+          />
+        </Link>
+      </div>
 
       <div className={styles.sectionList}>
         {SECTIONS.map((section) => {

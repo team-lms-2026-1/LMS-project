@@ -1,0 +1,42 @@
+.container {
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    color: #111827;
+}
+
+.periodCell {
+    color: #374151;
+    font-weight: 600;
+    text-align: center;
+}
+
+.cellContent {
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-height: 50px;
+    justify-content: center;
+}
+
+.subject {
+    font-weight: 700;
+    color: #111827;
+}
+
+.room {
+    color: #6b7280;
+}
+
+.prof {
+    color: #9ca3af;
+    font-size: 0.7rem;
+}

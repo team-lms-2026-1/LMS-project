@@ -110,12 +110,12 @@ function normalizeListResponse(raw: any): AccountsListResponseDto {
     Number(meta?.totalElements ?? meta?.total ?? undefined) ||
     Number(
       raw?.total ??
-        raw?.totalElements ??
-        raw?.count ??
-        raw?.data?.total ??
-        raw?.data?.totalElements ??
-        raw?.data?.count ??
-        undefined
+      raw?.totalElements ??
+      raw?.count ??
+      raw?.data?.total ??
+      raw?.data?.totalElements ??
+      raw?.data?.count ??
+      undefined
     ) ||
     items.length;
 
@@ -269,5 +269,47 @@ export const accountsApi = {
       majorName: String(m.name ?? m.majorName ?? m.label ?? ""),
       deptId: m.deptId ?? m.departmentId ?? undefined,
     }));
+  },
+
+  /** ✅ 학생 프로필 이미지 업로드 */
+  async uploadStudentProfileImage(accountId: number, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) throw new Error("프로필 이미지 업로드 실패");
+    const json = await res.json();
+    return json.data; // imageUrl
+  },
+
+  async updateStudentProfileImage(accountId: number, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`, {
+      method: "PATCH",
+      body: formData,
+    });
+    if (!res.ok) throw new Error("프로필 이미지 수정 실패");
+    const json = await res.json();
+    return json.data; // imageUrl
+  },
+
+  async getStudentProfileImage(accountId: number): Promise<string> {
+    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`);
+    if (!res.ok) throw new Error("프로필 이미지 조회 실패");
+    const json = await res.json();
+    return json.data; // presignedImageUrl
+  },
+
+  /** ✅ 학생 프로필 이미지 삭제 */
+  async deleteStudentProfileImage(accountId: number): Promise<void> {
+    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("프로필 이미지 삭제 실패");
   },
 };

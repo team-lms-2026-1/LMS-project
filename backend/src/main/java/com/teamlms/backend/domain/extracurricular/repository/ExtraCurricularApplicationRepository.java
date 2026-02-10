@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularApplication;
 import com.teamlms.backend.domain.extracurricular.enums.CompletionStatus;
 import com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus;
+import com.teamlms.backend.domain.extracurricular.api.dto.StudentExtraEnrollmentListItem;
 
 public interface ExtraCurricularApplicationRepository
         extends JpaRepository<ExtraCurricularApplication, Long> {
@@ -78,4 +79,86 @@ public interface ExtraCurricularApplicationRepository
         and a.applyStatus = com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus.APPLIED
     """)
     Optional<Long> findAppliedApplicationId(Long extraOfferingId, Long studentAccountId);
+
+    @Query(
+        value = """
+            select new com.teamlms.backend.domain.extracurricular.api.dto.StudentExtraEnrollmentListItem(
+                o.extraOfferingId,
+                o.extraOfferingCode,
+                o.extraOfferingName,
+                o.hostContactName,
+                s.displayName,
+                o.rewardPointDefault,
+                o.recognizedHoursDefault,
+                o.status
+            )
+            from ExtraCurricularApplication a
+            join ExtraCurricularOffering o
+                on o.extraOfferingId = a.extraOfferingId
+            join Semester s
+                on s.semesterId = o.semesterId
+            where a.studentAccountId = :studentAccountId
+              and a.applyStatus = com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus.APPLIED
+              and o.status in (
+                com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus.OPEN,
+                com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus.ENROLLMENT_CLOSED
+              )
+        """,
+        countQuery = """
+            select count(a.applicationId)
+            from ExtraCurricularApplication a
+            join ExtraCurricularOffering o
+                on o.extraOfferingId = a.extraOfferingId
+            join Semester s
+                on s.semesterId = o.semesterId
+            where a.studentAccountId = :studentAccountId
+              and a.applyStatus = com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus.APPLIED
+              and o.status in (
+                com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus.OPEN,
+                com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus.ENROLLMENT_CLOSED
+              )
+        """
+    )
+    org.springframework.data.domain.Page<StudentExtraEnrollmentListItem> findStudentEnrollments(
+        @Param("studentAccountId") Long studentAccountId,
+        org.springframework.data.domain.Pageable pageable
+    );
+
+    @Query(
+        value = """
+            select new com.teamlms.backend.domain.extracurricular.api.dto.StudentExtraEnrollmentListItem(
+                o.extraOfferingId,
+                o.extraOfferingCode,
+                o.extraOfferingName,
+                o.hostContactName,
+                s.displayName,
+                o.rewardPointDefault,
+                o.recognizedHoursDefault,
+                o.status
+            )
+            from ExtraCurricularApplication a
+            join ExtraCurricularOffering o
+                on o.extraOfferingId = a.extraOfferingId
+            join Semester s
+                on s.semesterId = o.semesterId
+            where a.studentAccountId = :studentAccountId
+              and a.applyStatus = com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus.APPLIED
+              and o.status = com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus.IN_PROGRESS
+        """,
+        countQuery = """
+            select count(a.applicationId)
+            from ExtraCurricularApplication a
+            join ExtraCurricularOffering o
+                on o.extraOfferingId = a.extraOfferingId
+            join Semester s
+                on s.semesterId = o.semesterId
+            where a.studentAccountId = :studentAccountId
+              and a.applyStatus = com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus.APPLIED
+              and o.status = com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus.IN_PROGRESS
+        """
+    )
+    org.springframework.data.domain.Page<StudentExtraEnrollmentListItem> findStudentCurrentEnrollments(
+        @Param("studentAccountId") Long studentAccountId,
+        org.springframework.data.domain.Pageable pageable
+    );
 }

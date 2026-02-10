@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ExtraSessionDetailDto, ExtraSessionListItemDto, ExtraCurricularOfferingCompetencyDto, ExtraCurricularOfferingDetailDto, ExtraCurricularOfferingListItemDto, PageMeta } from "../api/types";
-import { fetchExtraSessionDetail, fetchExtraSessionList, fetchExtraCurricularDetail, fetchExtraCurricularOfferingCompetency, fetchExtraCurricularOfferingList } from "../api/extraCurricularOfferingApi";
+import { ExtraOfferingApplicantRowDto, ExtraSessionDetailDto, ExtraSessionListItemDto, ExtraCurricularOfferingCompetencyDto, ExtraCurricularOfferingDetailDto, ExtraCurricularOfferingListItemDto, PageMeta } from "../api/types";
+import { fetchExtraOfferingApplicantList, fetchExtraSessionDetail, fetchExtraSessionList, fetchExtraCurricularDetail, fetchExtraCurricularOfferingCompetency, fetchExtraCurricularOfferingList } from "../api/extraCurricularOfferingApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -226,6 +226,75 @@ export function useExtraSessionList(offeringId?: number, enabled: boolean = true
       goPage: (p: number) => setPage(p),
 
       // ✅ PaginationBar size 변경용
+      setSize: (s: number) => {
+        setPage(1);
+        setSize(s);
+      },
+      reload: load,
+    },
+  };
+}
+
+// applicant list
+export function useExtraOfferingApplicantList(offeringId?: number, enabled: boolean = true) {
+  const [items, setItems] = useState<ExtraOfferingApplicantRowDto[]>([]);
+  const [meta, setMeta] = useState<PageMeta>(defaultMeta);
+
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(20);
+  const [keyword, setKeyword] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    if (!enabled) return;
+    if (!offeringId) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await fetchExtraOfferingApplicantList(offeringId, {
+        page,
+        size,
+        keyword: keyword || undefined,
+      });
+
+      setItems(res.data);
+      setMeta(res.meta);
+    } catch (e: any) {
+      console.error("[useExtraOfferingApplicantList]", e);
+      setError(e?.message ?? "신청자 목록 조회 실패");
+      setItems([]);
+      setMeta(defaultMeta);
+    } finally {
+      setLoading(false);
+    }
+  }, [enabled, offeringId, page, size, keyword]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [offeringId]);
+
+  return {
+    state: {
+      items,
+      meta,
+      page,
+      size,
+      keyword,
+      loading,
+      error,
+    },
+    actions: {
+      setKeyword,
+      search: () => setPage(1),
+      goPage: (p: number) => setPage(p),
       setSize: (s: number) => {
         setPage(1);
         setSize(s);

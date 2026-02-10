@@ -1,0 +1,115 @@
+.section {
+  border: 1px solid #e4e7ec;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(16, 24, 40, 0.06);
+  overflow: hidden;
+}
+
+/* ===== Header ===== */
+.sectionHeader {
+  padding: 14px 16px;
+  background: #fbfcfe;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* ✅ 오른쪽 끝 */
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 1000;
+  color: #101828;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.studentNo {
+  font-size: 18px;
+  font-weight: 800;
+  color: #667085;
+}
+
+.headerMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #475467;
+  white-space: nowrap;
+}
+
+.metaItem {
+  white-space: nowrap;
+}
+
+.dot {
+  color: #98a2b3;
+}
+
+/* ===== Body ===== */
+.body {
+  padding: 16px;
+}
+
+/* ===== Metrics ===== */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.metric {
+  border: 1px solid #eef2f6;
+  border-radius: 14px;
+  padding: 14px 12px;
+  background: #fafbfc;
+
+  /* ✅ 전부 가운데 정렬 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.metricLabel {
+  font-size: 14px;
+  font-weight: 900;
+  color: #667085;
+}
+
+.metricValue {
+  font-size: 22px;
+  font-weight: 1000;
+  color: #101828;
+  line-height: 1.1;
+}
+
+.metricSuffix {
+  font-size: 14px;
+  font-weight: 800;
+  color: #667085;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .headerRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerMeta {
+    align-self: flex-end; /* ✅ 좁아지면 아래줄 오른쪽 끝 유지 */
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import styles from "./ProfessorMentoring.module.css";
-import { MentoringRecruitment } from "@/features/mentoring/types";
-import { applyMentoringAsMentor } from "@/features/mentoring/lib/professorApi";
+import { MentoringRecruitment } from "@/features/mentoring/api/types";
+import { applyMentoring } from "@/features/mentoring/api/mentoringApi";
 
 interface MentorApplyModalProps {
     recruitment: MentoringRecruitment;
@@ -35,7 +35,7 @@ export function MentorApplyModal({ recruitment, onClose, onSuccess }: MentorAppl
         setShowConfirm(false);
         try {
             setSubmitting(true);
-            await applyMentoringAsMentor({
+            await applyMentoring({
                 recruitmentId: recruitment.recruitmentId,
                 role: "MENTOR"
             });

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { FaqListItemDto, PageMeta } from "../api/types";
-import { fetchFaqsList } from "../api/FaqsApi";
+import { fetchFaqsList } from "../api/faqsApi";
 
 
 const defaultMeta: PageMeta = {
@@ -58,7 +58,7 @@ export function useFaqsList() {
       items,
       meta,   // ✅ 항상 PageMeta
       page,
-      size, 
+      size,
       keyword,
       loading,
       error,

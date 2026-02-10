@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SpacesModal.module.css";
 import { Button } from "@/components/button";
-import { roomsApi } from "../../api/SpacesApi";
+import { roomsApi } from "../../api/spacesApi";
 import type { RoomDto } from "../../api/types";
 import toast from "react-hot-toast";
 import ReserveConfirmModal from "./ReserveConfirmModal.client";
@@ -222,7 +222,11 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
       setSubmittingRoomId(room.roomId);
 
       await roomsApi.reserve(spaceId, {
+<<<<<<< HEAD
         roomId: room.roomId,
+=======
+        roomId,
+>>>>>>> 2977ad0bbeda7226bde4ccd2932d0998527021c0
         rentalDate,
         startTime,
         endTime,

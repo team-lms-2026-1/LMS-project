@@ -1,0 +1,152 @@
+.questionCard {
+    position: relative;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background-color: #fff;
+}
+
+.questionHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.questionNum {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    width: 24px;
+}
+
+.inputQuestion {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #111827;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.inputQuestion:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.typeSelect {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #111827;
+    background: #fff;
+    outline: none;
+}
+
+.questionBody {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.labelRow {
+    display: flex;
+    gap: 12px;
+}
+
+.inputSmall {
+    flex: 1;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+}
+
+.scalePreview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.scaleLabel {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.scaleGrid {
+    display: flex;
+    gap: 8px;
+}
+
+.scaleBox {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #475569;
+}
+
+.scaleBoxActive {
+    background-color: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.optionList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.optionItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.optionInput {
+    flex: 1;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 13px;
+    outline: none;
+}
+
+.removeOption {
+    padding: 4px 8px;
+    color: #ef4444;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.essayPreview {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 14px;
+    resize: none;
+}

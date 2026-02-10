@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import styles from "../styles/studentMentoring.module.css";
-import { MentoringRecruitment } from "@/features/mentoring/types";
-import { applyMentoringStudent } from "@/features/mentoring/lib/studentApi";
+import { MentoringRecruitment } from "@/features/mentoring/api/types";
+import { applyMentoring } from "@/features/mentoring/api/mentoringApi";
 import { getJson } from "@/lib/http";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
@@ -55,7 +55,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            await applyMentoringStudent({
+            await applyMentoring({
                 recruitmentId: recruitment.recruitmentId,
                 role: "MENTEE",
                 // If the backend expects these profile fields in the application request, include them. 
@@ -101,7 +101,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                             className={styles.input}
                             name="name"
                             value={formData.name}
-                            onChange={handleChange}
+                            readOnly
                             placeholder="이름"
                         />
                     </div>
@@ -118,7 +118,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                     className={styles.input}
                     name="deptName"
                     value={formData.deptName}
-                    onChange={handleChange}
+                    readOnly
                     placeholder="학과"
                 />
             </div>
@@ -131,7 +131,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                             className={styles.input}
                             name="gradeLevel"
                             value={formData.gradeLevel}
-                            onChange={handleChange}
+                            readOnly
                             placeholder="학년"
                         />
                     </div>
@@ -141,7 +141,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                             className={styles.input}
                             name="studentNo"
                             value={formData.studentNo}
-                            onChange={handleChange}
+                            readOnly
                             placeholder="학번"
                         />
                     </div>
@@ -157,7 +157,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                             name="email"
                             type="email"
                             value={formData.email}
-                            onChange={handleChange}
+                            readOnly
                             placeholder="email@example.com"
                         />
                     </div>
@@ -168,7 +168,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
                             name="phone"
                             type="tel"
                             value={formData.phone}
-                            onChange={handleChange}
+                            readOnly
                             placeholder="010-0000-0000"
                         />
                     </div>

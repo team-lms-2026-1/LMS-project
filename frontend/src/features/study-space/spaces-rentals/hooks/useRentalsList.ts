@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { rentalsApi } from "../api/RentalsApi";
+import { rentalsApi } from "../api/rentalsApi";
 import type { RentalDto, RentalListParams, PageMeta } from "../api/types";
 import toast from "react-hot-toast";
 
@@ -77,14 +77,14 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
 
   const rejectRental = async (id: number, reason: string) => {
     try {
-        await rentalsApi.reject(id, reason);
-        toast.success("반려되었습니다.");
-        fetchList();
+      await rentalsApi.reject(id, reason);
+      toast.success("반려되었습니다.");
+      fetchList();
     } catch (e: any) {
-        console.error(e);
-        toast.error("처리 중 오류가 발생했습니다.");
+      console.error(e);
+      toast.error("처리 중 오류가 발생했습니다.");
     }
-    };
+  };
 
   return {
     data,

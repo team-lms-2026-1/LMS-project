@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import styles from "./ResourceDetailPage.module.css";
 import type { ResourceListItemDto, LoadState } from "../../api/types";
-import { fetchResourceDetail } from "../../api/ResourcesApi";
+import { fetchResourceDetail } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
 import DeleteModal from "../modal/DeleteModal.client";

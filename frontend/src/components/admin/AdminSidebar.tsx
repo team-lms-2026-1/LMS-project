@@ -126,7 +126,16 @@ export default function AdminSidebar() {
 
   return (
     <div className={styles.sidebarInner}>
-      <div className={styles.sidebarTitle}>상세 메뉴</div>
+      <div className={styles.sidebarHeader}>
+        <div className={styles.sidebarTitle}>상세 메뉴</div>
+        <Link href="/admin" className={styles.headerLogoLink}>
+          <img
+            src="/logo.png"
+            alt="관리자 메인으로 이동"
+            className={styles.headerLogoImage}
+          />
+        </Link>
+      </div>
 
       <div className={styles.sectionList}>
         {SECTIONS.map((section) => {

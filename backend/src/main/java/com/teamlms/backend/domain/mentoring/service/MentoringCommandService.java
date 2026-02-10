@@ -35,13 +35,24 @@ public class MentoringCommandService {
     private final MentoringApplicationRepository applicationRepository;
 
     public Long createRecruitment(Long adminId, MentoringRecruitmentCreateRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        MentoringRecruitmentStatus status;
+
+        if (now.isBefore(request.getRecruitStartAt())) {
+            status = MentoringRecruitmentStatus.DRAFT;
+        } else if (now.isAfter(request.getRecruitEndAt())) {
+            status = MentoringRecruitmentStatus.CLOSED;
+        } else {
+            status = MentoringRecruitmentStatus.OPEN;
+        }
+
         MentoringRecruitment recruitment = MentoringRecruitment.builder()
                 .semesterId(request.getSemesterId())
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .recruitStartAt(request.getRecruitStartAt())
                 .recruitEndAt(request.getRecruitEndAt())
-                .status(MentoringRecruitmentStatus.DRAFT) // Default to DRAFT
+                .status(status)
                 .build();
 
         return recruitmentRepository.save(recruitment).getRecruitmentId();
@@ -52,13 +63,24 @@ public class MentoringCommandService {
         MentoringRecruitment recruitment = recruitmentRepository.findById(recruitmentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
 
+        LocalDateTime now = LocalDateTime.now();
+        MentoringRecruitmentStatus status;
+
+        if (now.isBefore(request.getRecruitStartAt())) {
+            status = MentoringRecruitmentStatus.DRAFT;
+        } else if (now.isAfter(request.getRecruitEndAt())) {
+            status = MentoringRecruitmentStatus.CLOSED;
+        } else {
+            status = MentoringRecruitmentStatus.OPEN;
+        }
+
         recruitment.update(
                 request.getSemesterId(),
                 request.getTitle(),
                 request.getDescription(),
                 request.getRecruitStartAt(),
                 request.getRecruitEndAt(),
-                request.getStatus());
+                status);
     }
 
     public void deleteRecruitment(Long adminId, Long recruitmentId) {
@@ -169,7 +191,7 @@ public class MentoringCommandService {
         MentoringApplicationStatus newStatus = request.getStatus();
         if (newStatus == MentoringApplicationStatus.REJECTED
                 && (request.getRejectReason() == null || request.getRejectReason().isBlank())) {
-            throw new IllegalArgumentException("Reject reason is required for rejection.");
+            throw new BusinessException(ErrorCode.MENTORING_REJECT_REASON_REQUIRED);
         }
 
         application.updateStatus(newStatus, request.getRejectReason(), adminId);
@@ -191,9 +213,7 @@ public class MentoringCommandService {
 
         MentoringQuestion question = MentoringQuestion.builder()
                 .matchingId(request.getMatchingId())
-                .writerId(writerId)
                 .content(request.getContent())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         questionRepository.save(question);
@@ -216,9 +236,7 @@ public class MentoringCommandService {
 
         MentoringAnswer answer = MentoringAnswer.builder()
                 .questionId(request.getQuestionId())
-                .writerId(writerId)
                 .content(request.getContent())
-                .createdAt(LocalDateTime.now())
                 .build();
 
         answerRepository.save(answer);

@@ -14,6 +14,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # 환경 변수 설정 (빌드 시점에 필요하다면 추가)
 ENV NEXT_TELEMETRY_DISABLED 1
+# Node.js 메모리 제한을 4GB로 늘려서 빌드 시 메모리 부족 방지
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # 4. 실행 단계 (실제 서버)

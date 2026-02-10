@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import styles from "./QnaDetailPage.module.css";
 import type { QnaListItemDto } from "../../api/types";
-import { fetchQnaDetail, deleteQnaQuestion } from "../../api/QnasApi";
+import { fetchQnaDetail, deleteQnaQuestion } from "../../api/qnasApi";
 import { Button } from "@/components/button";
 import { useAuth } from "@/features/auth/AuthProvider";
 import toast from "react-hot-toast";

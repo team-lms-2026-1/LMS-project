@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.competency.api;
 
 import java.util.List;
+// import java.util.ArrayList;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,14 +10,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain;
-import com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType;
+// import com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain;
+// import com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType;
 import com.teamlms.backend.domain.competency.api.dto.*;
 import com.teamlms.backend.domain.competency.service.DiagnosisCommandService;
-import com.teamlms.backend.domain.competency.service.DiagnosisCommandService.QuestionCreateData;
-import com.teamlms.backend.domain.competency.service.DiagnosisCommandService.QuestionUpdateData;
+// import com.teamlms.backend.domain.competency.service.DiagnosisCommandService.QuestionCreateData;
+// import com.teamlms.backend.domain.competency.service.DiagnosisCommandService.QuestionUpdateData;
 import com.teamlms.backend.domain.competency.service.DiagnosisQueryService;
-import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
+// import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
 
@@ -64,24 +65,7 @@ public class AdminDiagnosisController {
         @PostMapping("/api/v1/admin/diagnoses")
         @PreAuthorize("hasAuthority('DIAGNOSIS_MANAGE')")
         public ApiResponse<DiagnosisCreateResponse> createDiagnosis(@Valid @RequestBody DiagnosisCreateRequest req) {
-                List<QuestionCreateData> questions = req.getQuestions().stream()
-                                .map(q -> QuestionCreateData.builder()
-                                                .domain(DiagnosisQuestionDomain.SKILL) // Default
-                                                .questionType(DiagnosisQuestionType.valueOf(q.getType()))
-                                                .text(q.getText())
-                                                .order(q.getOrder())
-                                                .weights(q.getWeights())
-                                                .build())
-                                .collect(java.util.stream.Collectors.toList());
-
-                Long runId = diagnosisCommandService.createDiagnosis(
-                                req.getTitle(),
-                                req.getSemesterId(),
-                                req.getTargetGrade(),
-                                req.getDeptId(),
-                                req.getStartedAt(),
-                                req.getEndedAt(),
-                                questions);
+                Long runId = diagnosisCommandService.createDiagnosis(req);
 
                 return ApiResponse.ok(DiagnosisCreateResponse.builder()
                                 .diagnosisId(runId)
@@ -99,30 +83,7 @@ public class AdminDiagnosisController {
                         @PathVariable Long diagnosisId,
                         @RequestBody DiagnosisPatchRequest req) {
 
-                DiagnosisRunStatus status = req.getStatus() != null ? DiagnosisRunStatus.valueOf(req.getStatus())
-                                : null;
-
-                List<QuestionUpdateData> questions = null;
-                if (req.getQuestions() != null) {
-                        questions = req.getQuestions().stream()
-                                        .map(q -> QuestionUpdateData.builder()
-                                                        .domain(DiagnosisQuestionDomain.SKILL) // Default
-                                                        .questionType(q.getType() != null
-                                                                        ? DiagnosisQuestionType.valueOf(q.getType())
-                                                                        : null)
-                                                        .text(q.getText())
-                                                        .order(q.getOrder())
-                                                        .weights(q.getWeights())
-                                                        .build())
-                                        .collect(java.util.stream.Collectors.toList());
-                }
-
-                diagnosisCommandService.updateDiagnosis(
-                                diagnosisId,
-                                req.getTitle(),
-                                req.getEndedAt(),
-                                status,
-                                questions);
+                diagnosisCommandService.updateDiagnosis(diagnosisId, req);
 
                 return ApiResponse.ok(DiagnosisPatchResponse.builder()
                                 .diagnosisId(diagnosisId)
@@ -151,7 +112,8 @@ public class AdminDiagnosisController {
                         "/api/v1/student/diagnoses/{diagnosisId}/report",
                         "/api/v1/professor/diagnoses/{diagnosisId}/report" })
         @PreAuthorize("hasAuthority('DIAGNOSIS_READ')")
-        public ApiResponse<DiagnosisReportResponse> getReport(@PathVariable Long diagnosisId) {
+        public ApiResponse<DiagnosisReportResponse> getReport(
+                        @PathVariable Long diagnosisId) {
                 return ApiResponse.ok(diagnosisQueryService.getDiagnosisReport(diagnosisId));
         }
 

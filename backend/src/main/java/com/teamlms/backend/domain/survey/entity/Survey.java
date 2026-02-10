@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.survey.entity;
 
 import com.teamlms.backend.domain.survey.enums.SurveyStatus;
+import com.teamlms.backend.domain.survey.enums.SurveyTargetGenType;
 import com.teamlms.backend.domain.survey.enums.SurveyType;
 import com.teamlms.backend.global.audit.BaseEntity;
 import jakarta.persistence.*;
@@ -22,13 +23,13 @@ public class Survey extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "survey_id")
-    private Long id;
+    private Long surveyId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "survey_type", nullable = false)
     private SurveyType type;
 
-    @Column(nullable = false)
+    @Column(length = 100, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -44,9 +45,10 @@ public class Survey extends BaseEntity {
     @Column(nullable = false)
     private SurveyStatus status;
 
-    // 대상자 생성 방식 메타데이터 (ALL, DEPT, USER 등)
-    @Column(name = "target_gen_type", nullable = false)
-    private String targetGenType;
+    // 대상자 생성 방식 메타데이터
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_gen_type", length = 20, nullable = false)
+    private SurveyTargetGenType targetGenType;
 
     @Column(name = "view_count", nullable = false)
     @Builder.Default
@@ -61,11 +63,21 @@ public class Survey extends BaseEntity {
         this.status = SurveyStatus.CLOSED;
     }
 
-    public void update(String title, String description, LocalDateTime startAt, LocalDateTime endAt) {
+    public void patch(String title, String description, LocalDateTime startAt, LocalDateTime endAt, SurveyStatus status, SurveyType type) {
+        if (title != null) this.title = title;
+        if (description != null) this.description = description;
+        if (startAt != null) this.startAt = startAt;
+        if (endAt != null) this.endAt = endAt;
+        if (status != null) this.status = status;
+        if (type != null) this.type = type;
+    }
+
+    public void update(String title, String description, LocalDateTime startAt, LocalDateTime endAt, SurveyType type) {
         this.title = title;
         this.description = description;
         this.startAt = startAt;
         this.endAt = endAt;
+        if (type != null) this.type = type;
     }
 
     public void increaseViewCount() {

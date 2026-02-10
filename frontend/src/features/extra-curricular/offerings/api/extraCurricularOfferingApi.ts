@@ -1,5 +1,25 @@
 import { getJson } from "@/lib/http";
-import { ExtraSessionUpdateRequest, ExtraSessionDetailResponse, ExtraSessionListResponse, ExtraCurricularOfferingCompetencyMappingBulkUpdateRequest, ExtraCurricularOfferingCompetencyResponse, ExtraCurricularOfferingCreateRequest, ExtraCurricularOfferingDetailResponse, ExtraCurricularOfferingDetailUpdateRequest, ExtraCurricularOfferingListResponsee, ExtraCurricularOfferingStatusUpdateRequest, ExtraCurricularSessionCreateRequest, ExtraSessionVideoPresignRequest, ExtraSessionVideoPresignResponse, SuccessResponse, ExtraSessionStatusChangeRequest } from "./types";
+import {
+  ExtraSessionUpdateRequest,
+  ExtraSessionDetailResponse,
+  ExtraSessionListResponse,
+  ExtraCurricularOfferingCompetencyMappingBulkUpdateRequest,
+  ExtraCurricularOfferingCompetencyResponse,
+  ExtraCurricularOfferingCreateRequest,
+  ExtraCurricularOfferingDetailResponse,
+  ExtraCurricularOfferingDetailUpdateRequest,
+  ExtraCurricularOfferingListResponsee,
+  ExtraCurricularOfferingStatusUpdateRequest,
+  ExtraCurricularSessionCreateRequest,
+  ExtraSessionVideoPresignRequest,
+  ExtraSessionVideoPresignResponse,
+  SuccessResponse,
+  ExtraSessionStatusChangeRequest,
+  ExtraOfferingApplicantListResponse,
+  ExtraCurricularGradeListResponse,
+  ExtraGradeDetailHeaderResponse,
+  ExtraCompletionListResponse,
+} from "./types";
 import { ExtraCurricularOfferingUserListResponse } from "@/features/student/extra-curricular/offerings/api/types";
 
 export type ExtraCurricularOfferingListQuery = {
@@ -122,6 +142,87 @@ export async function fetchExtraSessionList(id: number, query: ExtraSessionListQ
   const url = qs ? `/api/admin/extra-curricular/offerings/${id}/sessions?${qs}` : `/api/admin/extra-curricular/offerings/${id}/sessions`;
 
   return getJson<ExtraSessionListResponse>(url);
+}
+
+// applicant list
+export type ExtraOfferingApplicantListQuery = {
+  page?: number;
+  size?: number;
+  keyword?: string;
+};
+
+export async function fetchExtraOfferingApplicantList(
+  offeringId: number,
+  query: ExtraOfferingApplicantListQuery
+) {
+  const sp = new URLSearchParams();
+  if (query.page) sp.set("page", String(query.page));
+  if (query.size) sp.set("size", String(query.size));
+  if (query.keyword) sp.set("keyword", query.keyword);
+
+  const qs = sp.toString();
+  const url = qs
+    ? `/api/admin/extra-curricular/offerings/${offeringId}/applications?${qs}`
+    : `/api/admin/extra-curricular/offerings/${offeringId}/applications`;
+
+  return getJson<ExtraOfferingApplicantListResponse>(url);
+}
+
+// grade (admin)
+export type ExtraGradeListQuery = {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  deptId?: number;
+};
+
+export async function fetchExtraCurricularGradeList(query: ExtraGradeListQuery) {
+  const sp = new URLSearchParams();
+  if (query.page) sp.set("page", String(query.page));
+  if (query.size) sp.set("size", String(query.size));
+  if (query.keyword) sp.set("keyword", query.keyword);
+  if (query.deptId != null) {
+    sp.set("deptId", String(query.deptId));
+  }
+
+  const qs = sp.toString();
+  const url = qs
+    ? `/api/admin/extra-curricular/grade-reports?${qs}`
+    : `/api/admin/extra-curricular/grade-reports`;
+
+  return getJson<ExtraCurricularGradeListResponse>(url);
+}
+
+export async function fetchExtraCurricularGradeDetailHeader(studentAccountId: number) {
+  const url = `/api/admin/extra-curricular/grade-reports/${studentAccountId}`;
+  return getJson<ExtraGradeDetailHeaderResponse>(url, { cache: "no-store" });
+}
+
+export type ExtraGradeDetailListQuery = {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  semesterId?: number;
+};
+
+export async function fetchExtraCurricularGradeDetailList(
+  query: ExtraGradeDetailListQuery,
+  studentAccountId: number
+) {
+  const sp = new URLSearchParams();
+  if (query.page) sp.set("page", String(query.page));
+  if (query.size) sp.set("size", String(query.size));
+  if (query.keyword) sp.set("keyword", query.keyword);
+  if (query.semesterId != null) {
+    sp.set("semesterId", String(query.semesterId));
+  }
+
+  const qs = sp.toString();
+  const url = qs
+    ? `/api/admin/extra-curricular/grade-reports/${studentAccountId}/list?${qs}`
+    : `/api/admin/extra-curricular/grade-reports/${studentAccountId}/list`;
+
+  return getJson<ExtraCompletionListResponse>(url);
 }
 
 // session create

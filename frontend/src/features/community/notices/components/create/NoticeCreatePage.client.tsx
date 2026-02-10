@@ -358,7 +358,7 @@ export default function NoticeCreatePageClient() {
                       key={t}
                       type="button"
                       className={styles.toolBtn}
-                      onClick={() => {}}
+                      onClick={() => { }}
                       disabled={saving}
                       aria-label={t}
                       title={t}

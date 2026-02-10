@@ -13,16 +13,17 @@ import java.util.List;
  */
 @Builder
 public record StudentMypageInternalDto(
-        Long accountId,
-        String studentNo,
-        String studentName,
-        String deptName,
-        Integer gradeLevel,
-        AcademicStatus academicStatus,
-        String profileImageUrl,
-        Long totalCredits,
-        BigDecimal averageScore,
-        Long totalExtraPoints,
-        Long totalExtraHours,
-        List<TimetableInfo> currentTimetableJson) {
+                Long accountId,
+                String studentNo,
+                String studentName,
+                String deptName,
+                Integer gradeLevel,
+                AcademicStatus academicStatus,
+                String profileImageUrl,
+                String profileImageKey,
+                Long totalCredits,
+                BigDecimal averageScore,
+                Long totalExtraPoints,
+                Long totalExtraHours,
+                List<TimetableInfo> currentTimetableJson) {
 }

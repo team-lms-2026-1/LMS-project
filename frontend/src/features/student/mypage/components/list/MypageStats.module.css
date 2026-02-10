@@ -1,0 +1,43 @@
+.container {
+    display: flex;
+    justify-content: space-around;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111827;
+}
+
+.unit {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-left: 0.25rem;
+}
+
+.divider {
+    width: 1px;
+    height: 40px;
+    background-color: #e5e7eb;
+    align-self: center;
+}
