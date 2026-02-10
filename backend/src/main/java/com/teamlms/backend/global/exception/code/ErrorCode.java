@@ -24,6 +24,8 @@ public enum ErrorCode {
     AUTH_FAILED(HttpStatus.UNAUTHORIZED, "AUTH_FAILED", "아이디 또는 비밀번호가 올바르지 않습니다.", "auth.failed"),
     DUPLICATE_LOGIN_ID(HttpStatus.CONFLICT, "DUPLICATE_LOGIN_ID", "이미 사용 중인 로그인 아이디입니다.", "account.loginId.duplicate"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "접근 권한이 없습니다.", "account.accessDenied"),
+    PASSWORD_RESET_TOKEN_INVALID(HttpStatus.BAD_REQUEST, "PASSWORD_RESET_TOKEN_INVALID", "비밀번호 재설정 링크가 유효하지 않습니다.", "password.reset.token.invalid"),
+    PASSWORD_RESET_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "PASSWORD_RESET_TOKEN_EXPIRED", "비밀번호 재설정 링크가 만료되었습니다.", "password.reset.token.expired"),
 
     INVALID_HEAD_PROFESSOR(HttpStatus.CONFLICT, "INVALID_HEAD_PROFESSOR", "담당 교수는 해당 학과 소속 교수만 지정할 수 있습니다.", "dept.headProfessor.affiliationMismatch"),
     INVALID_PROFESSOR_ACCOUNT(HttpStatus.CONFLICT, "INVALID_PROFESSOR_ACCOUNT", "유효하지 않은 교수 아이디입니다.", "professor.id.invalid"),

@@ -60,4 +60,9 @@ public class Account extends BaseEntity {
     public void updateLastLoginAt(LocalDateTime at) {
         this.lastLoginAt = at;
     }
+
+    public void updatePassword(String newPasswordHash, LocalDateTime changedAt) {
+        this.passwordHash = newPasswordHash;
+        this.passwordChangedAt = changedAt;
+    }
 }
