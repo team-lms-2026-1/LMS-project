@@ -6,10 +6,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import java.util.List;
 
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class DiagnosisCreateRequest {
 
     @NotBlank
@@ -32,7 +41,9 @@ public class DiagnosisCreateRequest {
     @NotNull
     private LocalDateTime endedAt;
 
-    @NotNull
-    @Size(min = 1)
+    @Valid
+    private List<DiagnosisProblemRequest> problems;
+
+    @Valid
     private List<DiagnosisQuestionRequest> questions;
 }

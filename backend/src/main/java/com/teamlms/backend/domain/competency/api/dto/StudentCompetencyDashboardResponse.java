@@ -12,5 +12,4 @@ public class StudentCompetencyDashboardResponse {
     private List<CompetencyRadarItem> radarChart;
     private DiagnosisTrendChart trendChart;
     private List<CompetencyMyStatsTableItem> myStatsTable;
-    private List<CompetencyComparisonTableItem> comparisonTable;
 }

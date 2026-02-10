@@ -21,7 +21,12 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+
+import com.teamlms.backend.domain.competency.api.dto.*;
+import com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain;
+import com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType;
 
 /**
  * 진단 관리 커맨드 서비스 (생성/수정/삭제)
@@ -41,7 +46,23 @@ public class DiagnosisCommandService {
     private final com.teamlms.backend.domain.competency.service.CompetencySummaryService competencySummaryService;
 
     /**
-     * 진단지 생성
+     * 진단지 생성 (DTO 버전)
+     */
+    public Long createDiagnosis(@jakarta.validation.Valid DiagnosisCreateRequest req) {
+        List<QuestionCreateData> questions = mapToQuestionCreateData(req.getProblems(), req.getQuestions());
+
+        return createDiagnosis(
+                req.getTitle(),
+                req.getSemesterId(),
+                req.getTargetGrade(),
+                req.getDeptId(),
+                req.getStartedAt(),
+                req.getEndedAt(),
+                questions);
+    }
+
+    /**
+     * 진단지 생성 (원본)
      */
     public Long createDiagnosis(
             String title,
@@ -86,7 +107,22 @@ public class DiagnosisCommandService {
     }
 
     /**
-     * 진단지 수정
+     * 진단지 수정 (DTO 버전)
+     */
+    public void updateDiagnosis(Long diagnosisId, DiagnosisPatchRequest req) {
+        DiagnosisRunStatus status = req.getStatus() != null ? DiagnosisRunStatus.valueOf(req.getStatus()) : null;
+        List<QuestionUpdateData> questions = mapToQuestionUpdateData(req.getProblems(), req.getQuestions());
+
+        updateDiagnosis(
+                diagnosisId,
+                req.getTitle(),
+                req.getEndedAt(),
+                status,
+                questions);
+    }
+
+    /**
+     * 진단지 수정 (원본)
      */
     public void updateDiagnosis(
             Long diagnosisId,
@@ -196,8 +232,9 @@ public class DiagnosisCommandService {
 
             Boolean isCorrect = null;
             if (question.getQuestionType() == com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType.SHORT) {
-                isCorrect = question.getShortAnswerKey() != null && question.getShortAnswerKey().trim()
-                        .equalsIgnoreCase(item.getShortText() != null ? item.getShortText().trim() : "");
+                String studentAns = item.getShortText() != null ? item.getShortText().trim() : "";
+                String correctAns = question.getShortAnswerKey() != null ? question.getShortAnswerKey().trim() : "";
+                isCorrect = !correctAns.isEmpty() && correctAns.equalsIgnoreCase(studentAns);
             }
 
             com.teamlms.backend.domain.competency.entitiy.DiagnosisAnswer answer = com.teamlms.backend.domain.competency.entitiy.DiagnosisAnswer
@@ -250,21 +287,31 @@ public class DiagnosisCommandService {
     private void createQuestions(DiagnosisRun diagnosisRun, List<QuestionCreateData> questions) {
         for (int i = 0; i < questions.size(); i++) {
             QuestionCreateData data = questions.get(i);
-            validateWeights(data.getWeights());
 
             DiagnosisQuestion question = DiagnosisQuestion.builder()
                     .run(diagnosisRun)
                     .domain(data.getDomain())
                     .questionType(data.getQuestionType())
                     .content(data.getText())
+                    .sectionTitle(data.getSectionTitle())
                     .sortOrder(data.getOrder() != null ? data.getOrder() : i + 1)
                     .shortAnswerKey(data.getShortAnswerKey())
-                    .c1MaxScore(data.getWeights().getOrDefault("C1", 0))
-                    .c2MaxScore(data.getWeights().getOrDefault("C2", 0))
-                    .c3MaxScore(data.getWeights().getOrDefault("C3", 0))
-                    .c4MaxScore(data.getWeights().getOrDefault("C4", 0))
-                    .c5MaxScore(data.getWeights().getOrDefault("C5", 0))
-                    .c6MaxScore(data.getWeights().getOrDefault("C6", 0))
+                    .c1MaxScore(data.getC1() != null ? data.getC1() : 0)
+                    .c2MaxScore(data.getC2() != null ? data.getC2() : 0)
+                    .c3MaxScore(data.getC3() != null ? data.getC3() : 0)
+                    .c4MaxScore(data.getC4() != null ? data.getC4() : 0)
+                    .c5MaxScore(data.getC5() != null ? data.getC5() : 0)
+                    .c6MaxScore(data.getC6() != null ? data.getC6() : 0)
+                    .label1(data.getLabel1())
+                    .label2(data.getLabel2())
+                    .label3(data.getLabel3())
+                    .label4(data.getLabel4())
+                    .label5(data.getLabel5())
+                    .score1(data.getScore1())
+                    .score2(data.getScore2())
+                    .score3(data.getScore3())
+                    .score4(data.getScore4())
+                    .score5(data.getScore5())
                     .build();
 
             diagnosisQuestionRepository.save(question);
@@ -278,21 +325,31 @@ public class DiagnosisCommandService {
         // 새 문항 생성
         for (int i = 0; i < questions.size(); i++) {
             QuestionUpdateData data = questions.get(i);
-            validateWeights(data.getWeights());
 
             DiagnosisQuestion question = DiagnosisQuestion.builder()
                     .run(diagnosisRun)
                     .domain(data.getDomain())
                     .questionType(data.getQuestionType())
                     .content(data.getText())
+                    .sectionTitle(data.getSectionTitle())
                     .sortOrder(data.getOrder() != null ? data.getOrder() : i + 1)
                     .shortAnswerKey(data.getShortAnswerKey())
-                    .c1MaxScore(data.getWeights().getOrDefault("C1", 0))
-                    .c2MaxScore(data.getWeights().getOrDefault("C2", 0))
-                    .c3MaxScore(data.getWeights().getOrDefault("C3", 0))
-                    .c4MaxScore(data.getWeights().getOrDefault("C4", 0))
-                    .c5MaxScore(data.getWeights().getOrDefault("C5", 0))
-                    .c6MaxScore(data.getWeights().getOrDefault("C6", 0))
+                    .c1MaxScore(data.getC1() != null ? data.getC1() : 0)
+                    .c2MaxScore(data.getC2() != null ? data.getC2() : 0)
+                    .c3MaxScore(data.getC3() != null ? data.getC3() : 0)
+                    .c4MaxScore(data.getC4() != null ? data.getC4() : 0)
+                    .c5MaxScore(data.getC5() != null ? data.getC5() : 0)
+                    .c6MaxScore(data.getC6() != null ? data.getC6() : 0)
+                    .label1(data.getLabel1())
+                    .label2(data.getLabel2())
+                    .label3(data.getLabel3())
+                    .label4(data.getLabel4())
+                    .label5(data.getLabel5())
+                    .score1(data.getScore1())
+                    .score2(data.getScore2())
+                    .score3(data.getScore3())
+                    .score4(data.getScore4())
+                    .score5(data.getScore5())
                     .build();
 
             diagnosisQuestionRepository.save(question);
@@ -305,16 +362,210 @@ public class DiagnosisCommandService {
         }
     }
 
-    private void validateWeights(Map<String, Integer> weights) {
-        if (weights == null)
-            return;
-        for (Integer weight : weights.values()) {
-            if (weight == null)
-                continue;
-            if (weight < 0 || weight > 6) {
-                throw new BusinessException(ErrorCode.INVALID_COMPETENCY_WEIGHT);
+    private List<QuestionCreateData> mapToQuestionCreateData(List<DiagnosisProblemRequest> problems,
+            List<DiagnosisQuestionRequest> directQuestions) {
+        List<QuestionCreateData> questions = new ArrayList<>();
+
+        if (problems != null) {
+            for (DiagnosisProblemRequest problem : problems) {
+                String typeStr = problem.getType().toUpperCase();
+                DiagnosisQuestionType problemType = DiagnosisQuestionType.valueOf(typeStr);
+
+                if (problem.getItems() != null && !problem.getItems().isEmpty()) {
+                    for (DiagnosisQuestionRequest q : problem.getItems()) {
+                        questions.add(QuestionCreateData.builder()
+                                .domain(q.getDomain() != null
+                                        ? DiagnosisQuestionDomain.valueOf(q.getDomain().toUpperCase())
+                                        : (problem.getDomain() != null
+                                                ? DiagnosisQuestionDomain.valueOf(problem.getDomain().toUpperCase())
+                                                : DiagnosisQuestionDomain.SKILL))
+                                .questionType(
+                                        q.getType() != null ? DiagnosisQuestionType.valueOf(q.getType().toUpperCase())
+                                                : problemType)
+                                .sectionTitle(problem.getTitle())
+                                .text(q.getText())
+                                .order(q.getOrder())
+                                .shortAnswerKey(q.getShortAnswerKey() != null ? q.getShortAnswerKey()
+                                        : problem.getShortAnswerKey())
+                                .c1(q.getC1() != null ? q.getC1() : problem.getC1())
+                                .c2(q.getC2() != null ? q.getC2() : problem.getC2())
+                                .c3(q.getC3() != null ? q.getC3() : problem.getC3())
+                                .c4(q.getC4() != null ? q.getC4() : problem.getC4())
+                                .c5(q.getC5() != null ? q.getC5() : problem.getC5())
+                                .c6(q.getC6() != null ? q.getC6() : problem.getC6())
+                                .label1(q.getLabel1() != null ? q.getLabel1() : problem.getLabel1())
+                                .label2(q.getLabel2() != null ? q.getLabel2() : problem.getLabel2())
+                                .label3(q.getLabel3() != null ? q.getLabel3() : problem.getLabel3())
+                                .label4(q.getLabel4() != null ? q.getLabel4() : problem.getLabel4())
+                                .label5(q.getLabel5() != null ? q.getLabel5() : problem.getLabel5())
+                                .score1(q.getScore1() != null ? q.getScore1()
+                                        : (problem.getScore1() != null ? problem.getScore1() : 1))
+                                .score2(q.getScore2() != null ? q.getScore2()
+                                        : (problem.getScore2() != null ? problem.getScore2() : 2))
+                                .score3(q.getScore3() != null ? q.getScore3()
+                                        : (problem.getScore3() != null ? problem.getScore3() : 3))
+                                .score4(q.getScore4() != null ? q.getScore4()
+                                        : (problem.getScore4() != null ? problem.getScore4() : 4))
+                                .score5(q.getScore5() != null ? q.getScore5()
+                                        : (problem.getScore5() != null ? problem.getScore5() : 5))
+                                .build());
+                    }
+                } else {
+                    questions.add(QuestionCreateData.builder()
+                            .domain(problem.getDomain() != null
+                                    ? DiagnosisQuestionDomain.valueOf(problem.getDomain().toUpperCase())
+                                    : DiagnosisQuestionDomain.SKILL)
+                            .questionType(problemType)
+                            .sectionTitle(null)
+                            .text(problem.getTitle())
+                            .order(problem.getOrder())
+                            .shortAnswerKey(problem.getShortAnswerKey())
+                            .c1(problem.getC1())
+                            .c2(problem.getC2())
+                            .c3(problem.getC3())
+                            .c4(problem.getC4())
+                            .c5(problem.getC5())
+                            .c6(problem.getC6())
+                            .build());
+                }
             }
         }
+
+        if (directQuestions != null) {
+            for (DiagnosisQuestionRequest q : directQuestions) {
+                questions.add(QuestionCreateData.builder()
+                        .domain(q.getDomain() != null ? DiagnosisQuestionDomain.valueOf(q.getDomain().toUpperCase())
+                                : DiagnosisQuestionDomain.SKILL)
+                        .questionType(q.getType() != null ? DiagnosisQuestionType.valueOf(q.getType().toUpperCase())
+                                : DiagnosisQuestionType.SCALE)
+                        .sectionTitle(null)
+                        .text(q.getText())
+                        .order(q.getOrder())
+                        .shortAnswerKey(q.getShortAnswerKey())
+                        .c1(q.getC1())
+                        .c2(q.getC2())
+                        .c3(q.getC3())
+                        .c4(q.getC4())
+                        .c5(q.getC5())
+                        .c6(q.getC6())
+                        .label1(q.getLabel1())
+                        .label2(q.getLabel2())
+                        .label3(q.getLabel3())
+                        .label4(q.getLabel4())
+                        .label5(q.getLabel5())
+                        .score1(q.getScore1() != null ? q.getScore1() : 1)
+                        .score2(q.getScore2() != null ? q.getScore2() : 2)
+                        .score3(q.getScore3() != null ? q.getScore3() : 3)
+                        .score4(q.getScore4() != null ? q.getScore4() : 4)
+                        .score5(q.getScore5() != null ? q.getScore5() : 5)
+                        .build());
+            }
+        }
+        return questions;
+    }
+
+    private List<QuestionUpdateData> mapToQuestionUpdateData(List<DiagnosisProblemRequest> problems,
+            List<DiagnosisQuestionRequest> directQuestions) {
+        if (problems == null && directQuestions == null)
+            return null;
+        List<QuestionUpdateData> questions = new ArrayList<>();
+
+        if (problems != null) {
+            for (DiagnosisProblemRequest problem : problems) {
+                String typeStr = problem.getType() != null ? problem.getType().toUpperCase() : null;
+                DiagnosisQuestionType problemType = typeStr != null ? DiagnosisQuestionType.valueOf(typeStr) : null;
+
+                if (problem.getItems() != null && !problem.getItems().isEmpty()) {
+                    for (DiagnosisQuestionRequest q : problem.getItems()) {
+                        questions.add(QuestionUpdateData.builder()
+                                .domain(q.getDomain() != null
+                                        ? DiagnosisQuestionDomain.valueOf(q.getDomain().toUpperCase())
+                                        : (problem.getDomain() != null
+                                                ? DiagnosisQuestionDomain.valueOf(problem.getDomain().toUpperCase())
+                                                : DiagnosisQuestionDomain.SKILL))
+                                .questionType(
+                                        q.getType() != null ? DiagnosisQuestionType.valueOf(q.getType().toUpperCase())
+                                                : problemType)
+                                .sectionTitle(problem.getTitle())
+                                .text(q.getText())
+                                .order(q.getOrder())
+                                .shortAnswerKey(q.getShortAnswerKey() != null ? q.getShortAnswerKey()
+                                        : problem.getShortAnswerKey())
+                                .c1(q.getC1() != null ? q.getC1() : problem.getC1())
+                                .c2(q.getC2() != null ? q.getC2() : problem.getC2())
+                                .c3(q.getC3() != null ? q.getC3() : problem.getC3())
+                                .c4(q.getC4() != null ? q.getC4() : problem.getC4())
+                                .c5(q.getC5() != null ? q.getC5() : problem.getC5())
+                                .c6(q.getC6() != null ? q.getC6() : problem.getC6())
+                                .label1(q.getLabel1() != null ? q.getLabel1() : problem.getLabel1())
+                                .label2(q.getLabel2() != null ? q.getLabel2() : problem.getLabel2())
+                                .label3(q.getLabel3() != null ? q.getLabel3() : problem.getLabel3())
+                                .label4(q.getLabel4() != null ? q.getLabel4() : problem.getLabel4())
+                                .label5(q.getLabel5() != null ? q.getLabel5() : problem.getLabel5())
+                                .score1(q.getScore1() != null ? q.getScore1()
+                                        : (problem.getScore1() != null ? problem.getScore1() : 1))
+                                .score2(q.getScore2() != null ? q.getScore2()
+                                        : (problem.getScore2() != null ? problem.getScore2() : 2))
+                                .score3(q.getScore3() != null ? q.getScore3()
+                                        : (problem.getScore3() != null ? problem.getScore3() : 3))
+                                .score4(q.getScore4() != null ? q.getScore4()
+                                        : (problem.getScore4() != null ? problem.getScore4() : 4))
+                                .score5(q.getScore5() != null ? q.getScore5()
+                                        : (problem.getScore5() != null ? problem.getScore5() : 5))
+                                .build());
+                    }
+                } else {
+                    questions.add(QuestionUpdateData.builder()
+                            .domain(problem.getDomain() != null
+                                    ? DiagnosisQuestionDomain.valueOf(problem.getDomain().toUpperCase())
+                                    : DiagnosisQuestionDomain.SKILL)
+                            .questionType(problemType)
+                            .sectionTitle(null)
+                            .text(problem.getTitle())
+                            .order(problem.getOrder())
+                            .shortAnswerKey(problem.getShortAnswerKey())
+                            .c1(problem.getC1())
+                            .c2(problem.getC2())
+                            .c3(problem.getC3())
+                            .c4(problem.getC4())
+                            .c5(problem.getC5())
+                            .c6(problem.getC6())
+                            .build());
+                }
+            }
+        }
+
+        if (directQuestions != null) {
+            for (DiagnosisQuestionRequest q : directQuestions) {
+                questions.add(QuestionUpdateData.builder()
+                        .domain(q.getDomain() != null ? DiagnosisQuestionDomain.valueOf(q.getDomain().toUpperCase())
+                                : DiagnosisQuestionDomain.SKILL)
+                        .questionType(q.getType() != null ? DiagnosisQuestionType.valueOf(q.getType().toUpperCase())
+                                : DiagnosisQuestionType.SCALE)
+                        .sectionTitle(null)
+                        .text(q.getText())
+                        .order(q.getOrder())
+                        .shortAnswerKey(q.getShortAnswerKey())
+                        .c1(q.getC1())
+                        .c2(q.getC2())
+                        .c3(q.getC3())
+                        .c4(q.getC4())
+                        .c5(q.getC5())
+                        .c6(q.getC6())
+                        .label1(q.getLabel1())
+                        .label2(q.getLabel2())
+                        .label3(q.getLabel3())
+                        .label4(q.getLabel4())
+                        .label5(q.getLabel5())
+                        .score1(q.getScore1() != null ? q.getScore1() : 1)
+                        .score2(q.getScore2() != null ? q.getScore2() : 2)
+                        .score3(q.getScore3() != null ? q.getScore3() : 3)
+                        .score4(q.getScore4() != null ? q.getScore4() : 4)
+                        .score5(q.getScore5() != null ? q.getScore5() : 5)
+                        .build());
+            }
+        }
+        return questions;
     }
 
     private void validateStatusTransition(DiagnosisRunStatus current, DiagnosisRunStatus next) {
@@ -333,10 +584,28 @@ public class DiagnosisCommandService {
     public static class QuestionCreateData {
         private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain domain;
         private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType questionType;
+        private String sectionTitle;
         private String text;
         private Integer order;
         private String shortAnswerKey;
-        private Map<String, Integer> weights;
+        private Integer c1;
+        private Integer c2;
+        private Integer c3;
+        private Integer c4;
+        private Integer c5;
+        private Integer c6;
+
+        private String label1;
+        private String label2;
+        private String label3;
+        private String label4;
+        private String label5;
+
+        private Integer score1;
+        private Integer score2;
+        private Integer score3;
+        private Integer score4;
+        private Integer score5;
     }
 
     @lombok.Getter
@@ -344,9 +613,28 @@ public class DiagnosisCommandService {
     public static class QuestionUpdateData {
         private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain domain;
         private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType questionType;
+        private String sectionTitle;
         private String text;
         private Integer order;
         private String shortAnswerKey;
-        private Map<String, Integer> weights;
+        private Integer c1;
+        private Integer c2;
+        private Integer c3;
+        private Integer c4;
+        private Integer c5;
+        private Integer c6;
+
+        private String label1;
+        private String label2;
+        private String label3;
+        private String label4;
+        private String label5;
+
+        private Integer score1;
+        private Integer score2;
+        private Integer score3;
+        private Integer score4;
+        private Integer score5;
     }
+
 }

@@ -49,6 +49,9 @@ public class DiagnosisQuestion extends BaseEntity {
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "section_title")
+    private String sectionTitle; // 문제 그룹 제목
+
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder;
 
@@ -78,4 +81,27 @@ public class DiagnosisQuestion extends BaseEntity {
     @Builder.Default
     @Column(name = "c6_max_score", nullable = false)
     private Integer c6MaxScore = 0;
+
+    // --- 객관식 선택지 및 점수 ---
+    @Column(name = "label1")
+    private String label1;
+    @Column(name = "label2")
+    private String label2;
+    @Column(name = "label3")
+    private String label3;
+    @Column(name = "label4")
+    private String label4;
+    @Column(name = "label5")
+    private String label5;
+
+    @Column(name = "score1")
+    private Integer score1;
+    @Column(name = "score2")
+    private Integer score2;
+    @Column(name = "score3")
+    private Integer score3;
+    @Column(name = "score4")
+    private Integer score4;
+    @Column(name = "score5")
+    private Integer score5;
 }
