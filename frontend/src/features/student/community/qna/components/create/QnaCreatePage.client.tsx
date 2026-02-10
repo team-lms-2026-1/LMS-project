@@ -76,7 +76,7 @@ export default function QnaCreatePageClient() {
     setSaving(true);
     try {
       await createQnaQuestion(body);
-      router.push(LIST_PATH);
+      router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
       setError(e?.message ?? "등록에 실패했습니다.");
     } finally {

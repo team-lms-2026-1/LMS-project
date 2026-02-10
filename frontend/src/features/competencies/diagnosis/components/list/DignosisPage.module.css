@@ -1,0 +1,49 @@
+.page {
+  padding: 0;
+  min-height: 100vh;
+  background-color: transparent;
+}
+
+.card {
+  background: transparent;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 12px 0 16px;
+}
+
+.searchBarWrap {
+  flex: 0 0 auto;
+}
+
+.footerRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.footerCenter {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.footerRight {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.errorMessage {
+  color: #b91c1c;
+  margin-bottom: 12px;
+}

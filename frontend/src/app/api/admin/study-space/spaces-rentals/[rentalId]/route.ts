@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const TAG = "admin:spaces-rentals";
+const STUDENT_TAG = "student:rentals";
 
 type Ctx = { params: { rentalId: string } };
 
@@ -22,6 +23,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+  if (res.status >= 200 && res.status < 300) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }

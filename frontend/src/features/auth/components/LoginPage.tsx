@@ -17,9 +17,8 @@ export default function LoginPage() {
   function resolveRedirectPath(loginId: string) {
     const prefix = (loginId?.trim()?.[0] ?? "").toLowerCase();
     if (prefix === "a") return "/admin";
-    if (prefix === "s") return "/";
+    if (prefix === "s") return "/student/main";
     if (prefix === "p") return "/professor";
-    // 예외: 규칙 밖이면 기본값(원하면 변경)
     return "/";
   }
 

@@ -52,8 +52,8 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
   };
 
   const columns: Array<TableColumn<FaqListItemDto>> = [
-    { header: "번호", align: "left", render: (r) => r.faqId },
-    { header: "분류", align: "left", render: (r) => {
+    { header: "번호", align: "center", render: (r) => r.faqId },
+    { header: "분류", align: "center", render: (r) => {
         const c = r.category;
         if (!c) return "미분류"; // ✅ null/undefined 방어
         return (

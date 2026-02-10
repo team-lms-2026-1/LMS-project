@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const BACKEND_BASE = "/api/v1/student/spaces-rentals";
 const TAG = "student:rentals";
+const ADMIN_TAG = "admin:spaces-rentals";
 
 type Ctx = { params: { rentalId: string } };
 
@@ -22,6 +23,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
     }
   );
 
-  if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+  if (res.status >= 200 && res.status < 300) {
+    revalidateTag(TAG);
+    revalidateTag(ADMIN_TAG);
+  }
   return res;
 }

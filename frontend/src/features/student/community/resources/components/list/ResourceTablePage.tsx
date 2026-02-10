@@ -13,16 +13,44 @@ type Props = {
 
 export function ResourceTable({ items, loading, onEditClick }: Props) {
   const router = useRouter();
+  const goDetail = (id: number) => {
+    router.push(`/student/community/resources/${id}`);
+  };
   const columns: Array<TableColumn<ResourceListItemDto>> = [
-    { header: "번호", align: "center", render: (r) => r.resourceId },
-    { header: "분류", align: "center", render: (r) => {
+    {
+      header: "번호",
+      align: "center",
+      render: (r) => (
+        <div
+          className={styles.rowClickCell}
+          onClickCapture={() => goDetail(r.resourceId)}
+          role="button"
+          tabIndex={0}
+        >
+          {r.resourceId}
+        </div>
+      ),
+    },
+    {
+      header: "분류",
+      align: "center",
+      render: (r) => {
         const c = r.category;
-        if (!c) return "미분류"; // ✅ null/undefined 방어
         return (
-          <span
-            className={styles.badge}
-            style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}
-          >{c.name}</span>
+          <div
+            className={styles.rowClickCell}
+            onClickCapture={() => goDetail(r.resourceId)}
+            role="button"
+            tabIndex={0}
+          >
+            {!c ? (
+              "미분류"
+            ) : (
+              <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
+                {c.name}
+              </span>
+            )}
+          </div>
         );
       },
     },
@@ -30,27 +58,47 @@ export function ResourceTable({ items, loading, onEditClick }: Props) {
       header: "제목",
       align: "center",
       render: (r) => (
-        <button
-          type="button"
-          className={styles.titleLink}
-          onClick={() => router.push(`/student/community/resources/${r.resourceId}`)}
+        <div
+          className={styles.rowClickCell}
+          onClickCapture={() => goDetail(r.resourceId)}
+          role="button"
+          tabIndex={0}
+          title={r.title}
         >
-          {r.title}
-        </button>
+          <span className={styles.titleText}>{r.title}</span>
+        </div>
       ),
     },
-    { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createdAt },
+    {
+      header: "조회수",
+      align: "center",
+      render: (r) => (
+        <div className={styles.rowClickCell} onClickCapture={() => goDetail(r.resourceId)} role="button" tabIndex={0}>
+          {r.viewCount}
+        </div>
+      ),
+    },
+    {
+      header: "작성일",
+      align: "center",
+      render: (r) => (
+        <div className={styles.rowClickCell} onClickCapture={() => goDetail(r.resourceId)} role="button" tabIndex={0}>
+          {r.createdAt}
+        </div>
+      ),
+    },
   ];
 
   return (
-    <Table<ResourceListItemDto>
-      columns={columns}
-      items={items}
-      loading={loading}
-      skeletonRowCount={10}
-      rowKey={(r) => r.resourceId}
-      emptyText="자료가 없습니다."
-    />
+    <div className={styles.table}>
+      <Table<ResourceListItemDto>
+        columns={columns}
+        items={items}
+        loading={loading}
+        skeletonRowCount={10}
+        rowKey={(r) => r.resourceId}
+        emptyText="자료가 없습니다."
+      />
+    </div>
   );
 }

@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const TAG = "admin:notices";
+const STUDENT_TAG = "student:notices";
 
 export async function GET(req: Request) {
   return proxyToBackend(req, "/api/v1/admin/community/notices", {
@@ -27,7 +28,10 @@ export async function POST(req: Request) {
       forwardQuery: false,
     });
 
-    if (res.ok) revalidateTag(TAG);
+    if (res.ok) {
+      revalidateTag(TAG);
+      revalidateTag(STUDENT_TAG);
+    }
     return res;
   }
 
@@ -37,6 +41,9 @@ export async function POST(req: Request) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }

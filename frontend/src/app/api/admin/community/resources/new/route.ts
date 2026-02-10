@@ -2,6 +2,7 @@ import { proxyStreamToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "admin:resources";
+const STUDENT_TAG = "student:resources";
 
 export async function POST(req: Request) {
   const res = await proxyStreamToBackend(req, {
@@ -10,6 +11,9 @@ export async function POST(req: Request) {
     forwardQuery: false,
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }

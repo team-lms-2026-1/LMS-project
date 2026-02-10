@@ -48,10 +48,10 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
   };
 
   const columns: Array<TableColumn<NoticeListItemDto>> = [
-    { header: "번호", align: "left", render: (r) => r.noticeId },
+    { header: "번호", align: "center", render: (r) => r.noticeId },
     {
       header: "분류",
-      align: "left",
+      align: "center",
       render: (r) => {
         const c = r.category;
         if (!c) return "미분류";

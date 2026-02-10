@@ -13,6 +13,7 @@ type Props = {
   disabled?: boolean;
   min?: string; // "yyyy-MM-dd"
   max?: string; // "yyyy-MM-dd"
+  className?: string;
 
   /** ✅ 부모(모달) 닫힐 때 popover 강제 닫기용 */
   closeSignal?: number;
@@ -34,6 +35,7 @@ export function DatePickerInput({
   disabled = false,
   min,
   max,
+  className,
   closeSignal,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -99,7 +101,7 @@ export function DatePickerInput({
       <button
         ref={btnRef}
         type="button"
-        className={styles.inputButton}
+        className={[styles.inputButton, className].filter(Boolean).join(" ")}
         onClick={() => {
           if (disabled) return;
           setOpen((v) => !v);

@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import styles from "./QnaDetailPage.module.css";
 import type { QnaListItemDto } from "../../api/types";
 import { fetchQnaDetail, deleteQnaQuestion } from "../../api/QnasApi";
 import { Button } from "@/components/button";
 import { useAuth } from "@/features/auth/AuthProvider";
+import toast from "react-hot-toast";
+import DeleteModal from "../modal/DeleteModal.client";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
@@ -51,6 +53,8 @@ export default function QnaDetailpageClient() {
   const router = useRouter();
   const params = useParams<{ questionId?: string }>();
   const questionId = useMemo(() => Number(params?.questionId ?? 0), [params]);
+  const sp = useSearchParams();
+  const toastOnceRef = useRef<string | null>(null);
 
   // ✅ AuthProvider 구조에 맞게 me 꺼내기
   const { state: authState } = useAuth();
@@ -61,6 +65,8 @@ export default function QnaDetailpageClient() {
     error: null,
     data: null,
   });
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!questionId || Number.isNaN(questionId)) {
@@ -91,6 +97,21 @@ export default function QnaDetailpageClient() {
     };
   }, [questionId]);
 
+  useEffect(() => {
+    const t = sp.get("toast");
+    if (!t) return;
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+
+    if (t === "updated") toast.success("질문이 수정되었습니다.", { id: "qna-toast-updated" });
+
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+    const qs = next.toString();
+    const base = questionId ? `/student/community/qna/questions/${questionId}` : "/student/community/qna/questions";
+    router.replace(qs ? `${base}?${qs}` : base);
+  }, [sp, router, questionId]);
+
   const data = state.data;
 
   const badgeStyle = useMemo(() => {
@@ -116,18 +137,28 @@ export default function QnaDetailpageClient() {
     return byLogin || byId;
   }, [data, me]);
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = useCallback(() => {
+    setDeleteOpen(true);
+  }, []);
+
+  const closeDelete = useCallback(() => {
+    if (deleteLoading) return;
+    setDeleteOpen(false);
+  }, [deleteLoading]);
+
+  const confirmDelete = useCallback(async () => {
     if (!data) return;
 
-    const ok = confirm("이 질문을 삭제할까요?");
-    if (!ok) return;
-
     try {
+      setDeleteLoading(true);
       await deleteQnaQuestion(data.questionId);
-      router.push("/student/community/qna/questions");
+      setDeleteOpen(false);
+      router.push("/student/community/qna/questions?toast=deleted");
       router.refresh();
     } catch (e: any) {
-      alert(e?.message ?? "삭제 중 오류가 발생했습니다.");
+      toast.error(e?.message ?? "삭제 중 오류가 발생했습니다.");
+    } finally {
+      setDeleteLoading(false);
     }
   }, [data, router]);
 
@@ -199,6 +230,15 @@ export default function QnaDetailpageClient() {
             </div>
           </div>
         )}
+
+        <DeleteModal
+          open={deleteOpen}
+          targetLabel="질문"
+          targetTitle={data?.title}
+          loading={deleteLoading}
+          onClose={closeDelete}
+          onConfirm={confirmDelete}
+        />
       </div>
     </div>
   );

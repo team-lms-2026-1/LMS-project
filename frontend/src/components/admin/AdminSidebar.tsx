@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -49,7 +49,12 @@ const SECTIONS: NavSection[] = [
   {
     key: "competency",
     title: "역량 통합 관리",
-    items: [{ label: "6Cs 대시보드", href: "/competencies" }],
+    items: [
+      { label: "6Cs 란?", href: "/admin/competencies" },
+      { label: "학생역량활동조회", href: "/admin/competencies/students" },
+      { label: "역량진단지 관리", href: "/admin/competencies/dignosis" },
+      { label: "결과 관리", href: "/admin/competencies/result" },
+    ],
   },
   {
     key: "course",

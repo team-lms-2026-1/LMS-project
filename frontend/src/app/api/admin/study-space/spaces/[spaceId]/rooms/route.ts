@@ -5,6 +5,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const TAG = "admin:spaces";
+const STUDENT_LIST_TAG = "student:spaces:list";
+const STUDENT_DETAIL_TAG = (spaceId: string) => `student:spaces:detail:${spaceId}`;
+const STUDENT_ROOMS_TAG = (spaceId: string) => `student:spaces:rooms:${spaceId}`;
 
 type Ctx = { params: { spaceId: string } };
 
@@ -33,6 +36,11 @@ export async function POST(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_LIST_TAG);
+    revalidateTag(STUDENT_DETAIL_TAG(ctx.params.spaceId));
+    revalidateTag(STUDENT_ROOMS_TAG(ctx.params.spaceId));
+  }
   return res;
 }

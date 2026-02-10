@@ -2,6 +2,7 @@ import { proxyToBackend, proxyStreamToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "admin:resources";
+const STUDENT_TAG = "student:resources";
 
 type Ctx = { params: { resourceId: string } };
 
@@ -24,7 +25,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
     forwardQuery: false,
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }
 
@@ -37,6 +41,9 @@ export async function DELETE(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }

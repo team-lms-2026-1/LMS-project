@@ -182,6 +182,10 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
   };
 
   const onSubmit = async () => {
+    if (rules.some((r) => r.isEditing)) {
+      toast.error("규칙이 수정 중입니다. 규칙을 저장후에 완료해주세요.");
+      return;
+    }
     if (!spaceName.trim()) return alert("공간 이름을 입력하세요.");
     if (!location.trim()) return alert("위치를 입력하세요.");
     if (!description.trim()) return alert("설명을 입력하세요.");
