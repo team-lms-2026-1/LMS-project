@@ -18,12 +18,12 @@ import java.util.Map;
         @Index(name = "idx_target_user", columnList = "target_account_id, status"),
         @Index(name = "idx_target_unique", columnList = "survey_id, target_account_id", unique = true)
 })
-public class SurveyTarget {
+public class SurveyTarget extends com.teamlms.backend.global.audit.BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "target_id")
-    private Long id;
+    private Long targetId;
 
     @Column(name = "survey_id", nullable = false)
     private Long surveyId;
