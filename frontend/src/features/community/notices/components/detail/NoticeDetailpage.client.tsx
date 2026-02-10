@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import styles from "./NoticeDetailPage.module.css";
 import type { LoadState, NoticeListItemDto } from "../../api/types";
-import { fetchNoticeDetail } from "../../api/NoticesApi";
+import { fetchNoticeDetail } from "../../api/noticesApi";
 import { Button } from "@/components/button";
 import DeleteModal from "../modal/DeleteModal.client";
 
