@@ -7,63 +7,51 @@ on:
       - 'frontend/**' # frontend 폴더가 바뀔 때만 실행
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 1. 기존 배포 폴더 삭제 (오래된 파일 충돌 방지)
-    - name: Clean Previous Deployment
+    # 1. Docker Hub 로그인
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # 2. Docker 이미지 빌드 및 푸시 (GitHub Actions runner에서 실행)
+    - name: Build and Push Docker Image
+      run: |
+        cd frontend
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest \
+          -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:${{ github.sha }} .
+        docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:${{ github.sha }}
+
+    # 3. EC2에서 이미지 pull 및 실행
+    - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST_PROD }}
         username: ec2-user
         key: ${{ secrets.SSH_KEY }}
         script: |
-          # 기존 frontend 폴더 완전 삭제
-          rm -rf /home/ec2-user/app_frontend
-          # 빈 폴더 생성
-          mkdir -p /home/ec2-user/app_frontend
-
-    # 2. 소스 코드를 EC2로 전송 (node_modules 제외)
-    - name: Copy Frontend Code to EC2
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST_PROD }}
-        username: ec2-user # 본인 EC2 계정에 맞게 수정 (ubuntu 또는 ec2-user)
-        key: ${{ secrets.SSH_KEY }}
-        source: "frontend/"
-        target: "/home/ec2-user/app_frontend" # EC2 내부 저장 경로
-        strip_components: 1 # frontend/ 폴더 껍데기 벗기고 내용물만 전송
-
-    # 3. EC2 접속 후 도커 빌드 & 실행
-    - name: Build & Run Docker on EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST_PROD }}
-        username: ec2-user
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          # 폴더 이동
-          cd /home/ec2-user/app_frontend
-
           # 기존 컨테이너 중지 및 삭제
           sudo docker stop frontend-server || true
           sudo docker rm frontend-server || true
           
           # 기존 이미지 삭제 (공간 확보)
-          sudo docker rmi frontend-server || true
+          sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest || true
 
-          # 도커 이미지 빌드 (현재 폴더 . 기준)
-          sudo docker build -t frontend-server .
+          # Docker Hub에서 최신 이미지 pull
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
 
           # 도커 컨테이너 실행 (3000번 포트)
-          # -e NEXT_PUBLIC_API_URL: 프론트가 백엔드에 요청 보낼 주소 (중요!)
           sudo docker run -d --name frontend-server \
             -p 3000:3000 \
             -e NEXT_PUBLIC_API_URL=http://43.201.157.8:8080 \
-            frontend-server
+            ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
           
           # 불필요한 이미지 정리
           sudo docker image prune -f
