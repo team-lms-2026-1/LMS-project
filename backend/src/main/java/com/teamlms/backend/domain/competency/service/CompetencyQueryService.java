@@ -165,33 +165,20 @@ public class CompetencyQueryService {
                                 .collect(Collectors.toList());
 
                 // 6. 통계 테이블 (최근 학기 기준)
-                List<SemesterCompetencyCohortStat> stats = statRepository.findBySemesterSemesterId(latestSemesterId);
-                Map<Long, SemesterCompetencyCohortStat> statMap = stats.stream()
+                List<SemesterCompetencyCohortStat> totalStats = statRepository
+                                .findBySemesterSemesterId(latestSemesterId);
+                Map<Long, SemesterCompetencyCohortStat> totalStatMap = totalStats.stream()
                                 .collect(Collectors.toMap(s -> s.getCompetency().getCompetencyId(), s -> s));
 
                 List<CompetencyMyStatsTableItem> myStatsTable = latestSummaries.stream()
                                 .map(s -> {
-                                        SemesterCompetencyCohortStat stat = statMap
+                                        SemesterCompetencyCohortStat stat = totalStatMap
                                                         .get(s.getCompetency().getCompetencyId());
                                         return CompetencyMyStatsTableItem.builder()
                                                         .competencyName(s.getCompetency().getName())
                                                         .myScore(s.getTotalScore())
                                                         .avgScore(stat != null ? stat.getMean() : BigDecimal.ZERO)
                                                         .maxScore(stat != null ? stat.getMaxScore() : BigDecimal.ZERO)
-                                                        .build();
-                                })
-                                .collect(Collectors.toList());
-
-                List<CompetencyComparisonTableItem> comparisonTable = latestSummaries.stream()
-                                .map(s -> {
-                                        SemesterCompetencyCohortStat stat = statMap
-                                                        .get(s.getCompetency().getCompetencyId());
-                                        return CompetencyComparisonTableItem.builder()
-                                                        .competencyName(s.getCompetency().getName())
-                                                        .myScore(s.getTotalScore())
-                                                        .deptAvgScore(stat != null ? stat.getMean() : BigDecimal.ZERO)
-                                                        .deptMaxScore(stat != null ? stat.getMaxScore()
-                                                                        : BigDecimal.ZERO)
                                                         .build();
                                 })
                                 .collect(Collectors.toList());
@@ -205,7 +192,6 @@ public class CompetencyQueryService {
                                                 .series(series)
                                                 .build())
                                 .myStatsTable(myStatsTable)
-                                .comparisonTable(comparisonTable)
                                 .build();
         }
 
@@ -222,7 +208,6 @@ public class CompetencyQueryService {
                                                 .series(List.of())
                                                 .build())
                                 .myStatsTable(List.of())
-                                .comparisonTable(List.of())
                                 .build();
         }
 }
