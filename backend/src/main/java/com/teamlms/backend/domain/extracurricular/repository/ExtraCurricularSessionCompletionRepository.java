@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.extracurricular.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -30,13 +31,9 @@ public interface ExtraCurricularSessionCompletionRepository
             @Param("sessionIds") List<Long> sessionIds
     );
 
-    /**
-     * 세션 수정/취소 시: 해당 세션 출석 전부 무효화 (DELETE)
-     */
+    Optional<ExtraCurricularSessionCompletion> findBySessionIdAndApplicationId(Long sessionId, Long applicationId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("""
-        delete from ExtraCurricularSessionCompletion c
-        where c.sessionId = :sessionId
-    """)
-    void deleteBySessionId(@Param("sessionId") Long sessionId);
+        @Query("delete from ExtraCurricularSessionCompletion c where c.sessionId = :sessionId")
+        int deleteAllBySessionId(@Param("sessionId") Long sessionId);
 }

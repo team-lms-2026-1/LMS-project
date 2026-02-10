@@ -34,5 +34,6 @@ public interface ExtraCurricularOfferingCompetencyMapRepository
     Optional<ExtraCurricularOfferingCompetencyMap> findByIdExtraOfferingIdAndIdCompetencyId(Long extraOfferingId, Long competencyId);
 
     void deleteByIdExtraOfferingId(Long extraOfferingId);
+    
 }
 

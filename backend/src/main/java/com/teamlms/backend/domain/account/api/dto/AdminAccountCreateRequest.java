@@ -25,7 +25,7 @@ public class AdminAccountCreateRequest {
     // 영문+숫자+특수문자 포함(간단버전)
     @Pattern(
     regexp = "^(?=.*[A-Za-z])(?=.*\\d)\\S{6,}$",
-    message = "비밀번호는 6자 이상이며 영문+숫자를 포함하고 공백은 허용되지 않습니다."
+    message = "{validation.account.password.pattern}"
     )
     private String password;
 

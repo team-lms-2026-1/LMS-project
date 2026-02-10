@@ -31,8 +31,8 @@ spring:
   cloud:
     aws:
       credentials:
-        access-key: ${AWS_ACCESS_KEY} 
-        secret-key: ${AWS_SECRET_KEY} 
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
       region:
         static: ap-northeast-2
       s3:
@@ -89,3 +89,9 @@ api:
 worknet:
   key: "h3Fc15RT7IE4WhljLA0kr4FiYG7SBGdR"
   base-url: "http://openapi.work.go.kr/opi"
+
+app:
+  s3:
+    presign:
+      put-expires-seconds: 300
+      key-prefix: lms/extra-session-videos

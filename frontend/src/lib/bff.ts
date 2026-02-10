@@ -85,52 +85,65 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
   const clientIp = getClientIp(req);
   const userAgent = req.headers.get("user-agent") ?? "";
 
-  const res = await fetch(url, {
-    method: options.method ?? "GET",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-      "X-Forwarded-For": clientIp,
-      "User-Agent": userAgent,
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...(options.headers ?? {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
+  // ✅ 여기부터 추가
+  try {
+    console.log("[BFF] ->", options.method ?? "GET", url);
 
-    cache: options.cache ?? "no-store",
-    next: options.next,
-  });
+    const res = await fetch(url, {
+      method: options.method ?? "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+        "X-Forwarded-For": clientIp,
+        "User-Agent": userAgent,
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.headers ?? {}),
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      cache: options.cache ?? "no-store",
+      next: options.next,
+    });
 
-  if (res.status === 204) {
-    return new NextResponse(null, { status: 204 });
-  }
+    const contentType = res.headers.get("content-type") ?? "";
+    const text = await readTextSafe(res);
 
-  const contentType = res.headers.get("content-type") ?? "";
-  const contentLength = res.headers.get("content-length");
+    console.log("[BFF] <-", res.status, contentType);
 
-  if (!contentType.includes("application/json")) {
-    // 만약 Body가 없고 성공 응답이라면 통과 (예: 200 OK with Void)
-    if (res.ok && contentLength === "0") {
-      return NextResponse.json({}, { status: res.status });
+    // ✅ 업스트림이 에러면 body를 찍어라 (409 이유/메시지가 여기 있음)
+    if (!res.ok) {
+      console.error("[BFF] upstream error:", res.status, "body=", text.slice(0, 2000));
     }
 
-    const text = await readTextSafe(res);
-    return NextResponse.json(
-      {
-        error: {
-          code: "UPSTREAM_NOT_JSON",
-          message: "백엔드가 JSON이 아닌 응답을 반환",
-          status: res.status,
-          detail: text.slice(0, 300),
+    // JSON 체크
+    if (!contentType.includes("application/json")) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "UPSTREAM_NOT_JSON",
+            message: "백엔드가 JSON이 아닌 응답을 반환",
+            status: res.status,
+            detail: text.slice(0, 300),
+          },
         },
-      },
-      { status: 502 }
+        { status: 502 }
+      );
+    }
+
+    // ✅ text를 이미 읽었으니 여기서는 parse만
+    const data = text ? (() => { try { return JSON.parse(text); } catch { return text; } })() : null;
+    return NextResponse.json(data, { status: res.status });
+
+  } catch (e) {
+    // ✅ ECONNREFUSED 같은 게 여기로 옴
+    console.error("[BFF] fetch failed:", url, e);
+
+    return NextResponse.json(
+      { error: { code: "INTERNAL_ERROR", message: "서버 오류가 발생했습니다.", fieldErrors: null } },
+      { status: 500 }
     );
   }
-
-  const data = await parseJsonIfPossible(res);
-  return NextResponse.json(data, { status: res.status });
 }
+
 
 /**
  * 스트리밍 프록시 (multipart/form-data 포함)

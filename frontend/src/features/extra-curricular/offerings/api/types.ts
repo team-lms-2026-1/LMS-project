@@ -1,3 +1,5 @@
+import { Page } from "@/features/community/categories/api/types";
+
 export type ApiResponse<T, M = null> = {
   data: T;
   meta: M;
@@ -16,6 +18,10 @@ export type PageMeta = {
 export type ExtraOfferingStatus = "DRAFT" | "OPEN" | "ENROLLMENT_CLOSED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | string;
 
 export type ExtraSessionStatus = "OPEN" | "CLOSED" | "CANCELED" | string;
+
+export type ExtraApplicationApplyStatus = "APPLIED" | "CANCELED" | string;
+
+export type CompletionStatus = "IN_PROGRESS" | "PASSED" | "FAILED" | string;
 
 export type CompetencyCode = "C1" | "C2" | "C3" | "C4" | "C5" | "C6" | string;
 
@@ -69,11 +75,111 @@ export type ExtraCurricularOfferingCompetencyDto = {
   weight: number | null;
 }
 
+export type ExtraSessionListItemDto = {
+  sessionId: number;
+  sessionName: string;
+  startAt: string;
+  endAt: string;
+  rewardPoint: number;
+  recognizedHours: number;
+  status: ExtraSessionStatus;
+  videoId: number;
+  videoTitle: string;
+  durationSeconds: number;
+}
+
+export type ExtraSessionVideoDetailDto = {
+  videoId: number;
+  title: string;
+  durationSeconds: number;
+  previewUrl: string; // presigned GET url
+};
+
+export type ExtraSessionDetailDto = {
+  sessionId: number;
+  extraOfferingId: number;
+  sessionName: string;
+  status: ExtraSessionStatus;
+
+  startAt: string; // ISO-8601
+  endAt: string;   // ISO-8601
+
+  rewardPoint: number;
+  recognizedHours: number;
+
+  video: ExtraSessionVideoDetailDto;
+};
+
+export type ExtraOfferingApplicantSessionDto = {
+  sessionId: number;
+  sessionTitle: string;
+  sessionStatus: ExtraSessionStatus;
+  isAttended: boolean;
+};
+
+export type ExtraOfferingApplicantRowDto = {
+  applicationId: number;
+  studentAccountId: number;
+  studentNo: string;
+  studentName: string;
+  deptName: string;
+  gradeLevel: string;
+  applyStatus: ExtraApplicationApplyStatus;
+  completionStatus: CompletionStatus;
+  sessions: ExtraOfferingApplicantSessionDto[];
+};
+
+export type ExtraCurricularGradeListItemDto = {
+  studentAccountId: number;
+  studentNo: string;
+  deptName: string;
+  gradeLevel: number;
+  name: string;
+  totalEarnedPoints: number;
+  totalEarnedHours: number;
+};
+
+export type ExtraGradeTrendItemDto = {
+  semesterId: number;
+  semesterName: string;
+  semesterEarnedPoints: number;
+  semesterEarnedHours: number;
+};
+
+export type ExtraGradeDetailHeaderDto = {
+  studentAccountId: number;
+  studentName: string;
+  studentNo: string;
+  deptId: number;
+  deptName: string;
+  gradeLevel: number;
+  totalEarnedPoints: number;
+  totalEarnedHours: number;
+  trend: ExtraGradeTrendItemDto[];
+};
+
+export type ExtraCompletionListItemDto = {
+  applicationId: number;
+  semesterId: number;
+  semesterName: string;
+  extraOfferingCode: string;
+  extraOfferingName: string;
+  rewardPointDefault: number;
+  recognizedHoursDefault: number;
+  completionStatus: CompletionStatus;
+};
+
 /** Response */
 export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
 export type ExtraCurricularOfferingListResponsee = ApiResponse<ExtraCurricularOfferingListItemDto[], PageMeta>;
 export type ExtraCurricularOfferingDetailResponse = ApiResponse<ExtraCurricularOfferingDetailDto, null>;
 export type ExtraCurricularOfferingCompetencyResponse = ApiResponse<ExtraCurricularOfferingCompetencyDto[], null>;
+export type ExtraSessionListResponse = ApiResponse<ExtraSessionListItemDto[], PageMeta>;
+export type ExtraSessionDetailResponse = ApiResponse<ExtraSessionDetailDto, null>
+export type ExtraOfferingApplicantListResponse = ApiResponse<ExtraOfferingApplicantRowDto[], PageMeta>;
+export type ExtraCurricularGradeListResponse = ApiResponse<ExtraCurricularGradeListItemDto[], PageMeta>;
+export type ExtraGradeDetailHeaderResponse = ApiResponse<ExtraGradeDetailHeaderDto, null>;
+export type ExtraCompletionListResponse = ApiResponse<ExtraCompletionListItemDto[], PageMeta>;
 
 /** Request */
 export type ExtraCurricularOfferingCreateRequest = {
@@ -103,6 +209,11 @@ export type ExtraCurricularOfferingDetailUpdateRequest = {
   operationEndAt: string;
 }
 
+// 상태변경
+export type ExtraCurricularOfferingStatusUpdateRequest = {
+  status: ExtraOfferingStatus;
+}
+
 /** Request - 역량 맵핑(단건 아이템) */
 export type ExtraCurricularOfferingCompetencyMappingItem = {
   competencyId: number;
@@ -113,3 +224,56 @@ export type ExtraCurricularOfferingCompetencyMappingItem = {
 export type ExtraCurricularOfferingCompetencyMappingBulkUpdateRequest = {
   mappings: ExtraCurricularOfferingCompetencyMappingItem[];
 };
+
+// 세션생성
+export type ExtraSessionVideoCreateRequest = {
+  storageKey: string;
+  title: string;
+  durationSeconds: number;
+};
+
+export type ExtraCurricularSessionCreateRequest = {
+  sessionName: string;
+  startAt: string; // ISO-8601
+  endAt: string;   // ISO-8601
+  rewardPoint: number;
+  recognizedHours: number;
+  video: ExtraSessionVideoCreateRequest;
+};
+
+// 세션수정
+export type ExtraSessionVideoPatchRequest = {
+  title?: string | null;
+  videoUrl?: string | null;     // 보통은 안 보냄(undefined)
+  storageKey?: string | null;
+  durationSeconds?: number | null;
+};
+
+export type ExtraSessionUpdateRequest = {
+  sessionName?: string | null;
+  startAt?: string | null;       // ISO-8601 "2026-02-06T00:00:00"
+  endAt?: string | null;
+  rewardPoint?: number | null;
+  recognizedHours?: number | null;
+  video?: ExtraSessionVideoPatchRequest | null;
+};
+
+// 세션 상태변경
+export type ExtraSessionStatusChangeRequest = {
+  targetStatus: ExtraSessionStatus;
+};
+
+/** ===== Presign (Request/Response) ===== */
+export type ExtraSessionVideoPresignRequest = {
+  originalFileName: string;
+  contentType: string; // "video/mp4"
+  contentLength: number; // bytes
+};
+
+export type ExtraSessionVideoPresignDto = {
+  storageKey: string;
+  uploadUrl: string;
+  expiresAt: string; // ISO-8601
+};
+
+export type ExtraSessionVideoPresignResponse = ApiResponse<ExtraSessionVideoPresignDto, null>;

@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.teamlms.backend.domain.extracurricular.api.dto.AdminExtraCurricularSessionDetailRow;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionDetailResponse;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSessionListItem;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingRepository;
@@ -20,6 +21,7 @@ public class AdminExtraCurricularSessionQueryService {
 
     private final ExtraCurricularOfferingRepository offeringRepository;
     private final ExtraCurricularSessionRepository sessionRepository;
+    private final ExtraSessionVideoPreviewUrlService previewUrlService;
 
     @Transactional(readOnly = true)
     public Page<ExtraCurricularSessionListItem> list(Long extraOfferingId, String keyword, Pageable pageable) {
@@ -39,13 +41,30 @@ public class AdminExtraCurricularSessionQueryService {
             throw new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_FOUND);
         }
 
-        ExtraCurricularSessionDetailResponse dto =
+        AdminExtraCurricularSessionDetailRow row =
             sessionRepository.findAdminSessionDetail(extraOfferingId, sessionId);
 
-        if (dto == null) {
+        if (row == null) {
             throw new BusinessException(ErrorCode.EXTRA_SESSION_NOT_FOUND);
         }
 
-        return dto;
+        String previewUrl = previewUrlService.createPreviewUrl(row.storageKey());
+
+        return new ExtraCurricularSessionDetailResponse(
+            row.sessionId(),
+            row.extraOfferingId(),
+            row.sessionName(),
+            row.status().name(),
+            row.startAt().toString(),
+            row.endAt().toString(),
+            row.rewardPoint(),
+            row.recognizedHours(),
+            new ExtraCurricularSessionDetailResponse.VideoDto(
+                row.videoId(),
+                row.videoTitle(),
+                (row.durationSeconds() == null) ? null : row.durationSeconds().longValue(),
+                previewUrl
+            )
+        );
     }
 }

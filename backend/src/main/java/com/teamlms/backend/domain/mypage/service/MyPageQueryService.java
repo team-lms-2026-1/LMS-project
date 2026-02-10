@@ -1,0 +1,73 @@
+package com.teamlms.backend.domain.mypage.service;
+
+import com.teamlms.backend.domain.mypage.api.dto.StudentMypageResponse;
+import com.teamlms.backend.domain.mypage.dto.TimetableInfo;
+import com.teamlms.backend.domain.mypage.entity.StudentMypageSummary;
+import com.teamlms.backend.domain.mypage.repository.MyPageTimetableRepository;
+import com.teamlms.backend.domain.mypage.repository.StudentMypageSummaryRepository;
+import com.teamlms.backend.domain.semester.enums.Term;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class MyPageQueryService {
+
+    private final StudentMypageSummaryRepository studentMypageSummaryRepository;
+    private final MyPageTimetableRepository myPageTimetableRepository;
+
+    /**
+     * 학생 마이페이지 종합 정보 조회 (API Response)
+     * 
+     * @param accountId 계정 ID
+     * @param year      조회할 연도 (Optional)
+     * @param term      조회할 학기 (Optional)
+     * @return StudentMypageResponse
+     */
+    public StudentMypageResponse getStudentMyPage(Long accountId, Integer year, String term) {
+        StudentMypageSummary summary = studentMypageSummaryRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+
+        List<TimetableInfo> timetable = getTimetable(accountId, summary, year, term);
+
+        return toResponse(summary, timetable);
+    }
+
+    private List<TimetableInfo> getTimetable(Long accountId, StudentMypageSummary summary, Integer year, String term) {
+        if (year != null && term != null) {
+            try {
+                return myPageTimetableRepository.findTimetableBySemester(
+                        accountId,
+                        year,
+                        Term.valueOf(term));
+            } catch (IllegalArgumentException e) {
+                // Invalid term string fallback
+                throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+            }
+        }
+        return summary.getCurrentTimetableJson();
+    }
+
+    private StudentMypageResponse toResponse(StudentMypageSummary entity, List<TimetableInfo> timetable) {
+        return StudentMypageResponse.builder()
+                .accountId(entity.getAccountId())
+                .studentNo(entity.getStudentNo())
+                .studentName(entity.getStudentName())
+                .deptName(entity.getDeptName())
+                .gradeLevel(entity.getGradeLevel())
+                .academicStatus(entity.getAcademicStatus())
+                .profileImageUrl(entity.getProfileImageUrl())
+                .totalCredits(entity.getTotalCredits())
+                .averageScore(entity.getAverageScore())
+                .totalExtraPoints(entity.getTotalExtraPoints())
+                .totalExtraHours(entity.getTotalExtraHours())
+                .currentTimetable(timetable)
+                .build();
+    }
+}

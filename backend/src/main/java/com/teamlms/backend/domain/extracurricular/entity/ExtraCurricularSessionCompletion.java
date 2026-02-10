@@ -35,7 +35,6 @@ public class ExtraCurricularSessionCompletion extends BaseEntity {
     @Column(name = "application_id", nullable = false)
     private Long applicationId;
 
-    // 팀 규칙: Boolean wrapper
     @Column(name = "is_attended", nullable = false)
     private Boolean isAttended;
 

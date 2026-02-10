@@ -4,20 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./ResourceEditPage.module.css";
-import type { Category, ResourceListItemDto, ResourceFileDto } from "../../api/types";
+import type { Category, ResourceListItemDto, ResourceFileDto, ExistingFile, LoadState, } from "../../api/types";
 import { fetchResourceCategories, fetchResourceDetail, updateResource } from "../../api/ResourcesApi";
 import { Button } from "@/components/button";
-
-type LoadState =
-  | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: ResourceListItemDto | null };
-
-/** ✅ 기존 첨부(서버) - 삭제 식별자: fileId 기반 */
-type ExistingFile = {
-  fileId?: number;
-  fileName: string;
-  url?: string;
-};
 
 function normalizeDetail(payload: any): ResourceListItemDto {
   const raw = payload?.data ?? payload;
@@ -35,9 +24,6 @@ function normalizeDetail(payload: any): ResourceListItemDto {
   };
 }
 
-/** ✅ 서버 files(any[]) → ExistingFile[]로 정규화
- *  - fileId / id / attachmentId 어떤 키로 와도 숫자로 강제 변환
- */
 function normalizeExistingFiles(files: any[]): ExistingFile[] {
   if (!Array.isArray(files)) return [];
 
@@ -50,7 +36,7 @@ function normalizeExistingFiles(files: any[]): ExistingFile[] {
 
     const fileName = String(
       (dto as any)?.originalName ??
-        (dto as any)?.originaName ?? // 오타 방어
+        (dto as any)?.originaName ?? 
         (dto as any)?.fileName ??
         (dto as any)?.name ??
         `첨부파일 ${idx + 1}`
@@ -90,9 +76,12 @@ export default function ResourceEditPageClient() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [load, setLoad] = useState<LoadState>({ loading: true, error: null, data: null });
+  const [load, setLoad] = useState<LoadState<ResourceListItemDto>>({
+    loading: true,
+    error: null,
+    data: null,
+  });
 
-  // 폼 상태
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
@@ -221,23 +210,26 @@ export default function ResourceEditPageClient() {
     if (!t) return setFormError("제목을 입력하세요.");
     if (!c) return setFormError("내용을 입력하세요.");
 
-    const hasFileChanges = newFiles.length > 0 || deletedFileIds.length > 0;
+    // ✅ 새 파일이 있을 때만 files 파트를 보냄
+    const filesToSend = newFiles.length > 0 ? newFiles : undefined;
 
     setSaving(true);
     try {
-      await updateResource(
+      const res = await updateResource(
         resourceId,
         {
           title: t,
           content: c,
           categoryId: categoryId ? Number(categoryId) : undefined,
-          deleteFileIds: deletedFileIds, // ✅ 삭제 ID 전달
+          deleteFileIds: deletedFileIds,
         },
-        hasFileChanges ? newFiles : undefined
+        filesToSend
       );
 
-      router.push(DETAIL_PATH);
-      
+      const nextId =
+        (res as any)?.data?.resourceId != null ? Number((res as any).data.resourceId) : resourceId;
+
+      router.push(`/admin/community/resources/${nextId}?toast=updated`);
     } catch (e: any) {
       setFormError(e?.message ?? "수정에 실패했습니다.");
     } finally {

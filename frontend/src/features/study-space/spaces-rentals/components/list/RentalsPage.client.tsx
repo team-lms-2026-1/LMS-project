@@ -7,6 +7,7 @@ import RentalsTable from "./RentalsTable";
 import { SearchBar } from "@/components/searchbar";
 import { PaginationSimple } from "@/components/pagination";
 import RejectedModal from "../modal/RejectedModal";
+import ApproveModal from "../modal/ApproveModal";
 
 export default function RentalsPageClient() {
     const { data, meta, loading, updateParams, approveRental, rejectRental } = useRentalsList();
@@ -15,6 +16,8 @@ export default function RentalsPageClient() {
     // Modal State
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
     const [selectedRentalId, setSelectedRentalId] = useState<number | null>(null);
+    const [approveModalOpen, setApproveModalOpen] = useState(false);
+    const [approveRentalId, setApproveRentalId] = useState<number | null>(null);
 
     const onSearch = () => {
         updateParams({ keyword, page: 1 });
@@ -30,6 +33,11 @@ export default function RentalsPageClient() {
         setRejectModalOpen(true);
     };
 
+    const onApproveClick = (id: number) => {
+        setApproveRentalId(id);
+        setApproveModalOpen(true);
+    };
+
     // 모달에서 확인 클릭 시 실제 반려 처리
     const onRejectConfirm = (reason: string) => {
         if (selectedRentalId) {
@@ -37,6 +45,14 @@ export default function RentalsPageClient() {
         }
         setRejectModalOpen(false);
         setSelectedRentalId(null);
+    };
+
+    const onApproveConfirm = () => {
+        if (approveRentalId) {
+            approveRental(approveRentalId);
+        }
+        setApproveModalOpen(false);
+        setApproveRentalId(null);
     };
 
     return (
@@ -68,7 +84,7 @@ export default function RentalsPageClient() {
                 <RentalsTable
                     data={data}
                     loading={loading}
-                    onApprove={approveRental}
+                    onApprove={onApproveClick}
                     onReject={onRejectClick}
                 />
             </div>
@@ -89,6 +105,14 @@ export default function RentalsPageClient() {
                 open={rejectModalOpen}
                 onClose={() => setRejectModalOpen(false)}
                 onConfirm={onRejectConfirm}
+            />
+            <ApproveModal
+                open={approveModalOpen}
+                onClose={() => {
+                    setApproveModalOpen(false);
+                    setApproveRentalId(null);
+                }}
+                onConfirm={onApproveConfirm}
             />
         </div>
     );

@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./SpacesDetailPage.module.css";
 
 import { spacesApi } from "../../api/SpacesApi";
 import type { SpaceDetailDto } from "../../api/types";
 import { Button } from "@/components/button";
 import SpacesRoomModal from "../modal/SpacesRoomModal.client";
+import SpacesDeleteModal from "../modal/SpacesDeleteModal.client";
+import toast from "react-hot-toast";
 
 type Props = {
   spaceId: number;
@@ -15,12 +17,31 @@ type Props = {
 
 export default function SpacesDetailPageClient({ spaceId }: Props) {
   const router = useRouter();
+  const sp = useSearchParams();
+  const toastOnceRef = useRef<string | null>(null);
 
   const [data, setData] = useState<SpaceDetailDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
   const [roomOpen, setRoomOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const t = sp.get("toast");
+    if (!t) return;
+    if (toastOnceRef.current === t) return;
+    toastOnceRef.current = t;
+
+    if (t === "created") toast.success("학습공간이 등록되었습니다.", { id: "space-toast-created" });
+    else if (t === "updated") toast.success("학습공간이 수정되었습니다.", { id: "space-toast-updated" });
+
+    const next = new URLSearchParams(sp.toString());
+    next.delete("toast");
+    const qs = next.toString();
+    router.replace(qs ? `/admin/study-space/spaces/${spaceId}?${qs}` : `/admin/study-space/spaces/${spaceId}`);
+  }, [sp, router, spaceId]);
 
   useEffect(() => {
     let alive = true;
@@ -70,15 +91,23 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
     router.push("/admin/study-space/spaces");
   };
 
-  const onClickDelete = async () => {
-    if (!confirm("정말 삭제할까요?")) return;
+  const onClickDelete = () => {
+    setDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (deleting) return;
 
     try {
+      setDeleting(true);
       await spacesApi.remove(spaceId);
-      router.push("/admin/study-space/spaces");
+      router.push("/admin/study-space/spaces?toast=deleted");
       router.refresh();
     } catch (e: any) {
-      alert(e?.message || "삭제 중 오류가 발생했습니다.");
+      toast.error(e?.message || "삭제 중 오류가 발생했습니다.");
+    } finally {
+      setDeleting(false);
+      setDeleteOpen(false);
     }
   };
 
@@ -153,6 +182,16 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
 
       {/* ✅ 그룹 스터디실 관리 모달 (모달 내부에서 API 처리) */}
       <SpacesRoomModal open={roomOpen} onClose={() => setRoomOpen(false)} spaceId={spaceId} />
+      <SpacesDeleteModal
+        open={deleteOpen}
+        targetTitle={data?.spaceName}
+        loading={deleting}
+        onClose={() => {
+          if (deleting) return;
+          setDeleteOpen(false);
+        }}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

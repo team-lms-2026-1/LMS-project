@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { NoticeListItemDto, PageMeta } from "../api/types";
-import { fetchNoticesList } from "../api/NoticesApi"; // ✅ import 경로/파일명 프로젝트에 맞게 통일
+import { fetchNoticesList } from "../api/NoticesApi";
 
 const defaultMeta: PageMeta = {
   page: 1,

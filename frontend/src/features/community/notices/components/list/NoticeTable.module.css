@@ -37,6 +37,11 @@
   color: #111827;
   text-decoration: none;
 }
-.titleLink:hover {
-  text-decoration: underline;
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover {
+  background: #f9fafb;
 }

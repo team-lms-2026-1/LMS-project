@@ -6,6 +6,8 @@ import com.teamlms.backend.global.exception.dto.ErrorResponse;
 import com.teamlms.backend.global.exception.dto.FieldErrorItem;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,17 +21,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource; // i18n (없으면 주입 실패) -> Config 포함 권장
 
+    
     /**
      * Bean Validation (@Valid) 실패
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        
         ErrorCode ec = ErrorCode.VALIDATION_ERROR;
 
         List<FieldErrorItem> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
@@ -90,6 +95,15 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest req) {
+
+        // ✅ 추가: 스택트레이스 로깅
+        log.error("[UNEXPECTED] {} {} | query={} | ua={}",
+                req.getMethod(),
+                req.getRequestURI(),
+                req.getQueryString(),
+                req.getHeader("User-Agent"),
+                ex);
+
         ErrorCode ec = ErrorCode.INTERNAL_ERROR;
         String message = resolveMessage(ec, null, LocaleContextHolder.getLocaleSafely());
         return ResponseEntity.status(ec.getHttpStatus())

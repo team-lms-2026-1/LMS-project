@@ -17,7 +17,6 @@ import com.teamlms.backend.global.exception.code.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -80,16 +79,15 @@ public class AccountCommandService {
         defaultRoleAssignerService.assignDefaultRole(
                 account.getAccountId(),
                 accountType,
-                actorAccountId
-        );
-        
+                actorAccountId);
 
         return account.getAccountId();
     }
 
-    public Account updateStatus(Long accountId, AccountStatus status, Long actorAccountId ) {
-        
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
+    public Account updateStatus(Long accountId, AccountStatus status, Long actorAccountId) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
         AccountStatus newStatus = status; // 문자열에서 enum변환
 
@@ -114,7 +112,6 @@ public class AccountCommandService {
 
         studentProfileRepository.save(sp);
     }
-
 
     private void createProfessorProfile(Account account, AdminAccountCreateRequest.Profile p) {
 
@@ -157,7 +154,7 @@ public class AccountCommandService {
         if (p.getGradeLevel() == null) {
             throw new IllegalArgumentException("학생 계정은 gradeLevel(학년)이 필수입니다.");
         }
-        if (p.getAcademicStatus() == null ) {
+        if (p.getAcademicStatus() == null) {
             throw new IllegalArgumentException("학생 계정은 academicStatus(학적상태)가 필수입니다.");
         }
 
@@ -188,8 +185,7 @@ public class AccountCommandService {
             }
 
             studentMajorRepository.save(
-                    StudentMajor.of(studentAccount.getAccountId(), major.getMajorId(), m.getMajorType())
-            );
+                    StudentMajor.of(studentAccount.getAccountId(), major.getMajorId(), m.getMajorType()));
         }
     }
 
@@ -204,7 +200,7 @@ public class AccountCommandService {
             throw new IllegalArgumentException("교수 계정은 professorNo가 필수입니다.");
         }
     }
-    
+
     // 계정 수정
     @Transactional
     public void adminUpdate(Long accountId, AdminAccountUpdateRequest req, Long actorAccountId) {
@@ -240,12 +236,17 @@ public class AccountCommandService {
         // -------------------------
         // 1) 공통/학생 기본 필드 부분수정
         // -------------------------
-        if (req.getName() != null) sp.updateName(req.getName());
-        if (req.getEmail() != null) sp.updateEmail(req.getEmail());
-        if (req.getPhone() != null) sp.updatePhone(req.getPhone());
+        if (req.getName() != null)
+            sp.updateName(req.getName());
+        if (req.getEmail() != null)
+            sp.updateEmail(req.getEmail());
+        if (req.getPhone() != null)
+            sp.updatePhone(req.getPhone());
 
-        if (req.getGradeLevel() != null) sp.updateGradeLevel(req.getGradeLevel());
-        if (req.getAcademicStatus() != null) sp.updateAcademicStatus(req.getAcademicStatus());
+        if (req.getGradeLevel() != null)
+            sp.updateGradeLevel(req.getGradeLevel());
+        if (req.getAcademicStatus() != null)
+            sp.updateAcademicStatus(req.getAcademicStatus());
 
         // -------------------------
         // 2) 전과 + 전공 전체교체 (둘 다 들어온 경우만)
@@ -277,41 +278,46 @@ public class AccountCommandService {
                 }
 
                 studentMajorRepository.save(
-                        StudentMajor.of(accountId, major.getMajorId(), m.getMajorType())
-                );
+                        StudentMajor.of(accountId, major.getMajorId(), m.getMajorType()));
             }
 
         }
     }
 
-
     private void updateProfessorProfile(Long accountId, AdminAccountUpdateRequest req, Long actorAccountId) {
         ProfessorProfile pp = professorProfileRepository.findById(accountId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
-        if (req.getName() != null) pp.updateName(req.getName());
-        if (req.getEmail() != null) pp.updateEmail(req.getEmail());
-        if (req.getPhone() != null) pp.updatePhone(req.getPhone());
+        if (req.getName() != null)
+            pp.updateName(req.getName());
+        if (req.getEmail() != null)
+            pp.updateEmail(req.getEmail());
+        if (req.getPhone() != null)
+            pp.updatePhone(req.getPhone());
 
-        if (req.getDeptId() != null) pp.updateDeptId(req.getDeptId());
+        if (req.getDeptId() != null)
+            pp.updateDeptId(req.getDeptId());
     }
 
     private void updateAdminProfile(Long accountId, AdminAccountUpdateRequest req, Long actorAccountId) {
         AdminProfile ap = adminProfileRepository.findById(accountId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId));
 
-        if (req.getName() != null) ap.updateName(req.getName());
-        if (req.getEmail() != null) ap.updateEmail(req.getEmail());
-        if (req.getPhone() != null) ap.updatePhone(req.getPhone());
+        if (req.getName() != null)
+            ap.updateName(req.getName());
+        if (req.getEmail() != null)
+            ap.updateEmail(req.getEmail());
+        if (req.getPhone() != null)
+            ap.updatePhone(req.getPhone());
 
-        if (req.getMemo() != null) ap.updateMemo(req.getMemo());
+        if (req.getMemo() != null)
+            ap.updateMemo(req.getMemo());
     }
 
     // 학생 전공 검증 메서드
     private void validateUpdateMajorsOrThrow(
             Long targetDeptId,
-            List<AdminAccountUpdateRequest.MajorMapping> majors
-    ) {
+            List<AdminAccountUpdateRequest.MajorMapping> majors) {
         if (majors == null || majors.isEmpty()) {
             throw new IllegalArgumentException("majors는 비어 있을 수 없습니다.");
         }
@@ -351,6 +357,5 @@ public class AccountCommandService {
                     + "는 deptId=" + targetDeptId + " 소속 전공이어야 합니다.");
         }
     }
-
 
 }

@@ -7,6 +7,7 @@ import styles from "./SpacesCreatePage.module.css";
 import { spacesApi } from "../../api/SpacesApi";
 import type { CreateSpaceDetailRequestDto, SpaceRuleUpsertDto } from "../../api/types";
 import { Button } from "@/components/button";
+import toast from "react-hot-toast";
 
 type RuleRowState = {
   content: string;
@@ -156,19 +157,18 @@ export default function SpacesCreatePageClient() {
       // ✅ 등록은 multipart로
       const created = await spacesApi.createDetailMultipart(dto, imageFile);
 
-      alert("등록되었습니다.");
 
       // ✅ 등록 후 상세로 이동(응답에 spaceId가 있으면)
       const createdId = created?.data?.spaceId;
       if (createdId) {
-        router.push(`/admin/study-space/spaces/${createdId}`);
+        router.push(`/admin/study-space/spaces/${createdId}?toast=created`);
       } else {
-        router.push("/admin/study-space/spaces");
+        router.push("/admin/study-space/spaces?toast=created");
       }
       router.refresh();
     } catch (e: any) {
       console.error("[SpacesCreate submit]", e);
-      alert(e?.message || "등록 중 오류가 발생했습니다.");
+      toast.error(e?.message || "등록 중 오류가 발생했습니다.");
     } finally {
       setSaving(false);
     }

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class AuthLoginRequest {
 
     @NotBlank
-    @Pattern(regexp = "^[spa]\\d{8}$", message = "loginId는 s/p/a + 8자리 숫자여야 합니다.")
+    @Pattern(regexp = "^[spa]\\d{8}$", message = "{validation.auth.loginId.pattern}")
     private String loginId;
 
     @NotBlank

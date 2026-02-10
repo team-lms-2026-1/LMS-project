@@ -60,7 +60,7 @@ public class StudySpaceQueryService {
     // 2. 학습공간 상세 조회
     public SpaceDetailResponse getSpaceDetail(Long spaceId) {
         StudySpace space = spaceRepository.findById(spaceId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_NOT_FOUND_A));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_NOT_FOUND));
 
         List<StudySpaceImage> images = imageRepository.findByStudySpaceIdOrderBySortOrderAsc(spaceId);
         List<StudySpaceRule> rules = ruleRepository.findByStudySpaceIdOrderBySortOrderAsc(spaceId);

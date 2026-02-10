@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styles from "./RejectedModal.module.css";
 import { Button } from "@/components/button";
+import toast from "react-hot-toast";
 
 type Props = {
     open: boolean;
@@ -15,7 +16,7 @@ export default function RejectedModal({ open, onClose, onConfirm }: Props) {
 
     const handleSubmit = () => {
         if (!reason.trim()) {
-            alert("반려 사유를 입력해주세요.");
+            toast.error("반려 사유를 입력해주세요.");
             return;
         }
         onConfirm(reason);

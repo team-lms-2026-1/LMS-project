@@ -10,7 +10,7 @@ import type {
   ExtraOfferingStatus,
 } from "../../api/types";
 
-import { updateCurricularOfferingDetail } from "../../api/extraCurricularOfferingApi";
+import { updateExtraCurricularOfferingDetail } from "../../api/extraCurricularOfferingApi";
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 
@@ -166,7 +166,7 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
         operationEndAt: toEndAt(operationEndDate),
       };
 
-      await updateCurricularOfferingDetail(offeringId, body);
+      await updateExtraCurricularOfferingDetail(offeringId, body);
 
       setEditMode(false);
       await onReload?.();

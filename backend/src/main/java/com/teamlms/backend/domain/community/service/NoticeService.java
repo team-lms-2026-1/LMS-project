@@ -80,7 +80,7 @@ public class NoticeService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
 
         NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Notice notice = Notice.builder()
                 .title(request.getTitle())
@@ -99,49 +99,6 @@ public class NoticeService {
 
         return notice.getId();
     }
-
-    // // 4. 수정
-    // @Transactional
-    // public void updateNotice(Long noticeId, ExternalNoticePatchRequest request,
-    // List<MultipartFile> newFiles, Long modifierId) {
-    // Notice notice = noticeRepository.findById(noticeId)
-    // .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
-
-    // // 4-1. 정보 수정
-    // if (request.getCategoryId() != null) {
-    // NoticeCategory category =
-    // categoryRepository.findById(request.getCategoryId())
-    // .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
-    // notice.changeCategory(category); // 엔티티에 changeCategory 메서드 필요
-    // }
-
-    // // 자료실 스타일의 필드별 수정
-    // if (request.getTitle() != null) notice.changeTitle(request.getTitle());
-    // if (request.getContent() != null) notice.changeContent(request.getContent());
-    // if (request.getDisplayStartAt() != null)
-    // notice.changeDisplayStartAt(parseDateTime(request.getDisplayStartAt()));
-    // if (request.getDisplayEndAt() != null)
-    // notice.changeDisplayEndAt(parseDateTime(request.getDisplayEndAt()));
-
-    // // 4-2. 파일 삭제
-    // if (request.getDeleteFileIds() != null &&
-    // !request.getDeleteFileIds().isEmpty()) {
-    // List<NoticeAttachment> attachmentsToDelete =
-    // attachmentRepository.findAllById(request.getDeleteFileIds());
-    // for (NoticeAttachment att : attachmentsToDelete) {
-    // s3Service.delete(extractKeyFromUrl(att.getStorageKey()));
-    // }
-    // attachmentRepository.deleteAllById(request.getDeleteFileIds());
-    // }
-
-    // // 4-3. 새 파일 추가
-    // if (newFiles != null && !newFiles.isEmpty()) {
-    // Account modifier = accountRepository.findById(modifierId)
-    // .orElseThrow(() -> new
-    // BusinessException(ErrorCode.RESOURCE_AUTHOR_NOT_FOUND));
-    // saveAttachments(newFiles, notice, modifier);
-    // }
-    // }
 
     // 5. 삭제
     @Transactional
@@ -168,7 +125,7 @@ public class NoticeService {
         // 4-1. 기본 정보 수정
         if (request.getCategoryId() != null) {
             NoticeCategory category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_CATEGORY));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
             notice.changeCategory(category);
         }
 
@@ -180,7 +137,7 @@ public class NoticeService {
         // 날짜 파싱 로직 (String -> LocalDateTime)
         if (request.getDisplayStartAt() != null) {
             notice.changeDisplayStartAt(LocalDateTime.parse(request.getDisplayStartAt())); // 포맷에 따라 DateTimeFormatter
-                                                                                           // 필요할 수 있음
+            // 필요할 수 있음
         }
         if (request.getDisplayEndAt() != null) {
             notice.changeDisplayEndAt(LocalDateTime.parse(request.getDisplayEndAt()));
@@ -287,6 +244,12 @@ public class NoticeService {
                 .viewCount(notice.getViewCount())
                 .createdAt(notice.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .status(status.getDescription())
+                .displayStartAt(notice.getDisplayStartAt() != null
+                        ? notice.getDisplayStartAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                        : null)
+                .displayEndAt(notice.getDisplayEndAt() != null
+                        ? notice.getDisplayEndAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                        : null)
                 .files(filesDto)
                 .build();
     }
