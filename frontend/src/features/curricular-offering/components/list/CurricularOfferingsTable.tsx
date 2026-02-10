@@ -2,14 +2,14 @@
 
 import { Table, type TableColumn } from "@/components/table";
 import { CurricularOfferingListItemDto } from "../../api/types";
-import styles from "./CUrricularOfferingsTable.module.css"
+import styles from "./CurricularOfferingsTable.module.css"
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
 
 type Props = {
   items: CurricularOfferingListItemDto[];
   loading: boolean;
-//   onEditClick: (id: number) => void;
+  //   onEditClick: (id: number) => void;
   onRowClick?: (row: CurricularOfferingListItemDto) => void;
 };
 
@@ -43,7 +43,7 @@ export function CurricularOfferingsTable({ items, loading, onRowClick }: Props) 
             onClick={(e) => {
               e.stopPropagation();
               onRowClick?.(r);
-            }} 
+            }}
           >
             상세
           </Button>
