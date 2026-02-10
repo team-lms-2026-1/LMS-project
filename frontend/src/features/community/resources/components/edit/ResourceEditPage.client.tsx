@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./ResourceEditPage.module.css";
 import type { Category, ResourceListItemDto, ResourceFileDto, ExistingFile, LoadState, } from "../../api/types";
-import { fetchResourceCategories, fetchResourceDetail, updateResource } from "../../api/ResourcesApi";
+import { fetchResourceCategories, fetchResourceDetail, updateResource } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
 
 function normalizeDetail(payload: any): ResourceListItemDto {
@@ -36,10 +36,10 @@ function normalizeExistingFiles(files: any[]): ExistingFile[] {
 
     const fileName = String(
       (dto as any)?.originalName ??
-        (dto as any)?.originaName ?? 
-        (dto as any)?.fileName ??
-        (dto as any)?.name ??
-        `첨부파일 ${idx + 1}`
+      (dto as any)?.originaName ??
+      (dto as any)?.fileName ??
+      (dto as any)?.name ??
+      `첨부파일 ${idx + 1}`
     );
 
     const url =
