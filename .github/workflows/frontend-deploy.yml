@@ -9,25 +9,33 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 1. Docker Hub 로그인
-    - name: Login to Docker Hub
+    # 1. GitHub Container Registry 로그인 (별도 비밀번호 설정 불필요)
+    - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    # 2. Docker 이미지 빌드 및 푸시 (GitHub Actions runner에서 실행)
+    # 2. Docker 이미지 빌드 및 푸시
     - name: Build and Push Docker Image
       run: |
         cd frontend
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest \
-          -t ${{ secrets.DOCKER_USERNAME }}/lms-frontend:${{ github.sha }} .
-        docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
-        docker push ${{ secrets.DOCKER_USERNAME }}/lms-frontend:${{ github.sha }}
+        # 이미지 태그를 소문자로 설정 (ghcr.io는 대문자 허용 안함)
+        IMAGE_ID=ghcr.io/team-lms-2026-1/lms-frontend
+        
+        docker build -t $IMAGE_ID:latest \
+          -t $IMAGE_ID:${{ github.sha }} .
+        docker push $IMAGE_ID:latest
+        docker push $IMAGE_ID:${{ github.sha }}
 
     # 3. EC2에서 이미지 pull 및 실행
     - name: Deploy to EC2
@@ -37,21 +45,25 @@ jobs:
         username: ec2-user
         key: ${{ secrets.SSH_KEY }}
         script: |
-          # 기존 컨테이너 중지 및 삭제
+          # 이미지 이름 정의
+          IMAGE_ID=ghcr.io/team-lms-2026-1/lms-frontend
+
+          # GitHub Container Registry 로그인 (EC2에서도 필요)
+          echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          # 기존 컨테이너 정리
           sudo docker stop frontend-server || true
           sudo docker rm frontend-server || true
-          
-          # 기존 이미지 삭제 (공간 확보)
-          sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest || true
+          sudo docker rmi $IMAGE_ID:latest || true
 
-          # Docker Hub에서 최신 이미지 pull
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
+          # 이미지 pull
+          sudo docker pull $IMAGE_ID:latest
 
-          # 도커 컨테이너 실행 (3000번 포트)
+          # 실행
           sudo docker run -d --name frontend-server \
             -p 3000:3000 \
             -e NEXT_PUBLIC_API_URL=http://43.201.157.8:8080 \
-            ${{ secrets.DOCKER_USERNAME }}/lms-frontend:latest
+            $IMAGE_ID:latest
           
-          # 불필요한 이미지 정리
+          # 정리
           sudo docker image prune -f
