@@ -98,7 +98,7 @@ public class ExtraCurricularOfferingCommandService {
         if (req.extraOfferingCode() != null) {
             nextCode = req.extraOfferingCode().trim();
             if (nextCode.isBlank()) {
-                throw new BusinessException(ErrorCode.OFFERING_CODE_EMPTY);
+                throw new BusinessException(ErrorCode.VALIDATION_ERROR, "extraOfferingCode");
             }
 
             boolean duplicated = offeringRepository
@@ -217,7 +217,7 @@ public class ExtraCurricularOfferingCommandService {
         List<Long> validSessionIds = sessionRepository.findValidSessionIds(extraOfferingId);
 
         if (validSessionIds.isEmpty()) {
-            throw new BusinessException(ErrorCode.EXTRA_OFFERING_NOT_COMPLETABLE_NO_SESSION);
+            throw new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_COMPLETABLE, "no valid session");
         }
 
         List<Long> applicationIds = applicationRepository.findApplicationIdsByOfferingAndApplyStatus(
@@ -280,7 +280,7 @@ public class ExtraCurricularOfferingCommandService {
 
         long existCount = competencyRepository.countByCompetencyIdIn(ids);
         if (existCount != ids.size()) {
-            throw new BusinessException(ErrorCode.COMPETENCY_ID_INVALID);
+            throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, "some competencyId not found");
         }
 
         // ✅ 기존 맵핑 전부 삭제 후 재생성

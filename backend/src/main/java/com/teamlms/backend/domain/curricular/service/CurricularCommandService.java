@@ -59,7 +59,7 @@ public class CurricularCommandService {
         }
 
         if (nextCredits < 0) {
-            throw new BusinessException(ErrorCode.CREDITS_NEGATIVE);
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "credits must be non-negative");
         }
 
         // 수정

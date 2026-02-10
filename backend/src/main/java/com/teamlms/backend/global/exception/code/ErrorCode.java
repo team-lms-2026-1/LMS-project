@@ -187,14 +187,6 @@ public enum ErrorCode {
     SURVEY_HAS_RESPONSES(HttpStatus.CONFLICT, "SURVEY_HAS_RESPONSES", "이미 응답이 존재하여 수정할 수 없습니다.", "survey.hasResponses"),
 
     // =========================
-    // Domain: Curricular & ExtraCurricular
-    // =========================
-    OFFERING_CODE_EMPTY(HttpStatus.BAD_REQUEST, "OFFERING_CODE_EMPTY", "개설 코드는 필수입니다.", "offering.code.empty"),
-    EXTRA_OFFERING_NOT_COMPLETABLE_NO_SESSION(HttpStatus.CONFLICT, "EXTRA_OFFERING_NOT_COMPLETABLE_NO_SESSION", "회차가 없어 완료할 수 없습니다.", "extra.offering.notCompletable.noSession"),
-    COMPETENCY_ID_INVALID(HttpStatus.BAD_REQUEST, "COMPETENCY_ID_INVALID", "유효하지 않은 역량 ID입니다.", "competency.id.invalid"),
-    CREDITS_NEGATIVE(HttpStatus.BAD_REQUEST, "CREDITS_NEGATIVE", "학점은 0보다 커야 합니다.", "credits.negative"),
-
-    // =========================
     // Domain: Log
     // =========================
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "LOG_NOT_FOUND", "로그를 찾을 수 없습니다.", "log.notFound"),
