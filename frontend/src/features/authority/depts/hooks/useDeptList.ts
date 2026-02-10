@@ -1,24 +1,28 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { DeptListItemDto, PageMeta } from "../api/types";
+import type { DeptListItemDto, PageMeta } from "../api/types";
 import { fetchDeptList } from "../api/deptsApi";
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_SIZE = 10; // PaginationSimple 기본이 10이라면 맞춰주는 게 편함
+
 const defaultMeta: PageMeta = {
-  page: 1,
-  size: 20,
+  page: DEFAULT_PAGE,
+  size: DEFAULT_SIZE,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
   hasPrev: false,
   sort: [],
 };
+
 export function useDeptList() {
   const [items, setItems] = useState<DeptListItemDto[]>([]);
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
-  const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [page, setPage] = useState(DEFAULT_PAGE);
+  const [size, setSize] = useState(DEFAULT_SIZE);
   const [keyword, setKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -32,7 +36,7 @@ export function useDeptList() {
       const res = await fetchDeptList({
         page,
         size,
-        keyword: keyword || undefined,
+        keyword: keyword.trim() || undefined, // 공백만 있으면 안 보냄
       });
 
       setItems(res.data);
@@ -54,30 +58,36 @@ export function useDeptList() {
   return {
     state: {
       items,
-      meta,   // ✅ 항상 PageMeta
+      meta,
       page,
-      size, 
+      size,
       keyword,
       loading,
       error,
     },
     actions: {
-      setKeyword,
-      search: () => setPage(1),
-      goPage: (p: number) => setPage(p),
+      /** 검색어 바꾸기 + 자동으로 1페이지로 리셋 */
+      setKeyword: (value: string) => {
+        setKeyword(value);
+        setPage(1); // keyword 바뀌면 1페이지부터
+      },
 
-      // ✅ PaginationBar size 변경용
+      /** 페이지 이동 */
+      goPage: (p: number) => {
+        setPage(p);
+      },
+
+      /** 페이지 사이즈 변경 (1페이지로 리셋) */
       setSize: (s: number) => {
-        setPage(1);
         setSize(s);
+        setPage(1);
       },
 
       setDeptId: (id: number | null) => {
         setPage(1);
       },
-
+      /** 강제 새로고침 */
       reload: load,
     },
   };
-
 }

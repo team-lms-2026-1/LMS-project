@@ -1,9 +1,9 @@
-import DepartmentDetailPage from "@/features/authority/departments/components/detail/DepartmentDetailPage";
+import DeptDetailPageClient from "@/features/authority/depts/components/detail/DeptDetailPage.client";
 
 type Props = {
-  params: { departmentId: string };
+  params: { deptId: string };
 };
 
 export default function Page({ params }: Props) {
-  return <DepartmentDetailPage departmentId={params.departmentId} />;
+  return <DeptDetailPageClient deptId={params.deptId} />;
 }

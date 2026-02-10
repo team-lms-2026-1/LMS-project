@@ -66,7 +66,7 @@ export function DeptsTable({ items, loading, onEditClick, onToggleStatus }: Prop
             onChange={(next) => onToggleStatus?.(r.deptId, next)}
             onLabel="on"
             offLabel="off"
-            disabled={loading || hasMembers}
+            disabled={loading}
 
           />
         );

@@ -163,14 +163,23 @@ export async function fetchDeptMajorList(
 
   return mapped;
 }
+// deptsApi.ts
+// deptsApi.ts
 export async function updateDeptStatus(deptId: number, active: boolean) {
-  return getJson(`/api/admin/authority/depts/${deptId}/active`, {
-    method: "PATCH",
-    body: JSON.stringify({
-      isActive: active,
-    }),
-  });
+  // Next API 라우트: /api/admin/authority/depts/[deptId]/active 로 호출
+  return getJson<SuccessResponse<null>>(
+    `/api/admin/authority/depts/${deptId}/active`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        isActive: active, // ✅ 백엔드 원래 설계에 가깝게 되돌림
+      }),
+    }
+  );
 }
+
+
+
 
 export async function createDept(body: DeptCreateRequest) {
   return getJson<SuccessResponse<null>>(`/api/admin/authority/depts`, {

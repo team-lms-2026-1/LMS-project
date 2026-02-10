@@ -49,18 +49,17 @@ export default function DeptPageClient() {
 
   useEffect(() => {
     actions.goPage(page);
-  }, [page]);
+  }, [page, actions]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
-  }, [size, state.size]);
+  }, [size, state.size, actions]);
 
   // deptId 드롭다운 필터추가
   const handleSearch = useCallback(() => {
-    setPage(1);
-    actions.goPage(1);
-    actions.setKeyword(inputKeyword)
-  }, [inputKeyword, setPage, actions]);
+    const nextKeyword = inputKeyword.trim();
+    actions.setKeyword(nextKeyword);
+  }, [inputKeyword, actions]);
 
   return (
     <div className={styles.page}>
@@ -75,6 +74,7 @@ export default function DeptPageClient() {
               onSearch={handleSearch}
               placeholder="학과코드/학과명 검색"
             />
+
           </div>
         </div>
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
