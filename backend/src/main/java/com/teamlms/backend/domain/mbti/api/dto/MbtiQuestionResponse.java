@@ -1,5 +1,7 @@
 package com.teamlms.backend.domain.mbti.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.teamlms.backend.domain.mbti.dto.MbtiQuestionDto;
 import com.teamlms.backend.domain.mbti.entity.MbtiQuestion;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,10 +18,10 @@ public class MbtiQuestionResponse {
     private Integer sortOrder;
     private List<MbtiChoiceResponse> choices;
 
-    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
-    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
     public static MbtiQuestionResponse from(MbtiQuestion question) {
@@ -35,7 +37,7 @@ public class MbtiQuestionResponse {
                 .build();
     }
 
-    public static MbtiQuestionResponse from(com.teamlms.backend.domain.mbti.dto.MbtiQuestionDto dto) {
+    public static MbtiQuestionResponse from(MbtiQuestionDto dto) {
         return MbtiQuestionResponse.builder()
                 .questionId(dto.getQuestionId())
                 .content(dto.getContent())

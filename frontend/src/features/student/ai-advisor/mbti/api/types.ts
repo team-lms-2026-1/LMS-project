@@ -1,8 +1,7 @@
-export interface ApiResponse<T> {
+export type ApiResponse<T, M = null> = {
     data: T;
-    meta: any;
-    error: any;
-}
+    meta: M;
+};
 
 export interface MbtiChoice {
     choiceId: number;
