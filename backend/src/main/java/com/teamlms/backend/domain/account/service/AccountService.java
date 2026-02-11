@@ -51,9 +51,7 @@ public class AccountService {
         }
     }
 
-    /**
-     * 로그인 인증 (계정 조회 -> 상태 검증 -> 비밀번호 검증)
-     */
+    // 로그인 인증
     public Account authenticate(String loginId, String rawPassword) {
         Account account = getByLoginIdOrThrow(loginId);
         validateActive(account);

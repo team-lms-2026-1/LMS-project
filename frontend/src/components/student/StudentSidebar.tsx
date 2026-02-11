@@ -71,6 +71,13 @@ const SECTIONS: NavSection[] = [
       { label: "신청내역확인", href: "/student/study-space/spaces-rentals" },
     ],
   },
+  {
+    key: "ai",
+    title: "AI 어시스턴트",
+    items: [
+      { label: "AI 테스트", href: "/student/ai" },
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string) {

@@ -29,7 +29,7 @@ public class AdminGradeReportController {
 
     private final StudentGradeReportQueryService studentGradeReportQueryService;
 
-    // 0) 교과성적 목록
+    // 교과성적 목록
     @GetMapping
     public ApiResponse<List<CurricularGradeListItem>> getCurricularGradeList(
         @RequestParam(defaultValue = "1") int page,
@@ -55,7 +55,7 @@ public class AdminGradeReportController {
         );
     }
     
-    // 1) 상세 상단 + 추이
+    // 상세 상단 + 추이
     @GetMapping("/{studentAccountId}")
     public ApiResponse<StudentGradeDetailHeaderResponse> detail(
             @PathVariable Long studentAccountId
@@ -63,7 +63,7 @@ public class AdminGradeReportController {
         return ApiResponse.ok(studentGradeReportQueryService.getDetailHeader(studentAccountId));
     }
 
-    // 2) 과목 성적 리스트 (학기 필터 + 페이지)
+    // 과목 성적 리스트 (학기 필터 + 페이지)
     @GetMapping("/{studentAccountId}/list")
     public ApiResponse<List<StudentCourseGradeListItem>> curricular(
             @PathVariable Long studentAccountId,
