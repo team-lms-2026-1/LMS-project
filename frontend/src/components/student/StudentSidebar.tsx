@@ -72,10 +72,10 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "ai",
-    title: "AI 어시스턴트",
+    key: "ai-advisor",
+    title: "AI 어드바이져",
     items: [
-      { label: "AI 테스트", href: "/student/ai" },
+      { label: "직업매칭(MBTI)", href: "/student/ai-advisor" }
     ],
   },
 ];
