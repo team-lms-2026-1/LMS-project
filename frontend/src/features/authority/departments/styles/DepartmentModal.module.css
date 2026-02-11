@@ -1,0 +1,61 @@
+/* Department Modal Styles (Form Fields) */
+
+.field {
+    margin-bottom: 18px;
+}
+
+.label {
+    display: block;
+    font-size: 12px;
+    font-weight: 900;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.input,
+.textarea {
+    width: 100%;
+    padding: 0 14px;
+    box-sizing: border-box;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+
+    font-size: 14px;
+    color: #111827;
+    outline: none;
+}
+
+.input {
+    height: 42px;
+}
+
+.textarea {
+    min-height: 100px;
+    padding: 12px 14px;
+    resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+    color: #9ca3af;
+}
+
+.input:focus,
+.textarea:focus {
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+}
+
+.input:disabled,
+.textarea:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.required {
+    color: #dc2626;
+    margin-left: 2px;
+}

@@ -11,7 +11,6 @@ import com.teamlms.backend.domain.dept.api.dto.DeptSummaryResponse;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.entity.QDept;
 import com.teamlms.backend.domain.dept.entity.QMajor;
-import com.teamlms.backend.domain.dept.entity.QStudentMajor;
 
 import com.teamlms.backend.domain.account.entity.QAccount;
 import com.teamlms.backend.domain.account.entity.QProfessorProfile;
@@ -19,7 +18,6 @@ import com.teamlms.backend.domain.account.entity.QStudentProfile;
 import com.teamlms.backend.domain.account.enums.AcademicStatus;
 import com.teamlms.backend.domain.account.enums.AccountStatus;
 import com.teamlms.backend.domain.account.enums.AccountType;
-import com.teamlms.backend.domain.dept.enums.MajorType;
 
 import jakarta.persistence.EntityManager;
 
@@ -41,9 +39,6 @@ public class DeptRepositoryImpl implements DeptRepositoryCustom {
 
     @Override
     public Page<DeptListItem> searchDeptList(String keyword, Pageable pageable) {
-
-        QMajor major = QMajor.major;
-        QStudentMajor studentMajor = QStudentMajor.studentMajor;
 
         QStudentProfile studentProfile = QStudentProfile.studentProfile;
 
@@ -86,16 +81,10 @@ public class DeptRepositoryImpl implements DeptRepositoryCustom {
                 )
 
                 // -------------------------
-                // 학생수: major -> student_major(PRIMARY) -> student_profile(ENROLLED)
-                // - "학과 소속 학생 = 주전공" 이라는 기준
+                // 학생수: student_profile (ENROLLED, dept_id 기준)
                 // -------------------------
-                .leftJoin(major).on(major.deptId.eq(dept.deptId))
-                .leftJoin(studentMajor).on(
-                        studentMajor.id.majorId.eq(major.majorId)
-                                .and(studentMajor.majorType.eq(MajorType.PRIMARY))
-                )
                 .leftJoin(studentProfile).on(
-                        studentProfile.accountId.eq(studentMajor.id.studentAccountId)
+                        studentProfile.deptId.eq(dept.deptId)
                                 .and(studentProfile.academicStatus.eq(AcademicStatus.ENROLLED))
                 )
 
@@ -166,7 +155,6 @@ public class DeptRepositoryImpl implements DeptRepositoryCustom {
         QDept d = QDept.dept;
         QProfessorProfile pp = QProfessorProfile.professorProfile;
         QMajor m = QMajor.major;
-        QStudentMajor sm = QStudentMajor.studentMajor;
         QStudentProfile sp = QStudentProfile.studentProfile;
 
         // ---- 서브쿼리 표현식들 (Tuple에서 Expression으로 꺼내려고 변수화) ----
@@ -183,33 +171,24 @@ public class DeptRepositoryImpl implements DeptRepositoryCustom {
         var enrolledCount =
                 JPAExpressions.select(sp.accountId.countDistinct())
                         .from(sp)
-                        .join(sm).on(sm.id.studentAccountId.eq(sp.accountId))
-                        .join(m).on(m.majorId.eq(sm.id.majorId))
                         .where(
-                                m.deptId.eq(d.deptId),
-                                sm.majorType.eq(MajorType.PRIMARY),
+                                sp.deptId.eq(d.deptId),
                                 sp.academicStatus.eq(AcademicStatus.ENROLLED)
                         );
 
         var leaveCount =
                 JPAExpressions.select(sp.accountId.countDistinct())
                         .from(sp)
-                        .join(sm).on(sm.id.studentAccountId.eq(sp.accountId))
-                        .join(m).on(m.majorId.eq(sm.id.majorId))
                         .where(
-                                m.deptId.eq(d.deptId),
-                                sm.majorType.eq(MajorType.PRIMARY),
+                                sp.deptId.eq(d.deptId),
                                 sp.academicStatus.eq(AcademicStatus.LEAVE)
                         );
 
         var graduatedCount =
                 JPAExpressions.select(sp.accountId.countDistinct())
                         .from(sp)
-                        .join(sm).on(sm.id.studentAccountId.eq(sp.accountId))
-                        .join(m).on(m.majorId.eq(sm.id.majorId))
                         .where(
-                                m.deptId.eq(d.deptId),
-                                sm.majorType.eq(MajorType.PRIMARY),
+                                sp.deptId.eq(d.deptId),
                                 sp.academicStatus.eq(AcademicStatus.GRADUATED)
                         );
 

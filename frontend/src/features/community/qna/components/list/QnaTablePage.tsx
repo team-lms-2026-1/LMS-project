@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
 import type { QnaListItemDto, QnaTableProps } from "../../api/types";
 import styles from "./QnaTable.module.css";
 
@@ -22,9 +23,9 @@ export function QnaTable({ items, loading, onDeleteClick }: QnaTableProps) {
         const c = r.category;
         if (!c) return "미분류";
         return (
-          <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
+          <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
             {c.name}
-          </span>
+          </Badge>
         );
       },
     },

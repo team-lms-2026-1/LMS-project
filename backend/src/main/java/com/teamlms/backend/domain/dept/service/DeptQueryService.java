@@ -120,7 +120,7 @@ public class DeptQueryService {
 
     // 학과 - 전공 수정 ( 조회 )
     public MajorEditResponse getMajorEditForm(Long deptId, Long majorId) {
-        return majorRepository.findByMajorIdAndDeptIdAndActiveTrue(majorId, deptId)
+        return majorRepository.findByMajorIdAndDeptId(majorId, deptId)
                 .map(MajorEditResponse::from)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MAJOR_NOT_FOUND, majorId));
     }

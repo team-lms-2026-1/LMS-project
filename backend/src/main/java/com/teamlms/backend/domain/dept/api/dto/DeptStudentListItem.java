@@ -8,6 +8,7 @@ public record DeptStudentListItem(
     String name,
     Integer gradeLevel,
     AcademicStatus academicStatus,
-    String majorName // 주전공
+    String majorName, // 주전공
+    String email
 ) {
 }

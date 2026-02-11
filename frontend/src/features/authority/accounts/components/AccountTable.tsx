@@ -2,6 +2,7 @@
 
 import styles from "../styles/AccountListPage.module.css";
 import { AccountRowView, AccountStatus } from "../types";
+import { ToggleSwitch } from "@/components/toggle/ToggleSwitch";
 
 type Props = {
   rows: AccountRowView[];
@@ -56,21 +57,17 @@ export default function AccountTable({ rows, pendingIds, onToggleStatus, onClick
                   <td>{p?.email ?? "-"}</td>
                   <td>{row.account.createdAt.slice(0, 10)}</td>
                   <td>
-                    <label className={styles.switch} aria-disabled={isPending}>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        disabled={isPending}
-                        onChange={(e) =>
-                          onToggleStatus(
-                            row.account.accountId,
-                            row.account.status,
-                            e.target.checked ? "ACTIVE" : "INACTIVE"
-                          )
-                        }
-                      />
-                      <span className={styles.slider} />
-                    </label>
+                    <ToggleSwitch
+                      checked={checked}
+                      disabled={isPending}
+                      onChange={(chk) =>
+                        onToggleStatus(
+                          row.account.accountId,
+                          row.account.status,
+                          chk ? "ACTIVE" : "INACTIVE"
+                        )
+                      }
+                    />
                   </td>
                   <td>
                     <button

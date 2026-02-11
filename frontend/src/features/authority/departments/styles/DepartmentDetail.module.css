@@ -1,0 +1,222 @@
+/* 기존 스타일 유지 */
+.footerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding: 0 16px 16px 16px;
+}
+
+.footerLeft {
+    flex: 1;
+}
+
+.footerCenter {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.footerRight {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.topBar {
+    display: flex;
+    justify-content: flex-end;
+    /* 우측 정렬 */
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.backBtn {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #344054;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.backBtn:hover {
+    background: #f9fafb;
+}
+
+/* New Styles for Detail Page Layout */
+.pageContainer {
+    padding: 24px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+/* Info Card (Grey Box) */
+.infoCard {
+    background-color: #f3f4f6;
+    /* 회색 배경 */
+    border-radius: 8px 8px 0 0;
+    /* 탭과 연결되도록 하단은 둥글지 않게 하거나, 디자인에 따라 조정 */
+    padding: 32px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+}
+
+.infoLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.deptTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    /* "신학과"와 "관리" 사이 간격 */
+}
+
+.deptTitleSuffix {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.subInfo {
+    font-size: 14px;
+    color: #4b5563;
+    margin-top: 4px;
+}
+
+.subInfo strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.divider {
+    margin: 0 8px;
+    color: #d1d5db;
+}
+
+.infoRight {
+    max-width: 500px;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+    text-align: right;
+}
+
+/* Tab Menu */
+.tabContainer {
+    display: flex;
+    background-color: #f3f4f6;
+    /* 카드와 동일한 배경색 */
+    padding: 0 40px;
+    /* 카드 패딩과 라인 맞춤 */
+}
+
+.tabButton {
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #4b5563;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    border-radius: 8px 8px 0 0;
+}
+
+.tabButtonActive {
+    background-color: #2563eb;
+    /* Primary Blue */
+    color: white;
+    font-weight: 600;
+}
+
+.tabButton:hover:not(.tabButtonActive) {
+    background-color: #e5e7eb;
+    color: #111827;
+}
+
+/* Content Area */
+.contentArea {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-top: none;
+    /* 탭과 연결 */
+    border-radius: 0 0 8px 8px;
+    padding: 24px;
+}
+
+/* Search and Stats Row within Tabs */
+.filterRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.searchContainer {
+    width: 300px;
+}
+
+.statsText {
+    font-size: 14px;
+    color: #111827;
+    font-weight: 600;
+}
+
+/* Student Count Stats */
+.statsContainer {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0;
+}
+
+.statItem {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: #f3f4f6;
+}
+
+.statItemEnrolled {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.statItemLeave {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.statItemGraduated {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.statItemProfessor {
+    background-color: #e0e7ff;
+    color: #3730a3;
+}
