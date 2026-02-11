@@ -68,3 +68,32 @@ export function mapDeptItemsToDepartments(
 ): Department[] {
   return items.map(mapDeptItemToDepartment);
 }
+
+// 상세 페이지 관련 타입 (추가)
+export type Major = {
+  id: string;
+  code: string;
+  name: string;
+};
+
+export type Professor = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+};
+
+export type Student = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+};
+
+export type DepartmentDetail = {
+  department: Department;
+  professors: Professor[];
+  students: Student[];
+  majors: Major[];
+};
+
