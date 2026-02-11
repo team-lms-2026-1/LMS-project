@@ -1,3 +1,9 @@
+export interface ApiResponse<T> {
+    data: T;
+    meta?: any;
+    error?: any;
+}
+
 export interface MbtiChoice {
     choiceId: number;
     content: string;

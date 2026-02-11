@@ -1,21 +1,23 @@
 import { getJson, postJson } from "@/lib/http";
-import { MbtiQuestion, MbtiResult, MbtiSubmitRequest } from "./types";
+import { MbtiQuestion, MbtiResult, MbtiSubmitRequest, ApiResponse } from "./types";
 
 const BASE_URL = "/api/student/mbti";
 
 export const mbtiApi = {
     getQuestions: async (): Promise<MbtiQuestion[]> => {
-        return getJson<MbtiQuestion[]>(`${BASE_URL}/questions`);
+        const response = await getJson<ApiResponse<MbtiQuestion[]>>(`${BASE_URL}/questions`);
+        return response.data;
     },
 
     submitMbti: async (data: MbtiSubmitRequest): Promise<MbtiResult> => {
-        return postJson<MbtiResult>(`${BASE_URL}/submit`, data);
+        const response = await postJson<ApiResponse<MbtiResult>>(`${BASE_URL}/submit`, data);
+        return response.data;
     },
 
     getLatestResult: async (): Promise<MbtiResult | null> => {
         try {
-            const result = await getJson<MbtiResult>(`${BASE_URL}/result`);
-            return result;
+            const response = await getJson<ApiResponse<MbtiResult>>(`${BASE_URL}/result`);
+            return response.data;
         } catch (error) {
             return null;
         }
