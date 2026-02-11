@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import styles from "./adminMentoring.module.css";
-import { fetchAdminRecruitments, fetchAdminApplications, updateApplicationStatus } from "@/features/mentoring/lib/adminApi";
-import { MentoringRecruitment, MentoringApplication } from "@/features/mentoring/types";
+import { fetchAdminRecruitments, fetchAdminApplications, updateApplicationStatus } from "../../api/mentoringApi";
+import { MentoringRecruitment, MentoringApplication } from "../../api/types";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
 import { StatusPill } from "@/components/status/StatusPill";
@@ -13,19 +13,10 @@ import { Button } from "@/components/button/Button";
 import { Modal } from "@/components/modal/Modal";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
+import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
+import { Dropdown } from "@/features/dropdowns/_shared";
 
 const PAGE_SIZE = 10;
-
-const SEMESTER_OPTIONS = [
-    { label: "1학기", value: 1 },
-    { label: "여름학기", value: 2 },
-    { label: "2학기", value: 3 },
-    { label: "겨울학기", value: 4 },
-];
-
-const getSemesterLabel = (id: number) => {
-    return SEMESTER_OPTIONS.find(opt => opt.value === id)?.label || `${id}학기`;
-};
 
 export default function AdminApplicationApprovalPage() {
     const [page, setPage] = useState(1);
@@ -41,45 +32,51 @@ export default function AdminApplicationApprovalPage() {
     const [confirmApproveId, setConfirmApproveId] = useState<number | null>(null);
     const [rejectTargetId, setRejectTargetId] = useState<number | null>(null);
     const [rejectReason, setRejectReason] = useState("");
+    const [statusFilter, setStatusFilter] = useState("ALL");
 
-    const fetchRecruitments = async () => {
+    const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
+
+    const fetchRecruitList = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetchAdminRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
-            if (res && res.content) {
-                setRecruitments(res.content);
-                setTotalElements(res.totalElements);
-            }
+            const res = await fetchAdminRecruitments({
+                page: page - 1,
+                size: PAGE_SIZE,
+                keyword: keywordInput,
+                status: statusFilter
+            });
+            setRecruitments(res.data || []);
+            setTotalElements(res.meta?.totalElements || 0);
         } catch (e: any) {
             console.error(e);
             toast.error("모집 공고 조회 실패: " + (e.message || ""));
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, keywordInput, statusFilter]);
 
-    const fetchApplications = async (recruitmentId: number) => {
+    const fetchAppList = useCallback(async (recruitmentId: number) => {
         setLoadingApplications(true);
         try {
-            const data = await fetchAdminApplications(recruitmentId);
-            setApplications(data || []);
+            const res = await fetchAdminApplications(recruitmentId);
+            setApplications(res.data || []);
         } catch (e: any) {
             console.error(e);
             toast.error("신청자 조회 실패: " + (e.message || ""));
         } finally {
             setLoadingApplications(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        fetchRecruitments();
-    }, [page]);
+        fetchRecruitList();
+    }, [fetchRecruitList]);
 
     useEffect(() => {
         if (selectedRecruitment) {
-            fetchApplications(selectedRecruitment.recruitmentId);
+            fetchAppList(selectedRecruitment.recruitmentId);
         }
-    }, [selectedRecruitment]);
+    }, [selectedRecruitment, fetchAppList]);
 
     const handleApprove = (applicationId: number) => {
         setConfirmApproveId(applicationId);
@@ -97,7 +94,7 @@ export default function AdminApplicationApprovalPage() {
             });
             toast.success("승인되었습니다.");
             if (selectedRecruitment) {
-                fetchApplications(selectedRecruitment.recruitmentId);
+                fetchAppList(selectedRecruitment.recruitmentId);
             }
         } catch (e: any) {
             console.error(e);
@@ -130,7 +127,7 @@ export default function AdminApplicationApprovalPage() {
             });
             toast.success("반려되었습니다.");
             if (selectedRecruitment) {
-                fetchApplications(selectedRecruitment.recruitmentId);
+                fetchAppList(selectedRecruitment.recruitmentId);
             }
         } catch (e: any) {
             console.error(e);
@@ -144,7 +141,11 @@ export default function AdminApplicationApprovalPage() {
 
     const recruitmentColumns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (r) => getSemesterLabel(r.semesterId) },
+            {
+                header: "학기",
+                field: "semesterId",
+                render: (r) => semesterOptions.find(opt => opt.value === String(r.semesterId))?.label || `${r.semesterId}학기`
+            },
             { header: "제목", field: "title" },
             {
                 header: "모집기간",
@@ -158,12 +159,15 @@ export default function AdminApplicationApprovalPage() {
                 header: "상태",
                 field: "status",
                 render: (r) => {
+                    if (r.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
+                    if (r.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+
                     const now = new Date();
                     const start = new Date(r.recruitStartAt);
                     const end = new Date(r.recruitEndAt);
 
                     if (now < start) {
-                        return <StatusPill status="PENDING" label="대기" />;
+                        return <StatusPill status="DRAFT" label="DRAFT" />;
                     } else if (now >= start && now <= end) {
                         return <StatusPill status="ACTIVE" label="OPEN" />;
                     } else {
@@ -172,8 +176,9 @@ export default function AdminApplicationApprovalPage() {
                 }
             },
         ],
-        []
+        [semesterOptions]
     );
+
 
     const applicationColumns = useMemo<TableColumn<MentoringApplication>[]>(
         () => [
@@ -193,7 +198,7 @@ export default function AdminApplicationApprovalPage() {
                 align: "center",
                 render: (a) => {
                     const statusLabelMap: Record<string, string> = {
-                        APPLIED: "대기",
+                        APPLIED: "PENDING",
                         APPROVED: "승인",
                         REJECTED: "반려",
                         MATCHED: "매칭완료",
@@ -243,29 +248,52 @@ export default function AdminApplicationApprovalPage() {
         [processingId]
     );
 
+    const STATUS_OPTIONS = [
+        { value: "ALL", label: "전체 상태" },
+        { value: "DRAFT", label: "작성중 (DRAFT)" },
+        { value: "OPEN", label: "모집중 (OPEN)" },
+        { value: "CLOSED", label: "마감 (CLOSED)" },
+    ];
+
     return (
         <div className={styles.page}>
             <div className={styles.card}>
                 <h1 className={styles.title}>멘토링 신청 승인</h1>
 
                 <div className={styles.searchRow}>
-                    <SearchBar
-                        value={keywordInput}
-                        onChange={setKeywordInput}
-                        onSearch={fetchRecruitments}
-                        placeholder="모집 공고 제목 검색"
-                        className={styles.searchBox}
-                    />
+                    <div className={styles.searchGroup}>
+                        <div className={styles.dropdownWrap}>
+                            <Dropdown
+                                value={statusFilter}
+                                onChange={(val) => {
+                                    setStatusFilter(val);
+                                    setPage(1);
+                                }}
+                                options={STATUS_OPTIONS}
+                                placeholder="상태 선택"
+                                clearable={false}
+                                showPlaceholder={false}
+                            />
+                        </div>
+                        <div className={styles.searchBarWrap}>
+                            <SearchBar
+                                value={keywordInput}
+                                onChange={setKeywordInput}
+                                onSearch={fetchRecruitList}
+                                placeholder="모집 공고 제목 검색"
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>모집 공고 목록</h2>
+
                     <div className={styles.tableWrap}>
                         <Table
                             columns={recruitmentColumns}
                             items={recruitments}
                             rowKey={(r) => r.recruitmentId}
-                            loading={loading}
+                            loading={loading || semesterLoading}
                             skeletonRowCount={5}
                             emptyText="모집 공고가 없습니다."
                             onRowClick={(row) => setSelectedRecruitment(row)}

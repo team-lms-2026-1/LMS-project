@@ -11,7 +11,7 @@ import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
 import type { ExtraCurricularEnrollmentListItemDto } from "../../api/types";
 import { useStudentExtraCurricularEnrollmentsList } from "../../hooks/useExtraCurricularOfferingList";
 import { StudentExtraCurricularEnrollmentsTable } from "./StudentExtraEnrollmentsTable";
-import { cancelExtraCurricularOffering } from "../../api/extraCuccicularApi";
+import { cancelExtraCurricularOffering } from "../../api/extraCurricularApi";
 
 export default function StudentExtraCurricularEnrollmentPageClient() {
   const router = useRouter();

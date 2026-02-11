@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { QnaListItemDto, PageMeta } from "../api/types";
-import { fetchQnaList } from "../api/QnasApi";
+import { fetchQnaList } from "../api/qnasApi";
 
 
 const defaultMeta: PageMeta = {
@@ -60,8 +60,8 @@ export function useQnaList() {
       items,
       meta,   // ✅ 항상 PageMeta
       page,
-      size, 
-      deptId,  
+      size,
+      deptId,
       keyword,
       loading,
       error,

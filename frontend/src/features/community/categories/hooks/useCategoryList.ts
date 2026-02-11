@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Category, CategoryListResponse, CategoryListQuery, CategoryScope, PageMeta } from "../api/types";
-import { categoriesApi } from "../api/CategoriesApi";
+import { categoriesApi } from "../api/categoriesApi";
 
 const defaultMeta: PageMeta = {
   page: 1,

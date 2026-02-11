@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SpacesRoomModal.module.css";
 import { Button } from "@/components/button";
-import { roomsApi } from "../../api/SpacesApi";
+import { roomsApi } from "../../api/spacesApi";
 import toast from "react-hot-toast";
 import type {
   AdminRoomDto,

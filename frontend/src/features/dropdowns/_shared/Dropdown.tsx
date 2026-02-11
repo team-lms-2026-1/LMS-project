@@ -16,6 +16,7 @@ export type DropdownProps = {
   loading?: boolean;
   disabled?: boolean;
   clearable?: boolean;
+  showPlaceholder?: boolean;
 
   onChange: (value: string) => void;
   onClear?: () => void;
@@ -30,6 +31,7 @@ export function Dropdown({
   loading = false,
   disabled = false,
   clearable = true,
+  showPlaceholder = true,
   onChange,
   onClear,
   className,
@@ -53,7 +55,9 @@ export function Dropdown({
           onChange={(e) => onChange(e.target.value)}
           aria-busy={loading ? true : undefined}
         >
-          <option value="">{loading ? "불러오는 중..." : placeholder}</option>
+          {(showPlaceholder || loading) && (
+            <option value="">{loading ? "불러오는 중..." : placeholder}</option>
+          )}
           {options.map((o) => (
             <option key={o.value} value={o.value} disabled={o.disabled}>
               {o.label}

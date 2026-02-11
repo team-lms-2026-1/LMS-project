@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useRef  } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import styles from "./ResourcePage.module.css";
 import { ResourcesTable } from "./ResourceTablePage";
@@ -8,12 +8,12 @@ import { useResourcesList } from "../../hooks/useResourceList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { Button } from "@/components/button";
-import { useRouter, useSearchParams  } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
-import { fetchResourceCategories } from "../../api/ResourcesApi";
+import { fetchResourceCategories } from "../../api/resourcesApi";
 import type { Category } from "../../api/types";
 
 export default function ResourcePageClient() {
