@@ -51,6 +51,14 @@ spring:
         static: ap-northeast-2
       s3:
         bucket: teamlms-bucket # 본인 버킷명 확인 필수
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.7
+          max-tokens: 256
 
 # 🔐 JWT 공통 설정
 security:
