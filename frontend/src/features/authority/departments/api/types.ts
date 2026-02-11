@@ -24,8 +24,12 @@ export interface DepartmentDetailSummary {
         enrolled: number;
         leaveOfAbsence: number;
         graduated: number;
-    } | null; // 백엔드에서 null 가능성이 있으면
+    } | null;
     majorCount: number;
+}
+
+export interface DepartmentSummaryResponse {
+    data: DepartmentDetailSummary;
 }
 
 // 학과 생성 요청
@@ -54,7 +58,7 @@ export interface MajorListItem {
     majorName: string;
     enrolledStudentCount: number;
     isActive: boolean;
-    description?: string; // 상세 조회시? 일단 목록엔 없을수도
+    description?: string;
 }
 
 // 전공 생성 요청
@@ -74,13 +78,17 @@ export interface UpdateMajorRequest {
 
 export interface MajorEditResponse {
     majorId: number;
-    majorCode: string; // 전공 코드는 수정 불가 readOnly?
+    majorCode: string;
     majorName: string;
     description: string;
     isActive: boolean;
 }
 
-// 공통 PageMeta (이미 global/api/types에 있을 수 있지만 여기서 정의하거나 import)
+export interface MajorEditFormResponse {
+    data: MajorEditResponse;
+}
+
+// 공통 PageMeta
 export interface PageMeta {
     page: number;
     size: number;
@@ -100,7 +108,7 @@ export interface MajorListResponse {
     meta: PageMeta;
 }
 
-// 백엔드: DeptProfessorListItem (accountId, professorNo, name, email, phone)
+// 백엔드: DeptProfessorListItem
 export interface DepartmentProfessorListItem {
     accountId: number;
     professorNo: string;
@@ -109,14 +117,14 @@ export interface DepartmentProfessorListItem {
     phone: string;
 }
 
-// 백엔드: DeptStudentListItem (accountId, studentNo, name, gradeLevel, academicStatus, majorName, email)
+// 백엔드: DeptStudentListItem
 export interface DepartmentStudentListItem {
     accountId: number;
     studentNo: string;
     name: string;
     gradeLevel: number;
     academicStatus: string;
-    majorName: string | null; // left join으로 null 가능
+    majorName: string | null;
     email: string;
 }
 
@@ -149,3 +157,10 @@ export interface DepartmentEditResponse {
     professors: ProfessorDropdownItem[];
 }
 
+export interface DepartmentUpdateFormResponse {
+    data: DepartmentEditResponse;
+}
+
+export interface SuccessResponse {
+    data: { success: boolean };
+}

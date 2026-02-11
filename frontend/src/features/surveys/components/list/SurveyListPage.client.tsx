@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./SurveyListPage.client.module.css";
 import { SurveysTable } from "./SurveysTable";
-import { OutButton } from "@/components/button";
+import { Button } from "@/components/button";
 import { useSurveyList } from "../../hooks/useSurveyList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
@@ -135,9 +135,9 @@ export default function SurveyListPageClient() {
                         onChange={setPage}
                         disabled={state.loading}
                     />
-                    <OutButton onClick={() => router.push("/admin/surveys/new")}>
+                    <Button onClick={() => router.push("/admin/surveys/new")}>
                         새 설문 등록
-                    </OutButton>
+                    </Button>
                 </div>
             </div>
 

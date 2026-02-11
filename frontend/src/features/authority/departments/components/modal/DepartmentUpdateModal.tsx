@@ -6,6 +6,7 @@ import { UpdateDepartmentRequest, ProfessorDropdownItem } from "../../api/types"
 import toast from "react-hot-toast";
 import styles from "../../styles/DepartmentModal.module.css";
 import { Button } from "@/components/button/Button";
+import { Modal } from "@/components/modal/Modal";
 
 type Props = {
     deptId: number;
@@ -67,73 +68,71 @@ export function DepartmentUpdateModal({ deptId, open, onClose, onSuccess }: Prop
         }
     };
 
-    if (!open) return null;
-
     return (
-        <div className={styles.backdrop} onClick={onClose}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.header}>
-                    <h2 className={styles.title}>학과 수정</h2>
+        <Modal
+            open={open}
+            onClose={onClose}
+            title="학과 수정"
+            footer={
+                <div className="flex justify-end gap-2">
+                    <Button
+                        variant="secondary"
+                        onClick={onClose}
+                        disabled={loading}
+                    >
+                        취소
+                    </Button>
+                    {!fetching &&
+                        <Button
+                            type="submit"
+                            form="department-update-form"
+                            disabled={loading}
+                        >
+                            {loading ? "저장 중..." : "저장"}
+                        </Button>
+                    }
                 </div>
+            }
+        >
+            {fetching ? (
+                <div className="p-8 text-center text-gray-500">정보를 불러오는 중...</div>
+            ) : (
+                <form id="department-update-form" onSubmit={handleSubmit}>
+                    <div className={styles.field}>
+                        <label className={styles.label}>학과코드</label>
+                        <input
+                            className={`${styles.input} bg-gray-100 text-gray-500`}
+                            value={deptCode}
+                            disabled
+                            readOnly
+                        />
+                    </div>
 
-                {fetching ? (
-                    <div className="p-8 text-center text-gray-500">정보를 불러오는 중...</div>
-                ) : (
-                    <form onSubmit={handleSubmit}>
-                        <div className={styles.field}>
-                            <label className={styles.label}>학과코드</label>
-                            <input
-                                className={`${styles.input} bg-gray-100 text-gray-500`}
-                                value={deptCode}
-                                disabled
-                                readOnly
-                            />
-                        </div>
+                    <div className={styles.field}>
+                        <label className={styles.label}>
+                            학과이름<span className={styles.required}>*</span>
+                        </label>
+                        <input
+                            className={styles.input}
+                            value={form.deptName}
+                            onChange={(e) => setForm({ ...form, deptName: e.target.value })}
+                            disabled={loading}
+                            placeholder="학과 이름 입력"
+                        />
+                    </div>
 
-                        <div className={styles.field}>
-                            <label className={styles.label}>
-                                학과이름<span className={styles.required}>*</span>
-                            </label>
-                            <input
-                                className={styles.input}
-                                value={form.deptName}
-                                onChange={(e) => setForm({ ...form, deptName: e.target.value })}
-                                disabled={loading}
-                                placeholder="학과 이름 입력"
-                            />
-                        </div>
-
-
-
-                        <div className={styles.field}>
-                            <label className={styles.label}>설명</label>
-                            <textarea
-                                className={styles.textarea}
-                                value={form.description}
-                                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                                disabled={loading}
-                                placeholder="학과에 대한 설명"
-                            />
-                        </div>
-
-                        <div className={styles.actions}>
-                            <Button
-                                variant="secondary"
-                                onClick={onClose}
-                                disabled={loading}
-                            >
-                                취소
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                            >
-                                {loading ? "저장 중..." : "저장"}
-                            </Button>
-                        </div>
-                    </form>
-                )}
-            </div>
-        </div>
+                    <div className={styles.field}>
+                        <label className={styles.label}>설명</label>
+                        <textarea
+                            className={styles.textarea}
+                            value={form.description}
+                            onChange={(e) => setForm({ ...form, description: e.target.value })}
+                            disabled={loading}
+                            placeholder="학과에 대한 설명"
+                        />
+                    </div>
+                </form>
+            )}
+        </Modal>
     );
 }
