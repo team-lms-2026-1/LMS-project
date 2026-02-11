@@ -4,5 +4,6 @@ public record DeptMajorListItem(
     Long majorId,
     String majorCode,
     String majorName,
-    long enrolledStudentCount
+    long enrolledStudentCount,
+    boolean isActive
 ) {}

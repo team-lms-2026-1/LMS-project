@@ -130,6 +130,18 @@ public class DeptAdminController {
         return ApiResponse.ok(new SuccessResponse());
     }
 
+    // 담당교수 지정
+    @PatchMapping("/{deptId}/head-professor")
+    public ApiResponse<SuccessResponse> updateHeadProfessor(
+        @PathVariable Long deptId,
+        @RequestBody HeadProfessorUpdateRequest req
+    ) {
+        deptCommandService.updateHeadProfessor(deptId, req.headProfessorAccountId());
+        return ApiResponse.ok(new SuccessResponse());
+    }
+
+    public record HeadProfessorUpdateRequest(Long headProfessorAccountId) {}
+
     // 학과 상세 (summary)
     @GetMapping("/{deptId}/summary")
     public ApiResponse<DeptSummaryResponse> summary(@PathVariable Long deptId) {

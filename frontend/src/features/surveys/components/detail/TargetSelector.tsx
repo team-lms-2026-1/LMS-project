@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchDepartments } from "@/features/authority/depts/lib/clientApi";
+import { fetchDepartmentsList } from "@/features/authority/departments/api/departmentsApi";
 import styles from "./TargetSelector.module.css";
 
 interface Dept {
@@ -31,9 +31,9 @@ export function TargetSelector({
     const [depts, setDepts] = useState<Dept[]>([]);
 
     useEffect(() => {
-        fetchDepartments({ page: 1, size: 1000 }).then(res => {
+        fetchDepartmentsList(1, 1000).then(res => {
             if (res.data && res.data.length > 0) {
-                const list = res.data.map((d: any) => ({
+                const list = res.data.map(d => ({
                     deptId: d.deptId,
                     deptName: d.deptName
                 }));

@@ -37,6 +37,8 @@ public enum ErrorCode {
     // =========================
     DEPT_DEACTIVATE_NOT_ALLOWED(HttpStatus.CONFLICT, "DEPT_DEACTIVATE_NOT_ALLOWED", "연관 데이터가 존재하여 학과를 비활성화할 수 없습니다.", "dept.deactivate.notAllowed"),
     DEPT_NOT_FOUND(HttpStatus.NOT_FOUND, "DEPT_NOT_FOUND", "학과를 찾을 수 없습니다.", "dept.notFound"),
+    DUPLICATE_DEPT_CODE(HttpStatus.CONFLICT, "DUPLICATE_DEPT_CODE", "이미 사용 중인 학과 코드입니다.", "dept.code.duplicate"),
+    DUPLICATE_DEPT_NAME(HttpStatus.CONFLICT, "DUPLICATE_DEPT_NAME", "이미 사용 중인 학과 이름입니다.", "dept.name.duplicate"),
     DUPLICATE_MAJOR_CODE(HttpStatus.CONFLICT, "DUPLICATE_MAJOR_CODE", "이미 사용 중인 전공 코드입니다.", "major.code.duplicate"),
     DUPLICATE_MAJOR_NAME(HttpStatus.CONFLICT, "DUPLICATE_MAJOR_NAME", "이미 사용 중인 전공 이름입니다.", "major.name.duplicate"),
     MAJOR_NOT_FOUND(HttpStatus.NOT_FOUND, "MAJOR_NOT_FOUND", "전공을 찾을 수 없습니다.", "major.notFound"),

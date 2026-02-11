@@ -23,8 +23,11 @@ public interface MajorRepository extends JpaRepository<Major, Long>, MajorReposi
     boolean existsByMajorIdAndDeptId(Long majorId, Long deptId);
 
     boolean existsByDeptId(Long deptId);
+    
+    boolean existsByDeptIdAndActiveTrue(Long deptId);
 
     // 전공 수정폼 조회용
+    Optional<Major> findByMajorIdAndDeptId(Long majorId, Long deptId);
     Optional<Major> findByMajorIdAndDeptIdAndActiveTrue(Long majorId, Long deptId);
     boolean existsByMajorIdAndDeptIdAndActiveTrue(Long majorId, Long deptId);
 
@@ -35,7 +38,8 @@ public interface MajorRepository extends JpaRepository<Major, Long>, MajorReposi
             m.majorId,
             m.majorCode,
             m.majorName,
-            count(distinct s.accountId)
+            count(distinct s.accountId),
+            m.active
         )
         from Major m
         left join StudentMajor sm
