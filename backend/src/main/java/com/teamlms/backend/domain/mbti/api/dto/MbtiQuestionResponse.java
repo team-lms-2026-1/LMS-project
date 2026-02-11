@@ -15,7 +15,11 @@ public class MbtiQuestionResponse {
     private String content;
     private Integer sortOrder;
     private List<MbtiChoiceResponse> choices;
+
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
+
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
     public static MbtiQuestionResponse from(MbtiQuestion question) {

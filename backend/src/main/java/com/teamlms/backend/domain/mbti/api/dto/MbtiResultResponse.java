@@ -13,6 +13,8 @@ public class MbtiResultResponse {
     private Long accountId;
     private String mbtiType; // e.g., "ENTJ"
     private MbtiScore score;
+
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
     @Getter
