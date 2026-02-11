@@ -63,7 +63,9 @@ export default function SurveyDetailPageClient({ id }: Props) {
                             <Dropdown
                                 value={state.surveyType}
                                 options={typeOptions}
-                                onChange={(val) => actions.setSurveyType(val)}
+                                onChange={(val) => {
+                                    if (val !== "") actions.setSurveyType(val);
+                                }}
                                 placeholder="유형 선택"
                             />
                         </div>

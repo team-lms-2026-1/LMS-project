@@ -1,13 +1,3 @@
-.titleText {
-  cursor: pointer;
-  color: #2563eb;
-  font-weight: 500;
-}
-
-.titleText:hover {
-  text-decoration: underline;
-}
-
 .dateRange {
   font-size: 0.9rem;
   color: #666;
