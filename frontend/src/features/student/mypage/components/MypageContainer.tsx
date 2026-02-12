@@ -7,7 +7,7 @@ import MypageStats from './MypageStats';
 import MypageTimetable from './MypageTimetable';
 import styles from './Mypage.module.css';
 
-export default function MypageContainer() {
+const MypageContainer = () => {
     const { data: studentData, loading, error } = useStudentMypage();
 
     if (loading) return <div className={styles.container}>Loading...</div>;
@@ -25,4 +25,6 @@ export default function MypageContainer() {
             <MypageTimetable timetable={studentData.currentTimetable} />
         </div>
     );
-}
+};
+
+export default MypageContainer;
