@@ -1,5 +1,8 @@
 package com.teamlms.backend.domain.mbti.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.teamlms.backend.domain.mbti.dto.MbtiResultDto;
 import com.teamlms.backend.domain.mbti.entity.MbtiResult;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +16,8 @@ public class MbtiResultResponse {
     private Long accountId;
     private String mbtiType; // e.g., "ENTJ"
     private MbtiScore score;
+
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
     @Getter
@@ -47,7 +52,7 @@ public class MbtiResultResponse {
                 .build();
     }
 
-    public static MbtiResultResponse from(com.teamlms.backend.domain.mbti.dto.MbtiResultDto dto) {
+    public static MbtiResultResponse from(MbtiResultDto dto) {
         return MbtiResultResponse.builder()
                 .resultId(dto.getResultId())
                 .accountId(dto.getAccountId())

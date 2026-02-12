@@ -1,39 +1,27 @@
 package com.teamlms.backend.domain.mbti.service;
 
-import com.teamlms.backend.domain.mbti.dto.MbtiQuestionDto;
-import com.teamlms.backend.domain.mbti.dto.MbtiResultDto;
+import com.teamlms.backend.domain.mbti.api.dto.MbtiResultResponse;
 import com.teamlms.backend.domain.mbti.dto.MbtiSubmitCommand;
 import com.teamlms.backend.domain.mbti.entity.MbtiChoice;
 import com.teamlms.backend.domain.mbti.entity.MbtiQuestion;
 import com.teamlms.backend.domain.mbti.entity.MbtiResult;
 import com.teamlms.backend.domain.mbti.repository.MbtiChoiceRepository;
-import com.teamlms.backend.domain.mbti.repository.MbtiQuestionRepository;
 import com.teamlms.backend.domain.mbti.repository.MbtiResultRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class MbtiService {
+@Transactional
+public class MbtiCommandService {
 
-    private final MbtiQuestionRepository questionRepository;
     private final MbtiChoiceRepository choiceRepository;
     private final MbtiResultRepository resultRepository;
 
-    public List<MbtiQuestionDto> getAllQuestions() {
-        List<MbtiQuestion> questions = questionRepository.findAllWithChoices();
-        return questions.stream()
-                .map(MbtiQuestionDto::from)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public MbtiResultDto submitMbti(MbtiSubmitCommand command) {
+    public MbtiResultResponse submitMbti(MbtiSubmitCommand command) {
         List<MbtiChoice> selectedChoices = choiceRepository.findAllById(command.getAnswerChoiceIds());
 
         // Calculate Scores
@@ -81,13 +69,6 @@ public class MbtiService {
                 .build();
 
         MbtiResult savedResult = resultRepository.save(result);
-        return MbtiResultDto.from(savedResult);
+        return MbtiResultResponse.from(savedResult);
     }
-
-    public MbtiResultDto getLatestResult(Long accountId) {
-        return resultRepository.findTopByAccountIdOrderByCreatedAtDesc(accountId)
-                .map(MbtiResultDto::from)
-                .orElse(null);
-    }
-
 }

@@ -1,23 +1,27 @@
-import { getJson, postJson } from "@/lib/http";
-import { MbtiQuestion, MbtiResult, MbtiSubmitRequest } from "./types";
+import { getJson } from "@/lib/http";
+import { MbtiQuestionResponse, MbtiSubmitRequest, MbtiResultResponse } from "./types";
+import { SuccessResponse } from "@/features/ai/api/types";
 
-const BASE_URL = "/api/student/mbti";
+export async function fetchMbtiQuestions() {
+    const url = `/api/student/mbti/questions`
+    return getJson<MbtiQuestionResponse>(url, {
+        cache: "no-store"
+    });
+}
 
-export const mbtiApi = {
-    getQuestions: async (): Promise<MbtiQuestion[]> => {
-        return getJson<MbtiQuestion[]>(`${BASE_URL}/questions`);
-    },
+export async function submitMbtiAnswers(body: MbtiSubmitRequest) {
+    const url = `/api/student/mbti/submit`;
+    return getJson<MbtiResultResponse>(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        cache: "no-store",
+    });
+}
 
-    submitMbti: async (data: MbtiSubmitRequest): Promise<MbtiResult> => {
-        return postJson<MbtiResult>(`${BASE_URL}/submit`, data);
-    },
-
-    getLatestResult: async (): Promise<MbtiResult | null> => {
-        try {
-            const result = await getJson<MbtiResult>(`${BASE_URL}/result`);
-            return result;
-        } catch (error) {
-            return null;
-        }
-    },
-};
+export async function fetchMbtiResult() {
+    const url = `/api/student/mbti/result`
+    return getJson<MbtiResultResponse>(url, {
+        cache: "no-store"
+    });
+}

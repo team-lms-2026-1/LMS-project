@@ -1,0 +1,245 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.pageTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #111;
+    text-align: center;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.loading,
+.error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.error {
+    color: #e74c3c;
+}
+
+/* Question List */
+.questionList {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.questionItem {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.questionText {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.choiceBtn {
+    padding: 1rem;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.choiceBtn:hover {
+    border-color: #3498db;
+    background: #f8fbff;
+}
+
+.choiceBtn.selected {
+    border-color: #3498db;
+    background: #eaf6ff;
+    color: #2980b9;
+    font-weight: 600;
+}
+
+.submitBtn {
+    display: block;
+    margin-top: 2rem;
+    /* width/padding handled in later block or here */
+}
+
+/* Result View */
+.resultContainer {
+    text-align: center;
+    background: #fff;
+    padding: 3rem;
+
+    /* Match Modal.module.css .panel style */
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+    border: 1px solid #e5e7eb;
+}
+
+.mbtiType {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.resultDesc {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin-bottom: 3rem;
+    line-height: 1.6;
+}
+
+.resultChart {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chartRow {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.label {
+    font-weight: 700;
+    font-size: 1.1rem;
+    width: 80px;
+    text-align: center;
+}
+
+.label.left {
+    color: #e74c3c;
+}
+
+.label.right {
+    color: #3498db;
+}
+
+/* Custom colors per dimension if needed */
+.row-EI .label.left {
+    color: #e74c3c;
+}
+
+/* E - Red */
+.row-EI .label.right {
+    color: #3498db;
+}
+
+/* I - Blue */
+
+.row-SN .label.left {
+    color: #f1c40f;
+}
+
+/* S - Yellow */
+.row-SN .label.right {
+    color: #9b59b6;
+}
+
+/* N - Purple */
+
+.row-TF .label.left {
+    color: #2ecc71;
+}
+
+/* T - Green */
+.row-TF .label.right {
+    color: #e67e22;
+}
+
+/* F - Orange */
+
+.row-JP .label.left {
+    color: #1abc9c;
+}
+
+/* J - Teal */
+.row-JP .label.right {
+    color: #34495e;
+}
+
+/* P - Navy */
+
+
+.barContainer {
+    flex: 1;
+    height: 40px;
+    /* Thicker bar for text inside */
+    background: #f0f0f0;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+}
+
+.barLeft,
+.barRight {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: width 0.6s ease-out;
+}
+
+.barLeft {
+    background-color: inherit;
+    /* overridden inline */
+}
+
+/* ... bar styles ... */
+.barRight {
+    background-color: inherit;
+    /* overridden inline */
+}
+
+
+.actionArea {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.submitBtn {
+    /* Layout overrides for big CTA */
+    width: 100%;
+    height: auto !important;
+    /* Override fixed height */
+    padding: 1.2rem !important;
+    font-size: 1.2rem !important;
+}
+
+/* Remove .retestBtn as we use default secondary button or inline style if needed */

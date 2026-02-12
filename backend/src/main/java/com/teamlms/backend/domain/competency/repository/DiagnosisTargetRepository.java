@@ -36,4 +36,6 @@ public interface DiagnosisTargetRepository extends JpaRepository<DiagnosisTarget
           ORDER BY dt.student.accountId
       """)
   List<DiagnosisTarget> findPendingTargetsByRunId(@Param("runId") Long runId);
+
+  boolean existsByRunRunIdAndStudentAccountId(Long runId, Long accountId);
 }

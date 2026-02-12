@@ -1,5 +1,6 @@
 package com.teamlms.backend.domain.mbti.api.dto;
 
+import com.teamlms.backend.domain.mbti.dto.MbtiSubmitCommand;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +24,8 @@ public class MbtiSubmitRequest {
         private Long choiceId;
     }
 
-    public com.teamlms.backend.domain.mbti.dto.MbtiSubmitCommand toCommand(Long accountId) {
-        return com.teamlms.backend.domain.mbti.dto.MbtiSubmitCommand.builder()
+    public MbtiSubmitCommand toCommand(Long accountId) {
+        return MbtiSubmitCommand.builder()
                 .accountId(accountId)
                 .answerChoiceIds(this.answers.stream()
                         .map(MbtiAnswer::getChoiceId)
