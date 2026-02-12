@@ -1,0 +1,158 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Pretendard', sans-serif;
+}
+
+.pageTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #111;
+    text-align: center;
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+/* Card Style */
+.card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 11px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+}
+
+/* Profile Specifics */
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profileImage {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #eee;
+}
+
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.profileInfo h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.3rem;
+}
+
+.profileMeta {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Stats Grid */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.statCard {
+    background: #fff;
+    padding: 5px 1px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid #f0f0f0;
+    min-height: 100px;
+}
+
+.statLabel {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 0.4rem;
+}
+
+.statValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3498db;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+}
+
+.statUnit {
+    font-size: 0.9rem;
+    color: #bbb;
+    font-weight: 400;
+}
+
+/* Timetable Items (Classes used within Table component) */
+.periodCell {
+    background: #fafafa;
+    text-align: center;
+    vertical-align: middle !important;
+    font-weight: 600;
+    color: #777;
+}
+
+.timetableCell {
+    padding: 2px !important;
+    height: 100px !important;
+    vertical-align: top !important;
+}
+
+.courseItem {
+    background: #eaf6ff;
+    border: 1px solid #d0e8ff;
+    color: #2980b9;
+    padding: 0.5rem;
+    border-radius: 6px;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+}
+
+.courseName {
+    font-weight: 700;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.courseDetail {
+    font-size: 0.75rem;
+    color: #5d9bc9;
+}

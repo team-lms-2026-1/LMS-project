@@ -19,7 +19,10 @@ export async function PATCH(
     }
   );
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag("student:mypage");
+  }
 
   return res;
 }
