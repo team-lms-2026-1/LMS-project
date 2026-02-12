@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 const BACKEND_URL = "http://localhost:8080";
 
-export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
     try {
