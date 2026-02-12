@@ -56,14 +56,10 @@ jobs:
             sudo docker stop backend-server || true
             sudo docker rm backend-server || true
 
-            # 네트워크 생성 (없으면 생성)
-            sudo docker network create lms-network || true
-
             # 2. 도커로 서버 실행
-            # -v 옵션: EC2에 있는 app.jar 파일을 도커 안으로 연결(마운트)
+            # --network host: 호스트 네트워크 사용 (포트 포워딩 불필요)
             sudo docker run -d --name backend-server \
-              --network lms-network \
-              -p 8080:8080 \
+              --network host \
               -v /home/${{ secrets.USERNAME }}/app/app.jar:/app.jar \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
