@@ -1,1 +1,1 @@
-ec2 testttt
+ec2 test
