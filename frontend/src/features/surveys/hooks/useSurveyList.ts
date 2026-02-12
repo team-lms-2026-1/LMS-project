@@ -26,6 +26,7 @@ export function useSurveyList() {
     const [type, setType] = useState("");
 
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -36,9 +37,11 @@ export function useSurveyList() {
             if (res.meta) {
                 setMeta(res.meta);
             }
+            setError(null);
         } catch (e: any) {
             console.error("[useSurveyList]", e);
             toast.error(e.message ?? "설문 목록 조회 실패");
+            setError(e.message || "설문 목록 조회 실패");
             setItems([]);
             setMeta(defaultMeta);
         } finally {
@@ -59,6 +62,7 @@ export function useSurveyList() {
             keyword,
             type,
             loading,
+            error,
         },
         actions: {
             setKeyword,
