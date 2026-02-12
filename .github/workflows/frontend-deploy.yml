@@ -61,10 +61,10 @@ jobs:
 
           # 실행
           sudo docker run -d --name frontend-server \
+            --network lms-network \
             -p 3000:3000 \
-            --add-host host.docker.internal:host-gateway \
             -e NEXT_PUBLIC_API_URL=http://43.201.157.8:8080 \
-            -e API_BASE_URL=http://host.docker.internal:8080 \
+            -e API_BASE_URL=http://backend-server:8080 \
             $IMAGE_ID:latest
           
           # 정리
