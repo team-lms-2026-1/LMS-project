@@ -3,12 +3,14 @@ export type ApiResponse<T, M = null> = {
     meta: M;
 };
 
-export interface MbtiChoice {
+
+
+export type MbtiChoice = {
     choiceId: number;
     content: string;
 }
 
-export interface MbtiQuestion {
+export type MbtiQuestion = {
     questionId: number;
     content: string;
     sortOrder: number;
@@ -17,7 +19,19 @@ export interface MbtiQuestion {
     updatedAt: string;
 }
 
-export interface MbtiScore {
+
+
+
+export type MbtiSubmitRequest = {
+    answers: MbtiAnswer[];
+}
+
+export type MbtiAnswer = {
+    questionId: number;
+    choiceId: number;
+}
+
+export type MbtiScore = {
     e: number;
     i: number;
     s: number;
@@ -28,7 +42,7 @@ export interface MbtiScore {
     p: number;
 }
 
-export interface MbtiResult {
+export type MbtiResult = {
     resultId: number;
     accountId: number;
     mbtiType: string;
@@ -36,11 +50,11 @@ export interface MbtiResult {
     createdAt: string;
 }
 
-export interface MbtiAnswer {
-    questionId: number;
-    choiceId: number;
-}
 
-export interface MbtiSubmitRequest {
-    answers: MbtiAnswer[];
-}
+
+export type MbtiDimension = "EI" | "SN" | "TF" | "JP" | string;
+export type MbtiResultType = "E" | "I" | "S" | "N" | "T" | "F" | "J" | "P" | "NONE" | string;
+
+export type MbtiQuestionResponse = ApiResponse<MbtiQuestion[], null>;
+export type MbtiResultResponse = ApiResponse<MbtiResult, null>;
+export type MbtiLatestResultResponse = ApiResponse<MbtiResult, null>;
