@@ -1,0 +1,761 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :resolveMainClassName UP-TO-DATE
+
+> Task :bootRun
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.9)
+
+2026-02-11T15:46:22.579+09:00  INFO 11876 --- [backend] [  restartedMain] com.teamlms.backend.BackendApplication   : Starting BackendApplication using Java 17.0.16 with PID 11876 (C:\LMS-project\backend\build\classes\java\main started by JA60308 in C:\LMS-project\backend)
+2026-02-11T15:46:22.587+09:00  INFO 11876 --- [backend] [  restartedMain] com.teamlms.backend.BackendApplication   : The following 1 profile is active: "local"
+2026-02-11T15:46:22.771+09:00  INFO 11876 --- [backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-02-11T15:46:22.772+09:00  INFO 11876 --- [backend] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-02-11T15:46:28.270+09:00  INFO 11876 --- [backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-11T15:46:29.053+09:00  INFO 11876 --- [backend] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 769 ms. Found 64 JPA repository interfaces.
+2026-02-11T15:46:30.799+09:00  INFO 11876 --- [backend] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-02-11T15:46:30.837+09:00  INFO 11876 --- [backend] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-11T15:46:30.838+09:00  INFO 11876 --- [backend] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-02-11T15:46:31.006+09:00  INFO 11876 --- [backend] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-02-11T15:46:31.008+09:00  INFO 11876 --- [backend] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 8229 ms
+2026-02-11T15:46:32.523+09:00  INFO 11876 --- [backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-02-11T15:46:32.901+09:00  INFO 11876 --- [backend] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6d4838ca
+2026-02-11T15:46:32.903+09:00  INFO 11876 --- [backend] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-02-11T15:46:32.974+09:00  INFO 11876 --- [backend] [  restartedMain] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5432/team_lms (PostgreSQL 16.11)
+2026-02-11T15:46:33.634+09:00  INFO 11876 --- [backend] [  restartedMain] o.f.core.internal.command.DbValidate     : Successfully validated 36 migrations (execution time 00:00.591s)
+2026-02-11T15:46:33.671+09:00  INFO 11876 --- [backend] [  restartedMain] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 37
+2026-02-11T15:46:33.671+09:00  WARN 11876 --- [backend] [  restartedMain] o.f.core.internal.command.DbMigrate      : outOfOrder mode is active. Migration of schema "public" may not be reproducible.
+2026-02-11T15:46:33.679+09:00  INFO 11876 --- [backend] [  restartedMain] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-02-11T15:46:35.481+09:00  INFO 11876 --- [backend] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-11T15:46:35.619+09:00  INFO 11876 --- [backend] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.39.Final
+2026-02-11T15:46:35.697+09:00  INFO 11876 --- [backend] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-02-11T15:46:36.385+09:00  INFO 11876 --- [backend] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-11T15:46:36.600+09:00  INFO 11876 --- [backend] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.11
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-02-11T15:46:40.091+09:00  INFO 11876 --- [backend] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-02-11T15:46:40.241+09:00  INFO 11876 --- [backend] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-11T15:46:40.827+09:00  INFO 11876 --- [backend] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-02-11T15:46:48.686+09:00  WARN 11876 --- [backend] [  restartedMain] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 038bb3c0-c530-4468-8fef-36aade71ebdc
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-02-11T15:46:48.697+09:00  INFO 11876 --- [backend] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-02-11T15:46:48.943+09:00 DEBUG 11876 --- [backend] [  restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, LogoutFilter, JwtAuthenticationFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-02-11T15:46:50.202+09:00  INFO 11876 --- [backend] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-02-11T15:46:50.290+09:00  INFO 11876 --- [backend] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-02-11T15:46:50.310+09:00  INFO 11876 --- [backend] [  restartedMain] com.teamlms.backend.BackendApplication   : Started BackendApplication in 29.191 seconds (process running for 30.685)
+2026-02-11T15:48:21.269+09:00  INFO 11876 --- [backend] [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-11T15:48:21.269+09:00  INFO 11876 --- [backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-11T15:48:21.273+09:00  INFO 11876 --- [backend] [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
+2026-02-11T15:48:21.310+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:48:21.394+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T15:48:21.397+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+2026-02-11T15:48:21.889+09:00  WARN 11876 --- [backend] [nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [com.teamlms.backend.global.exception.base.BusinessException: 아이디 또는 비밀번호가 올바르지 않습니다.]
+2026-02-11T15:48:33.518+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:48:33.519+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T15:48:33.519+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:48:51.323+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:48:51.323+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T15:48:51.324+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:04.431+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:04.438+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:10.166+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:10.169+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:13.813+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:13.815+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:19.302+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:19.306+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:27.442+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:27.442+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T15:49:27.443+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:37.455+09:00 DEBUG 11876 --- [backend] [io-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:37.459+09:00 DEBUG 11876 --- [backend] [io-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:51.489+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:51.491+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:49:58.910+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-02-11T15:49:58.915+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        a1_0.account_id,
+        a1_0.account_type,
+        a1_0.created_at,
+        a1_0.created_by,
+        a1_0.last_login_at,
+        a1_0.login_id,
+        a1_0.password_changed_at,
+        a1_0.password_hash,
+        a1_0.status,
+        a1_0.updated_at,
+        a1_0.updated_by 
+    from
+        account a1_0 
+    where
+        a1_0.login_id=?
+Hibernate: 
+    select
+        distinct p1_0.code 
+    from
+        auth_account_role aar1_0 
+    join
+        auth_role r1_0 
+            on r1_0.role_id=aar1_0.role_id 
+    join
+        auth_role_permission arp1_0 
+            on arp1_0.role_id=r1_0.role_id 
+    join
+        auth_permission p1_0 
+            on p1_0.permission_id=arp1_0.permission_id 
+    where
+        aar1_0.account_id=? 
+        and r1_0.is_active=true 
+        and p1_0.is_active=true
+Hibernate: 
+    insert 
+    into
+        account_access_log
+        (access_url, accessed_at, account_id, ip, os, user_agent) 
+    values
+        (?, ?, ?, ?, ?, ?)
+Hibernate: 
+    INSERT 
+    INTO
+        user_activity
+        (   account_id,   first_activity_at,   last_activity_at,   last_request_path,   last_ip,   last_user_agent,   updated_at ) 
+    VALUES
+        (   ?,   ?,   ?,   ?,   ?,   ?,   ? ) 
+            ON CONFLICT (account_id) DO UPDATE 
+    SET
+        last_activity_at = EXCLUDED.last_activity_at,
+        last_request_path = EXCLUDED.last_request_path,
+        last_ip = EXCLUDED.last_ip,
+        last_user_agent = EXCLUDED.last_user_agent,
+        updated_at = EXCLUDED.updated_at 
+2026-02-11T15:50:07.237+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/admin/community/notices/categories
+2026-02-11T15:50:07.237+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T15:50:07.241+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2026-02-11T15:50:07.258+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /error
+2026-02-11T15:50:07.258+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /error
+2026-02-11T15:50:07.269+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T15:50:35.510+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/admin/community/notices/categories
+2026-02-11T15:50:35.516+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T15:50:35.517+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2026-02-11T15:50:35.518+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /error
+2026-02-11T15:50:35.519+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /error
+2026-02-11T15:50:35.521+09:00 DEBUG 11876 --- [backend] [nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-11T16:15:57.710+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5f338949 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:03.035+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@6d4838ca (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:08.185+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@4b217f69 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:13.342+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@58274340 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:14.055+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m37s509ms674µs500ns).
+2026-02-11T16:16:19.674+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@1b1df0cc (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:24.809+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@7ce9e0b5 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:29.976+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@3c730276 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:35.093+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@5e2c7bfb (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:16:40.205+09:00  WARN 11876 --- [backend] [l-1:housekeeper] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@199ccad7 (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-02-11T16:17:03.464+09:00  WARN 11876 --- [backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Pool is empty, failed to create/setup connection (22eea671-5d42-444a-a88f-cda82479452b)
+
+org.postgresql.util.PSQLException: The connection attempt failed.
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:385) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:57) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:279) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.Driver.makeConnection(Driver.java:448) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.Driver.connect(Driver.java:298) ~[postgresql-42.7.8.jar:42.7.8]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:144) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:370) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:207) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:488) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:752) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:731) ~[HikariCP-6.3.3.jar:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:842) ~[na:na]
+Caused by: java.net.SocketTimeoutException: Read timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSocketImpl.java:288) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:314) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808) ~[na:na]
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966) ~[na:na]
+	at org.postgresql.core.VisibleBufferedInputStream.readMore(VisibleBufferedInputStream.java:192) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.VisibleBufferedInputStream.ensureBytes(VisibleBufferedInputStream.java:159) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.VisibleBufferedInputStream.ensureBytes(VisibleBufferedInputStream.java:144) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.VisibleBufferedInputStream.read(VisibleBufferedInputStream.java:76) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.PGStream.receiveChar(PGStream.java:477) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.ConnectionFactoryImpl.enableSSL(ConnectionFactoryImpl.java:627) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:207) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:289) ~[postgresql-42.7.8.jar:42.7.8]
+	... 14 common frames omitted
+
+2026-02-11T16:18:33.679+09:00  WARN 11876 --- [backend] [onnection-adder] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Pool is empty, failed to create/setup connection (34e9c136-941e-401d-99ca-ec694f2b4f0a)
+
+org.postgresql.util.PSQLException: The connection attempt failed.
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:385) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:57) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:279) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.Driver.makeConnection(Driver.java:448) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.Driver.connect(Driver.java:298) ~[postgresql-42.7.8.jar:42.7.8]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:144) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:370) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:207) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:488) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:752) ~[HikariCP-6.3.3.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:731) ~[HikariCP-6.3.3.jar:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:842) ~[na:na]
+Caused by: java.net.SocketTimeoutException: Read timed out
+	at java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSocketImpl.java:288) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:314) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:355) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:808) ~[na:na]
+	at java.base/java.net.Socket$SocketInputStream.read(Socket.java:966) ~[na:na]
+	at org.postgresql.core.VisibleBufferedInputStream.readMore(VisibleBufferedInputStream.java:192) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.VisibleBufferedInputStream.ensureBytes(VisibleBufferedInputStream.java:159) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.VisibleBufferedInputStream.ensureBytes(VisibleBufferedInputStream.java:144) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.VisibleBufferedInputStream.read(VisibleBufferedInputStream.java:76) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.PGStream.receiveChar(PGStream.java:477) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.ConnectionFactoryImpl.enableSSL(ConnectionFactoryImpl.java:627) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:207) ~[postgresql-42.7.8.jar:42.7.8]
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:289) ~[postgresql-42.7.8.jar:42.7.8]
+	... 14 common frames omitted
+
+^C

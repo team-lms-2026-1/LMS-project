@@ -11,6 +11,8 @@ import com.teamlms.backend.domain.community.repository.CommunityAccountRepositor
 import com.teamlms.backend.domain.community.repository.QnaAnswerRepository;
 import com.teamlms.backend.domain.community.repository.QnaCategoryRepository;
 import com.teamlms.backend.domain.community.repository.QnaQuestionRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 
 // 에러코드 임포트
 import com.teamlms.backend.global.exception.base.BusinessException;
@@ -37,6 +39,7 @@ public class QnaService {
         private final QnaCategoryRepository categoryRepository;
         private final AccountRepository accountRepository;
         private final CommunityAccountRepository communityAccountRepository;
+        private final AlarmCommandService alarmCommandService;
 
         // --- 질문 (Question) ---
 
@@ -185,6 +188,8 @@ public class QnaService {
                 QnaAnswer answer = QnaAnswer.builder()
                                 .question(question).author(admin).content(request.getContent()).build();
                 answerRepository.save(answer);
+
+                notifyCommunityComment(question, adminId);
         }
 
         @Transactional
@@ -213,6 +218,24 @@ public class QnaService {
                 question.removeAnswer();
 
                 // answerRepository.delete(answer); <-- 이 줄은 이제 필요 없습니다! 지우세요.
+        }
+
+        private void notifyCommunityComment(QnaQuestion question, Long actorId) {
+                Long recipientId = question.getAuthor().getAccountId();
+                if (recipientId == null || recipientId.equals(actorId)) {
+                        return;
+                }
+
+                String title = "Q&A answer";
+                String message = "Your question '" + question.getTitle() + "' has a new answer.";
+                String linkUrl = "/community/qna/questions/" + question.getId();
+
+                alarmCommandService.createAlarm(
+                                recipientId,
+                                AlarmType.COMMUNITY_COMMENT,
+                                title,
+                                message,
+                                linkUrl);
         }
 
         private ExternalCategoryResponse toCategoryDto(QnaCategory c) {

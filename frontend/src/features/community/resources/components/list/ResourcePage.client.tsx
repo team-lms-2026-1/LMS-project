@@ -13,7 +13,7 @@ import { useRouter, useSearchParams  } from "next/navigation";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
-import { fetchResourceCategories } from "../../api/ResourcesApi";
+import { fetchResourceCategories } from "../../api/resourcesApi";
 import type { Category } from "../../api/types";
 
 export default function ResourcePageClient() {

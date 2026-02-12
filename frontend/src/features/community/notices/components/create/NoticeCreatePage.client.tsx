@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 import styles from "./NoticeCreatePage.module.css";
 import type { Category, CreateNoticeRequestDto } from "../../api/types";
-import { createNotice, fetchNoticeCategories } from "../../api/NoticesApi";
+import { createNotice, fetchNoticeCategories } from "../../api/noticesApi";
 import { Button } from "@/components/button";
 import DatePicker from "react-datepicker";
 

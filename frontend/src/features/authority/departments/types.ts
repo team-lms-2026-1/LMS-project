@@ -1,25 +1,25 @@
 /* =========================
- *  백엔드 응답 타입
+ *  백엔???�답 ?�??
  * ========================= */
 
-// 학과 목록 API 전체 응답
+// ?�과 목록 API ?�체 ?�답
 export type DeptListResponse = {
   data: DeptItem[];
   meta: PageMeta;
 };
 
-// 학과 단건 (백엔드 DTO 그대로)
+// ?�과 ?�건 (백엔??DTO 그�?�?
 export type DeptItem = {
   deptId: number;
   deptCode: string;
   deptName: string;
   headProfessorName: string | null;
-  studentCount: number;
-  professorCount: number;
-  isActive: boolean;
+  studentCount?: number;
+  professorCount?: number;
+  isActive?: boolean;
 };
 
-// 페이지 메타 정보
+// ?�이지 메�? ?�보
 export type PageMeta = {
   page: number;
   size: number;
@@ -31,28 +31,31 @@ export type PageMeta = {
 };
 
 /* =========================
- *  화면 전용 타입
+ *  ?�면 ?�용 ?�??
  * ========================= */
 
-// 화면(DeptsPage)에서 사용하는 학과 타입
+// ?�면(DeptsPage)?�서 ?�용?�는 ?�과 ?�??
 export type Department = {
-  id: string;              // 화면에서는 string ID 사용
+  id: string;              // ?�면?�서??string ID ?�용
   code: string;
   name: string;
-  headProfessor: string;
-  studentCount: number;
-  professorCount: number;
-  isActive: boolean;
+  description?: string;
+  createdAt?: string;
+  status?: "ACTIVE" | "INACTIVE" | string;
+  headProfessor?: string;
+  studentCount?: number;
+  professorCount?: number;
+  isActive?: boolean;
 };
 
 /* =========================
- *  매핑 함수
+ *  매핑 ?�수
  * ========================= */
 
-// 백엔드 DeptItem → 화면 Department
+// 백엔??DeptItem ???�면 Department
 export function mapDeptItemToDepartment(item: DeptItem): Department {
   return {
-    id: String(item.deptId),                // number → string
+    id: String(item.deptId),                // number ??string
     code: item.deptCode,
     name: item.deptName,
     headProfessor: item.headProfessorName ?? "",
@@ -62,9 +65,40 @@ export function mapDeptItemToDepartment(item: DeptItem): Department {
   };
 }
 
-// 배열용 매핑 (선택)
+// 배열??매핑 (?�택)
 export function mapDeptItemsToDepartments(
   items: DeptItem[]
 ): Department[] {
   return items.map(mapDeptItemToDepartment);
 }
+
+export type Professor = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+};
+
+export type Student = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+};
+
+export type Major = {
+  id: string;
+  code: string;
+  name: string;
+};
+
+export type DepartmentDetail = {
+  department: Department;
+  professors: Professor[];
+  students: Student[];
+  majors: Major[];
+};
+
+
+export type DepartmentStatus = "ACTIVE" | "INACTIVE" | string;
+

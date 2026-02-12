@@ -21,6 +21,10 @@ import com.teamlms.backend.domain.mentoring.repository.MentoringMatchingReposito
 import com.teamlms.backend.domain.mentoring.repository.MentoringRecruitmentRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringQuestionRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringAnswerRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
+import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +37,7 @@ public class MentoringCommandService {
 
     private final MentoringRecruitmentRepository recruitmentRepository;
     private final MentoringApplicationRepository applicationRepository;
+    private final AlarmCommandService alarmCommandService;
 
     public Long createRecruitment(Long adminId, MentoringRecruitmentCreateRequest request) {
         MentoringRecruitment recruitment = MentoringRecruitment.builder()
@@ -126,7 +131,8 @@ public class MentoringCommandService {
                 .applyReason(request.getReason())
                 .build();
 
-        applicationRepository.save(application);
+        MentoringApplication savedApplication = applicationRepository.save(application);
+        notifyNewApplication(savedApplication, recruitment, account);
     }
 
     private final MentoringMatchingRepository matchingRepository;
@@ -155,6 +161,9 @@ public class MentoringCommandService {
         // Update statuses
         mentorApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
         menteeApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
+
+        notifyApplicationStatus(mentorApp);
+        notifyApplicationStatus(menteeApp);
     }
 
     private final MentoringQuestionRepository questionRepository;
@@ -173,6 +182,8 @@ public class MentoringCommandService {
         }
 
         application.updateStatus(newStatus, request.getRejectReason(), adminId);
+
+        notifyApplicationStatus(application);
     }
 
     public void createQuestion(Long writerId, MentoringQuestionRequest request) {
@@ -222,5 +233,79 @@ public class MentoringCommandService {
                 .build();
 
         answerRepository.save(answer);
+
+        notifyQuestionAnswered(question, matching, writerId);
+    }
+
+    private void notifyNewApplication(MentoringApplication application, MentoringRecruitment recruitment,
+            Account applicant) {
+        java.util.List<Account> admins = accountRepository.findAllByAccountType(AccountType.ADMIN);
+        if (admins.isEmpty()) {
+            return;
+        }
+
+        String applicantName = applicant != null ? applicant.getLoginId() : "User";
+        String title = "Mentoring application";
+        String message = applicantName + " applied for '" + recruitment.getTitle() + "' as "
+                + application.getRole().name() + ".";
+        String linkUrl = "/admin/mentoring/recruitments/" + recruitment.getRecruitmentId() + "/applications";
+
+        for (Account admin : admins) {
+            alarmCommandService.createAlarm(
+                    admin.getAccountId(),
+                    AlarmType.MENTORING_NEW_APPLICATION,
+                    title,
+                    message,
+                    linkUrl);
+        }
+    }
+
+    private void notifyApplicationStatus(MentoringApplication application) {
+        Long recipientId = application.getAccountId();
+        if (recipientId == null) {
+            return;
+        }
+
+        String title = "Mentoring application status";
+        String message = switch (application.getStatus()) {
+            case APPROVED -> "Your mentoring application was approved.";
+            case REJECTED -> {
+                String reason = application.getRejectReason();
+                if (reason == null || reason.isBlank()) {
+                    yield "Your mentoring application was rejected.";
+                }
+                yield "Your mentoring application was rejected. Reason: " + reason;
+            }
+            case MATCHED -> "Your mentoring application was matched.";
+            case CANCELED -> "Your mentoring application was canceled.";
+            case APPLIED -> "Your mentoring application was received.";
+        };
+
+        String linkUrl = "/mentoring/recruitments/" + application.getRecruitmentId();
+
+        alarmCommandService.createAlarm(
+                recipientId,
+                AlarmType.MENTORING_APPLICATION_STATUS,
+                title,
+                message,
+                linkUrl);
+    }
+
+    private void notifyQuestionAnswered(MentoringQuestion question, MentoringMatching matching, Long actorId) {
+        Long recipientId = question.getWriterId();
+        if (recipientId == null || recipientId.equals(actorId)) {
+            return;
+        }
+
+        String title = "Mentoring answer";
+        String message = "Your mentoring question has been answered.";
+        String linkUrl = "/mentoring/matchings/" + matching.getMatchingId() + "/chat";
+
+        alarmCommandService.createAlarm(
+                recipientId,
+                AlarmType.MENTORING_QUESTION_ANSWERED,
+                title,
+                message,
+                linkUrl);
     }
 }

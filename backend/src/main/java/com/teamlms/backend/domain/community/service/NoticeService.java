@@ -2,6 +2,8 @@ package com.teamlms.backend.domain.community.service;
 
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.domain.community.api.dto.*;
 import com.teamlms.backend.domain.community.dto.InternalNoticeRequest; // 명칭 확인 필요
 import com.teamlms.backend.domain.community.entity.*;
@@ -37,6 +39,7 @@ public class NoticeService {
     private final AccountRepository accountRepository;
     private final CommunityAccountRepository communityAccountRepository;
     private final S3Service s3Service;
+    private final AlarmCommandService alarmCommandService;
 
     // 1. 목록 조회 (자료실 스타일: Condition 객체 활용)
     public Page<ExternalNoticeResponse> getNoticeList(Pageable pageable, Long categoryId, String keyword) {
@@ -96,6 +99,8 @@ public class NoticeService {
         if (files != null && !files.isEmpty()) {
             saveAttachments(files, notice, author);
         }
+
+        createNoticeAlarms(notice, authorId);
 
         return notice.getId();
     }
@@ -199,10 +204,49 @@ public class NoticeService {
         }
     }
 
+    private void createNoticeAlarms(Notice notice, Long authorId) {
+        List<Account> recipients = accountRepository.findAll();
+        if (recipients.isEmpty()) {
+            return;
+        }
+
+        String title = notice.getTitle();
+        String message = buildNoticeMessage(notice.getContent());
+        String linkUrl = "/community/notices/" + notice.getId();
+
+        for (Account recipient : recipients) {
+            alarmCommandService.createAlarm(
+                    recipient.getAccountId(),
+                    AlarmType.NOTICE_NEW,
+                    title,
+                    message,
+                    linkUrl);
+        }
+    }
+
     private String extractKeyFromUrl(String url) {
         if (url == null || !url.contains("notices/"))
             return url;
         return url.substring(url.indexOf("notices/"));
+    }
+
+    private String buildNoticeMessage(String content) {
+        if (content == null) {
+            return "공지사항이 등록되었습니다.";
+        }
+
+        String normalized = content.replaceAll("<[^>]*>", " ");
+        normalized = normalized.replaceAll("\\s+", " ").trim();
+        if (normalized.isEmpty()) {
+            return "공지사항이 등록되었습니다.";
+        }
+
+        int maxLen = 80;
+        if (normalized.length() <= maxLen) {
+            return normalized;
+        }
+
+        return normalized.substring(0, maxLen) + "...";
     }
 
     private ExternalNoticeResponse convertToExternalResponse(Notice notice, String authorName) {

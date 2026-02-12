@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import AlarmBell from "@/components/alarm/AlarmBell";
 import styles from "./student-shell.module.css";
 
 const EXP_KEY = "auth_expires_at";
@@ -83,6 +84,7 @@ export default function StudentTopbar() {
           </div>
         )}
 
+        <AlarmBell />
         <button className={styles.profileBtn} type="button" title="프로필">
           <span className={styles.profileAvatar} aria-hidden="true" />
           <span className={styles.profileText}>학생</span>
@@ -91,3 +93,4 @@ export default function StudentTopbar() {
     </div>
   );
 }
+

@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./ResourceEditPage.module.css";
 import type { Category, ResourceListItemDto, ResourceFileDto, ExistingFile, LoadState, } from "../../api/types";
-import { fetchResourceCategories, fetchResourceDetail, updateResource } from "../../api/ResourcesApi";
+import { fetchResourceCategories, fetchResourceDetail, updateResource } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
 
 function normalizeDetail(payload: any): ResourceListItemDto {

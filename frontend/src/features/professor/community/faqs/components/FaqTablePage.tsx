@@ -1,7 +1,7 @@
 "use client";
 
 import { Table, type TableColumn } from "@/components/table";
-import { FaqListItemDto } from "../../api/types";
+import { FaqListItemDto } from "../api/types";
 import styles from "./FaqTable.module.css";
 import { useRouter } from "next/navigation";
 

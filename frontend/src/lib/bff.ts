@@ -78,6 +78,7 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
     );
   }
 
+  const method = options.method ?? req.method ?? "GET";
   const forwardQuery = options.forwardQuery ?? true;
   const qs = forwardQuery ? new URL(req.url).search : "";
   const url = `${base.replace(/\/+$/, "")}${upstreamPath}${qs}`;
@@ -87,10 +88,10 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
 
   // ✅ 여기부터 추가
   try {
-    console.log("[BFF] ->", options.method ?? "GET", url);
+    console.log("[BFF] ->", method, url);
 
     const res = await fetch(url, {
-      method: options.method ?? "GET",
+      method,
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,

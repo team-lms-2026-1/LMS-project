@@ -14,7 +14,7 @@
     ExistingFile,
     LoadState,
   } from "../../api/types";
-  import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/NoticesApi";
+  import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/noticesApi";
   import { Button } from "@/components/button";
   import DatePicker from "react-datepicker";
 

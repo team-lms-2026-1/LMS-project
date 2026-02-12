@@ -1,0 +1,261 @@
+﻿.wrap {
+  position: relative;
+}
+
+.bellButton {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bellButton:hover {
+  background: #f9fafb;
+}
+
+.bellButton:focus,
+.bellButton:focus-visible,
+.bellButton:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.bellIcon {
+  width: 18px;
+  height: 18px;
+  color: #374151;
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+}
+
+.panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.panelTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.panelActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panelAction {
+  font-size: 11px;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.panelAction:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.panelActionDanger {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.panelActionDanger:hover {
+  background: #fee2e2;
+}
+
+.panelList {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.panelItem {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0 10px 0 14px;
+}
+
+.panelItem:hover {
+  background: #f9fafb;
+}
+
+.panelItemUnread {
+  background: #eef2ff;
+}
+
+.panelItemUnread:hover {
+  background: #e0e7ff;
+}
+
+.itemButton {
+  flex: 1;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 10px 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.itemButton:focus,
+.itemButton:focus-visible,
+.itemButton:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.itemTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.itemBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1f2937;
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 1px 6px;
+  line-height: 1.4;
+}
+
+.itemBadgeNotice {
+  color: #1e3a8a;
+  background: #e0e7ff;
+  border-color: #c7d2fe;
+}
+
+.itemBadgeMentoring {
+  color: #065f46;
+  background: #d1fae5;
+  border-color: #a7f3d0;
+}
+
+.itemBadgeCommunity {
+  color: #9a3412;
+  background: #ffedd5;
+  border-color: #fed7aa;
+}
+
+.itemMessage {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.itemMeta {
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+.itemDelete {
+  margin-top: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.itemDelete:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.itemDelete:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.itemDeleteIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.panelEmpty {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.panelError {
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-bottom: 1px solid #fee2e2;
+}

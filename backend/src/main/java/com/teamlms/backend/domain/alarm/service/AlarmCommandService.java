@@ -40,4 +40,15 @@ public class AlarmCommandService {
     public int markAllRead(Long accountId) {
         return alarmRepository.markAllRead(accountId, LocalDateTime.now());
     }
+
+    public void deleteAlarm(Long accountId, Long alarmId) {
+        long deleted = alarmRepository.deleteByAlarmIdAndRecipientAccountId(alarmId, accountId);
+        if (deleted == 0) {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        }
+    }
+
+    public int deleteAll(Long accountId) {
+        return alarmRepository.deleteAllByRecipientAccountId(accountId);
+    }
 }

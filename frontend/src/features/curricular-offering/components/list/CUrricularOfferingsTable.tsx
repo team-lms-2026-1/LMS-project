@@ -2,7 +2,7 @@
 
 import { Table, type TableColumn } from "@/components/table";
 import { CurricularOfferingListItemDto } from "../../api/types";
-import styles from "./CUrricularOfferingsTable.module.css"
+import styles from "./CurricularOfferingsTable.module.css"
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
 

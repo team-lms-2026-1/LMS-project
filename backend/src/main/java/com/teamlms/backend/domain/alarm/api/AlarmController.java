@@ -68,4 +68,21 @@ public class AlarmController {
         int updated = commandService.markAllRead(user.getAccountId());
         return ApiResponse.ok(Map.of("success", true, "updated", updated));
     }
+
+    @DeleteMapping
+    public ApiResponse<Map<String, Object>> deleteAll(
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        int deleted = commandService.deleteAll(user.getAccountId());
+        return ApiResponse.ok(Map.of("success", true, "deleted", deleted));
+    }
+
+    @DeleteMapping("/{alarmId}")
+    public ApiResponse<Map<String, Boolean>> deleteAlarm(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable Long alarmId
+    ) {
+        commandService.deleteAlarm(user.getAccountId(), alarmId);
+        return ApiResponse.ok(Map.of("success", true));
+    }
 }

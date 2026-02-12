@@ -17,6 +17,8 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
 
     Optional<Alarm> findByAlarmIdAndRecipientAccountId(Long alarmId, Long recipientAccountId);
 
+    long deleteByAlarmIdAndRecipientAccountId(Long alarmId, Long recipientAccountId);
+
     long countByRecipientAccountIdAndReadAtIsNull(Long recipientAccountId);
 
     @Modifying
@@ -27,4 +29,11 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
           and a.readAt is null
         """)
     int markAllRead(@Param("recipientAccountId") Long recipientAccountId, @Param("now") LocalDateTime now);
+
+    @Modifying
+    @Query("""
+        delete from Alarm a
+        where a.recipientAccountId = :recipientAccountId
+        """)
+    int deleteAllByRecipientAccountId(@Param("recipientAccountId") Long recipientAccountId);
 }
