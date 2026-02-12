@@ -56,10 +56,15 @@ jobs:
             sudo docker stop backend-server || true
             sudo docker rm backend-server || true
 
+            # 네트워크 생성 (없으면 생성)
+            sudo docker network create lms-network || true
+
             # 2. 도커로 서버 실행
-            # --network host: 호스트 네트워크 사용 (포트 포워딩 불필요)
+            # --network lms-network: 전용 네트워크 사용
+            # -p 8080:8080: 외부 접속을 위해 포트 열기
             sudo docker run -d --name backend-server \
-              --network host \
+              --network lms-network \
+              -p 8080:8080 \
               -v /home/${{ secrets.USERNAME }}/app/app.jar:/app.jar \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
