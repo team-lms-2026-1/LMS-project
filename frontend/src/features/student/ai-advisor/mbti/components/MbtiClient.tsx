@@ -8,12 +8,46 @@ import { useMbtiQuestions, useMbtiResult } from "../hooks/useMbti";
 import { submitMbtiAnswers } from "../api/mbtiApi";
 import { MbtiSubmitRequest } from "../api/types";
 
+// ... imports
+import { ConfirmModal } from "@/components/modal";
+
 export default function MbtiClient() {
     const { state: resultState, actions: resultActions } = useMbtiResult();
-    const { state: questionState } = useMbtiQuestions(!resultState.data); // 결과가 없으면 질문 로딩
+    const { state: questionState } = useMbtiQuestions(!resultState.data);
 
     const [answers, setAnswers] = useState<Record<number, number>>({});
     const [submitting, setSubmitting] = useState(false);
+
+    // Modal State
+    const [modalConfig, setModalConfig] = useState<{
+        open: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        type?: "primary" | "danger" | "warning";
+    }>({
+        open: false,
+        title: "",
+        message: "",
+        onConfirm: () => { },
+    });
+
+    const closeModal = () => {
+        setModalConfig((prev) => ({ ...prev, open: false }));
+    };
+
+    const openConfirm = (title: string, message: string, onConfirm: () => void, type: "primary" | "danger" | "warning" = "primary") => {
+        setModalConfig({
+            open: true,
+            title,
+            message,
+            onConfirm: () => {
+                onConfirm();
+                closeModal();
+            },
+            type,
+        });
+    };
 
     // 결과 로딩 중
     if (resultState.loading) {
@@ -29,6 +63,19 @@ export default function MbtiClient() {
         // useMbtiResult에서 에러 발생 시 여기로 옴.
         // 만약 '결과 없음'이 에러가 아니라 null data라면 아래 로직으로 넘어감.
     }
+
+    // Handle Retest
+    const handleRetest = () => {
+        openConfirm(
+            "재검사 확인",
+            "다시 검사하시겠습니까? 기존 결과는 사라집니다.",
+            () => {
+                resultActions.setData(null);
+                setAnswers({});
+            },
+            "warning"
+        );
+    };
 
     // 결과가 있으면 결과 화면
     if (resultState.data) {
@@ -73,17 +120,20 @@ export default function MbtiClient() {
                     <div className={styles.actionArea}>
                         <Button
                             variant="secondary"
-                            onClick={() => {
-                                if (confirm("다시 검사하시겠습니까? 기존 결과는 사라집니다.")) {
-                                    resultActions.setData(null);
-                                    setAnswers({});
-                                }
-                            }}
+                            onClick={handleRetest}
                         >
                             다시 검사하기
                         </Button>
                     </div>
                 </div>
+                <ConfirmModal
+                    open={modalConfig.open}
+                    title={modalConfig.title}
+                    message={modalConfig.message}
+                    onConfirm={modalConfig.onConfirm}
+                    onCancel={closeModal}
+                    type={modalConfig.type}
+                />
             </div>
         );
     }
@@ -106,15 +156,7 @@ export default function MbtiClient() {
         setAnswers(prev => ({ ...prev, [qId]: cId }));
     };
 
-    // 제출 핸들러
-    const handleSubmit = async () => {
-        if (Object.keys(answers).length < questions.length) {
-            toast.error("모든 문항에 답변해주세요.");
-            return;
-        }
-
-        if (!confirm("제출하시겠습니까?")) return;
-
+    const processSubmit = async () => {
         setSubmitting(true);
         try {
             const submitData: MbtiSubmitRequest = {
@@ -126,9 +168,7 @@ export default function MbtiClient() {
 
             const res = await submitMbtiAnswers(submitData);
 
-            // Backend returns MbtiResultResponse wrapped in ApiResponse
             if (res.data) {
-                // 결과 바로 적용 (Reload 불필요)
                 resultActions.setData(res.data);
                 toast.success("MBTI 분석이 완료되었습니다.");
             } else {
@@ -141,6 +181,21 @@ export default function MbtiClient() {
         } finally {
             setSubmitting(false);
         }
+    };
+
+    // 제출 핸들러
+    const handleSubmit = async () => {
+        if (Object.keys(answers).length < questions.length) {
+            toast.error("모든 문항에 답변해주세요.");
+            return;
+        }
+
+        openConfirm(
+            "제출 확인",
+            "제출하시겠습니까?",
+            () => processSubmit(), // Call actual submit function
+            "primary"
+        );
     };
 
     return (
@@ -181,6 +236,14 @@ export default function MbtiClient() {
                     결과 보기
                 </Button>
             </div>
+            <ConfirmModal
+                open={modalConfig.open}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                onConfirm={modalConfig.onConfirm}
+                onCancel={closeModal}
+                type={modalConfig.type}
+            />
         </div>
     );
 };
