@@ -192,6 +192,16 @@ public enum ErrorCode {
     SURVEY_HAS_RESPONSES(HttpStatus.CONFLICT, "SURVEY_HAS_RESPONSES", "이미 응답이 존재하여 수정할 수 없습니다.", "survey.hasResponses"),
 
     // =========================
+    // Domain: MBTI
+    // =========================
+    MBTI_SUBMIT_INVALID(HttpStatus.BAD_REQUEST, "MBTI_SUBMIT_INVALID", "MBTI submit payload is invalid.", "mbti.submit.invalid"),
+    MBTI_ANSWER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MBTI_ANSWER_NOT_FOUND", "One or more answer choices are invalid.", "mbti.answer.notFound"),
+    MBTI_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND, "MBTI_RESULT_NOT_FOUND", "MBTI result is not found.", "mbti.result.notFound"),
+    MBTI_KEYWORD_MIN_REQUIRED(HttpStatus.BAD_REQUEST, "MBTI_KEYWORD_MIN_REQUIRED", "Select at least two interest keywords.", "mbti.keyword.minRequired"),
+    MBTI_KEYWORD_INVALID(HttpStatus.BAD_REQUEST, "MBTI_KEYWORD_INVALID", "One or more selected keywords are invalid.", "mbti.keyword.invalid"),
+    MBTI_JOB_CATALOG_EMPTY(HttpStatus.NOT_FOUND, "MBTI_JOB_CATALOG_EMPTY", "Job catalog data is not available.", "mbti.jobCatalog.empty"),
+
+    // =========================
     // Domain: Log
     // =========================
     LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "LOG_NOT_FOUND", "로그를 찾을 수 없습니다.", "log.notFound"),

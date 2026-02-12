@@ -1,27 +1,53 @@
 import { getJson } from "@/lib/http";
-import { MbtiQuestionResponse, MbtiSubmitRequest, MbtiResultResponse } from "./types";
-import { SuccessResponse } from "@/features/ai/api/types";
+import {
+  MbtiInterestKeywordResponse,
+  MbtiLatestRecommendationResponse,
+  MbtiQuestionResponse,
+  MbtiRecommendationRequest,
+  MbtiRecommendationResponse,
+  MbtiResultResponse,
+  MbtiSubmitRequest,
+} from "./types";
 
 export async function fetchMbtiQuestions() {
-    const url = `/api/student/mbti/questions`
-    return getJson<MbtiQuestionResponse>(url, {
-        cache: "no-store"
-    });
+  return getJson<MbtiQuestionResponse>("/api/student/mbti/questions", {
+    cache: "no-store",
+  });
 }
 
 export async function submitMbtiAnswers(body: MbtiSubmitRequest) {
-    const url = `/api/student/mbti/submit`;
-    return getJson<MbtiResultResponse>(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        cache: "no-store",
-    });
+  return getJson<MbtiResultResponse>("/api/student/mbti/submit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
 }
 
 export async function fetchMbtiResult() {
-    const url = `/api/student/mbti/result`
-    return getJson<MbtiResultResponse>(url, {
-        cache: "no-store"
-    });
+  return getJson<MbtiResultResponse>("/api/student/mbti/result", {
+    cache: "no-store",
+  });
 }
+
+export async function fetchInterestKeywords() {
+  return getJson<MbtiInterestKeywordResponse>("/api/student/mbti/interest-keywords", {
+    cache: "no-store",
+  });
+}
+
+export async function createMbtiRecommendation(body: MbtiRecommendationRequest) {
+  return getJson<MbtiRecommendationResponse>("/api/student/mbti/recommendations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+}
+
+export async function fetchLatestRecommendation() {
+  return getJson<MbtiLatestRecommendationResponse>("/api/student/mbti/recommendations/latest", {
+    cache: "no-store",
+  });
+}
+
