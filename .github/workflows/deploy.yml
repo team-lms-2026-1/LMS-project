@@ -70,6 +70,9 @@ jobs:
               -e RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
               -e DB_USER=${{ secrets.DB_USER }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.MY_AWS_ACCESS_KEY }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.MY_AWS_SECRET_KEY }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               openjdk:17-jdk-slim \
               java -Xms128m -Xmx128m -jar /app.jar
             
