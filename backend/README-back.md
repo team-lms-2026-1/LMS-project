@@ -56,7 +56,7 @@
   `JPQL + DTO 생성자 방식`으로 조회한다.
 - 필요한 컬럼만 명시적으로 select 하고, 조인은 쿼리에서 명확히 수행한다.
 - Spring Data Projection(interface)은 사용하지 않는다.
-- QueryDSL은 필요 시 별도 논의 후 도입한다.
+- QueryDSL은 필요 시 별도 논의 후 도입한다..
 
 ---
 
