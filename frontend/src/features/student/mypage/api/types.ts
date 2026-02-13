@@ -5,16 +5,16 @@ export type ApiResponse<T, M = null> = {
     meta: M;
 };
 
-export interface TimetableInfo {
+export type TimetableInfo = {
+    period: number;
+    location: string;
     offering_name: string;
     course_code: string;
     day_of_week: string;
-    period: number;
-    location: string;
     professor_name: string;
 }
 
-export interface StudentMypageResponse {
+export type StudentMypageResponse = {
     accountId: number;
     studentNo: string;
     studentName: string;
@@ -22,10 +22,12 @@ export interface StudentMypageResponse {
     gradeLevel: number;
     academicStatus: StudentAcademicStatus;
     profileImageUrl: string;
-    profileImageKey?: string;
+    profileImageKey: string;
     totalCredits: number;
     averageScore: number;
     totalExtraPoints: number;
     totalExtraHours: number;
     currentTimetable: TimetableInfo[];
 }
+
+export type StudentMypageApiResponse = ApiResponse<StudentMypageResponse, null>;
