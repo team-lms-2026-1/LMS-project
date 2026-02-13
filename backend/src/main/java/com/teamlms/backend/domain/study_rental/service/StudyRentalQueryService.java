@@ -161,6 +161,44 @@ public class StudyRentalQueryService {
                 return getRentalList(condition, pageable);
         }
 
+        public RentalResponse getMyRentalDetail(Long rentalId, Object principal) {
+                Long accountId = extractAccountId(principal);
+
+                StudyRoomRental rental = rentalRepository.findById(rentalId)
+                                .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_NOT_FOUND));
+
+                if (rental.getApplicant() == null
+                                || !accountId.equals(rental.getApplicant().getAccountId())) {
+                        throw new BusinessException(ErrorCode.ACCESS_DENIED);
+                }
+
+                Set<Long> accountIds = Set.of(accountId);
+                Map<Long, StudentProfile> studentProfileMap = studentProfileRepository.findAllById(accountIds).stream()
+                                .collect(Collectors.toMap(StudentProfile::getAccountId, Function.identity()));
+
+                Set<Long> remainingIds = accountIds.stream()
+                                .filter(id -> !studentProfileMap.containsKey(id))
+                                .collect(Collectors.toSet());
+
+                Map<Long, ProfessorProfile> professorProfileMap = remainingIds.isEmpty() ? Map.of()
+                                : professorProfileRepository.findAllById(remainingIds).stream()
+                                                .collect(Collectors.toMap(ProfessorProfile::getAccountId,
+                                                                Function.identity()));
+
+                Set<Long> deptIds = studentProfileMap.values().stream()
+                                .map(StudentProfile::getDeptId)
+                                .collect(Collectors.toSet());
+                deptIds.addAll(professorProfileMap.values().stream()
+                                .map(ProfessorProfile::getDeptId)
+                                .collect(Collectors.toSet()));
+
+                Map<Long, String> deptNameMap = deptIds.isEmpty() ? Map.of()
+                                : deptRepository.findAllById(deptIds).stream()
+                                                .collect(Collectors.toMap(Dept::getDeptId, Dept::getDeptName));
+
+                return toRentalResponse(rental, studentProfileMap, professorProfileMap, deptNameMap);
+        }
+
         // =================================================================================
         // 2. ID 추출 헬퍼 메서드
         // =================================================================================

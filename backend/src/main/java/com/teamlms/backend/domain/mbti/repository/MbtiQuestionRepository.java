@@ -10,6 +10,10 @@ import java.util.List;
 @Repository
 public interface MbtiQuestionRepository extends JpaRepository<MbtiQuestion, Long> {
 
-    @Query("SELECT q FROM MbtiQuestion q JOIN FETCH q.choices ORDER BY q.sortOrder ASC")
+    @Query("SELECT DISTINCT q FROM MbtiQuestion q LEFT JOIN FETCH q.choices ORDER BY q.sortOrder ASC")
     List<MbtiQuestion> findAllWithChoices();
+
+    @Query("SELECT q FROM MbtiQuestion q ORDER BY q.sortOrder ASC")
+    List<MbtiQuestion> findAllOrderBySortOrder();
 }
+

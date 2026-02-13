@@ -42,11 +42,11 @@ public class AdmincCurricularController {
         @Valid @RequestBody CurricularCreateRequest req
     ) {
         curricularCommandService.create(
-            req.getCurricularCode(),
-            req.getCurricularName(),
-            req.getDeptId(),
-            req.getCredits(),
-            req.getDescription()
+            req.curricularCode(),
+            req.curricularName(),
+            req.deptId(),
+            req.credits(),
+            req.description()
         );
 
         return ApiResponse.ok(new SuccessResponse());

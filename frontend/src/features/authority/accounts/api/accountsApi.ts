@@ -1,4 +1,4 @@
-import { bffRequest } from "@/lib/bffClient";
+import { getJson, postJson, patchJson, deleteJson } from "@/lib/http";
 import { AccountStatus, AccountType } from "../types";
 import type {
   AccountsListResponseDto,
@@ -191,46 +191,37 @@ export const accountsApi = {
     qs.set("size", String(params?.size ?? 20));
 
     const url = `${BASE}?${qs.toString()}`;
-    const raw = await bffRequest<any>(url);
+    const raw = await getJson<any>(url);
     return normalizeListResponse(raw);
   },
 
   /** ✅ 수정 모달에서 "연락처/학과/주전공" 정확히 채우기 위해 상세 호출 */
   async detail(accountId: number): Promise<AccountRowDto> {
-    const raw = await bffRequest<any>(`${BASE}/${accountId}`);
+    const raw = await getJson<any>(`${BASE}/${accountId}`);
     const obj = raw?.data ?? raw; // {data:{...}} 대응
     return normalizeRow(obj);
   },
 
   create(body: CreateAccountRequestDto) {
-    return bffRequest<{ accountId: number }>(BASE, { method: "POST", body });
+    return postJson<{ accountId: number }>(BASE, body);
   },
 
   update(accountId: number, body: UpdateAccountRequestDto) {
     const payload = sanitizeUpdateBody(body);
-    return bffRequest<void>(`${BASE}/${accountId}`, { method: "PATCH", body: payload });
+    return patchJson<void>(`${BASE}/${accountId}`, payload);
   },
 
   updateStatus(accountId: number, status: AccountStatus) {
-    return bffRequest<void>(`${BASE}/${accountId}/status`, {
-      method: "PATCH",
-      body: { status },
-    });
+    return patchJson<void>(`${BASE}/${accountId}/status`, { status });
   },
 
   resetPassword(accountId: number) {
-    return bffRequest<void>(`${BASE}/${accountId}/password/reset`, {
-      method: "POST",
-      body: {},
-    });
+    return postJson<void>(`${BASE}/${accountId}/password/reset`, {});
   },
 
   /** ✅ 학과 드롭다운 */
   async listDepts(): Promise<DeptDto[]> {
-    const res = await fetch("/api/admin/authority/depts/dropdown", { cache: "no-store" });
-    if (!res.ok) throw new Error("학과 목록 조회 실패");
-
-    const json = await res.json();
+    const json = await getJson<any>("/api/admin/authority/depts/dropdown", { cache: "no-store" });
     const arr = unwrapArray(json);
 
     return arr.map((d: any) => ({
@@ -241,12 +232,9 @@ export const accountsApi = {
 
   /** ✅ 주전공(학과 선택 -> 해당 학과 전공만) */
   async listMajorsByDept(deptId: number): Promise<MajorDto[]> {
-    const res = await fetch(`/api/admin/authority/depts/${deptId}/majors/dropdown`, {
+    const json = await getJson<any>(`/api/admin/authority/depts/${deptId}/majors/dropdown`, {
       cache: "no-store",
     });
-    if (!res.ok) throw new Error("전공 목록 조회 실패");
-
-    const json = await res.json();
     const arr = unwrapArray(json);
 
     return arr.map((m: any) => ({
@@ -258,10 +246,7 @@ export const accountsApi = {
 
   /** ✅ 부/복수전공: 학과 무관 전체 전공 */
   async listMajorsAll(): Promise<MajorDto[]> {
-    const res = await fetch(`/api/admin/authority/majors/dropdown`, { cache: "no-store" });
-    if (!res.ok) throw new Error("전체 전공 목록 조회 실패");
-
-    const json = await res.json();
+    const json = await getJson<any>(`/api/admin/authority/majors/dropdown`, { cache: "no-store" });
     const arr = unwrapArray(json);
 
     return arr.map((m: any) => ({
@@ -299,17 +284,12 @@ export const accountsApi = {
   },
 
   async getStudentProfileImage(accountId: number): Promise<string> {
-    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`);
-    if (!res.ok) throw new Error("프로필 이미지 조회 실패");
-    const json = await res.json();
+    const json = await getJson<any>(`/api/admin/mypage/student/${accountId}/image`);
     return json.data; // presignedImageUrl
   },
 
   /** ✅ 학생 프로필 이미지 삭제 */
   async deleteStudentProfileImage(accountId: number): Promise<void> {
-    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`, {
-      method: "DELETE",
-    });
-    if (!res.ok) throw new Error("프로필 이미지 삭제 실패");
+    await deleteJson<void>(`/api/admin/mypage/student/${accountId}/image`);
   },
 };

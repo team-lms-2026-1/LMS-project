@@ -16,6 +16,7 @@ import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -73,7 +74,7 @@ public class MbtiRecommendationService {
     private final InterestKeywordMasterRepository keywordRepository;
     private final JobCatalogRepository jobCatalogRepository;
     private final MbtiJobRecommendationRepository recommendationRepository;
-    private final ChatClient chatClient;
+    private final ObjectProvider<ChatClient.Builder> chatClientBuilderProvider;
     private final ObjectMapper objectMapper;
 
     public List<InterestKeywordMaster> getActiveInterestKeywords() {
@@ -288,13 +289,19 @@ public class MbtiRecommendationService {
             List<InterestKeywordMaster> selectedKeywords,
             List<JobCandidate> candidates
     ) {
+        ChatClient.Builder chatClientBuilder = chatClientBuilderProvider.getIfAvailable();
+        if (chatClientBuilder == null) {
+            log.warn("ChatClient.Builder bean not found. Using template fallback recommendations.");
+            return fallbackRecommendations(mbtiResult, selectedKeywords, candidates);
+        }
+
         Map<String, JobCandidate> candidateMap = candidates.stream()
                 .collect(java.util.stream.Collectors.toMap(c -> c.job().getJobCode(), c -> c, (a, b) -> a, LinkedHashMap::new));
 
         String errorHint = null;
         for (int attempt = 1; attempt <= AI_MAX_RETRY; attempt++) {
             try {
-                String raw = requestAiContent(mbtiResult, selectedKeywords, candidates, errorHint);
+                String raw = requestAiContent(chatClientBuilder, mbtiResult, selectedKeywords, candidates, errorHint);
                 return parseAndResolve(raw, candidateMap, mbtiResult, selectedKeywords);
             } catch (Exception e) {
                 errorHint = e.getMessage();
@@ -305,6 +312,7 @@ public class MbtiRecommendationService {
     }
 
     private String requestAiContent(
+            ChatClient.Builder chatClientBuilder,
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords,
             List<JobCandidate> candidates,
@@ -333,7 +341,7 @@ public class MbtiRecommendationService {
                 """;
 
         String userPrompt = buildUserPrompt(mbtiResult, selectedKeywords, candidates, errorHint);
-        String content = chatClient.prompt()
+        String content = chatClientBuilder.build().prompt()
                 .system(systemPrompt)
                 .user(userPrompt)
                 .options(options)

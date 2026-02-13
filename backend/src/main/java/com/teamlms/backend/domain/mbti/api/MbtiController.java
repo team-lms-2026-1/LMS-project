@@ -10,7 +10,9 @@ import com.teamlms.backend.domain.mbti.dto.MbtiSubmitCommand;
 import com.teamlms.backend.domain.mbti.service.MbtiCommandService;
 import com.teamlms.backend.domain.mbti.service.MbtiQueryService;
 import com.teamlms.backend.domain.mbti.service.MbtiRecommendationService;
+import com.teamlms.backend.domain.mbti.service.MbtiI18nService;
 import com.teamlms.backend.global.api.ApiResponse;
+import com.teamlms.backend.global.i18n.LocaleUtil;
 import com.teamlms.backend.global.security.principal.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,10 +28,18 @@ public class MbtiController {
     private final MbtiQueryService queryService;
     private final MbtiCommandService commandService;
     private final MbtiRecommendationService recommendationService;
+    private final MbtiI18nService i18nService;
 
+    /**
+     * MBTI 질문 조회 (다국어 지원)
+     * Accept-Language 헤더 또는 ?locale=en 쿼리 파라미터로 언어 지정
+     */
     @GetMapping("/questions")
-    public ApiResponse<List<MbtiQuestionResponse>> getQuestions() {
-        return ApiResponse.ok(queryService.getAllQuestions());
+    public ApiResponse<List<MbtiQuestionResponse>> getQuestions(
+            @RequestParam(value = "locale", required = false) String locale) {
+        String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
+        List<MbtiQuestionResponse> questions = i18nService.getAllQuestionsWithI18nAsDto(currentLocale);
+        return ApiResponse.ok(questions);
     }
 
     @PostMapping("/submit")
@@ -45,13 +55,18 @@ public class MbtiController {
         return ApiResponse.ok(queryService.getLatestResult(authUser.getAccountId()));
     }
 
+    /**
+     * 관심 키워드 조회 (다국어 지원)
+     * Accept-Language 헤더 또는 ?locale=en 쿼리 파라미터로 언어 지정
+     */
     @GetMapping("/interest-keywords")
-    public ApiResponse<List<InterestKeywordResponse>> getInterestKeywords() {
-        return ApiResponse.ok(
-                recommendationService.getActiveInterestKeywords().stream()
-                        .map(InterestKeywordResponse::from)
-                        .toList()
-        );
+    public ApiResponse<List<InterestKeywordResponse>> getInterestKeywords(
+            @RequestParam(value = "locale", required = false) String locale) {
+        String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
+        List<InterestKeywordResponse> keywords = i18nService.getAllInterestKeywordsWithI18n(currentLocale).stream()
+                .map(keyword -> InterestKeywordResponse.fromWithI18n(keyword, currentLocale, i18nService))
+                .toList();
+        return ApiResponse.ok(keywords);
     }
 
     @PostMapping("/recommendations")
@@ -69,3 +84,4 @@ public class MbtiController {
         return ApiResponse.ok(recommendationService.getLatestRecommendation(authUser.getAccountId()));
     }
 }
+
