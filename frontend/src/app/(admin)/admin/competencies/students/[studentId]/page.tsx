@@ -1,8 +1,6 @@
-export default function StudentCompetencyDetail() {
-    return (
-        <div>
-            <h1>Student Competency Detail Page</h1>
-            <p>This page is under construction.</p>
-        </div>
-    );
+import StudentDetailPageClient from "@/features/competencies/scai/components/detail/StudentDetailPage.client";
+
+export default function Page() {
+  return <StudentDetailPageClient />;
+
 }

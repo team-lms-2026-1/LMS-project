@@ -1,0 +1,51 @@
+.desc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 2px;
+}
+
+.main {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #111827;
+  margin: 0;
+}
+
+.emph {
+  font-weight: 700;
+}
+
+.meta {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.metaRow {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+  column-gap: 10px;
+  font-size: 12px;
+}
+
+.metaLabel {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.metaValue {
+  color: #111827;
+  font-weight: 700;
+}
+
+.sub {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7280;
+  margin: 0;
+}

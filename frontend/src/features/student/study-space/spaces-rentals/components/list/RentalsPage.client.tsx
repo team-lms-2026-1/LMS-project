@@ -16,6 +16,11 @@ type RejectModalState = {
   reason: string;
 };
 
+type CancelModalState = {
+  open: boolean;
+  rentalId: number | null;
+};
+
 export default function RentalsPageClient() {
   // ✅ URL query와 연동되는 공용 pagination
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
@@ -43,6 +48,11 @@ export default function RentalsPageClient() {
     reason: "",
   });
 
+  const [cancelModal, setCancelModal] = useState<CancelModalState>({
+    open: false,
+    rentalId: null,
+  });
+
   useEffect(() => {
     updateParams({ page, size });
     }, [page, size]);
@@ -63,6 +73,20 @@ export default function RentalsPageClient() {
 
   const closeRejectModal = () => {
     setRejectModal({ open: false, rentalId: null, reason: "" });
+  };
+
+  const openCancelModal = (rentalId: number) => {
+    setCancelModal({ open: true, rentalId });
+  };
+
+  const closeCancelModal = () => {
+    setCancelModal({ open: false, rentalId: null });
+  };
+
+  const confirmCancel = async () => {
+    if (!cancelModal.rentalId) return;
+    await cancelRental(cancelModal.rentalId);
+    closeCancelModal();
   };
 
   if (meLoading) {
@@ -109,7 +133,7 @@ export default function RentalsPageClient() {
       <RentalsTable
         items={data}
         loading={loading}
-        onCancel={cancelRental}
+        onCancel={openCancelModal}
         onShowRejectReason={openRejectModal}
       />
 
@@ -138,6 +162,35 @@ export default function RentalsPageClient() {
             <div className={styles.modalBottom}>
               <Button variant="primary" onClick={closeRejectModal}>
                 확인
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelModal.open && (
+        <div className={styles.modalOverlay} onMouseDown={closeCancelModal}>
+          <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <div className={styles.modalTop}>
+              <div className={styles.modalTitle}>예약 취소</div>
+              <button className={styles.closeBtn} onClick={closeCancelModal} aria-label="close">
+                ×
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.confirmBox}>
+                <p className={styles.confirmMain}>예약을 취소할까요?</p>
+                <p className={styles.confirmSub}>취소 후에는 복구할 수 없습니다.</p>
+              </div>
+            </div>
+
+            <div className={styles.modalBottom}>
+              <Button variant="secondary" onClick={closeCancelModal}>
+                닫기
+              </Button>
+              <Button variant="danger" onClick={confirmCancel}>
+                취소하기
               </Button>
             </div>
           </div>

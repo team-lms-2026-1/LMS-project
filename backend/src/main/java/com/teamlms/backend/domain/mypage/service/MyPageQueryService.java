@@ -67,7 +67,8 @@ public class MyPageQueryService {
                 throw new BusinessException(ErrorCode.VALIDATION_ERROR);
             }
         }
-        return summary.getCurrentTimetableJson();
+        // 기본적으로 현재 활성화된 학기의 시간표를 실시간으로 조회하여 반환
+        return myPageTimetableRepository.findCurrentTimetable(accountId);
     }
 
     private StudentMypageResponse toResponse(StudentMypageSummary entity, List<TimetableInfo> timetable) {

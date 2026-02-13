@@ -13,6 +13,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (res.ok) {
     revalidateTag("student:curricular-offering");
     revalidateTag("admin:curricular-offering");
+    revalidateTag("student:mypage");
   }
   return res;
 }

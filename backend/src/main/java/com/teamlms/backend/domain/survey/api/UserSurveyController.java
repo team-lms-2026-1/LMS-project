@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/student/surveys")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('SURVEY_READ')")
 public class UserSurveyController {
 
     private final SurveyQueryService queryService;

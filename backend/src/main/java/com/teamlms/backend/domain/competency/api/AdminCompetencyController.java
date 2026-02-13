@@ -48,8 +48,10 @@ public class AdminCompetencyController {
             "/api/v1/student/competencies/students/{studentId}/dashboard",
             "/api/v1/professor/competencies/students/{studentId}/dashboard" })
     @PreAuthorize("hasAuthority('DIAGNOSIS_READ')")
-    public ApiResponse<StudentCompetencyDashboardResponse> getStudentDashboard(@PathVariable Long studentId) {
-        return ApiResponse.ok(competencyQueryService.getStudentDashboard(studentId));
+    public ApiResponse<StudentCompetencyDashboardResponse> getStudentDashboard(
+            @PathVariable Long studentId,
+            @RequestParam(required = false) Long semesterId) {
+        return ApiResponse.ok(competencyQueryService.getStudentDashboard(studentId, semesterId));
     }
 
     /**

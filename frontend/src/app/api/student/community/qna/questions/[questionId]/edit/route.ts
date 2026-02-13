@@ -2,6 +2,7 @@ import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "student:questions";
+const ADMIN_TAG = "admin:questions";
 
 type Ctx = { params: { questionId: string } };
 
@@ -25,6 +26,9 @@ export async function PATCH(req: Request, ctx: Ctx) {
     }
   );
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(ADMIN_TAG);
+  }
   return res;
 }

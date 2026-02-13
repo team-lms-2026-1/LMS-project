@@ -24,6 +24,7 @@ export async function POST(
   if (res.ok) {
     revalidateTag(TAG);
     revalidateTag(ADMIN_TAG);
+    revalidateTag("student:mypage");
   }
 
   return res;

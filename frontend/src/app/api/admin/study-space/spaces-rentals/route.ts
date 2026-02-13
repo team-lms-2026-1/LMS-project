@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const TAG = "admin:spaces-rentals";
+const STUDENT_TAG = "student:rentals";
 
 export async function GET(req: Request) {
   const upstream = `/api/v1/admin/spaces-rentals`;
@@ -28,6 +29,9 @@ export async function PATCH(req: Request) {
     cache: "no-store",
   });
 
-  if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+  if (res.status >= 200 && res.status < 300) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }

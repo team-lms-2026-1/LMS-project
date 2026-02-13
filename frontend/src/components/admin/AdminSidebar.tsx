@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import styles from "./admin-shell.module.css";
 
-type NavItem = { label: string; href: string };
+type NavItem = { label: string; href: string; exact?: boolean };
 type NavSection = { key: string; title: string; items: NavItem[] };
 
 const SECTIONS: NavSection[] = [
@@ -49,7 +49,11 @@ const SECTIONS: NavSection[] = [
   {
     key: "competency",
     title: "역량 통합 관리",
-    items: [{ label: "6Cs 대시보드", href: "/competencies" }],
+    items: [
+      { label: "6Cs 란?", href: "/admin/competencies", exact: true },
+      { label: "학생역량활동조회", href: "/admin/competencies/students" },
+      { label: "역량진단지 관리", href: "/admin/competencies/dignosis" },
+    ],
   },
   {
     key: "course",
@@ -93,7 +97,8 @@ const SECTIONS: NavSection[] = [
   },
 ];
 
-function isActive(pathname: string, href: string) {
+function isActive(pathname: string, href: string, exact: boolean = false) {
+  if (exact) return pathname === href;
   return pathname === href || pathname.startsWith(href + "/");
 }
 
@@ -114,7 +119,7 @@ export default function AdminSidebar() {
    */
   const activeSectionKey = useMemo(() => {
     for (const s of SECTIONS) {
-      if (s.items.some((it) => isActive(pathname, it.href))) return s.key;
+      if (s.items.some((it) => isActive(pathname, it.href, it.exact))) return s.key;
     }
     return null;
   }, [pathname]);
@@ -166,7 +171,7 @@ export default function AdminSidebar() {
               {open && (
                 <div className={styles.sectionBody}>
                   {section.items.map((item) => {
-                    const active = isActive(pathname, item.href);
+                    const active = isActive(pathname, item.href, item.exact);
 
                     return (
                       <Link

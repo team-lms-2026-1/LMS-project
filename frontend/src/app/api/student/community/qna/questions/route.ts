@@ -2,6 +2,7 @@ import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "student:questions";
+const ADMIN_TAG = "admin:questions";
 
 export async function GET(req: Request) {
   return proxyToBackend(req, "/api/v1/student/community/qna/questions", { 
@@ -21,7 +22,10 @@ export async function POST(req: Request) {
     cache: "no-store"
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(ADMIN_TAG);
+  }
 
   return res;
 }

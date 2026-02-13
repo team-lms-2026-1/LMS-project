@@ -62,9 +62,17 @@
   font-size: 13px;
   outline: none;
   background: #fff;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
-.textarea { resize: vertical; line-height: 1.6; }
+.input { height: 44px; }
+
+.textarea {
+  min-height: 260px;
+  resize: vertical;
+  line-height: 1.6;
+}
 
 .footerRow {
   display: flex;

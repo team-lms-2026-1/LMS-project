@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { PaginationSimple, useListQuery } from "@/components/pagination";
@@ -9,6 +9,7 @@ import { spacesApi } from "../../api/spacesApi";
 import type { PageMeta, SpaceListItemDto } from "../../api/types";
 import { SpacesTable } from "./SpacesTable";
 import styles from "./SpacesPage.module.css";
+import toast from "react-hot-toast";
 
 export default function SpacesPageClient() {
   const router = useRouter();
@@ -20,32 +21,51 @@ export default function SpacesPageClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      setLoading(true);
+  const fetchList = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!opts?.silent) {
+        setLoading(true);
+      }
       setError("");
       try {
         const res = await spacesApi.list({ page, size });
-        if (!alive) return;
-
         setRows(res.data ?? []);
         setMeta(res.meta ?? null);
       } catch (e: any) {
-        if (!alive) return;
         setError(e?.message || "목록 조회 중 오류가 발생했습니다.");
       } finally {
-        if (alive) setLoading(false);
+        if (!opts?.silent) setLoading(false);
       }
-    })();
+    },
+    [page, size]
+  );
+
+  useEffect(() => {
+    fetchList();
+  }, [fetchList]);
+
+  useEffect(() => {
+    const onFocus = () => fetchList({ silent: true });
+    window.addEventListener("focus", onFocus);
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchList({ silent: true });
+      }
+    }, 10000);
 
     return () => {
-      alive = false;
+      window.removeEventListener("focus", onFocus);
+      window.clearInterval(intervalId);
     };
-  }, [page, size]);
+  }, [fetchList]);
 
   const onCardClick = (spaceId: number) => {
+    const target = rows.find((item) => item.spaceId === spaceId);
+    if (target && target.isRentable === false) {
+      toast.error("예약가능한 스터디룸이 없습니다.");
+      return;
+    }
     router.push(`/student/study-space/spaces/${spaceId}`);
   };
 

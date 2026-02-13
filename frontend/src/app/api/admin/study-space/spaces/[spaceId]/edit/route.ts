@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 const BACKEND_BASE = "/api/v1/admin/spaces";
 
 const TAG = "admin:spaces";
+const STUDENT_LIST_TAG = "student:spaces:list";
+const STUDENT_DETAIL_TAG = (spaceId: string) => `student:spaces:detail:${spaceId}`;
 
 type Ctx = { params: { spaceId: string } };
 
@@ -27,7 +29,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
       forwardQuery: false,
     });
 
-    if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+    if (res.status >= 200 && res.status < 300) {
+      revalidateTag(TAG);
+      revalidateTag(STUDENT_LIST_TAG);
+      revalidateTag(STUDENT_DETAIL_TAG(ctx.params.spaceId));
+    }
     return res;
   }
 
@@ -39,6 +45,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+  if (res.status >= 200 && res.status < 300) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_LIST_TAG);
+    revalidateTag(STUDENT_DETAIL_TAG(ctx.params.spaceId));
+  }
   return res;
 }

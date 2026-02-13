@@ -192,6 +192,7 @@ public class DiagnosisCommandService {
 
         // 문항 삭제
         diagnosisQuestionRepository.deleteByRunRunId(diagnosisId);
+        diagnosisTargetRepository.deleteByRunRunId(diagnosisId);
 
         // 진단 삭제
         diagnosisRunRepository.delete(diagnosisRun);

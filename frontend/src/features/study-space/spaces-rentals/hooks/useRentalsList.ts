@@ -11,8 +11,10 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
 
   const [params, setParams] = useState<RentalListParams>(initialParams);
 
-  const fetchList = useCallback(async () => {
-    setLoading(true);
+  const fetchList = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) {
+      setLoading(true);
+    }
     setError("");
 
     try {
@@ -32,12 +34,30 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
           : "목록을 불러오지 못했습니다.";
       setError(msg);
     } finally {
-      setLoading(false);
+      if (!opts?.silent) {
+        setLoading(false);
+      }
     }
   }, [params]);
 
   useEffect(() => {
     fetchList();
+  }, [fetchList]);
+
+  useEffect(() => {
+    const onFocus = () => fetchList({ silent: true });
+    window.addEventListener("focus", onFocus);
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchList({ silent: true });
+      }
+    }, 10000);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.clearInterval(intervalId);
+    };
   }, [fetchList]);
 
   const updateParams = (newParams: Partial<RentalListParams>) => {
