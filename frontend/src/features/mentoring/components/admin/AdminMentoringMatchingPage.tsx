@@ -288,7 +288,6 @@ export default function AdminMentoringMatchingPage() {
 
                         <div className={styles.matchActionRow}>
                             <Button
-                                size="large"
                                 onClick={handleMatch}
                                 disabled={!selectedMentor || !selectedMentee}
                             >

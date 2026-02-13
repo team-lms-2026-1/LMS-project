@@ -3,51 +3,41 @@ package com.teamlms.backend.domain.mbti.api.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.teamlms.backend.domain.mbti.dto.MbtiQuestionDto;
 import com.teamlms.backend.domain.mbti.entity.MbtiQuestion;
-import lombok.Builder;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Getter
-@Builder
-public class MbtiQuestionResponse {
-    private Long questionId;
-    private String content;
-    private Integer sortOrder;
-    private List<MbtiChoiceResponse> choices;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime createdAt;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime updatedAt;
-
+public record MbtiQuestionResponse(
+        Long questionId,
+        String content,
+        Integer sortOrder,
+        List<MbtiChoiceResponse> choices,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime createdAt,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime updatedAt
+) {
     public static MbtiQuestionResponse from(MbtiQuestion question) {
-        return MbtiQuestionResponse.builder()
-                .questionId(question.getQuestionId())
-                .content(question.getContent())
-                .sortOrder(question.getSortOrder())
-                .choices(question.getChoices().stream()
-                        .map(MbtiChoiceResponse::from)
-                        .collect(Collectors.toList()))
-                .createdAt(question.getCreatedAt())
-                .updatedAt(question.getUpdatedAt())
-                .build();
+        return new MbtiQuestionResponse(
+                question.getQuestionId(),
+                question.getContent(),
+                question.getSortOrder(),
+                question.getChoices().stream().map(MbtiChoiceResponse::from).toList(),
+                question.getCreatedAt(),
+                question.getUpdatedAt()
+        );
     }
 
     public static MbtiQuestionResponse from(MbtiQuestionDto dto) {
-        return MbtiQuestionResponse.builder()
-                .questionId(dto.getQuestionId())
-                .content(dto.getContent())
-                .sortOrder(dto.getSortOrder())
-                .choices(dto.getChoices().stream()
-                        .map(c -> MbtiChoiceResponse.builder()
-                                .choiceId(c.getChoiceId())
-                                .content(c.getContent())
-                                .build())
-                        .collect(Collectors.toList()))
-                .build();
+        return new MbtiQuestionResponse(
+                dto.questionId(),
+                dto.content(),
+                dto.sortOrder(),
+                dto.choices().stream()
+                        .map(c -> new MbtiChoiceResponse(c.choiceId(), c.content()))
+                        .toList(),
+                null,
+                null
+        );
     }
 }

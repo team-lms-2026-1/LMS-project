@@ -56,17 +56,31 @@ jobs:
             sudo docker stop backend-server || true
             sudo docker rm backend-server || true
 
+            # 네트워크 생성 (없으면 생성)
+            sudo docker network create lms-network || true
+
             # 2. 도커로 서버 실행
-            # -v 옵션: EC2에 있는 app.jar 파일을 도커 안으로 연결(마운트)
+            # --network lms-network: 전용 네트워크 사용
+            # -p 8080:8080: 외부 접속을 위해 포트 열기
             sudo docker run -d --name backend-server \
+              --network lms-network \
               -p 8080:8080 \
               -v /home/${{ secrets.USERNAME }}/app/app.jar:/app.jar \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
               -e DB_USER=${{ secrets.DB_USER }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              openjdk:17-jdk-slim \
-              java -Xms128m -Xmx128m -jar /app.jar
+              -e AWS_ACCESS_KEY_ID=${{ secrets.MY_AWS_ACCESS_KEY }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.MY_AWS_SECRET_KEY }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              eclipse-temurin:17-jdk-jammy \
+              java -Xms384m -Xmx384m -jar /app.jar
+            
+            # [디버깅] 배포 후 로그 확인
+            echo "Waiting for backend to start..."
+            sleep 15
+            sudo docker ps -a --filter name=backend-server
+            sudo docker logs --tail 100 backend-server
             
             # 3. 안 쓰는 찌꺼기 이미지 정리 (용량 확보)
             sudo docker image prune -f
