@@ -35,7 +35,7 @@ export function MentorApplyModal({ recruitment, onClose, onSuccess }: MentorAppl
         setShowConfirm(false);
         try {
             setSubmitting(true);
-            await applyMentoring({
+            await applyMentoring("professor", {
                 recruitmentId: recruitment.recruitmentId,
                 role: "MENTOR"
             });

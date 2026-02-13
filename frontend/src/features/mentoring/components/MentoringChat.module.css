@@ -144,10 +144,12 @@
 
 .myMessage .messageContentWrapper {
     flex-direction: row;
+    margin-left: auto;
 }
 
 .partnerMessage .messageContentWrapper {
     flex-direction: row-reverse;
+    margin-right: auto;
 }
 
 .bubble {

@@ -34,7 +34,7 @@ public class MentoringCommandService {
     private final MentoringRecruitmentRepository recruitmentRepository;
     private final MentoringApplicationRepository applicationRepository;
 
-    public Long createRecruitment(Long adminId, MentoringRecruitmentCreateRequest request) {
+    public Long createRecruitment(MentoringRecruitmentCreateRequest request) {
         LocalDateTime now = LocalDateTime.now();
         MentoringRecruitmentStatus status;
 
@@ -58,7 +58,7 @@ public class MentoringCommandService {
         return recruitmentRepository.save(recruitment).getRecruitmentId();
     }
 
-    public void updateRecruitment(Long adminId, Long recruitmentId,
+    public void updateRecruitment(Long recruitmentId,
             com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentUpdateRequest request) {
         MentoringRecruitment recruitment = recruitmentRepository.findById(recruitmentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
@@ -83,7 +83,7 @@ public class MentoringCommandService {
                 status);
     }
 
-    public void deleteRecruitment(Long adminId, Long recruitmentId) {
+    public void deleteRecruitment(Long recruitmentId) {
         MentoringRecruitment recruitment = recruitmentRepository.findById(recruitmentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
 
@@ -186,7 +186,7 @@ public class MentoringCommandService {
         MentoringApplication application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
 
-        // TODO: Validate adminId (권한 체크)
+
 
         MentoringApplicationStatus newStatus = request.getStatus();
         if (newStatus == MentoringApplicationStatus.REJECTED

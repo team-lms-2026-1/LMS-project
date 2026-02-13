@@ -55,7 +55,7 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            await applyMentoring({
+            await applyMentoring("student", {
                 recruitmentId: recruitment.recruitmentId,
                 role: "MENTEE",
                 // If the backend expects these profile fields in the application request, include them. 

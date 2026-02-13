@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { fetchMyMatchings, fetchChatHistory } from "../api/mentoringApi";
 import { MentoringMatchingResponse, ChatMessageResponse } from "../api/types";
 
-export const useMentoringChat = () => {
+export const useMentoringChat = (userRole: "student" | "professor") => {
     const [matchings, setMatchings] = useState<MentoringMatchingResponse[]>([]);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [messages, setMessages] = useState<ChatMessageResponse[]>([]);
@@ -12,7 +12,7 @@ export const useMentoringChat = () => {
     const loadRooms = useCallback(async () => {
         setLoadingRooms(true);
         try {
-            const res = await fetchMyMatchings();
+            const res = await fetchMyMatchings(userRole);
             const data = res.data || [];
             setMatchings(data);
             if (data.length > 0 && !selectedId) {
@@ -28,7 +28,7 @@ export const useMentoringChat = () => {
     const loadChat = useCallback(async (matchingId: number) => {
         setLoadingChat(true);
         try {
-            const res = await fetchChatHistory(matchingId);
+            const res = await fetchChatHistory(userRole, matchingId);
             setMessages(res.data || []);
         } catch (e) {
             console.error(e);
