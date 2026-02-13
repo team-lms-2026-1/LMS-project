@@ -7,7 +7,11 @@ import { useMentoringChat } from "../hooks/useMentoringChat";
 import { useAuth } from "@/features/auth/AuthProvider";
 import toast from "react-hot-toast";
 
-export default function MentoringChatPage() {
+interface Props {
+    userRole: "student" | "professor";
+}
+
+export default function MentoringChatPage({ userRole }: Props) {
     const { state } = useAuth();
     const myAccountId = state.me?.accountId;
 
@@ -19,7 +23,7 @@ export default function MentoringChatPage() {
         setMessages,
         loadingRooms,
         refreshChat
-    } = useMentoringChat();
+    } = useMentoringChat(userRole);
 
     const [inputValue, setInputValue] = useState("");
     const [sending, setSending] = useState(false);
@@ -43,7 +47,7 @@ export default function MentoringChatPage() {
 
         const timer = setInterval(async () => {
             try {
-                const res = await fetchChatHistory(selectedId);
+                const res = await fetchChatHistory(userRole, selectedId);
                 const data = res.data;
                 setMessages(prev => {
                     if (JSON.stringify(prev) !== JSON.stringify(data)) return data;
@@ -61,7 +65,7 @@ export default function MentoringChatPage() {
         try {
             setSending(true);
             if (activeRoom.role === "MENTEE") {
-                await sendQuestion({
+                await sendQuestion(userRole, {
                     matchingId: activeRoom.matchingId,
                     content: inputValue
                 });
@@ -69,12 +73,12 @@ export default function MentoringChatPage() {
                 const lastQuestion = [...messages].reverse().find(m => m.type === "QUESTION");
 
                 if (lastQuestion) {
-                    await sendAnswer({
+                    await sendAnswer(userRole, {
                         questionId: lastQuestion.id,
                         content: inputValue
                     });
                 } else {
-                    await sendQuestion({
+                    await sendQuestion(userRole, {
                         matchingId: activeRoom.matchingId,
                         content: inputValue
                     });

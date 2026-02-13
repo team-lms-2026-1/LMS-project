@@ -35,8 +35,7 @@ public class SurveyCommandService {
     private final AccountRepository accountRepository;
 
     // 1. 설문 생성
-    public void createAndPublishSurvey(Long adminId, SurveyCreateRequest request) {
-        validateAdmin(adminId);
+    public void createAndPublishSurvey(Long accountId, SurveyCreateRequest request) {
         validateQuestionOptions(request.questions());
 
         if (request.endAt().isBefore(request.startAt())) {
@@ -78,8 +77,7 @@ public class SurveyCommandService {
     }
 
     // 2. 설문 수정
-    public void patchSurvey(Long adminId, Long surveyId, SurveyPatchRequest request) {
-        validateAdmin(adminId);
+    public void patchSurvey(Long surveyId, SurveyPatchRequest request) {
         validateQuestionOptions(request.questions());
 
         Survey survey = surveyRepository.findById(surveyId)
@@ -128,8 +126,7 @@ public class SurveyCommandService {
     }
 
     // 3. 설문 삭제
-    public void deleteSurvey(Long adminId, Long surveyId) {
-        validateAdmin(adminId);
+    public void deleteSurvey(Long surveyId) {
 
         Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId));
@@ -215,12 +212,5 @@ public class SurveyCommandService {
         }
     }
 
-    private void validateAdmin(Long adminId) {
-        Account admin = accountRepository.findById(adminId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, adminId));
 
-        if (admin.getAccountType() != AccountType.ADMIN) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED);
-        }
-    }
 }

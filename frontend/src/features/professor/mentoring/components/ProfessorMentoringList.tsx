@@ -36,7 +36,7 @@ export default function ProfessorMentoringList() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await fetchRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput, status: "OPEN" });
+            const res = await fetchRecruitments("professor", { page: page - 1, size: PAGE_SIZE, keyword: keywordInput, status: "OPEN" });
             if (res && res.data) {
                 setItems(res.data);
                 setTotalElements(res.meta?.totalElements || 0);
