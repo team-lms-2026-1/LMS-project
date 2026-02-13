@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/hooks/useLocale";
 import styles from "./student-shell.module.css";
 
 const EXP_KEY = "auth_expires_at";
@@ -35,6 +36,7 @@ async function logoutViaBff() {
 
 export default function StudentTopbar() {
   const router = useRouter();
+  const { locale, setLocale, mounted } = useLocale();
   const today = useMemo(() => formatDateKR(new Date()), []);
 
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
@@ -75,6 +77,29 @@ export default function StudentTopbar() {
         <div className={styles.dateChip} title="오늘 날짜">
           {today}
         </div>
+
+        {/* 언어 토글 버튼 */}
+        {mounted && (
+          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+            {["ko", "en", "ja"].map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setLocale(lang as "ko" | "en" | "ja")}
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  border: locale === lang ? "2px solid #0066cc" : "1px solid #ccc",
+                  background: locale === lang ? "#e6f2ff" : "transparent",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: locale === lang ? "bold" : "normal",
+                }}
+              >
+                {lang === "ko" ? "KO" : lang === "en" ? "EN" : "JA"}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* ✅ 날짜 옆 타이머 */}
         {expiresAt && (

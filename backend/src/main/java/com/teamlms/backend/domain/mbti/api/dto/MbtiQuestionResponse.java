@@ -3,6 +3,7 @@ package com.teamlms.backend.domain.mbti.api.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.teamlms.backend.domain.mbti.dto.MbtiQuestionDto;
 import com.teamlms.backend.domain.mbti.entity.MbtiQuestion;
+import com.teamlms.backend.domain.mbti.service.MbtiI18nService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +29,25 @@ public record MbtiQuestionResponse(
         );
     }
 
+    /**
+     * 다국어 지원 버전 - locale에 맞는 내용 반환
+     */
+    public static MbtiQuestionResponse fromWithI18n(
+            MbtiQuestion question,
+            String locale,
+            MbtiI18nService i18nService) {
+        return new MbtiQuestionResponse(
+                question.getQuestionId(),
+                i18nService.getQuestionContent(question, locale),
+                question.getSortOrder(),
+                question.getChoices().stream()
+                        .map(choice -> MbtiChoiceResponse.fromWithI18n(choice, locale, i18nService))
+                        .toList(),
+                question.getCreatedAt(),
+                question.getUpdatedAt()
+        );
+    }
+
     public static MbtiQuestionResponse from(MbtiQuestionDto dto) {
         return new MbtiQuestionResponse(
                 dto.questionId(),
@@ -41,3 +61,4 @@ public record MbtiQuestionResponse(
         );
     }
 }
+

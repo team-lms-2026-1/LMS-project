@@ -3,8 +3,6 @@ import { cookies } from "next/headers";
 
 export async function POST() {
   const cookieStore = await cookies();
-
-  // access_token 삭제
   cookieStore.set("access_token", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

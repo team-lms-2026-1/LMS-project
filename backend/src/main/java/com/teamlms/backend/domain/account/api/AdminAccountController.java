@@ -33,10 +33,6 @@ public class AdminAccountController {
         private final AccountCommandService accountCommandService;
         private final AccountService accountService;
 
-        /**
-         * 관리자: 계정 생성
-         * POST /api/v1/admin/accounts
-         */
         @PostMapping
         @ResponseStatus(HttpStatus.CREATED)
         public ApiResponse<SuccessResponse> create(@Valid @RequestBody AdminAccountCreateRequest request,

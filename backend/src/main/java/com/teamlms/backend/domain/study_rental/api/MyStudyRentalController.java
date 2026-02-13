@@ -25,7 +25,6 @@ public class MyStudyRentalController {
     private final StudyRentalQueryService queryService;
     private final com.teamlms.backend.domain.study_rental.service.StudyRentalCommandService commandService;
 
-    // 내 예약 내역 조회
     @GetMapping("/api/v1/student/spaces-rentals")
     @PreAuthorize("hasAuthority('RENTAL_READ')")
     public ApiResponse<List<RentalResponse>> listMyRentals(
@@ -38,21 +37,26 @@ public class MyStudyRentalController {
 
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by(Sort.Direction.DESC, "appliedAt"));
 
-        // 서비스의 새 메서드 호출
         Page<RentalResponse> result = queryService.getMyRentalList(
                 keyword, spaceId, status, pageable, principal);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
-    // 예약 취소
+    @GetMapping("/api/v1/student/spaces-rentals/{rentalId}")
+    @PreAuthorize("hasAuthority('RENTAL_READ')")
+    public ApiResponse<RentalResponse> getMyRentalDetail(
+            @PathVariable Long rentalId,
+            @AuthenticationPrincipal Object principal) {
+        return ApiResponse.ok(queryService.getMyRentalDetail(rentalId, principal));
+    }
+
     @PatchMapping("/api/v1/student/spaces-rentals/{rentalId}/cancel")
     @PreAuthorize("hasAuthority('RENTAL_DELETE')")
     public ApiResponse<Void> cancelRental(
             @PathVariable Long rentalId,
             @AuthenticationPrincipal Object principal) {
 
-        // 서비스로 principal 객체를 통째로 넘김
         commandService.cancelRental(principal, rentalId);
 
         return ApiResponse.ok(null);

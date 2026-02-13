@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { useLocale } from "@/hooks/useLocale";
 import { ApiError } from "@/lib/http";
 import styles from "./MbtiClient.module.css";
 import {
@@ -29,6 +30,8 @@ type ViewMode = "home" | "test" | "keywords" | "result";
 const MIN_KEYWORD_COUNT = 2;
 
 export default function MbtiClient() {
+  const { locale } = useLocale();
+  
   const [viewMode, setViewMode] = useState<ViewMode>("home");
   const [questions, setQuestions] = useState<MbtiQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -40,6 +43,16 @@ export default function MbtiClient() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 언어 변경 시 홈 화면으로 리셋
+  useEffect(() => {
+    if (viewMode !== "home") {
+      setViewMode("home");
+      setQuestions([]);
+      setAnswers({});
+      setSelectedKeywordIds([]);
+    }
+  }, [locale]);
 
   useEffect(() => {
     const init = async () => {

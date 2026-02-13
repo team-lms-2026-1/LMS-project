@@ -21,7 +21,7 @@ public class MbtiQueryService {
     private final MbtiResultRepository resultRepository;
 
     public List<MbtiQuestionResponse> getAllQuestions() {
-        List<MbtiQuestion> questions = questionRepository.findAllWithChoices();
+        List<MbtiQuestion> questions = questionRepository.findAllOrderBySortOrder();
         return questions.stream()
                 .map(MbtiQuestionResponse::from)
                 .collect(Collectors.toList());

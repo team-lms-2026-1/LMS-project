@@ -50,14 +50,14 @@ public class AdminCurricularOfferingController {
         @Valid @RequestBody CurricularOfferingCreateRequest req
     ) {
         curricularOfferingCommandService.create(
-            req.getOfferingCode(),
-            req.getCurricularId(),
-            req.getSemesterId(),
-            req.getDayOfWeek(),
-            req.getPeriod(),
-            req.getCapacity(),
-            req.getLocation(),
-            req.getProfessorAccountId()
+            req.offeringCode(),
+            req.curricularId(),
+            req.semesterId(),
+            req.dayOfWeek(),
+            req.period(),
+            req.capacity(),
+            req.location(),
+            req.professorAccountId()
         );
 
         return ApiResponse.ok(new SuccessResponse());

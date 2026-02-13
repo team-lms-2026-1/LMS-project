@@ -9,7 +9,7 @@ type LoginBffResponse = {
 const EXP_KEY = "auth_expires_at";
 
 export async function logoutViaBff(): Promise<void> {
-  await fetch("/api/admin/auth/logout", {
+  await fetch("/api/auth/logout", {
     method: "POST",
     credentials: "include",
   });
@@ -28,7 +28,7 @@ export function scheduleAutoLogout(expiresAt: number, onExpire: () => void) {
 }
 
 export async function loginViaBff(payload: LoginRequest): Promise<LoginBffResponse> {
-  const res = await fetch("/api/admin/auth/login", {
+  const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
