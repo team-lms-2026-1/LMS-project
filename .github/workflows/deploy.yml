@@ -73,7 +73,7 @@ jobs:
               -e AWS_ACCESS_KEY_ID=${{ secrets.MY_AWS_ACCESS_KEY }} \
               -e AWS_SECRET_ACCESS_KEY=${{ secrets.MY_AWS_SECRET_KEY }} \
               -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-              openjdk:17-jdk-slim \
+              eclipse-temurin:17-jdk-jammy \
               java -Xms384m -Xmx384m -jar /app.jar
             
             # [디버깅] 배포 후 로그 확인
