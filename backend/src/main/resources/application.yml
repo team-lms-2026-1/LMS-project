@@ -26,8 +26,6 @@ spring:
     enabled: true
     baseline-on-migrate: true
     out-of-order: true # 마이그레이션 순서 유연하게 허용
-    clean-disabled: false # [위험] DB 초기화 기능 활성화
-    clean-on-start: true # [Custom] 시작 시 DB 초기화 (FlywayConfig에서 사용)
 
   # Mail (common defaults)
   mail:
