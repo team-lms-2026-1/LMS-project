@@ -7,12 +7,13 @@ import {
   type ResultCompetencyQuery,
 } from "@/features/competencies/result/api/ResultCompetenciesApi";
 
-export function useResultList(query?: ResultCompetencyQuery) {
+export function useResultList(query?: ResultCompetencyQuery, enabled: boolean = true) {
   const [data, setData] = useState<ResultCompetencyDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async (nextQuery?: ResultCompetencyQuery) => {
+    if (!enabled) return;
     try {
       setLoading(true);
       setError(null);
@@ -31,11 +32,15 @@ export function useResultList(query?: ResultCompetencyQuery) {
     } finally {
       setLoading(false);
     }
-  }, [query?.dignosisId, query?.deptId, query?.deptName]);
+  }, [enabled, query?.dignosisId, query?.deptId, query?.deptName, query?.semesterId, query?.semesterName]);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
     void load();
-  }, [load]);
+  }, [enabled, load]);
 
   return {
     state: {

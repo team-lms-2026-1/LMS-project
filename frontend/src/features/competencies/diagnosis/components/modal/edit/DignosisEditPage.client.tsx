@@ -1,20 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getJson, patchJson } from "@/lib/http";
+import toast from "react-hot-toast";
 import DignosisPageClient from "@/features/competencies/diagnosis/components/list/DignosisPage.client";
 import { DignosisEditModal } from "./DignosisEditModal.client";
+import {
+  fetchDiagnosisDetail,
+  updateDiagnosis,
+} from "@/features/competencies/diagnosis/api/DiagnosisApi";
 import type {
-  DiagnosisFormValue,
+  DiagnosisDetailValue,
+  DiagnosisUpsertPayload,
   DiagnosisQuestion,
   DiagnosisQuestionType,
-  DiagnosisDetailResponse,
+  DiagnosisEditPageProps,
 } from "@/features/competencies/diagnosis/api/types";
-
-type Props = {
-  dignosisId: string;
-};
 
 
 const SCORE_OPTIONS = [1, 2, 3, 4, 5];
@@ -52,6 +53,18 @@ function toDateOnly(value?: string | number | Date | null) {
   return text;
 }
 
+function toTimeOnly(value?: string | number | Date | null) {
+  if (value === undefined || value === null) return "";
+  if (value instanceof Date) return value.toISOString().slice(11, 16);
+  const text = String(value).trim();
+  if (!text) return "";
+  if (text.includes("T")) {
+    const time = text.split("T")[1]?.slice(0, 5) ?? "";
+    return /^\d{2}:\d{2}$/.test(time) ? time : "";
+  }
+  return "";
+}
+
 function getByPath(obj: any, path: string) {
   if (!obj) return undefined;
   const parts = path.split(".");
@@ -71,16 +84,6 @@ function pickFirstValue(obj: any, paths: string[]) {
   return undefined;
 }
 
-function parsePeriodText(value?: string) {
-  if (!value) return { start: "", end: "" };
-  const text = String(value);
-  const matches = text.match(/\d{4}[./-]\d{2}[./-]\d{2}/g);
-  if (matches && matches.length >= 2) {
-    return { start: toDateOnly(matches[0]), end: toDateOnly(matches[1]) };
-  }
-  return { start: "", end: "" };
-}
-
 function toGradeValue(raw?: string | number) {
   if (raw === undefined || raw === null) return "";
   const text = String(raw).trim();
@@ -98,6 +101,39 @@ function createScaleOptions() {
   }));
 }
 
+function pickScore(...values: any[]) {
+  for (const value of values) {
+    const num = Number(value);
+    if (Number.isFinite(num)) return num;
+  }
+  return 5;
+}
+
+function pickText(...values: any[]) {
+  for (const value of values) {
+    if (value === undefined || value === null) continue;
+    const text = String(value).trim();
+    if (text) return text;
+  }
+  return "";
+}
+
+function buildScaleOptionsFromFields(q: any, idx: number) {
+  const labels = [q?.label1, q?.label2, q?.label3, q?.label4, q?.label5];
+  const scores = [q?.score1, q?.score2, q?.score3, q?.score4, q?.score5];
+  const hasAny =
+    labels.some((v) => v !== undefined && v !== null && String(v).trim() !== "") ||
+    scores.some((v) => Number.isFinite(Number(v)));
+  if (!hasAny) return undefined;
+  return labels.map((label, oidx) => ({
+    id: String(q?.optionId ?? `${idx}-${oidx}`),
+    label: label ?? SCALE_LABELS[oidx] ?? "",
+    score: Number.isFinite(Number(scores[oidx]))
+      ? Number(scores[oidx])
+      : SCORE_OPTIONS[SCORE_OPTIONS.length - 1 - oidx] ?? 1,
+  }));
+}
+
 function mapQuestions(raw?: any[]): DiagnosisQuestion[] {
   if (!Array.isArray(raw) || raw.length === 0) return [];
 
@@ -109,6 +145,7 @@ function mapQuestions(raw?: any[]): DiagnosisQuestion[] {
         ? q.options
         : [];
 
+    const scaleOptionsFromFields = buildScaleOptionsFromFields(q, idx);
     const scaleOptions =
       optionsRaw.length > 0
         ? optionsRaw.map((opt: any, oidx: number) => ({
@@ -121,23 +158,71 @@ function mapQuestions(raw?: any[]): DiagnosisQuestion[] {
                 1
             ),
           }))
-        : createScaleOptions();
+        : scaleOptionsFromFields ?? createScaleOptions();
 
     const cs = q?.csScores ?? q?.csScore ?? {};
+    const weights = q?.weights ?? q?.weight ?? {};
 
     return {
       id: String(q?.id ?? q?.questionId ?? idx),
       title: q?.title ?? q?.questionTitle ?? q?.text ?? "",
       type: type === "SHORT" ? "SHORT" : "SCALE",
       scaleOptions,
-      shortAnswer: q?.shortAnswer ?? q?.answer ?? "",
+      shortAnswer: pickText(
+        q?.shortAnswer,
+        q?.shortAnswerKey,
+        q?.short_answer_key,
+        q?.answer
+      ),
       csScores: {
-        criticalThinking: Number(cs?.criticalThinking ?? cs?.ct ?? 5),
-        character: Number(cs?.character ?? cs?.ch ?? 5),
-        communication: Number(cs?.communication ?? cs?.com ?? 5),
-        collaboration: Number(cs?.collaboration ?? cs?.col ?? 5),
-        creativity: Number(cs?.creativity ?? cs?.cre ?? 5),
-        convergence: Number(cs?.convergence ?? cs?.conv ?? 5),
+        criticalThinking: pickScore(
+          cs?.criticalThinking,
+          cs?.ct,
+          weights?.C1,
+          weights?.c1,
+          q?.c1,
+          q?.C1
+        ),
+        character: pickScore(
+          cs?.character,
+          cs?.ch,
+          weights?.C2,
+          weights?.c2,
+          q?.c2,
+          q?.C2
+        ),
+        communication: pickScore(
+          cs?.communication,
+          cs?.com,
+          weights?.C3,
+          weights?.c3,
+          q?.c3,
+          q?.C3
+        ),
+        collaboration: pickScore(
+          cs?.collaboration,
+          cs?.col,
+          weights?.C4,
+          weights?.c4,
+          q?.c4,
+          q?.C4
+        ),
+        creativity: pickScore(
+          cs?.creativity,
+          cs?.cre,
+          weights?.C5,
+          weights?.c5,
+          q?.c5,
+          q?.C5
+        ),
+        convergence: pickScore(
+          cs?.convergence,
+          cs?.conv,
+          weights?.C6,
+          weights?.c6,
+          q?.c6,
+          q?.C6
+        ),
       },
     };
   });
@@ -175,7 +260,7 @@ function unwrapDetail(raw: any) {
   return raw;
 }
 
-function mapDetailValue(raw: any): DiagnosisFormValue {
+function mapDetailValue(raw: any): DiagnosisDetailValue {
   const base = unwrapDetail(raw) ?? raw;
   const info = base?.basicInfo ?? base?.diagnosis ?? base?.detail ?? base;
   const questionsRaw = base?.questions ?? info?.questions;
@@ -190,157 +275,26 @@ function mapDetailValue(raw: any): DiagnosisFormValue {
         ? "All"
         : "";
 
-  const directStart =
-    pickFirstValue(info, [
-      "startedAt",
-      "startDate",
-      "startAt",
-      "startDatetime",
-      "startDateTime",
-      "submitStartAt",
-      "submitStartDate",
-      "submissionStartAt",
-      "submissionStartDate",
-      "periodStart",
-      "period.start",
-      "period.startDate",
-      "period.startedAt",
-      "period.startAt",
-      "period.startDatetime",
-      "period.startDateTime",
-      "schedule.start",
-      "schedule.startDate",
-      "schedule.startedAt",
-      "schedule.startAt",
-      "schedule.beginAt",
-      "diagnosis.startedAt",
-      "diagnosis.startDate",
-      "diagnosis.startAt",
-      "diagnosisRun.startedAt",
-      "diagnosisRun.startAt",
-      "run.startedAt",
-      "run.startAt",
-    ]) ??
-    pickFirstValue(base, [
-    "startedAt",
-    "startDate",
-    "startAt",
-    "startDatetime",
-    "startDateTime",
-    "submitStartAt",
-    "submitStartDate",
-    "submissionStartAt",
-    "submissionStartDate",
-    "periodStart",
-    "period.start",
-    "period.startDate",
-    "period.startedAt",
-    "period.startAt",
-    "period.startDatetime",
-    "period.startDateTime",
-    "schedule.start",
-    "schedule.startDate",
-    "schedule.startedAt",
-    "schedule.startAt",
-    "schedule.beginAt",
-    "diagnosis.startedAt",
-    "diagnosis.startDate",
-    "diagnosis.startAt",
-    "diagnosisRun.startedAt",
-    "diagnosisRun.startAt",
-    "run.startedAt",
-    "run.startAt",
-    ]);
+  const directStart = pickFirstValue(info, ["startedAt"]) ?? pickFirstValue(base, ["startedAt"]);
 
-  const directEnd =
-    pickFirstValue(info, [
-      "endedAt",
-      "endDate",
-      "endAt",
-      "endDatetime",
-      "endDateTime",
-      "submitEndAt",
-      "submitEndDate",
-      "submissionEndAt",
-      "submissionEndDate",
-      "periodEnd",
-      "period.end",
-      "period.endDate",
-      "period.endedAt",
-      "period.endAt",
-      "period.endDatetime",
-      "period.endDateTime",
-      "schedule.end",
-      "schedule.endDate",
-      "schedule.endedAt",
-      "schedule.endAt",
-      "schedule.finishAt",
-      "diagnosis.endedAt",
-      "diagnosis.endDate",
-      "diagnosis.endAt",
-      "diagnosisRun.endedAt",
-      "diagnosisRun.endAt",
-      "run.endedAt",
-      "run.endAt",
-    ]) ??
-    pickFirstValue(base, [
-    "endedAt",
-    "endDate",
-    "endAt",
-    "endDatetime",
-    "endDateTime",
-    "submitEndAt",
-    "submitEndDate",
-    "submissionEndAt",
-    "submissionEndDate",
-    "periodEnd",
-    "period.end",
-    "period.endDate",
-    "period.endedAt",
-    "period.endAt",
-    "period.endDatetime",
-    "period.endDateTime",
-    "schedule.end",
-    "schedule.endDate",
-    "schedule.endedAt",
-    "schedule.endAt",
-    "schedule.finishAt",
-    "diagnosis.endedAt",
-    "diagnosis.endDate",
-    "diagnosis.endAt",
-    "diagnosisRun.endedAt",
-    "diagnosisRun.endAt",
-    "run.endedAt",
-    "run.endAt",
-    ]);
+  const directEnd = pickFirstValue(info, ["endedAt"]) ?? pickFirstValue(base, ["endedAt"]);
 
-  const periodText =
-    pickFirstValue(info, [
-      "period",
-      "submitPeriod",
-      "submissionPeriod",
-      "periodText",
-      "submissionRange",
-      "dateRange",
-      "datePeriod",
-      "diagnosisPeriod",
-    ]) ??
-    pickFirstValue(base, [
-    "period",
-    "submitPeriod",
-    "submissionPeriod",
-    "periodText",
-    "submissionRange",
-    "dateRange",
-    "datePeriod",
-    "diagnosisPeriod",
-    ]);
+  const startedAt = toDateOnly(directStart);
+  const endedAt = toDateOnly(directEnd);
+  const startedTime = toTimeOnly(directStart);
+  const endedTime = toTimeOnly(directEnd);
 
-  const parsed = parsePeriodText(typeof periodText === "string" ? periodText : undefined);
-  const startedAt = toDateOnly(directStart) || parsed.start;
-  const endedAt = toDateOnly(directEnd) || parsed.end;
+  const title =
+    (pickFirstValue(info, ["title", "diagnosisTitle", "name"]) ??
+      pickFirstValue(base, ["title", "diagnosisTitle", "name"])) ??
+    "";
+
+  const semesterId = pickFirstValue(info, ["semesterId", "semester.semesterId", "semester.id"]) ??
+    pickFirstValue(base, ["semesterId", "semester.semesterId", "semester.id"]);
 
   return {
+    title: String(title ?? ""),
+    semesterId: semesterId !== undefined && semesterId !== null ? Number(semesterId) : undefined,
     deptValue,
     gradeValue: toGradeValue(
       info?.targetGrade ??
@@ -352,18 +306,18 @@ function mapDetailValue(raw: any): DiagnosisFormValue {
     ),
     startedAt,
     endedAt,
+    startedTime,
+    endedTime,
     status: info?.status ?? base?.status ?? "DRAFT",
     questions: mapQuestions(questionsRaw),
   };
 }
 
-export default function DignosisEditPageClient({ dignosisId }: Props) {
+export default function DignosisEditPageClient({ dignosisId }: DiagnosisEditPageProps) {
   const router = useRouter();
-  const [initialValue, setInitialValue] = useState<DiagnosisFormValue | undefined>(undefined);
+  const [initialValue, setInitialValue] = useState<DiagnosisDetailValue | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
-  const encodedId = useMemo(() => encodeURIComponent(String(dignosisId)), [dignosisId]);
 
   useEffect(() => {
     let alive = true;
@@ -371,7 +325,7 @@ export default function DignosisEditPageClient({ dignosisId }: Props) {
 
     (async () => {
       try {
-        const res = await getJson<DiagnosisDetailResponse>(`/api/admin/competencies/dignosis/${encodedId}`);
+        const res = await fetchDiagnosisDetail(dignosisId);
         const data = (res as any)?.data ?? res ?? {};
         if (!alive) return;
         setInitialValue(mapDetailValue(data));
@@ -384,19 +338,19 @@ export default function DignosisEditPageClient({ dignosisId }: Props) {
     return () => {
       alive = false;
     };
-  }, [encodedId]);
+  }, [dignosisId]);
 
   const handleClose = useCallback(() => {
     router.push("/admin/competencies/dignosis");
   }, [router]);
 
   const handleSubmit = useCallback(
-    async (payload: DiagnosisFormValue) => {
+    async (payload: DiagnosisUpsertPayload) => {
       if (saving) return;
       setSaving(true);
       setError(null);
       try {
-        await patchJson(`/api/admin/competencies/dignosis/${encodedId}`, payload);
+        await updateDiagnosis(dignosisId, payload);
       } catch (e: any) {
         const message = e?.message ?? "진단지 수정에 실패했습니다.";
         setError(message);
@@ -405,12 +359,12 @@ export default function DignosisEditPageClient({ dignosisId }: Props) {
         setSaving(false);
       }
     },
-    [encodedId, saving]
+    [dignosisId, saving]
   );
 
   useEffect(() => {
     if (!error) return;
-    window.alert(error);
+    toast.error(error);
   }, [error]);
 
   return (
@@ -421,6 +375,7 @@ export default function DignosisEditPageClient({ dignosisId }: Props) {
         onClose={handleClose}
         initialValue={initialValue}
         onSubmit={handleSubmit}
+        dignosisId={dignosisId}
       />
     </>
   );

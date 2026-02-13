@@ -86,6 +86,8 @@ export type StudentCompetencyStatRow = {
   name?: string;
   competencyName?: string;
   myScore?: number;
+  myAvgScore?: number;
+  myMaxScore?: number;
   score?: number;
   avgScore?: number;
   maxScore?: number;

@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./DignosisPage.module.css";
 import { DiagnosisTable } from "./DiagnosisTable";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { Button } from "@/components/button";
 import { fetchDiagnosisList } from "../../api/DiagnosisApi";
+import { deleteJson } from "@/lib/http";
+import toast from "react-hot-toast";
+import DignosisDeleteModal from "../modal/delete/DignosisDeleteModal.client";
 import type { DiagnosisListItemDto, PageMeta } from "../../api/types";
 import { useRouter } from "next/navigation";
 
@@ -28,6 +31,10 @@ export default function DignosisPageClient() {
   const [meta, setMeta] = useState<PageMeta>(DEFAULT_META);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DiagnosisListItemDto | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const deleteTitle = useMemo(() => deleteTarget?.title, [deleteTarget]);
 
   useEffect(() => {
     setInputKeyword(keyword ?? "");
@@ -70,10 +77,33 @@ export default function DignosisPageClient() {
   };
 
   const handleDelete = (id: number) => {
-    const ok = window.confirm("정말 삭제하시겠습니까?");
-    if (!ok) return;
-    setItems((prev) => prev.filter((item) => item.diagnosisId !== id));
+    const target = items.find((item) => item.diagnosisId === id) ?? null;
+    if (!target) {
+      toast.error("삭제할 진단지를 찾을 수 없습니다.");
+      return;
+    }
+    setDeleteTarget(target);
   };
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget || deleteLoading) return;
+    setDeleteLoading(true);
+    try {
+      await deleteJson(`/api/admin/competencies/dignosis/${deleteTarget.diagnosisId}`);
+      setItems((prev) => prev.filter((item) => item.diagnosisId !== deleteTarget.diagnosisId));
+      setDeleteTarget(null);
+      toast.success("진단지가 삭제되었습니다.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "진단지 삭제에 실패했습니다.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  }, [deleteLoading, deleteTarget]);
+
+  const handleDeleteClose = useCallback(() => {
+    if (deleteLoading) return;
+    setDeleteTarget(null);
+  }, [deleteLoading]);
 
   return (
     <div className={styles.page}>
@@ -107,6 +137,13 @@ export default function DignosisPageClient() {
           </div>
         </div>
       </div>
+      <DignosisDeleteModal
+        open={Boolean(deleteTarget)}
+        targetTitle={deleteTitle}
+        loading={deleteLoading}
+        onConfirm={handleDeleteConfirm}
+        onClose={handleDeleteClose}
+      />
     </div>
   );
 }

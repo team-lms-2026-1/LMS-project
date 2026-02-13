@@ -1,23 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteJson, getJson } from "@/lib/http";
 import DignosisPageClient from "@/features/competencies/diagnosis/components/list/DignosisPage.client";
 import DignosisDeleteModal from "./DignosisDeleteModal.client";
-import type { DiagnosisDetailResponse } from "@/features/competencies/diagnosis/api/types";
+import type { DiagnosisDeletePageProps } from "@/features/competencies/diagnosis/api/types";
+import {
+  deleteDiagnosis,
+  fetchDiagnosisDetail,
+} from "@/features/competencies/diagnosis/api/DiagnosisApi";
 
-type Props = {
-  dignosisId: string;
-};
-
-export default function DignosisDeletePageClient({ dignosisId }: Props) {
+export default function DignosisDeletePageClient({ dignosisId }: DiagnosisDeletePageProps) {
   const router = useRouter();
   const [title, setTitle] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const encodedId = useMemo(() => encodeURIComponent(String(dignosisId)), [dignosisId]);
 
   useEffect(() => {
     let alive = true;
@@ -25,7 +22,7 @@ export default function DignosisDeletePageClient({ dignosisId }: Props) {
 
     (async () => {
       try {
-        const res = await getJson<DiagnosisDetailResponse>(`/api/admin/competencies/dignosis/${encodedId}`);
+        const res = await fetchDiagnosisDetail(dignosisId);
         const data = (res as any)?.data ?? res ?? {};
         if (!alive) return;
         setTitle(data?.title ?? data?.diagnosisTitle ?? undefined);
@@ -38,7 +35,7 @@ export default function DignosisDeletePageClient({ dignosisId }: Props) {
     return () => {
       alive = false;
     };
-  }, [encodedId]);
+  }, [dignosisId]);
 
   const handleClose = useCallback(() => {
     router.push("/admin/competencies/dignosis");
@@ -49,7 +46,7 @@ export default function DignosisDeletePageClient({ dignosisId }: Props) {
     setLoading(true);
     setError(null);
     try {
-      await deleteJson(`/api/admin/competencies/dignosis/${encodedId}`);
+      await deleteDiagnosis(dignosisId);
       router.push("/admin/competencies/dignosis");
     } catch (e: any) {
       const message = e?.message ?? "진단지 삭제에 실패했습니다.";
@@ -57,7 +54,7 @@ export default function DignosisDeletePageClient({ dignosisId }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [encodedId, loading, router]);
+  }, [dignosisId, loading, router]);
 
   useEffect(() => {
     if (!error) return;

@@ -104,6 +104,16 @@
   min-width: 120px;
 }
 
+.filterInput {
+  min-width: 180px;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
 .dateRange {
   display: flex;
   align-items: center;
@@ -112,6 +122,17 @@
 
 .dateInput {
   min-width: 130px;
+  height: 42px;
+}
+
+.timeInput {
+  width: 90px;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+  background: #fff;
 }
 
 .dateSep {

@@ -103,6 +103,9 @@ public class DiagnosisCommandService {
             createQuestions(savedRun, questions);
         }
 
+        // 대상자 생성 (DRAFT 상태여도 미리 생성)
+        generateTargets(savedRun);
+
         return savedRun.getRunId();
     }
 
@@ -189,6 +192,7 @@ public class DiagnosisCommandService {
 
         // 문항 삭제
         diagnosisQuestionRepository.deleteByRunRunId(diagnosisId);
+        diagnosisTargetRepository.deleteByRunRunId(diagnosisId);
 
         // 진단 삭제
         diagnosisRunRepository.delete(diagnosisRun);
@@ -267,13 +271,24 @@ public class DiagnosisCommandService {
     // === Private Helper Methods ===
 
     private void generateTargets(DiagnosisRun diagnosisRun) {
-        // 재학 중인(ENROLLED) 모든 학생을 대상으로 생성
+        // 재학 중인(ENROLLED) 학생 중 조건에 맞는 학생 대상 생성
         List<com.teamlms.backend.domain.account.entity.StudentProfile> studentProfiles = studentProfileRepository
                 .findAll().stream()
                 .filter(p -> p.getAcademicStatus() == com.teamlms.backend.domain.account.enums.AcademicStatus.ENROLLED)
+                // 학년 필터 (null이면 전체)
+                .filter(p -> diagnosisRun.getTargetGrade() == null || diagnosisRun.getTargetGrade() == 0
+                        || p.getGradeLevel().equals(diagnosisRun.getTargetGrade()))
+                // 학과 필터 (null이면 전체)
+                .filter(p -> diagnosisRun.getDeptId() == null || p.getDeptId().equals(diagnosisRun.getDeptId()))
                 .collect(java.util.stream.Collectors.toList());
 
         for (com.teamlms.backend.domain.account.entity.StudentProfile profile : studentProfiles) {
+            // 이미 존재하는지 확인
+            if (diagnosisTargetRepository.existsByRunRunIdAndStudentAccountId(diagnosisRun.getRunId(),
+                    profile.getAccount().getAccountId())) {
+                continue;
+            }
+
             DiagnosisTarget target = DiagnosisTarget.builder()
                     .run(diagnosisRun)
                     .student(profile.getAccount())

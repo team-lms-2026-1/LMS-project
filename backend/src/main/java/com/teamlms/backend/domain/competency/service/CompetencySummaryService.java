@@ -50,6 +50,7 @@ public class CompetencySummaryService {
         private final DiagnosisRunRepository diagnosisRunRepository;
         private final DiagnosisSubmissionRepository diagnosisSubmissionRepository;
         private final DiagnosisAnswerRepository diagnosisAnswerRepository;
+        private final DiagnosisTargetRepository diagnosisTargetRepository;
 
         private final EnrollmentRepository enrollmentRepository;
         private final CurricularOfferingCompetencyMapRepository curricularCompetencyMapRepository;
@@ -87,10 +88,23 @@ public class CompetencySummaryService {
                                                 semesterId, studentAccountId, competencyId)
                                 .orElse(null);
 
-                BigDecimal diagnosisScore = diagnosisSkillScore.add(diagnosisAptitudeScore);
+                BigDecimal multiplier = BigDecimal.valueOf(10);
+
+                // 1) 진단 점수(숙련도+소양) * 10
+                BigDecimal scaledDiagSkill = diagnosisSkillScore.multiply(multiplier);
+                BigDecimal scaledDiagAptitude = diagnosisAptitudeScore.multiply(multiplier);
+                BigDecimal diagnosisScore = scaledDiagSkill.add(scaledDiagAptitude);
+
+                // 2) 비교과 점수 * 10
+                BigDecimal scaledExtra = extraScore.multiply(multiplier);
+
+                // 3) 교과 점수 (그대로)
+                BigDecimal scaledCurricular = curricularScore;
+
+                // 4) 최종 합계 (진단, 비교과, 교과, 수정점수 계산)
                 BigDecimal totalScore = diagnosisScore
-                                .add(curricularScore)
-                                .add(extraScore)
+                                .add(scaledExtra)
+                                .add(scaledCurricular)
                                 .add(selfExtraScore);
 
                 if (summary == null) {
@@ -98,11 +112,11 @@ public class CompetencySummaryService {
                                         .semester(semester)
                                         .student(student)
                                         .competency(competency)
-                                        .diagnosisSkillScore(diagnosisSkillScore)
-                                        .diagnosisAptitudeScore(diagnosisAptitudeScore)
+                                        .diagnosisSkillScore(scaledDiagSkill)
+                                        .diagnosisAptitudeScore(scaledDiagAptitude)
                                         .diagnosisScore(diagnosisScore)
-                                        .curricularScore(curricularScore)
-                                        .extraScore(extraScore)
+                                        .curricularScore(scaledCurricular)
+                                        .extraScore(scaledExtra)
                                         .selfExtraScore(selfExtraScore)
                                         .totalScore(totalScore)
                                         .calculatedAt(LocalDateTime.now())
@@ -113,11 +127,11 @@ public class CompetencySummaryService {
                                         .semester(summary.getSemester())
                                         .student(summary.getStudent())
                                         .competency(competency)
-                                        .diagnosisSkillScore(diagnosisSkillScore)
-                                        .diagnosisAptitudeScore(diagnosisAptitudeScore)
+                                        .diagnosisSkillScore(scaledDiagSkill)
+                                        .diagnosisAptitudeScore(scaledDiagAptitude)
                                         .diagnosisScore(diagnosisScore)
-                                        .curricularScore(curricularScore)
-                                        .extraScore(extraScore)
+                                        .curricularScore(scaledCurricular)
+                                        .extraScore(scaledExtra)
                                         .selfExtraScore(selfExtraScore)
                                         .totalScore(totalScore)
                                         .calculatedAt(LocalDateTime.now())
@@ -238,14 +252,23 @@ public class CompetencySummaryService {
         public void recalculateAllSummaries(Long semesterId) {
 
                 List<Competency> competencies = competencyRepository.findAll();
-                List<com.teamlms.backend.domain.account.entity.StudentProfile> students = studentProfileRepository
-                                .findAll();
-
                 DiagnosisRun run = diagnosisRunRepository.findBySemesterSemesterId(semesterId).orElse(null);
 
-                for (com.teamlms.backend.domain.account.entity.StudentProfile student : students) {
+                summaryRepository.deleteBySemesterSemesterId(semesterId);
 
-                        Long studentId = student.getAccountId();
+                List<Long> studentIds;
+                if (run != null) {
+                        studentIds = diagnosisSubmissionRepository.findByRunRunId(run.getRunId()).stream()
+                                        .map(submission -> submission.getStudent().getAccountId())
+                                        .distinct()
+                                        .collect(Collectors.toList());
+                } else {
+                        studentIds = studentProfileRepository.findAll().stream()
+                                        .map(com.teamlms.backend.domain.account.entity.StudentProfile::getAccountId)
+                                        .collect(Collectors.toList());
+                }
+
+                for (Long studentId : studentIds) {
 
                         for (Competency comp : competencies) {
 
@@ -360,6 +383,10 @@ public class CompetencySummaryService {
                 List<Competency> competencies = competencyRepository.findAll();
                 List<SemesterStudentCompetencySummary> allSummaries = summaryRepository
                                 .findBySemesterSemesterId(semesterId);
+                DiagnosisRun run = diagnosisRunRepository.findBySemesterSemesterId(semesterId).orElse(null);
+                int totalTarget = run != null
+                                ? (int) diagnosisTargetRepository.countByRunRunId(run.getRunId())
+                                : (int) studentProfileRepository.count();
 
                 Map<Long, List<SemesterStudentCompetencySummary>> groupedByComp = allSummaries.stream()
                                 .collect(Collectors.groupingBy(s -> s.getCompetency().getCompetencyId()));
@@ -369,7 +396,6 @@ public class CompetencySummaryService {
                         List<SemesterStudentCompetencySummary> compSummaries = groupedByComp
                                         .getOrDefault(comp.getCompetencyId(), List.of());
 
-                        int totalTarget = (int) studentProfileRepository.count();
                         int calculatedCount = compSummaries.size();
 
                         BigDecimal mean = BigDecimal.ZERO;
@@ -477,12 +503,14 @@ public class CompetencySummaryService {
         private Integer getChoiceScore(DiagnosisQuestion q, Integer scaleValue) {
                 if (scaleValue == null)
                         return null;
+                // UI에서 1(매우 아니다) ~ 5(매우 그렇다) 형태의 강도로 넘어올 경우,
+                // 등록된 score1(5점) ~ score5(1점) 매핑과 반전되도록 처리
                 return switch (scaleValue) {
-                        case 1 -> q.getScore1() != null ? q.getScore1() : 1;
-                        case 2 -> q.getScore2() != null ? q.getScore2() : 2;
+                        case 5 -> q.getScore1() != null ? q.getScore1() : 5;
+                        case 4 -> q.getScore2() != null ? q.getScore2() : 4;
                         case 3 -> q.getScore3() != null ? q.getScore3() : 3;
-                        case 4 -> q.getScore4() != null ? q.getScore4() : 4;
-                        case 5 -> q.getScore5() != null ? q.getScore5() : 5;
+                        case 2 -> q.getScore4() != null ? q.getScore4() : 2;
+                        case 1 -> q.getScore5() != null ? q.getScore5() : 1;
                         default -> 0;
                 };
         }

@@ -79,11 +79,6 @@ export default function StudentDetailPageClient() {
     () => normalizeMyStats(data?.myStatsTable ?? []),
     [data?.myStatsTable]
   );
-  const comparisonRows = useMemo(
-    () => normalizeComparisonStats(data?.comparisonTable ?? []),
-    [data?.comparisonTable]
-  );
-
   if (loading) {
     return <div className={styles.page}>불러오는 중...</div>;
   }
@@ -200,15 +195,47 @@ export default function StudentDetailPageClient() {
             </div>
             <div className={styles.tableWrap}>
               {myStatsRows.length === 0 ? (
-                <div className={styles.empty}>통계 데이터가 없습니다.</div>
+                <div className={styles.empty}>데이터가 없습니다.</div>
               ) : (
                 <table className={styles.statTable}>
                   <thead>
                     <tr>
                       <th>역량 이름</th>
-                      <th>내점수</th>
+                      <th>내 점수</th>
                       <th>평균</th>
-                      <th>최고점수</th>
+                      <th>내 최고점수</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {myStatsRows.map((row) => (
+                      <tr key={row.key}>
+                        <td>{row.name}</td>
+                        <td>{formatScore(row.myScore)}</td>
+                        <td>{formatScore(row.myAvgScore)}</td>
+                        <td>{formatScore(row.myMaxScore)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </section>
+
+          <section className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>내 역량 비교</h2>
+            </div>
+            <div className={styles.tableWrap}>
+              {myStatsRows.length === 0 ? (
+                <div className={styles.empty}>데이터가 없습니다.</div>
+              ) : (
+                <table className={styles.statTable}>
+                  <thead>
+                    <tr>
+                      <th>역량 이름</th>
+                      <th>내 점수</th>
+                      <th>학과 평균</th>
+                      <th>학과 최고점수</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -225,38 +252,6 @@ export default function StudentDetailPageClient() {
               )}
             </div>
           </section>
-
-          <section className={styles.panel}>
-            <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>내 역량 비교</h2>
-            </div>
-            <div className={styles.tableWrap}>
-              {comparisonRows.length === 0 ? (
-                <div className={styles.empty}>비교 데이터가 없습니다.</div>
-              ) : (
-                <table className={styles.statTable}>
-                  <thead>
-                    <tr>
-                      <th>역량 이름</th>
-                      <th>내점수</th>
-                      <th>학과평균</th>
-                      <th>학과최고점수</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comparisonRows.map((row) => (
-                      <tr key={row.key}>
-                        <td>{row.name}</td>
-                        <td>{formatScore(row.myScore)}</td>
-                        <td>{formatScore(row.deptAvgScore)}</td>
-                        <td>{formatScore(row.deptMaxScore)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </section>
         </div>
       </div>
     </div>
@@ -265,7 +260,7 @@ export default function StudentDetailPageClient() {
 
 function normalizeRadar(items: StudentCompetencyRadarItem[]) {
   return items.map((item, index) => ({
-    name: pickString(item, ["name", "label", "competencyName"]) || `항목 ${index + 1}`,
+    name: pickString(item, ["name", "label", "competencyName"]) || `역량 ${index + 1}`,
     value: pickNumber(item, ["value", "score", "myScore", "avgScore", "maxScore", "weight"]) ?? 0,
   }));
 }
@@ -284,20 +279,12 @@ function normalizeTrend(categories: string[], series: StudentCompetencyTrendSeri
 function normalizeMyStats(rows: StudentCompetencyStatRow[]) {
   return rows.map((row, idx) => ({
     key: `${pickString(row, ["name", "competencyName"]) || "row"}-${idx}`,
-    name: pickString(row, ["name", "competencyName"]) || `항목 ${idx + 1}`,
+    name: pickString(row, ["name", "competencyName"]) || `역량 ${idx + 1}`,
     myScore: pickNumber(row, ["myScore", "score", "value"]),
+    myAvgScore: pickNumber(row, ["myAvgScore", "myAverage"]),
+    myMaxScore: pickNumber(row, ["myMaxScore", "myMaximum"]),
     avgScore: pickNumber(row, ["avgScore", "average", "avg"]),
     maxScore: pickNumber(row, ["maxScore", "maximum", "max"]),
-  }));
-}
-
-function normalizeComparisonStats(rows: StudentCompetencyStatRow[]) {
-  return rows.map((row, idx) => ({
-    key: `${pickString(row, ["name", "competencyName"]) || "row"}-${idx}`,
-    name: pickString(row, ["name", "competencyName"]) || `항목 ${idx + 1}`,
-    myScore: pickNumber(row, ["myScore", "score", "value"]),
-    deptAvgScore: pickNumber(row, ["deptAvgScore", "departmentAvg", "avgScore", "avg"]),
-    deptMaxScore: pickNumber(row, ["deptMaxScore", "departmentMax", "maxScore", "max"]),
   }));
 }
 

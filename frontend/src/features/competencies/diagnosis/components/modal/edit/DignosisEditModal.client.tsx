@@ -1,26 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
+import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
+import toast from "react-hot-toast";
 import styles from "./DignosisEditModal.module.css";
 import type {
   DiagnosisQuestionType,
   DiagnosisCsKey,
   DiagnosisScaleOption,
   DiagnosisQuestion,
-  DiagnosisFormValue,
+  DiagnosisCreateQuestionPayload,
+  DiagnosisUpsertPayload,
+  DiagnosisEditModalProps,
 } from "@/features/competencies/diagnosis/api/types";
-
-type Props = {
-  open: boolean;
-  onClose: () => void;
-  initialValue?: Partial<DiagnosisFormValue>;
-  onSubmit?: (payload: DiagnosisFormValue) => void | Promise<void>;
-};
 
 const SCORE_OPTIONS = [1, 2, 3, 4, 5];
 const SCALE_LABELS = ["매우 그렇다", "그렇다", "보통이다", "그렇지 않다", "매우 그렇지 않다"];
@@ -82,6 +80,97 @@ function createDefaultQuestion(): DiagnosisQuestion {
   };
 }
 
+function serializeQuestions(questions: DiagnosisQuestion[]) {
+  return JSON.stringify(
+    questions.map((q) => ({
+      title: q.title ?? "",
+      type: q.type ?? "SCALE",
+      shortAnswer: q.shortAnswer ?? "",
+      scaleOptions: (q.scaleOptions ?? []).map((opt) => ({
+        label: opt.label ?? "",
+        score: opt.score ?? 0,
+      })),
+      csScores: {
+        criticalThinking: q.csScores?.criticalThinking ?? 0,
+        character: q.csScores?.character ?? 0,
+        communication: q.csScores?.communication ?? 0,
+        collaboration: q.csScores?.collaboration ?? 0,
+        creativity: q.csScores?.creativity ?? 0,
+        convergence: q.csScores?.convergence ?? 0,
+      },
+    }))
+  );
+}
+
+function toNumber(value: string, fallback: number = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function toDateOnly(value?: string) {
+  if (!value) return "";
+  const text = String(value).trim();
+  if (!text) return "";
+  if (text.includes("T")) return text.slice(0, 10);
+  return text.slice(0, 10);
+}
+
+function toTimeOnly(value?: string, fallback: string = "09:00") {
+  if (!value) return fallback;
+  const text = String(value).trim();
+  if (!text) return fallback;
+  if (text.includes("T")) {
+    const time = text.split("T")[1]?.slice(0, 5) ?? "";
+    return /^\d{2}:\d{2}$/.test(time) ? time : fallback;
+  }
+  return fallback;
+}
+
+function toDateTime(dateValue: string, timeValue: string) {
+  if (!dateValue) return "";
+  if (dateValue.includes("T")) return dateValue;
+  const time = /^\d{2}:\d{2}$/.test(timeValue) ? timeValue : "00:00";
+  return `${dateValue}T${time}:00`;
+}
+
+function buildCreateQuestions(questions: DiagnosisQuestion[]): DiagnosisCreateQuestionPayload[] {
+  return questions.map((q, index) => {
+    const scale = q.scaleOptions ?? [];
+    const base = {
+      order: index + 1,
+      type: q.type,
+      text: q.title,
+      c1: q.csScores.criticalThinking,
+      c2: q.csScores.character,
+      c3: q.csScores.communication,
+      c4: q.csScores.collaboration,
+      c5: q.csScores.creativity,
+      c6: q.csScores.convergence,
+    };
+
+    if (q.type === "SHORT") {
+      return {
+        ...base,
+        shortAnswerKey: q.shortAnswer,
+      };
+    }
+
+    return {
+      ...base,
+      label1: scale[0]?.label ?? "",
+      score1: scale[0]?.score ?? 0,
+      label2: scale[1]?.label ?? "",
+      score2: scale[1]?.score ?? 0,
+      label3: scale[2]?.label ?? "",
+      score3: scale[2]?.score ?? 0,
+      label4: scale[3]?.label ?? "",
+      score4: scale[3]?.score ?? 0,
+      label5: scale[4]?.label ?? "",
+      score5: scale[4]?.score ?? 0,
+    };
+  });
+}
+
 function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[] {
   if (!questions || questions.length === 0) return [createDefaultQuestion()];
   return questions.map((q) => ({
@@ -108,14 +197,34 @@ function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[
   }));
 }
 
-export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Props) {
+export function DignosisEditModal({
+  open,
+  onClose,
+  initialValue,
+  onSubmit,
+  dignosisId,
+}: DiagnosisEditModalProps) {
+  const router = useRouter();
   const { options: deptOptionsRaw, loading: deptLoading } = useDeptsDropdownOptions();
+  const { options: semesterOptionsRaw, loading: semesterLoading } = useSemestersDropdownOptions();
   const deptOptions = useMemo(
     () => [{ value: "All", label: "전체" }, ...deptOptionsRaw],
     [deptOptionsRaw]
   );
 
+  const encodedId = useMemo(
+    () =>
+      dignosisId !== undefined && dignosisId !== null
+        ? encodeURIComponent(String(dignosisId))
+        : "",
+    [dignosisId]
+  );
+
   const [activeTab, setActiveTab] = useState<"QUESTION" | "ANSWER">("QUESTION");
+  const [title, setTitle] = useState("");
+  const [semesterValue, setSemesterValue] = useState("");
+  const [startedTime, setStartedTime] = useState("09:00");
+  const [endedTime, setEndedTime] = useState("18:00");
   const [deptValue, setDeptValue] = useState("All");
   const [gradeValue, setGradeValue] = useState("");
   const [status, setStatus] = useState("DRAFT");
@@ -123,17 +232,53 @@ export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Pro
   const [endedAt, setEndedAt] = useState("");
   const [questions, setQuestions] = useState<DiagnosisQuestion[]>([createDefaultQuestion()]);
   const [closeSignal, setCloseSignal] = useState(0);
+  const initialSnapshotRef = useRef<{
+    status: string;
+    title: string;
+    semesterValue: string;
+    deptValue: string;
+    gradeValue: string;
+    startedAt: string;
+    endedAt: string;
+    startedTime: string;
+    endedTime: string;
+    questions: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setActiveTab("QUESTION");
+    setTitle(initialValue?.title ?? "");
+    setSemesterValue(initialValue?.semesterId !== undefined ? String(initialValue?.semesterId) : "");
     setDeptValue(initialValue?.deptValue ?? "All");
     setGradeValue(initialValue?.gradeValue ?? "");
     setStatus(initialValue?.status ?? "DRAFT");
-    setStartedAt(initialValue?.startedAt ?? "");
-    setEndedAt(initialValue?.endedAt ?? "");
-    setQuestions(normalizeQuestions(initialValue?.questions));
+    setStartedAt(toDateOnly(initialValue?.startedAt));
+    setEndedAt(toDateOnly(initialValue?.endedAt));
+    const nextStartedTime =
+      initialValue?.startedTime ?? toTimeOnly(initialValue?.startedAt, "09:00");
+    const nextEndedTime =
+      initialValue?.endedTime ?? toTimeOnly(initialValue?.endedAt, "18:00");
+    setStartedTime(nextStartedTime);
+    setEndedTime(nextEndedTime);
+    const normalizedQuestions = normalizeQuestions(initialValue?.questions);
+    setQuestions(normalizedQuestions);
+    initialSnapshotRef.current = {
+      status: String(initialValue?.status ?? "DRAFT").toUpperCase(),
+      title: (initialValue?.title ?? "").trim(),
+      semesterValue:
+        initialValue?.semesterId !== undefined ? String(initialValue?.semesterId) : "",
+      deptValue: initialValue?.deptValue ?? "All",
+      gradeValue: initialValue?.gradeValue ?? "",
+      startedAt: toDateOnly(initialValue?.startedAt),
+      endedAt: toDateOnly(initialValue?.endedAt),
+      startedTime: nextStartedTime,
+      endedTime: nextEndedTime,
+      questions: serializeQuestions(normalizedQuestions),
+    };
   }, [open, initialValue]);
+
+  const canAddQuestion = status !== "CLOSED";
 
   const updateQuestion = (id: string, updater: (q: DiagnosisQuestion) => DiagnosisQuestion) => {
     setQuestions((prev) => prev.map((q) => (q.id === id ? updater(q) : q)));
@@ -196,16 +341,72 @@ export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Pro
     onClose();
   };
 
+  const handleAnswerTab = () => {
+    if (encodedId) {
+      router.push(`/admin/competencies/dignosis/${encodedId}?tab=ANSWER`);
+      return;
+    }
+    setActiveTab("ANSWER");
+  };
+
   const handleSubmit = async () => {
-    const payload: DiagnosisFormValue = {
-      deptValue,
-      gradeValue,
-      startedAt,
-      endedAt,
+    const initialSnapshot = initialSnapshotRef.current;
+    const currentStatus = String(status).toUpperCase();
+    if (initialSnapshot?.status === "OPEN") {
+      const hasOtherChanges =
+        initialSnapshot.title !== title.trim() ||
+        initialSnapshot.semesterValue !== semesterValue ||
+        initialSnapshot.deptValue !== deptValue ||
+        initialSnapshot.gradeValue !== gradeValue ||
+        initialSnapshot.startedAt !== startedAt ||
+        initialSnapshot.endedAt !== endedAt ||
+        initialSnapshot.startedTime !== startedTime ||
+        initialSnapshot.endedTime !== endedTime ||
+        initialSnapshot.questions !== serializeQuestions(questions);
+
+      if (hasOtherChanges) {
+        toast.error("OPEN상태에서는 변경 불가능합니다.");
+        return;
+      }
+    }
+
+    if (!title.trim()) {
+      window.alert("제목을 입력해 주세요.");
+      return;
+    }
+    if (!semesterValue) {
+      window.alert("학기를 선택해 주세요.");
+      return;
+    }
+    if (!deptValue || deptValue === "All") {
+      window.alert("학과를 선택해 주세요.");
+      return;
+    }
+    if (!gradeValue || gradeValue === "ALL") {
+      window.alert("학년을 선택해 주세요.");
+      return;
+    }
+    if (!startedAt || !endedAt) {
+      window.alert("기간을 선택해 주세요.");
+      return;
+    }
+
+    const shouldSendQuestions = status === "DRAFT";
+    const payload: DiagnosisUpsertPayload = {
+      title: title.trim(),
+      semesterId: toNumber(semesterValue),
+      targetGrade: toNumber(gradeValue),
+      deptId: toNumber(deptValue),
+      startedAt: toDateTime(startedAt, startedTime),
+      endedAt: toDateTime(endedAt, endedTime),
       status,
-      questions,
+      questions: shouldSendQuestions ? buildCreateQuestions(questions) : undefined,
     };
-    if (onSubmit) await onSubmit(payload);
+    try {
+      if (onSubmit) await onSubmit(payload);
+    } catch {
+      return;
+    }
     setCloseSignal((v) => v + 1);
     onClose();
   };
@@ -241,7 +442,7 @@ export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Pro
             <button
               type="button"
               className={`${styles.tabButton} ${activeTab === "ANSWER" ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab("ANSWER")}
+              onClick={handleAnswerTab}
             >
               응답
             </button>
@@ -275,6 +476,27 @@ export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Pro
 
                 <div className={styles.filters}>
                   <div className={styles.filterItem}>
+                    <span className={styles.filterLabel}>제목</span>
+                    <input
+                      className={styles.filterInput}
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="제목"
+                    />
+                  </div>
+
+                  <div className={styles.filterItem}>
+                    <span className={styles.filterLabel}>학기</span>
+                    <Dropdown
+                      value={semesterValue}
+                      options={semesterOptionsRaw}
+                      placeholder="학기"
+                      loading={semesterLoading}
+                      onChange={setSemesterValue}
+                      className={styles.filterDropdown}
+                    />
+                  </div>
+                  <div className={styles.filterItem}>
                     <span className={styles.filterLabel}>학과</span>
                     <Dropdown
                       value={deptValue}
@@ -307,6 +529,12 @@ export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Pro
                         className={styles.dateInput}
                         closeSignal={closeSignal}
                       />
+                      <input
+                        type="time"
+                        className={styles.timeInput}
+                        value={startedTime}
+                        onChange={(e) => setStartedTime(e.target.value)}
+                      />
                       <span className={styles.dateSep}>~</span>
                       <DatePickerInput
                         value={endedAt}
@@ -315,6 +543,12 @@ export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Pro
                         min={startedAt || undefined}
                         className={styles.dateInput}
                         closeSignal={closeSignal}
+                      />
+                      <input
+                        type="time"
+                        className={styles.timeInput}
+                        value={endedTime}
+                        onChange={(e) => setEndedTime(e.target.value)}
                       />
                     </div>
                   </div>
@@ -444,9 +678,11 @@ export function DignosisEditModal({ open, onClose, initialValue, onSubmit }: Pro
                 ))}
               </div>
 
-              <button type="button" className={styles.addButton} onClick={handleAddQuestion}>
-                +
-              </button>
+              {canAddQuestion && (
+                <button type="button" className={styles.addButton} onClick={handleAddQuestion}>
+                  +
+                </button>
+              )}
             </div>
           </>
         )}

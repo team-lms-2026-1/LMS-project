@@ -3,15 +3,18 @@
 import { useMemo, useState } from "react";
 import styles from "./ResultPage.module.css";
 import { useResultList } from "@/features/competencies/result/hooks/useResultList";
+import { recalculateCompetencySummary } from "@/features/competencies/result/api/ResultCompetenciesApi";
 import type {
   ResultCompetencyDashboard,
   ResultCompetencyRadarItem,
   ResultCompetencyRadarSeries,
   ResultCompetencyStatRow,
 } from "@/features/competencies/result/api/types";
+import { Button } from "@/components/button";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
-import { useSearchParams } from "next/navigation";
+import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CartesianGrid,
   Legend,
@@ -37,10 +40,41 @@ type NormalizedRadarSeries = {
 };
 
 export default function ResultPageClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const dignosisId = searchParams.get("dignosisId") ?? "1";
+  const semesterIdParam = searchParams.get("semesterId");
+  const semesterNameParam = searchParams.get("semesterName");
+  const semesterId = semesterIdParam ?? (semesterNameParam ? "" : "1");
+  const statusParam = searchParams.get("status");
   const { options: deptOptionsRaw, loading: deptLoading } = useDeptsDropdownOptions();
+  const { options: semesterOptions } = useSemestersDropdownOptions();
   const [selectedDeptValue, setSelectedDeptValue] = useState("");
+  const [recalcLoading, setRecalcLoading] = useState(false);
+  const [recalcError, setRecalcError] = useState<string | null>(null);
+
+
+
+  const resolvedSemesterId = useMemo(() => {
+    if (semesterIdParam) return semesterIdParam;
+    if (!semesterNameParam) return "";
+
+    const normalize = (value: string) =>
+      value
+        .replace(/\s+/g, "")
+        .replace(/학년도/g, "")
+        .replace(/학기/g, "")
+        .replace(/-/g, "")
+        .toLowerCase();
+
+    const target = normalize(semesterNameParam);
+    const match = semesterOptions.find((opt) => normalize(opt.label) === target);
+    return match?.value ?? "";
+  }, [semesterIdParam, semesterNameParam, semesterOptions]);
+
+  const isClosed = String(statusParam ?? "").toUpperCase() === "CLOSED";
+
+
 
   const selectedDeptLabel = useMemo(() => {
     if (!selectedDeptValue) return "";
@@ -49,14 +83,38 @@ export default function ResultPageClient() {
 
   const query = useMemo(() => {
     if (!dignosisId) return undefined;
+    const semesterQuery = semesterId
+      ? { semesterId }
+      : semesterNameParam
+        ? { semesterName: semesterNameParam }
+        : {};
     const isDeptId = deptOptionsRaw.some((o) => o.value === selectedDeptValue);
-    if (!selectedDeptValue) return { dignosisId };
+    if (!selectedDeptValue) return { dignosisId, ...semesterQuery };
     return isDeptId
-      ? { dignosisId, deptId: selectedDeptValue, deptName: selectedDeptLabel }
-      : { dignosisId, deptName: selectedDeptLabel };
-  }, [deptOptionsRaw, dignosisId, selectedDeptLabel, selectedDeptValue]);
+      ? { dignosisId, deptId: selectedDeptValue, deptName: selectedDeptLabel, ...semesterQuery }
+      : { dignosisId, deptName: selectedDeptLabel, ...semesterQuery };
+  }, [deptOptionsRaw, dignosisId, selectedDeptLabel, selectedDeptValue, semesterId, semesterNameParam]);
 
-  const { state } = useResultList(query);
+  const { state, actions } = useResultList(query);
+
+  const handleRecalculate = async () => {
+    if (!isClosed || recalcLoading) return;
+    const semesterIdValue = resolvedSemesterId || "";
+    if (!semesterIdValue) {
+      setRecalcError("학기 정보를 찾을 수 없습니다.");
+      return;
+    }
+    setRecalcLoading(true);
+    setRecalcError(null);
+    try {
+      await recalculateCompetencySummary(semesterIdValue);
+      await actions.reload();
+    } catch (e: any) {
+      setRecalcError(e?.message ?? "역량 재계산에 실패했습니다.");
+    } finally {
+      setRecalcLoading(false);
+    }
+  };
 
   const summary = useMemo(() => normalizeSummary(state.data), [state.data]);
   const radarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);
@@ -95,12 +153,12 @@ export default function ResultPageClient() {
 
   const statsRows = useMemo(() => normalizeStats(state.data), [state.data]);
 
-  if (state.loading) {
+  if (state.loading || recalcLoading) {
     return <div className={styles.page}>불러오는 중...</div>;
   }
 
-  if (state.error) {
-    return <div className={styles.page}>{state.error}</div>;
+  if (state.error || recalcError) {
+    return <div className={styles.page}>{state.error ?? recalcError}</div>;
   }
 
   return (
@@ -108,6 +166,18 @@ export default function ResultPageClient() {
       <div className={styles.card}>
         <div className={styles.topBar}>
           <h1 className={styles.title}>역량 통합 관리</h1>
+          {isClosed && (
+            <Button
+              variant="primary"
+              onClick={handleRecalculate}
+              disabled={recalcLoading || !resolvedSemesterId}
+            >
+              결과 산출
+            </Button>
+          )}
+          <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
+            목록
+          </Button>
         </div>
 
         <div className={styles.summaryRow}>
@@ -318,7 +388,7 @@ function normalizeRadarSeries(data: ResultCompetencyDashboard | null): Normalize
 function normalizeRadarItems(items: ResultCompetencyRadarItem[] | any) {
   if (!Array.isArray(items)) return [];
   return items.map((item, index) => ({
-    name: pickString(item, ["name", "label", "competencyName"]) || `항목 ${index + 1}`,
+    name: pickString(item, ["name", "label", "competencyName"]) || `역량 ${index + 1}`,
     value: pickNumber(item, ["value", "score", "avgScore", "weight", "myScore", "maxScore"]) ?? 0,
   }));
 }
@@ -398,7 +468,7 @@ function normalizeStats(data: ResultCompetencyDashboard | null) {
   if (!Array.isArray(raw)) return [];
   return raw.map((row: ResultCompetencyStatRow, idx: number) => ({
     key: `${pickString(row, ["name", "competencyName"]) || "row"}-${idx}`,
-    name: pickString(row, ["name", "competencyName"]) || `항목 ${idx + 1}`,
+    name: pickString(row, ["name", "competencyName"]) || `역량 ${idx + 1}`,
     totalTargets: pickNumber(row, ["targetCount", "totalTargets", "totalCount", "targets", "total"]),
     calculatedTargets: pickNumber(row, [
       "responseCount",
@@ -454,3 +524,27 @@ function formatDateTime(value?: string | null) {
   const min = String(d.getMinutes()).padStart(2, "0");
   return `${yyyy}.${mm}.${dd} - ${hh}:${min}`;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -41,6 +41,30 @@ function canDelete(status: DiagnosisStatus) {
 
 export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTableProps) {
   const router = useRouter();
+  const buildDetailUrl = (r: DiagnosisListItemDto) => {
+    const params = new URLSearchParams();
+    if (r.startedAt) {
+      params.set("startedAt", r.startedAt);
+      params.set("start", r.startedAt);
+    }
+    if (r.endedAt) {
+      params.set("endedAt", r.endedAt);
+      params.set("end", r.endedAt);
+    }
+    const query = params.toString();
+    return `/admin/competencies/dignosis/${r.diagnosisId}${query ? `?${query}` : ""}`;
+  };
+  const buildResultUrl = (r: DiagnosisListItemDto) => {
+    const params = new URLSearchParams();
+    params.set("dignosisId", String(r.diagnosisId));
+    params.set("status", r.status);
+    if (r.semesterId !== undefined && r.semesterId !== null && String(r.semesterId).trim()) {
+      params.set("semesterId", String(r.semesterId));
+    } else if (r.semesterName?.trim()) {
+      params.set("semesterName", r.semesterName.trim());
+    }
+    return `/admin/competencies/result?${params.toString()}`;
+  };
   const columns: Array<TableColumn<DiagnosisListItemDto>> = [
     {
       header: "번호",
@@ -80,16 +104,24 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
     },
     {
       header: "관리",
-      width: 180,
+      width: 240,
       align: "center",
       stopRowClick: true,
       render: (r) => {
         const showEdit = canEdit(r.status);
         const showDelete = canDelete(r.status);
-        if (!showEdit && !showDelete) return null;
 
         return (
           <div className={styles.manageCell}>
+            <Button
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(buildDetailUrl(r));
+              }}
+            >
+              상세
+            </Button>
             {showEdit && (
               <Button
                 variant="secondary"
@@ -127,19 +159,7 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
       rowKey={(r) => r.diagnosisId}
       emptyText="조회된 진단지가 없습니다."
       onRowClick={(r) => {
-        const params = new URLSearchParams();
-        if (r.startedAt) {
-          params.set("startedAt", r.startedAt);
-          params.set("start", r.startedAt);
-        }
-        if (r.endedAt) {
-          params.set("endedAt", r.endedAt);
-          params.set("end", r.endedAt);
-        }
-        const query = params.toString();
-        router.push(
-          `/admin/competencies/dignosis/${r.diagnosisId}${query ? `?${query}` : ""}`
-        );
+        router.push(buildResultUrl(r));
       }}
     />
   );

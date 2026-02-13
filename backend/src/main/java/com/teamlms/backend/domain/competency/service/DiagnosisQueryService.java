@@ -9,6 +9,7 @@ import com.teamlms.backend.domain.account.entity.StudentProfile;
 import com.teamlms.backend.domain.account.repository.StudentProfileRepository;
 import com.teamlms.backend.domain.competency.api.dto.*;
 import com.teamlms.backend.domain.competency.entitiy.*;
+import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 import com.teamlms.backend.domain.competency.repository.*;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
@@ -38,6 +39,7 @@ public class DiagnosisQueryService {
         private final DeptRepository deptRepository;
         private final SemesterCompetencyCohortStatRepository statRepository;
         private final SemesterStudentCompetencySummaryRepository summaryRepository;
+        private final CompetencySummaryService competencySummaryService;
 
         /**
          * 진단지 목록 조회
@@ -134,19 +136,21 @@ public class DiagnosisQueryService {
         /**
          * 내 진단 목록 조회 (학생용)
          */
-        public List<MyDiagnosisListItem> listMyDiagnoses(Long accountId) {
-                List<DiagnosisTarget> targets = diagnosisTargetRepository.findByStudentAccountId(accountId);
+    public List<MyDiagnosisListItem> listMyDiagnoses(Long accountId) {
+        List<DiagnosisTarget> targets = diagnosisTargetRepository
+                        .findByStudentAccountIdAndRunStatus(accountId, DiagnosisRunStatus.OPEN);
 
-                return targets.stream()
-                                .map(target -> MyDiagnosisListItem.builder()
-                                                .diagnosisId(target.getRun().getRunId())
-                                                .title(target.getRun().getTitle())
-                                                .semesterName(target.getRun().getSemester().getDisplayName())
-                                                .startedAt(target.getRun().getStartAt())
-                                                .endedAt(target.getRun().getEndAt())
-                                                .status(target.getStatus().name())
-                                                .build())
-                                .collect(Collectors.toList());
+        return targets.stream()
+                        .map(target -> MyDiagnosisListItem.builder()
+                                        .diagnosisId(target.getRun().getRunId())
+                                        .title(target.getRun().getTitle())
+                                        .semesterName(target.getRun().getSemester().getDisplayName())
+                                        .startedAt(target.getRun().getStartAt())
+                                        .endedAt(target.getRun().getEndAt())
+                                        .status(target.getStatus().name())
+                                        .diagnosisStatus(target.getRun().getStatus().name())
+                                        .build())
+                        .collect(Collectors.toList());
         }
 
         /**
@@ -170,6 +174,7 @@ public class DiagnosisQueryService {
         /**
          * 진단 리포트 조회
          */
+        @Transactional
         public DiagnosisReportResponse getDiagnosisReport(Long runId) {
                 DiagnosisRun run = diagnosisRunRepository.findById(runId)
                                 .orElseThrow(() -> new BusinessException(ErrorCode.DIAGNOSIS_NOT_FOUND, runId));
@@ -177,13 +182,17 @@ public class DiagnosisQueryService {
                 Long semesterId = run.getSemester().getSemesterId();
 
                 // 1. 역량 통계 데이터 조회 (현재 학기)
+                long targetCount = diagnosisTargetRepository.countByRunRunId(runId);
+                long responseCount = diagnosisSubmissionRepository.countByRunRunId(runId);
                 List<SemesterCompetencyCohortStat> currentStats = statRepository.findBySemesterSemesterId(semesterId);
+
+                if (currentStats.isEmpty() && responseCount > 0) {
+                        competencySummaryService.calculateCohortStatistics(semesterId);
+                        currentStats = statRepository.findBySemesterSemesterId(semesterId);
+                }
 
                 if (currentStats.isEmpty()) {
                         // 대략적인 대상자수만이라도 반환
-                        long targetCount = diagnosisTargetRepository.countByRunRunId(runId);
-                        long responseCount = diagnosisSubmissionRepository.countByRunRunId(runId);
-
                         return DiagnosisReportResponse.builder()
                                         .summary(DiagnosisReportSummary.builder()
                                                         .targetCount((int) targetCount)
@@ -323,21 +332,32 @@ public class DiagnosisQueryService {
                                 .build();
         }
 
-        private DiagnosisQuestionDetail toQuestionDetail(DiagnosisQuestion question) {
-                Map<String, Integer> weights = Map.of(
-                                "C1", question.getC1MaxScore(),
-                                "C2", question.getC2MaxScore(),
-                                "C3", question.getC3MaxScore(),
-                                "C4", question.getC4MaxScore(),
-                                "C5", question.getC5MaxScore(),
-                                "C6", question.getC6MaxScore());
+    private DiagnosisQuestionDetail toQuestionDetail(DiagnosisQuestion question) {
+        Map<String, Integer> weights = Map.of(
+                        "C1", question.getC1MaxScore(),
+                        "C2", question.getC2MaxScore(),
+                        "C3", question.getC3MaxScore(),
+                        "C4", question.getC4MaxScore(),
+                        "C5", question.getC5MaxScore(),
+                        "C6", question.getC6MaxScore());
 
-                return DiagnosisQuestionDetail.builder()
-                                .questionId(question.getQuestionId())
-                                .type(question.getQuestionType().name())
-                                .text(question.getContent())
-                                .order(question.getSortOrder())
-                                .weights(weights)
-                                .build();
-        }
+        return DiagnosisQuestionDetail.builder()
+                        .questionId(question.getQuestionId())
+                        .type(question.getQuestionType().name())
+                        .text(question.getContent())
+                        .order(question.getSortOrder())
+                        .weights(weights)
+                        .shortAnswerKey(question.getShortAnswerKey())
+                        .label1(question.getLabel1())
+                        .label2(question.getLabel2())
+                        .label3(question.getLabel3())
+                        .label4(question.getLabel4())
+                        .label5(question.getLabel5())
+                        .score1(question.getScore1())
+                        .score2(question.getScore2())
+                        .score3(question.getScore3())
+                        .score4(question.getScore4())
+                        .score5(question.getScore5())
+                        .build();
+    }
 }

@@ -5,10 +5,13 @@ import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
+import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
+import toast from "react-hot-toast";
 import styles from "./DignosisCreateModal.module.css";
 import type {
   DiagnosisCreatePayload,
+  DiagnosisCreateQuestionPayload,
   DiagnosisQuestion,
   DiagnosisQuestionType,
   DiagnosisScaleOption,
@@ -18,7 +21,7 @@ import type {
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSubmit?: (payload: DiagnosisCreatePayload) => void | Promise<void>;
+  onSubmit?: (payload: DiagnosisCreatePayload) => boolean | Promise<boolean>;
 };
 
 const SCORE_OPTIONS = [1, 2, 3, 4, 5];
@@ -81,14 +84,69 @@ function createDefaultQuestion(): DiagnosisQuestion {
   };
 }
 
+function toNumber(value: string, fallback: number = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function toDateTime(dateValue: string, timeValue: string) {
+  if (!dateValue) return "";
+  if (dateValue.includes("T")) return dateValue;
+  const time = /^\d{2}:\d{2}$/.test(timeValue) ? timeValue : "00:00";
+  return `${dateValue}T${time}:00`;
+}
+
+function buildCreateQuestions(questions: DiagnosisQuestion[]): DiagnosisCreateQuestionPayload[] {
+  return questions.map((q, index) => {
+    const scale = q.scaleOptions ?? [];
+    const base = {
+      order: index + 1,
+      type: q.type,
+      text: q.title,
+      c1: q.csScores.criticalThinking,
+      c2: q.csScores.character,
+      c3: q.csScores.communication,
+      c4: q.csScores.collaboration,
+      c5: q.csScores.creativity,
+      c6: q.csScores.convergence,
+    };
+
+    if (q.type === "SHORT") {
+      return {
+        ...base,
+        shortAnswerKey: q.shortAnswer,
+      };
+    }
+
+    return {
+      ...base,
+      label1: scale[0]?.label ?? "",
+      score1: scale[0]?.score ?? 0,
+      label2: scale[1]?.label ?? "",
+      score2: scale[1]?.score ?? 0,
+      label3: scale[2]?.label ?? "",
+      score3: scale[2]?.score ?? 0,
+      label4: scale[3]?.label ?? "",
+      score4: scale[3]?.score ?? 0,
+      label5: scale[4]?.label ?? "",
+      score5: scale[4]?.score ?? 0,
+    };
+  });
+}
+
 export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
   const { options: deptOptionsRaw, loading: deptLoading } = useDeptsDropdownOptions();
+  const { options: semesterOptionsRaw, loading: semesterLoading } = useSemestersDropdownOptions();
   const deptOptions = useMemo(
     () => [{ value: "All", label: "전체" }, ...deptOptionsRaw],
     [deptOptionsRaw]
   );
 
   const [activeTab, setActiveTab] = useState<"QUESTION" | "ANSWER">("QUESTION");
+  const [title, setTitle] = useState("");
+  const [semesterValue, setSemesterValue] = useState("");
+  const [startedTime, setStartedTime] = useState("09:00");
+  const [endedTime, setEndedTime] = useState("18:00");
   const [deptValue, setDeptValue] = useState("All");
   const [gradeValue, setGradeValue] = useState("");
   const [status, setStatus] = useState("DRAFT");
@@ -99,6 +157,10 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
 
   const resetAll = () => {
     setActiveTab("QUESTION");
+    setTitle("");
+    setSemesterValue("");
+    setStartedTime("09:00");
+    setEndedTime("18:00");
     setDeptValue("All");
     setGradeValue("");
     setStatus("DRAFT");
@@ -176,15 +238,54 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
   };
 
   const handleSubmit = async () => {
+    if (!title.trim()) {
+      toast.error("제목을 입력해 주세요.");
+      return;
+    }
+    if (!semesterValue) {
+      toast.error("학기를 선택해 주세요.");
+      return;
+    }
+    if (!deptValue || deptValue === "All") {
+      toast.error("학과를 선택해 주세요.");
+      return;
+    }
+    if (!gradeValue || gradeValue === "ALL") {
+      toast.error("학년을 선택해 주세요.");
+      return;
+    }
+    if (!startedAt || !endedAt) {
+      toast.error("기간을 선택해 주세요.");
+      return;
+    }
+
+    for (const q of questions) {
+      if (!q.title.trim()) {
+        toast.error("질문의 제목을 넣어주세요.");
+        return;
+      }
+      if (q.type === "SHORT" && !q.shortAnswer.trim()) {
+        toast.error("정답을 작성해주세요.");
+        return;
+      }
+    }
+
     const payload: DiagnosisCreatePayload = {
-      deptValue,
-      gradeValue,
-      startedAt,
-      endedAt,
+      title: title.trim(),
+      semesterId: toNumber(semesterValue),
+      targetGrade: toNumber(gradeValue),
+      deptId: toNumber(deptValue),
+      startedAt: toDateTime(startedAt, startedTime),
+      endedAt: toDateTime(endedAt, endedTime),
       status,
-      questions,
+      questions: buildCreateQuestions(questions),
     };
-    if (onSubmit) await onSubmit(payload);
+    try {
+      const ok = onSubmit ? await onSubmit(payload) : true;
+      if (ok === false) return;
+    } catch {
+      return;
+    }
     setCloseSignal((v) => v + 1);
     onClose();
   };
@@ -254,6 +355,27 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
 
                 <div className={styles.filters}>
                   <div className={styles.filterItem}>
+                    <span className={styles.filterLabel}>제목</span>
+                    <input
+                      className={styles.filterInput}
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="제목"
+                    />
+                  </div>
+
+                  <div className={styles.filterItem}>
+                    <span className={styles.filterLabel}>학기</span>
+                    <Dropdown
+                      value={semesterValue}
+                      options={semesterOptionsRaw}
+                      placeholder="학기"
+                      loading={semesterLoading}
+                      onChange={setSemesterValue}
+                      className={styles.filterDropdown}
+                    />
+                  </div>
+                  <div className={styles.filterItem}>
                     <span className={styles.filterLabel}>학과</span>
                     <Dropdown
                       value={deptValue}
@@ -284,7 +406,13 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
                         onChange={setStartedAt}
                         placeholder="시작일"
                         className={styles.dateInput}
-                        closeSignal={closeSignal}
+                      closeSignal={closeSignal}
+                      />
+                      <input
+                        type="time"
+                        className={styles.timeInput}
+                        value={startedTime}
+                        onChange={(e) => setStartedTime(e.target.value)}
                       />
                       <span className={styles.dateSep}>~</span>
                       <DatePickerInput
@@ -293,7 +421,13 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
                         placeholder="종료일"
                         min={startedAt || undefined}
                         className={styles.dateInput}
-                        closeSignal={closeSignal}
+                      closeSignal={closeSignal}
+                      />
+                      <input
+                        type="time"
+                        className={styles.timeInput}
+                        value={endedTime}
+                        onChange={(e) => setEndedTime(e.target.value)}
                       />
                     </div>
                   </div>
