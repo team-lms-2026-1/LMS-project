@@ -26,6 +26,8 @@ spring:
     enabled: true
     baseline-on-migrate: true
     out-of-order: true # 마이그레이션 순서 유연하게 허용
+    clean-disabled: false # [위험] DB 초기화 기능 활성화 (개발 단계라 허용)
+    clean-on-validation-error: true # 체크섬 불일치 시 자동으로 DB 날리고 다시 시작
 
   # Mail (common defaults)
   mail:
