@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.teamlms.backend.domain.competency.entitiy.DiagnosisTarget;
+import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 import com.teamlms.backend.domain.competency.enums.DiagnosisTargetStatus;
 
 import java.util.List;
@@ -24,6 +25,9 @@ public interface DiagnosisTargetRepository extends JpaRepository<DiagnosisTarget
   // 특정 학생의 모든 진단 대상 내역 조회
   List<DiagnosisTarget> findByStudentAccountId(Long accountId);
 
+  // 특정 진단의 모든 대상자 삭제
+  long deleteByRunRunId(Long runId);
+
   // 특정 진단의 상태별 대상자 수 조회
   long countByRunRunIdAndStatus(Long runId, DiagnosisTargetStatus status);
 
@@ -36,6 +40,18 @@ public interface DiagnosisTargetRepository extends JpaRepository<DiagnosisTarget
           ORDER BY dt.student.accountId
       """)
   List<DiagnosisTarget> findPendingTargetsByRunId(@Param("runId") Long runId);
+
+  @Query("""
+          SELECT dt
+          FROM DiagnosisTarget dt
+          JOIN FETCH dt.run r
+          WHERE dt.student.accountId = :accountId
+            AND r.status = :status
+      """)
+  List<DiagnosisTarget> findByStudentAccountIdAndRunStatus(
+          @Param("accountId") Long accountId,
+          @Param("status") DiagnosisRunStatus status);
+
 
   boolean existsByRunRunIdAndStudentAccountId(Long runId, Long accountId);
 }

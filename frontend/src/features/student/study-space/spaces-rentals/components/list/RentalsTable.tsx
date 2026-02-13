@@ -104,15 +104,22 @@ export default function RentalsTable({
                   )}
 
                   {r.status === "REJECTED" && (
-                    <Button variant="danger" onClick={() => onShowRejectReason(r)}>
-                      반려됨
-                    </Button>
+                    <>
+                      <Button variant="danger" onClick={() => onShowRejectReason(r)}>
+                        반려됨
+                      </Button>
+                    </>
                   )}
 
                   {r.status === "APPROVED" && (
-                    <Button variant="primary" disabled>
-                      허가
-                    </Button>
+                    <>
+                      <Button variant="primary" disabled>
+                        허가
+                      </Button>
+                      <Button variant="secondary" onClick={() => onCancel(r.rentalId)}>
+                        취소하기
+                      </Button>
+                    </>
                   )}
 
                   {r.status === "CANCELLED" && (

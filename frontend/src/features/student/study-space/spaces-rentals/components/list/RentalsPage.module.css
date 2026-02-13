@@ -125,11 +125,33 @@
   min-height: 90px;
 }
 
+.confirmBox {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  background: #fff;
+  color: #111827;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.confirmMain {
+  margin: 0;
+  font-weight: 700;
+}
+
+.confirmSub {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
 .modalBottom {
   padding: 12px 14px;
   border-top: 1px solid #f3f4f6;
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   background: #fff;
 }
 

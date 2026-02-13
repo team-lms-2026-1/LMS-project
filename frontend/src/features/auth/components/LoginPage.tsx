@@ -20,6 +20,7 @@ export default function LoginPage() {
     if (prefix === "s") return "/student/main";
     if (prefix === "p") return "/professor";
     // 예외: 규칙 밖이면 기본값으로 변경
+
     return "/";
   }
 

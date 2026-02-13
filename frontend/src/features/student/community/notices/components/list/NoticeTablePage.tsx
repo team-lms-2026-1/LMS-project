@@ -13,9 +13,12 @@ type Props = {
 
 export function NoticesTable({ items, loading, onEditClick }: Props) {
   const router = useRouter();
+  const goDetail = (id: number) => {
+    router.push(`/student/community/notices/${id}`);
+  };
   const columns: Array<TableColumn<NoticeListItemDto>> = [
-    { header: "번호", align: "left", render: (r) => r.noticeId },
-    { header: "분류", align: "left", render: (r) => {
+    { header: "번호", align: "center", render: (r) => r.noticeId },
+    { header: "분류", align: "center", render: (r) => {
         const c = r.category;
         if (!c) return "미분류"; // ✅ null/undefined 방어
         return (
@@ -33,7 +36,10 @@ export function NoticesTable({ items, loading, onEditClick }: Props) {
         <button
           type="button"
           className={styles.titleLink}
-          onClick={() => router.push(`/student/community/notices/${r.noticeId}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            goDetail(r.noticeId);
+          }}
         >
           {r.title}
         </button>
@@ -51,6 +57,7 @@ export function NoticesTable({ items, loading, onEditClick }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.noticeId}
       emptyText="공지사항이 없습니다."
+      onRowClick={(r) => goDetail(r.noticeId)}
     />
   );
 }

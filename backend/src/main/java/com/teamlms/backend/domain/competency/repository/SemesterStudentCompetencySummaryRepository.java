@@ -26,6 +26,9 @@ public interface SemesterStudentCompetencySummaryRepository
         // 특정 학기의 모든 학생 요약 조회
         List<SemesterStudentCompetencySummary> findBySemesterSemesterId(Long semesterId);
 
+        // 특정 학기의 모든 학생 요약 삭제
+        void deleteBySemesterSemesterId(Long semesterId);
+
         // 특정 학생의 전체 학기 역량 이력 조회
         List<SemesterStudentCompetencySummary> findByStudentAccountId(Long studentAccountId);
 

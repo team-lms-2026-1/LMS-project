@@ -15,7 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       {children}
-      {mounted && <Toaster position="top-center" />}
+      {mounted && <Toaster position="top-center" containerStyle={{ zIndex: 99999 }} />}
     </AuthProvider>
   );
 }

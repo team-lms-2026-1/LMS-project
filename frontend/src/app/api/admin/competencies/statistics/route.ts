@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
+import { proxyToBackend } from "@/lib/bff";
 
-export async function GET() {
-  return NextResponse.json({ message: "API 준비중" });
-}
-
-export async function POST() {
-  return NextResponse.json({ message: "API 준비중" });
+export async function GET(req: Request) {
+  return proxyToBackend(req, "/api/v1/admin/competencies/statistics", {
+    method: "GET",
+    cache: "no-store",
+  });
 }

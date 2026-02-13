@@ -1,5 +1,6 @@
-import CompetencyGuidePage from "@/features/competencies/components/CompetencyGuidePage";
+import CompetencyPageClient from "@/features/competencies/main/components/CompetencyPage.client";
 
 export default function Page() {
-  return <CompetencyGuidePage />;
+  return <CompetencyPageClient />;
+
 }

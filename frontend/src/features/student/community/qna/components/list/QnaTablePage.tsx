@@ -13,6 +13,9 @@ type Props = {
 
 export function QnaTable({ items, loading, onEditClick }: Props) {
   const router = useRouter();
+  const goDetail = (id: number) => {
+    router.push(`/student/community/qna/questions/${id}`);
+  };
   const columns: Array<TableColumn<QnaListItemDto>> = [
     { header: "번호", align: "center", render: (r) => r.questionId },
     { header: "분류", align: "center", render: (r) => {
@@ -33,7 +36,10 @@ export function QnaTable({ items, loading, onEditClick }: Props) {
         <button
           type="button"
           className={styles.titleLink}
-          onClick={() => router.push(`/student/community/qna/questions/${r.questionId}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            goDetail(r.questionId);
+          }}
         >
           {r.title}
         </button>
@@ -51,6 +57,7 @@ export function QnaTable({ items, loading, onEditClick }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.questionId}
       emptyText="Q&A가 없습니다."
+      onRowClick={(r) => goDetail(r.questionId)}
     />
   );
 }

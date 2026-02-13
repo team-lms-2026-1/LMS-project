@@ -99,3 +99,12 @@ export type SuccessResponse = ApiResponse<{ success: boolean }, null>;
 export type QnaListResponse = ApiResponse<QnaListItemDto[], PageMeta>;
 export type QnaDetailResponse = ApiResponse<QnaDetailDto, null>;
 export type QnaCategoryListResponse = ApiResponse<Category[], null>;
+
+export type QnaDeleteModalProps = {
+  open: boolean;
+  targetLabel?: string;
+  targetTitle?: string;
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+  loading?: boolean;
+};

@@ -2,6 +2,7 @@ import { proxyToBackend,proxyStreamToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "admin:faqs";
+const STUDENT_TAG = "student:faqs";
 
 // ✅ Next route params는 string
 type Ctx = { params: { faqId: string } };
@@ -32,7 +33,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }
 
@@ -50,6 +54,9 @@ export async function DELETE(req: Request, ctx: Ctx) {
     cache: "no-store",
   });
 
-  if (res.ok) revalidateTag(TAG);
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
   return res;
 }

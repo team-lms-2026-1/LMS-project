@@ -13,6 +13,9 @@ type Props = {
 
 export function FaqTable({ items, loading, onEditClick }: Props) {
   const router = useRouter();
+  const goDetail = (id: number) => {
+    router.push(`/student/community/faqs/${id}`);
+  };
   const columns: Array<TableColumn<FaqListItemDto>> = [
     { header: "번호", align: "center", render: (r) => r.faqId },
     { header: "분류", align: "center", render: (r) => {
@@ -33,7 +36,10 @@ export function FaqTable({ items, loading, onEditClick }: Props) {
         <button
           type="button"
           className={styles.titleLink}
-          onClick={() => router.push(`/student/community/faqs/${r.faqId}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            goDetail(r.faqId);
+          }}
         >
           {r.title}
         </button>
@@ -51,6 +57,7 @@ export function FaqTable({ items, loading, onEditClick }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.faqId}
       emptyText="FAQ가 없습니다."
+      onRowClick={(r) => goDetail(r.faqId)}
     />
   );
 }

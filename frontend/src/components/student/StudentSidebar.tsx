@@ -51,9 +51,9 @@ const SECTIONS: NavSection[] = [
     key: "competency",
     title: "역량진단",
     items: [
-      { label: "안내", href: "/student/competency/guide" },
-      { label: "진단목록", href: "/student/competency" },
-      { label: "결과 조회", href: "/student/competency/results" },
+      { label: "6cs 란", href: "/student/competencies/introduce" },
+      { label: "진단목록", href: "/student/competencies/dignosis" },
+      { label: "결과 조회", href: "/student/competencies/result" },
     ],
   },
   {

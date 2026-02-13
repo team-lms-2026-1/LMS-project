@@ -10,6 +10,7 @@ type Ctx = { params: { rentalId: string } };
 
 /** ✅ 태그는 하나만 */
 const TAG = "student:rentals";
+const ADMIN_TAG = "admin:spaces-rentals";
 
 function withId(ctx: Ctx) {
   return `${BACKEND_BASE}/${encodeURIComponent(ctx.params.rentalId)}`;
@@ -37,6 +38,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
   if (res.status >= 200 && res.status < 300) {
     revalidateTag(TAG);
+    revalidateTag(ADMIN_TAG);
   }
 
   return res;
