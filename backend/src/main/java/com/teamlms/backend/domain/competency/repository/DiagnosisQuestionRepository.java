@@ -7,6 +7,10 @@ import org.springframework.data.repository.query.Param;
 import com.teamlms.backend.domain.competency.entitiy.DiagnosisQuestion;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface DiagnosisQuestionRepository extends JpaRepository<DiagnosisQuestion, Long> {
 
@@ -14,8 +18,8 @@ public interface DiagnosisQuestionRepository extends JpaRepository<DiagnosisQues
   List<DiagnosisQuestion> findByRunRunIdOrderBySortOrderAsc(Long runId);
 
   // 특정 진단의 문항 삭제
-  @org.springframework.data.jpa.repository.Modifying
-  @org.springframework.transaction.annotation.Transactional
+  @Modifying
+  @Transactional
   @Query("DELETE FROM DiagnosisQuestion dq WHERE dq.run.runId = :runId")
   void deleteByRunRunId(@Param("runId") Long runId);
 
@@ -29,7 +33,7 @@ public interface DiagnosisQuestionRepository extends JpaRepository<DiagnosisQues
           WHERE dq.run.runId = :runId
             AND dq.sortOrder = :sortOrder
       """)
-  java.util.Optional<DiagnosisQuestion> findByRunIdAndSortOrder(
+  Optional<DiagnosisQuestion> findByRunIdAndSortOrder(
       @Param("runId") Long runId,
       @Param("sortOrder") Integer sortOrder);
 }

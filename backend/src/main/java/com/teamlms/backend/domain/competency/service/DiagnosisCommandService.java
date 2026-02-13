@@ -2,22 +2,31 @@ package com.teamlms.backend.domain.competency.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.validation.Valid;
 
 import com.teamlms.backend.domain.competency.entitiy.DiagnosisRun;
 import com.teamlms.backend.domain.competency.entitiy.DiagnosisQuestion;
 import com.teamlms.backend.domain.competency.entitiy.DiagnosisTarget;
+import com.teamlms.backend.domain.competency.entitiy.DiagnosisSubmission;
+import com.teamlms.backend.domain.competency.entitiy.DiagnosisAnswer;
 import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 import com.teamlms.backend.domain.competency.enums.DiagnosisTargetStatus;
 import com.teamlms.backend.domain.competency.repository.DiagnosisRunRepository;
 import com.teamlms.backend.domain.competency.repository.DiagnosisQuestionRepository;
 import com.teamlms.backend.domain.competency.repository.DiagnosisTargetRepository;
 import com.teamlms.backend.domain.competency.repository.DiagnosisSubmissionRepository;
+import com.teamlms.backend.domain.competency.repository.DiagnosisAnswerRepository;
 import com.teamlms.backend.domain.semester.entity.Semester;
 import com.teamlms.backend.domain.semester.repository.SemesterRepository;
+import com.teamlms.backend.domain.account.entity.StudentProfile;
+import com.teamlms.backend.domain.account.enums.AcademicStatus;
+import com.teamlms.backend.domain.account.repository.StudentProfileRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,15 +49,15 @@ public class DiagnosisCommandService {
     private final DiagnosisQuestionRepository diagnosisQuestionRepository;
     private final DiagnosisTargetRepository diagnosisTargetRepository;
     private final DiagnosisSubmissionRepository diagnosisSubmissionRepository;
-    private final com.teamlms.backend.domain.competency.repository.DiagnosisAnswerRepository diagnosisAnswerRepository;
+    private final DiagnosisAnswerRepository diagnosisAnswerRepository;
     private final SemesterRepository semesterRepository;
-    private final com.teamlms.backend.domain.account.repository.StudentProfileRepository studentProfileRepository;
-    private final com.teamlms.backend.domain.competency.service.CompetencySummaryService competencySummaryService;
+    private final StudentProfileRepository studentProfileRepository;
+    private final CompetencySummaryService competencySummaryService;
 
     /**
      * 진단지 생성 (DTO 버전)
      */
-    public Long createDiagnosis(@jakarta.validation.Valid DiagnosisCreateRequest req) {
+    public Long createDiagnosis(@Valid DiagnosisCreateRequest req) {
         List<QuestionCreateData> questions = mapToQuestionCreateData(req.getProblems(), req.getQuestions());
 
         return createDiagnosis(
@@ -202,7 +211,7 @@ public class DiagnosisCommandService {
      * 학생 진단 제출
      */
     public void submitDiagnosis(Long diagnosisId, Long accountId,
-            com.teamlms.backend.domain.competency.api.dto.DiagnosisSubmitRequest req) {
+            DiagnosisSubmitRequest req) {
         // 1. 참여 대상 및 상태 확인
         DiagnosisTarget target = diagnosisTargetRepository.findByRunRunIdAndStudentAccountId(diagnosisId, accountId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.DIAGNOSIS_NOT_FOUND, diagnosisId));
@@ -213,7 +222,7 @@ public class DiagnosisCommandService {
         }
 
         // 2. 제출 정보 생성
-        com.teamlms.backend.domain.competency.entitiy.DiagnosisSubmission submission = com.teamlms.backend.domain.competency.entitiy.DiagnosisSubmission
+        DiagnosisSubmission submission = DiagnosisSubmission
                 .builder()
                 .run(target.getRun())
                 .student(target.getStudent())
@@ -228,20 +237,20 @@ public class DiagnosisCommandService {
                 .stream().collect(java.util.stream.Collectors.toMap(DiagnosisQuestion::getQuestionId,
                         java.util.function.Function.identity()));
 
-        for (com.teamlms.backend.domain.competency.api.dto.DiagnosisSubmitRequest.AnswerSubmitItem item : req
+        for (DiagnosisSubmitRequest.AnswerSubmitItem item : req
                 .getAnswers()) {
             DiagnosisQuestion question = questionMap.get(item.getQuestionId());
             if (question == null)
                 continue;
 
             Boolean isCorrect = null;
-            if (question.getQuestionType() == com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType.SHORT) {
+            if (question.getQuestionType() == DiagnosisQuestionType.SHORT) {
                 String studentAns = item.getShortText() != null ? item.getShortText().trim() : "";
                 String correctAns = question.getShortAnswerKey() != null ? question.getShortAnswerKey().trim() : "";
                 isCorrect = !correctAns.isEmpty() && correctAns.equalsIgnoreCase(studentAns);
             }
 
-            com.teamlms.backend.domain.competency.entitiy.DiagnosisAnswer answer = com.teamlms.backend.domain.competency.entitiy.DiagnosisAnswer
+            DiagnosisAnswer answer = DiagnosisAnswer
                     .builder()
                     .submission(submission)
                     .question(question)
@@ -272,9 +281,9 @@ public class DiagnosisCommandService {
 
     private void generateTargets(DiagnosisRun diagnosisRun) {
         // 재학 중인(ENROLLED) 학생 중 조건에 맞는 학생 대상 생성
-        List<com.teamlms.backend.domain.account.entity.StudentProfile> studentProfiles = studentProfileRepository
+        List<StudentProfile> studentProfiles = studentProfileRepository
                 .findAll().stream()
-                .filter(p -> p.getAcademicStatus() == com.teamlms.backend.domain.account.enums.AcademicStatus.ENROLLED)
+                .filter(p -> p.getAcademicStatus() == AcademicStatus.ENROLLED)
                 // 학년 필터 (null이면 전체)
                 .filter(p -> diagnosisRun.getTargetGrade() == null || diagnosisRun.getTargetGrade() == 0
                         || p.getGradeLevel().equals(diagnosisRun.getTargetGrade()))
@@ -282,7 +291,7 @@ public class DiagnosisCommandService {
                 .filter(p -> diagnosisRun.getDeptId() == null || p.getDeptId().equals(diagnosisRun.getDeptId()))
                 .collect(java.util.stream.Collectors.toList());
 
-        for (com.teamlms.backend.domain.account.entity.StudentProfile profile : studentProfiles) {
+        for (StudentProfile profile : studentProfiles) {
             // 이미 존재하는지 확인
             if (diagnosisTargetRepository.existsByRunRunIdAndStudentAccountId(diagnosisRun.getRunId(),
                     profile.getAccount().getAccountId())) {
@@ -594,11 +603,11 @@ public class DiagnosisCommandService {
 
     // === Inner Classes for Data Transfer ===
 
-    @lombok.Getter
-    @lombok.Builder
+    @Getter
+    @Builder
     public static class QuestionCreateData {
-        private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain domain;
-        private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType questionType;
+        private DiagnosisQuestionDomain domain;
+        private DiagnosisQuestionType questionType;
         private String sectionTitle;
         private String text;
         private Integer order;
@@ -623,11 +632,11 @@ public class DiagnosisCommandService {
         private Integer score5;
     }
 
-    @lombok.Getter
-    @lombok.Builder
+    @Getter
+    @Builder
     public static class QuestionUpdateData {
-        private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain domain;
-        private com.teamlms.backend.domain.competency.enums.DiagnosisQuestionType questionType;
+        private DiagnosisQuestionDomain domain;
+        private DiagnosisQuestionType questionType;
         private String sectionTitle;
         private String text;
         private Integer order;

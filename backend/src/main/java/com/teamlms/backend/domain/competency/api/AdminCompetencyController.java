@@ -50,8 +50,9 @@ public class AdminCompetencyController {
     @PreAuthorize("hasAuthority('DIAGNOSIS_READ')")
     public ApiResponse<StudentCompetencyDashboardResponse> getStudentDashboard(
             @PathVariable Long studentId,
-            @RequestParam(required = false) Long semesterId) {
-        return ApiResponse.ok(competencyQueryService.getStudentDashboard(studentId, semesterId));
+            @RequestParam(required = false) Long semesterId,
+            @RequestParam(defaultValue = "STUDENT") String trendMode) {
+        return ApiResponse.ok(competencyQueryService.getStudentDashboard(studentId, semesterId, trendMode));
     }
 
     /**

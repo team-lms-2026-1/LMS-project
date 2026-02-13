@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
+import com.teamlms.backend.domain.account.entity.StudentProfile;
 import com.teamlms.backend.domain.account.repository.StudentProfileRepository;
 import com.teamlms.backend.domain.competency.entitiy.*;
 import com.teamlms.backend.domain.competency.enums.DiagnosisQuestionDomain;
@@ -18,6 +19,7 @@ import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularAppl
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingCompetencyMapRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionCompletionRepository;
+import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSessionCompletion;
 import com.teamlms.backend.domain.semester.entity.Semester;
 import com.teamlms.backend.domain.semester.repository.SemesterRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
@@ -264,7 +266,7 @@ public class CompetencySummaryService {
                                         .collect(Collectors.toList());
                 } else {
                         studentIds = studentProfileRepository.findAll().stream()
-                                        .map(com.teamlms.backend.domain.account.entity.StudentProfile::getAccountId)
+                                        .map(StudentProfile::getAccountId)
                                         .collect(Collectors.toList());
                 }
 
@@ -345,7 +347,7 @@ public class CompetencySummaryService {
 
                                         if (weightMap.isPresent()) {
                                                 long totalPoints = completionList.stream()
-                                                                .mapToLong(com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSessionCompletion::getEarnedPoint)
+                                                                .mapToLong(ExtraCurricularSessionCompletion::getEarnedPoint)
                                                                 .sum();
 
                                                 extra = extra.add(
