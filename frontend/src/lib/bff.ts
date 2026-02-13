@@ -21,7 +21,7 @@ type StreamProxyOptions = {
   upstreamPath: string;
 };
 
-function resolveBaseUrl() {
+export function resolveBaseUrl() {
   return process.env.API_BASE_URL ?? process.env.ADMIN_API_BASE_URL ?? "http://localhost:8080";
 }
 

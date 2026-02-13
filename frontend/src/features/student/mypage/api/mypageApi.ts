@@ -1,4 +1,5 @@
 import { getJson } from "@/lib/http";
+import { resolveBaseUrl } from "@/lib/bff";
 import { StudentMypageResponse, ApiResponse } from "./types";
 import { cookies } from "next/headers";
 
@@ -13,7 +14,8 @@ export class MypageApi {
 
         const queryString = queryParams.toString();
         // Server-side call needs absolute URL to backend
-        const url = `http://localhost:8080/api/v1/student/mypage${queryString ? `?${queryString}` : ""}`;
+        const baseUrl = resolveBaseUrl();
+        const url = `${baseUrl}/api/v1/student/mypage${queryString ? `?${queryString}` : ""}`;
 
         const cookieStore = cookies();
         const accessToken = cookieStore.get("access_token")?.value;
