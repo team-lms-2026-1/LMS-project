@@ -10,6 +10,8 @@ import com.teamlms.backend.domain.study_rental.entity.StudyRoomRental;
 import com.teamlms.backend.domain.study_rental.enums.RentalStatus;
 import com.teamlms.backend.domain.study_rental.repository.StudyRoomRentalRepository;
 import com.teamlms.backend.domain.study_rental.repository.StudyRoomRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class StudyRentalCommandService {
     private final StudyRoomRentalRepository rentalRepository;
     private final StudyRoomRepository roomRepository;
     private final AccountRepository accountRepository; // 신청자/처리자 조회용
+    private final AlarmCommandService alarmCommandService;
 
     // 1. 예약 신청
     public void applyRental(Object principal, RentalApplyRequest req) {
@@ -80,6 +84,8 @@ public class StudyRentalCommandService {
         StudyRoomRental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND));
 
+        RentalStatus previousStatus = rental.getStatus();
+
         if (req.getStatus() == RentalStatus.APPROVED) {
             boolean isOverlapped = !rentalRepository.findOverlappingRentals(
                     rental.getStudyRoom().getId(),
@@ -92,6 +98,10 @@ public class StudyRentalCommandService {
             }
         }
         rental.process(req.getStatus(), processor, req.getRejectionReason());
+
+        if (previousStatus != RentalStatus.APPROVED && req.getStatus() == RentalStatus.APPROVED) {
+            notifyRentalApproved(rental);
+        }
     }
 
     // 3. 예약 취소 (수정됨: Principal 직접 받음)
@@ -137,5 +147,65 @@ public class StudyRentalCommandService {
         }
 
         throw new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND);
+    }
+
+    private void notifyRentalApproved(StudyRoomRental rental) {
+        if (rental == null || rental.getApplicant() == null) {
+            return;
+        }
+
+        Long recipientId = rental.getApplicant().getAccountId();
+        if (recipientId == null) {
+            return;
+        }
+
+        String title = "학습공간";
+        String spaceName = rental.getStudyRoom() != null && rental.getStudyRoom().getStudySpace() != null
+                ? rental.getStudyRoom().getStudySpace().getSpaceName()
+                : "학습공간";
+        String roomName = rental.getStudyRoom() != null ? rental.getStudyRoom().getRoomName() : "";
+
+        String period = formatRentalPeriod(rental.getStartAt(), rental.getEndAt());
+        StringBuilder details = new StringBuilder(spaceName);
+        if (roomName != null && !roomName.isBlank()) {
+            details.append(" / ").append(roomName);
+        }
+        if (!period.isBlank()) {
+            details.append(" / ").append(period);
+        }
+
+        String message = "학습공간 대여가 승인되었습니다.";
+        if (details.length() > 0) {
+            message = message + " (" + details + ")";
+        }
+
+        String linkUrl = "/study-space/spaces-rentals";
+
+        alarmCommandService.createAlarm(
+                recipientId,
+                AlarmType.STUDY_RENTAL_APPROVED,
+                title,
+                message,
+                linkUrl);
+    }
+
+    private String formatRentalPeriod(LocalDateTime startAt, LocalDateTime endAt) {
+        if (startAt == null || endAt == null) {
+            return "";
+        }
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        String startDate = startAt.toLocalDate().format(dateFormatter);
+        String endDate = endAt.toLocalDate().format(dateFormatter);
+        String startTime = startAt.toLocalTime().format(timeFormatter);
+        String endTime = endAt.toLocalTime().format(timeFormatter);
+
+        if (startDate.equals(endDate)) {
+            return startDate + " " + startTime + "~" + endTime;
+        }
+
+        return startDate + " " + startTime + " ~ " + endDate + " " + endTime;
     }
 }

@@ -21,6 +21,7 @@ import com.teamlms.backend.domain.mentoring.repository.MentoringMatchingReposito
 import com.teamlms.backend.domain.mentoring.repository.MentoringRecruitmentRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringQuestionRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringAnswerRepository;
+import com.teamlms.backend.domain.mentoring.enums.MentoringRole;
 import com.teamlms.backend.domain.alarm.enums.AlarmType;
 import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.domain.account.entity.Account;
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -176,14 +178,27 @@ public class MentoringCommandService {
         // TODO: Validate adminId (권한 체크)
 
         MentoringApplicationStatus newStatus = request.getStatus();
-        if (newStatus == MentoringApplicationStatus.REJECTED
-                && (request.getRejectReason() == null || request.getRejectReason().isBlank())) {
+        MentoringApplicationStatus currentStatus = application.getStatus();
+        String currentReason = normalizeReason(application.getRejectReason());
+        String nextReason = normalizeReason(request.getRejectReason());
+        boolean shouldNotify = true;
+
+        if (currentStatus == newStatus) {
+            if (newStatus != MentoringApplicationStatus.REJECTED || Objects.equals(currentReason, nextReason)) {
+                return;
+            }
+            shouldNotify = false;
+        }
+
+        if (newStatus == MentoringApplicationStatus.REJECTED && nextReason == null) {
             throw new IllegalArgumentException("Reject reason is required for rejection.");
         }
 
-        application.updateStatus(newStatus, request.getRejectReason(), adminId);
+        application.updateStatus(newStatus, nextReason, adminId);
 
-        notifyApplicationStatus(application);
+        if (shouldNotify) {
+            notifyApplicationStatus(application);
+        }
     }
 
     public void createQuestion(Long writerId, MentoringQuestionRequest request) {
@@ -208,6 +223,9 @@ public class MentoringCommandService {
                 .build();
 
         questionRepository.save(question);
+
+        Long recipientId = resolveChatRecipient(mentorApp, menteeApp, writerId);
+        sendMentoringChatAlarm(recipientId, matching.getMatchingId(), writerId);
     }
 
     public void createAnswer(Long writerId, MentoringAnswerRequest request) {
@@ -233,8 +251,7 @@ public class MentoringCommandService {
                 .build();
 
         answerRepository.save(answer);
-
-        notifyQuestionAnswered(question, matching, writerId);
+        sendMentoringChatAlarm(question.getWriterId(), matching.getMatchingId(), writerId);
     }
 
     private void notifyNewApplication(MentoringApplication application, MentoringRecruitment recruitment,
@@ -245,9 +262,10 @@ public class MentoringCommandService {
         }
 
         String applicantName = applicant != null ? applicant.getLoginId() : "User";
-        String title = "Mentoring application";
-        String message = applicantName + " applied for '" + recruitment.getTitle() + "' as "
-                + application.getRole().name() + ".";
+        String title = "멘토링";
+        String roleLabel = application.getRole() == MentoringRole.MENTOR ? "멘토" : "멘티";
+        String message = String.format("%s님이 '%s' 멘토링에 %s로 신청했습니다.",
+                applicantName, recruitment.getTitle(), roleLabel);
         String linkUrl = "/admin/mentoring/recruitments/" + recruitment.getRecruitmentId() + "/applications";
 
         for (Account admin : admins) {
@@ -266,19 +284,19 @@ public class MentoringCommandService {
             return;
         }
 
-        String title = "Mentoring application status";
+        String title = "멘토링";
         String message = switch (application.getStatus()) {
-            case APPROVED -> "Your mentoring application was approved.";
+            case APPROVED -> "멘토링 신청이 승인되었습니다.";
             case REJECTED -> {
                 String reason = application.getRejectReason();
                 if (reason == null || reason.isBlank()) {
-                    yield "Your mentoring application was rejected.";
+                    yield "멘토링 신청이 반려되었습니다.";
                 }
-                yield "Your mentoring application was rejected. Reason: " + reason;
+                yield "멘토링 신청이 반려되었습니다. 사유: " + reason;
             }
-            case MATCHED -> "Your mentoring application was matched.";
-            case CANCELED -> "Your mentoring application was canceled.";
-            case APPLIED -> "Your mentoring application was received.";
+            case MATCHED -> "멘토링이 매칭되었습니다.";
+            case CANCELED -> "멘토링 신청이 취소되었습니다.";
+            case APPLIED -> "멘토링 신청이 접수되었습니다.";
         };
 
         String linkUrl = "/mentoring/recruitments/" + application.getRecruitmentId();
@@ -291,21 +309,45 @@ public class MentoringCommandService {
                 linkUrl);
     }
 
-    private void notifyQuestionAnswered(MentoringQuestion question, MentoringMatching matching, Long actorId) {
-        Long recipientId = question.getWriterId();
-        if (recipientId == null || recipientId.equals(actorId)) {
+    private Long resolveChatRecipient(MentoringApplication mentorApp, MentoringApplication menteeApp, Long senderId) {
+        if (senderId == null || mentorApp == null || menteeApp == null) {
+            return null;
+        }
+
+        Long mentorId = mentorApp.getAccountId();
+        Long menteeId = menteeApp.getAccountId();
+
+        if (senderId.equals(mentorId)) {
+            return menteeId;
+        }
+        if (senderId.equals(menteeId)) {
+            return mentorId;
+        }
+        return null;
+    }
+
+    private void sendMentoringChatAlarm(Long recipientId, Long matchingId, Long senderId) {
+        if (recipientId == null || senderId == null || recipientId.equals(senderId)) {
             return;
         }
 
-        String title = "Mentoring answer";
-        String message = "Your mentoring question has been answered.";
-        String linkUrl = "/mentoring/matchings/" + matching.getMatchingId() + "/chat";
+        String title = "멘토링";
+        String message = "멘토링 채팅 메시지가 도착했습니다.";
+        String linkUrl = "/mentoring/matchings/" + matchingId + "/chat";
 
         alarmCommandService.createAlarm(
                 recipientId,
-                AlarmType.MENTORING_QUESTION_ANSWERED,
+                AlarmType.MENTORING_CHAT_MESSAGE,
                 title,
                 message,
                 linkUrl);
+    }
+
+    private String normalizeReason(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

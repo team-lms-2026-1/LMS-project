@@ -198,6 +198,12 @@
   border-color: #fed7aa;
 }
 
+.itemBadgeStudy {
+  color: #0f766e;
+  background: #ccfbf1;
+  border-color: #99f6e4;
+}
+
 .itemMessage {
   font-size: 12px;
   color: #374151;

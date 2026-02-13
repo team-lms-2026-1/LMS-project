@@ -57,6 +57,10 @@ export default function NoticePageClient() {
         const res = await fetchNoticeCategories();
         if (!alive) return;
         setCategories(res.data ?? []);
+      } catch (e) {
+        if (!alive) return;
+        console.error("[NoticePage] fetchNoticeCategories failed", e);
+        setCategories([]);
       } finally {
         if (alive) setCatsLoading(false);
       }
