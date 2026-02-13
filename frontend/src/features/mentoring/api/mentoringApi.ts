@@ -63,43 +63,45 @@ export async function matchMentoring(data: MentoringMatchingRequest) {
 
 /** User (Student/Professor) API */
 
+type UserRole = "student" | "professor";
+
 // 모집 공고 목록 조회
-export async function fetchRecruitments(params: { page?: number; size?: number; keyword?: string; status?: string }) {
+export async function fetchRecruitments(userRole: UserRole, params: { page?: number; size?: number; keyword?: string; status?: string }) {
     const qs = new URLSearchParams();
     if (params.page !== undefined) qs.set("page", String(params.page));
     if (params.size) qs.set("size", String(params.size));
     if (params.keyword) qs.set("keyword", params.keyword);
     if (params.status) qs.set("status", params.status);
 
-    return getJson<MentoringRecruitmentListResponse>(`/api/mentoring/recruitments?${qs.toString()}`);
+    return getJson<MentoringRecruitmentListResponse>(`/api/${userRole}/mentoring/recruitments?${qs.toString()}`);
 }
 
 // 모집 공고 상세 조회
-export async function fetchRecruitment(id: number) {
-    return getJson<MentoringRecruitmentDetailResponse>(`/api/mentoring/recruitments/${id}`);
+export async function fetchRecruitment(userRole: UserRole, id: number) {
+    return getJson<MentoringRecruitmentDetailResponse>(`/api/${userRole}/mentoring/recruitments/${id}`);
 }
 
 // 멘토링 신청
-export async function applyMentoring(data: MentoringApplicationRequest) {
-    return postJson<SuccessResponse>(`/api/mentoring/applications`, data);
+export async function applyMentoring(userRole: UserRole, data: MentoringApplicationRequest) {
+    return postJson<SuccessResponse>(`/api/${userRole}/mentoring/applications`, data);
 }
 
 // 내 매칭 목록 조회
-export async function fetchMyMatchings() {
-    return getJson<MentoringMatchingListResponse>(`/api/mentoring/matchings`);
+export async function fetchMyMatchings(userRole: UserRole) {
+    return getJson<MentoringMatchingListResponse>(`/api/${userRole}/mentoring/matchings`);
 }
 
 // 채팅 내역 조회
-export async function fetchChatHistory(matchingId: number) {
-    return getJson<ChatHistoryResponse>(`/api/mentoring/matchings/${matchingId}/chat`);
+export async function fetchChatHistory(userRole: UserRole, matchingId: number) {
+    return getJson<ChatHistoryResponse>(`/api/${userRole}/mentoring/matchings/${matchingId}/chat`);
 }
 
 // 질문 등록
-export async function sendQuestion(data: { matchingId: number; content: string }) {
-    return postJson<SuccessResponse>(`/api/mentoring/questions`, data);
+export async function sendQuestion(userRole: UserRole, data: { matchingId: number; content: string }) {
+    return postJson<SuccessResponse>(`/api/${userRole}/mentoring/questions`, data);
 }
 
 // 답변 등록
-export async function sendAnswer(data: { questionId: number; content: string }) {
-    return postJson<SuccessResponse>(`/api/mentoring/answers`, data);
+export async function sendAnswer(userRole: UserRole, data: { questionId: number; content: string }) {
+    return postJson<SuccessResponse>(`/api/${userRole}/mentoring/answers`, data);
 }

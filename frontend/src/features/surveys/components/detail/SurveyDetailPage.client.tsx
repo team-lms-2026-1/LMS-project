@@ -7,7 +7,8 @@ import { Button } from "@/components/button";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import styles from "./SurveyDetailPage.client.module.css";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 
 interface Props {
     id: string;
@@ -33,13 +34,24 @@ export default function SurveyDetailPageClient({ id }: Props) {
         });
     };
 
+    const typeOptions = useMemo(() => {
+        return state.surveyTypes.map((t) => ({
+            value: t.typeCode,
+            label: t.typeName,
+        }));
+    }, [state.surveyTypes]);
+
     return (
         <div className={styles.page}>
             <div className={styles.topBar}>
                 <div className={styles.title}>{isNew ? "새 설문 등록" : "설문 수정"}</div>
-                <button className={styles.backBtn} type="button" onClick={() => router.back()}>
+                <Button
+                    variant="secondary"
+                    onClick={() => router.back()}
+                    style={{ height: '36px', fontSize: '14px', padding: '0 12px' }}
+                >
                     목록으로 →
-                </button>
+                </Button>
             </div>
 
             <div className={styles.body}>
@@ -48,17 +60,14 @@ export default function SurveyDetailPageClient({ id }: Props) {
                     <div className={styles.formGrid}>
                         <div className={styles.formGroup}>
                             <label className={styles.label}>설문 유형</label>
-                            <select
-                                className={styles.input}
+                            <Dropdown
                                 value={state.surveyType}
-                                onChange={(e) => actions.setSurveyType(e.target.value)}
-                            >
-                                {state.surveyTypes.map((t) => (
-                                    <option key={t.typeCode} value={t.typeCode}>
-                                        {t.typeName}
-                                    </option>
-                                ))}
-                            </select>
+                                options={typeOptions}
+                                onChange={(val) => {
+                                    if (val !== "") actions.setSurveyType(val);
+                                }}
+                                placeholder="유형 선택"
+                            />
                         </div>
                         <div className={styles.formGroupFull}>
                             <label className={styles.label}>설문 제목</label>

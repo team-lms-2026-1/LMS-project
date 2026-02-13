@@ -9,6 +9,7 @@ import com.teamlms.backend.global.security.principal.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentCreateRequest;
@@ -16,6 +17,7 @@ import com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentCreateRe
 @RestController
 @RequestMapping("/api/v1/admin/mentoring")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('MENTORING_MANAGE')")
 public class MentoringAdminController {
 
     private final MentoringCommandService commandService;
@@ -26,7 +28,7 @@ public class MentoringAdminController {
     public ApiResponse<Long> createRecruitment(
             @AuthenticationPrincipal AuthUser admin,
             @RequestBody @Valid MentoringRecruitmentCreateRequest request) {
-        Long id = commandService.createRecruitment(admin.getAccountId(), request);
+        Long id = commandService.createRecruitment(request);
         return ApiResponse.ok(id);
     }
 
@@ -36,7 +38,7 @@ public class MentoringAdminController {
             @AuthenticationPrincipal AuthUser admin,
             @PathVariable Long id,
             @RequestBody @Valid com.teamlms.backend.domain.mentoring.api.dto.MentoringRecruitmentUpdateRequest request) {
-        commandService.updateRecruitment(admin.getAccountId(), id, request);
+        commandService.updateRecruitment(id, request);
         return ApiResponse.ok(new SuccessResponse());
     }
 
@@ -45,7 +47,7 @@ public class MentoringAdminController {
     public ApiResponse<SuccessResponse> deleteRecruitment(
             @AuthenticationPrincipal AuthUser admin,
             @PathVariable Long id) {
-        commandService.deleteRecruitment(admin.getAccountId(), id);
+        commandService.deleteRecruitment(id);
         return ApiResponse.ok(new SuccessResponse());
     }
 

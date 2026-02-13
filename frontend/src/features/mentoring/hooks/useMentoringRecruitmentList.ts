@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchRecruitments } from "../api/mentoringApi";
+import { fetchAdminRecruitments } from "../api/mentoringApi";
 import { MentoringRecruitment, PageMeta } from "../api/types";
 
 export const useMentoringRecruitmentList = (pageSize: number = 10) => {
@@ -14,7 +14,7 @@ export const useMentoringRecruitmentList = (pageSize: number = 10) => {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetchRecruitments({
+            const res = await fetchAdminRecruitments({
                 page: page - 1,
                 size: pageSize,
                 keyword: searchKeyword,

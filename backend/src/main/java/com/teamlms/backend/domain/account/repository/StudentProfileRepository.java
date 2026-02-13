@@ -23,15 +23,16 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
               s.name,
               s.gradeLevel,
               s.academicStatus,
-              m.majorName
+              m.majorName,
+              s.email
           )
           from StudentProfile s
-            join StudentMajor sm
+            left join StudentMajor sm
               on sm.id.studentAccountId = s.accountId
              and sm.majorType = com.teamlms.backend.domain.dept.enums.MajorType.PRIMARY
-            join Major m
+            left join Major m
               on m.majorId = sm.id.majorId
-          where m.deptId = :deptId
+          where (m.deptId = :deptId or s.deptId = :deptId)
             and (
               coalesce(:keyword, '') = ''
               or lower(s.name) like lower(concat('%', coalesce(:keyword, ''), '%'))

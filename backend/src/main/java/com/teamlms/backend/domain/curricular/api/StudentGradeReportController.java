@@ -22,7 +22,7 @@ public class StudentGradeReportController {
 
     private final StudentGradeReportQueryService studentGradeReportQueryService;
 
-    // 1) 내 성적 헤더 + 추이
+    // 내 성적 헤더 + 추이
     @GetMapping("/me")
     public ApiResponse<StudentGradeDetailHeaderResponse> meHeader(
             @AuthenticationPrincipal AuthUser user
@@ -31,7 +31,7 @@ public class StudentGradeReportController {
         return ApiResponse.ok(studentGradeReportQueryService.getDetailHeader(studentAccountId));
     }
 
-    // 2) 내 과목 성적 리스트 (학기 필터 + 페이지 + 키워드)
+    // 내 과목 성적 리스트 (학기 필터 + 페이지 + 키워드)
     @GetMapping("/me/list")
     public ApiResponse<List<StudentCourseGradeListItem>> meList(
             @AuthenticationPrincipal AuthUser user,

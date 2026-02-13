@@ -1,13 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { fetchDepartments } from "@/features/authority/depts/lib/clientApi";
+import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
+import { useDeptsDropdownOptions } from "@/features/dropdowns/depts";
 import styles from "./TargetSelector.module.css";
-
-interface Dept {
-    deptId: number;
-    deptName: string;
-}
 
 interface Props {
     targetType: "ALL" | "DEPT" | "GRADE" | "DEPT_GRADE";
@@ -28,28 +23,16 @@ export function TargetSelector({
     selectedGrades,
     setSelectedGrades
 }: Props) {
-    const [depts, setDepts] = useState<Dept[]>([]);
+    const { options: deptOptions, loading: deptLoading } = useDeptsDropdownOptions();
 
-    useEffect(() => {
-        fetchDepartments({ page: 1, size: 1000 }).then(res => {
-            if (res.data && res.data.length > 0) {
-                const list = res.data.map((d: any) => ({
-                    deptId: d.deptId,
-                    deptName: d.deptName
-                }));
-                setDepts(list);
-            }
-        }).catch(err => {
-            console.error(err);
-        });
-    }, []);
-
-    const toggleDept = (id: number) => {
-        if (selectedDeptIds.includes(id)) {
-            setSelectedDeptIds(selectedDeptIds.filter(d => d !== id));
-        } else {
+    const addDept = (id: number) => {
+        if (!selectedDeptIds.includes(id)) {
             setSelectedDeptIds([...selectedDeptIds, id]);
         }
+    };
+
+    const removeDept = (id: number) => {
+        setSelectedDeptIds(selectedDeptIds.filter(d => d !== id));
     };
 
     const toggleGrade = (g: number) => {
@@ -58,6 +41,10 @@ export function TargetSelector({
         } else {
             setSelectedGrades([...selectedGrades, g]);
         }
+    };
+
+    const getDeptName = (id: number) => {
+        return deptOptions.find(o => o.value === String(id))?.label || `학과 ${id}`;
     };
 
     return (
@@ -106,17 +93,30 @@ export function TargetSelector({
                     <p className={styles.guideText}>
                         {targetType === "DEPT_GRADE" ? "1. 대상이 될 학과를 선택하세요." : "대상이 될 학과를 선택하세요."}
                     </p>
+
+                    <div style={{ maxWidth: '300px', marginBottom: '12px' }}>
+                        <DeptFilterDropdown
+                            value=""
+                            onChange={(val) => {
+                                if (val) addDept(Number(val));
+                            }}
+                        />
+                    </div>
+
                     <div className={styles.chipGrid}>
-                        {depts.map(dept => (
+                        {selectedDeptIds.map(deptId => (
                             <button
-                                key={dept.deptId}
+                                key={deptId}
                                 type="button"
-                                className={`${styles.chip} ${selectedDeptIds.includes(dept.deptId) ? styles.chipActive : ''}`}
-                                onClick={() => toggleDept(dept.deptId)}
+                                className={`${styles.chip} ${styles.chipActive}`}
+                                onClick={() => removeDept(deptId)}
                             >
-                                {dept.deptName}
+                                {getDeptName(deptId)} ✕
                             </button>
                         ))}
+                        {selectedDeptIds.length === 0 && (
+                            <span className="text-sm text-gray-400">선택된 학과가 없습니다.</span>
+                        )}
                     </div>
                 </div>
             )}

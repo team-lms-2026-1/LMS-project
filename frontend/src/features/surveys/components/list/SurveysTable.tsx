@@ -1,10 +1,18 @@
 "use client";
 
 import { Table, type TableColumn } from "@/components/table";
-import { SurveyListItemDto } from "../../api/types";
+import { SurveyListItemDto, SurveyTypeLabel } from "../../api/types";
 import { StatusPill } from "@/components/status";
 import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
 import styles from "./SurveysTable.module.css";
+
+const SURVEY_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
+    SATISFACTION: { bg: "#eff6ff", text: "#1d4ed8" },
+    COURSE: { bg: "#f0fdf4", text: "#15803d" },
+    SERVICE: { bg: "#f5f3ff", text: "#7c3aed" },
+    ETC: { bg: "#f3f4f6", text: "#374151" },
+};
 
 interface Props {
     items: SurveyListItemDto[];
@@ -44,14 +52,24 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
             }
         },
         {
+            header: "유형",
+            field: "type",
+            width: "130px",
+            align: "center",
+            render: (row) => {
+                const colors = SURVEY_TYPE_COLORS[row.type] || SURVEY_TYPE_COLORS.ETC;
+                return (
+                    <Badge bgColor={colors.bg} textColor={colors.text}>
+                        {SurveyTypeLabel[row.type] || row.type}
+                    </Badge>
+                );
+            }
+        },
+        {
             header: "제목",
             field: "title",
-            align: "left",
-            render: (row) => (
-                <span className={styles.titleText} onClick={() => onEditClick(row.surveyId)}>
-                    {row.title}
-                </span>
-            )
+            align: "center",
+            render: (row) => <span>{row.title}</span>
         },
         {
             header: "조회수",

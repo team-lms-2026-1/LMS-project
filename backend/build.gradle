@@ -1,28 +1,28 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.9'
-	id 'io.spring.dependency-management' version '1.1.7'
+  id 'java'
+  id 'org.springframework.boot' version '3.5.9'
+  id 'io.spring.dependency-management' version '1.1.7'
 }
-
 
 group = 'com.teamlms'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+  toolchain { languageVersion = JavaLanguageVersion.of(17) }
+}
+
+ext {
+  springAiVersion = "1.1.2" // 문서 기준 최신이 1.1.2 (네가 1.1.1 써도 되긴 함)
+}
+
+repositories {
+  mavenCentral()
 }
 
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
-}
-
-repositories {
-	mavenCentral()
 }
 
 dependencies {
@@ -60,6 +60,9 @@ dependencies {
 	// AWS S3
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0'
 	
+	// spring ai
+	implementation platform("org.springframework.ai:spring-ai-bom:${springAiVersion}")
+	implementation "org.springframework.ai:spring-ai-starter-model-openai"
 }
 
 tasks.named('test') {

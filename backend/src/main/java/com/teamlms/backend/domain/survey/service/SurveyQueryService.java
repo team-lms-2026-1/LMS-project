@@ -44,8 +44,7 @@ public class SurveyQueryService {
     private final SurveyTypeConfigRepository typeConfigRepository;
 
     // 관리자 목록 조회
-    public Page<SurveyListResponse> getSurveyList(Long adminId, InternalSurveySearchRequest request, Pageable pageable) {
-        validateAdmin(adminId);
+    public Page<SurveyListResponse> getSurveyList(InternalSurveySearchRequest request, Pageable pageable) {
         // Using custom repository method
         return surveyRepository.findSurveyAdminList(
                 request.type(),
@@ -111,8 +110,7 @@ public class SurveyQueryService {
     }
 
     // 설문 통계 조회
-    public SurveyStatsResponse getSurveyStats(Long adminId, Long surveyId) {
-        validateAdmin(adminId);
+    public SurveyStatsResponse getSurveyStats(Long surveyId) {
 
         Survey survey = surveyRepository.findById(surveyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId));
@@ -203,8 +201,7 @@ public class SurveyQueryService {
                 .build();
     }
 
-    public Page<SurveyParticipantResponse> getSurveyParticipants(Long adminId, Long surveyId, Pageable pageable) {
-        validateAdmin(adminId);
+    public Page<SurveyParticipantResponse> getSurveyParticipants(Long surveyId, Pageable pageable) {
         if (!surveyRepository.existsById(surveyId)) {
             throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId);
         }
@@ -225,13 +222,7 @@ public class SurveyQueryService {
         });
     }
 
-    private void validateAdmin(Long adminId) {
-        Account admin = accountRepository.findById(adminId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, adminId));
-        if (admin.getAccountType() != com.teamlms.backend.domain.account.enums.AccountType.ADMIN) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED);
-        }
-    }
+
 
     private SurveyDetailResponse toSurveyDetailResponse(Survey survey, List<SurveyQuestion> questions) {
         return SurveyDetailResponse.builder()

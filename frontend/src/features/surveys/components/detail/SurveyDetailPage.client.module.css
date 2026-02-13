@@ -17,22 +17,6 @@
     color: #111827;
 }
 
-.backBtn {
-    height: 36px;
-    padding: 0 12px;
-    border-radius: 8px;
-    border: 1px solid #d0d5dd;
-    background: #fff;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: #344054;
-}
-
-.backBtn:hover {
-    background: #f9fafb;
-}
-
 .body {
     display: flex;
     flex-direction: column;

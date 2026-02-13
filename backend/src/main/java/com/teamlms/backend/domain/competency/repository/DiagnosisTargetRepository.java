@@ -52,5 +52,6 @@ public interface DiagnosisTargetRepository extends JpaRepository<DiagnosisTarget
           @Param("accountId") Long accountId,
           @Param("status") DiagnosisRunStatus status);
 
+
   boolean existsByRunRunIdAndStudentAccountId(Long runId, Long accountId);
 }

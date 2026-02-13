@@ -49,7 +49,7 @@ public class MajorCommandService {
                 .majorCode(request.getMajorCode())
                 .majorName(request.getMajorName())
                 .description(request.getDescription())
-                .active(true)
+                .active(request.isActive())
                 .sortOrder(0)
                 .build();
 
@@ -96,7 +96,8 @@ public class MajorCommandService {
         }
         major.update(
             request.majorName(),
-            request.description()
+            request.description(),
+            request.isActive()
         );
     }
 

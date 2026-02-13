@@ -71,6 +71,13 @@ const SECTIONS: NavSection[] = [
       { label: "신청내역확인", href: "/student/study-space/spaces-rentals" },
     ],
   },
+  {
+    key: "ai-advisor",
+    title: "AI 어드바이져",
+    items: [
+      { label: "직업매칭(MBTI)", href: "/student/mbti" }
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string) {

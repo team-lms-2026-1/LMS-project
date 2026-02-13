@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/surveys")
+@PreAuthorize("hasAuthority('SURVEY_MANAGE')")
 public class AdminSurveyController {
 
     private final SurveyCommandService commandService;
@@ -56,7 +58,7 @@ public class AdminSurveyController {
 
         InternalSurveySearchRequest searchRequest = new InternalSurveySearchRequest(type, status, keyword);
 
-        Page<SurveyListResponse> result = queryService.getSurveyList(user.getAccountId(), searchRequest, pageable);
+        Page<SurveyListResponse> result = queryService.getSurveyList(searchRequest, pageable);
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
@@ -75,7 +77,7 @@ public class AdminSurveyController {
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId,
             @RequestBody @Valid SurveyPatchRequest request) {
-        commandService.patchSurvey(user.getAccountId(), surveyId, request);
+        commandService.patchSurvey(surveyId, request);
         return ApiResponse.ok(new SuccessResponse());
     }
 
@@ -88,20 +90,17 @@ public class AdminSurveyController {
     }
 
     // 설문 삭제
-    @DeleteMapping("/{surveyId}")
     public ApiResponse<SuccessResponse> delete(
-            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId) {
-        commandService.deleteSurvey(user.getAccountId(), surveyId);
+        commandService.deleteSurvey(surveyId);
         return ApiResponse.ok(new SuccessResponse());
     }
 
     // 설문 통계 조회
     @GetMapping("/{surveyId}/stats")
     public ApiResponse<SurveyStatsResponse> stats(
-            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId) {
-        return ApiResponse.ok(queryService.getSurveyStats(user.getAccountId(), surveyId));
+        return ApiResponse.ok(queryService.getSurveyStats(surveyId));
     }
 
     // 설문 참여자 목록 조회
@@ -121,7 +120,7 @@ public class AdminSurveyController {
                 Sort.by(Sort.Direction.DESC, "targetId")
         );
 
-        Page<SurveyParticipantResponse> result = queryService.getSurveyParticipants(user.getAccountId(), surveyId, pageable);
+        Page<SurveyParticipantResponse> result = queryService.getSurveyParticipants(surveyId, pageable);
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 }

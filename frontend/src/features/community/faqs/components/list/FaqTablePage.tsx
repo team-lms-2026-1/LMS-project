@@ -6,6 +6,7 @@ import { FaqListItemDto, type FaqsTableProps } from "../../api/types";
 import styles from "./FaqTable.module.css";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
 import toast from "react-hot-toast";
 import DeleteModal from "../modal/DeleteModal.client";
 
@@ -54,13 +55,13 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
   const columns: Array<TableColumn<FaqListItemDto>> = [
     { header: "번호", align: "center", render: (r) => r.faqId },
     { header: "분류", align: "center", render: (r) => {
+
         const c = r.category;
         if (!c) return "미분류"; // ✅ null/undefined 방어
         return (
-          <span
-            className={styles.badge}
-            style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}
-          >{c.name}</span>
+          <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
+            {c.name}
+          </Badge>
         );
       },
     },
@@ -99,18 +100,18 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
             수정
           </Button>
           <div className={styles.manageCell}>
-          <Button
-            variant="danger"
-            onClick={(e: any) => {
-              e?.stopPropagation?.();
-              setDeleteTarget({ id: r.faqId, title: r.title });
-            }}
-          >
-            삭제
-          </Button>
+            <Button
+              variant="danger"
+              onClick={(e: any) => {
+                e?.stopPropagation?.();
+                setDeleteTarget({ id: r.faqId, title: r.title });
+              }}
+            >
+              삭제
+            </Button>
+          </div>
         </div>
-        </div>
-        
+
       ),
     },
   ];

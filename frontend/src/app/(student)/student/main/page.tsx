@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import MypageContainer from "@/features/student/mypage/components/list/MypageContainer";
+import MypageContainer from "@/features/student/mypage/components/MypageContainer";
 
 export const metadata: Metadata = {
   title: "메인 - 학생",

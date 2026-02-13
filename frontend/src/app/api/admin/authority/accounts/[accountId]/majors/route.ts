@@ -13,6 +13,8 @@ function buildHeaders() {
   return h;
 }
 
+export const dynamic = "force-dynamic";
+
 export async function GET(_req: Request, ctx: { params: { accountId: string } }) {
   const upstreamUrl = `${getBaseUrl()}/api/v1/admin/accounts/${ctx.params.accountId}/majors`;
   const res = await fetch(upstreamUrl, { headers: buildHeaders(), cache: "no-store" });

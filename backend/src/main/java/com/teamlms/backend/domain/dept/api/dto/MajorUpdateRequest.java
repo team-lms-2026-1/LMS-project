@@ -7,5 +7,7 @@ public record MajorUpdateRequest(
     String majorName,
     
     @NotBlank
-    String description
+    String description,
+
+    boolean isActive
 ) {}

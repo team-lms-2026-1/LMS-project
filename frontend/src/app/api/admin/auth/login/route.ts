@@ -80,7 +80,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ message: errMsg }, { status: upstreamRes.status });
 
-    
+
   }
 
   // 성공 파싱: ApiResponse<AuthLoginResponse>
@@ -103,7 +103,8 @@ export async function POST(req: Request) {
   const cookieStore = await cookies();
   cookieStore.set("access_token", data.accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production", // 정식 배포 시 이 코드로 변경
+    secure: false, // [Dev/Test] HTTP 환경 지원을 위해 false로 변경
     sameSite: "lax",
     path: "/",
     // expiresInSeconds 반영하고 싶으면 maxAge로:
