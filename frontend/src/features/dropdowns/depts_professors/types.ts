@@ -1,6 +1,8 @@
 export type DeptProfessorItem = {
   accountId: number;
   name: string;
+  email?: string | null;
+  phone?: string | null;
 };
 
 export type DeptProfessorsDropdownResponse = {

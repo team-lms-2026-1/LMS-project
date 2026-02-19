@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./SurveyListPage.client.module.css";
@@ -80,7 +80,7 @@ export default function SurveyListPageClient() {
             await actions.reload();
         } catch (e: any) {
             console.error(e);
-            toast.error(e.message ?? "삭제 실패");
+            toast.error(e.message ?? "삭제에 실패했습니다.");
         } finally {
             setDeleteId(null);
         }
@@ -152,3 +152,4 @@ export default function SurveyListPageClient() {
         </div>
     );
 }
+

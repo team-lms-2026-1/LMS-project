@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import styles from "./RentalsTable.module.css";
 import { Button } from "@/components/button";
@@ -44,7 +44,7 @@ function calcRowNo(meta: PageMeta | null | undefined, indexInPage: number, fallb
   const page = (meta as any)?.page ?? 1;
 
   // 0-based 페이지라면 아래처럼 바꿔서 사용:
-  // const page = ((meta as any)?.page ?? 0) + 1;
+  // cleaned comment
 
   return total - ((page - 1) * size + indexInPage);
 }

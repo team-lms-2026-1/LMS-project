@@ -11,8 +11,8 @@ import type { CurricularEnrollmentListItemDto } from "../../api/types";
 import { useCurricularEnrollmentsList } from "../../hooks/useCurricularEnrollmentList";
 import { StudentCurricularEnrollmentsTable } from "./StudentEnrollmentsTable";
 
-import { ConfirmDialog } from "@/components/modal/ConfirmDialog"; // ✅ 경로가 다르면 수정
-import { cancelCurricularOffering } from "../../api/curricularApi"; // ✅ 네가 만든 cancel 함수 있는 파일로 경로 수정
+import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
+import { cancelCurricularOffering } from "../../api/curricularApi";
 
 export default function StudentCurricularEnrollmentPageClient() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function StudentCurricularEnrollmentPageClient() {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size, actions]);
 
-  // ✅ confirm modal state
+  // confirm modal state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [target, setTarget] = useState<CurricularEnrollmentListItemDto | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
@@ -54,7 +54,7 @@ export default function StudentCurricularEnrollmentPageClient() {
     try {
       setCancelLoading(true);
 
-      // ✅ 실제 취소 API 호출
+      // 실제 취소 API 호출
       await cancelCurricularOffering(target.offeringId);
 
       toast.success("신청이 취소되었습니다.");
@@ -101,7 +101,7 @@ export default function StudentCurricularEnrollmentPageClient() {
           />
         </div>
 
-        {/* ✅ Confirm Modal */}
+        {/* Confirm Modal */}
         <ConfirmDialog
           open={confirmOpen}
           title="신청 취소"

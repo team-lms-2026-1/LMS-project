@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type { NoticeListItemDto, PageMeta } from "../api/types";
@@ -6,7 +6,7 @@ import { fetchNoticesList } from "../api/NoticesApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -19,10 +19,10 @@ export function useNoticesList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
-  // ✅ 추가: categoryId (null이면 전체)
+  // cleaned comment
   const [categoryId, setCategoryId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ export function useNoticesList() {
         page,
         size,
         keyword: keyword || undefined,
-        categoryId: categoryId ?? undefined, // ✅ 추가
+        categoryId: categoryId ?? undefined, // cleaned comment
       });
 
       setItems(res.data);
@@ -70,7 +70,7 @@ export function useNoticesList() {
     actions: {
       setKeyword,
 
-      // ✅ 카테고리 변경 시 page 1로 리셋
+      // cleaned comment
       setCategoryId: (cid: number | null) => {
         setPage(1);
         setCategoryId(cid);
@@ -88,3 +88,5 @@ export function useNoticesList() {
     },
   };
 }
+
+

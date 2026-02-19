@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./SurveyListPage.client.module.css";
@@ -62,9 +62,9 @@ export default function SurveyResultsPageClient() {
                 if (now < start) {
                     return <StatusPill status="PENDING" label="대기" />;
                 } else if (now >= start && now <= end) {
-                    return <StatusPill status="ACTIVE" label="OPEN" />;
+                    return <StatusPill status="ACTIVE" label="진행중" />;
                 } else {
-                    return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    return <StatusPill status="INACTIVE" label="종료" />;
                 }
             }
         },

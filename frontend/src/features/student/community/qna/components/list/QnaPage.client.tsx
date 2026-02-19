@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,7 +15,7 @@ export default function QnaPageClient() {
   const toastOnceRef = useRef<string | null>(null);
   const { state, actions } = useQnaList();
 
-  // 지금 학생화면이면 아래 두 개는 사실 필요 없음(남겨도 동작은 함)
+  // 학생 화면에서는 작성/수정 관련 별도 모달 상태를 사용하지 않음
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
@@ -57,7 +57,7 @@ export default function QnaPageClient() {
   }, [inputKeyword, setPage, actions]);
 
   const handleCreate = () => {
-    // ✅ 질문 등록 페이지로 이동 (폴더 구조에 맞게 경로만 조정하면 됨)
+    // 질문 등록 페이지로 이동
     router.push("/student/community/qna/questions/new");
   };
 
@@ -65,7 +65,7 @@ export default function QnaPageClient() {
     <div className={styles.page}>
       <div className={styles.card}>
 
-        {/* ✅ 제목 + 검색 + 등록 버튼 한 줄 */}
+        {/* 제목 + 검색 + 등록 버튼 */}
         <div className={styles.topRow}>
           <h1 className={styles.title}>Q&A</h1>
 

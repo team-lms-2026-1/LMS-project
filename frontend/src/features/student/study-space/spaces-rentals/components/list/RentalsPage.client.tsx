@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import styles from "./RentalsPage.module.css";
@@ -7,7 +7,7 @@ import { Button } from "@/components/button";
 import { useRental } from "../../hooks/useRental";
 import type { RentalDto } from "../../api/types";
 
-// ✅ 공용 pagination (SpacesPageClient와 동일 사용)
+// 공용 pagination (SpacesPageClient와 동일하게 사용)
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 
 type RejectModalState = {
@@ -22,7 +22,7 @@ type CancelModalState = {
 };
 
 export default function RentalsPageClient() {
-  // ✅ URL query와 연동되는 공용 pagination
+  // URL query와 연동되는 공용 pagination
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
   const {
@@ -55,7 +55,7 @@ export default function RentalsPageClient() {
 
   useEffect(() => {
     updateParams({ page, size });
-    }, [page, size]);
+  }, [page, size, updateParams]);
 
   const title = useMemo(() => {
     const id = me?.loginId ? `(${me.loginId})` : "";
@@ -137,21 +137,21 @@ export default function RentalsPageClient() {
         onShowRejectReason={openRejectModal}
       />
 
-      {/* ✅ SpacesPageClient와 동일하게 PaginationSimple 사용 */}
+      {/* SpacesPageClient와 동일하게 PaginationSimple 사용 */}
       <div className={styles.bottomRow}>
         <div className={styles.paginationWrap}>
           <PaginationSimple page={page} totalPages={totalPages} onChange={(p: number) => setPage(p)} />
         </div>
       </div>
 
-      {/* ✅ 반려 사유 모달 */}
+      {/* 반려 사유 모달 */}
       {rejectModal.open && (
         <div className={styles.modalOverlay} onMouseDown={closeRejectModal}>
           <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <div className={styles.modalTop}>
               <div className={styles.modalTitle}>반려 사유</div>
               <button className={styles.closeBtn} onClick={closeRejectModal} aria-label="close">
-                ×
+                횞
               </button>
             </div>
 
@@ -174,7 +174,7 @@ export default function RentalsPageClient() {
             <div className={styles.modalTop}>
               <div className={styles.modalTitle}>예약 취소</div>
               <button className={styles.closeBtn} onClick={closeCancelModal} aria-label="close">
-                ×
+                횞
               </button>
             </div>
 

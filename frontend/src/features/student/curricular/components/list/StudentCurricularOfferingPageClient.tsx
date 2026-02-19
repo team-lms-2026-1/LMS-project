@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./StudentCurricularOfferingPageClient.module.css"
@@ -43,7 +43,7 @@ export default function StudentCurricularOfferingPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>교과신청</h1>
+        <h1 className={styles.title}>교과 신청</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>

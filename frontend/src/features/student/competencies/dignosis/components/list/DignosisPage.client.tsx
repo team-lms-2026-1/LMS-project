@@ -58,7 +58,7 @@ export default function DignosisPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>역량 진단서</h1>
+        <h1 className={styles.title}>역량 진단지</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>

@@ -65,7 +65,7 @@ export default function ResourcePageClient() {
     };
   }, []);
 
-  // ✅ URL categoryId -> hook 반영
+  // URL categoryId -> hook 반영
   useEffect(() => {
     const v = categoryIdQs ? Number(categoryIdQs) : null;
     actions.setCategoryId(v);
