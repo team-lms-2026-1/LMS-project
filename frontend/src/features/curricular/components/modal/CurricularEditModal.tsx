@@ -8,6 +8,7 @@ import styles from "./CurricularEditModal.module.css";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
 import { useCurricularEdit } from "../../hooks/useCurricularList";
 import { patchCurricular } from "../../api/curricularsApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -22,6 +23,9 @@ export function CurricularEditModal({
   onClose,
   onUpdated
 }: Props) {
+  const t = useI18n("curricular.modal.curricularEdit");
+  const tStatus = useI18n("curricular.status.active");
+  const tCommon = useI18n("curricular.common");
   const { state } = useCurricularEdit(curricularId, open);
   const { data, loading, error } = state;
 
@@ -54,7 +58,7 @@ export function CurricularEditModal({
 
       onClose();
     } catch (e: any) {
-      setSubmitError(e?.message ?? "교과 수정에 실패했습니다.");
+      setSubmitError(e?.message ?? t("submitFailed"));
     } finally {
       setSaving(false);
     }
@@ -92,13 +96,13 @@ export function CurricularEditModal({
   return (
     <Modal
       open={open}
-      title="교과목 수정"
+      title={t("title")}
       onClose={handleClose}
       size="md"
       headerRight={
         <label className={styles.headerToggle} aria-disabled={disabled}>
           <span className={styles.headerToggleLabel}>
-            {isActive ? "활성" : "비활성"}
+            {isActive ? tStatus("ACTIVE") : tStatus("INACTIVE")}
           </span>
 
           <input
@@ -107,7 +111,7 @@ export function CurricularEditModal({
             checked={isActive}
             disabled={disabled}
             onChange={(e) => setIsActive(e.target.checked)}
-            aria-label="활성 여부"
+            aria-label={t("activeAriaLabel")}
           />
 
           <span className={styles.headerToggleTrack} aria-hidden="true">
@@ -119,10 +123,10 @@ export function CurricularEditModal({
       footer={
         <>
           <Button variant="primary" onClick={handlesubmit} loading={saving} disabled={disabled || saving} >
-            저장
+            {tCommon("saveButton")}
           </Button>
           <Button variant="secondary" onClick={handleClose}>
-            닫기
+            {tCommon("closeButton")}
           </Button>
         </>
       }
@@ -134,7 +138,7 @@ export function CurricularEditModal({
         <div className={styles.grid2}>
           {/* 교과목 코드 */}
           <label className={styles.field}>
-            <div className={styles.label}>교과목 코드</div>
+            <div className={styles.label}>{t("curricularCodeLabel")}</div>
             <input
               className={styles.control}
               value={curricularCode}
@@ -144,7 +148,7 @@ export function CurricularEditModal({
 
           {/* 교과목명 */}
           <label className={styles.field}>
-            <div className={styles.label}>교과목명</div>
+            <div className={styles.label}>{t("curricularNameLabel")}</div>
             <input
               className={styles.control}
               value={curricularName}
@@ -155,7 +159,7 @@ export function CurricularEditModal({
 
           {/* 학과 ID */}
           <label className={styles.field}>
-            <div className={styles.label}>주관학과</div>
+            <div className={styles.label}>{t("deptLabel")}</div>
             <DeptFilterDropdown
               value={deptId > 0 ? String(deptId) : ""}
               onChange={(v) => setDeptId(v ? Number(v) : 0)}
@@ -164,7 +168,7 @@ export function CurricularEditModal({
 
           {/* 학점 */}
           <label className={styles.field}>
-            <div className={styles.label}>학점</div>
+            <div className={styles.label}>{t("creditsLabel")}</div>
             <input
               type="number"
               className={styles.control}
@@ -176,7 +180,7 @@ export function CurricularEditModal({
         </div>
           {/* 설명 */}
           <label className={styles.field}>
-            <div className={styles.label}>설명</div>
+            <div className={styles.label}>{t("descriptionLabel")}</div>
             <textarea
               className={styles.control}
               value={description}

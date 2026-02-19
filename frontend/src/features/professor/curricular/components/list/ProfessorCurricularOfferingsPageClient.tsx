@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
-import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
-
+import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
+import { useI18n } from "@/i18n/useI18n";
 import { useCurricularOfferingsList } from "../../hooks/useCurricularOfferingList";
 import { ProfessorCurricularOfferingsTable } from "./ProfessorCurricularOfferingsTable";
 import styles from "./ProfessorCurricularOfferingsPage.module.css";
@@ -15,35 +14,35 @@ import styles from "./ProfessorCurricularOfferingsPage.module.css";
 export default function ProfessorCurricularOfferingsPageClient() {
   const router = useRouter();
   const { state, actions } = useCurricularOfferingsList();
+  const t = useI18n("curricular.professorOfferings");
 
   const { get } = useFilterQuery(["semesterId"]);
   const semesterId = get("semesterId");
-
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
 
   useEffect(() => {
     actions.goPage(page);
-  }, [page]);
+  }, [actions, page]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
-  }, [size, state.size]);
+  }, [actions, size, state.size]);
 
   useEffect(() => {
     actions.setSemesterId(semesterId ? Number(semesterId) : null);
-  }, [semesterId, actions]);
+  }, [actions, semesterId]);
 
   const handleSearch = useCallback(() => {
     setPage(1);
     actions.goPage(1);
     actions.setKeyword(inputKeyword);
-  }, [inputKeyword, setPage, actions]);
+  }, [actions, inputKeyword, setPage]);
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>내 강의 목록</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <SemesterFilterDropdown />
@@ -52,7 +51,7 @@ export default function ProfessorCurricularOfferingsPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="개설코드 또는 교과목명을 검색하세요."
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>

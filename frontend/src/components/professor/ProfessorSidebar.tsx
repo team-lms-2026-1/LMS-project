@@ -3,43 +3,44 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./professor-shell.module.css";
 
-type NavItem = { label: string; href: string };
-type NavSection = { key: string; title: string; items: NavItem[] };
+type NavItem = { labelKey: string; href: string };
+type NavSection = { key: string; titleKey: string; items: NavItem[] };
 
 const SECTIONS: NavSection[] = [
   {
     key: "community",
-    title: "커뮤니티",
+    titleKey: "sections.community.title",
     items: [
-      { label: "공지사항", href: "/professor/community/notices" },
-      { label: "자료실", href: "/professor/community/resources" },
-      { label: "FAQ", href: "/professor/community/faqs" },
-      { label: "Q&A", href: "/professor/community/qna" },
+      { labelKey: "sections.community.items.notices", href: "/professor/community/notices" },
+      { labelKey: "sections.community.items.resources", href: "/professor/community/resources" },
+      { labelKey: "sections.community.items.faqs", href: "/professor/community/faqs" },
+      { labelKey: "sections.community.items.qna", href: "/professor/community/qna" },
     ],
   },
   {
     key: "competency",
-    title: "역량 관리",
-    items: [{ label: "역량 조회", href: "/professor/competencies" }],
+    titleKey: "sections.competency.title",
+    items: [{ labelKey: "sections.competency.items.dashboard", href: "/professor/competencies" }],
   },
   {
     key: "course",
-    title: "교과 관리",
+    titleKey: "sections.course.title",
     items: [
-      { label: "내 강의 목록", href: "/professor/curricular/offerings" },
-      { label: "강의 계획서", href: "/professor/syllabus" },
-      { label: "성적 입력", href: "/professor/grades" },
-      { label: "출석 관리", href: "/professor/attendance" },
+      { labelKey: "sections.course.items.offerings", href: "/professor/curricular/offerings" },
+      { labelKey: "sections.course.items.syllabus", href: "/professor/syllabus" },
+      { labelKey: "sections.course.items.grades", href: "/professor/grades" },
+      { labelKey: "sections.course.items.attendance", href: "/professor/attendance" },
     ],
   },
   {
     key: "mentoring",
-    title: "멘토링",
+    titleKey: "sections.mentoring.title",
     items: [
-      { label: "멘토 요청", href: "/professor/mentoring/apply" },
-      { label: "멘토링 채팅", href: "/professor/mentoring/chat" },
+      { labelKey: "sections.mentoring.items.apply", href: "/professor/mentoring/apply" },
+      { labelKey: "sections.mentoring.items.chat", href: "/professor/mentoring/chat" },
     ],
   },
 ];
@@ -50,11 +51,13 @@ function isActive(pathname: string, href: string) {
 
 export default function ProfessorSidebar() {
   const pathname = usePathname();
+  const t = useI18n("menu.professor");
+  const tCommon = useI18n("menu.common");
   const [hoverOpenKey, setHoverOpenKey] = useState<string | null>(null);
 
   const activeSectionKey = useMemo(() => {
-    for (const s of SECTIONS) {
-      if (s.items.some((it) => isActive(pathname, it.href))) return s.key;
+    for (const section of SECTIONS) {
+      if (section.items.some((item) => isActive(pathname, item.href))) return section.key;
     }
     return null;
   }, [pathname]);
@@ -62,9 +65,9 @@ export default function ProfessorSidebar() {
   return (
     <div className={styles.sidebarInner}>
       <div className={styles.sidebarHeader}>
-        <div className={styles.sidebarTitle}>상세 메뉴</div>
+        <div className={styles.sidebarTitle}>{tCommon("sidebarTitle")}</div>
         <Link href="/professor" className={styles.headerLogoLink}>
-          <img src="/logo.png" alt="교수 메인으로 이동" className={styles.headerLogoImage} />
+          <img src="/logo.png" alt={tCommon("logoAlt.professor")} className={styles.headerLogoImage} />
         </Link>
       </div>
 
@@ -88,7 +91,7 @@ export default function ProfessorSidebar() {
                 ].join(" ")}
                 aria-expanded={open}
               >
-                <span className={styles.sectionHeaderText}>{section.title}</span>
+                <span className={styles.sectionHeaderText}>{t(section.titleKey)}</span>
                 <span className={open ? styles.chevUp : styles.chevDown} aria-hidden="true" />
               </div>
 
@@ -98,11 +101,11 @@ export default function ProfessorSidebar() {
                     const active = isActive(pathname, item.href);
                     return (
                       <Link
-                        key={item.href + item.label}
+                        key={item.href + item.labelKey}
                         href={item.href}
                         className={active ? styles.itemActive : styles.item}
                       >
-                        {item.label}
+                        {t(item.labelKey)}
                       </Link>
                     );
                   })}

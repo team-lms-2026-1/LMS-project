@@ -5,6 +5,7 @@ import { CurricularOfferingListItemDto } from "../../api/types";
 import styles from "./CurricularOfferingsTable.module.css"
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: CurricularOfferingListItemDto[];
@@ -14,26 +15,49 @@ type Props = {
 };
 
 export function CurricularOfferingsTable({ items, loading, onRowClick }: Props) {
+  const t = useI18n("curricular.adminOfferings.table");
+  const tStatus = useI18n("curricular.status.offering");
+  const tCommon = useI18n("curricular.common");
+
+  const offeringStatusLabel = (value: string) => {
+    switch (value) {
+      case "DRAFT":
+        return tStatus("DRAFT");
+      case "OPEN":
+        return tStatus("OPEN");
+      case "ENROLLMENT_CLOSED":
+        return tStatus("ENROLLMENT_CLOSED");
+      case "IN_PROGRESS":
+        return tStatus("IN_PROGRESS");
+      case "COMPLETED":
+        return tStatus("COMPLETED");
+      case "CANCELED":
+        return tStatus("CANCELED");
+      default:
+        return value;
+    }
+  };
+
   const columns: Array<TableColumn<CurricularOfferingListItemDto>> = [
-    { header: "개설코드", align: "center", render: (r) => r.offeringCode },
-    { header: "교과목명", align: "center", render: (r) => r.curricularName },
-    { header: "인원수", align: "center", render: (r) => r.capacity },
-    { header: "담당교수", align: "center", render: (r) => r.professorName },
-    { header: "학기", align: "center", render: (r) => r.semesterName },
-    { header: "장소", align: "center", render: (r) => r.location },
-    { header: "학점", align: "center", render: (r) => r.credit },
+    { header: t("offeringCode"), align: "center", render: (r) => r.offeringCode },
+    { header: t("curricularName"), align: "center", render: (r) => r.curricularName },
+    { header: t("capacity"), align: "center", render: (r) => r.capacity },
+    { header: t("professorName"), align: "center", render: (r) => r.professorName },
+    { header: t("semesterName"), align: "center", render: (r) => r.semesterName },
+    { header: t("location"), align: "center", render: (r) => r.location },
+    { header: t("credit"), align: "center", render: (r) => r.credit },
     {
-      header: "상태",
+      header: t("status"),
       align: "center",
       render: (r) => (
         <StatusPill
-          status={r.status as any}   // ⬅️ StatusPill 타입이 과하게 넓어서 충돌나면 이 한 줄로 해결
-          label={r.status}           // ⬅️ 영어 그대로 표시
+          status={r.status as any}
+          label={offeringStatusLabel(r.status)}
         />
       ),
     },
     {
-      header: "관리",
+      header: tCommon("manageHeader"),
       width: 140,
       align: "center",
       stopRowClick: true,
@@ -45,7 +69,7 @@ export function CurricularOfferingsTable({ items, loading, onRowClick }: Props) 
               onRowClick?.(r);
             }}
           >
-            상세
+            {tCommon("detailButton")}
           </Button>
         </div>
       ),
@@ -59,7 +83,7 @@ export function CurricularOfferingsTable({ items, loading, onRowClick }: Props) 
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.offeringId}
-      emptyText="교과운영이 없습니다."
+      emptyText={t("emptyText")}
       onRowClick={onRowClick ? (row) => onRowClick(row) : undefined}
     />
   );

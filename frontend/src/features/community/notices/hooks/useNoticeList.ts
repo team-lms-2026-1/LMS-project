@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { NoticeListItemDto, PageMeta } from "../api/types";
-import { fetchNoticesList } from "../api/NoticesApi";
+import { fetchNoticesList } from "../api/noticesApi";
 
 const defaultMeta: PageMeta = {
   page: 1,

@@ -4,6 +4,7 @@ import { Fragment } from "react";
 import styles from "./ExtraOfferingSessionsExpandableTable.module.css";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
+import { useI18n } from "@/i18n/useI18n";
 
 import type { ExtraOfferingStatus, ExtraSessionListItemDto } from "../../../api/types";
 import { ExtraSessionDetailPanel } from "./ExtraSessionDetailPanel";
@@ -27,7 +28,22 @@ export function ExtraOfferingSessionsExpandableTable({
   onToggle,
   onReloadList,
 }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.sessions");
+  const tStatus = useI18n("extraCurricular.status.session");
   const colCount = 7;
+
+  const sessionStatusLabel = (value: string) => {
+    switch (value) {
+      case "OPEN":
+        return tStatus("OPEN");
+      case "CLOSED":
+        return tStatus("CLOSED");
+      case "CANCELED":
+        return tStatus("CANCELED");
+      default:
+        return value;
+    }
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -44,13 +60,13 @@ export function ExtraOfferingSessionsExpandableTable({
 
         <thead className={styles.thead}>
           <tr>
-            <th className={styles.th}>회차명</th>
-            <th className={styles.th}>회차포인트</th>
-            <th className={styles.th}>회차인정시간</th>
-            <th className={styles.th}>시작기간</th>
-            <th className={styles.th}>마감기간</th>
-            <th className={styles.th}>상태</th>
-            <th className={styles.th}>관리</th>
+            <th className={styles.th}>{t("headers.sessionName")}</th>
+            <th className={styles.th}>{t("headers.rewardPoint")}</th>
+            <th className={styles.th}>{t("headers.recognizedHours")}</th>
+            <th className={styles.th}>{t("headers.startAt")}</th>
+            <th className={styles.th}>{t("headers.endAt")}</th>
+            <th className={styles.th}>{t("headers.status")}</th>
+            <th className={styles.th}>{t("headers.manage")}</th>
           </tr>
         </thead>
 
@@ -70,7 +86,7 @@ export function ExtraOfferingSessionsExpandableTable({
           ) : items.length === 0 ? (
             <tr>
               <td className={styles.empty} colSpan={colCount}>
-                회차가 없습니다.
+                {t("emptyText")}
               </td>
             </tr>
           ) : (
@@ -89,11 +105,11 @@ export function ExtraOfferingSessionsExpandableTable({
                     <td className={styles.tdCenter}>{r.startAt}</td>
                     <td className={styles.tdCenter}>{r.endAt}</td>
                     <td className={styles.tdCenter}>
-                      <StatusPill status={r.status as any} label={r.status} />
+                      <StatusPill status={r.status as any} label={sessionStatusLabel(r.status)} />
                     </td>
                     <td className={styles.tdCenter} onClick={(e) => e.stopPropagation()}>
                       <Button variant="secondary" onClick={() => onToggle(r)}>
-                        {isExpanded ? "닫기" : "상세"}
+                        {isExpanded ? t("buttons.close") : t("buttons.detail")}
                       </Button>
                     </td>
                   </tr>

@@ -1,0 +1,651 @@
+{
+  "topbar": {
+    "todayTitle": "Today's date",
+    "sessionTitle": "Time remaining before auto logout",
+    "sessionPrefix": "Session",
+    "sessionEmpty": "Session --:--",
+    "profileTitle": "Profile",
+    "fallback": {
+      "student": "Student",
+      "admin": "Admin",
+      "professor": "Professor"
+    }
+  },
+  "menu": {
+    "common": {
+      "sidebarTitle": "Detailed Menu",
+      "logoAlt": {
+        "student": "Go to student main page",
+        "admin": "Go to admin main page",
+        "professor": "Go to professor main page"
+      }
+    },
+    "student": {
+      "sections": {
+        "community": {
+          "title": "Community",
+          "items": {
+            "notices": "Notices",
+            "resources": "Resources",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "course": {
+          "title": "Curricular",
+          "items": {
+            "offerings": "Course Enrollment",
+            "enrollments": "Enrollment Status",
+            "currentEnrollments": "Current Courses",
+            "gradeReports": "Course Grades"
+          }
+        },
+        "extra": {
+          "title": "Extra-curricular",
+          "items": {
+            "offerings": "Program Enrollment",
+            "enrollments": "Enrollment Status",
+            "currentEnrollments": "Current Programs",
+            "gradeReports": "Program Grades"
+          }
+        },
+        "mentoring": {
+          "title": "Mentoring",
+          "items": {
+            "apply": "Mentee Application",
+            "chat": "Mentoring Chat"
+          }
+        },
+        "competency": {
+          "title": "Competency Diagnosis",
+          "items": {
+            "introduce": "What is 6Cs?",
+            "diagnosis": "Diagnosis List",
+            "result": "Result"
+          }
+        },
+        "survey": {
+          "title": "Survey",
+          "items": {
+            "list": "Survey List"
+          }
+        },
+        "space": {
+          "title": "Study Space Rental",
+          "items": {
+            "spaces": "Browse and Apply Spaces",
+            "rentals": "Application History"
+          }
+        },
+        "aiAdvisor": {
+          "title": "AI Advisor",
+          "items": {
+            "mbti": "Career Matching (MBTI)"
+          }
+        }
+      }
+    },
+    "professor": {
+      "sections": {
+        "community": {
+          "title": "Community",
+          "items": {
+            "notices": "Notices",
+            "resources": "Resources",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "competency": {
+          "title": "Competency",
+          "items": {
+            "dashboard": "Competency Dashboard"
+          }
+        },
+        "course": {
+          "title": "Course Management",
+          "items": {
+            "offerings": "My Courses",
+            "syllabus": "Syllabus",
+            "grades": "Grade Entry",
+            "attendance": "Attendance"
+          }
+        },
+        "mentoring": {
+          "title": "Mentoring",
+          "items": {
+            "apply": "Mentor Request",
+            "chat": "Mentoring Chat"
+          }
+        }
+      }
+    },
+    "admin": {
+      "sections": {
+        "community": {
+          "title": "Community",
+          "items": {
+            "notices": "Notices",
+            "resources": "Resources",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "authority": {
+          "title": "Authority Management",
+          "items": {
+            "departments": "Department Management",
+            "accounts": "Account Management",
+            "semesters": "Semester Management"
+          }
+        },
+        "systemStatus": {
+          "title": "System Status",
+          "items": {
+            "accountLogs": "Account Logs"
+          }
+        },
+        "survey": {
+          "title": "Survey Management",
+          "items": {
+            "surveys": "Survey List",
+            "statistics": "Survey Statistics"
+          }
+        },
+        "competency": {
+          "title": "Competency Management",
+          "items": {
+            "intro": "What is 6Cs?",
+            "students": "Student Competency Activity",
+            "diagnosis": "Competency Diagnosis Management"
+          }
+        },
+        "course": {
+          "title": "Curricular Management",
+          "items": {
+            "curriculars": "Curricular Management",
+            "offerings": "Course Offering Management",
+            "grades": "Course Grade Management"
+          }
+        },
+        "extra": {
+          "title": "Extra-curricular Management",
+          "items": {
+            "programs": "Program Management",
+            "offerings": "Program Offering Management",
+            "grades": "Program Grade Management"
+          }
+        },
+        "mentoring": {
+          "title": "Mentoring",
+          "items": {
+            "recruitments": "Recruitment Posting",
+            "applications": "Application Approval",
+            "matching": "Mentor-Mentee Matching"
+          }
+        },
+        "space": {
+          "title": "Study Space Rental",
+          "items": {
+            "spaces": "Study Space List",
+            "rentals": "Study Space Application List"
+          }
+        }
+      }
+    }
+  },
+  "curricular": {
+    "common": {
+      "manageHeader": "Manage",
+      "detailButton": "Details",
+      "editButton": "Edit",
+      "registerButton": "Register",
+      "saveButton": "Save",
+      "cancelButton": "Cancel",
+      "closeButton": "Close"
+    },
+    "status": {
+      "offering": {
+        "DRAFT": "Draft",
+        "OPEN": "Open",
+        "ENROLLMENT_CLOSED": "Enrollment Closed",
+        "IN_PROGRESS": "In Progress",
+        "COMPLETED": "Completed",
+        "CANCELED": "Canceled"
+      },
+      "active": {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive"
+      },
+      "enrollment": {
+        "ENROLLED": "Enrolled",
+        "CANCELED": "Canceled"
+      },
+      "completion": {
+        "IN_PROGRESS": "In Progress",
+        "PASSED": "Passed",
+        "FAILED": "Failed"
+      }
+    },
+    "dayOfWeek": {
+      "MONDAY": {
+        "short": "Mon",
+        "long": "Monday"
+      },
+      "TUESDAY": {
+        "short": "Tue",
+        "long": "Tuesday"
+      },
+      "WEDNESDAY": {
+        "short": "Wed",
+        "long": "Wednesday"
+      },
+      "THURSDAY": {
+        "short": "Thu",
+        "long": "Thursday"
+      },
+      "FRIDAY": {
+        "short": "Fri",
+        "long": "Friday"
+      },
+      "SATURDAY": {
+        "short": "Sat",
+        "long": "Saturday"
+      },
+      "SUNDAY": {
+        "short": "Sun",
+        "long": "Sunday"
+      }
+    },
+    "studentOfferings": {
+      "title": "Course Enrollment",
+      "searchPlaceholder": "Search by course name/code",
+      "table": {
+        "offeringCode": "Offering Code",
+        "curricularName": "Course Name",
+        "professorName": "Professor",
+        "semesterName": "Semester",
+        "credit": "Credits",
+        "competency1": "Competency 1",
+        "competency2": "Competency 2",
+        "capacity": "Capacity",
+        "enrolledCount": "Enrolled",
+        "emptyText": "No course offerings."
+      }
+    },
+    "professorOfferings": {
+      "title": "My Courses",
+      "searchPlaceholder": "Search by course name/code",
+      "table": {
+        "offeringCode": "Offering Code",
+        "curricularName": "Course Name",
+        "capacity": "Capacity",
+        "professorName": "Professor",
+        "semesterName": "Semester",
+        "location": "Location",
+        "credit": "Credits",
+        "status": "Status",
+        "emptyText": "No course offerings."
+      }
+    },
+    "adminCurriculars": {
+      "title": "Curricular Management",
+      "searchPlaceholder": "Search by course name/code",
+      "registerButton": "Register Curricular",
+      "table": {
+        "curricularCode": "Course Code",
+        "curricularName": "Course Name",
+        "deptName": "Department",
+        "credits": "Credits",
+        "status": "Status",
+        "emptyText": "No curricular courses."
+      }
+    },
+    "adminOfferings": {
+      "title": "Course Offering Management",
+      "searchPlaceholder": "Search by offering name/code",
+      "registerButton": "Register Offering",
+      "table": {
+        "offeringCode": "Offering Code",
+        "curricularName": "Course Name",
+        "capacity": "Capacity",
+        "professorName": "Professor",
+        "semesterName": "Semester",
+        "location": "Location",
+        "credit": "Credits",
+        "status": "Status",
+        "emptyText": "No course offerings."
+      }
+    },
+    "adminGrades": {
+      "title": "Course Grade Management",
+      "searchPlaceholder": "Search by student ID/name",
+      "table": {
+        "studentNo": "Student ID",
+        "deptName": "Department",
+        "gradeLevel": "Year",
+        "name": "Name",
+        "gpa": "GPA",
+        "emptyText": "No course grade records."
+      }
+    },
+    "adminOfferingDetail": {
+      "page": {
+        "loading": "Loading...",
+        "loadError": "An error occurred.",
+        "empty": "No data available.",
+        "title": "Course Offering Management",
+        "backButton": "Back to list"
+      },
+      "tabs": {
+        "detail": "Detail",
+        "students": "Students",
+        "competencies": "Competencies"
+      },
+      "detail": {
+        "sections": {
+          "course": "Course",
+          "operation": "Operation",
+          "professor": "Professor",
+          "remark": "Remarks"
+        },
+        "fields": {
+          "curricularName": "Course Name",
+          "deptName": "Department",
+          "credits": "Credits",
+          "offeringCode": "Offering Code",
+          "enrolledCount": "Enrolled",
+          "capacity": "Capacity",
+          "semester": "Semester",
+          "dayOfWeek": "Day",
+          "period": "Period",
+          "periodValue": "Period {period}",
+          "location": "Location",
+          "professor": "Professor",
+          "professorName": "Professor Name",
+          "phone": "Phone",
+          "email": "Email",
+          "description": "Description"
+        },
+        "messages": {
+          "onlyDraft": "Editable only in Draft status.",
+          "requiredDayOfWeek": "Please select a day.",
+          "saveFailed": "Failed to update.",
+          "selectProfessorHint": "Reflected after selecting a professor"
+        }
+      },
+      "students": {
+        "headers": {
+          "studentName": "Student Name",
+          "studentNo": "Student ID",
+          "gradeLevel": "Year",
+          "deptName": "Department",
+          "rawScore": "Score",
+          "grade": "Grade",
+          "enrollmentStatus": "Enrollment Status",
+          "completionStatus": "Completion Status",
+          "scoreAction": "Score Entry"
+        },
+        "buttons": {
+          "input": "Input",
+          "saving": "Saving..."
+        },
+        "messages": {
+          "scoreRange": "Score must be a number between 0 and 100.",
+          "savingToast": "Saving...",
+          "savedToast": "Score has been saved.",
+          "saveFailed": "Failed to save. Please try again.",
+          "canEditOnlyInProgress": "Score editing is available only when offering is IN_PROGRESS."
+        },
+        "emptyText": "No students found."
+      },
+      "competencies": {
+        "labels": {
+          "professor": "Professor",
+          "mainCompetencies": "Primary Competencies"
+        },
+        "titles": {
+          "mapping": "Competency Mapping",
+          "radar": "Competency Mapping Radar Chart"
+        },
+        "messages": {
+          "loading": "Loading...",
+          "loadError": "Failed to load.",
+          "saved": "Competency mapping has been saved.",
+          "duplicateWeight": "This score is already used by another competency.",
+          "saveFailed": "Save failed"
+        },
+        "buttons": {
+          "saving": "Saving..."
+        }
+      },
+      "radar": {
+        "empty": "Please register competency scores.",
+        "tooltip": "{value} points"
+      },
+      "status": {
+        "title": "Change Status",
+        "confirmYes": "Yes",
+        "confirmNo": "No",
+        "messages": {
+          "confirmText": "Do you want to change the status? (This action cannot be undone.)",
+          "updateFailed": "Failed to change status."
+        }
+      }
+    },
+    "modal": {
+      "curricularCreate": {
+        "title": "Register Curricular",
+        "curricularCodeLabel": "Course Code",
+        "curricularNameLabel": "Course Name",
+        "deptLabel": "Department",
+        "creditsLabel": "Credits",
+        "descriptionLabel": "Description",
+        "curricularCodePlaceholder": "e.g. CS101",
+        "curricularNamePlaceholder": "e.g. Data Structures",
+        "creditsPlaceholder": "e.g. 3",
+        "descriptionPlaceholder": "Enter course description.",
+        "submitFailed": "Registration failed.",
+        "validation": {
+          "requiredCurricularCode": "Please enter a course code.",
+          "requiredCurricularName": "Please enter a course name.",
+          "requiredDept": "Please select a department.",
+          "requiredCredits": "Please enter credits.",
+          "requiredDescription": "Please enter a description."
+        }
+      },
+      "curricularEdit": {
+        "title": "Edit Curricular",
+        "activeAriaLabel": "Active status",
+        "curricularCodeLabel": "Course Code",
+        "curricularNameLabel": "Course Name",
+        "deptLabel": "Department",
+        "creditsLabel": "Credits",
+        "descriptionLabel": "Description",
+        "submitFailed": "Failed to update curricular."
+      },
+      "offeringCreate": {
+        "title": "Register Course Offering",
+        "offeringCodeLabel": "Offering Code",
+        "semesterLabel": "Semester",
+        "deptLabel": "Department",
+        "curricularLabel": "Course",
+        "dayOfWeekLabel": "Day",
+        "periodLabel": "Period",
+        "capacityLabel": "Capacity",
+        "locationLabel": "Location",
+        "professorLabel": "Professor",
+        "professorEmailLabel": "Professor Email",
+        "professorPhoneLabel": "Professor Phone",
+        "offeringCodePlaceholder": "e.g. CS101-1",
+        "capacityPlaceholder": "e.g. 30",
+        "locationPlaceholder": "e.g. Main Building 302",
+        "submitFailed": "Registration failed.",
+        "validation": {
+          "requiredOfferingCode": "Please enter an offering code.",
+          "requiredSemester": "Please select a semester.",
+          "requiredDept": "Please select a department.",
+          "requiredCurricular": "Please select a course.",
+          "requiredDayOfWeek": "Please select a day.",
+          "requiredPeriod": "Please select a period.",
+          "requiredCapacity": "Please enter capacity.",
+          "requiredLocation": "Please enter a location.",
+          "requiredProfessor": "Please select a professor."
+        }
+      }
+    }
+  },
+  "extraCurricular": {
+    "status": {
+      "offering": {
+        "DRAFT": "Draft",
+        "OPEN": "Enrollment Open",
+        "ENROLLMENT_CLOSED": "Enrollment Closed",
+        "IN_PROGRESS": "In Progress",
+        "COMPLETED": "Completed (Finalized)",
+        "CANCELED": "Canceled"
+      },
+      "apply": {
+        "APPLIED": "Applied",
+        "CANCELED": "Canceled"
+      },
+      "session": {
+        "OPEN": "Open",
+        "CLOSED": "Closed",
+        "CANCELED": "Canceled"
+      },
+      "attended": {
+        "ATTENDED": "Attended",
+        "ABSENT": "Absent"
+      }
+    },
+    "adminOfferingDetail": {
+      "page": {
+        "loading": "Loading...",
+        "loadError": "An error occurred.",
+        "empty": "No data available.",
+        "title": "Extra-Curricular Offering Management",
+        "backButton": "Back to list"
+      },
+      "tabs": {
+        "detail": "Detail",
+        "session": "Sessions",
+        "students": "Students",
+        "competencies": "Competencies"
+      },
+      "detail": {
+        "sections": {
+          "program": "Program",
+          "operation": "Operation",
+          "contact": "Contact",
+          "remark": "Remarks"
+        },
+        "fields": {
+          "programCode": "Program Code",
+          "programName": "Program Name",
+          "hostOrgName": "Host Organization",
+          "offeringCode": "Offering Code",
+          "rewardPoint": "Points",
+          "recognizedHours": "Recognized Hours",
+          "enrolledCount": "Enrolled",
+          "semester": "Semester",
+          "operationStartDate": "Operation Start Date",
+          "operationEndDate": "Operation End Date",
+          "operationStartDatePlaceholder": "Select start date",
+          "operationEndDatePlaceholder": "Select end date",
+          "contactName": "Contact Name",
+          "contactPhone": "Contact Phone",
+          "contactEmail": "Contact Email",
+          "description": "Description"
+        },
+        "messages": {
+          "requiredOfferingCode": "Please enter an offering code.",
+          "requiredOfferingName": "Please enter an offering name.",
+          "requiredSemester": "Please select a semester.",
+          "invalidRewardPoint": "Default points must be 0 or greater.",
+          "invalidRecognizedHours": "Default recognized hours must be 0 or greater.",
+          "requiredOperationStartDate": "Please select an operation start date.",
+          "requiredOperationEndDate": "Please select an operation end date.",
+          "invalidOperationPeriod": "Start date cannot be later than end date.",
+          "invalidContactEmail": "Contact email format is invalid.",
+          "onlyDraft": "Editable only in Draft status.",
+          "saveFailed": "Failed to update."
+        }
+      },
+      "students": {
+        "headers": {
+          "studentName": "Student Name",
+          "studentNo": "Student ID",
+          "gradeLevel": "Year",
+          "deptName": "Department",
+          "applyStatus": "Application Status",
+          "completionStatus": "Completion Status",
+          "attendanceAction": "Attendance"
+        },
+        "innerHeaders": {
+          "sessionName": "Session Name",
+          "sessionStatus": "Session Status",
+          "attendance": "Attendance"
+        },
+        "buttons": {
+          "view": "View",
+          "close": "Close"
+        },
+        "messages": {
+          "noSessions": "No sessions."
+        },
+        "emptyText": "No applicants."
+      },
+      "sessions": {
+        "createButton": "Create Session",
+        "headers": {
+          "sessionName": "Session Name",
+          "rewardPoint": "Session Points",
+          "recognizedHours": "Session Hours",
+          "startAt": "Start Period",
+          "endAt": "End Period",
+          "status": "Status",
+          "manage": "Manage"
+        },
+        "buttons": {
+          "detail": "Detail",
+          "close": "Close"
+        },
+        "emptyText": "No sessions."
+      },
+      "competencies": {
+        "labels": {
+          "hostOrgName": "Host Organization",
+          "mainCompetencies": "Primary Competencies"
+        },
+        "titles": {
+          "mapping": "Competency Mapping",
+          "radar": "Competency Mapping Radar Chart"
+        },
+        "messages": {
+          "loading": "Loading...",
+          "loadError": "Failed to load.",
+          "saved": "Competency mapping has been saved.",
+          "duplicateWeight": "This score is already used by another competency.",
+          "saveFailed": "Save failed"
+        },
+        "buttons": {
+          "saving": "Saving..."
+        }
+      },
+      "radar": {
+        "empty": "Please register competency scores.",
+        "tooltip": "{value} points"
+      },
+      "status": {
+        "title": "Change Status",
+        "confirmYes": "Yes",
+        "confirmNo": "No",
+        "messages": {
+          "confirmText": "Do you want to change the status? (This action cannot be undone.)",
+          "updateFailed": "Failed to change status."
+        }
+      }
+    }
+  }
+}

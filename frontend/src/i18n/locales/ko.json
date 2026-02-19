@@ -1,0 +1,651 @@
+{
+  "topbar": {
+    "todayTitle": "오늘 날짜",
+    "sessionTitle": "자동 로그아웃까지 남은 시간",
+    "sessionPrefix": "세션",
+    "sessionEmpty": "세션 --:--",
+    "profileTitle": "프로필",
+    "fallback": {
+      "student": "학생",
+      "admin": "관리자",
+      "professor": "교수"
+    }
+  },
+  "menu": {
+    "common": {
+      "sidebarTitle": "상세 메뉴",
+      "logoAlt": {
+        "student": "메인 페이지로 이동",
+        "admin": "관리자 메인으로 이동",
+        "professor": "교수 메인으로 이동"
+      }
+    },
+    "student": {
+      "sections": {
+        "community": {
+          "title": "커뮤니티",
+          "items": {
+            "notices": "공지사항",
+            "resources": "자료실",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "course": {
+          "title": "교과",
+          "items": {
+            "offerings": "수강 신청",
+            "enrollments": "수강 신청현황",
+            "currentEnrollments": "수강중 교과",
+            "gradeReports": "교과 성적"
+          }
+        },
+        "extra": {
+          "title": "비교과",
+          "items": {
+            "offerings": "비교과 프로그램 신청",
+            "enrollments": "비교과 프로그램 신청현황",
+            "currentEnrollments": "이수중 비교과",
+            "gradeReports": "비교과 성적"
+          }
+        },
+        "mentoring": {
+          "title": "멘토링",
+          "items": {
+            "apply": "멘티 신청",
+            "chat": "멘토링 채팅"
+          }
+        },
+        "competency": {
+          "title": "역량진단",
+          "items": {
+            "introduce": "6Cs 란?",
+            "diagnosis": "진단목록",
+            "result": "결과 조회"
+          }
+        },
+        "survey": {
+          "title": "설문",
+          "items": {
+            "list": "설문 목록"
+          }
+        },
+        "space": {
+          "title": "학습공간대여",
+          "items": {
+            "spaces": "학습공간대여 및 신청",
+            "rentals": "신청내역확인"
+          }
+        },
+        "aiAdvisor": {
+          "title": "AI 어드바이저",
+          "items": {
+            "mbti": "직업매칭(MBTI)"
+          }
+        }
+      }
+    },
+    "professor": {
+      "sections": {
+        "community": {
+          "title": "커뮤니티",
+          "items": {
+            "notices": "공지사항",
+            "resources": "자료실",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "competency": {
+          "title": "역량 관리",
+          "items": {
+            "dashboard": "역량 조회"
+          }
+        },
+        "course": {
+          "title": "교과 관리",
+          "items": {
+            "offerings": "내 강의 목록",
+            "syllabus": "강의 계획서",
+            "grades": "성적 입력",
+            "attendance": "출석 관리"
+          }
+        },
+        "mentoring": {
+          "title": "멘토링",
+          "items": {
+            "apply": "멘토 요청",
+            "chat": "멘토링 채팅"
+          }
+        }
+      }
+    },
+    "admin": {
+      "sections": {
+        "community": {
+          "title": "커뮤니티",
+          "items": {
+            "notices": "공지사항",
+            "resources": "자료실",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "authority": {
+          "title": "권한 관리",
+          "items": {
+            "departments": "학과관리",
+            "accounts": "계정관리",
+            "semesters": "학기관리"
+          }
+        },
+        "systemStatus": {
+          "title": "시스템현황 관리",
+          "items": {
+            "accountLogs": "계정로그관리"
+          }
+        },
+        "survey": {
+          "title": "설문 통합 관리",
+          "items": {
+            "surveys": "설문 목록",
+            "statistics": "설문 통계"
+          }
+        },
+        "competency": {
+          "title": "역량 통합 관리",
+          "items": {
+            "intro": "6Cs 란?",
+            "students": "학생역량활동조회",
+            "diagnosis": "역량진단지 관리"
+          }
+        },
+        "course": {
+          "title": "교과 관리",
+          "items": {
+            "curriculars": "교과 관리",
+            "offerings": "교과운영 관리",
+            "grades": "교과성적 관리"
+          }
+        },
+        "extra": {
+          "title": "비교과 관리",
+          "items": {
+            "programs": "비교과 관리",
+            "offerings": "비교과운영 관리",
+            "grades": "비교과성적관리"
+          }
+        },
+        "mentoring": {
+          "title": "멘토링",
+          "items": {
+            "recruitments": "모집 공고 등록",
+            "applications": "신청 승인",
+            "matching": "멘토-멘티 매칭"
+          }
+        },
+        "space": {
+          "title": "학습 공간 대여",
+          "items": {
+            "spaces": "학습공간 목록",
+            "rentals": "학습공간 신청 목록"
+          }
+        }
+      }
+    }
+  },
+  "curricular": {
+    "common": {
+      "manageHeader": "관리",
+      "detailButton": "상세",
+      "editButton": "수정",
+      "registerButton": "등록",
+      "saveButton": "저장",
+      "cancelButton": "취소",
+      "closeButton": "닫기"
+    },
+    "status": {
+      "offering": {
+        "DRAFT": "작성중",
+        "OPEN": "개설",
+        "ENROLLMENT_CLOSED": "수강신청마감",
+        "IN_PROGRESS": "운영중",
+        "COMPLETED": "운영종료",
+        "CANCELED": "폐강"
+      },
+      "active": {
+        "ACTIVE": "활성",
+        "INACTIVE": "비활성"
+      },
+      "enrollment": {
+        "ENROLLED": "수강",
+        "CANCELED": "수강취소"
+      },
+      "completion": {
+        "IN_PROGRESS": "이수중",
+        "PASSED": "이수완료",
+        "FAILED": "미이수"
+      }
+    },
+    "dayOfWeek": {
+      "MONDAY": {
+        "short": "월",
+        "long": "월요일"
+      },
+      "TUESDAY": {
+        "short": "화",
+        "long": "화요일"
+      },
+      "WEDNESDAY": {
+        "short": "수",
+        "long": "수요일"
+      },
+      "THURSDAY": {
+        "short": "목",
+        "long": "목요일"
+      },
+      "FRIDAY": {
+        "short": "금",
+        "long": "금요일"
+      },
+      "SATURDAY": {
+        "short": "토",
+        "long": "토요일"
+      },
+      "SUNDAY": {
+        "short": "일",
+        "long": "일요일"
+      }
+    },
+    "studentOfferings": {
+      "title": "교과 수강 신청",
+      "searchPlaceholder": "교과목명/코드 검색",
+      "table": {
+        "offeringCode": "개설코드",
+        "curricularName": "교과목명",
+        "professorName": "담당교수",
+        "semesterName": "학기",
+        "credit": "학점",
+        "competency1": "역량1",
+        "competency2": "역량2",
+        "capacity": "인원수",
+        "enrolledCount": "신청인원",
+        "emptyText": "교과운영이 없습니다."
+      }
+    },
+    "professorOfferings": {
+      "title": "내 강의 목록",
+      "searchPlaceholder": "교과목명/코드 검색",
+      "table": {
+        "offeringCode": "개설코드",
+        "curricularName": "교과목명",
+        "capacity": "인원수",
+        "professorName": "담당교수",
+        "semesterName": "학기",
+        "location": "장소",
+        "credit": "학점",
+        "status": "상태",
+        "emptyText": "교과운영이 없습니다."
+      }
+    },
+    "adminCurriculars": {
+      "title": "교과 관리",
+      "searchPlaceholder": "교과목명/코드 검색",
+      "registerButton": "교과 등록",
+      "table": {
+        "curricularCode": "교과코드",
+        "curricularName": "교과목명",
+        "deptName": "주관학과",
+        "credits": "학점",
+        "status": "사용여부",
+        "emptyText": "교과가 없습니다."
+      }
+    },
+    "adminOfferings": {
+      "title": "교과운영 관리",
+      "searchPlaceholder": "교과운영명/코드 검색",
+      "registerButton": "운영등록",
+      "table": {
+        "offeringCode": "개설코드",
+        "curricularName": "교과목명",
+        "capacity": "인원수",
+        "professorName": "담당교수",
+        "semesterName": "학기",
+        "location": "장소",
+        "credit": "학점",
+        "status": "상태",
+        "emptyText": "교과운영이 없습니다."
+      }
+    },
+    "adminGrades": {
+      "title": "교과 성적 관리",
+      "searchPlaceholder": "학번/이름 검색",
+      "table": {
+        "studentNo": "학번",
+        "deptName": "소속학과",
+        "gradeLevel": "학년",
+        "name": "이름",
+        "gpa": "GPA",
+        "emptyText": "교과성적 정보가 없습니다."
+      }
+    },
+    "adminOfferingDetail": {
+      "page": {
+        "loading": "불러오는 중...",
+        "loadError": "에러가 발생했습니다.",
+        "empty": "데이터가 없습니다.",
+        "title": "교과운영 운영관리",
+        "backButton": "목록"
+      },
+      "tabs": {
+        "detail": "상세",
+        "students": "학생",
+        "competencies": "역량"
+      },
+      "detail": {
+        "sections": {
+          "course": "교과",
+          "operation": "운영",
+          "professor": "담당교수",
+          "remark": "비고"
+        },
+        "fields": {
+          "curricularName": "교과명",
+          "deptName": "주관학과",
+          "credits": "학점",
+          "offeringCode": "운영코드",
+          "enrolledCount": "등록인원",
+          "capacity": "수용인원",
+          "semester": "학기",
+          "dayOfWeek": "요일",
+          "period": "교시",
+          "periodValue": "{period}교시",
+          "location": "장소",
+          "professor": "담당교수",
+          "professorName": "담당교수명",
+          "phone": "전화번호",
+          "email": "이메일",
+          "description": "설명"
+        },
+        "messages": {
+          "onlyDraft": "DRAFT 상태에서만 수정할 수 있습니다.",
+          "requiredDayOfWeek": "요일을 선택해 주세요.",
+          "saveFailed": "수정에 실패했습니다.",
+          "selectProfessorHint": "교수 선택 후 반영"
+        }
+      },
+      "students": {
+        "headers": {
+          "studentName": "학생명",
+          "studentNo": "학번",
+          "gradeLevel": "학년",
+          "deptName": "소속학과",
+          "rawScore": "점수",
+          "grade": "등급",
+          "enrollmentStatus": "수강상태",
+          "completionStatus": "이수상태",
+          "scoreAction": "점수등록"
+        },
+        "buttons": {
+          "input": "입력",
+          "saving": "저장중..."
+        },
+        "messages": {
+          "scoreRange": "점수는 0 ~ 100 사이 숫자만 입력할 수 있어요",
+          "savingToast": "저장중...",
+          "savedToast": "점수가 저장되었습니다.",
+          "saveFailed": "저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+          "canEditOnlyInProgress": "수강중(IN_PROGRESS) 상태에서만 점수 수정이 가능합니다."
+        },
+        "emptyText": "이수학생이 없습니다."
+      },
+      "competencies": {
+        "labels": {
+          "professor": "담당교수",
+          "mainCompetencies": "주역량"
+        },
+        "titles": {
+          "mapping": "역량 맵핑",
+          "radar": "역량맵핑 레이더차트"
+        },
+        "messages": {
+          "loading": "불러오는 중...",
+          "loadError": "조회 실패",
+          "saved": "역량 맵핑이 저장되었습니다.",
+          "duplicateWeight": "이미 다른 역량이 사용 중인 점수입니다.",
+          "saveFailed": "저장 실패"
+        },
+        "buttons": {
+          "saving": "저장중..."
+        }
+      },
+      "radar": {
+        "empty": "역량 점수를 등록해주세요.",
+        "tooltip": "{value}점"
+      },
+      "status": {
+        "title": "상태 변경",
+        "confirmYes": "예",
+        "confirmNo": "아니오",
+        "messages": {
+          "confirmText": "상태를 변경하시겠습니까? (상태는 되돌릴 수 없습니다.)",
+          "updateFailed": "상태변경에 실패했습니다."
+        }
+      }
+    },
+    "modal": {
+      "curricularCreate": {
+        "title": "교과 등록",
+        "curricularCodeLabel": "교과코드",
+        "curricularNameLabel": "교과명",
+        "deptLabel": "주관학과",
+        "creditsLabel": "학점",
+        "descriptionLabel": "설명",
+        "curricularCodePlaceholder": "예) CS101",
+        "curricularNamePlaceholder": "예) 자료구조",
+        "creditsPlaceholder": "예) 3",
+        "descriptionPlaceholder": "교과 설명을 입력하세요.",
+        "submitFailed": "등록에 실패했습니다.",
+        "validation": {
+          "requiredCurricularCode": "교과코드를 입력하세요.",
+          "requiredCurricularName": "교과이름을 입력하세요.",
+          "requiredDept": "주관학과를 선택하세요.",
+          "requiredCredits": "부여 학점을 입력하세요.",
+          "requiredDescription": "교과 설명을 입력하세요."
+        }
+      },
+      "curricularEdit": {
+        "title": "교과목 수정",
+        "activeAriaLabel": "활성 여부",
+        "curricularCodeLabel": "교과목 코드",
+        "curricularNameLabel": "교과목명",
+        "deptLabel": "주관학과",
+        "creditsLabel": "학점",
+        "descriptionLabel": "설명",
+        "submitFailed": "교과 수정에 실패했습니다."
+      },
+      "offeringCreate": {
+        "title": "교과운영 등록",
+        "offeringCodeLabel": "교과운영코드",
+        "semesterLabel": "학기",
+        "deptLabel": "주관학과",
+        "curricularLabel": "교과",
+        "dayOfWeekLabel": "요일",
+        "periodLabel": "교시",
+        "capacityLabel": "인원수",
+        "locationLabel": "장소",
+        "professorLabel": "담당교수",
+        "professorEmailLabel": "교수 이메일",
+        "professorPhoneLabel": "교수 전화번호",
+        "offeringCodePlaceholder": "예) CS101-1",
+        "capacityPlaceholder": "예) 30",
+        "locationPlaceholder": "예) 본관 302호",
+        "submitFailed": "등록에 실패했습니다.",
+        "validation": {
+          "requiredOfferingCode": "교과운영코드를 입력하세요.",
+          "requiredSemester": "학기를 선택하세요.",
+          "requiredDept": "주관학과를 선택하세요.",
+          "requiredCurricular": "교과를 선택하세요.",
+          "requiredDayOfWeek": "요일을 선택하세요.",
+          "requiredPeriod": "교시를 입력하세요.",
+          "requiredCapacity": "인원수를 입력하세요.",
+          "requiredLocation": "장소를 입력하세요.",
+          "requiredProfessor": "담당교수를 선택하세요."
+        }
+      }
+    }
+  },
+  "extraCurricular": {
+    "status": {
+      "offering": {
+        "DRAFT": "작성중",
+        "OPEN": "등록열림",
+        "ENROLLMENT_CLOSED": "등록마감",
+        "IN_PROGRESS": "진행중",
+        "COMPLETED": "완료(성적확정)",
+        "CANCELED": "취소"
+      },
+      "apply": {
+        "APPLIED": "신청",
+        "CANCELED": "취소"
+      },
+      "session": {
+        "OPEN": "진행중",
+        "CLOSED": "종료",
+        "CANCELED": "취소"
+      },
+      "attended": {
+        "ATTENDED": "출석",
+        "ABSENT": "미출석"
+      }
+    },
+    "adminOfferingDetail": {
+      "page": {
+        "loading": "불러오는 중...",
+        "loadError": "에러가 발생했습니다.",
+        "empty": "데이터가 없습니다.",
+        "title": "비교과운영 운영관리",
+        "backButton": "목록"
+      },
+      "tabs": {
+        "detail": "상세",
+        "session": "회차",
+        "students": "학생",
+        "competencies": "역량"
+      },
+      "detail": {
+        "sections": {
+          "program": "비교과",
+          "operation": "운영",
+          "contact": "담당자",
+          "remark": "비고"
+        },
+        "fields": {
+          "programCode": "비교과코드",
+          "programName": "비교과명",
+          "hostOrgName": "주관기관",
+          "offeringCode": "운영코드",
+          "rewardPoint": "포인트",
+          "recognizedHours": "인정시간",
+          "enrolledCount": "등록인원",
+          "semester": "학기",
+          "operationStartDate": "운영 시작일",
+          "operationEndDate": "운영 종료일",
+          "operationStartDatePlaceholder": "시작일 선택",
+          "operationEndDatePlaceholder": "종료일 선택",
+          "contactName": "담당자명",
+          "contactPhone": "담당자 전화",
+          "contactEmail": "담당자 이메일",
+          "description": "설명"
+        },
+        "messages": {
+          "requiredOfferingCode": "운영코드를 입력하세요.",
+          "requiredOfferingName": "운영명을 입력하세요.",
+          "requiredSemester": "학기를 선택하세요.",
+          "invalidRewardPoint": "포인트(기본)는 0 이상이어야 합니다.",
+          "invalidRecognizedHours": "인정시간(기본)은 0 이상이어야 합니다.",
+          "requiredOperationStartDate": "운영 시작일을 선택하세요.",
+          "requiredOperationEndDate": "운영 종료일을 선택하세요.",
+          "invalidOperationPeriod": "시작일은 종료일보다 늦을 수 없습니다.",
+          "invalidContactEmail": "담당자 이메일 형식이 올바르지 않습니다.",
+          "onlyDraft": "DRAFT 상태에서만 수정할 수 있습니다.",
+          "saveFailed": "수정에 실패했습니다."
+        }
+      },
+      "students": {
+        "headers": {
+          "studentName": "학생명",
+          "studentNo": "학번",
+          "gradeLevel": "학년",
+          "deptName": "소속학과",
+          "applyStatus": "신청상태",
+          "completionStatus": "이수상태",
+          "attendanceAction": "출석조회"
+        },
+        "innerHeaders": {
+          "sessionName": "회차명",
+          "sessionStatus": "회차상태",
+          "attendance": "출석"
+        },
+        "buttons": {
+          "view": "조회",
+          "close": "닫기"
+        },
+        "messages": {
+          "noSessions": "회차가 없습니다."
+        },
+        "emptyText": "신청 학생이 없습니다."
+      },
+      "sessions": {
+        "createButton": "회차 생성",
+        "headers": {
+          "sessionName": "회차명",
+          "rewardPoint": "회차포인트",
+          "recognizedHours": "회차인정시간",
+          "startAt": "시작기간",
+          "endAt": "마감기간",
+          "status": "상태",
+          "manage": "관리"
+        },
+        "buttons": {
+          "detail": "상세",
+          "close": "닫기"
+        },
+        "emptyText": "회차가 없습니다."
+      },
+      "competencies": {
+        "labels": {
+          "hostOrgName": "주관기관",
+          "mainCompetencies": "주역량"
+        },
+        "titles": {
+          "mapping": "역량 맵핑",
+          "radar": "역량맵핑 레이더차트"
+        },
+        "messages": {
+          "loading": "불러오는 중...",
+          "loadError": "조회 실패",
+          "saved": "역량 맵핑이 저장되었습니다.",
+          "duplicateWeight": "이미 다른 역량이 사용 중인 점수입니다.",
+          "saveFailed": "저장 실패"
+        },
+        "buttons": {
+          "saving": "저장중..."
+        }
+      },
+      "radar": {
+        "empty": "역량 점수를 등록해주세요.",
+        "tooltip": "{value}점"
+      },
+      "status": {
+        "title": "상태 변경",
+        "confirmYes": "예",
+        "confirmNo": "아니오",
+        "messages": {
+          "confirmText": "상태를 변경하시겠습니까? (상태는 되돌릴 수 없습니다.)",
+          "updateFailed": "상태변경에 실패했습니다."
+        }
+      }
+    }
+  }
+}
