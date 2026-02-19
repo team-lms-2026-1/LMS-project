@@ -67,7 +67,8 @@ public class AdminAccountController {
                         @RequestParam(defaultValue = "1") int page,
                         @RequestParam(defaultValue = "20") int size,
                         @RequestParam(required = false) String keyword,
-                        @RequestParam(required = false) AccountType accountType) {
+                        @RequestParam(required = false) AccountType accountType,
+                        @RequestParam(required = false) Long deptId) {
                 int safePage = Math.max(page, 1);
                 int safeSize = Math.min(Math.max(size, 1), 100);
 
@@ -76,7 +77,7 @@ public class AdminAccountController {
                                 safeSize,
                                 Sort.by(Sort.Direction.DESC, "createdAt"));
 
-                Page<AdminAccountListItem> result = accountService.adminList(keyword, accountType, pageable);
+                Page<AdminAccountListItem> result = accountService.adminList(keyword, accountType, deptId, pageable);
 
                 return ApiResponse.of(
                                 result.getContent(),
