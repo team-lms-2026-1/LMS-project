@@ -39,6 +39,7 @@ export function useExtraCurricularOfferingList() {
   const [size, setSize] = useState(10);
 
   const [keyword, setKeyword] = useState("");
+  const [semesterId, setSemesterId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +49,12 @@ export function useExtraCurricularOfferingList() {
       setLoading(true);
       setError(null);
 
-      const res = await fetchCurricularOfferingsList({ page, size });
+      const res = await fetchCurricularOfferingsList({
+        page,
+        size,
+        keyword: keyword || undefined,
+        semesterId: semesterId ?? undefined,
+      });
 
       setItems(res.data);
       setMeta(res.meta ?? defaultMeta); // cleaned comment
@@ -60,7 +66,7 @@ export function useExtraCurricularOfferingList() {
     } finally {
       setLoading(false);
     }
-  }, [page, size, keyword]);
+  }, [page, size, keyword, semesterId]);
 
   useEffect(() => {
     void load();
@@ -72,6 +78,7 @@ export function useExtraCurricularOfferingList() {
       meta,
       page,
       size,
+      semesterId,
       loading,
       error,
     },
@@ -79,6 +86,13 @@ export function useExtraCurricularOfferingList() {
       setKeyword,
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
+      setSemesterId: (id: number | null) => {
+        setPage(1);
+        setSemesterId((prev) => {
+          if (prev === id) return prev;
+          return id;
+        });
+      },
 
       // cleaned comment
       setSize: (s: number) => {

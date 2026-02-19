@@ -3,6 +3,7 @@
 import { Table, type TableColumn } from "@/components/table";
 import styles from "./ExtraCurricularGradeTable.module.css";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 import type { ExtraCurricularGradeListItemDto } from "../../api/types";
 
@@ -13,15 +14,18 @@ type Props = {
 };
 
 export function ExtraCurricularGradeTable({ items, loading, onRowClick }: Props) {
+  const t = useI18n("extraCurricular.adminGrades.table");
+  const tCommon = useI18n("extraCurricular.common");
+
   const columns: Array<TableColumn<ExtraCurricularGradeListItemDto>> = [
-    { header: "학번", align: "center", render: (r) => r.studentNo },
-    { header: "소속학과", align: "center", render: (r) => r.deptName },
-    { header: "학년", align: "center", render: (r) => r.gradeLevel },
-    { header: "이름", align: "center", render: (r) => r.name },
-    { header: "총 이수 포인트", align: "center", render: (r) => r.totalEarnedPoints },
-    { header: "총 이수 시간", align: "center", render: (r) => r.totalEarnedHours },
+    { header: t("studentNo"), align: "center", render: (r) => r.studentNo },
+    { header: t("deptName"), align: "center", render: (r) => r.deptName },
+    { header: t("gradeLevel"), align: "center", render: (r) => r.gradeLevel },
+    { header: t("name"), align: "center", render: (r) => r.name },
+    { header: t("totalEarnedPoints"), align: "center", render: (r) => r.totalEarnedPoints },
+    { header: t("totalEarnedHours"), align: "center", render: (r) => r.totalEarnedHours },
     {
-      header: "관리",
+      header: tCommon("manageHeader"),
       width: 140,
       align: "center",
       stopRowClick: true,
@@ -34,7 +38,7 @@ export function ExtraCurricularGradeTable({ items, loading, onRowClick }: Props)
               onRowClick?.(r);
             }}
           >
-            상세
+            {tCommon("detailButton")}
           </Button>
         </div>
       ),
@@ -48,7 +52,7 @@ export function ExtraCurricularGradeTable({ items, loading, onRowClick }: Props)
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.studentAccountId}
-      emptyText="비교과 성적 정보가 없습니다."
+      emptyText={t("emptyText")}
       onRowClick={onRowClick ? (row) => onRowClick(row) : undefined}
     />
   );

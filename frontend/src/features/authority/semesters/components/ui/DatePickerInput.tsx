@@ -5,6 +5,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { format, parseISO } from "date-fns";
 import styles from "./DatePickerInput.module.css";
+import { useLocale } from "@/hooks/useLocale";
 
 type Props = {
   value: string; // "yyyy-MM-dd" or ""
@@ -31,13 +32,14 @@ function toDate(value: string): Date | undefined {
 export function DatePickerInput({
   value,
   onChange,
-  placeholder = "날짜 선택",
+  placeholder,
   disabled = false,
   min,
   max,
   className,
   closeSignal,
 }: Props) {
+  const { locale } = useLocale();
   const [open, setOpen] = useState(false);
 
   const btnRef = useRef<HTMLButtonElement | null>(null);
@@ -83,6 +85,9 @@ export function DatePickerInput({
   }, [open]);
 
   const label = selected ? format(selected, "yyyy-MM-dd") : "";
+  const resolvedPlaceholder =
+    placeholder ??
+    (locale === "en" ? "Select date" : locale === "ja" ? "日付を選択" : "날짜 선택");
 
   // ✅ fixed popover 좌표 (렌더 시점에 계산)
   const rect = btnRef.current?.getBoundingClientRect();
@@ -110,7 +115,7 @@ export function DatePickerInput({
         disabled={disabled}
       >
         <span className={label ? styles.text : styles.placeholder}>
-          {label || placeholder}
+          {label || resolvedPlaceholder}
         </span>
         <span className={styles.chev}>▾</span>
       </button>

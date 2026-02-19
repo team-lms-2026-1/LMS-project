@@ -9,9 +9,11 @@ import { SemesterCreateModal } from "../modal/SemesterCreateModal";
 import styles from "./SemestersPage.client.module.css";
 import { SemesterEditModal } from "../modal/SemesterEditModal";
 import { OutButton } from "@/components/button/OutButton";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function SemestersPageClient() {
   const { state, actions } = useSemestersList();
+  const t = useI18n("authority.semesters.page");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
@@ -35,7 +37,7 @@ export default function SemestersPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>학기 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
@@ -53,7 +55,7 @@ export default function SemestersPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            학기등록
+            {t("registerButton")}
           </OutButton>
         </div>
 

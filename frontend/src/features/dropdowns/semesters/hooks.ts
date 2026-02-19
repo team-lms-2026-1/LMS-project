@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { fetchSemestersDropdown } from "./api";
-import type { SelectOption } from "./types";
+import type { SelectOption, SemesterItem } from "./types";
+import { useLocale } from "@/hooks/useLocale";
+import { localizeSemesterOptionLabel } from "./localeLabel";
 
 export type UseSemetersDropdownOptionsResult = {
   options: SelectOption[];
@@ -12,7 +14,8 @@ export type UseSemetersDropdownOptionsResult = {
 };
 
 export function useSemestersDropdownOptions(): UseSemetersDropdownOptionsResult {
-  const [options, setOptions] = React.useState<SelectOption[]>([]);
+  const { locale } = useLocale();
+  const [items, setItems] = React.useState<SemesterItem[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<unknown>(null);
 
@@ -22,17 +25,22 @@ export function useSemestersDropdownOptions(): UseSemetersDropdownOptionsResult 
 
     try {
       const res = await fetchSemestersDropdown();
-      const next = (res.data ?? []).map((d) => ({
-        value: String(d.semesterId),
-        label: d.displayName,
-      }));
-      setOptions(next);
+      setItems(res.data ?? []);
     } catch (e) {
       setError(e);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const options = React.useMemo<SelectOption[]>(
+    () =>
+      items.map((d) => ({
+        value: String(d.semesterId),
+        label: localizeSemesterOptionLabel(d.displayName, locale),
+      })),
+    [items, locale]
+  );
 
   React.useEffect(() => {
     // 최초 1회 로드

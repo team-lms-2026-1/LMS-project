@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchSemesterDetail, fetchSemestersList } from "../api/semestersApi";
 import type { SemesterItem, SemesterListItemDto, PageMeta, SemesterDetailDto } from "../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -27,6 +28,7 @@ function mapDto(dto: SemesterListItemDto): SemesterItem {
 }
 
 export function useSemestersList() {
+  const t = useI18n("authority.semesters.errors");
   const [items, setItems] = useState<SemesterItem[]>([]);
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
@@ -52,13 +54,13 @@ export function useSemestersList() {
       setMeta(res.meta);
     } catch (e: any) {
       console.error("[useSemestersList]", e);
-      setError(e.message ?? "학기 목록 조회 실패");
+      setError(e?.message ?? t("listLoadFailed"));
       setItems([]);
       setMeta(defaultMeta); // cleaned comment
     } finally {
       setLoading(false);
     }
-  }, [page, size, keyword]);
+  }, [page, size, keyword, t]);
 
   useEffect(() => {
     load();
@@ -93,6 +95,7 @@ export function useSemestersList() {
 
 // cleaned comment
 export function useSemesterDetail(semesterId?: string, enabled: boolean = true) {
+  const t = useI18n("authority.semesters.errors");
   const [data, setData] = useState<SemesterDetailDto | null>(null);
   
   const [loading, setLoading] = useState(false);
@@ -106,7 +109,7 @@ export function useSemesterDetail(semesterId?: string, enabled: boolean = true) 
       setData(res.data);
     } catch (e) {
       console.error("[useSemesterDetail]", e);
-      setError("조회 실패");
+      setError(t("detailLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -116,7 +119,7 @@ export function useSemesterDetail(semesterId?: string, enabled: boolean = true) 
     if (!enabled) return;
     if (!semesterId) return;
     void load(semesterId);
-  }, [semesterId, enabled]);
+  }, [semesterId, enabled, t]);
 
   return { state : { data, loading, error }, actions: { load }};
 }
