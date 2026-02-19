@@ -77,10 +77,9 @@ type NormalizedRadarSeries = {
 export default function ResultPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dignosisId = searchParams.get("dignosisId") ?? "1";
-  const semesterIdParam = searchParams.get("semesterId");
-  const semesterNameParam = searchParams.get("semesterName");
-  const semesterId = semesterIdParam ?? (semesterNameParam ? "" : "1");
+  const dignosisId = searchParams.get("dignosisId")?.trim() ?? "";
+  const semesterIdParam = searchParams.get("semesterId")?.trim() ?? "";
+  const semesterNameParam = searchParams.get("semesterName")?.trim() ?? "";
   const statusParam = searchParams.get("status");
   const deptIdParam = searchParams.get("deptId")?.trim() ?? "";
   const deptNameParam =
@@ -99,7 +98,7 @@ export default function ResultPageClient() {
     const normalize = (value: string) =>
       value
         .replace(/\s+/g, "")
-        .replace(/학년/g, "")
+        .replace(/학년도/g, "")
         .replace(/학기/g, "")
         .replace(/-/g, "")
         .toLowerCase();
@@ -123,8 +122,8 @@ export default function ResultPageClient() {
 
   const query = useMemo(() => {
     if (!dignosisId) return undefined;
-    const semesterQuery = semesterId
-      ? { semesterId }
+    const semesterQuery = semesterIdParam
+      ? { semesterId: semesterIdParam }
       : semesterNameParam
         ? { semesterName: semesterNameParam }
         : {};
@@ -138,7 +137,7 @@ export default function ResultPageClient() {
     }
     if (deptNameParam) return { dignosisId, deptName: deptNameParam, ...semesterQuery };
     return { dignosisId, ...semesterQuery };
-  }, [dignosisId, deptIdParam, deptNameParam, semesterId, semesterNameParam]);
+  }, [dignosisId, deptIdParam, deptNameParam, semesterIdParam, semesterNameParam]);
 
   const { state, actions } = useResultList(query);
 
@@ -201,7 +200,7 @@ export default function ResultPageClient() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.topBar}>
-          <h1 className={styles.title}>역량 종합 관리</h1>
+          <h1 className={styles.title}>진단 결과 관리</h1>
           <div className={styles.topActions}>
             {isClosed && (
               <Button
@@ -220,11 +219,11 @@ export default function ResultPageClient() {
 
         <div className={styles.summaryRow}>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>대상자 수</div>
+            <div className={styles.summaryLabel}>대상자수</div>
             <div className={styles.summaryValue}>{formatNumber(summary.totalCount)}</div>
           </div>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>산출 대상자 수</div>
+            <div className={styles.summaryLabel}>산출대상자수</div>
             <div className={styles.summaryValue}>{formatNumber(summary.calculatedCount)}</div>
           </div>
           <div className={styles.summaryCard}>
@@ -248,11 +247,7 @@ export default function ResultPageClient() {
                     <PolarAngleAxis dataKey="name" tick={{ className: styles.radarTick }} />
                     <PolarRadiusAxis tick={false} axisLine={false} />
                     <Tooltip formatter={(v) => formatScore(v)} />
-                    <Legend
-                      verticalAlign="bottom"
-                      height={12}
-                      content={renderRadarLegend}
-                    />
+                    <Legend verticalAlign="bottom" height={12} content={renderRadarLegend} />
                     {filteredRadarSeries.map((series, index) => (
                       <Radar
                         key={series.deptName}
@@ -284,11 +279,7 @@ export default function ResultPageClient() {
                     <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
                     <YAxis tick={{ className: styles.axisTick }} />
                     <Tooltip />
-                    <Legend
-                      verticalAlign="bottom"
-                      align="center"
-                      content={renderLineLegend}
-                    />
+                    <Legend verticalAlign="bottom" align="center" content={renderLineLegend} />
                     {trendSeries.map((s, i) => (
                       <Line
                         key={s.name}
@@ -318,7 +309,7 @@ export default function ResultPageClient() {
                 <thead>
                   <tr>
                     <th>역량 이름</th>
-                    <th>대상자/산출대상자</th>
+                    <th>대상자수/산출대상자수</th>
                     <th>평균</th>
                     <th>중간값</th>
                     <th>표준편차</th>

@@ -28,7 +28,7 @@ export function useResultList(query?: ResultCompetencyQuery, enabled: boolean = 
         setData(res.data ?? null);
       } catch (e: any) {
         console.error("[useResultList]", e);
-        setError(e?.message ?? "역량 종합 결과를 불러오지 못했습니다.");
+        setError(e?.message ?? "진단 결과를 불러오지 못했습니다.");
         setData(null);
       } finally {
         setLoading(false);

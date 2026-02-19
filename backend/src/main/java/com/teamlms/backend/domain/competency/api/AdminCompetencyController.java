@@ -76,13 +76,15 @@ public class AdminCompetencyController {
             @RequestParam(required = false) Long semesterId,
             @RequestParam(required = false) String semesterName,
             @RequestParam(required = false) Long deptId,
-            @RequestParam(required = false) String deptName) {
+            @RequestParam(required = false) String deptName,
+            @RequestParam(required = false) String scope) {
         Long resolvedDiagnosisId = diagnosisId != null ? diagnosisId : dignosisId;
         return ApiResponse.ok(competencyQueryService.getCompetencyResultDashboard(
                 resolvedDiagnosisId,
                 semesterId,
                 semesterName,
                 deptId,
-                deptName));
+                deptName,
+                scope));
     }
 }
