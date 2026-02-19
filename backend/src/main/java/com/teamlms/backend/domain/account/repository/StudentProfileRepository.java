@@ -2,6 +2,7 @@ package com.teamlms.backend.domain.account.repository;
 
 import com.teamlms.backend.domain.account.entity.StudentProfile;
 import com.teamlms.backend.domain.dept.api.dto.DeptStudentListItem;
+import com.teamlms.backend.domain.account.enums.AcademicStatus;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,10 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
   boolean existsByStudentNo(String studentNo);
 
   List<StudentProfile> findByDeptId(Long deptId);
+
+  long countByAcademicStatus(AcademicStatus status);
+
+  long countByAcademicStatusAndDeptId(AcademicStatus status, Long deptId);
 
   // 상세페이지 학생
   @Query("""

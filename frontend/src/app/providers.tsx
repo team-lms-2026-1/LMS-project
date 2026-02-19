@@ -1,4 +1,4 @@
-// src/app/providers.tsx
+﻿// src/app/providers.tsx
 "use client";
 
 import React from "react";
@@ -15,7 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       {children}
-      {mounted && <Toaster position="top-center" containerStyle={{ zIndex: 99999 }} />}
+      {mounted && <Toaster position="top-center" />}
     </AuthProvider>
   );
 }

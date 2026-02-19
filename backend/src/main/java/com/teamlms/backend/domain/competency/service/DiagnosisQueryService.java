@@ -42,7 +42,6 @@ public class DiagnosisQueryService {
         private final DeptRepository deptRepository;
         private final SemesterCompetencyCohortStatRepository statRepository;
         private final SemesterStudentCompetencySummaryRepository summaryRepository;
-        private final CompetencySummaryService competencySummaryService;
         private final CompetencyRepository competencyRepository;
 
         /**
@@ -189,11 +188,6 @@ public class DiagnosisQueryService {
                 long targetCount = diagnosisTargetRepository.countByRunRunId(runId);
                 long responseCount = diagnosisSubmissionRepository.countByRunRunId(runId);
                 List<SemesterCompetencyCohortStat> currentStats = statRepository.findBySemesterSemesterId(semesterId);
-
-                if (currentStats.isEmpty() && responseCount > 0) {
-                        competencySummaryService.calculateCohortStatistics(semesterId);
-                        currentStats = statRepository.findBySemesterSemesterId(semesterId);
-                }
 
                 if (currentStats.isEmpty()) {
                         // 대략적인 대상자수만이라도 반환

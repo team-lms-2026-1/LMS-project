@@ -5,6 +5,8 @@ import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
 import styles from "./DignosisDetailModal.module.css";
 import { DignosisNonRespondentModal } from "./DignosisNonRespondentModal.client";
+import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
+import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import type {
   DiagnosisScaleOption,
   DiagnosisQuestion,
@@ -33,6 +35,14 @@ const CS_META: Array<{ key: DiagnosisCsKey; label: string; color: string }> = [
   { key: "collaboration", label: "Collaboration", color: "#2563eb" },
   { key: "convergence", label: "Convergence", color: "#8b5cf6" },
 ];
+const LEGEND_DOT_CLASS: Record<DiagnosisCsKey, string> = {
+  criticalThinking: styles.legendDotCriticalThinking,
+  character: styles.legendDotCharacter,
+  creativity: styles.legendDotCreativity,
+  communication: styles.legendDotCommunication,
+  collaboration: styles.legendDotCollaboration,
+  convergence: styles.legendDotConvergence,
+};
 const CS_INDEX = new Map<DiagnosisCsKey, number>(
   CS_META.map((item, index) => [item.key, index])
 );
@@ -72,6 +82,21 @@ function formatScore(value?: number) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "-";
   return String(Math.round(n));
+}
+
+function toDisplayText(value?: string, fallback = "-") {
+  if (value === undefined || value === null) return fallback;
+  const text = String(value).trim();
+  return text ? text : fallback;
+}
+
+function formatGrade(value?: string) {
+  if (!value) return "전체";
+  const text = String(value).trim();
+  if (!text) return "전체";
+  if (text.toUpperCase() === "ALL" || text === "전체") return "전체";
+  if (/^\d+$/.test(text)) return `${text}학년`;
+  return text;
 }
 
 function createScaleOptions(): DiagnosisScaleOption[] {
@@ -137,6 +162,12 @@ export function DignosisDetailModal({
   const [activeTab, setActiveTab] = useState<"QUESTION" | "ANSWER">("QUESTION");
   const [questions, setQuestions] = useState<DiagnosisQuestion[]>([createDefaultQuestion()]);
   const [nonRespondentOpen, setNonRespondentOpen] = useState(false);
+  const { options: deptOptionsRaw } = useDeptsDropdownOptions();
+  const { options: semesterOptionsRaw } = useSemestersDropdownOptions();
+  const deptOptions = useMemo(
+    () => [{ value: "All", label: "전체" }, ...deptOptionsRaw],
+    [deptOptionsRaw]
+  );
   const startedAt =
     value?.startedAt ??
     (value as any)?.basicInfo?.startedAt ??
@@ -152,8 +183,57 @@ export function DignosisDetailModal({
   const responseItems = responseStats?.items ?? [];
   const responseCount = responseStats?.totalResponses ?? 0;
   const nonRespondents = value?.nonRespondents ?? [];
-  const deptLabel =
-    value?.deptName && value.deptName !== "All" ? value.deptName : "전체";
+  const deptLabel = useMemo(() => {
+    const rawDeptValue =
+      value?.deptValue ??
+      (value as any)?.basicInfo?.deptId ??
+      (value as any)?.deptId ??
+      (value as any)?.departmentId ??
+      (value as any)?.department?.deptId ??
+      (value as any)?.department?.id;
+    const fallbackName = toDisplayText(
+      value?.deptName ??
+        (value as any)?.basicInfo?.deptName ??
+        (value as any)?.deptName ??
+        (value as any)?.departmentName ??
+        (value as any)?.department?.deptName ??
+        (value as any)?.department?.name
+    );
+    if (rawDeptValue === undefined || rawDeptValue === null || String(rawDeptValue).trim() === "") {
+      return fallbackName === "-" ? "전체" : fallbackName;
+    }
+    const deptValue = String(rawDeptValue);
+    if (deptValue === "All" || deptValue.toUpperCase() === "ALL") return "전체";
+    const matched = deptOptions.find((opt) => String(opt.value) === deptValue);
+    return matched?.label ?? fallbackName;
+  }, [deptOptions, value]);
+  const semesterLabel = useMemo(() => {
+    const rawSemesterId =
+      value?.semesterId ??
+      (value as any)?.basicInfo?.semesterId ??
+      (value as any)?.semesterId ??
+      (value as any)?.semester?.semesterId ??
+      (value as any)?.semester?.id;
+    const fallbackName = toDisplayText(
+      value?.semesterName ??
+        (value as any)?.basicInfo?.semesterName ??
+        (value as any)?.semesterName ??
+        (value as any)?.semester?.displayName ??
+        (value as any)?.semester?.name
+    );
+    if (rawSemesterId === undefined || rawSemesterId === null || String(rawSemesterId).trim() === "") {
+      return fallbackName;
+    }
+    const semesterValue = String(rawSemesterId);
+    const matched = semesterOptionsRaw.find((opt) => String(opt.value) === semesterValue);
+    return matched?.label ?? fallbackName;
+  }, [semesterOptionsRaw, value]);
+  const gradeLabel = formatGrade(
+    value?.gradeValue ??
+      (value as any)?.basicInfo?.targetGrade ??
+      (value as any)?.grade ??
+      (value as any)?.gradeLevel
+  );
   const statusText =
     value?.status ??
     (value as any)?.basicInfo?.status ??
@@ -328,8 +408,8 @@ export function DignosisDetailModal({
                           dataKey="score"
                           type="number"
                           tick={{ fontSize: 12 }}
-                          domain={[0, 350]}
-                          ticks={[0, 50, 100, 150, 200, 250, 300, 350]}
+                          domain={[0, 3100]}
+                          ticks={[0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100]}
                           allowDecimals={false}
                           allowDataOverflow
                         />
@@ -396,11 +476,10 @@ export function DignosisDetailModal({
                 {legendItems.length > 0 ? (
                   <div className={styles.legend}>
                     {legendItems.map((item) => {
-                      const color =
-                        CS_META.find((c) => c.key === item.key)?.color ?? "#111827";
+                      const dotClass = LEGEND_DOT_CLASS[item.key];
                       return (
                         <div key={`legend-${item.key}`} className={styles.legendItem}>
-                          <span className={styles.legendDot} style={{ backgroundColor: color }} />
+                          <span className={`${styles.legendDot} ${dotClass ?? ""}`} />
                           <span className={styles.legendText}>
                             {item.label}: 최소 {formatScore(item.min)} / 최대 {formatScore(item.max)}
                             {Number.isFinite(item.avg) ? ` / 평균 ${formatScore(item.avg)}` : ""}
@@ -421,11 +500,23 @@ export function DignosisDetailModal({
                     <div className={styles.formTitleSub}>진단 문항은 {questions.length}문항으로 구성되어 있습니다.</div>
                   </div>
 
-                  <div className={styles.formMeta}>
-                    <div className={styles.metaRow}>
-                      <span className={styles.metaLabel}>제출기간</span>
-                      <span className={styles.metaValue}>
-                        {formatPeriod(startedAt, endedAt)}
+                <div className={styles.formMeta}>
+                  <div className={styles.metaRow}>
+                    <span className={styles.metaLabel}>학기</span>
+                    <span className={styles.metaValue}>{semesterLabel}</span>
+                  </div>
+                  <div className={styles.metaRow}>
+                    <span className={styles.metaLabel}>학과</span>
+                    <span className={styles.metaValue}>{deptLabel}</span>
+                  </div>
+                  <div className={styles.metaRow}>
+                    <span className={styles.metaLabel}>학년</span>
+                    <span className={styles.metaValue}>{gradeLabel}</span>
+                  </div>
+                  <div className={styles.metaRow}>
+                    <span className={styles.metaLabel}>제출기간</span>
+                    <span className={styles.metaValue}>
+                      {formatPeriod(startedAt, endedAt)}
                       </span>
                     </div>
                   </div>
@@ -487,7 +578,6 @@ export function DignosisDetailModal({
     </>
   );
 }
-
 
 
 

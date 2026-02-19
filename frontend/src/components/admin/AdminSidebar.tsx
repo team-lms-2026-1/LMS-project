@@ -53,6 +53,7 @@ const SECTIONS: NavSection[] = [
       { label: "6Cs 란?", href: "/admin/competencies", exact: true },
       { label: "학생역량활동조회", href: "/admin/competencies/students" },
       { label: "역량진단지 관리", href: "/admin/competencies/dignosis" },
+      { label: "통합 결과 관리", href: "/admin/competencies/result" },
     ],
   },
   {

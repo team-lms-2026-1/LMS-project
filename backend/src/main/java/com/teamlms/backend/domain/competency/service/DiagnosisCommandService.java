@@ -86,10 +86,17 @@ public class DiagnosisCommandService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.SEMESTER_NOT_FOUND, semesterId));
 
         // 학기별 진단 중복 검증
-        diagnosisRunRepository.findBySemesterSemesterId(semesterId)
-                .ifPresent(existing -> {
-                    throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
-                });
+        if (deptId == null) {
+            diagnosisRunRepository.findBySemesterSemesterIdAndDeptIdIsNull(semesterId)
+                    .ifPresent(existing -> {
+                        throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                    });
+        } else {
+            diagnosisRunRepository.findBySemesterSemesterIdAndDeptId(semesterId, deptId)
+                    .ifPresent(existing -> {
+                        throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                    });
+        }
 
         // 날짜 유효성 검증
         validateDateRange(startedAt, endedAt);

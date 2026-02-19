@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.teamlms.backend.domain.competency.entitiy.SemesterStudentCompetencySummary;
+import com.teamlms.backend.domain.account.enums.AcademicStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,14 +24,26 @@ public interface SemesterStudentCompetencySummaryRepository
       Long studentAccountId,
       Long competencyId);
 
-  // 특정 학기의 모든 학생 요약 조회
+  // 특정 학기 전체 학생 요약 조회
   List<SemesterStudentCompetencySummary> findBySemesterSemesterId(Long semesterId);
 
-  // 특정 학기의 모든 학생 요약 삭제
+  // 특정 학기 전체 학생 요약 삭제
   void deleteBySemesterSemesterId(Long semesterId);
 
   // 특정 학생의 전체 학기 역량 이력 조회
   List<SemesterStudentCompetencySummary> findByStudentAccountId(Long studentAccountId);
+
+  // 특정 학기, 특정 학적 상태 학생의 요약 목록 조회
+  @Query("""
+      SELECT s
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  List<SemesterStudentCompetencySummary> findBySemesterSemesterIdAndAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
 
   // 특정 학생의 전체 학기 역량 이력 조회
   @Query("""
@@ -55,6 +68,69 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("semesterId") Long semesterId,
       @Param("competencyId") Long competencyId,
       @Param("deptId") Long deptId);
+
+  // 특정 학기, 특정 학적 상태 학생의 산출 대상자 수
+  @Query("""
+      SELECT COUNT(DISTINCT s.student.accountId)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  long countDistinctStudentsBySemesterAndAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학기, 특정 학적 상태 학생의 진단 점수 평균
+  @Query("""
+      SELECT AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  Double getSemesterAverageDiagnosisScoreByAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학기 내 모든 학과 * 역량별 평균 점수
+  @Query("""
+      SELECT p.deptId, s.competency.competencyId, AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      GROUP BY p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptCompetencyAverages(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 여러 학기 내 학과별 평균 점수 (전체 추이 평균)
+  @Query("""
+      SELECT s.semester.semesterId, p.deptId, AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId IN :semesterIds
+        AND p.academicStatus = :status
+      GROUP BY s.semester.semesterId, p.deptId
+      """)
+  List<Object[]> findDeptSemesterAverages(
+      @Param("semesterIds") List<Long> semesterIds,
+      @Param("status") AcademicStatus status);
+
+  // 여러 학기 내 학과별 역량 평균 점수 (6CS 추이 비교)
+  @Query("""
+      SELECT s.semester.semesterId, p.deptId, s.competency.competencyId, AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId IN :semesterIds
+        AND p.academicStatus = :status
+      GROUP BY s.semester.semesterId, p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptSemesterCompetencyAverages(
+      @Param("semesterIds") List<Long> semesterIds,
+      @Param("status") AcademicStatus status);
 
   // 특정 학기, 특정 역량의 모든 학생 점수 조회
   @Query("""

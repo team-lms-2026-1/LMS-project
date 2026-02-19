@@ -2,17 +2,15 @@
 
 import { useMemo, useState } from "react";
 import styles from "./ResultPage.module.css";
-import { useResultList } from "@/features/competencies/result/hooks/useResultList";
-import { recalculateCompetencySummary } from "@/features/competencies/result/api/ResultCompetenciesApi";
+import { useResultList } from "@/features/competencies/diagnosis/hooks/useDignosisList";
+import { recalculateCompetencySummary } from "@/features/competencies/diagnosis/api/DiagnosisApi";
 import type {
   ResultCompetencyDashboard,
   ResultCompetencyRadarItem,
   ResultCompetencyRadarSeries,
   ResultCompetencyStatRow,
-} from "@/features/competencies/result/api/types";
+} from "@/features/competencies/diagnosis/api/types";
 import { Button } from "@/components/button";
-import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
-import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -84,13 +82,15 @@ export default function ResultPageClient() {
   const semesterNameParam = searchParams.get("semesterName");
   const semesterId = semesterIdParam ?? (semesterNameParam ? "" : "1");
   const statusParam = searchParams.get("status");
-  const { options: deptOptionsRaw, loading: deptLoading } = useDeptsDropdownOptions();
+  const deptIdParam = searchParams.get("deptId")?.trim() ?? "";
+  const deptNameParam =
+    searchParams.get("deptName")?.trim() ??
+    searchParams.get("departmentName")?.trim() ??
+    searchParams.get("dept")?.trim() ??
+    "";
   const { options: semesterOptions } = useSemestersDropdownOptions();
   const [recalcLoading, setRecalcLoading] = useState(false);
   const [recalcError, setRecalcError] = useState<string | null>(null);
-  const [trendDeptValue, setTrendDeptValue] = useState("");
-
-
 
   const resolvedSemesterId = useMemo(() => {
     if (semesterIdParam) return semesterIdParam;
@@ -99,7 +99,7 @@ export default function ResultPageClient() {
     const normalize = (value: string) =>
       value
         .replace(/\s+/g, "")
-        .replace(/학년도/g, "")
+        .replace(/학년/g, "")
         .replace(/학기/g, "")
         .replace(/-/g, "")
         .toLowerCase();
@@ -111,7 +111,15 @@ export default function ResultPageClient() {
 
   const isClosed = String(statusParam ?? "").toUpperCase() === "CLOSED";
 
+  const selectedDeptLabel = useMemo(() => {
+    if (deptNameParam) return deptNameParam;
+    return "";
+  }, [deptNameParam]);
 
+  const isAllDept = useMemo(() => {
+    const label = selectedDeptLabel.trim();
+    return !label || label === "전체" || label.toUpperCase() === "ALL";
+  }, [selectedDeptLabel]);
 
   const query = useMemo(() => {
     if (!dignosisId) return undefined;
@@ -120,15 +128,23 @@ export default function ResultPageClient() {
       : semesterNameParam
         ? { semesterName: semesterNameParam }
         : {};
+    if (deptIdParam) {
+      return {
+        dignosisId,
+        deptId: deptIdParam,
+        ...(deptNameParam ? { deptName: deptNameParam } : {}),
+        ...semesterQuery,
+      };
+    }
+    if (deptNameParam) return { dignosisId, deptName: deptNameParam, ...semesterQuery };
     return { dignosisId, ...semesterQuery };
-  }, [dignosisId, semesterId, semesterNameParam]);
+  }, [dignosisId, deptIdParam, deptNameParam, semesterId, semesterNameParam]);
 
   const { state, actions } = useResultList(query);
 
   const handleRecalculate = async () => {
     if (!isClosed || recalcLoading) return;
     const semesterIdValue = resolvedSemesterId || "";
-
     if (!semesterIdValue) {
       setRecalcError("학기 정보를 찾을 수 없습니다.");
       return;
@@ -139,53 +155,37 @@ export default function ResultPageClient() {
       await recalculateCompetencySummary(semesterIdValue);
       await actions.reload();
     } catch (e: any) {
-      setRecalcError(e?.message ?? "역량 재계산에 실패했습니다.");
+      setRecalcError(e?.message ?? "결과 산출에 실패했습니다.");
     } finally {
       setRecalcLoading(false);
     }
   };
 
   const summary = useMemo(() => normalizeSummary(state.data), [state.data]);
-  const radarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);  const trendDeptOptions = useMemo(() => {
-    const names = new Set<string>();
-    deptOptionsRaw.forEach((opt) => {
-      const label = String(opt.label ?? "").trim();
-      if (label && label !== "전체") names.add(label);
-    });
-    const data = state.data;
-    const rawDepts = [
-      ...(Array.isArray(data?.deptNames) ? data?.deptNames : []),
-      ...(Array.isArray(data?.departments) ? data?.departments : []),
-    ];
-    rawDepts.forEach((d) => {
-      if (typeof d === "string" && d.trim()) names.add(d.trim());
-    });
-    radarSeries.forEach((s) => {
-      if (s.deptName) names.add(String(s.deptName).trim());
-    });
-    return Array.from(names)
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b))
-      .map((dept) => ({ value: dept, label: dept }));
-  }, [deptOptionsRaw, state.data, radarSeries]);
-  const isTrendDeptSelected = Boolean(trendDeptValue.trim());
-  const radarData = useMemo(() => buildRadarData(radarSeries), [radarSeries]);
-  const isSingleRadarSeries = radarSeries.length <= 1;
+  const radarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);
+
+  const labeledRadarSeries = useMemo(() => {
+    const label = selectedDeptLabel.trim();
+    if (isAllDept) return radarSeries;
+    if (radarSeries.length === 1 && label) {
+      return [{ ...radarSeries[0], deptName: label }];
+    }
+    return radarSeries;
+  }, [radarSeries, selectedDeptLabel, isAllDept]);
+
+  const filteredRadarSeries = useMemo(() => {
+    const label = selectedDeptLabel.trim();
+    if (isAllDept) return labeledRadarSeries;
+    return labeledRadarSeries.filter((s) => s.deptName === label);
+  }, [labeledRadarSeries, selectedDeptLabel, isAllDept]);
+
+  const radarData = useMemo(() => buildRadarData(filteredRadarSeries), [filteredRadarSeries]);
 
   const trendSeries = useMemo(() => normalizeTrendSeries(state.data), [state.data]);
-  const filteredTrendSeries = useMemo(() => {
-    if (!isTrendDeptSelected) return [];
-    const prefix = `${trendDeptValue} -`;
-    const matched = trendSeries.filter(
-      (s) => s.name === trendDeptValue || s.name.startsWith(prefix)
-    );
-    return matched;
-  }, [trendSeries, isTrendDeptSelected, trendDeptValue]);
   const trendData = useMemo(
-    () => normalizeTrendData(state.data, filteredTrendSeries),
-    [state.data, filteredTrendSeries]
+    () => normalizeTrendData(state.data, trendSeries),
+    [state.data, trendSeries]
   );
-
 
   const statsRows = useMemo(() => normalizeStats(state.data), [state.data]);
 
@@ -200,29 +200,31 @@ export default function ResultPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.topBar}>          <h1 className={styles.title}>역량 통합 관리</h1>
-          {isClosed && (
-            <Button
-              variant="primary"
-              onClick={handleRecalculate}
-              disabled={recalcLoading || !resolvedSemesterId}
-            >
-              결과 산출
+        <div className={styles.topBar}>
+          <h1 className={styles.title}>역량 종합 관리</h1>
+          <div className={styles.topActions}>
+            {isClosed && (
+              <Button
+                variant="primary"
+                onClick={handleRecalculate}
+                disabled={recalcLoading || !resolvedSemesterId}
+              >
+                결과 산출
+              </Button>
+            )}
+            <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
+              목록
             </Button>
-          )}
-          <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
-            목록
-          </Button>
-
+          </div>
         </div>
 
         <div className={styles.summaryRow}>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>대상자수</div>
+            <div className={styles.summaryLabel}>대상자 수</div>
             <div className={styles.summaryValue}>{formatNumber(summary.totalCount)}</div>
           </div>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>산출대상자수</div>
+            <div className={styles.summaryLabel}>산출 대상자 수</div>
             <div className={styles.summaryValue}>{formatNumber(summary.calculatedCount)}</div>
           </div>
           <div className={styles.summaryCard}>
@@ -234,7 +236,8 @@ export default function ResultPageClient() {
         <div className={styles.grid}>
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>역량 차트</h2>            </div>
+              <h2 className={styles.panelTitle}>역량 차트</h2>
+            </div>
             <div className={styles.chartWrap}>
               {radarData.length === 0 ? (
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
@@ -250,16 +253,15 @@ export default function ResultPageClient() {
                       height={12}
                       content={renderRadarLegend}
                     />
-                    {radarSeries.map((series, index) => (
+                    {filteredRadarSeries.map((series, index) => (
                       <Radar
                         key={series.deptName}
                         dataKey={series.deptName}
                         stroke={RADAR_COLOR_VARS[index % RADAR_COLOR_VARS.length]}
                         fill={RADAR_COLOR_VARS[index % RADAR_COLOR_VARS.length]}
                         className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[index % RADAR_COLOR_CLASSES.length]} ${
-                          isSingleRadarSeries ? styles.radarFillSingle : styles.radarFillAll
+                          isAllDept ? styles.radarFillAll : styles.radarFillSingle
                         }`}
-
                       />
                     ))}
                   </RadarChart>
@@ -270,40 +272,30 @@ export default function ResultPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>상대 차트</h2>              
-              <div className={styles.filterWrap}>
-                <span className={styles.filterLabel}>학과</span>
-                <Dropdown
-                  value={trendDeptValue}
-                  onChange={setTrendDeptValue}
-                  options={trendDeptOptions}
-                  placeholder="학과 선택"
-                  loading={deptLoading}
-                  className={styles.dropdownWrap}
-                />
-              </div>
-
+              <h2 className={styles.panelTitle}>역량 추이</h2>
             </div>
-            <div className={styles.chartWrap}>              {!isTrendDeptSelected ? (
-                <div className={styles.emptyCentered}>학과를 선택해주세요</div>
-              ) : trendData.length === 0 || filteredTrendSeries.length === 0 ? (
-
+            <div className={styles.chartWrap}>
+              {trendData.length === 0 || trendSeries.length === 0 ? (
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
               ) : (
-                <ResponsiveContainer width="100%" height="100%">                  <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
                     <CartesianGrid className={styles.chartGrid} />
                     <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
                     <YAxis tick={{ className: styles.axisTick }} />
-                    <Tooltip formatter={(value) => formatScore(value)} />
-                    <Legend verticalAlign="bottom" align="center" content={renderLineLegend} />
-                    {filteredTrendSeries.map((s, i) => (
-
+                    <Tooltip />
+                    <Legend
+                      verticalAlign="bottom"
+                      align="center"
+                      content={renderLineLegend}
+                    />
+                    {trendSeries.map((s, i) => (
                       <Line
                         key={s.name}
                         type="monotone"
-                        dataKey={s.name}                        stroke={LINE_COLOR_VARS[i % LINE_COLOR_VARS.length]}
+                        dataKey={s.name}
+                        stroke={LINE_COLOR_VARS[i % LINE_COLOR_VARS.length]}
                         className={`${styles.chartLine} ${LINE_COLOR_CLASSES[i % LINE_COLOR_CLASSES.length]}`}
-
                         dot={false}
                       />
                     ))}
@@ -326,7 +318,7 @@ export default function ResultPageClient() {
                 <thead>
                   <tr>
                     <th>역량 이름</th>
-                    <th>대상자수/산출대상자수</th>
+                    <th>대상자/산출대상자</th>
                     <th>평균</th>
                     <th>중간값</th>
                     <th>표준편차</th>
@@ -530,6 +522,7 @@ function normalizeStats(data: ResultCompetencyDashboard | null) {
     calculatedAt: pickString(row, ["calculatedAt", "calculatedDate", "updatedAt", "date"]),
   }));
 }
+
 function renderCircleLegend(
   props: any,
   options: {
@@ -545,8 +538,10 @@ function renderCircleLegend(
   const columnCount = Math.max(1, Math.min(maxColumns, payload.length));
   const showDash = options.showDash ?? false;
   const colorClasses = options.colorClasses ?? [];
-  const variantClass = options.variant === "radar" ? styles.legendWrapRadar : styles.legendWrapLine;
-  const columnClass = styles[`legendCols${columnCount}`] ?? styles.legendCols3 ?? "";
+  const variantClass =
+    options.variant === "radar" ? styles.legendWrapRadar : styles.legendWrapLine;
+  const columnClass =
+    styles[`legendCols${columnCount}`] ?? styles.legendCols3 ?? "";
   return (
     <div className={`${styles.legendWrap} ${variantClass}`}>
       <div className={`${styles.legendGrid} ${columnClass}`}>
@@ -560,7 +555,10 @@ function renderCircleLegend(
           const colorClass =
             indexedClass ?? LEGEND_COLOR_CLASS[colorKey] ?? styles.legendColorDefault;
           return (
-            <div key={`${label || "legend"}-${index}`} className={`${styles.legendItem} ${colorClass}`}>
+            <div
+              key={`${label || "legend"}-${index}`}
+              className={`${styles.legendItem} ${colorClass}`}
+            >
               <span className={styles.legendIcon}>
                 {showDash ? <span className={styles.legendDash}>-</span> : null}
                 <span className={styles.legendDot} />
@@ -602,7 +600,6 @@ const LEGEND_COLOR_CLASS: Record<string, string> = {
   "#facc15": styles.legendColorYellow,
 };
 
-
 function pickString(obj: any, keys: string[]) {
   for (const k of keys) {
     const v = obj?.[k];
@@ -643,27 +640,3 @@ function formatDateTime(value?: string | null) {
   const min = String(d.getMinutes()).padStart(2, "0");
   return `${yyyy}.${mm}.${dd} - ${hh}:${min}`;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -2,6 +2,21 @@
   padding: 0;
   min-height: 100vh;
   background-color: transparent;
+  --chart-grid: #eef2f6;
+  --chart-axis-color: #475467;
+  --chart-axis-font: 12px;
+  --chart-radar-font: 11px;
+  --chart-line-width: 2;
+  --chart-radar-fill-all: 0.18;
+  --chart-radar-fill-single: 0.25;
+  --series-blue: #2563eb;
+  --series-green: #16a34a;
+  --series-orange: #f97316;
+  --series-purple: #7c3aed;
+  --series-red: #e11d48;
+  --series-sky: #0ea5e9;
+  --series-teal: #10b981;
+  --series-yellow: #facc15;
 }
 
 .card {
@@ -13,6 +28,12 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .title {
@@ -65,12 +86,25 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  gap: 12px;
 }
 
 .panelTitle {
   font-size: 14px;
   font-weight: 700;
   color: #111827;
+}
+
+.filterWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterLabel {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
 }
 
 .dropdownWrap {
@@ -80,6 +114,143 @@
 .chartWrap {
   width: 100%;
   height: 260px;
+}
+
+.chartGrid line {
+  stroke: var(--chart-grid);
+  stroke-dasharray: 3 3;
+}
+
+.axisTick {
+  font-size: var(--chart-axis-font);
+  fill: var(--chart-axis-color);
+}
+
+.radarTick {
+  font-size: var(--chart-radar-font);
+}
+
+.chartLine :global(.recharts-line-curve) {
+  stroke: currentColor;
+  stroke-width: var(--chart-line-width);
+}
+
+.radarSeries path,
+.radarSeries polygon {
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+.radarFillAll path,
+.radarFillAll polygon {
+  fill-opacity: var(--chart-radar-fill-all);
+}
+
+.radarFillSingle path,
+.radarFillSingle polygon {
+  fill-opacity: var(--chart-radar-fill-single);
+}
+
+.legendWrap {
+  width: 100%;
+}
+
+.legendWrapRadar {
+  margin-top: 4px;
+}
+
+.legendWrapLine {
+  margin-top: 6px;
+}
+
+.legendGrid {
+  display: grid;
+  gap: 2px 6px;
+  justify-content: center;
+  justify-items: start;
+  align-items: center;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.legendCols1 {
+  grid-template-columns: repeat(1, max-content);
+}
+
+.legendCols2 {
+  grid-template-columns: repeat(2, max-content);
+}
+
+.legendCols3 {
+  grid-template-columns: repeat(3, max-content);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.legendIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.legendDash {
+  color: currentColor;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.legendLabel {
+  color: inherit;
+}
+
+.legendColorDefault {
+  color: #111827;
+}
+
+.legendColorBlue {
+  color: var(--series-blue);
+}
+
+.legendColorGreen {
+  color: var(--series-green);
+}
+
+.legendColorOrange {
+  color: var(--series-orange);
+}
+
+.legendColorPurple {
+  color: var(--series-purple);
+}
+
+.legendColorRed {
+  color: var(--series-red);
+}
+
+.legendColorSky {
+  color: var(--series-sky);
+}
+
+.legendColorTeal {
+  color: var(--series-teal);
+}
+
+.legendColorYellow {
+  color: var(--series-yellow);
 }
 
 .tableSection {
@@ -117,6 +288,16 @@
   padding: 40px 0;
 }
 
+.emptyCentered {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
 @media (max-width: 1024px) {
   .summaryRow {
     grid-template-columns: 1fr;
@@ -128,5 +309,12 @@
 
   .dropdownWrap {
     min-width: 120px;
+  }
+}
+
+@media (max-width: 720px) {
+  .panelHeader {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
