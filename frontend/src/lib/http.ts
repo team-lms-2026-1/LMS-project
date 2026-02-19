@@ -1,4 +1,5 @@
 // src/lib/http.ts
+import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from "@/i18n/locale";
 export class ApiError extends Error {
   status: number;
   body: any;
@@ -45,7 +46,7 @@ export async function getJson<T>(input: string, init: JsonFetchOptions = {}): Pr
 
   // Accept-Language 헤더 자동 추가
   if (typeof window !== "undefined") {
-    const locale = localStorage.getItem("locale") || "ko";
+    const locale = localStorage.getItem(LOCALE_STORAGE_KEY) || DEFAULT_LOCALE;
     headers.set("Accept-Language", locale);
     console.log(`[HTTP] Accept-Language: ${locale} for ${method} ${input}`);
   }

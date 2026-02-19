@@ -15,6 +15,7 @@ import { DayOfWeekFilterDropdown } from "@/features/dropdowns/week/DayOfWeekFilt
 
 import type { DayOfWeekType } from "../../api/types";
 import { PeriodFilterDropdown } from "@/features/dropdowns/period/PeriodFilterDropdown";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -23,6 +24,9 @@ type Props = {
 };
 
 export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Props) {
+  const t = useI18n("curricular.modal.offeringCreate");
+  const tCommon = useI18n("curricular.common");
+
   // UI 제어용
   const [deptId, setDeptId] = useState<number>(0);
 
@@ -86,15 +90,15 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
   };
 
   const validate = (): string | null => {
-    if (!offeringCode.trim()) return "교과운영코드를 입력하세요.";
-    if (semesterId <= 0) return "학기를 선택하세요.";
-    if (deptId <= 0) return "주관학과를 선택하세요.";
-    if (curricularId <= 0) return "교과를 선택하세요.";
-    if (!dayOfWeek) return "요일을 선택하세요.";
-    if (period <= 0) return "교시를 입력하세요.";
-    if (capacity <= 0) return "인원수를 입력하세요.";
-    if (!location.trim()) return "장소를 입력하세요.";
-    if (professorAccountId <= 0) return "담당교수를 선택하세요.";
+    if (!offeringCode.trim()) return t("validation.requiredOfferingCode");
+    if (semesterId <= 0) return t("validation.requiredSemester");
+    if (deptId <= 0) return t("validation.requiredDept");
+    if (curricularId <= 0) return t("validation.requiredCurricular");
+    if (!dayOfWeek) return t("validation.requiredDayOfWeek");
+    if (period <= 0) return t("validation.requiredPeriod");
+    if (capacity <= 0) return t("validation.requiredCapacity");
+    if (!location.trim()) return t("validation.requiredLocation");
+    if (professorAccountId <= 0) return t("validation.requiredProfessor");
     return null;
   };
 
@@ -124,7 +128,7 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
       resetAll();
       onClose();
     } catch (e: any) {
-      setError(e?.error?.message ?? e?.message ?? "등록에 실패했습니다.");
+      setError(e?.error?.message ?? e?.message ?? t("submitFailed"));
     } finally {
       setLoading(false);
     }
@@ -133,16 +137,16 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
   return (
     <Modal
       open={open}
-      title="교과운영 등록"
+      title={t("title")}
       onClose={handleClose}
       size="lg"
       footer={
         <>
           <Button onClick={handleSubmit} loading={loading}>
-            등록
+            {tCommon("registerButton")}
           </Button>
           <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
+            {tCommon("cancelButton")}
           </Button>
         </>
       }
@@ -153,18 +157,18 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
         {/* ✅ 2×2: 운영코드 / 학기 / 주관학과 / 교과 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>교과운영코드</div>
+            <div className={styles.label}>{t("offeringCodeLabel")}</div>
             <input
               className={styles.control}
               value={offeringCode}
               onChange={(e) => setOfferingCode(e.target.value)}
-              placeholder="예) CS101-1"
+              placeholder={t("offeringCodePlaceholder")}
               autoComplete="off"
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>학기</div>
+            <div className={styles.label}>{t("semesterLabel")}</div>
             <SemesterFilterDropdown
               value={semesterId > 0 ? String(semesterId) : ""}
               onChange={(v) => setSemesterId(v ? Number(v) : 0)}
@@ -172,7 +176,7 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>주관학과</div>
+            <div className={styles.label}>{t("deptLabel")}</div>
             <DeptFilterDropdown
               value={deptId > 0 ? String(deptId) : ""}
               onChange={(v) => setDeptId(v ? Number(v) : 0)}
@@ -180,7 +184,7 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>교과</div>
+            <div className={styles.label}>{t("curricularLabel")}</div>
             <DeptCurricularFilterDropdown
               deptId={deptId > 0 ? String(deptId) : ""}
               value={curricularId > 0 ? String(curricularId) : ""}
@@ -192,7 +196,7 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
         {/* ✅ 2×2: 요일 / 교시 / 인원수 / 장소 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>요일</div>
+            <div className={styles.label}>{t("dayOfWeekLabel")}</div>
             <DayOfWeekFilterDropdown
               value={dayOfWeek}
               onChange={(v) => setDayOfWeek(v as DayOfWeekType)}
@@ -200,7 +204,7 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>교시</div>
+            <div className={styles.label}>{t("periodLabel")}</div>
             <PeriodFilterDropdown
             value={period > 0 ? String(period) : ""}
             onChange={(v) => setPeriod(v ? Number(v) : 0)}
@@ -208,25 +212,25 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>인원수</div>
+            <div className={styles.label}>{t("capacityLabel")}</div>
             <input
               className={styles.control}
               type="number"
               value={capacity === 0 ? "" : capacity}
               onChange={(e) => setCapacity(e.target.value === "" ? 0 : Number(e.target.value))}
-              placeholder="예) 30"
+              placeholder={t("capacityPlaceholder")}
               min={1}
               max={9999}
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>장소</div>
+            <div className={styles.label}>{t("locationLabel")}</div>
             <input
               className={styles.control}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="예) 본관 302호"
+              placeholder={t("locationPlaceholder")}
               autoComplete="off"
             />
           </label>
@@ -235,7 +239,7 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
         {/* ✅ 2×2: 담당교수 / 이메일(표시) / 전화(표시) / 빈칸 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>담당교수</div>
+            <div className={styles.label}>{t("professorLabel")}</div>
             <DeptProfessorFilterDropdown
               deptId={deptId > 0 ? String(deptId) : ""}
               value={professorAccountId > 0 ? String(professorAccountId) : ""}
@@ -246,12 +250,12 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
           <label className={styles.field}></label>
 
           <label className={styles.field}>
-            <div className={styles.label}>교수 이메일</div>
+            <div className={styles.label}>{t("professorEmailLabel")}</div>
             <input className={styles.control} value={professorEmail} disabled />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>교수 전화번호</div>
+            <div className={styles.label}>{t("professorPhoneLabel")}</div>
             <input className={styles.control} value={professorPhone} disabled />
           </label>
           <div />

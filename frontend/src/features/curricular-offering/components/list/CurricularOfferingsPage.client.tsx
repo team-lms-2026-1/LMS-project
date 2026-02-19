@@ -11,10 +11,12 @@ import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterF
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { CurricularOfferingCreateModal } from "../modal/CurricularOfferingCreateModal";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function CurricularOfferingPageClient() {
   const router = useRouter();
   const { state, actions } = useCurricularOfferingsList();
+  const t = useI18n("curricular.adminOfferings");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
@@ -52,7 +54,7 @@ export default function CurricularOfferingPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>교과운영 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <SemesterFilterDropdown />
@@ -61,7 +63,7 @@ export default function CurricularOfferingPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="교과운영명/코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
@@ -82,7 +84,7 @@ export default function CurricularOfferingPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            운영등록
+            {t("registerButton")}
           </OutButton>
         </div>
         <CurricularOfferingCreateModal

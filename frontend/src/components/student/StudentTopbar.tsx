@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "@/hooks/useLocale";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useLocale } from "@/hooks/useLocale";
+import { useI18n } from "@/i18n/useI18n";
+import { LOCALES } from "@/i18n/locale";
 import styles from "./student-shell.module.css";
 
 const EXP_KEY = "auth_expires_at";
@@ -65,6 +67,7 @@ export default function StudentTopbar() {
   const router = useRouter();
   const { state: authState } = useAuth();
   const { locale, setLocale, mounted } = useLocale();
+  const t = useI18n("topbar");
   const today = useMemo(() => formatDateKR(new Date()), []);
 
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
@@ -109,21 +112,21 @@ export default function StudentTopbar() {
     };
   }, []);
 
-  const profileLabel = profileName || authState.me?.loginId || "학생";
+  const profileLabel = profileName || authState.me?.loginId || t("fallback.student");
 
   return (
     <div className={styles.topbarInner}>
       <div className={styles.topbarRight}>
-        <div className={styles.dateChip} title="오늘 날짜">
+        <div className={styles.dateChip} title={t("todayTitle")}>
           {today}
         </div>
 
         {mounted && (
           <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-            {["ko", "en", "ja"].map((lang) => (
+            {LOCALES.map((lang) => (
               <button
                 key={lang}
-                onClick={() => setLocale(lang as "ko" | "en" | "ja")}
+                onClick={() => setLocale(lang)}
                 style={{
                   padding: "4px 8px",
                   borderRadius: "4px",
@@ -134,19 +137,19 @@ export default function StudentTopbar() {
                   fontWeight: locale === lang ? "bold" : "normal",
                 }}
               >
-                {lang === "ko" ? "KO" : lang === "en" ? "EN" : "JA"}
+                {lang.toUpperCase()}
               </button>
             ))}
           </div>
         )}
 
         {expiresAt && (
-          <div className={styles.sessionChip} title="자동 로그아웃까지 남은 시간">
-            {remainText ? `세션 ${remainText}` : "세션 --:--"}
+          <div className={styles.sessionChip} title={t("sessionTitle")}>
+            {remainText ? `${t("sessionPrefix")} ${remainText}` : t("sessionEmpty")}
           </div>
         )}
 
-        <button className={styles.profileBtn} type="button" title="프로필">
+        <button className={styles.profileBtn} type="button" title={t("profileTitle")}>
           <span className={styles.profileAvatar} aria-hidden="true" />
           <span className={styles.profileText}>{profileLabel}</span>
         </button>

@@ -1,10 +1,13 @@
 "use client";
 import styles from "./ExtraOfferingDetailTabBar.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Tab = "detail" | "session" | "students" | "competencies";
 type Props = { value: Tab; onChange: (v: Tab) => void };
 
 export function ExtraOfferingDetailTabBar({ value, onChange }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.tabs");
+
   return (
     <div className={styles.tabs}>
       <button
@@ -12,28 +15,28 @@ export function ExtraOfferingDetailTabBar({ value, onChange }: Props) {
         type="button"
         onClick={() => onChange("detail")}
       >
-        상세
+        {t("detail")}
       </button>
       <button
         className={`${styles.tab} ${value === "session" ? styles.active : ""}`}
         type="button"
         onClick={() => onChange("session")}
       >
-        회차
+        {t("session")}
       </button>
       <button
         className={`${styles.tab} ${value === "students" ? styles.active : ""}`}
         type="button"
         onClick={() => onChange("students")}
       >
-        학생
+        {t("students")}
       </button>
       <button
         className={`${styles.tab} ${value === "competencies" ? styles.active : ""}`}
         type="button"
         onClick={() => onChange("competencies")}
       >
-        역량
+        {t("competencies")}
       </button>
     </div>
   );

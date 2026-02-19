@@ -8,10 +8,12 @@ import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function StudentCurricularOfferingPageClient() {
   const router = useRouter();
   const { state, actions } = useCurricularOfferingsList();
+  const t = useI18n("curricular.studentOfferings");
 
   // pagination + search
 
@@ -43,7 +45,7 @@ export default function StudentCurricularOfferingPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>교과 신청</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>
@@ -51,7 +53,7 @@ export default function StudentCurricularOfferingPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="교과운영명/코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>

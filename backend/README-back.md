@@ -111,3 +111,5 @@ ADMIN
   'Admin!2345'
 
 
+## swagger
+http://localhost:8080/swagger-ui/index.html

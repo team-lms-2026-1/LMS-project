@@ -1,0 +1,651 @@
+{
+  "topbar": {
+    "todayTitle": "今日の日付",
+    "sessionTitle": "自動ログアウトまでの残り時間",
+    "sessionPrefix": "セッション",
+    "sessionEmpty": "セッション --:--",
+    "profileTitle": "プロフィール",
+    "fallback": {
+      "student": "学生",
+      "admin": "管理者",
+      "professor": "教授"
+    }
+  },
+  "menu": {
+    "common": {
+      "sidebarTitle": "詳細メニュー",
+      "logoAlt": {
+        "student": "学生メインへ移動",
+        "admin": "管理者メインへ移動",
+        "professor": "教授メインへ移動"
+      }
+    },
+    "student": {
+      "sections": {
+        "community": {
+          "title": "コミュニティ",
+          "items": {
+            "notices": "お知らせ",
+            "resources": "資料室",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "course": {
+          "title": "正規課程",
+          "items": {
+            "offerings": "履修申請",
+            "enrollments": "履修申請状況",
+            "currentEnrollments": "履修中の科目",
+            "gradeReports": "成績"
+          }
+        },
+        "extra": {
+          "title": "課外プログラム",
+          "items": {
+            "offerings": "課外プログラム申請",
+            "enrollments": "課外プログラム申請状況",
+            "currentEnrollments": "履修中の課外プログラム",
+            "gradeReports": "課外成績"
+          }
+        },
+        "mentoring": {
+          "title": "メンタリング",
+          "items": {
+            "apply": "メンティー申請",
+            "chat": "メンタリングチャット"
+          }
+        },
+        "competency": {
+          "title": "コンピテンシー診断",
+          "items": {
+            "introduce": "6Csとは?",
+            "diagnosis": "診断一覧",
+            "result": "結果照会"
+          }
+        },
+        "survey": {
+          "title": "アンケート",
+          "items": {
+            "list": "アンケート一覧"
+          }
+        },
+        "space": {
+          "title": "学習スペース貸与",
+          "items": {
+            "spaces": "学習スペース貸与・申請",
+            "rentals": "申請履歴確認"
+          }
+        },
+        "aiAdvisor": {
+          "title": "AIアドバイザー",
+          "items": {
+            "mbti": "職業マッチング(MBTI)"
+          }
+        }
+      }
+    },
+    "professor": {
+      "sections": {
+        "community": {
+          "title": "コミュニティ",
+          "items": {
+            "notices": "お知らせ",
+            "resources": "資料室",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "competency": {
+          "title": "コンピテンシー管理",
+          "items": {
+            "dashboard": "コンピテンシー照会"
+          }
+        },
+        "course": {
+          "title": "授業管理",
+          "items": {
+            "offerings": "担当講義一覧",
+            "syllabus": "講義計画書",
+            "grades": "成績入力",
+            "attendance": "出席管理"
+          }
+        },
+        "mentoring": {
+          "title": "メンタリング",
+          "items": {
+            "apply": "メンター申請",
+            "chat": "メンタリングチャット"
+          }
+        }
+      }
+    },
+    "admin": {
+      "sections": {
+        "community": {
+          "title": "コミュニティ",
+          "items": {
+            "notices": "お知らせ",
+            "resources": "資料室",
+            "faqs": "FAQ",
+            "qna": "Q&A"
+          }
+        },
+        "authority": {
+          "title": "権限管理",
+          "items": {
+            "departments": "学科管理",
+            "accounts": "アカウント管理",
+            "semesters": "学期管理"
+          }
+        },
+        "systemStatus": {
+          "title": "システム現況管理",
+          "items": {
+            "accountLogs": "アカウントログ管理"
+          }
+        },
+        "survey": {
+          "title": "アンケート統合管理",
+          "items": {
+            "surveys": "アンケート一覧",
+            "statistics": "アンケート統計"
+          }
+        },
+        "competency": {
+          "title": "コンピテンシー統合管理",
+          "items": {
+            "intro": "6Csとは?",
+            "students": "学生コンピテンシー活動照会",
+            "diagnosis": "コンピテンシー診断管理"
+          }
+        },
+        "course": {
+          "title": "正規課程管理",
+          "items": {
+            "curriculars": "正規課程管理",
+            "offerings": "授業運営管理",
+            "grades": "成績管理"
+          }
+        },
+        "extra": {
+          "title": "課外管理",
+          "items": {
+            "programs": "課外管理",
+            "offerings": "課外運営管理",
+            "grades": "課外成績管理"
+          }
+        },
+        "mentoring": {
+          "title": "メンタリング",
+          "items": {
+            "recruitments": "募集公告登録",
+            "applications": "申請承認",
+            "matching": "メンター・メンティーマッチング"
+          }
+        },
+        "space": {
+          "title": "学習スペース貸与",
+          "items": {
+            "spaces": "学習スペース一覧",
+            "rentals": "学習スペース申請一覧"
+          }
+        }
+      }
+    }
+  },
+  "curricular": {
+    "common": {
+      "manageHeader": "管理",
+      "detailButton": "詳細",
+      "editButton": "修正",
+      "registerButton": "登録",
+      "saveButton": "保存",
+      "cancelButton": "キャンセル",
+      "closeButton": "閉じる"
+    },
+    "status": {
+      "offering": {
+        "DRAFT": "作成中",
+        "OPEN": "開設",
+        "ENROLLMENT_CLOSED": "履修申請締切",
+        "IN_PROGRESS": "運営中",
+        "COMPLETED": "運営終了",
+        "CANCELED": "閉講"
+      },
+      "active": {
+        "ACTIVE": "有効",
+        "INACTIVE": "無効"
+      },
+      "enrollment": {
+        "ENROLLED": "履修",
+        "CANCELED": "履修取消"
+      },
+      "completion": {
+        "IN_PROGRESS": "履修中",
+        "PASSED": "履修完了",
+        "FAILED": "未履修"
+      }
+    },
+    "dayOfWeek": {
+      "MONDAY": {
+        "short": "月",
+        "long": "月曜日"
+      },
+      "TUESDAY": {
+        "short": "火",
+        "long": "火曜日"
+      },
+      "WEDNESDAY": {
+        "short": "水",
+        "long": "水曜日"
+      },
+      "THURSDAY": {
+        "short": "木",
+        "long": "木曜日"
+      },
+      "FRIDAY": {
+        "short": "金",
+        "long": "金曜日"
+      },
+      "SATURDAY": {
+        "short": "土",
+        "long": "土曜日"
+      },
+      "SUNDAY": {
+        "short": "日",
+        "long": "日曜日"
+      }
+    },
+    "studentOfferings": {
+      "title": "正規課程履修申請",
+      "searchPlaceholder": "科目名/コード検索",
+      "table": {
+        "offeringCode": "開設コード",
+        "curricularName": "科目名",
+        "professorName": "担当教授",
+        "semesterName": "学期",
+        "credit": "単位",
+        "competency1": "コンピテンシー1",
+        "competency2": "コンピテンシー2",
+        "capacity": "定員",
+        "enrolledCount": "申請人数",
+        "emptyText": "授業運営情報がありません。"
+      }
+    },
+    "professorOfferings": {
+      "title": "担当授業一覧",
+      "searchPlaceholder": "科目名/コード検索",
+      "table": {
+        "offeringCode": "開設コード",
+        "curricularName": "科目名",
+        "capacity": "定員",
+        "professorName": "担当教授",
+        "semesterName": "学期",
+        "location": "場所",
+        "credit": "単位",
+        "status": "状態",
+        "emptyText": "授業運営情報がありません。"
+      }
+    },
+    "adminCurriculars": {
+      "title": "正規課程管理",
+      "searchPlaceholder": "科目名/コード検索",
+      "registerButton": "科目登録",
+      "table": {
+        "curricularCode": "科目コード",
+        "curricularName": "科目名",
+        "deptName": "主管学科",
+        "credits": "単位",
+        "status": "使用可否",
+        "emptyText": "科目情報がありません。"
+      }
+    },
+    "adminOfferings": {
+      "title": "授業運営管理",
+      "searchPlaceholder": "授業運営名/コード検索",
+      "registerButton": "運営登録",
+      "table": {
+        "offeringCode": "開設コード",
+        "curricularName": "科目名",
+        "capacity": "定員",
+        "professorName": "担当教授",
+        "semesterName": "学期",
+        "location": "場所",
+        "credit": "単位",
+        "status": "状態",
+        "emptyText": "授業運営情報がありません。"
+      }
+    },
+    "adminGrades": {
+      "title": "成績管理",
+      "searchPlaceholder": "学籍番号/氏名検索",
+      "table": {
+        "studentNo": "学籍番号",
+        "deptName": "所属学科",
+        "gradeLevel": "学年",
+        "name": "氏名",
+        "gpa": "GPA",
+        "emptyText": "成績情報がありません。"
+      }
+    },
+    "adminOfferingDetail": {
+      "page": {
+        "loading": "読み込み中...",
+        "loadError": "エラーが発生しました。",
+        "empty": "データがありません。",
+        "title": "授業運営管理",
+        "backButton": "一覧"
+      },
+      "tabs": {
+        "detail": "詳細",
+        "students": "学生",
+        "competencies": "コンピテンシー"
+      },
+      "detail": {
+        "sections": {
+          "course": "科目",
+          "operation": "運営",
+          "professor": "担当教授",
+          "remark": "備考"
+        },
+        "fields": {
+          "curricularName": "科目名",
+          "deptName": "主管学科",
+          "credits": "単位",
+          "offeringCode": "運営コード",
+          "enrolledCount": "登録人数",
+          "capacity": "定員",
+          "semester": "学期",
+          "dayOfWeek": "曜日",
+          "period": "時限",
+          "periodValue": "{period}時限",
+          "location": "場所",
+          "professor": "担当教授",
+          "professorName": "担当教授名",
+          "phone": "電話番号",
+          "email": "メール",
+          "description": "説明"
+        },
+        "messages": {
+          "onlyDraft": "DRAFT状態でのみ修正できます。",
+          "requiredDayOfWeek": "曜日を選択してください。",
+          "saveFailed": "修正に失敗しました。",
+          "selectProfessorHint": "教授選択後に反映"
+        }
+      },
+      "students": {
+        "headers": {
+          "studentName": "学生名",
+          "studentNo": "学籍番号",
+          "gradeLevel": "学年",
+          "deptName": "所属学科",
+          "rawScore": "点数",
+          "grade": "等級",
+          "enrollmentStatus": "履修状態",
+          "completionStatus": "履修完了状態",
+          "scoreAction": "点数登録"
+        },
+        "buttons": {
+          "input": "入力",
+          "saving": "保存中..."
+        },
+        "messages": {
+          "scoreRange": "点数は0〜100の数値で入力してください",
+          "savingToast": "保存中...",
+          "savedToast": "点数が保存されました。",
+          "saveFailed": "保存に失敗しました。しばらくしてから再試行してください。",
+          "canEditOnlyInProgress": "履修中(IN_PROGRESS)状態でのみ点数修正が可能です。"
+        },
+        "emptyText": "履修学生がいません。"
+      },
+      "competencies": {
+        "labels": {
+          "professor": "担当教授",
+          "mainCompetencies": "主要コンピテンシー"
+        },
+        "titles": {
+          "mapping": "コンピテンシーマッピング",
+          "radar": "コンピテンシーマッピング レーダーチャート"
+        },
+        "messages": {
+          "loading": "読み込み中...",
+          "loadError": "照会失敗",
+          "saved": "コンピテンシーマッピングが保存されました。",
+          "duplicateWeight": "すでに他のコンピテンシーで使用中の点数です。",
+          "saveFailed": "保存失敗"
+        },
+        "buttons": {
+          "saving": "保存中..."
+        }
+      },
+      "radar": {
+        "empty": "コンピテンシー点数を登録してください。",
+        "tooltip": "{value}点"
+      },
+      "status": {
+        "title": "状態変更",
+        "confirmYes": "はい",
+        "confirmNo": "いいえ",
+        "messages": {
+          "confirmText": "状態を変更しますか？（状態は元に戻せません）",
+          "updateFailed": "状態変更に失敗しました。"
+        }
+      }
+    },
+    "modal": {
+      "curricularCreate": {
+        "title": "科目登録",
+        "curricularCodeLabel": "科目コード",
+        "curricularNameLabel": "科目名",
+        "deptLabel": "主管学科",
+        "creditsLabel": "単位",
+        "descriptionLabel": "説明",
+        "curricularCodePlaceholder": "例) CS101",
+        "curricularNamePlaceholder": "例) データ構造",
+        "creditsPlaceholder": "例) 3",
+        "descriptionPlaceholder": "科目説明を入力してください。",
+        "submitFailed": "登録に失敗しました。",
+        "validation": {
+          "requiredCurricularCode": "科目コードを入力してください。",
+          "requiredCurricularName": "科目名を入力してください。",
+          "requiredDept": "主管学科を選択してください。",
+          "requiredCredits": "単位を入力してください。",
+          "requiredDescription": "科目説明を入力してください。"
+        }
+      },
+      "curricularEdit": {
+        "title": "科目修正",
+        "activeAriaLabel": "有効状態",
+        "curricularCodeLabel": "科目コード",
+        "curricularNameLabel": "科目名",
+        "deptLabel": "主管学科",
+        "creditsLabel": "単位",
+        "descriptionLabel": "説明",
+        "submitFailed": "科目の修正に失敗しました。"
+      },
+      "offeringCreate": {
+        "title": "授業運営登録",
+        "offeringCodeLabel": "授業運営コード",
+        "semesterLabel": "学期",
+        "deptLabel": "主管学科",
+        "curricularLabel": "科目",
+        "dayOfWeekLabel": "曜日",
+        "periodLabel": "時限",
+        "capacityLabel": "定員",
+        "locationLabel": "場所",
+        "professorLabel": "担当教授",
+        "professorEmailLabel": "教授メール",
+        "professorPhoneLabel": "教授電話番号",
+        "offeringCodePlaceholder": "例) CS101-1",
+        "capacityPlaceholder": "例) 30",
+        "locationPlaceholder": "例) 本館302号",
+        "submitFailed": "登録に失敗しました。",
+        "validation": {
+          "requiredOfferingCode": "授業運営コードを入力してください。",
+          "requiredSemester": "学期を選択してください。",
+          "requiredDept": "主管学科を選択してください。",
+          "requiredCurricular": "科目を選択してください。",
+          "requiredDayOfWeek": "曜日を選択してください。",
+          "requiredPeriod": "時限を選択してください。",
+          "requiredCapacity": "定員を入力してください。",
+          "requiredLocation": "場所を入力してください。",
+          "requiredProfessor": "担当教授を選択してください。"
+        }
+      }
+    }
+  },
+  "extraCurricular": {
+    "status": {
+      "offering": {
+        "DRAFT": "作成中",
+        "OPEN": "申込受付中",
+        "ENROLLMENT_CLOSED": "申込締切",
+        "IN_PROGRESS": "進行中",
+        "COMPLETED": "完了(成績確定)",
+        "CANCELED": "キャンセル"
+      },
+      "apply": {
+        "APPLIED": "申込",
+        "CANCELED": "キャンセル"
+      },
+      "session": {
+        "OPEN": "進行中",
+        "CLOSED": "終了",
+        "CANCELED": "キャンセル"
+      },
+      "attended": {
+        "ATTENDED": "出席",
+        "ABSENT": "欠席"
+      }
+    },
+    "adminOfferingDetail": {
+      "page": {
+        "loading": "読み込み中...",
+        "loadError": "エラーが発生しました。",
+        "empty": "データがありません。",
+        "title": "比較科運営管理",
+        "backButton": "一覧"
+      },
+      "tabs": {
+        "detail": "詳細",
+        "session": "回次",
+        "students": "学生",
+        "competencies": "コンピテンシー"
+      },
+      "detail": {
+        "sections": {
+          "program": "比較科",
+          "operation": "運営",
+          "contact": "担当者",
+          "remark": "備考"
+        },
+        "fields": {
+          "programCode": "比較科コード",
+          "programName": "比較科名",
+          "hostOrgName": "主管機関",
+          "offeringCode": "運営コード",
+          "rewardPoint": "ポイント",
+          "recognizedHours": "認定時間",
+          "enrolledCount": "登録人数",
+          "semester": "学期",
+          "operationStartDate": "運営開始日",
+          "operationEndDate": "運営終了日",
+          "operationStartDatePlaceholder": "開始日を選択",
+          "operationEndDatePlaceholder": "終了日を選択",
+          "contactName": "担当者名",
+          "contactPhone": "担当者電話",
+          "contactEmail": "担当者メール",
+          "description": "説明"
+        },
+        "messages": {
+          "requiredOfferingCode": "運営コードを入力してください。",
+          "requiredOfferingName": "運営名を入力してください。",
+          "requiredSemester": "学期を選択してください。",
+          "invalidRewardPoint": "ポイント(基本)は0以上で入力してください。",
+          "invalidRecognizedHours": "認定時間(基本)は0以上で入力してください。",
+          "requiredOperationStartDate": "運営開始日を選択してください。",
+          "requiredOperationEndDate": "運営終了日を選択してください。",
+          "invalidOperationPeriod": "開始日は終了日より後にできません。",
+          "invalidContactEmail": "担当者メールの形式が正しくありません。",
+          "onlyDraft": "DRAFT状態でのみ修正できます。",
+          "saveFailed": "修正に失敗しました。"
+        }
+      },
+      "students": {
+        "headers": {
+          "studentName": "学生名",
+          "studentNo": "学籍番号",
+          "gradeLevel": "学年",
+          "deptName": "所属学科",
+          "applyStatus": "申込状態",
+          "completionStatus": "修了状態",
+          "attendanceAction": "出席照会"
+        },
+        "innerHeaders": {
+          "sessionName": "回次名",
+          "sessionStatus": "回次状態",
+          "attendance": "出席"
+        },
+        "buttons": {
+          "view": "照会",
+          "close": "閉じる"
+        },
+        "messages": {
+          "noSessions": "回次がありません。"
+        },
+        "emptyText": "申込学生がいません。"
+      },
+      "sessions": {
+        "createButton": "回次作成",
+        "headers": {
+          "sessionName": "回次名",
+          "rewardPoint": "回次ポイント",
+          "recognizedHours": "回次認定時間",
+          "startAt": "開始期間",
+          "endAt": "締切期間",
+          "status": "状態",
+          "manage": "管理"
+        },
+        "buttons": {
+          "detail": "詳細",
+          "close": "閉じる"
+        },
+        "emptyText": "回次がありません。"
+      },
+      "competencies": {
+        "labels": {
+          "hostOrgName": "主管機関",
+          "mainCompetencies": "主要コンピテンシー"
+        },
+        "titles": {
+          "mapping": "コンピテンシーマッピング",
+          "radar": "コンピテンシーマッピング レーダーチャート"
+        },
+        "messages": {
+          "loading": "読み込み中...",
+          "loadError": "照会失敗",
+          "saved": "コンピテンシーマッピングが保存されました。",
+          "duplicateWeight": "すでに他のコンピテンシーで使用中の点数です。",
+          "saveFailed": "保存失敗"
+        },
+        "buttons": {
+          "saving": "保存中..."
+        }
+      },
+      "radar": {
+        "empty": "コンピテンシー点数を登録してください。",
+        "tooltip": "{value}点"
+      },
+      "status": {
+        "title": "状態変更",
+        "confirmYes": "はい",
+        "confirmNo": "いいえ",
+        "messages": {
+          "confirmText": "状態を変更しますか？（状態は元に戻せません）",
+          "updateFailed": "状態変更に失敗しました。"
+        }
+      }
+    }
+  }
+}

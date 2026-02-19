@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useLocale } from "@/hooks/useLocale";
+import { useI18n } from "@/i18n/useI18n";
+import { LOCALES } from "@/i18n/locale";
 import styles from "./admin-shell.module.css";
 
 const EXP_KEY = "auth_expires_at";
@@ -63,6 +66,8 @@ async function fetchProfileName(): Promise<string | null> {
 export default function AdminTopbar() {
   const router = useRouter();
   const { state: authState } = useAuth();
+  const { locale, setLocale, mounted } = useLocale();
+  const t = useI18n("topbar");
   const today = useMemo(() => formatDateKR(new Date()), []);
 
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
@@ -107,22 +112,44 @@ export default function AdminTopbar() {
     };
   }, []);
 
-  const profileLabel = profileName || authState.me?.loginId || "관리자";
+  const profileLabel = profileName || authState.me?.loginId || t("fallback.admin");
 
   return (
     <div className={styles.topbarInner}>
       <div className={styles.topbarRight}>
-        <div className={styles.dateChip} title="오늘 날짜">
+        <div className={styles.dateChip} title={t("todayTitle")}>
           {today}
         </div>
 
-        {expiresAt && (
-          <div className={styles.sessionChip} title="자동 로그아웃까지 남은 시간">
-            {remainText ? `세션 ${remainText}` : "세션 --:--"}
+        {mounted && (
+          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+            {LOCALES.map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setLocale(lang)}
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  border: locale === lang ? "2px solid #0066cc" : "1px solid #ccc",
+                  background: locale === lang ? "#e6f2ff" : "transparent",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: locale === lang ? "bold" : "normal",
+                }}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
           </div>
         )}
 
-        <button className={styles.profileBtn} type="button" title="프로필">
+        {expiresAt && (
+          <div className={styles.sessionChip} title={t("sessionTitle")}>
+            {remainText ? `${t("sessionPrefix")} ${remainText}` : t("sessionEmpty")}
+          </div>
+        )}
+
+        <button className={styles.profileBtn} type="button" title={t("profileTitle")}>
           <span className={styles.profileAvatar} aria-hidden="true" />
           <span className={styles.profileText}>{profileLabel}</span>
         </button>

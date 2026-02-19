@@ -14,6 +14,7 @@ import type {
 } from "../../api/types";
 import { useExtraOfferingCompetencyMapping } from "../../hooks/useExtraCurricularOfferingList";
 import { updateExtraCurricularOfferingCompetency } from "../../api/extraCurricularOfferingApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   offeringId?: number;
@@ -21,6 +22,8 @@ type Props = {
 };
 
 export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.competencies");
+  const tCommon = useI18n("curricular.common");
   const { state, actions } = useExtraOfferingCompetencyMapping(offeringId);
   const { data: mappingData, loading, error } = state;
 
@@ -100,7 +103,7 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
 
     try {
       await updateExtraCurricularOfferingCompetency(offeringId, body);
-      toast.success("역량 맵핑이 저장되었습니다.");
+      toast.success(t("messages.saved"));
 
       // ✅ 저장 성공하면 다시 읽기 전용
       setIsEditing(false);
@@ -112,9 +115,9 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
       const code = e?.body?.error?.code;
 
       if (status === 409 && code === "OFFERING_COMPETENCY_WEIGHT_DUPLICATED") {
-        toast.error("이미 다른 역량이 사용 중인 점수입니다.");
+        toast.error(t("messages.duplicateWeight"));
       } else {
-        toast.error(e?.body?.error?.message || "저장 실패");
+        toast.error(e?.body?.error?.message || t("messages.saveFailed"));
       }
     } finally {
       setSaving(false);
@@ -140,10 +143,10 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
 
   // 버튼 라벨/동작 결정
   const primaryLabel = useMemo(() => {
-    if (saving) return "저장중...";
-    if (isEditing) return "저장";
-    return hasAnyWeight ? "수정" : "등록";
-  }, [saving, isEditing, hasAnyWeight]);
+    if (saving) return t("buttons.saving");
+    if (isEditing) return tCommon("saveButton");
+    return hasAnyWeight ? tCommon("editButton") : tCommon("registerButton");
+  }, [saving, isEditing, hasAnyWeight, t, tCommon]);
 
   const onPrimaryClick = () => {
     if (isEditing) {
@@ -159,9 +162,9 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
       <div className={styles.section}>
         <Header title={`${data.extraCurricularName} (${data.extraOfferingCode} / ${data.semesterDisplayName})`} />
         <div className={styles.body}>
-          <span>주관기관 : {data.hostContactName}</span>
+          <span>{t("labels.hostOrgName")} : {data.hostContactName}</span>
           <span>
-            주역량 :{" "}
+            {t("labels.mainCompetencies")} :{" "}
             {mainCompetencies.length
               ? mainCompetencies.map((c) => c.name).join(", ")
               : "-"}
@@ -173,10 +176,10 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
       <div className={styles.mainRow}>
         {/* 왼쪽 */}
         <div className={`${styles.section} ${styles.leftCol}`}>
-          <Header title="역량 맵핑" />
+          <Header title={t("titles.mapping")} />
           <div className={styles.body}>
-            {loading ? <div>불러오는 중...</div> : null}
-            {error ? <div>조회 실패</div> : null}
+            {loading ? <div>{t("messages.loading")}</div> : null}
+            {error ? <div>{t("messages.loadError")}</div> : null}
 
             {!loading && !error && mappingData?.length ? (
               <>
@@ -236,7 +239,7 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
                         onClick={onCancelEdit}
                         disabled={saving}
                       >
-                        취소
+                        {tCommon("cancelButton")}
                       </Button>
                     </>
                   ) : (
@@ -257,7 +260,7 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
 
         {/* 오른쪽 */}
         <div className={`${styles.section} ${styles.rightCol}`}>
-          <Header title="역량맵핑 레이더차트" />
+          <Header title={t("titles.radar")} />
           <div className={styles.body}>
             {!loading && !error && mappingData?.length ? (
               <OfferingCompetencyRadarChart items={mappingData} />

@@ -5,6 +5,7 @@ import { CurricularListItemDto } from "../../api/types";
 import styles from "./CurricularsTable.module.css";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: CurricularListItemDto[];
@@ -13,30 +14,34 @@ type Props = {
 };
 
 export function CurricularsTable({ items, loading, onEditClick }: Props) {
+  const t = useI18n("curricular.adminCurriculars.table");
+  const tStatus = useI18n("curricular.status.active");
+  const tCommon = useI18n("curricular.common");
+
   const columns: Array<TableColumn<CurricularListItemDto>> = [
-    { header: "교과코드", align: "center", render: (r) => r.curricularCode },
-    { header: "교과목명", align: "center", render: (r) => r.curricularName },
-    { header: "주관학과", align: "center", render: (r) => r.deptName },
-    { header: "학점", align: "center", render: (r) => r.credits },
+    { header: t("curricularCode"), align: "center", render: (r) => r.curricularCode },
+    { header: t("curricularName"), align: "center", render: (r) => r.curricularName },
+    { header: t("deptName"), align: "center", render: (r) => r.deptName },
+    { header: t("credits"), align: "center", render: (r) => r.credits },
     {
-      header: "사용여부",
+      header: t("status"),
       align: "center",
       render: (r) => (
         <StatusPill
           status={r.isActive ? "ACTIVE" : "INACTIVE"}
-          label={r.isActive ? "활성" : "비활성"}  
+          label={r.isActive ? tStatus("ACTIVE") : tStatus("INACTIVE")}
         />
       ),
     },
     {
-      header: "관리",
+      header: tCommon("manageHeader"),
       width: 140,
       align: "center",
       stopRowClick: true,
       render: (r) => (
         <div className={styles.manageCell}>
           <Button variant="secondary" onClick={() => onEditClick(r.curricularId)}>
-            수정
+            {tCommon("editButton")}
           </Button>
         </div>
       ),
@@ -50,7 +55,7 @@ export function CurricularsTable({ items, loading, onEditClick }: Props) {
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.curricularId}
-      emptyText="교과가 없습니다."
+      emptyText={t("emptyText")}
     />
   );
 }

@@ -8,6 +8,7 @@ import { useExtraSessionList } from "../../hooks/useExtraCurricularOfferingList"
 import type { ExtraSessionListItemDto ,ExtraOfferingStatus } from "../../api/types";
 
 import { ExtraOfferingSessionsExpandableTable } from "./components/ExtraOfferingSessionsExpandableTable";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   offeringId: number;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default function ExtraOfferingSessionSection({ offeringId, offeringStatus }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.sessions");
   const { state, actions } = useExtraSessionList(offeringId);
   const [open, setOpen] = useState(false);
 
@@ -37,7 +39,7 @@ export default function ExtraOfferingSessionSection({ offeringId, offeringStatus
       />
 
       <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
-        <Button onClick={() => setOpen(true)}>회차 생성</Button>
+        <Button onClick={() => setOpen(true)}>{t("createButton")}</Button>
       </div>
 
       <SessionCreateModal

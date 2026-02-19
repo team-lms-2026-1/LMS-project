@@ -4,10 +4,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "./OfferingDetailSection.module.css";
 import { Button } from "@/components/button";
 
-import { useCurricularDetail } from "../../hooks/useCurricularOfferingList";
 import { DayOfWeekType, OfferingStatus } from "../../api/types";
 import type { CurricularOfferingDetailDto, CurricularOfferingDetailUpdateRequest } from "../../api/types";
 import { updateCurricularOfferingDetail } from "../../api/curricularOfferingsApi";
+import { useI18n } from "@/i18n/useI18n";
 
 // ✅ 생성 모달에서 쓰던 드롭다운 그대로 사용
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
@@ -21,27 +21,10 @@ type Props = {
   onReload?: () => void | Promise<void>
 };
 
-/** ✅ 표시용 요일 라벨 */
-const DAY_OF_WEEK_LABEL: Record<
-  Exclude<DayOfWeekType, string> | string,
-  { short: string; long: string }
-> = {
-  MONDAY: { short: "월", long: "월요일" },
-  TUESDAY: { short: "화", long: "화요일" },
-  WEDNESDAY: { short: "수", long: "수요일" },
-  THURSDAY: { short: "목", long: "목요일" },
-  FRIDAY: { short: "금", long: "금요일" },
-  SATURDAY: { short: "토", long: "토요일" },
-  SUNDAY: { short: "일", long: "일요일" },
-};
-
-function formatDayOfWeek(v: DayOfWeekType | "" | null | undefined, mode: "short" | "long" = "short") {
-  if (!v) return "";
-  const hit = DAY_OF_WEEK_LABEL[v];
-  return hit ? hit[mode] : v; // 혹시 모르는 값이면 원문 그대로
-}
-
 export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
+  const t = useI18n("curricular.adminOfferingDetail.detail");
+  const tCommon = useI18n("curricular.common");
+  const tDay = useI18n("curricular.dayOfWeek");
 
   const [editMode, setEditMode] = useState(false);
 
@@ -87,6 +70,23 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
 
   const deptIdStr = useMemo(() => (deptId > 0 ? String(deptId) : ""), [deptId]);
 
+  const formatDayOfWeek = (v: DayOfWeekType | "" | null | undefined, mode: "short" | "long" = "short") => {
+    if (!v) return "";
+
+    switch (v) {
+      case "MONDAY":
+      case "TUESDAY":
+      case "WEDNESDAY":
+      case "THURSDAY":
+      case "FRIDAY":
+      case "SATURDAY":
+      case "SUNDAY":
+        return tDay(`${v}.${mode}`);
+      default:
+        return v;
+    }
+  };
+
   const hydrateFromData = (d: NonNullable<typeof data>) => {
     setOfferingCode(d.offeringCode);
 
@@ -125,7 +125,7 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
   const handleEnterEdit = () => {
     setSubmitError(null);
     if (!editable) {
-      setSubmitError("DRAFT 상태에서만 수정할 수 있습니다.");
+      setSubmitError(t("messages.onlyDraft"));
       return;
     }
     setEditMode(true);
@@ -146,7 +146,7 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
 
     // ✅ 최소 검증(요일 빈 값 방지)
     if (!dayOfWeek) {
-      setSubmitError("요일을 선택해 주세요.");
+      setSubmitError(t("messages.requiredDayOfWeek"));
       return;
     }
 
@@ -171,7 +171,7 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
       // ✅ 상세 재조회
       await onReload?.();
     } catch (e: any) {
-      setSubmitError(e?.message ?? "수정에 실패했습니다.");
+      setSubmitError(e?.message ?? t("messages.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -183,23 +183,23 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
 
       {/* 교과: 수정 불가 */}
       <section className={styles.section}>
-        <Header title="교과" />
+        <Header title={t("sections.course")} />
         <div className={styles.body}>
           <Row cols={3}>
-            <FieldView label="교과명" value={curricularName} readonly={editMode} />
-            <FieldView label="주관학과" value={deptName} readonly={editMode} />
-            <FieldView label="학점" value={credits} readonly={editMode} />
+            <FieldView label={t("fields.curricularName")} value={curricularName} readonly={editMode} />
+            <FieldView label={t("fields.deptName")} value={deptName} readonly={editMode} />
+            <FieldView label={t("fields.credits")} value={credits} readonly={editMode} />
           </Row>
         </div>
       </section>
 
       {/* 운영 */}
       <section className={styles.section}>
-        <Header title="운영" />
+        <Header title={t("sections.operation")} />
         <div className={styles.body}>
           <Row cols={3}>
             {editMode ? (
-              <FieldEdit label="운영코드" disabled={formDisabled}>
+              <FieldEdit label={t("fields.offeringCode")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   value={offeringCode}
@@ -208,13 +208,13 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="운영코드" value={offeringCode} />
+              <FieldView label={t("fields.offeringCode")} value={offeringCode} />
             )}
 
-            <FieldView label="등록인원" value={enrolledCount} readonly={editMode} />
+            <FieldView label={t("fields.enrolledCount")} value={enrolledCount} readonly={editMode} />
 
             {editMode ? (
-              <FieldEdit label="수용인원" disabled={formDisabled}>
+              <FieldEdit label={t("fields.capacity")} disabled={formDisabled}>
                 <input
                   type="number"
                   className={styles.control}
@@ -226,24 +226,24 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="수용인원" value={capacity} />
+              <FieldView label={t("fields.capacity")} value={capacity} />
             )}
           </Row>
 
           <Row cols={4}>
             {editMode ? (
-              <FieldEditDropdown label="학기" disabled={formDisabled}>
+              <FieldEditDropdown label={t("fields.semester")} disabled={formDisabled}>
                 <SemesterFilterDropdown
                   value={semesterId > 0 ? String(semesterId) : ""}
                   onChange={(v) => setSemesterId(v ? Number(v) : 0)}
                 />
               </FieldEditDropdown>
             ) : (
-              <FieldView label="학기" value={semesterName} />
+              <FieldView label={t("fields.semester")} value={semesterName} />
             )}
 
             {editMode ? (
-              <FieldEditDropdown label="요일" disabled={formDisabled}>
+              <FieldEditDropdown label={t("fields.dayOfWeek")} disabled={formDisabled}>
                 <DayOfWeekFilterDropdown
                   value={dayOfWeek}
                   onChange={(v) => setDayOfWeek(v as DayOfWeekType)}
@@ -251,22 +251,22 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
               </FieldEditDropdown>
             ) : (
               // ✅ 여기만 변경: 영어 enum → 한글 라벨
-              <FieldView label="요일" value={formatDayOfWeek(dayOfWeek, "short")} />
+              <FieldView label={t("fields.dayOfWeek")} value={formatDayOfWeek(dayOfWeek, "short")} />
             )}
 
             {editMode ? (
-              <FieldEditDropdown label="교시" disabled={formDisabled}>
+              <FieldEditDropdown label={t("fields.period")} disabled={formDisabled}>
                 <PeriodFilterDropdown
                   value={period > 0 ? String(period) : ""}
                   onChange={(v) => setPeriod(v ? Number(v) : 0)}
                 />
               </FieldEditDropdown>
             ) : (
-              <FieldView label="교시" value={`${period}교시`} />
+              <FieldView label={t("fields.period")} value={t("fields.periodValue", { period })} />
             )}
 
             {editMode ? (
-              <FieldEdit label="장소" disabled={formDisabled}>
+              <FieldEdit label={t("fields.location")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   value={location}
@@ -275,7 +275,7 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="장소" value={location} />
+              <FieldView label={t("fields.location")} value={location} />
             )}
           </Row>
         </div>
@@ -283,11 +283,11 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
 
       {/* 담당교수 */}
       <section className={styles.section}>
-        <Header title="담당교수" />
+        <Header title={t("sections.professor")} />
         <div className={styles.body}>
           <Row cols={3}>
             {editMode ? (
-              <FieldEditDropdown label="담당교수" disabled={formDisabled}>
+              <FieldEditDropdown label={t("fields.professor")} disabled={formDisabled}>
                 <DeptProfessorFilterDropdown
                   deptId={deptIdStr}
                   value={professorAccountId > 0 ? String(professorAccountId) : ""}
@@ -295,17 +295,17 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
                 />
               </FieldEditDropdown>
             ) : (
-              <FieldView label="담당교수명" value={professorName} />
+              <FieldView label={t("fields.professorName")} value={professorName} />
             )}
 
             <FieldView
-              label="전화번호"
-              value={editMode ? <span className={styles.mutedText}>교수 선택 후 반영</span> : phone}
+              label={t("fields.phone")}
+              value={editMode ? <span className={styles.mutedText}>{t("messages.selectProfessorHint")}</span> : phone}
               readonly={editMode}
             />
             <FieldView
-              label="이메일"
-              value={editMode ? <span className={styles.mutedText}>교수 선택 후 반영</span> : email}
+              label={t("fields.email")}
+              value={editMode ? <span className={styles.mutedText}>{t("messages.selectProfessorHint")}</span> : email}
               readonly={editMode}
             />
           </Row>
@@ -314,10 +314,10 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
 
       {/* 설명 */}
       <section className={styles.section}>
-        <Header title="비고" />
+        <Header title={t("sections.remark")} />
         <div className={styles.body}>
           <div className={styles.descRow}>
-            <div className={styles.descLabel}>설명</div>
+            <div className={styles.descLabel}>{t("fields.description")}</div>
             <div className={`${styles.descBox} ${editMode ? styles.readonlyBox : ""}`}>{description}</div>
           </div>
         </div>
@@ -326,15 +326,15 @@ export function OfferingDetailSection({ offeringId, data, onReload }: Props) {
           {editMode ? (
             <>
               <Button variant="primary" onClick={handleSave} loading={saving} disabled={formDisabled}>
-                저장
+                {tCommon("saveButton")}
               </Button>
               <Button variant="secondary" onClick={handleCancelEdit} disabled={saving}>
-                취소
+                {tCommon("cancelButton")}
               </Button>
             </>
           ) : (
             <Button variant="primary" onClick={handleEnterEdit} disabled={!editable}>
-              수정
+              {tCommon("editButton")}
             </Button>
           )}
         </div>

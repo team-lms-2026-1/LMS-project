@@ -4,12 +4,12 @@ import { Table, type TableColumn } from "@/components/table";
 import styles from "./OfferingStudentsTable.module.css";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
-import { enrollmentStatusLabel, completionStatusLabel } from "@/features/curricular-offering/utils/studentStatusLable";
 import { CurricularOfferingStudentListItemDto } from "@/features/curricular-offering/api/types";
 import { useState } from "react";
 import { updateStudentScore } from "@/features/curricular-offering/api/curricularOfferingsApi";
 import { OfferingStatus } from "@/features/curricular/api/types";
 import toast from "react-hot-toast"
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   offeringId: number;
@@ -20,6 +20,11 @@ type Props = {
 };
 
 export function OfferingStudentsTable({ offeringId, offeringStatus, items, loading, onSaved }: Props) {
+  const t = useI18n("curricular.adminOfferingDetail.students");
+  const tCommon = useI18n("curricular.common");
+  const tEnrollment = useI18n("curricular.status.enrollment");
+  const tCompletion = useI18n("curricular.status.completion");
+
   const [editId, setEditId] = useState<number | null>(null); // 현재 편집중 enrollmentId
   const [editRawScore, setEditRawScore] = useState<string>(""); // input 값
   const [savingId, setSavingId] = useState<number | null>(null); // 저장중인 row 
@@ -39,16 +44,16 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
   const saveEdit = async (enrollmentId: number) => {
     const n = Number(editRawScore);
     if (!Number.isFinite(n) || n < 0 || n > 100) {
-      toast.error("점수는 0 ~ 100 사이 숫자만 입력할 수 있어요");
+      toast.error(t("messages.scoreRange"));
       return;
     };
 
     setSavingId(enrollmentId);
-    const tId = toast.loading("저장중...")
+    const tId = toast.loading(t("messages.savingToast"))
     try {
       await updateStudentScore(offeringId, enrollmentId, { rawScore: n });
 
-      toast.success("점수가 저장되었습니다.", {id: tId});
+      toast.success(t("messages.savedToast"), {id: tId});
       setEditId(null);
       setEditRawScore("");
 
@@ -59,7 +64,7 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
         const msg =
           e?.message ||
           e?.error?.message ||
-          "저장에 실패했습니다. 잠시 후 다시 시도해주세요.";
+          t("messages.saveFailed");
 
         toast.error(msg, { id: tId });
       } finally {
@@ -67,13 +72,37 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
       }
   };
 
+  const enrollmentStatusLabel = (value: string) => {
+    switch (value) {
+      case "ENROLLED":
+        return tEnrollment("ENROLLED");
+      case "CANCELED":
+        return tEnrollment("CANCELED");
+      default:
+        return value;
+    }
+  };
+
+  const completionStatusLabel = (value: string) => {
+    switch (value) {
+      case "IN_PROGRESS":
+        return tCompletion("IN_PROGRESS");
+      case "PASSED":
+        return tCompletion("PASSED");
+      case "FAILED":
+        return tCompletion("FAILED");
+      default:
+        return value;
+    }
+  };
+
   const columns: Array<TableColumn<CurricularOfferingStudentListItemDto>> = [
-    { header: "학생명", align: "center", render: (r) => r.studentName },
-    { header: "학번", align: "center", render: (r) => r.studentNo },
-    { header: "학년", align: "center", render: (r) => r.gradeLevel },
-    { header: "소속학과", align: "center", render: (r) => r.deptName },
+    { header: t("headers.studentName"), align: "center", render: (r) => r.studentName },
+    { header: t("headers.studentNo"), align: "center", render: (r) => r.studentNo },
+    { header: t("headers.gradeLevel"), align: "center", render: (r) => r.gradeLevel },
+    { header: t("headers.deptName"), align: "center", render: (r) => r.deptName },
     {
-      header: "점수",
+      header: t("headers.rawScore"),
       align: "center",
       stopRowClick: true,
       render: (r) => {
@@ -93,22 +122,22 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
         );
       },
     },
-    { header: "등급", align: "center", render: (r) => r.grade },
-    { header: "수강상태", align: "center", render: (r) => (
+    { header: t("headers.grade"), align: "center", render: (r) => r.grade },
+    { header: t("headers.enrollmentStatus"), align: "center", render: (r) => (
     <StatusPill
         status={r.enrollmentStatus as any}
         label={enrollmentStatusLabel(r.enrollmentStatus)}
     />
     )},
 
-    { header: "이수상태", align: "center", render: (r) => (
+    { header: t("headers.completionStatus"), align: "center", render: (r) => (
     <StatusPill
         status={r.completionStatus as any}
         label={completionStatusLabel(r.completionStatus)}
     />
     )},
     {
-      header: "점수등록",
+      header: t("headers.scoreAction"),
       width: 180,
       align: "center",
       stopRowClick: true,
@@ -124,9 +153,9 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
               variant="secondary"
               onClick={() => startEdit(r)}
               disabled={!canEditScore}
-              title={!canEditScore ? "수강중(IN_PROGRESS) 상태에서만 점수 수정이 가능합니다." : undefined}
+              title={!canEditScore ? t("messages.canEditOnlyInProgress") : undefined}
             >
-              {hasScore ? "수정" : "입력"}
+              {hasScore ? tCommon("editButton") : t("buttons.input")}
             </Button>
 
             </div>
@@ -139,11 +168,11 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
               onClick={() => saveEdit(r.enrollmentId)}
               disabled={isSaving || !canEditScore}
             >
-              {isSaving ? "저장중..." : "저장"}
+              {isSaving ? t("buttons.saving") : tCommon("saveButton")}
             </Button>
 
             <Button variant="secondary" onClick={cancelEdit} disabled={isSaving}>
-              취소
+              {tCommon("cancelButton")}
             </Button>
           </div>
         );
@@ -158,7 +187,7 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.enrollmentId}
-      emptyText="이수학생이 없습니다."
+      emptyText={t("emptyText")}
     />
   );
 }

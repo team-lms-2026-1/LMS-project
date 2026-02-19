@@ -3,87 +3,94 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./admin-shell.module.css";
 
-type NavItem = { label: string; href: string; exact?: boolean };
-type NavSection = { key: string; title: string; items: NavItem[] };
+type NavItem = { labelKey: string; href: string; exact?: boolean };
+type NavSection = { key: string; titleKey: string; items: NavItem[] };
 
 const SECTIONS: NavSection[] = [
   {
     key: "community",
-    title: "커뮤니티",
+    titleKey: "sections.community.title",
     items: [
-      { label: "공지사항", href: "/admin/community/notices" },
-      { label: "자료실", href: "/admin/community/resources" },
-      { label: "FAQ", href: "/admin/community/faqs" },
-      { label: "Q&A", href: "/admin/community/qna" },
+      { labelKey: "sections.community.items.notices", href: "/admin/community/notices" },
+      { labelKey: "sections.community.items.resources", href: "/admin/community/resources" },
+      { labelKey: "sections.community.items.faqs", href: "/admin/community/faqs" },
+      { labelKey: "sections.community.items.qna", href: "/admin/community/qna" },
     ],
   },
   {
     key: "authority",
-    title: "권한 관리",
+    titleKey: "sections.authority.title",
     items: [
-      { label: "학과관리", href: "/admin/authority/departments" },
-      { label: "계정관리", href: "/admin/authority/accounts" },
-      { label: "학기관리", href: "/admin/authority/semesters" },
+      { labelKey: "sections.authority.items.departments", href: "/admin/authority/departments" },
+      { labelKey: "sections.authority.items.accounts", href: "/admin/authority/accounts" },
+      { labelKey: "sections.authority.items.semesters", href: "/admin/authority/semesters" },
     ],
   },
   {
     key: "system-status",
-    title: "시스템현황 관리",
-    items: [{ label: "계정로그관리", href: "/admin/system-status/account-logs" }],
+    titleKey: "sections.systemStatus.title",
+    items: [{ labelKey: "sections.systemStatus.items.accountLogs", href: "/admin/system-status/account-logs" }],
   },
   {
     key: "survey",
-    title: "설문 통합 관리",
+    titleKey: "sections.survey.title",
     items: [
-      { label: "설문 목록", href: "/admin/surveys" },
-      { label: "설문 통계", href: "/admin/survey-results" },
+      { labelKey: "sections.survey.items.surveys", href: "/admin/surveys" },
+      { labelKey: "sections.survey.items.statistics", href: "/admin/survey-results" },
     ],
   },
   {
     key: "competency",
-    title: "역량 통합 관리",
+    titleKey: "sections.competency.title",
     items: [
+<<<<<<< HEAD
       { label: "6Cs 란?", href: "/admin/competencies", exact: true },
       { label: "학생역량활동조회", href: "/admin/competencies/students" },
       { label: "역량진단지 관리", href: "/admin/competencies/dignosis" },
       { label: "통합 결과 관리", href: "/admin/competencies/result" },
+=======
+      { labelKey: "sections.competency.items.intro", href: "/admin/competencies", exact: true },
+      { labelKey: "sections.competency.items.students", href: "/admin/competencies/students" },
+      { labelKey: "sections.competency.items.diagnosis", href: "/admin/competencies/dignosis" },
+>>>>>>> 9f7781f255ff1b1b6e2658d4f8f0a0829190d79e
     ],
   },
   {
     key: "course",
-    title: "교과 관리",
+    titleKey: "sections.course.title",
     items: [
-      { label: "교과 관리", href: "/admin/curricular/curriculars" },
-      { label: "교과운영 관리", href: "/admin/curricular/offerings" },
-      { label: "교과성적 관리", href: "/admin/curricular/grade-reports" },
+      { labelKey: "sections.course.items.curriculars", href: "/admin/curricular/curriculars" },
+      { labelKey: "sections.course.items.offerings", href: "/admin/curricular/offerings" },
+      { labelKey: "sections.course.items.grades", href: "/admin/curricular/grade-reports" },
     ],
   },
   {
     key: "extra",
-    title: "비교과 관리",
+    titleKey: "sections.extra.title",
     items: [
-      { label: "비교과 관리", href: "/admin/extra-curricular/extra-curriculars" },
-      { label: "비교과운영 관리", href: "/admin/extra-curricular/offerings" },
-      { label: "비교과성적관리", href: "/admin/extra-curricular/grade-reports" },
+      { labelKey: "sections.extra.items.programs", href: "/admin/extra-curricular/extra-curriculars" },
+      { labelKey: "sections.extra.items.offerings", href: "/admin/extra-curricular/offerings" },
+      { labelKey: "sections.extra.items.grades", href: "/admin/extra-curricular/grade-reports" },
     ],
   },
   {
     key: "mentoring",
-    title: "멘토링",
+    titleKey: "sections.mentoring.title",
     items: [
-      { label: "모집 공고 등록", href: "/admin/mentoring/recruitments" },
-      { label: "신청 승인", href: "/admin/mentoring/applications" },
-      { label: "멘토-멘티 매칭", href: "/admin/mentoring/matching" },
+      { labelKey: "sections.mentoring.items.recruitments", href: "/admin/mentoring/recruitments" },
+      { labelKey: "sections.mentoring.items.applications", href: "/admin/mentoring/applications" },
+      { labelKey: "sections.mentoring.items.matching", href: "/admin/mentoring/matching" },
     ],
   },
   {
     key: "space",
-    title: "학습 공간 대여",
+    titleKey: "sections.space.title",
     items: [
-      { label: "학습공간 목록", href: "/admin/study-space/spaces" },
-      { label: "학습공간 신청 목록", href: "/admin/study-space/spaces-rentals" },
+      { labelKey: "sections.space.items.spaces", href: "/admin/study-space/spaces" },
+      { labelKey: "sections.space.items.rentals", href: "/admin/study-space/spaces-rentals" },
     ],
   },
 ];
@@ -95,19 +102,11 @@ function isActive(pathname: string, href: string, exact: boolean = false) {
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const t = useI18n("menu.admin");
+  const tCommon = useI18n("menu.common");
 
-  /**
-   * ✅ hover로만 열리는 섹션
-   * - null이면 전부 닫힘
-   * - 어떤 섹션 위에 마우스가 올라가면 그 섹션 key로 설정
-   * - 섹션 영역 밖으로 나가면 null로 닫힘
-   */
   const [hoverOpenKey, setHoverOpenKey] = useState<string | null>(null);
 
-  /**
-   * ✅ 현재 경로가 속한 섹션(활성 표시용)
-   * - "자동 오픈"이 아니라 "헤더 active 스타일 표시" 목적
-   */
   const activeSectionKey = useMemo(() => {
     for (const s of SECTIONS) {
       if (s.items.some((it) => isActive(pathname, it.href, it.exact))) return s.key;
@@ -118,11 +117,11 @@ export default function AdminSidebar() {
   return (
     <div className={styles.sidebarInner}>
       <div className={styles.sidebarHeader}>
-        <div className={styles.sidebarTitle}>상세 메뉴</div>
+        <div className={styles.sidebarTitle}>{tCommon("sidebarTitle")}</div>
         <Link href="/admin" className={styles.headerLogoLink}>
           <img
             src="/logo.png"
-            alt="관리자 메인으로 이동"
+            alt={tCommon("logoAlt.admin")}
             className={styles.headerLogoImage}
           />
         </Link>
@@ -133,11 +132,6 @@ export default function AdminSidebar() {
           const open = hoverOpenKey === section.key;
 
           return (
-            /**
-             * ✅ wrapper에 enter/leave를 걸어야
-             * - 헤더 -> 서브메뉴로 이동할 때 닫히지 않습니다.
-             * - 서브메뉴 위에 있어도 "열림 상태 유지"가 됩니다.
-             */
             <div
               key={section.key}
               className={styles.section}
@@ -145,7 +139,6 @@ export default function AdminSidebar() {
               onMouseEnter={() => setHoverOpenKey(section.key)}
               onMouseLeave={() => setHoverOpenKey(null)}
             >
-              {/* ✅ 버튼은 클릭 토글 용도가 아니라 "헤더 UI" 용도 */}
               <div
                 className={[
                   styles.sectionHeader,
@@ -154,7 +147,7 @@ export default function AdminSidebar() {
                 ].join(" ")}
                 aria-expanded={open}
               >
-                <span className={styles.sectionHeaderText}>{section.title}</span>
+                <span className={styles.sectionHeaderText}>{t(section.titleKey)}</span>
                 <span className={open ? styles.chevUp : styles.chevDown} aria-hidden="true" />
               </div>
 
@@ -166,11 +159,11 @@ export default function AdminSidebar() {
 
                     return (
                       <Link
-                        key={item.href + item.label}
+                        key={item.href + item.labelKey}
                         href={item.href}
                         className={active ? styles.itemActive : styles.item}
                       >
-                        {item.label}
+                        {t(item.labelKey)}
                       </Link>
                     );
                   })}
