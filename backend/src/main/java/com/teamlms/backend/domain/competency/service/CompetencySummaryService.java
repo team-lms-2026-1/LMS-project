@@ -152,7 +152,8 @@ public class CompetencySummaryService {
                 List<Competency> competencies = competencyRepository.findAll();
                 StudentProfile profile = studentProfileRepository.findById(studentAccountId).orElse(null);
                 Long deptId = profile != null ? profile.getDeptId() : null;
-                DiagnosisRun run = resolveDiagnosisRun(semesterId, deptId);
+                Integer grade = profile != null ? profile.getGradeLevel() : null;
+                DiagnosisRun run = resolveDiagnosisRun(semesterId, deptId, grade);
 
                 for (Competency comp : competencies) {
 
@@ -278,7 +279,8 @@ public class CompetencySummaryService {
                 for (Long studentId : studentIds) {
                         StudentProfile profile = studentProfileRepository.findById(studentId).orElse(null);
                         Long deptId = profile != null ? profile.getDeptId() : null;
-                        DiagnosisRun runForStudent = resolveDiagnosisRun(semesterId, deptId);
+                        Integer grade = profile != null ? profile.getGradeLevel() : null;
+                        DiagnosisRun runForStudent = resolveDiagnosisRun(semesterId, deptId, grade);
 
                         for (Competency comp : competencies) {
 
@@ -485,16 +487,52 @@ public class CompetencySummaryService {
                 }
         }
 
-        private DiagnosisRun resolveDiagnosisRun(Long semesterId, Long deptId) {
-                if (deptId != null) {
+        private DiagnosisRun resolveDiagnosisRun(Long semesterId, Long deptId, Integer targetGrade) {
+                Integer normalizedGrade = targetGrade != null && targetGrade > 0 ? targetGrade : null;
+
+                if (deptId != null && normalizedGrade != null) {
                         DiagnosisRun run = diagnosisRunRepository
-                                        .findBySemesterSemesterIdAndDeptId(semesterId, deptId)
+                                        .findBySemesterSemesterIdAndDeptIdAndTargetGrade(semesterId, deptId, normalizedGrade)
                                         .orElse(null);
                         if (run != null) {
                                 return run;
                         }
                 }
-                return diagnosisRunRepository.findBySemesterSemesterIdAndDeptIdIsNull(semesterId).orElse(null);
+
+                if (deptId != null) {
+                        DiagnosisRun run = diagnosisRunRepository
+                                        .findBySemesterSemesterIdAndDeptIdAndTargetGradeIsNull(semesterId, deptId)
+                                        .orElse(null);
+                        if (run != null) {
+                                return run;
+                        }
+                        run = diagnosisRunRepository
+                                        .findBySemesterSemesterIdAndDeptIdAndTargetGrade(semesterId, deptId, 0)
+                                        .orElse(null);
+                        if (run != null) {
+                                return run;
+                        }
+                }
+
+                if (normalizedGrade != null) {
+                        DiagnosisRun run = diagnosisRunRepository
+                                        .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGrade(semesterId, normalizedGrade)
+                                        .orElse(null);
+                        if (run != null) {
+                                return run;
+                        }
+                }
+
+                DiagnosisRun run = diagnosisRunRepository
+                                .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGradeIsNull(semesterId)
+                                .orElse(null);
+                if (run != null) {
+                        return run;
+                }
+
+                return diagnosisRunRepository
+                                .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGrade(semesterId, 0)
+                                .orElse(null);
         }
 
         /**

@@ -18,6 +18,10 @@ public interface DiagnosisRunRepository extends JpaRepository<DiagnosisRun, Long
     List<DiagnosisRun> findAllBySemesterSemesterId(Long semesterId);
     Optional<DiagnosisRun> findBySemesterSemesterIdAndDeptId(Long semesterId, Long deptId);
     Optional<DiagnosisRun> findBySemesterSemesterIdAndDeptIdIsNull(Long semesterId);
+    Optional<DiagnosisRun> findBySemesterSemesterIdAndDeptIdAndTargetGrade(Long semesterId, Long deptId, Integer targetGrade);
+    Optional<DiagnosisRun> findBySemesterSemesterIdAndDeptIdAndTargetGradeIsNull(Long semesterId, Long deptId);
+    Optional<DiagnosisRun> findBySemesterSemesterIdAndDeptIdIsNullAndTargetGrade(Long semesterId, Integer targetGrade);
+    Optional<DiagnosisRun> findBySemesterSemesterIdAndDeptIdIsNullAndTargetGradeIsNull(Long semesterId);
 
     // 특정 상태의 진단 실행 조회
     @Query("""
