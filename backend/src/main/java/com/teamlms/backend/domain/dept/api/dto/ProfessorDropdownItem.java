@@ -4,12 +4,16 @@ import com.teamlms.backend.domain.account.entity.ProfessorProfile;
 
 public record ProfessorDropdownItem(
         Long accountId,
-        String name
+        String name,
+        String email,
+        String phone
 ) {
     public static ProfessorDropdownItem from(ProfessorProfile p) {
         return new ProfessorDropdownItem(
                 p.getAccountId(),
-                p.getName()
+                p.getName(),
+                p.getEmail(),
+                p.getPhone()
         );
     }
 }

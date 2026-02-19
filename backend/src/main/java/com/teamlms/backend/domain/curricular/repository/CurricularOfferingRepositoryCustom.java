@@ -16,8 +16,16 @@ public interface CurricularOfferingRepositoryCustom {
             Pageable pageable
     );
 
+    Page<CurricularOfferingListItem> findOfferingProfessorList(
+            Long professorAccountId,
+            Long semesterId,
+            String keyword,
+            Pageable pageable
+    );
+
     Page<CurricularOfferingUserListItem> findOfferingUserList(
             String keyword,
+            Long professorAccountId,
             Pageable pageable
     );
 

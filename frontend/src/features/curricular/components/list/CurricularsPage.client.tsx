@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./CurricularsPage.module.css"
@@ -26,7 +26,7 @@ export default function CurricularPageClient() {
   const { get } = useFilterQuery(["deptId"])
   const deptId = get("deptId")
 
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 2 });
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
   const [inputKeyword, setInputKeyword] = useState("");
 
@@ -38,7 +38,7 @@ export default function CurricularPageClient() {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size]);
 
-  // deptId 드롭다운 필터추가
+  // deptId 드롭다운 필터 적용
   useEffect(() => {
     actions.setDeptId(deptId ? Number(deptId) : null);
   }, [deptId, actions]);
@@ -61,7 +61,7 @@ export default function CurricularPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="학기명/코드 검색"
+              placeholder="교과목명/코드 검색"
             />
           </div>
         </div>
@@ -81,7 +81,7 @@ export default function CurricularPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            교과운영 등록
+            교과 등록
           </OutButton>
         </div>
         <CurricularCreateModal
@@ -91,11 +91,11 @@ export default function CurricularPageClient() {
         />
         <CurricularEditModal
           open={Boolean(editId)}
-          curricularId = {editId ?? undefined}
+          curricularId={editId ?? undefined}
           onClose={() => setEditId(null)}
-          onUpdated={ async () => {
+          onUpdated={async () => {
             await actions.reload();
-            setEditId(null)
+            setEditId(null);
           }}
         />
       </div>
@@ -103,3 +103,5 @@ export default function CurricularPageClient() {
     </div>
   )
 }
+
+

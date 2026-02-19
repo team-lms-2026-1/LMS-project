@@ -39,7 +39,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
             join ProfessorProfile p on p.accountId = o.professorAccountId
         """;
 
-        String where = buildWhere(semesterId, keyword);
+        String where = buildWhere(semesterId, keyword, null);
         String orderBy = " order by o.createdAt desc";
 
         // ================= content =================
@@ -60,7 +60,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
         TypedQuery<CurricularOfferingListItem> contentQuery =
                 em.createQuery(contentJpql, CurricularOfferingListItem.class);
 
-        setParams(contentQuery, semesterId, keyword);
+        setParams(contentQuery, semesterId, keyword, null);
         contentQuery.setFirstResult((int) pageable.getOffset());
         contentQuery.setMaxResults(pageable.getPageSize());
 
@@ -75,17 +75,72 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
         TypedQuery<Long> countQuery =
                 em.createQuery(countJpql, Long.class);
 
-        setParams(countQuery, semesterId, keyword);
+        setParams(countQuery, semesterId, keyword, null);
         long total = countQuery.getSingleResult();
 
         return new PageImpl<>(content, pageable, total);
     }
 
-    private String buildWhere(Long semesterId, String keyword) {
+    @Override
+    public Page<CurricularOfferingListItem> findOfferingProfessorList(
+            Long professorAccountId,
+            Long semesterId,
+            String keyword,
+            Pageable pageable
+    ) {
+        String baseJpql = """
+            from CurricularOffering o
+            join Curricular c on c.curricularId = o.curricularId
+            join Semester s on s.semesterId = o.semesterId
+            join ProfessorProfile p on p.accountId = o.professorAccountId
+        """;
+
+        String where = buildWhere(semesterId, keyword, professorAccountId);
+        String orderBy = " order by o.createdAt desc";
+
+        String contentJpql = """
+            select new com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem(
+                o.offeringId,
+                o.offeringCode,
+                c.curricularName,
+                o.capacity,
+                p.name,
+                s.displayName,
+                o.location,
+                c.credits,
+                o.status
+            )
+        """ + baseJpql + where + orderBy;
+
+        TypedQuery<CurricularOfferingListItem> contentQuery =
+                em.createQuery(contentJpql, CurricularOfferingListItem.class);
+
+        setParams(contentQuery, semesterId, keyword, professorAccountId);
+        contentQuery.setFirstResult((int) pageable.getOffset());
+        contentQuery.setMaxResults(pageable.getPageSize());
+
+        List<CurricularOfferingListItem> content = contentQuery.getResultList();
+
+        String countJpql = """
+            select count(o.offeringId)
+        """ + baseJpql + where;
+
+        TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
+        setParams(countQuery, semesterId, keyword, professorAccountId);
+
+        long total = countQuery.getSingleResult();
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    private String buildWhere(Long semesterId, String keyword, Long professorAccountId) {
         StringBuilder sb = new StringBuilder(" where 1=1 ");
 
         if (semesterId != null) {
             sb.append(" and o.semesterId = :semesterId");
+        }
+        if (professorAccountId != null) {
+            sb.append(" and o.professorAccountId = :professorAccountId");
         }
         if (keyword != null && !keyword.isBlank()) {
             sb.append("""
@@ -99,9 +154,12 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
     }
 
 
-    private void setParams(TypedQuery<?> query, Long semesterId, String keyword) {
+    private void setParams(TypedQuery<?> query, Long semesterId, String keyword, Long professorAccountId) {
         if (semesterId != null) {
             query.setParameter("semesterId", semesterId);
+        }
+        if (professorAccountId != null) {
+            query.setParameter("professorAccountId", professorAccountId);
         }
         if (keyword != null && !keyword.isBlank()) {
             query.setParameter("kw", "%" + keyword.toLowerCase() + "%");
@@ -112,6 +170,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
     @Override
     public Page<CurricularOfferingUserListItem> findOfferingUserList(
             String keyword,
+            Long professorAccountId,
             Pageable pageable
     ) {
         String baseJpql = """
@@ -125,7 +184,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
             left join Competency comp on comp.competencyId = m.id.competencyId
         """;
 
-        String where = buildUserWhere(keyword);
+        String where = buildUserWhere(keyword, professorAccountId);
         String groupBy = """
             group by
                 o.offeringId,
@@ -160,7 +219,7 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
         TypedQuery<CurricularOfferingUserListItem> contentQuery =
                 em.createQuery(contentJpql, CurricularOfferingUserListItem.class);
 
-        setUserParams(contentQuery, keyword);
+        setUserParams(contentQuery, keyword, professorAccountId);
         contentQuery.setFirstResult((int) pageable.getOffset());
         contentQuery.setMaxResults(pageable.getPageSize());
 
@@ -173,17 +232,20 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
         """ + baseJpql + where;
 
         TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
-        setUserParams(countQuery, keyword);
+        setUserParams(countQuery, keyword, professorAccountId);
 
         long total = countQuery.getSingleResult();
 
         return new PageImpl<>(content, pageable, total);
     }
 
-    private String buildUserWhere(String keyword) {
+    private String buildUserWhere(String keyword, Long professorAccountId) {
         StringBuilder sb = new StringBuilder(" where 1=1 ");
 
         sb.append("and o.status in :visibleStatuses");
+        if (professorAccountId != null) {
+            sb.append(" and o.professorAccountId = :professorAccountId");
+        }
 
         if (keyword != null && !keyword.isBlank()) {
             sb.append("""
@@ -197,13 +259,16 @@ public class CurricularOfferingRepositoryImpl implements CurricularOfferingRepos
         return sb.toString();
     }
 
-    private void setUserParams(TypedQuery<?> query, String keyword) {
+    private void setUserParams(TypedQuery<?> query, String keyword, Long professorAccountId) {
         query.setParameter(
             "visibleStatuses",
             List.of(
                 OfferingStatus.OPEN
             )
         );
+        if (professorAccountId != null) {
+            query.setParameter("professorAccountId", professorAccountId);
+        }
 
         if (keyword != null && !keyword.isBlank()) {
             query.setParameter("kw", "%" + keyword.toLowerCase() + "%");

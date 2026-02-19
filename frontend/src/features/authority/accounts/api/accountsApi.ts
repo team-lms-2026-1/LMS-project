@@ -14,6 +14,7 @@ const BASE = "/api/admin/authority/accounts";
 type AccountsListParams = {
   accountType?: AccountType;
   keyword?: string;
+  deptId?: number; // ✅ 학과 필터 추가
   page?: number; // ✅ 0-based로 보내는 걸 권장 (프론트에서 page-1 변환)
   size?: number;
 };
@@ -186,9 +187,11 @@ export const accountsApi = {
     const kw = (params?.keyword ?? "").trim();
     if (kw) qs.set("keyword", kw);
 
+    if (params?.deptId) qs.set("deptId", String(params.deptId));
+
     // ✅ 서버는 보통 0-based (프론트에서 page-1로 변환해서 넣는 걸 권장)
     qs.set("page", String(params?.page ?? 0));
-    qs.set("size", String(params?.size ?? 20));
+    qs.set("size", String(params?.size ?? 10));
 
     const url = `${BASE}?${qs.toString()}`;
     const raw = await getJson<any>(url);

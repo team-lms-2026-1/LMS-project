@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type { ResourceListItemDto, PageMeta } from "../api/types";
@@ -6,7 +6,7 @@ import { fetchResourcesList } from "../api/resourcesApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -19,7 +19,7 @@ export function useResourcesList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [categoryId, setCategoryId] = useState<number | null>(null);
@@ -62,14 +62,14 @@ export function useResourcesList() {
       page,
       size,
       keyword,
-      categoryId, // ✅ 추가
+      categoryId, // cleaned comment
       loading,
       error,
     },
     actions: {
       setKeyword,
 
-      // ✅ 카테고리 변경 시 page 1로 리셋
+      // cleaned comment
       setCategoryId: (cid: number | null) => {
         setPage(1);
         setCategoryId(cid);
@@ -87,3 +87,5 @@ export function useResourcesList() {
     },
   };
 }
+
+

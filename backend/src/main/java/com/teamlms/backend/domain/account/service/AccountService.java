@@ -31,6 +31,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final com.teamlms.backend.domain.account.repository.StudentProfileRepository studentProfileRepository;
     private final com.teamlms.backend.domain.account.repository.ProfessorProfileRepository professorProfileRepository;
+    private final com.teamlms.backend.domain.account.repository.AdminProfileRepository adminProfileRepository;
     private final com.teamlms.backend.domain.dept.repository.DeptRepository deptRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -63,8 +64,9 @@ public class AccountService {
     public Page<AdminAccountListItem> adminList(
             String keyword,
             AccountType accountType,
+            Long deptId,
             Pageable pageable) {
-        return accountRepository.searchAccounts(keyword, accountType, pageable);
+        return accountRepository.searchAccounts(keyword, accountType, deptId, pageable);
     }
 
     // 상세 조회
@@ -168,6 +170,12 @@ public class AccountService {
                     deptRepository.findById(p.getDeptId())
                             .ifPresent(d -> builder.deptName(d.getDeptName()));
                 }
+            });
+        } else if (type == AccountType.ADMIN) {
+            adminProfileRepository.findById(accountId).ifPresent(p -> {
+                builder.name(p.getName())
+                        .email(p.getEmail())
+                        .phone(p.getPhone());
             });
         }
 

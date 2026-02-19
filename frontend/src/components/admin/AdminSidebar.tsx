@@ -42,11 +42,6 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "personal",
-    title: "개인정보 조회",
-    items: [{ label: "조회", href: "/competencies" }],
-  },
-  {
     key: "competency",
     title: "역량 통합 관리",
     items: [
@@ -82,11 +77,6 @@ const SECTIONS: NavSection[] = [
       { label: "신청 승인", href: "/admin/mentoring/applications" },
       { label: "멘토-멘티 매칭", href: "/admin/mentoring/matching" },
     ],
-  },
-  {
-    key: "counsel",
-    title: "상담 관리",
-    items: [{ label: "상담 이력", href: "/surveys" }],
   },
   {
     key: "space",

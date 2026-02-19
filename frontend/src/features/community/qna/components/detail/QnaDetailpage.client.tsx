@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -145,7 +145,7 @@ export default function QnaDetailPageClient() {
     setSavingAnswer(true);
     try {
       if (hasAnswer) {
-        // ?? ??: answerId ??
+        // cleaned comment
         await updateQnaAnswer(questionId, { content: answerText });
       } else {
         await createQnaAnswer(questionId, { content: answerText });

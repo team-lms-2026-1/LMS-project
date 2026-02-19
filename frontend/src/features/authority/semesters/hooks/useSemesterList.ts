@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchSemesterDetail, fetchSemestersList } from "../api/semestersApi";
@@ -6,7 +6,7 @@ import type { SemesterItem, SemesterListItemDto, PageMeta, SemesterDetailDto } f
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -31,7 +31,7 @@ export function useSemestersList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -54,7 +54,7 @@ export function useSemestersList() {
       console.error("[useSemestersList]", e);
       setError(e.message ?? "학기 목록 조회 실패");
       setItems([]);
-      setMeta(defaultMeta); // ✅ null 금지
+      setMeta(defaultMeta); // cleaned comment
     } finally {
       setLoading(false);
     }
@@ -67,9 +67,9 @@ export function useSemestersList() {
   return {
     state: {
       items,
-      meta,   // ✅ 항상 PageMeta
+      meta,   // cleaned comment
       page,
-      size,   // ✅ 밖에서도 필요하면 노출
+      size,   // cleaned comment
       keyword,
       loading,
       error,
@@ -79,7 +79,7 @@ export function useSemestersList() {
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 
-      // ✅ PaginationBar size 변경용
+      // cleaned comment
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
@@ -91,7 +91,7 @@ export function useSemestersList() {
 }
 
 
-// 모달 수정조회
+// cleaned comment
 export function useSemesterDetail(semesterId?: string, enabled: boolean = true) {
   const [data, setData] = useState<SemesterDetailDto | null>(null);
   
@@ -120,3 +120,4 @@ export function useSemesterDetail(semesterId?: string, enabled: boolean = true) 
 
   return { state : { data, loading, error }, actions: { load }};
 }
+

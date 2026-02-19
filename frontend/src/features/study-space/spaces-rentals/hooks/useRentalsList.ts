@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import { rentalsApi } from "../api/rentalsApi";
 import type { RentalDto, RentalListParams, PageMeta } from "../api/types";
 import toast from "react-hot-toast";
@@ -24,7 +24,7 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
     } catch (e: any) {
       console.error(e);
 
-      // ✅ Mock 제거: 실패하면 그냥 빈 리스트 + 에러 표시
+      // cleaned comment
       setData([]);
       setMeta(null);
 

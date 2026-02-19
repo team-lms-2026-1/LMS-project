@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { FaqListItemDto, PageMeta } from "../api/types";
@@ -6,7 +6,7 @@ import { fetchFaqList } from "../api/faqsApi";
 
 const defaultMeta: PageMeta = {
     page: 1,
-    size: 20,
+    size: 10,
     totalElements: 0,
     totalPages: 1,
     hasNext: false,
@@ -19,7 +19,7 @@ export function useFaqList() {
     const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
     const [page, setPage] = useState(1);
-    const [size, setSize] = useState(20);
+    const [size, setSize] = useState(10);
     const [keyword, setKeyword] = useState("");
     const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
 
@@ -81,3 +81,5 @@ export function useFaqList() {
         },
     };
 }
+
+

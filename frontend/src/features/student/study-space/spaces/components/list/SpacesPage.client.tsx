@@ -1,4 +1,4 @@
-
+﻿
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 export default function SpacesPageClient() {
   const router = useRouter();
 
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 8 });
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
   const [rows, setRows] = useState<SpaceListItemDto[]>([]);
   const [meta, setMeta] = useState<PageMeta | null>(null);
@@ -63,7 +63,7 @@ export default function SpacesPageClient() {
   const onCardClick = (spaceId: number) => {
     const target = rows.find((item) => item.spaceId === spaceId);
     if (target && target.isRentable === false) {
-      toast.error("예약가능한 스터디룸이 없습니다.");
+      toast.error("예약 가능한 스터디룸이 없습니다.");
       return;
     }
     router.push(`/student/study-space/spaces/${spaceId}`);
@@ -75,7 +75,7 @@ export default function SpacesPageClient() {
     <div className={styles.page}>
       <div className={styles.headerRow}>
         <div>
-          <div className={styles.breadcrumb}>🏠 &gt; 학습공간 대여 관리</div>
+          <div className={styles.breadcrumb}>홈 &gt; 학습공간 대여 관리</div>
           <h1 className={styles.title}>학습공간 대여 관리</h1>
         </div>
       </div>
@@ -93,3 +93,5 @@ export default function SpacesPageClient() {
     </div>
   );
 }
+
+

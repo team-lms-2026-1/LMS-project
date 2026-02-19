@@ -13,15 +13,16 @@ import com.teamlms.backend.domain.account.enums.AccountType;
 
 public interface AccountRepositoryCustom {
     Page<AdminAccountListItem> searchAccounts(
-        String keyword,
-        AccountType accountType,
-        Pageable pageable
-    );
+            String keyword,
+            AccountType accountType,
+            Long deptId,
+            Pageable pageable);
 
     // 상세 조회
     AccountType findAccountTypeById(Long accountId);
 
     AdminStudentDetailResponse findStudentBaseDetail(Long accountId);
+
     List<AdminStudentDetailResponse.MajorItem> findStudentMajors(Long studentAccountId);
 
     AdminProfessorDetailResponse findProfessorDetail(Long accountId);
