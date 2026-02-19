@@ -79,10 +79,8 @@ type NormalizedRadarSeries = {
 export default function ResultPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dignosisId = searchParams.get("dignosisId") ?? "1";
-  const semesterIdParam = searchParams.get("semesterId");
-  const semesterNameParam = searchParams.get("semesterName");
-  const semesterId = semesterIdParam ?? (semesterNameParam ? "" : "1");
+  const semesterIdParam = searchParams.get("semesterId")?.trim() ?? "";
+  const semesterNameParam = searchParams.get("semesterName")?.trim() ?? "";
   const statusParam = searchParams.get("status");
   const { options: deptOptionsRaw, loading: deptLoading } = useDeptsDropdownOptions();
   const { options: semesterOptions } = useSemestersDropdownOptions();
@@ -114,14 +112,13 @@ export default function ResultPageClient() {
 
 
   const query = useMemo(() => {
-    if (!dignosisId) return undefined;
-    const semesterQuery = semesterId
-      ? { semesterId }
+    const semesterQuery = semesterIdParam
+      ? { semesterId: semesterIdParam }
       : semesterNameParam
         ? { semesterName: semesterNameParam }
         : {};
-    return { dignosisId, ...semesterQuery };
-  }, [dignosisId, semesterId, semesterNameParam]);
+    return semesterQuery;
+  }, [semesterIdParam, semesterNameParam]);
 
   const { state, actions } = useResultList(query);
 
@@ -146,7 +143,8 @@ export default function ResultPageClient() {
   };
 
   const summary = useMemo(() => normalizeSummary(state.data), [state.data]);
-  const radarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);  const trendDeptOptions = useMemo(() => {
+  const radarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);
+  const trendDeptOptions = useMemo(() => {
     const names = new Set<string>();
     deptOptionsRaw.forEach((opt) => {
       const label = String(opt.label ?? "").trim();
@@ -200,20 +198,22 @@ export default function ResultPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.topBar}>          <h1 className={styles.title}>역량 통합 관리</h1>
-          {isClosed && (
-            <Button
-              variant="primary"
-              onClick={handleRecalculate}
-              disabled={recalcLoading || !resolvedSemesterId}
-            >
-              결과 산출
+        <div className={styles.topBar}>
+          <h1 className={styles.title}>역량 통합 관리</h1>
+          <div className={styles.topActions}>
+            {isClosed && (
+              <Button
+                variant="primary"
+                onClick={handleRecalculate}
+                disabled={recalcLoading || !resolvedSemesterId}
+              >
+                결과 산출
+              </Button>
+            )}
+            <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
+              목록
             </Button>
-          )}
-          <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
-            목록
-          </Button>
-
+          </div>
         </div>
 
         <div className={styles.summaryRow}>
@@ -234,7 +234,8 @@ export default function ResultPageClient() {
         <div className={styles.grid}>
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>역량 차트</h2>            </div>
+              <h2 className={styles.panelTitle}>역량 차트</h2>
+            </div>
             <div className={styles.chartWrap}>
               {radarData.length === 0 ? (
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
@@ -259,7 +260,6 @@ export default function ResultPageClient() {
                         className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[index % RADAR_COLOR_CLASSES.length]} ${
                           isSingleRadarSeries ? styles.radarFillSingle : styles.radarFillAll
                         }`}
-
                       />
                     ))}
                   </RadarChart>
@@ -270,7 +270,7 @@ export default function ResultPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>상대 차트</h2>              
+              <h2 className={styles.panelTitle}>상대 차트</h2>
               <div className={styles.filterWrap}>
                 <span className={styles.filterLabel}>학과</span>
                 <Dropdown
@@ -284,26 +284,26 @@ export default function ResultPageClient() {
               </div>
 
             </div>
-            <div className={styles.chartWrap}>              {!isTrendDeptSelected ? (
+            <div className={styles.chartWrap}>
+              {!isTrendDeptSelected ? (
                 <div className={styles.emptyCentered}>학과를 선택해주세요</div>
               ) : trendData.length === 0 || filteredTrendSeries.length === 0 ? (
-
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
               ) : (
-                <ResponsiveContainer width="100%" height="100%">                  <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
                     <CartesianGrid className={styles.chartGrid} />
                     <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
                     <YAxis tick={{ className: styles.axisTick }} />
                     <Tooltip formatter={(value) => formatScore(value)} />
                     <Legend verticalAlign="bottom" align="center" content={renderLineLegend} />
                     {filteredTrendSeries.map((s, i) => (
-
                       <Line
                         key={s.name}
                         type="monotone"
-                        dataKey={s.name}                        stroke={LINE_COLOR_VARS[i % LINE_COLOR_VARS.length]}
+                        dataKey={s.name}
+                        stroke={LINE_COLOR_VARS[i % LINE_COLOR_VARS.length]}
                         className={`${styles.chartLine} ${LINE_COLOR_CLASSES[i % LINE_COLOR_CLASSES.length]}`}
-
                         dot={false}
                       />
                     ))}

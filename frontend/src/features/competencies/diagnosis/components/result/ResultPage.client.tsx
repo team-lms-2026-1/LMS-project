@@ -9,6 +9,7 @@ import type {
   ResultCompetencyRadarItem,
   ResultCompetencyRadarSeries,
   ResultCompetencyStatRow,
+  ResultCompetencyTrendSeries,
 } from "@/features/competencies/diagnosis/api/types";
 import { Button } from "@/components/button";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
@@ -180,10 +181,13 @@ export default function ResultPageClient() {
 
   const radarData = useMemo(() => buildRadarData(filteredRadarSeries), [filteredRadarSeries]);
 
-  const trendSeries = useMemo(() => normalizeTrendSeries(state.data), [state.data]);
+  const trendSeries = useMemo(
+    () => state.data?.trendChart?.series ?? [],
+    [state.data?.trendChart?.series]
+  );
   const trendData = useMemo(
-    () => normalizeTrendData(state.data, trendSeries),
-    [state.data, trendSeries]
+    () => normalizeTrend(state.data?.trendChart?.categories ?? [], trendSeries),
+    [state.data?.trendChart?.categories, trendSeries]
   );
 
   const statsRows = useMemo(() => normalizeStats(state.data), [state.data]);
@@ -454,35 +458,12 @@ function buildRadarData(series: NormalizedRadarSeries[]) {
   return rows;
 }
 
-function normalizeTrendSeries(data: ResultCompetencyDashboard | null) {
-  if (!data) return [];
-  const raw = (data as any).trendChart ?? (data as any).trend ?? (data as any).trendData ?? null;
-  const seriesRaw = raw?.series ?? raw?.lines ?? raw?.data ?? [];
-  if (!Array.isArray(seriesRaw)) return [];
-  return seriesRaw.map((s: any, idx: number) => ({
-    name: pickString(s, ["name", "label"]) || `Series ${idx + 1}`,
-    data: Array.isArray(s?.data) ? s.data.map((v: any) => pickNumber({ value: v }, ["value"]) ?? 0) : [],
-  }));
-}
-
-function normalizeTrendData(data: ResultCompetencyDashboard | null, series: { name: string; data: number[] }[]) {
-  if (!data || series.length === 0) return [];
-  const raw = (data as any).trendChart ?? (data as any).trend ?? (data as any).trendData ?? null;
-  const categories = Array.isArray(raw?.categories)
-    ? raw.categories
-    : Array.isArray(raw?.labels)
-      ? raw.labels
-      : [];
-  const maxLen = Math.max(...series.map((s) => s.data.length), 0);
-  const normalizedCategories =
-    categories.length > 0
-      ? categories
-      : Array.from({ length: maxLen }, (_, i) => `${i + 1}`);
-
-  return normalizedCategories.map((cat: any, idx: number) => {
-    const row: Record<string, any> = { category: String(cat ?? idx + 1) };
+function normalizeTrend(categories: string[], series: ResultCompetencyTrendSeries[]) {
+  if (!categories.length || !series.length) return [];
+  return categories.map((cat, idx) => {
+    const row: Record<string, any> = { category: cat };
     series.forEach((s) => {
-      row[s.name] = s.data[idx] ?? null;
+      row[s.name] = pickNumber({ value: s.data?.[idx] }, ["value"]);
     });
     return row;
   });

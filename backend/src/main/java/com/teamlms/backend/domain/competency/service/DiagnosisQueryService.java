@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.teamlms.backend.domain.account.entity.StudentProfile;
+import com.teamlms.backend.domain.account.enums.AcademicStatus;
 import com.teamlms.backend.domain.account.repository.StudentProfileRepository;
 import com.teamlms.backend.domain.competency.api.dto.*;
 import com.teamlms.backend.domain.competency.entitiy.*;
@@ -255,7 +256,6 @@ public class DiagnosisQueryService {
                 BigDecimal multiplier = BigDecimal.valueOf(10);
                 List<CompetencyRadarItem> radarChart = new ArrayList<>();
                 List<CompetencyStatsTableItem> statsTable = new ArrayList<>();
-                Map<String, BigDecimal> meanMap = new HashMap<>();
                 BigDecimal totalAverage = BigDecimal.ZERO;
                 int averageCount = 0;
 
@@ -278,7 +278,6 @@ public class DiagnosisQueryService {
                         BigDecimal mean = calculateMean(scores);
                         BigDecimal median = calculateMedian(scores);
                         BigDecimal stdDev = calculateStdDev(scores, mean);
-                        meanMap.put(code, mean);
 
                         if (mean != null) {
                                 totalAverage = totalAverage.add(mean);
@@ -311,16 +310,73 @@ public class DiagnosisQueryService {
                                 .totalAverage(averagedTotal)
                                 .build();
 
-                List<String> categories = List.of(run.getSemester().getDisplayName());
-                List<CompetencyTrendSeries> series = competencies.stream()
-                                .map(comp -> {
-                                        BigDecimal mean = meanMap.getOrDefault(comp.getCode(), BigDecimal.ZERO);
-                                        return CompetencyTrendSeries.builder()
-                                                        .name(comp.getName())
-                                                        .data(List.of(mean))
-                                                        .build();
-                                })
+                List<DiagnosisRun> closedRuns = diagnosisRunRepository.findByStatus(DiagnosisRunStatus.CLOSED);
+                List<Semester> trendSemesters = closedRuns.stream()
+                                .map(DiagnosisRun::getSemester)
+                                .filter(Objects::nonNull)
+                                .distinct()
+                                .sorted(Comparator.comparing(Semester::getSemesterId))
                                 .collect(Collectors.toList());
+                List<String> categories = trendSemesters.stream()
+                                .map(Semester::getDisplayName)
+                                .collect(Collectors.toList());
+                List<Long> semesterIds = trendSemesters.stream()
+                                .map(Semester::getSemesterId)
+                                .collect(Collectors.toList());
+                if (categories.isEmpty()) {
+                        categories = List.of("-");
+                }
+
+                List<Dept> targetDepts;
+                if (run.getDeptId() != null) {
+                        targetDepts = deptRepository.findAllById(List.of(run.getDeptId()));
+                } else {
+                        targetDepts = deptRepository.findAll();
+                        targetDepts.sort(Comparator.comparing(
+                                        Dept::getDeptName,
+                                        Comparator.nullsLast(String::compareTo)));
+                }
+
+                Map<Long, Map<Long, Map<Long, BigDecimal>>> deptCompSemesterAvgMap = new HashMap<>();
+                if (!semesterIds.isEmpty()) {
+                        List<Object[]> rows = summaryRepository
+                                        .findDeptSemesterCompetencyAverages(semesterIds, AcademicStatus.ENROLLED);
+                        for (Object[] row : rows) {
+                                Long rowSemesterId = toLong(row[0]);
+                                Long rowDeptId = toLong(row[1]);
+                                Long rowCompId = toLong(row[2]);
+                                if (rowSemesterId == null || rowDeptId == null || rowCompId == null) {
+                                        continue;
+                                }
+                                BigDecimal avgScore = toScaledDecimal(row[3]);
+                                deptCompSemesterAvgMap
+                                                .computeIfAbsent(rowDeptId, k -> new HashMap<>())
+                                                .computeIfAbsent(rowCompId, k -> new HashMap<>())
+                                                .put(rowSemesterId, avgScore);
+                        }
+                }
+
+                List<CompetencyTrendSeries> series = new ArrayList<>();
+                for (Dept dept : targetDepts) {
+                        Long deptId = dept.getDeptId();
+                        Map<Long, Map<Long, BigDecimal>> compMap = deptCompSemesterAvgMap
+                                        .getOrDefault(deptId, Map.of());
+                        for (Competency comp : competencies) {
+                                Map<Long, BigDecimal> semMap = compMap.getOrDefault(comp.getCompetencyId(), Map.of());
+                                List<BigDecimal> data = new ArrayList<>();
+                                if (semesterIds.isEmpty()) {
+                                        data.add(BigDecimal.ZERO);
+                                } else {
+                                        for (Long semId : semesterIds) {
+                                                data.add(semMap.getOrDefault(semId, BigDecimal.ZERO));
+                                        }
+                                }
+                                series.add(CompetencyTrendSeries.builder()
+                                                .name(String.format("%s - %s", dept.getDeptName(), comp.getName()))
+                                                .data(data)
+                                                .build());
+                        }
+                }
 
                 return DiagnosisReportResponse.builder()
                                 .summary(summary)
@@ -421,6 +477,30 @@ public class DiagnosisQueryService {
                         case "C6" -> q.getC6MaxScore();
                         default -> 0;
                 };
+        }
+
+        private Long toLong(Object value) {
+                if (value == null) {
+                        return null;
+                }
+                if (value instanceof Number) {
+                        return ((Number) value).longValue();
+                }
+                return null;
+        }
+
+        private BigDecimal toScaledDecimal(Object value) {
+                if (value == null) {
+                        return BigDecimal.ZERO;
+                }
+                if (value instanceof BigDecimal) {
+                        return ((BigDecimal) value).setScale(2, RoundingMode.HALF_UP);
+                }
+                if (value instanceof Number) {
+                        return BigDecimal.valueOf(((Number) value).doubleValue())
+                                        .setScale(2, RoundingMode.HALF_UP);
+                }
+                return BigDecimal.ZERO;
         }
 
         /**
