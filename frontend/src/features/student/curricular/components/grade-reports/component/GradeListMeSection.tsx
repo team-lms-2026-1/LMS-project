@@ -16,27 +16,27 @@ import { GradeDetailMeTable } from "./GradeDetailMeTable";
 export function GradeListMeSection() {
   const { state, actions } = useCurricularGradeMeList();
 
-  // ✅ URL query (semesterId)
+  // URL query (semesterId)
   const { get } = useFilterQuery(["semesterId"]);
   const semesterId = get("semesterId");
 
-  // ✅ pagination (page/size)
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 7 });
+  // pagination (page/size)
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
-  // ✅ search input (keyword)
+  // search input (keyword)
   const [inputKeyword, setInputKeyword] = useState("");
 
-  // ✅ page 동기화
+  // sync page
   useEffect(() => {
     actions.goPage(page);
   }, [page, actions]);
 
-  // ✅ size 동기화
+  // sync size
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size, actions]);
 
-  // ✅ semesterId 동기화 (URL → hook)
+  // sync semesterId (URL -> hook)
   useEffect(() => {
     actions.setSemesterId(semesterId ? Number(semesterId) : null);
   }, [semesterId, actions]);
@@ -53,7 +53,7 @@ export function GradeListMeSection() {
 
       <div className={styles.body}>
         <div className={styles.searchRow}>
-          {/* ✅ 학기 필터 (URL semesterId를 쓰는 드롭다운이면 그냥 둬도 됨) */}
+          {/* 학기 필터 */}
           <SemesterFilterDropdown />
 
           <div className={styles.searchBarWrap}>
@@ -61,7 +61,7 @@ export function GradeListMeSection() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="교과명/코드 검색"
+              placeholder="교과목 코드 검색"
             />
           </div>
         </div>
@@ -90,3 +90,4 @@ function Header({ title }: { title: string }) {
     </div>
   );
 }
+

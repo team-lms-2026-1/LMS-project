@@ -1,4 +1,4 @@
-// "use client";
+﻿// "use client";
 
 // import { useEffect, useMemo, useState } from "react";
 // import toast from "react-hot-toast";
@@ -43,7 +43,7 @@
 
 //     const init: Record<number, number | null> = {};
 //     for (const item of mappingData) {
-//       init[item.competencyId] = item.weight ?? null;
+// cleaned comment
 //     }
 //     setWeights(init);
 
@@ -129,7 +129,7 @@
 //       .filter((x) => x.weight != null)
 //       .sort((a, b) => {
 //         // weight 큰 게 우선
-//         const diff = (b.weight ?? -1) - (a.weight ?? -1);
+// cleaned comment
 //         if (diff !== 0) return diff;
 //         // 동점이면 code로 안정 정렬
 //         return String(a.code).localeCompare(String(b.code));

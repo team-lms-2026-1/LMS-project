@@ -1,4 +1,4 @@
-import { getJson, postJson, patchJson, deleteJson } from "@/lib/http";
+﻿import { getJson, postJson, patchJson, deleteJson } from "@/lib/http";
 import type {
     DepartmentListResponse,
     DepartmentSummaryResponse,
@@ -17,8 +17,8 @@ import type {
 
 const BASE_URL = "/api/admin/departments";
 
-// 목록 조회
-export async function fetchDepartmentsList(page = 1, size = 20, keyword?: string) {
+// cleaned comment
+export async function fetchDepartmentsList(page = 1, size = 10, keyword?: string) {
     const params = new URLSearchParams({
         page: String(page),
         size: String(size),
@@ -43,19 +43,19 @@ export async function updateDepartment(deptId: number, data: UpdateDepartmentReq
     return patchJson<SuccessResponse>(`${BASE_URL}/${deptId}/edit`, data);
 }
 
-// 활성/비활성 토글
+// cleaned comment
 export async function toggleDepartmentActive(deptId: number, isActive: boolean) {
     const payload: UpdateDepartmentActiveRequest = { isActive };
     return patchJson<SuccessResponse>(`${BASE_URL}/${deptId}/active`, payload);
 }
 
-// 학과장 지정
+// cleaned comment
 export async function updateHeadProfessor(deptId: number, headProfessorAccountId: number) {
     return patchJson<SuccessResponse>(`${BASE_URL}/${deptId}/head-professor`, { headProfessorAccountId });
 }
 
-// 전공 목록 조회
-export async function fetchDepartmentMajors(deptId: number, page = 1, size = 20, keyword?: string) {
+// cleaned comment
+export async function fetchDepartmentMajors(deptId: number, page = 1, size = 10, keyword?: string) {
     const params = new URLSearchParams({
         page: String(page),
         size: String(size),
@@ -75,18 +75,18 @@ export async function updateMajor(deptId: number, majorId: number, data: UpdateM
     return patchJson<SuccessResponse>(`${BASE_URL}/${deptId}/majors/${majorId}/edit`, data);
 }
 
-// 전공 수정용 조회
+// cleaned comment
 export async function fetchMajorForUpdate(deptId: number, majorId: number) {
     return getJson<MajorEditFormResponse>(`${BASE_URL}/${deptId}/majors/${majorId}/edit`);
 }
 
-// 전공 삭제
+// cleaned comment
 export async function deleteMajor(deptId: number, majorId: number) {
     return deleteJson<SuccessResponse>(`${BASE_URL}/${deptId}/majors/${majorId}`);
 }
 
-// 교수 목록 조회
-export async function fetchDepartmentProfessors(deptId: number, page = 1, size = 20, keyword?: string) {
+// cleaned comment
+export async function fetchDepartmentProfessors(deptId: number, page = 1, size = 10, keyword?: string) {
     const params = new URLSearchParams({
         page: String(page),
         size: String(size),
@@ -96,8 +96,8 @@ export async function fetchDepartmentProfessors(deptId: number, page = 1, size =
     return getJson<DepartmentProfessorListResponse>(`${BASE_URL}/${deptId}/professors?${params.toString()}`);
 }
 
-// 학생 목록 조회
-export async function fetchDepartmentStudents(deptId: number, page = 1, size = 20, keyword?: string) {
+// cleaned comment
+export async function fetchDepartmentStudents(deptId: number, page = 1, size = 10, keyword?: string) {
     const params = new URLSearchParams({
         page: String(page),
         size: String(size),
@@ -107,7 +107,9 @@ export async function fetchDepartmentStudents(deptId: number, page = 1, size = 2
     return getJson<DepartmentStudentListResponse>(`${BASE_URL}/${deptId}/students?${params.toString()}`);
 }
 
-// 학과 수정용 데이터 조회
+// cleaned comment
 export async function fetchDepartmentForUpdate(deptId: number) {
     return getJson<DepartmentUpdateFormResponse>(`${BASE_URL}/${deptId}/edit`);
 }
+
+

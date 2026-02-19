@@ -87,7 +87,7 @@ function mapRow(dto: AccountRowDto): AccountRowView {
 }
 
 export default function AccountListPage() {
-  const SIZE = 20;
+  const SIZE = 10;
 
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
   const [keywordDraft, setKeywordDraft] = useState("");

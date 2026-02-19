@@ -9,7 +9,7 @@ export type UseListQueryOptions = {
   keywordKey?: string; // ✅ default "keyword"
 
   defaultPage?: number; // default 1
-  defaultSize?: number; // default 20
+  defaultSize?: number; // default 10
   defaultKeyword?: string; // ✅ default ""
 
   history?: "push" | "replace"; // default "replace"
@@ -23,7 +23,7 @@ export function useListQuery(options?: UseListQueryOptions) {
     keywordKey = "keyword",
 
     defaultPage = 1,
-    defaultSize = 20,
+    defaultSize = 10,
     defaultKeyword = "",
 
     history = "replace",

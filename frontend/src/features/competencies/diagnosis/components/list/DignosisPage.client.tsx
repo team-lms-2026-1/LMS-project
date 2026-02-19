@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 
 const DEFAULT_META: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -25,7 +25,7 @@ const DEFAULT_META: PageMeta = {
 
 export default function DignosisPageClient() {
   const router = useRouter();
-  const { page, size, keyword, setPage, setKeyword } = useListQuery({ defaultPage: 1, defaultSize: 20 });
+  const { page, size, keyword, setPage, setKeyword } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
   const [items, setItems] = useState<DiagnosisListItemDto[]>([]);
   const [meta, setMeta] = useState<PageMeta>(DEFAULT_META);
@@ -147,3 +147,5 @@ export default function DignosisPageClient() {
     </div>
   );
 }
+
+

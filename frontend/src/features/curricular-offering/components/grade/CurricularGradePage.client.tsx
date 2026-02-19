@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./CurricularGradePage.module.css"
@@ -46,7 +46,7 @@ export default function CurricularGradePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>교과성적 관리</h1>
+        <h1 className={styles.title}>교과 성적 관리</h1>
 
         <div className={styles.searchRow}>
           <DeptFilterDropdown />

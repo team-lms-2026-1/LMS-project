@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./ExtraGradeDetailListSection.module.css";
@@ -25,7 +25,7 @@ export function ExtraGradeDetailListSection({ studentAccountId }: Props) {
   const { get } = useFilterQuery(["semesterId"]);
   const semesterId = get("semesterId");
 
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 7 });
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
 
   useEffect(() => {
@@ -88,3 +88,4 @@ function Header({ title }: { title: string }) {
     </div>
   );
 }
+

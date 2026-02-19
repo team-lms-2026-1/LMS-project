@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { CurricularOfferingCompetencyDto, CurricularOfferingDetailDto, CurricularOfferingListItemDto, CurricularOfferingStudentListItemDto, PageMeta } from "../api/types";
@@ -6,7 +6,7 @@ import { fetchCurricularDetailForm, fetchCurricularOfferingCompetency, fetchCurr
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -19,7 +19,7 @@ export function useCurricularOfferingsList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [semesterId, setSemesterId] = useState<number | null>(null);
@@ -58,7 +58,7 @@ export function useCurricularOfferingsList() {
   return {
     state: {
       items,
-      meta,   // ✅ 항상 PageMeta
+      meta,   // cleaned comment
       page,
       size,
       semesterId,
@@ -71,17 +71,17 @@ export function useCurricularOfferingsList() {
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 
-      // ✅ PaginationBar size 변경용
+      // cleaned comment
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
       },
       setSemesterId: (id: number | null) => {
         setSemesterId((prev) => {
-          // 값이 같으면 아무 것도 하지 않음 (page 리셋도 방지)
+          // cleaned comment
           if (prev === id) return prev;
 
-          // 값이 바뀌는 순간에만 page 1로 리셋
+          // cleaned comment
           setPage(1);
           return id;
         });
@@ -92,7 +92,7 @@ export function useCurricularOfferingsList() {
 }
 
 
-// 상세- 기본
+// 상세 기본
 export function useCurricularDetail(offeringId?: number, enabled: boolean = true) {
   const [data, setData] = useState<CurricularOfferingDetailDto | null>(null);
   
@@ -168,14 +168,14 @@ export function useOfferingStudentsList(offeringId?: number, enabled: boolean = 
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    // offering id 없으면 호출 안함 추가
+    // cleaned comment
     if (!enabled) return;
     if (!offeringId) return;
 
@@ -224,7 +224,7 @@ export function useOfferingStudentsList(offeringId?: number, enabled: boolean = 
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 
-      // ✅ PaginationBar size 변경용
+      // cleaned comment
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
@@ -233,3 +233,5 @@ export function useOfferingStudentsList(offeringId?: number, enabled: boolean = 
     },
   };
 }
+
+

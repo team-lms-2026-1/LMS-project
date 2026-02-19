@@ -9,6 +9,7 @@ import { createCurricularOffering } from "../../api/curricularOfferingsApi";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
 import { DeptCurricularFilterDropdown } from "@/features/dropdowns/depts_curriculars/DeptCurricularFilterDropdown";
 import { DeptProfessorFilterDropdown } from "@/features/dropdowns/depts_professors/DeptProfessorFilterDropdown";
+import type { DeptProfessorItem } from "@/features/dropdowns/depts_professors/types";
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { DayOfWeekFilterDropdown } from "@/features/dropdowns/week/DayOfWeekFilterDropdown";
 
@@ -55,10 +56,10 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
   }, [deptId]);
 
   // ✅ (선택) 교수 선택 초기화/변경 시 표시용 값 초기화
-  useEffect(() => {
-    setProfessorEmail("");
-    setProfessorPhone("");
-  }, [professorAccountId]);
+  const handleProfessorSelect = (item: DeptProfessorItem | null) => {
+    setProfessorEmail(item?.email ?? "");
+    setProfessorPhone(item?.phone ?? "");
+  };
 
   const resetAll = () => {
     setDeptId(0);
@@ -239,6 +240,7 @@ export function CurricularOfferingCreateModal({ open, onClose, onCreated }: Prop
               deptId={deptId > 0 ? String(deptId) : ""}
               value={professorAccountId > 0 ? String(professorAccountId) : ""}
               onChange={(v) => setProfessorAccountId(v ? Number(v) : 0)}
+              onSelectItem={handleProfessorSelect}
             />
           </label>
           <label className={styles.field}></label>

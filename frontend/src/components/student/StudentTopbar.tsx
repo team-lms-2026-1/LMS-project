@@ -3,9 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/hooks/useLocale";
+import { useAuth } from "@/features/auth/AuthProvider";
 import styles from "./student-shell.module.css";
 
 const EXP_KEY = "auth_expires_at";
+
+type AccountMeResponse = {
+  data?: {
+    name?: string | null;
+  } | null;
+};
 
 function formatDateKR(d: Date) {
   const y = d.getFullYear();
@@ -34,15 +41,36 @@ async function logoutViaBff() {
   }
 }
 
+async function fetchProfileName(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/accounts/me", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+
+    const json = (await res.json()) as AccountMeResponse;
+    const name = json?.data?.name;
+    if (typeof name !== "string") return null;
+
+    const trimmed = name.trim();
+    return trimmed.length ? trimmed : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function StudentTopbar() {
   const router = useRouter();
+  const { state: authState } = useAuth();
   const { locale, setLocale, mounted } = useLocale();
   const today = useMemo(() => formatDateKR(new Date()), []);
 
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [remainText, setRemainText] = useState<string>("");
+  const [profileName, setProfileName] = useState<string>("");
 
-  // 만료 시각 로드
   useEffect(() => {
     const v = localStorage.getItem(EXP_KEY);
     if (!v) return;
@@ -51,7 +79,6 @@ export default function StudentTopbar() {
     setExpiresAt(n);
   }, []);
 
-  // 카운트다운 + 만료 처리
   useEffect(() => {
     if (!expiresAt) return;
 
@@ -66,10 +93,23 @@ export default function StudentTopbar() {
       setRemainText(formatRemain(ms));
     };
 
-    tick(); // 즉시 1회 반영
+    tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
   }, [expiresAt, router]);
+
+  useEffect(() => {
+    let active = true;
+    fetchProfileName().then((name) => {
+      if (!active || !name) return;
+      setProfileName(name);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const profileLabel = profileName || authState.me?.loginId || "학생";
 
   return (
     <div className={styles.topbarInner}>
@@ -78,7 +118,6 @@ export default function StudentTopbar() {
           {today}
         </div>
 
-        {/* 언어 토글 버튼 */}
         {mounted && (
           <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
             {["ko", "en", "ja"].map((lang) => (
@@ -101,7 +140,6 @@ export default function StudentTopbar() {
           </div>
         )}
 
-        {/* ✅ 날짜 옆 타이머 */}
         {expiresAt && (
           <div className={styles.sessionChip} title="자동 로그아웃까지 남은 시간">
             {remainText ? `세션 ${remainText}` : "세션 --:--"}
@@ -110,7 +148,7 @@ export default function StudentTopbar() {
 
         <button className={styles.profileBtn} type="button" title="프로필">
           <span className={styles.profileAvatar} aria-hidden="true" />
-          <span className={styles.profileText}>학생</span>
+          <span className={styles.profileText}>{profileLabel}</span>
         </button>
       </div>
     </div>

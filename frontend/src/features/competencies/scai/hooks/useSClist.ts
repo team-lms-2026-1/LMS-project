@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type { StudentCompetencyListItemDto, PageMeta } from "@/features/competencies/scai/api/types";
@@ -6,7 +6,7 @@ import { fetchStudentCompetencyList } from "@/features/competencies/scai/api/Stu
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -19,7 +19,7 @@ export function useSClist() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
   const [deptName, setDeptName] = useState("");
 
@@ -81,3 +81,5 @@ export function useSClist() {
     },
   };
 }
+
+

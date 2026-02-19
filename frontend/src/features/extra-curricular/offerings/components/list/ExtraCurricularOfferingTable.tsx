@@ -17,7 +17,7 @@ type Props = {
 export function ExtraCurricularOfferingTable({ items, loading, onRowClick }: Props) {
   const columns: Array<TableColumn<ExtraCurricularOfferingListItemDto>> = [
     { header: "개설코드", align: "center", render: (r) => r.extraOfferingCode },
-    { header: "바교과목명", align: "center", render: (r) => r.extraOfferingName },
+    { header: "비교과목명", align: "center", render: (r) => r.extraOfferingName },
     { header: "주관기관", align: "center", render: (r) => r.hostContactName },
     { header: "포인트", align: "center", render: (r) => r.rewardPointDefault },
     { header: "인정시간", align: "center", render: (r) => r.recognizedHoursDefault },

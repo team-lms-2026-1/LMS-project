@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { ResourceListItemDto, PageMeta } from "../api/types";
@@ -7,7 +7,7 @@ import { fetchResourcesList } from "../api/resourcesApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -20,7 +20,7 @@ export function useResourcesList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ export function useResourcesList() {
   return {
     state: {
       items,
-      meta,   // ✅ 항상 PageMeta
+      meta,   // cleaned comment
       page,
       size,
       keyword,
@@ -68,7 +68,7 @@ export function useResourcesList() {
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 
-      // ✅ PaginationBar size 변경용
+      // cleaned comment
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
@@ -78,3 +78,4 @@ export function useResourcesList() {
   };
 
 }
+

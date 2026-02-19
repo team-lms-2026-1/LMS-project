@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type { PageMeta } from "../api/types";
@@ -8,7 +8,7 @@ import { fetchCurricularEnrollmentsList } from "../api/curricularApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -21,7 +21,7 @@ export function useCurricularEnrollmentsList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export function useCurricularEnrollmentsList() {
       const res = await fetchCurricularEnrollmentsList({ page, size });
 
       setItems(res.data);
-      setMeta(res.meta ?? defaultMeta); // meta가 null일 가능성 있으면 방어
+      setMeta(res.meta ?? defaultMeta); // cleaned comment
     } catch (e: any) {
       console.error("[useCurricularEnrollmentsList]", e);
       setError(e?.message ?? "수강신청 교과목 목록 조회 실패");
@@ -70,3 +70,5 @@ export function useCurricularEnrollmentsList() {
     },
   };
 }
+
+

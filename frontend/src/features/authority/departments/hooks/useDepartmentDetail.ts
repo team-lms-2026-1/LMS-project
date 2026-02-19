@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { DepartmentDetailSummary, MajorListItem, DepartmentProfessorListItem, DepartmentStudentListItem, PageMeta } from "../api/types";
@@ -14,7 +14,7 @@ export function useDepartmentDetail(deptId: number) {
             setLoadingSummary(true);
             setErrorSummary(null);
             const res = await fetchDepartmentSummary(deptId);
-            // fetchDepartmentSummary 리턴 타입: Promise<{data: DepartmentDetailSummary}>
+            // cleaned comment
             setSummary(res.data);
         } catch (err: any) {
             console.error(err);
@@ -36,14 +36,14 @@ export function useDepartmentDetail(deptId: number) {
     };
 }
 
-// 전공 목록 Hook
+// cleaned comment
 export function useDepartmentMajors(deptId: number) {
     const [majors, setMajors] = useState<MajorListItem[]>([]);
     const [meta, setMeta] = useState<PageMeta>({
-        page: 1, size: 20, totalElements: 0, totalPages: 1, hasNext: false, hasPrev: false
+        page: 1, size: 10, totalElements: 0, totalPages: 1, hasNext: false, hasPrev: false
     });
     const [page, setPage] = useState(1);
-    const [size, setSize] = useState(20);
+    const [size, setSize] = useState(10);
     const [keyword, setKeyword] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -51,7 +51,7 @@ export function useDepartmentMajors(deptId: number) {
         try {
             setLoading(true);
             const res = await fetchDepartmentMajors(deptId, page, size, keyword);
-            // res.data -> MajorListItem[], res.meta -> PageMeta (MajorListResponse 구조)
+            // cleaned comment
             setMajors(res.data);
             setMeta(res.meta);
         } catch (e) {
@@ -71,14 +71,14 @@ export function useDepartmentMajors(deptId: number) {
     };
 }
 
-// 교수 목록 Hook
+// cleaned comment
 export function useDepartmentProfessors(deptId: number) {
     const [items, setItems] = useState<DepartmentProfessorListItem[]>([]);
     const [meta, setMeta] = useState<PageMeta>({
-        page: 1, size: 20, totalElements: 0, totalPages: 1, hasNext: false, hasPrev: false
+        page: 1, size: 10, totalElements: 0, totalPages: 1, hasNext: false, hasPrev: false
     });
     const [page, setPage] = useState(1);
-    const [size, setSize] = useState(20);
+    const [size, setSize] = useState(10);
     const [keyword, setKeyword] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -105,14 +105,14 @@ export function useDepartmentProfessors(deptId: number) {
     };
 }
 
-// 학생 목록 Hook
+// cleaned comment
 export function useDepartmentStudents(deptId: number) {
     const [items, setItems] = useState<DepartmentStudentListItem[]>([]);
     const [meta, setMeta] = useState<PageMeta>({
-        page: 1, size: 20, totalElements: 0, totalPages: 1, hasNext: false, hasPrev: false
+        page: 1, size: 10, totalElements: 0, totalPages: 1, hasNext: false, hasPrev: false
     });
     const [page, setPage] = useState(1);
-    const [size, setSize] = useState(20);
+    const [size, setSize] = useState(10);
     const [keyword, setKeyword] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -138,3 +138,5 @@ export function useDepartmentStudents(deptId: number) {
         items, meta, page, size, keyword, setPage, setSize, setKeyword, loading, reload: load
     };
 }
+
+

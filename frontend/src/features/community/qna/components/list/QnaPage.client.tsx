@@ -117,7 +117,7 @@ export default function QnaPageClient() {
       toast.success("Q&A가 삭제되었습니다.");
       setDeleteTarget(null);
     } catch (e: any) {
-      toast.error(e?.message ?? "삭제 실패");
+      toast.error(e?.message ?? "삭제에 실패했습니다.");
     } finally {
       setDeleting(false);
     }

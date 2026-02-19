@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingDetailResponse;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUserListItem;
-import com.teamlms.backend.domain.curricular.api.dto.EnrollListItem;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingItem;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingStudentListItem;
 import com.teamlms.backend.domain.curricular.repository.CurricularOfferingCompetencyMapRepository;
@@ -30,7 +29,6 @@ public class CurricularOfferingQueryService {
     private final EnrollmentRepository enrollmentRepository;
     private final CurricularOfferingCompetencyMapRepository curricularOfferingCompetencyMapRepository;
 
-    // 목록 ( Admin )
     public Page<CurricularOfferingListItem> listForAdmin(
             Long semesterId,
             String keyword,
@@ -39,20 +37,35 @@ public class CurricularOfferingQueryService {
         return curricularOfferingRepository.findOfferingAdminList(semesterId, keyword, pageable);
     }
 
-    //목록 ( User )
-    public Page<CurricularOfferingUserListItem> listForUser(
+    public Page<CurricularOfferingListItem> listForProfessor(
+            Long professorAccountId,
+            Long semesterId,
             String keyword,
             Pageable pageable
     ) {
-        return curricularOfferingRepository.findOfferingUserList(keyword, pageable);
+        return curricularOfferingRepository.findOfferingProfessorList(professorAccountId, semesterId, keyword, pageable);
     }
 
-    // 상세 ( 기본 )
+    public Page<CurricularOfferingUserListItem> listForUser(
+            String keyword,
+            Long professorAccountId,
+            Pageable pageable
+    ) {
+        return curricularOfferingRepository.findOfferingUserList(keyword, professorAccountId, pageable);
+    }
+
     public CurricularOfferingDetailResponse getDetail(Long offeringId) {
         return curricularOfferingRepository.findOfferingDetail(offeringId);
     }
 
-    // 상세 ( 학생 )
+    public CurricularOfferingDetailResponse getDetailForProfessor(
+            Long professorAccountId,
+            Long offeringId
+    ) {
+        assertProfessorOwnsOffering(offeringId, professorAccountId);
+        return getDetail(offeringId);
+    }
+
     public Page<OfferingStudentListItem> listStudents(
             Long offeringId,
             String keyword,
@@ -61,19 +74,35 @@ public class CurricularOfferingQueryService {
         return enrollmentRepository.findStudentsByOffering(offeringId, keyword, pageable);
     }
 
-    // 상세 ( 역량매핑)
-    public List<OfferingCompetencyMappingItem> getMapping(Long offeringId) {
+    public Page<OfferingStudentListItem> listStudentsForProfessor(
+            Long professorAccountId,
+            Long offeringId,
+            String keyword,
+            Pageable pageable
+    ) {
+        assertProfessorOwnsOffering(offeringId, professorAccountId);
+        return listStudents(offeringId, keyword, pageable);
+    }
 
+    public List<OfferingCompetencyMappingItem> getMapping(Long offeringId) {
         if (!curricularOfferingRepository.existsById(offeringId)) {
-            throw new BusinessException(
-                ErrorCode.CURRICULAR_OFFERING_NOT_FOUND,
-                offeringId
-            );
+            throw new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId);
         }
 
-        List<OfferingCompetencyMappingItem> result =
-                curricularOfferingCompetencyMapRepository.findOfferingCompetencyMapping(offeringId);
-                
-        return result;
+        return curricularOfferingCompetencyMapRepository.findOfferingCompetencyMapping(offeringId);
+    }
+
+    public List<OfferingCompetencyMappingItem> getMappingForProfessor(
+            Long professorAccountId,
+            Long offeringId
+    ) {
+        assertProfessorOwnsOffering(offeringId, professorAccountId);
+        return getMapping(offeringId);
+    }
+
+    private void assertProfessorOwnsOffering(Long offeringId, Long professorAccountId) {
+        if (!curricularOfferingRepository.existsByOfferingIdAndProfessorAccountId(offeringId, professorAccountId)) {
+            throw new BusinessException(ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId);
+        }
     }
 }

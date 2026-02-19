@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./ExtraCurricularMasterPage.module.css"
@@ -70,7 +70,7 @@ export default function ExtraCurricularMasterPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            교과운영 등록
+            비교과 등록
           </OutButton>
         </div>
         <ExtraCurricularCreateModal
@@ -80,11 +80,11 @@ export default function ExtraCurricularMasterPageClient() {
         />
         <ExtraCurricularEditModal
           open={Boolean(editId)}
-          extraCurricularId = {editId ?? undefined}
+          extraCurricularId={editId ?? undefined}
           onClose={() => setEditId(null)}
-          onUpdated={ async () => {
+          onUpdated={async () => {
             await actions.reload();
-            setEditId(null)
+            setEditId(null);
           }}
         />
       </div>

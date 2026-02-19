@@ -188,7 +188,7 @@ export const accountsApi = {
 
     // ✅ 서버는 보통 0-based (프론트에서 page-1로 변환해서 넣는 걸 권장)
     qs.set("page", String(params?.page ?? 0));
-    qs.set("size", String(params?.size ?? 20));
+    qs.set("size", String(params?.size ?? 10));
 
     const url = `${BASE}?${qs.toString()}`;
     const raw = await getJson<any>(url);
