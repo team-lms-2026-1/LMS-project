@@ -64,8 +64,9 @@ public class AccountService {
     public Page<AdminAccountListItem> adminList(
             String keyword,
             AccountType accountType,
+            Long deptId,
             Pageable pageable) {
-        return accountRepository.searchAccounts(keyword, accountType, pageable);
+        return accountRepository.searchAccounts(keyword, accountType, deptId, pageable);
     }
 
     // 상세 조회

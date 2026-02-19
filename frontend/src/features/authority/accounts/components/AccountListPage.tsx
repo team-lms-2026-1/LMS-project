@@ -12,6 +12,7 @@ import { accountsApi } from "../api/accountsApi";
 import type { AccountRowDto } from "../api/dto";
 
 import { PaginationSimple, useListQuery } from "@/components/pagination";
+import { Button } from "@/components/button/Button"; // ✅
 
 type RoleFilter = "ALL" | AccountType;
 
@@ -34,18 +35,18 @@ function mapRow(dto: AccountRowDto): AccountRowView {
       account: base,
       studentProfile: p
         ? {
-            accountId: dto.accountId,
-            studentNo: p.studentNo ?? "",
-            name: p.name,
-            email: p.email ?? null,
-            phone: p.phone ?? null,
-            deptId: p.deptId ?? 0,
-            gradeLevel: p.gradeLevel ?? 1,
-            academicStatus: (p.academicStatus as any) ?? "ENROLLED",
-            majors: (p.majors as any) ?? [],
-            createdAt: dto.createdAt,
-            updatedAt: dto.updatedAt ?? dto.createdAt,
-          }
+          accountId: dto.accountId,
+          studentNo: p.studentNo ?? "",
+          name: p.name,
+          email: p.email ?? null,
+          phone: p.phone ?? null,
+          deptId: p.deptId ?? 0,
+          gradeLevel: p.gradeLevel ?? 1,
+          academicStatus: (p.academicStatus as any) ?? "ENROLLED",
+          majors: (p.majors as any) ?? [],
+          createdAt: dto.createdAt,
+          updatedAt: dto.updatedAt ?? dto.createdAt,
+        }
         : undefined,
     };
   }
@@ -55,15 +56,15 @@ function mapRow(dto: AccountRowDto): AccountRowView {
       account: base,
       professorProfile: p
         ? {
-            accountId: dto.accountId,
-            professorNo: p.professorNo ?? "",
-            name: p.name,
-            email: p.email ?? null,
-            phone: p.phone ?? null,
-            deptId: p.deptId ?? 0,
-            createdAt: dto.createdAt,
-            updatedAt: dto.updatedAt ?? dto.createdAt,
-          }
+          accountId: dto.accountId,
+          professorNo: p.professorNo ?? "",
+          name: p.name,
+          email: p.email ?? null,
+          phone: p.phone ?? null,
+          deptId: p.deptId ?? 0,
+          createdAt: dto.createdAt,
+          updatedAt: dto.updatedAt ?? dto.createdAt,
+        }
         : undefined,
     };
   }
@@ -74,17 +75,19 @@ function mapRow(dto: AccountRowDto): AccountRowView {
     account: base,
     adminProfile: ap
       ? {
-          accountId: dto.accountId,
-          name: ap.name,
-          email: ap.email ?? null,
-          phone: ap.phone ?? null,
-          memo: ap.memo ?? null,
-          createdAt: dto.createdAt,
-          updatedAt: dto.updatedAt ?? dto.createdAt,
-        }
+        accountId: dto.accountId,
+        name: ap.name,
+        email: ap.email ?? null,
+        phone: ap.phone ?? null,
+        memo: ap.memo ?? null,
+        createdAt: dto.createdAt,
+        updatedAt: dto.updatedAt ?? dto.createdAt,
+      }
       : undefined,
   };
 }
+
+
 
 export default function AccountListPage() {
   const SIZE = 10;
@@ -92,6 +95,7 @@ export default function AccountListPage() {
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
   const [keywordDraft, setKeywordDraft] = useState("");
   const [keywordApplied, setKeywordApplied] = useState("");
+  const [deptFilter, setDeptFilter] = useState<number | null>(null); // ✅
 
   const [rows, setRows] = useState<AccountRowView[]>([]);
   const [loading, setLoading] = useState(false);
@@ -147,16 +151,18 @@ export default function AccountListPage() {
     return {
       accountType: roleFilter === "ALL" ? undefined : roleFilter,
       keyword: kw.length ? kw : undefined,
+      deptId: deptFilter ?? undefined, // ✅
       page: page,
       size: SIZE,
     };
-  }, [roleFilter, keywordApplied, page]);
+  }, [roleFilter, keywordApplied, deptFilter, page]);
 
   // ✅ 의존성용 “문자열 키”로 고정 (object identity 흔들림 방지)
   const fetchKey = useMemo(() => {
     return JSON.stringify({
       accountType: apiParams.accountType ?? null,
       keyword: apiParams.keyword ?? null,
+      deptId: apiParams.deptId ?? null, // ✅
       page: apiParams.page,
       size: apiParams.size,
       reloadTick,
@@ -252,9 +258,14 @@ export default function AccountListPage() {
         <h1 className={styles.title}>계정 목록</h1>
 
         <div className={styles.actions}>
-          <button className={styles.primaryBtn} type="button" onClick={() => setCreateOpen(true)}>
+          {/* ✅ 공용 Button 교체 */}
+          <Button
+            variant="primary"
+            className={styles.customActionBtn}
+            onClick={() => setCreateOpen(true)}
+          >
             계정 생성
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -262,11 +273,17 @@ export default function AccountListPage() {
         <AccountFilters
           role={roleFilter}
           keyword={keywordDraft}
+          deptId={deptFilter} // ✅
           onChangeRole={(v) => {
             setRoleFilter(v);
             safeSetPage(1);
           }}
           onChangeKeyword={setKeywordDraft}
+          onChangeDept={(d) => {
+            // ✅
+            setDeptFilter(d);
+            safeSetPage(1);
+          }}
           onApply={() => {
             setKeywordApplied(keywordDraft.trim());
             safeSetPage(1);

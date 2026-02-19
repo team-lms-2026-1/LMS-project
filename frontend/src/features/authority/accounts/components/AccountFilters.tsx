@@ -5,19 +5,26 @@ import { AccountType } from "../types";
 
 type RoleFilter = "ALL" | AccountType;
 
+import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
+import { SearchBar } from "@/components/searchbar/SearchBar"; // ✅
+
 type Props = {
   role: RoleFilter;
   keyword: string;
+  deptId?: number | null; // ✅
   onChangeRole: (r: RoleFilter) => void;
   onChangeKeyword: (v: string) => void;
+  onChangeDept: (d: number | null) => void; // ✅
   onApply: () => void;
 };
 
 export default function AccountFilters({
   role,
   keyword,
+  deptId,
   onChangeRole,
   onChangeKeyword,
+  onChangeDept,
   onApply,
 }: Props) {
   return (
@@ -53,22 +60,24 @@ export default function AccountFilters({
         </button>
       </div>
 
-      <div className={styles.searchBox}>
-        <input
-          className={styles.searchInput}
-          placeholder="ID/이름/이메일 검색"
+      <div className={styles.filterRight}>
+        {/* ✅ 학과 필터 (학생/교수일 때만 의미가 있지만, 일단 항상 노출하거나 조건부 노출) */}
+        {(role === "STUDENT" || role === "PROFESSOR" || role === "ALL") && (
+          <div style={{ width: 160 }}>
+            <DeptFilterDropdown
+              value={deptId ? String(deptId) : ""}
+              onChange={(v) => onChangeDept(v ? Number(v) : null)}
+            />
+          </div>
+        )}
+
+        <SearchBar
           value={keyword}
-          onChange={(e) => onChangeKeyword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              onApply();
-            }
-          }}
+          onChange={onChangeKeyword}
+          onSearch={onApply}
+          placeholder="ID/이름/이메일 검색"
+          className={styles.customSearchBar}
         />
-        <button className={styles.searchBtn} type="button" onClick={onApply}>
-          검색
-        </button>
       </div>
     </div>
   );

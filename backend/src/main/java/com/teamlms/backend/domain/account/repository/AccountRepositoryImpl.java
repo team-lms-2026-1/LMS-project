@@ -32,6 +32,7 @@ public class AccountRepositoryImpl implements AccountRepositoryCustom {
         public Page<AdminAccountListItem> searchAccounts(
                         String keyword,
                         AccountType accountType,
+                        Long deptId,
                         Pageable pageable) {
 
                 QAccount a = QAccount.account;
@@ -42,6 +43,12 @@ public class AccountRepositoryImpl implements AccountRepositoryCustom {
                 String k = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
 
                 BooleanExpression typeCond = accountType == null ? null : a.accountType.eq(accountType);
+
+                // deptId 필터링 (학생: sp.deptId, 교수: pp.deptId)
+                BooleanExpression deptCond = null;
+                if (deptId != null) {
+                        deptCond = sp.deptId.eq(deptId).or(pp.deptId.eq(deptId));
+                }
 
                 // profile별 name/email → coalesce
                 Expression<String> nameExpr = Expressions.stringTemplate(
@@ -71,7 +78,7 @@ public class AccountRepositoryImpl implements AccountRepositoryCustom {
                                 .leftJoin(sp).on(sp.account.accountId.eq(a.accountId))
                                 .leftJoin(pp).on(pp.account.accountId.eq(a.accountId))
                                 .leftJoin(ap).on(ap.account.accountId.eq(a.accountId))
-                                .where(typeCond, keywordCond)
+                                .where(typeCond, keywordCond, deptCond)
                                 .orderBy(a.createdAt.desc())
                                 .offset(pageable.getOffset())
                                 .limit(pageable.getPageSize())
@@ -83,7 +90,7 @@ public class AccountRepositoryImpl implements AccountRepositoryCustom {
                                 .leftJoin(sp).on(sp.account.accountId.eq(a.accountId))
                                 .leftJoin(pp).on(pp.account.accountId.eq(a.accountId))
                                 .leftJoin(ap).on(ap.account.accountId.eq(a.accountId))
-                                .where(typeCond, keywordCond)
+                                .where(typeCond, keywordCond, deptCond)
                                 .fetchOne();
 
                 return new PageImpl<>(

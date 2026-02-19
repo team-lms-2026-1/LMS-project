@@ -76,28 +76,12 @@
   font-weight: 700;
 }
 
-.searchBox {
+
+/* 드롭다운과 검색창 사이 간격 */
+.filterRight {
   display: flex;
-  gap: 8px;
+  gap: 30px;
   align-items: center;
-}
-
-.searchInput {
-  width: 260px;
-  height: 36px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 0 12px;
-  outline: none;
-}
-
-.searchBtn {
-  height: 36px;
-  padding: 0 14px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  border-radius: 10px;
-  cursor: pointer;
 }
 
 /* table */
@@ -163,6 +147,25 @@
 
 .footerCenter {
   justify-self: center;
+}
+
+
+/* Button overrides */
+.customActionBtn {
+  height: 36px !important;
+  /* 입력창 높이(36px)와 맞춤 */
+}
+
+.customTableBtn {
+  height: 30px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+}
+
+/* SearchBar overrides */
+.customSearchBar {
+  width: 300px !important;
+  /* 기본 280px보다 조금 더 넓게 */
 }
 
 .footerRight {

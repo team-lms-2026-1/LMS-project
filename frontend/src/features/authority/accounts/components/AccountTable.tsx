@@ -3,6 +3,7 @@
 import styles from "../styles/AccountListPage.module.css";
 import { AccountRowView, AccountStatus } from "../types";
 import { ToggleSwitch } from "@/components/toggle/ToggleSwitch";
+import { Button } from "@/components/button/Button"; // ✅
 
 type Props = {
   rows: AccountRowView[];
@@ -70,14 +71,15 @@ export default function AccountTable({ rows, pendingIds, onToggleStatus, onClick
                     />
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className={styles.smallBtn}
+                    {/* ✅ 공용 Button 교체 (secondary variant, small override) */}
+                    <Button
+                      variant="secondary"
+                      className={styles.customTableBtn}
                       onClick={() => onClickEdit(row.account.accountId)}
                       disabled={isPending}
                     >
                       수정
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               );
