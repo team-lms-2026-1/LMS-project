@@ -3,6 +3,8 @@
 import { useDeptsDropdownOptions } from "./hooks";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { Dropdown } from "../_shared";
+import { useLocale } from "@/hooks/useLocale";
+import { getDeptDropdownPlaceholder } from "../localeLabel";
 
 type Props = {
   /** 모달에서 사용할 때 */
@@ -12,13 +14,14 @@ type Props = {
 
 export function DeptFilterDropdown({ value, onChange }: Props) {
   const { options, loading } = useDeptsDropdownOptions();
+  const { locale } = useLocale();
   const { get, setFilters } = useFilterQuery(["deptId"]);
 
   const controlled = value !== undefined && onChange !== undefined;
 
   return (
     <Dropdown
-      placeholder="학과"
+      placeholder={getDeptDropdownPlaceholder(locale)}
       loading={loading}
       value={controlled ? value : get("deptId")}
       options={options}

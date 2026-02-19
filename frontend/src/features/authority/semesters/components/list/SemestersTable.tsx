@@ -2,10 +2,12 @@
 
 import { Table, type TableColumn } from "@/components/table";
 import type { SemesterItem } from "@/features/authority/semesters/api/types";
-import { termToLabel } from "../../utils/semesterLabel";
+import { statusToLabel, termToLabel } from "../../utils/semesterLabel";
 import styles from "./SemestersTable.module.css";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status/StatusPill";
+import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
 
 type Props = {
   items: SemesterItem[];
@@ -14,29 +16,32 @@ type Props = {
 };
 
 export function SemestersTable({ items, loading, onEditClick }: Props) {
+  const { locale } = useLocale();
+  const t = useI18n("authority.semesters.table");
+
   const columns: Array<TableColumn<SemesterItem>> = [
-    { header: "연도", align: "center", render: (r) => r.year },
-    { header: "학기", align: "center", render: (r) => termToLabel(r.term) },
-    { header: "기간", align: "center", render: (r) => r.period },
+    { header: t("year"), align: "center", render: (r) => r.year },
+    { header: t("term"), align: "center", render: (r) => termToLabel(r.term, locale) },
+    { header: t("period"), align: "center", render: (r) => r.period },
     {
-      header: "상태",
+      header: t("status"),
       align: "center",
       render: (r) => (
         <StatusPill
-          status={r.status as any}   // ⬅️ StatusPill 타입이 과하게 넓어서 충돌나면 이 한 줄로 해결
-          label={r.status}           // ⬅️ 영어 그대로 표시
+          status={r.status as any}
+          label={statusToLabel(r.status, locale)}
         />
       ),
     },
     {
-      header: "관리",
+      header: t("manage"),
       width: 140,
       align: "center",
       stopRowClick: true,
       render: (r) => (
         <div className={styles.manageCell}>
           <Button variant="secondary" onClick={() => onEditClick(r.id)}>
-            수정
+            {t("editButton")}
           </Button>
         </div>
       ),
@@ -50,7 +55,7 @@ export function SemestersTable({ items, loading, onEditClick }: Props) {
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.id}
-      emptyText="학기가 없습니다."
+      emptyText={t("emptyText")}
     />
   );
 }

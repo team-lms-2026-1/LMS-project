@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import styles from "./OutButton.module.css";
+import { useLocale } from "@/hooks/useLocale";
+import { getOutButtonLoadingText } from "@/components/localeText";
 
 export type OutButtonProps =
   React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -15,7 +17,9 @@ export function OutButton({
   disabled,
   ...props
 }: OutButtonProps) {
+  const { locale } = useLocale();
   const isDisabled = disabled || loading;
+  const loadingText = getOutButtonLoadingText(locale);
 
   return (
     <button
@@ -23,7 +27,7 @@ export function OutButton({
       disabled={isDisabled}
       {...props}
     >
-      {loading ? "처리중..." : children}
+      {loading ? loadingText : children}
     </button>
   );
 }

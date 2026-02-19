@@ -5,14 +5,14 @@ import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
 import styles from "./SemetserEditModal.module.css";
 import { DatePickerInput } from "../ui/DatePickerInput";
+import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
 
 import { useSemesterDetail } from "../../hooks/useSemesterList";
 import { SemesterStatus, SemesterTerm } from "../../api/types";
-import { termToLabel } from "../../utils/semesterLabel";
+import { SEMESTER_STATUSES, statusToLabel, termToLabel } from "../../utils/semesterLabel";
 import { patchSemester } from "../../api/semestersApi";
 
-
-const STATUS_VALUES: SemesterStatus[] = ["PLANNED", "ACTIVE", "CLOSED"];
 
 type Props = {
   open: boolean;
@@ -22,6 +22,8 @@ type Props = {
 };
 
 export function SemesterEditModal({ open, semesterId, onClose, onUpdated }: Props) {
+  const t = useI18n("authority.semesters.editModal");
+  const { locale } = useLocale();
   const { state } = useSemesterDetail(semesterId, open);
   const { data, loading, error } = state;
 
@@ -54,7 +56,7 @@ export function SemesterEditModal({ open, semesterId, onClose, onUpdated }: Prop
       setCloseSignal((v) => v + 1 );
       onClose();
     } catch (e: any) {
-      setSubmitError(e?.message ?? "학기 수정에 실패했습니다.");
+      setSubmitError(e?.message ?? t("messages.submitFailed"));
     } finally {
       setSaving(false);
     }
@@ -91,16 +93,16 @@ export function SemesterEditModal({ open, semesterId, onClose, onUpdated }: Prop
   return (
     <Modal
       open={open}
-      title="학기 수정"
+      title={t("title")}
       onClose={handleClose}
       size="md"
       footer={
         <>
           <Button variant="primary" onClick={handlesubmit} loading={saving} disabled={disabled || saving} >
-            저장
+            {t("buttons.save")}
           </Button>
           <Button variant="secondary" onClick={handleClose}>
-            닫기
+            {t("buttons.close")}
           </Button>
         </>
       }
@@ -112,28 +114,28 @@ export function SemesterEditModal({ open, semesterId, onClose, onUpdated }: Prop
         <div className={styles.grid2}>
           {/* 연도 */}
           <label className={styles.field}>
-            <div className={styles.label}>연도</div>
+            <div className={styles.label}>{t("fields.year")}</div>
             <input className={styles.control} value={year ?? ""} disabled />
           </label>
 
           {/* 학기 */}
           <label className={styles.field}>
-            <div className={styles.label}>학기</div>
-            <input className={styles.control} value={term ? termToLabel(term) : ""} disabled />
+            <div className={styles.label}>{t("fields.term")}</div>
+            <input className={styles.control} value={term ? termToLabel(term, locale) : ""} disabled />
           </label>
 
           {/* 상태 */}
           <label className={styles.field}>
-            <div className={styles.label}>상태</div>
+            <div className={styles.label}>{t("fields.status")}</div>
             <select
               className={styles.control}
               value={status}
               onChange={(e) => setStatus(e.target.value as SemesterStatus)}
               disabled={disabled}
             >
-              {STATUS_VALUES.map((v) => (
+              {SEMESTER_STATUSES.map((v) => (
                 <option key={v} value={v}>
-                  {v}
+                  {statusToLabel(v, locale)}
                 </option>
               ))}
             </select>
@@ -143,24 +145,26 @@ export function SemesterEditModal({ open, semesterId, onClose, onUpdated }: Prop
 
           {/* 시작일 */}
           <label className={styles.field}>
-            <div className={styles.label}>시작일</div>
+            <div className={styles.label}>{t("fields.startDate")}</div>
             <DatePickerInput
               value={startDate}
               onChange={(v) => {
                 setStartDate(v);
                 if (endDate && v > endDate) setEndDate("");
               }}
+              placeholder={t("placeholders.startDate")}
               closeSignal={closeSignal}
             />
           </label>
 
           {/* 종료일 */}
           <label className={styles.field}>
-            <div className={styles.label}>종료일</div>
+            <div className={styles.label}>{t("fields.endDate")}</div>
             <DatePickerInput
               value={endDate}
               onChange={setEndDate}
               min={startDate || undefined}
+              placeholder={t("placeholders.endDate")}
               closeSignal={closeSignal}
             />
           </label>

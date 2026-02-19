@@ -3,6 +3,8 @@
 import { useExtraCurricularsDropdownOptions } from "./hooks";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { Dropdown } from "../_shared";
+import { useLocale } from "@/hooks/useLocale";
+import { getExtraCurricularDropdownPlaceholder } from "../localeLabel";
 
 type Props = {
   /** 모달에서 사용할 때 */
@@ -12,13 +14,14 @@ type Props = {
 
 export function ExtraCurricularFilterDropdown({ value, onChange }: Props) {
   const { options, loading } = useExtraCurricularsDropdownOptions();
+  const { locale } = useLocale();
   const { get, setFilters } = useFilterQuery(["extraCurricularId"]);
 
   const controlled = value !== undefined && onChange !== undefined;
 
   return (
     <Dropdown
-      placeholder="비교과"
+      placeholder={getExtraCurricularDropdownPlaceholder(locale)}
       loading={loading}
       value={controlled ? value : get("extraCurricularId")}
       options={options}

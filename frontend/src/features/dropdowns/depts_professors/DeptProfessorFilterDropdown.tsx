@@ -6,6 +6,8 @@ import { Dropdown } from "../_shared";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { useDeptProfessorDropdownOptions } from "./hooks";
 import type { DeptProfessorItem } from "./types";
+import { useLocale } from "@/hooks/useLocale";
+import { getProfessorDropdownPlaceholder } from "../localeLabel";
 
 type Props = {
   deptId?: string;
@@ -21,6 +23,7 @@ export function DeptProfessorFilterDropdown({
   onSelectItem,
 }: Props) {
   const { get, setFilters } = useFilterQuery(["deptId", "accountId"]);
+  const { locale } = useLocale();
 
   const controlled = value !== undefined && onChange !== undefined;
 
@@ -48,7 +51,7 @@ export function DeptProfessorFilterDropdown({
 
   return (
     <Dropdown
-      placeholder="담당교수"
+      placeholder={getProfessorDropdownPlaceholder(locale)}
       loading={loading}
       disabled={!deptIdNum}
       value={controlled ? (value ?? "") : get("accountId")}

@@ -9,6 +9,7 @@ import { DatePickerInput } from "@/features/authority/semesters/components/ui/Da
 import { ExtraCurricularFilterDropdown } from "@/features/dropdowns/extraCurriculars/ExtraCurricularFilterDropdown";
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { createExtraCurricularOffering } from "../../../api/extraCurricularOfferingApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -21,6 +22,9 @@ export function ExtraCurricularOfferingCreateModal({
   onClose,
   onCreated,
 }: Props) {
+  const t = useI18n("extraCurricular.modal.offeringCreate");
+  const tCommon = useI18n("extraCurricular.common");
+
   // request payload
   const [extraCurricularId, setExtraCurricularId] = useState<number>(0);
   const [extraOfferingCode, setExtraOfferingCode] = useState<string>("");
@@ -79,21 +83,21 @@ export function ExtraCurricularOfferingCreateModal({
   };
 
   const validate = (): string | null => {
-    if (extraCurricularId <= 0) return "비교과 프로그램을 선택하세요.";
-    if (!extraOfferingCode.trim()) return "비교과운영코드를 입력하세요.";
-    if (!extraOfferingName.trim()) return "비교과운영명을 입력하세요.";
-    if (semesterId <= 0) return "학기를 선택하세요.";
+    if (extraCurricularId <= 0) return t("validation.requiredExtraCurricular");
+    if (!extraOfferingCode.trim()) return t("validation.requiredOfferingCode");
+    if (!extraOfferingName.trim()) return t("validation.requiredOfferingName");
+    if (semesterId <= 0) return t("validation.requiredSemester");
 
-    if (!operationStartDate) return "운영 시작일을 선택하세요.";
-    if (!operationEndDate) return "운영 종료일을 선택하세요.";
+    if (!operationStartDate) return t("validation.requiredOperationStartDate");
+    if (!operationEndDate) return t("validation.requiredOperationEndDate");
     if (operationStartDate > operationEndDate)
-      return "운영 시작일은 종료일보다 늦을 수 없습니다.";
+      return t("validation.invalidOperationPeriod");
 
-    if (rewardPointDefault < 0) return "포인트(기본)는 0 이상이어야 합니다.";
-    if (recognizedHoursDefault < 0) return "인정시간(기본)은 0 이상이어야 합니다.";
+    if (rewardPointDefault < 0) return t("validation.invalidRewardPoint");
+    if (recognizedHoursDefault < 0) return t("validation.invalidRecognizedHours");
 
     if (!isValidEmail(hostContactEmail))
-      return "담당자 이메일 형식이 올바르지 않습니다.";
+      return t("validation.invalidHostContactEmail");
 
     return null;
   };
@@ -134,7 +138,7 @@ export function ExtraCurricularOfferingCreateModal({
       resetAll();
       onClose();
     } catch (e: any) {
-      setError(e?.error?.message ?? e?.message ?? "등록에 실패했습니다.");
+      setError(e?.error?.message ?? e?.message ?? t("submitFailed"));
     } finally {
       setLoading(false);
     }
@@ -143,16 +147,16 @@ export function ExtraCurricularOfferingCreateModal({
   return (
     <Modal
       open={open}
-      title="비교과운영 등록"
+      title={t("title")}
       onClose={handleClose}
       size="lg"
       footer={
         <>
           <Button onClick={handleSubmit} loading={loading}>
-            등록
+            {tCommon("registerButton")}
           </Button>
           <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
+            {tCommon("cancelButton")}
           </Button>
         </>
       }
@@ -163,7 +167,7 @@ export function ExtraCurricularOfferingCreateModal({
         {/* ✅ 2×2: 비교과 / 운영코드 / 운영명 / 학기 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>비교과 프로그램</div>
+            <div className={styles.label}>{t("fields.extraCurricular")}</div>
             <ExtraCurricularFilterDropdown
               value={extraCurricularId > 0 ? String(extraCurricularId) : ""}
               onChange={(v) => setExtraCurricularId(v ? Number(v) : 0)}
@@ -171,29 +175,29 @@ export function ExtraCurricularOfferingCreateModal({
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>비교과운영코드</div>
+            <div className={styles.label}>{t("fields.offeringCode")}</div>
             <input
               className={styles.control}
               value={extraOfferingCode}
               onChange={(e) => setExtraOfferingCode(e.target.value)}
-              placeholder="예) EXTRA-2026-001"
+              placeholder={t("placeholders.offeringCode")}
               autoComplete="off"
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>비교과운영명</div>
+            <div className={styles.label}>{t("fields.offeringName")}</div>
             <input
               className={styles.control}
               value={extraOfferingName}
               onChange={(e) => setExtraOfferingName(e.target.value)}
-              placeholder="예) 신입생 역량 캠프 1차"
+              placeholder={t("placeholders.offeringName")}
               autoComplete="off"
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>학기</div>
+            <div className={styles.label}>{t("fields.semester")}</div>
             <SemesterFilterDropdown
               value={semesterId > 0 ? String(semesterId) : ""}
               onChange={(v) => setSemesterId(v ? Number(v) : 0)}
@@ -204,7 +208,7 @@ export function ExtraCurricularOfferingCreateModal({
         {/* ✅ 2×2: 기본 포인트 / 기본 인정시간 / 운영 시작일 / 운영 종료일 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>포인트(기본)</div>
+            <div className={styles.label}>{t("fields.rewardPointDefault")}</div>
             <input
               className={styles.control}
               type="number"
@@ -212,14 +216,14 @@ export function ExtraCurricularOfferingCreateModal({
               onChange={(e) =>
                 setRewardPointDefault(e.target.value === "" ? 0 : Number(e.target.value))
               }
-              placeholder="예) 10"
+              placeholder={t("placeholders.rewardPointDefault")}
               min={0}
               max={999999}
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>인정시간(기본)</div>
+            <div className={styles.label}>{t("fields.recognizedHoursDefault")}</div>
             <input
               className={styles.control}
               type="number"
@@ -227,31 +231,31 @@ export function ExtraCurricularOfferingCreateModal({
               onChange={(e) =>
                 setRecognizedHoursDefault(e.target.value === "" ? 0 : Number(e.target.value))
               }
-              placeholder="예) 2"
+              placeholder={t("placeholders.recognizedHoursDefault")}
               min={0}
               max={999999}
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>운영 시작일</div>
+            <div className={styles.label}>{t("fields.operationStartDate")}</div>
             <DatePickerInput
               value={operationStartDate}
               onChange={(v) => {
                 setOperationStartDate(v);
                 if (operationEndDate && v > operationEndDate) setOperationEndDate("");
               }}
-              placeholder="시작일 선택"
+              placeholder={t("placeholders.operationStartDate")}
               closeSignal={closeSignal}
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>운영 종료일</div>
+            <div className={styles.label}>{t("fields.operationEndDate")}</div>
             <DatePickerInput
               value={operationEndDate}
               onChange={setOperationEndDate}
-              placeholder="종료일 선택"
+              placeholder={t("placeholders.operationEndDate")}
               min={operationStartDate || undefined}
               closeSignal={closeSignal}
             />
@@ -261,34 +265,34 @@ export function ExtraCurricularOfferingCreateModal({
         {/* ✅ 2×2: 담당자명 / 담당자 전화 / 담당자 이메일 / 빈칸 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>담당자명</div>
+            <div className={styles.label}>{t("fields.hostContactName")}</div>
             <input
               className={styles.control}
               value={hostContactName}
               onChange={(e) => setHostContactName(e.target.value)}
-              placeholder="예) 홍길동"
+              placeholder={t("placeholders.hostContactName")}
               autoComplete="off"
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>담당자 전화</div>
+            <div className={styles.label}>{t("fields.hostContactPhone")}</div>
             <input
               className={styles.control}
               value={hostContactPhone}
               onChange={(e) => setHostContactPhone(e.target.value)}
-              placeholder="예) 010-1234-5678"
+              placeholder={t("placeholders.hostContactPhone")}
               autoComplete="off"
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>담당자 이메일</div>
+            <div className={styles.label}>{t("fields.hostContactEmail")}</div>
             <input
               className={styles.control}
               value={hostContactEmail}
               onChange={(e) => setHostContactEmail(e.target.value)}
-              placeholder="예) 담당자@school.ac.kr"
+              placeholder={t("placeholders.hostContactEmail")}
               autoComplete="off"
             />
           </label>

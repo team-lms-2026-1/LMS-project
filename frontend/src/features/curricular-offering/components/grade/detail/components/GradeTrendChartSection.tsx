@@ -3,13 +3,16 @@
 import { StudentGradeDetailHeaderDto } from "@/features/curricular-offering/api/types";
 import styles from "./GradeTreandChartSection.module.css";
 import { GradeTrendComposedChart } from "./GradeTrendComposedChart";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = { data: StudentGradeDetailHeaderDto };
 
 export function GradeTrendChartSection({ data }: Props) {
+  const t = useI18n("curricular.adminGrades.detail.trend");
+
   return (
     <div className={styles.section}>
-      <Header title="학기별 성적 추이" />
+      <Header title={t("title")} />
       <div className={styles.body}>
         <GradeTrendComposedChart items={data.trend ?? []} />
       </div>

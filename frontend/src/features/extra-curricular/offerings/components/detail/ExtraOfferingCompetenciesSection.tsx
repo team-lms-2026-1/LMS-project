@@ -15,6 +15,12 @@ import type {
 import { useExtraOfferingCompetencyMapping } from "../../hooks/useExtraCurricularOfferingList";
 import { updateExtraCurricularOfferingCompetency } from "../../api/extraCurricularOfferingApi";
 import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getLocalizedCompetencyDescription,
+  getLocalizedCompetencyName,
+} from "@/features/competencies/utils/competencyLocale";
+import { stripSemesterSuffix } from "../../utils/semesterDisplayName";
 
 type Props = {
   offeringId?: number;
@@ -24,6 +30,7 @@ type Props = {
 export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
   const t = useI18n("extraCurricular.adminOfferingDetail.competencies");
   const tCommon = useI18n("curricular.common");
+  const { locale } = useLocale();
   const { state, actions } = useExtraOfferingCompetencyMapping(offeringId);
   const { data: mappingData, loading, error } = state;
 
@@ -156,17 +163,25 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
     }
   };
 
+  const getCompetencyName = (code: string, fallback: string) =>
+    getLocalizedCompetencyName(code, locale, fallback);
+
+  const getCompetencyDescription = (code: string, fallback: string) =>
+    getLocalizedCompetencyDescription(code, locale, fallback);
+
+  const semesterDisplayName = stripSemesterSuffix(data.semesterDisplayName);
+
   return (
     <div className={styles.wrap}>
       {/* 상단 */}
       <div className={styles.section}>
-        <Header title={`${data.extraCurricularName} (${data.extraOfferingCode} / ${data.semesterDisplayName})`} />
+        <Header title={`${data.extraCurricularName} (${data.extraOfferingCode} / ${semesterDisplayName})`} />
         <div className={styles.body}>
           <span>{t("labels.hostOrgName")} : {data.hostContactName}</span>
           <span>
             {t("labels.mainCompetencies")} :{" "}
             {mainCompetencies.length
-              ? mainCompetencies.map((c) => c.name).join(", ")
+              ? mainCompetencies.map((c) => getCompetencyName(c.code, c.name)).join(", ")
               : "-"}
           </span>
         </div>
@@ -186,7 +201,8 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
                 <ul className={styles.description}>
                   {mappingData.map((item) => (
                     <li key={item.competencyId}>
-                      <strong>{item.name}</strong> : {item.description}
+                      <strong>{getCompetencyName(item.code, item.name)}</strong> :{" "}
+                      {getCompetencyDescription(item.code, item.description)}
                     </li>
                   ))}
                 </ul>
@@ -198,7 +214,9 @@ export function ExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
                     return (
                       <div key={item.competencyId} className={styles.mappingCard}>
                         <div className={styles.mappingTop}>
-                          <div className={styles.mappingName}>{item.name}</div>
+                          <div className={styles.mappingName}>
+                            {getCompetencyName(item.code, item.name)}
+                          </div>
                         </div>
 
                         <div className={styles.scoreRow}>
