@@ -297,7 +297,7 @@ public class CompetencyQueryService {
         }
 
         /**
-         * ??웾 醫낇빀 愿由?용 ??웾 ?듦퀎 議고쉶
+         * 역량 종합 관리용 역량 통계 조회
          */
         public CompetencyResultDashboardResponse getCompetencyResultDashboard(
                         Long diagnosisId,
@@ -334,7 +334,7 @@ public class CompetencyQueryService {
                 long totalResponseCount = summaryRepository
                                 .countDistinctStudentsBySemesterAndAcademicStatus(targetSemesterId, targetStatus);
                 Double avgScoreRaw = summaryRepository
-                                .getSemesterAverageDiagnosisScoreByAcademicStatus(targetSemesterId, targetStatus);
+                                .getSemesterAverageTotalScoreByAcademicStatus(targetSemesterId, targetStatus);
                 BigDecimal totalAverage = avgScoreRaw != null
                                 ? BigDecimal.valueOf(avgScoreRaw).setScale(2, RoundingMode.HALF_UP)
                                 : BigDecimal.ZERO;
@@ -348,7 +348,7 @@ public class CompetencyQueryService {
                                 enrolledSummaries,
                                 totalTargetCount);
 
-                List<Object[]> avgRows = summaryRepository.findDeptCompetencyAverages(
+                List<Object[]> avgRows = summaryRepository.findDeptCompetencyTotalScoreAverages(
                                 targetSemesterId,
                                 targetStatus);
                 Map<Long, Map<Long, BigDecimal>> deptCompetencyAvgMap = new HashMap<>();
@@ -486,8 +486,8 @@ public class CompetencyQueryService {
                                 .map(comp -> {
                                         List<SemesterStudentCompetencySummary> compSummaries = summaryMap
                                                         .getOrDefault(comp.getCompetencyId(), List.of());
-                                        List<BigDecimal> scores = compSummaries.stream()
-                                                        .map(SemesterStudentCompetencySummary::getDiagnosisScore)
+                        List<BigDecimal> scores = compSummaries.stream()
+                                                        .map(SemesterStudentCompetencySummary::getTotalScore)
                                                         .filter(Objects::nonNull)
                                                         .collect(Collectors.toList());
                                         BigDecimal mean = calculateMean(scores);
@@ -536,7 +536,8 @@ public class CompetencyQueryService {
 
                 Map<Long, Map<Long, Map<Long, BigDecimal>>> deptCompSemesterAvgMap = new HashMap<>();
                 if (!semesterIds.isEmpty()) {
-                        List<Object[]> rows = summaryRepository.findDeptSemesterCompetencyAverages(semesterIds, status);
+                        List<Object[]> rows = summaryRepository
+                                        .findDeptSemesterCompetencyTotalScoreAverages(semesterIds, status);
                         for (Object[] row : rows) {
                                 Long rowSemesterId = toLong(row[0]);
                                 Long rowDeptId = toLong(row[1]);

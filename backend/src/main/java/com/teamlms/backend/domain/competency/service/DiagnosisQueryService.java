@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.teamlms.backend.domain.account.entity.StudentProfile;
-import com.teamlms.backend.domain.account.enums.AcademicStatus;
 import com.teamlms.backend.domain.account.repository.StudentProfileRepository;
 import com.teamlms.backend.domain.competency.api.dto.*;
 import com.teamlms.backend.domain.competency.entitiy.*;
@@ -212,8 +211,19 @@ public class DiagnosisQueryService {
                                         .build();
                 }
 
-                List<DiagnosisAnswer> answers = diagnosisAnswerRepository.findByRunRunId(runId);
-                if (answers.isEmpty()) {
+                Long semesterId = run.getSemester().getSemesterId();
+                List<Long> respondentIdList = submissions.stream()
+                                .map(s -> s.getStudent().getAccountId())
+                                .collect(Collectors.toList());
+                Set<Long> respondentIdSet = new HashSet<>(respondentIdList);
+
+                List<SemesterStudentCompetencySummary> summaries = summaryRepository
+                                .findBySemesterSemesterId(semesterId);
+                List<SemesterStudentCompetencySummary> respondentSummaries = summaries.stream()
+                                .filter(s -> respondentIdSet.contains(s.getStudent().getAccountId()))
+                                .collect(Collectors.toList());
+
+                if (respondentSummaries.isEmpty()) {
                         return DiagnosisReportResponse.builder()
                                         .summary(DiagnosisReportSummary.builder()
                                                         .targetCount((int) targetCount)
@@ -234,45 +244,36 @@ public class DiagnosisQueryService {
                                 Competency::getSortOrder,
                                 Comparator.nullsLast(Integer::compareTo)));
 
-                Map<Long, Map<String, BigDecimal>> submissionScores = new HashMap<>();
-                for (DiagnosisSubmission submission : submissions) {
-                        submissionScores.put(submission.getSubmissionId(), new HashMap<>());
+                Map<Long, Map<Long, BigDecimal>> respondentScores = new HashMap<>();
+                for (SemesterStudentCompetencySummary summaryRow : respondentSummaries) {
+                        Long studentId = summaryRow.getStudent().getAccountId();
+                        Long competencyId = summaryRow.getCompetency().getCompetencyId();
+                        BigDecimal score = summaryRow.getTotalScore() != null
+                                        ? summaryRow.getTotalScore()
+                                        : BigDecimal.ZERO;
+                        respondentScores
+                                        .computeIfAbsent(studentId, k -> new HashMap<>())
+                                        .put(competencyId, score);
                 }
 
-                for (DiagnosisAnswer answer : answers) {
-                        Long submissionId = answer.getSubmission().getSubmissionId();
-                        Map<String, BigDecimal> compScores = submissionScores
-                                        .computeIfAbsent(submissionId, k -> new HashMap<>());
-                        for (Competency comp : competencies) {
-                                String code = comp.getCode();
-                                BigDecimal score = calculateQuestionScore(answer, code);
-                                if (score == null || score.signum() == 0) {
-                                        continue;
-                                }
-                                compScores.merge(code, score, BigDecimal::add);
-                        }
-                }
-
-                BigDecimal multiplier = BigDecimal.valueOf(10);
                 List<CompetencyRadarItem> radarChart = new ArrayList<>();
                 List<CompetencyStatsTableItem> statsTable = new ArrayList<>();
                 BigDecimal totalAverage = BigDecimal.ZERO;
                 int averageCount = 0;
 
-                LocalDateTime calculatedAt = submissions.stream()
-                                .map(DiagnosisSubmission::getSubmittedAt)
+                LocalDateTime calculatedAt = respondentSummaries.stream()
+                                .map(SemesterStudentCompetencySummary::getCalculatedAt)
                                 .max(LocalDateTime::compareTo)
                                 .orElse(null);
 
                 for (Competency comp : competencies) {
-                        String code = comp.getCode();
+                        Long competencyId = comp.getCompetencyId();
                         List<BigDecimal> scores = new ArrayList<>();
-                        for (DiagnosisSubmission submission : submissions) {
-                                Map<String, BigDecimal> compScores = submissionScores
-                                                .getOrDefault(submission.getSubmissionId(), Map.of());
-                                BigDecimal raw = compScores.getOrDefault(code, BigDecimal.ZERO);
-                                BigDecimal scaled = raw.multiply(multiplier);
-                                scores.add(scaled);
+                        for (Long studentId : respondentIdList) {
+                                Map<Long, BigDecimal> compScores = respondentScores
+                                                .getOrDefault(studentId, Map.of());
+                                BigDecimal value = compScores.getOrDefault(competencyId, BigDecimal.ZERO);
+                                scores.add(value);
                         }
 
                         BigDecimal mean = calculateMean(scores);
@@ -339,36 +340,115 @@ public class DiagnosisQueryService {
 
                 Map<Long, Map<Long, Map<Long, BigDecimal>>> deptCompSemesterAvgMap = new HashMap<>();
                 if (!semesterIds.isEmpty()) {
-                        List<Object[]> rows = summaryRepository
-                                        .findDeptSemesterCompetencyAverages(semesterIds, AcademicStatus.ENROLLED);
-                        for (Object[] row : rows) {
-                                Long rowSemesterId = toLong(row[0]);
-                                Long rowDeptId = toLong(row[1]);
-                                Long rowCompId = toLong(row[2]);
-                                if (rowSemesterId == null || rowDeptId == null || rowCompId == null) {
+                        Map<Long, Long> runSemesterMap = closedRuns.stream()
+                                        .filter(r -> r.getSemester() != null)
+                                        .collect(Collectors.toMap(
+                                                        DiagnosisRun::getRunId,
+                                                        r -> r.getSemester().getSemesterId(),
+                                                        (a, b) -> a));
+                        List<Long> runIds = new ArrayList<>(runSemesterMap.keySet());
+                        Map<Long, Set<Long>> respondentIdsBySemester = new HashMap<>();
+
+                        if (!runIds.isEmpty()) {
+                                List<DiagnosisSubmission> allSubmissions = diagnosisSubmissionRepository
+                                                .findByRunRunIdIn(runIds);
+                                for (DiagnosisSubmission submission : allSubmissions) {
+                                        DiagnosisRun submissionRun = submission.getRun();
+                                        if (submissionRun == null) {
+                                                continue;
+                                        }
+                                        Long semId = runSemesterMap.get(submissionRun.getRunId());
+                                        if (semId == null) {
+                                                continue;
+                                        }
+                                        respondentIdsBySemester
+                                                        .computeIfAbsent(semId, k -> new HashSet<>())
+                                                        .add(submission.getStudent().getAccountId());
+                                }
+                        }
+
+                        for (Long semId : semesterIds) {
+                                Set<Long> semRespondents = respondentIdsBySemester.getOrDefault(semId, Set.of());
+                                if (semRespondents.isEmpty()) {
                                         continue;
                                 }
-                                BigDecimal avgScore = toScaledDecimal(row[3]);
-                                deptCompSemesterAvgMap
-                                                .computeIfAbsent(rowDeptId, k -> new HashMap<>())
-                                                .computeIfAbsent(rowCompId, k -> new HashMap<>())
-                                                .put(rowSemesterId, avgScore);
+
+                                List<SemesterStudentCompetencySummary> semesterSummaries = summaryRepository
+                                                .findBySemesterSemesterId(semId);
+                                List<SemesterStudentCompetencySummary> filteredSummaries = semesterSummaries.stream()
+                                                .filter(s -> semRespondents.contains(s.getStudent().getAccountId()))
+                                                .collect(Collectors.toList());
+                                if (filteredSummaries.isEmpty()) {
+                                        continue;
+                                }
+
+                                Map<Long, Long> studentDeptMap = studentProfileRepository.findAllById(semRespondents)
+                                                .stream()
+                                                .filter(p -> p.getDeptId() != null)
+                                                .collect(Collectors.toMap(
+                                                                StudentProfile::getAccountId,
+                                                                StudentProfile::getDeptId,
+                                                                (a, b) -> a));
+
+                                Map<Long, Map<Long, BigDecimal>> sumByDeptComp = new HashMap<>();
+                                Map<Long, Map<Long, Integer>> countByDeptComp = new HashMap<>();
+
+                                for (SemesterStudentCompetencySummary summaryRow : filteredSummaries) {
+                                        Long studentId = summaryRow.getStudent().getAccountId();
+                                        Long deptId = studentDeptMap.get(studentId);
+                                        if (deptId == null) {
+                                                continue;
+                                        }
+                                        Long competencyId = summaryRow.getCompetency().getCompetencyId();
+                                        BigDecimal score = summaryRow.getTotalScore() != null
+                                                        ? summaryRow.getTotalScore()
+                                                        : BigDecimal.ZERO;
+
+                                        sumByDeptComp
+                                                        .computeIfAbsent(deptId, k -> new HashMap<>())
+                                                        .merge(competencyId, score, BigDecimal::add);
+                                        countByDeptComp
+                                                        .computeIfAbsent(deptId, k -> new HashMap<>())
+                                                        .merge(competencyId, 1, Integer::sum);
+                                }
+
+                                Map<Long, Map<Long, BigDecimal>> deptCompAvgMap = new HashMap<>();
+                                for (Map.Entry<Long, Map<Long, BigDecimal>> deptEntry : sumByDeptComp.entrySet()) {
+                                        Long deptId = deptEntry.getKey();
+                                        Map<Long, BigDecimal> compSumMap = deptEntry.getValue();
+                                        Map<Long, Integer> compCountMap = countByDeptComp
+                                                        .getOrDefault(deptId, Map.of());
+
+                                        Map<Long, BigDecimal> compAvgMap = new HashMap<>();
+                                        for (Map.Entry<Long, BigDecimal> compEntry : compSumMap.entrySet()) {
+                                                Long competencyId = compEntry.getKey();
+                                                BigDecimal sum = compEntry.getValue();
+                                                int count = compCountMap.getOrDefault(competencyId, 0);
+                                                BigDecimal avgScore = count > 0
+                                                                ? sum.divide(BigDecimal.valueOf(count), 2,
+                                                                                RoundingMode.HALF_UP)
+                                                                : BigDecimal.ZERO;
+                                                compAvgMap.put(competencyId, avgScore);
+                                        }
+                                        deptCompAvgMap.put(deptId, compAvgMap);
+                                }
+                                deptCompSemesterAvgMap.put(semId, deptCompAvgMap);
                         }
                 }
 
                 List<CompetencyTrendSeries> series = new ArrayList<>();
                 for (Dept dept : targetDepts) {
                         Long deptId = dept.getDeptId();
-                        Map<Long, Map<Long, BigDecimal>> compMap = deptCompSemesterAvgMap
-                                        .getOrDefault(deptId, Map.of());
                         for (Competency comp : competencies) {
-                                Map<Long, BigDecimal> semMap = compMap.getOrDefault(comp.getCompetencyId(), Map.of());
                                 List<BigDecimal> data = new ArrayList<>();
                                 if (semesterIds.isEmpty()) {
                                         data.add(BigDecimal.ZERO);
                                 } else {
                                         for (Long semId : semesterIds) {
-                                                data.add(semMap.getOrDefault(semId, BigDecimal.ZERO));
+                                                Map<Long, Map<Long, BigDecimal>> deptMap = deptCompSemesterAvgMap
+                                                                .getOrDefault(semId, Map.of());
+                                                Map<Long, BigDecimal> compMap = deptMap.getOrDefault(deptId, Map.of());
+                                                data.add(compMap.getOrDefault(comp.getCompetencyId(), BigDecimal.ZERO));
                                         }
                                 }
                                 series.add(CompetencyTrendSeries.builder()

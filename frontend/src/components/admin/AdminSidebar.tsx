@@ -46,16 +46,10 @@ const SECTIONS: NavSection[] = [
     key: "competency",
     titleKey: "sections.competency.title",
     items: [
-<<<<<<< HEAD
-      { label: "6Cs 란?", href: "/admin/competencies", exact: true },
-      { label: "학생역량활동조회", href: "/admin/competencies/students" },
-      { label: "역량진단지 관리", href: "/admin/competencies/dignosis" },
-      { label: "통합 결과 관리", href: "/admin/competencies/result" },
-=======
       { labelKey: "sections.competency.items.intro", href: "/admin/competencies", exact: true },
       { labelKey: "sections.competency.items.students", href: "/admin/competencies/students" },
       { labelKey: "sections.competency.items.diagnosis", href: "/admin/competencies/dignosis" },
->>>>>>> 9f7781f255ff1b1b6e2658d4f8f0a0829190d79e
+      { labelKey: "sections.competency.items.results", href: "/admin/competencies/result" },
     ],
   },
   {

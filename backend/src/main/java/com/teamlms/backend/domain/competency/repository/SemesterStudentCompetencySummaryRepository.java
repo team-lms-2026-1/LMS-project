@@ -13,27 +13,27 @@ import java.util.Optional;
 public interface SemesterStudentCompetencySummaryRepository
     extends JpaRepository<SemesterStudentCompetencySummary, Long> {
 
-  // 특정 학기, 특정 학생의 역량 요약 목록 조회
+  // ?뱀젙 ?숆린, ?뱀젙 ?숈깮????웾 ?붿빟 紐⑸줉 議고쉶
   List<SemesterStudentCompetencySummary> findBySemesterSemesterIdAndStudentAccountId(
       Long semesterId,
       Long studentAccountId);
 
-  // 특정 학기, 특정 학생, 특정 역량 요약 조회
+  // ?뱀젙 ?숆린, ?뱀젙 ?숈깮, ?뱀젙 ??웾 ?붿빟 議고쉶
   Optional<SemesterStudentCompetencySummary> findBySemesterSemesterIdAndStudentAccountIdAndCompetencyCompetencyId(
       Long semesterId,
       Long studentAccountId,
       Long competencyId);
 
-  // 특정 학기 전체 학생 요약 조회
+  // ?뱀젙 ?숆린 ?꾩껜 ?숈깮 ?붿빟 議고쉶
   List<SemesterStudentCompetencySummary> findBySemesterSemesterId(Long semesterId);
 
-  // 특정 학기 전체 학생 요약 삭제
+  // ?뱀젙 ?숆린 ?꾩껜 ?숈깮 ?붿빟 ??젣
   void deleteBySemesterSemesterId(Long semesterId);
 
-  // 특정 학생의 전체 학기 역량 이력 조회
+  // ?뱀젙 ?숈깮???꾩껜 ?숆린 ??웾 ?대젰 議고쉶
   List<SemesterStudentCompetencySummary> findByStudentAccountId(Long studentAccountId);
 
-  // 특정 학기, 특정 학적 상태 학생의 요약 목록 조회
+  // ?뱀젙 ?숆린, ?뱀젙 ?숈쟻 ?곹깭 ?숈깮???붿빟 紐⑸줉 議고쉶
   @Query("""
       SELECT s
       FROM SemesterStudentCompetencySummary s
@@ -45,7 +45,7 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("semesterId") Long semesterId,
       @Param("status") AcademicStatus status);
 
-  // 특정 학생의 전체 학기 역량 이력 조회
+  // ?뱀젙 ?숈깮???꾩껜 ?숆린 ??웾 ?대젰 議고쉶
   @Query("""
           SELECT s
           FROM SemesterStudentCompetencySummary s
@@ -55,7 +55,7 @@ public interface SemesterStudentCompetencySummaryRepository
   List<SemesterStudentCompetencySummary> findByStudentAccountIdOrderBySemester(
       @Param("studentAccountId") Long studentAccountId);
 
-  // 특정 학기, 특정 역량, 특정 학과의 평균 점수 조회
+  // ?뱀젙 ?숆린, ?뱀젙 ??웾, ?뱀젙 ?숆낵???됯퇏 ?먯닔 議고쉶
   @Query("""
       SELECT AVG(s.totalScore)
       FROM SemesterStudentCompetencySummary s
@@ -69,7 +69,7 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("competencyId") Long competencyId,
       @Param("deptId") Long deptId);
 
-  // 특정 학기, 특정 학적 상태 학생의 산출 대상자 수
+  // ?뱀젙 ?숆린, ?뱀젙 ?숈쟻 ?곹깭 ?숈깮???곗텧 ??곸옄 ??
   @Query("""
       SELECT COUNT(DISTINCT s.student.accountId)
       FROM SemesterStudentCompetencySummary s
@@ -81,7 +81,7 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("semesterId") Long semesterId,
       @Param("status") AcademicStatus status);
 
-  // 특정 학기, 특정 학적 상태 학생의 진단 점수 평균
+  // ?뱀젙 ?숆린, ?뱀젙 ?숈쟻 ?곹깭 ?숈깮??吏꾨떒 ?먯닔 ?됯퇏
   @Query("""
       SELECT AVG(s.diagnosisScore)
       FROM SemesterStudentCompetencySummary s
@@ -93,7 +93,19 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("semesterId") Long semesterId,
       @Param("status") AcademicStatus status);
 
-  // 특정 학기 내 모든 학과 * 역량별 평균 점수
+  // ?뱀젙 ?숆린, ?뱀젙 ?숈쟻 ?곹깭 ?숈깮??total ?먯닔 ?됯퇏
+  @Query("""
+      SELECT AVG(s.totalScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  Double getSemesterAverageTotalScoreByAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // ?뱀젙 ?숆린 ??紐⑤뱺 ?숆낵 * ??웾蹂??됯퇏 ?먯닔
   @Query("""
       SELECT p.deptId, s.competency.competencyId, AVG(s.diagnosisScore)
       FROM SemesterStudentCompetencySummary s
@@ -106,7 +118,20 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("semesterId") Long semesterId,
       @Param("status") AcademicStatus status);
 
-  // 여러 학기 내 학과별 평균 점수 (전체 추이 평균)
+  // ?뱀젙 ?숆린 ??紐⑤뱺 ?숆낵 * ??웾 total ?됯퇏 ?먯닔
+  @Query("""
+      SELECT p.deptId, s.competency.competencyId, AVG(s.totalScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      GROUP BY p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptCompetencyTotalScoreAverages(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // ?щ윭 ?숆린 ???숆낵蹂??됯퇏 ?먯닔 (?꾩껜 異붿씠 ?됯퇏)
   @Query("""
       SELECT s.semester.semesterId, p.deptId, AVG(s.diagnosisScore)
       FROM SemesterStudentCompetencySummary s
@@ -119,7 +144,7 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("semesterIds") List<Long> semesterIds,
       @Param("status") AcademicStatus status);
 
-  // 여러 학기 내 학과별 역량 평균 점수 (6CS 추이 비교)
+  // ?щ윭 ?숆린 ???숆낵蹂???웾 ?됯퇏 ?먯닔 (6CS 異붿씠 鍮꾧탳)
   @Query("""
       SELECT s.semester.semesterId, p.deptId, s.competency.competencyId, AVG(s.diagnosisScore)
       FROM SemesterStudentCompetencySummary s
@@ -132,7 +157,20 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("semesterIds") List<Long> semesterIds,
       @Param("status") AcademicStatus status);
 
-  // 특정 학기, 특정 역량의 모든 학생 점수 조회
+  // ?щ윭 ?숆린 ???숆낵蹂???웾 total ?됯퇏 ?먯닔 (6CS 異붿씠 鍮꾧탳)
+  @Query("""
+      SELECT s.semester.semesterId, p.deptId, s.competency.competencyId, AVG(s.totalScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId IN :semesterIds
+        AND p.academicStatus = :status
+      GROUP BY s.semester.semesterId, p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptSemesterCompetencyTotalScoreAverages(
+      @Param("semesterIds") List<Long> semesterIds,
+      @Param("status") AcademicStatus status);
+
+  // ?뱀젙 ?숆린, ?뱀젙 ??웾??紐⑤뱺 ?숈깮 ?먯닔 議고쉶
   @Query("""
           SELECT s
           FROM SemesterStudentCompetencySummary s

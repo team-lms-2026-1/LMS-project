@@ -157,7 +157,8 @@
           "items": {
             "intro": "6Cs 란?",
             "students": "학생역량활동조회",
-            "diagnosis": "역량진단지 관리"
+            "diagnosis": "역량진단지 관리",
+            "results" : "통합역량결과 관리"
           }
         },
         "course": {
