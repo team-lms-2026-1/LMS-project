@@ -17,6 +17,7 @@ import type {
 import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/noticesApi";
 import { Button } from "@/components/button";
 import DatePicker from "react-datepicker";
+import { useI18n } from "@/i18n/useI18n";
 
 function toMidnightLocalDateTime(dateOnly: string) {
   if (!dateOnly) return "";
@@ -63,7 +64,7 @@ function normalizeDetail(payload: any): NoticeDetailDto {
   };
 }
 
-function normalizeExistingAttachments(files: any[]): ExistingFile[] {
+function normalizeExistingAttachments(files: any[], fallbackFileName: (index: number) => string): ExistingFile[] {
   if (!Array.isArray(files)) return [];
 
   return files.map((f: any, idx: number) => {
@@ -72,7 +73,7 @@ function normalizeExistingAttachments(files: any[]): ExistingFile[] {
     const safeAttachmentId = Number.isFinite(attachmentId) ? attachmentId : undefined;
 
     const fileName = String(
-      f?.originalName ?? f?.originaName ?? f?.fileName ?? f?.name ?? `첨부파일 ${idx + 1}`
+      f?.originalName ?? f?.originaName ?? f?.fileName ?? f?.name ?? fallbackFileName(idx + 1)
     );
 
     const url =
@@ -105,6 +106,7 @@ const DateTextInput = forwardRef<HTMLInputElement, any>(function DateTextInput(p
 
 export default function NoticeEditPageClient() {
   const router = useRouter();
+  const i18n = useI18n("community.notices.admin.edit");
   const params = useParams<{ noticeId?: string }>();
   const allowLeaveRef = useRef(false);
 
@@ -165,8 +167,8 @@ export default function NoticeEditPageClient() {
   }, [load.data, title, content, categoryId, displayStartAt, displayEndAt, deletedAttachmentIds.length, newFiles.length]);
 
   const toastLeave = useCallback(() => {
-    toast.error("공지사항을 수정 중입니다.");
-  }, []);
+    toast.error(i18n("errors.leaveGuard"));
+  }, [i18n]);
 
   useEffect(() => {
     if (!isDirty || saving) return;
@@ -292,7 +294,7 @@ export default function NoticeEditPageClient() {
 
   useEffect(() => {
     if (!noticeId || Number.isNaN(noticeId)) {
-      setLoad({ loading: false, error: "잘못된 공지사항 ID입니다.", data: null });
+      setLoad({ loading: false, error: i18n("errors.invalidId"), data: null });
       return;
     }
 
@@ -313,14 +315,16 @@ export default function NoticeEditPageClient() {
         setDisplayStartAt(parseYmdToDate(data.displayStartAt));
         setDisplayEndAt(parseYmdToDate(data.displayEndAt));
 
-        setExistingFiles(normalizeExistingAttachments(data.files ?? []));
+        setExistingFiles(
+          normalizeExistingAttachments(data.files ?? [], (index) => i18n("texts.attachmentFallback", { index }))
+        );
         setDeletedAttachmentIds([]);
         setNewFiles([]);
       } catch (e: any) {
         if (!alive) return;
         setLoad({
           loading: false,
-          error: e?.message ?? "공지사항을 불러오지 못했습니다.",
+          error: e?.message ?? i18n("errors.loadFailed"),
           data: null,
         });
       }
@@ -329,7 +333,7 @@ export default function NoticeEditPageClient() {
     return () => {
       alive = false;
     };
-  }, [noticeId]);
+  }, [noticeId, i18n]);
 
   useEffect(() => {
     let alive = true;
@@ -394,7 +398,7 @@ export default function NoticeEditPageClient() {
 
   const toggleDeleteExisting = (f: ExistingFile) => {
     if (typeof f.attachmentId !== "number") {
-      toast.error("이 첨부파일은 attachmentId가 없어 삭제할 수 없습니다.");
+      toast.error(i18n("errors.missingAttachmentId"));
       return;
     }
 
@@ -409,9 +413,9 @@ export default function NoticeEditPageClient() {
     const t = title.trim();
     const c = content.trim();
 
-    if (!t) return toast.error("제목을 입력하세요.");
-    if (!c) return toast.error("내용을 입력하세요.");
-    if (!isPeriodValid) return toast.error("게시기간이 올바르지 않습니다. 종료일은 시작일 이후여야 합니다.");
+    if (!t) return toast.error(i18n("errors.titleRequired"));
+    if (!c) return toast.error(i18n("errors.contentRequired"));
+    if (!isPeriodValid) return toast.error(i18n("errors.invalidPeriod"));
 
     const displayStartAtIso = displayStartAt ? toMidnightLocalDateTime(formatYmd(displayStartAt)) : "";
     const displayEndAtIso = displayEndAt ? toMidnightLocalDateTime(formatYmd(displayEndAt)) : "";
@@ -429,10 +433,10 @@ export default function NoticeEditPageClient() {
     try {
       await updateNotice(noticeId, body, newFiles);
       allowLeaveRef.current = true;
-      toast.success("공지사항이 수정되었습니다.");
+      toast.success(i18n("toasts.saveSuccess"));
       router.push(DETAIL_PATH);
     } catch (e: any) {
-      toast.error(e?.message ?? "수정에 실패했습니다.");
+      toast.error(e?.message ?? i18n("errors.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -453,7 +457,7 @@ export default function NoticeEditPageClient() {
     return { backgroundColor: bg, color: fg };
   }, [selectedCategory?.bgColorHex, selectedCategory?.textColorHex]);
 
-  const badgeLabel = selectedCategory?.name ?? "미분류";
+  const badgeLabel = selectedCategory?.name ?? i18n("texts.uncategorized");
 
   return (
     <div className={styles.page}>
@@ -461,21 +465,21 @@ export default function NoticeEditPageClient() {
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
             <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
-              공지사항
+              {i18n("title")}
             </span>
             <span className={styles.sep}>›</span>
-            <span className={styles.current}>수정페이지</span>
+            <span className={styles.current}>{i18n("breadcrumbCurrent")}</span>
           </div>
 
           <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
-            목록으로
+            {i18n("buttons.list")}
           </Button>
         </div>
 
-        <h1 className={styles.title}>공지사항</h1>
+        <h1 className={styles.title}>{i18n("title")}</h1>
 
         {load.error && <div className={styles.errorMessage}>{load.error}</div>}
-        {load.loading && <div className={styles.loadingBox}>불러오는 중...</div>}
+        {load.loading && <div className={styles.loadingBox}>{i18n("loading")}</div>}
 
         {!load.loading && data && (
           <div className={styles.detailBox}>
@@ -489,36 +493,38 @@ export default function NoticeEditPageClient() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={saving}
-                placeholder="제목"
+                placeholder={i18n("placeholders.title")}
                 maxLength={200}
               />
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{i18n("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
 
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{i18n("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{data.createdAt || "-"}</span>
               </div>
 
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{i18n("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
 
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>분류</span>
+                <span className={styles.metaLabel}>{i18n("labels.category")}</span>
                 <select
                   className={styles.categorySelect}
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
                   disabled={saving || loadingCats}
                 >
-                  <option value="">{loadingCats ? "불러오는 중..." : "미분류"}</option>
+                  <option value="">
+                    {loadingCats ? i18n("placeholders.categoryLoading") : i18n("placeholders.uncategorized")}
+                  </option>
                   {categories.map((c) => (
                     <option key={c.categoryId} value={String(c.categoryId)}>
                       {c.name}
@@ -528,7 +534,7 @@ export default function NoticeEditPageClient() {
               </div>
 
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>게시기간</span>
+                <span className={styles.metaLabel}>{i18n("labels.period")}</span>
                 <div className={styles.periodRow}>
                   <DatePicker
                     selected={displayStartAt}
@@ -537,7 +543,7 @@ export default function NoticeEditPageClient() {
                       if (d && displayEndAt && displayEndAt < d) setDisplayEndAt(d);
                     }}
                     dateFormat="yyyy-MM-dd"
-                    placeholderText="시작일"
+                    placeholderText={i18n("placeholders.startDate")}
                     customInput={<DateTextInput />}
                     disabled={saving}
                     isClearable
@@ -549,7 +555,7 @@ export default function NoticeEditPageClient() {
                     selected={displayEndAt}
                     onChange={(d: Date | null) => setDisplayEndAt(d)}
                     dateFormat="yyyy-MM-dd"
-                    placeholderText="종료일"
+                    placeholderText={i18n("placeholders.endDate")}
                     customInput={<DateTextInput />}
                     disabled={saving}
                     minDate={displayStartAt ?? undefined}
@@ -567,35 +573,35 @@ export default function NoticeEditPageClient() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 disabled={saving}
-                placeholder="내용을 입력하세요."
+                placeholder={i18n("placeholders.content")}
                 rows={12}
               />
             </div>
 
             <div className={styles.attachBox}>
               <div className={styles.attachRow}>
-                <div className={styles.attachLabel}>첨부</div>
+                <div className={styles.attachLabel}>{i18n("labels.attachment")}</div>
 
                 <div className={styles.attachWrap}>
                   <div className={styles.attachTabs}>
                     <button type="button" className={styles.tabActive} disabled={saving}>
-                      내 PC
+                      {i18n("buttons.myPc")}
                     </button>
                   </div>
 
                   <div className={styles.dropzone}>
                     <div className={styles.dropText}>
-                      Drop here to attach or{" "}
+                      {i18n("help.dropPrefix")}{" "}
                       <button
                         type="button"
                         className={styles.uploadLink}
                         onClick={() => fileInputRef.current?.click()}
                         disabled={saving}
                       >
-                        upload
+                        {i18n("buttons.upload")}
                       </button>
                     </div>
-                    <div className={styles.maxSize}>Max size: 50MB</div>
+                    <div className={styles.maxSize}>{i18n("help.maxSize")}</div>
 
                     <input
                       ref={fileInputRef}
@@ -626,7 +632,7 @@ export default function NoticeEditPageClient() {
                               </span>
                               {f.url ? (
                                 <a className={styles.fileLink} href={f.url} target="_blank" rel="noreferrer">
-                                  열기
+                                  {i18n("buttons.open")}
                                 </a>
                               ) : null}
                             </div>
@@ -637,13 +643,13 @@ export default function NoticeEditPageClient() {
                               onClick={() => toggleDeleteExisting(f)}
                               disabled={saving}
                             >
-                              {deleted ? "삭제 취소" : "삭제"}
+                              {deleted ? i18n("buttons.deleteFileCancel") : i18n("buttons.deleteFile")}
                             </button>
                           </div>
                         );
                       })
                     ) : (
-                      <div className={styles.attachEmpty}>기존 첨부파일 없음</div>
+                      <div className={styles.attachEmpty}>{i18n("texts.noExistingFiles")}</div>
                     )}
                   </div>
 
@@ -663,7 +669,7 @@ export default function NoticeEditPageClient() {
                               onClick={() => removeNewFile(key)}
                               disabled={saving}
                             >
-                              삭제
+                              {i18n("buttons.deleteFile")}
                             </button>
                           </div>
                         );
@@ -676,10 +682,10 @@ export default function NoticeEditPageClient() {
 
             <div className={styles.footerRow}>
               <Button variant="secondary" onClick={onCancel} disabled={saving}>
-                취소
+                {i18n("buttons.cancel")}
               </Button>
               <Button variant="primary" onClick={onSave} disabled={!canSubmit}>
-                {saving ? "수정 중..." : "수정"}
+                {saving ? i18n("buttons.saving") : i18n("buttons.save")}
               </Button>
             </div>
           </div>

@@ -5,24 +5,23 @@ import { useRouter } from "next/navigation";
 import styles from "./QnaCreatePage.module.css";
 import type { Category, CreateQnaQuestionRequestDto } from "../../api/types";
 import { createQnaQuestion, fetchQnaCategories } from "../../api/qnasApi";
+import { useI18n } from "@/i18n/useI18n";
 
-const LIST_PATH = "/student/community/qna/questions"; // ✅ 너 프로젝트 목록 라우트에 맞춰 수정 가능
+const LIST_PATH = "/student/community/qna/questions";
 
 export default function QnaCreatePageClient() {
   const router = useRouter();
+  const t = useI18n("community.qna.student.create");
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-
-  // ✅ 카테고리
   const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryId, setCategoryId] = useState<string>(""); // select는 string
+  const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>("");
 
-  // ✅ 카테고리 목록 로드
   useEffect(() => {
     let alive = true;
 
@@ -30,18 +29,13 @@ export default function QnaCreatePageClient() {
       setLoadingCats(true);
       try {
         const res = await fetchQnaCategories();
-
-        // 응답이 {data: [...]} 형태 (너의 ApiResponse)
         const list = Array.isArray(res?.data) ? res.data : [];
         if (!alive) return;
-
         setCategories(list);
-
-        // 기본 선택값: 첫 카테고리(원하면 미분류 유지)
-        // 미분류를 default로 두고 싶으면 아래 줄 주석 처리
-        if (!categoryId && list.length > 0) setCategoryId(String(list[0].categoryId));
-      } catch (e) {
-        // 카테고리 불러오기 실패해도 등록 자체는 되게(미분류)
+        if (!categoryId && list.length > 0) {
+          setCategoryId(String(list[0].categoryId));
+        }
+      } catch {
         if (!alive) return;
         setCategories([]);
       } finally {
@@ -62,14 +56,15 @@ export default function QnaCreatePageClient() {
   const onSubmit = async () => {
     setError("");
 
-    const t = title.trim();
-    const c = content.trim();
-    if (!t) return setError("제목을 입력하세요.");
-    if (!c) return setError("내용을 입력하세요.");
+    const trimmedTitle = title.trim();
+    const trimmedContent = content.trim();
+
+    if (!trimmedTitle) return setError(t("errors.titleRequired"));
+    if (!trimmedContent) return setError(t("errors.contentRequired"));
 
     const body: CreateQnaQuestionRequestDto = {
-      title: t,
-      content: c,
+      title: trimmedTitle,
+      content: trimmedContent,
       categoryId: categoryId ? Number(categoryId) : null,
     };
 
@@ -78,7 +73,7 @@ export default function QnaCreatePageClient() {
       await createQnaQuestion(body);
       router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
-      setError(e?.message ?? "등록에 실패했습니다.");
+      setError(e?.message ?? t("errors.submitFailed"));
     } finally {
       setSaving(false);
     }
@@ -88,7 +83,7 @@ export default function QnaCreatePageClient() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.headerRow}>
-          <h1 className={styles.title}>Q&A 질문 등록</h1>
+          <h1 className={styles.title}>{t("title")}</h1>
 
           <button
             type="button"
@@ -96,7 +91,7 @@ export default function QnaCreatePageClient() {
             onClick={() => router.push(LIST_PATH)}
             disabled={saving}
           >
-            목록으로
+            {t("buttons.list")}
           </button>
         </div>
 
@@ -104,14 +99,16 @@ export default function QnaCreatePageClient() {
 
         <div className={styles.form}>
           <div className={styles.field}>
-            <div className={styles.label}>분류</div>
+            <div className={styles.label}>{t("labels.category")}</div>
             <select
               className={styles.select}
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               disabled={saving || loadingCats}
             >
-              <option value="">{loadingCats ? "불러오는 중..." : "미분류"}</option>
+              <option value="">
+                {loadingCats ? t("placeholders.categoryLoading") : t("placeholders.uncategorized")}
+              </option>
               {categories.map((c) => (
                 <option key={c.categoryId} value={String(c.categoryId)}>
                   {c.name}
@@ -121,37 +118,32 @@ export default function QnaCreatePageClient() {
           </div>
 
           <div className={styles.field}>
-            <div className={styles.label}>제목</div>
+            <div className={styles.label}>{t("labels.title")}</div>
             <input
               className={styles.input}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="제목을 입력하세요"
+              placeholder={t("placeholders.title")}
               disabled={saving}
               maxLength={190}
             />
           </div>
 
           <div className={styles.field}>
-            <div className={styles.label}>내용</div>
+            <div className={styles.label}>{t("labels.content")}</div>
             <textarea
               className={styles.textarea}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="질문 내용을 입력하세요"
+              placeholder={t("placeholders.content")}
               disabled={saving}
               rows={12}
             />
           </div>
 
           <div className={styles.footerRow}>
-            <button
-              type="button"
-              className={styles.submitBtn}
-              onClick={onSubmit}
-              disabled={!canSubmit}
-            >
-              {saving ? "등록 중..." : "등록"}
+            <button type="button" className={styles.submitBtn} onClick={onSubmit} disabled={!canSubmit}>
+              {saving ? t("buttons.submitting") : t("buttons.submit")}
             </button>
           </div>
         </div>

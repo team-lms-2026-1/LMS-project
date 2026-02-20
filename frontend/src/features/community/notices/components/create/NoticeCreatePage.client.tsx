@@ -10,6 +10,7 @@ import type { Category, CreateNoticeRequestDto } from "../../api/types";
 import { createNotice, fetchNoticeCategories } from "../../api/noticesApi";
 import { Button } from "@/components/button";
 import DatePicker from "react-datepicker";
+import { useI18n } from "@/i18n/useI18n";
 
 const LIST_PATH = "/admin/community/notices";
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
@@ -43,6 +44,7 @@ const DateTextInput = forwardRef<HTMLInputElement, any>(function DateTextInput(p
 
 export default function NoticeCreatePageClient() {
   const router = useRouter();
+  const i18n = useI18n("community.notices.admin.create");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [title, setTitle] = useState("");
@@ -74,8 +76,8 @@ export default function NoticeCreatePageClient() {
   }, [title, content, files.length, displayStartAt, displayEndAt, categoryId]);
 
   const toastLeave = useCallback(() => {
-    toast.error("등록 작성 중입니다.");
-  }, []);
+    toast.error(i18n("errors.leaveGuard"));
+  }, [i18n]);
 
   useEffect(() => {
     let alive = true;
@@ -199,9 +201,9 @@ export default function NoticeCreatePageClient() {
     const t = title.trim();
     const c = content.trim();
 
-    if (!t) return toast.error("제목을 입력하세요.");
-    if (!c) return toast.error("내용을 입력하세요.");
-    if (!displayStartAt && !displayEndAt) return toast.error("게시기간을 정해 주세요.");
+    if (!t) return toast.error(i18n("errors.titleRequired"));
+    if (!c) return toast.error(i18n("errors.contentRequired"));
+    if (!displayStartAt && !displayEndAt) return toast.error(i18n("errors.periodRequired"));
 
     const displayStartAtIso = displayStartAt ? toMidnightLocalDateTime(formatYmd(displayStartAt)) : "";
     const displayEndAtIso = displayEndAt ? toMidnightLocalDateTime(formatYmd(displayEndAt)) : "";
@@ -224,7 +226,7 @@ export default function NoticeCreatePageClient() {
         const res = await fetch("/api/admin/community/notices", { method: "POST", body: fd });
 
         if (!res.ok) {
-          let msg = `등록 실패 (${res.status})`;
+          let msg = `${i18n("errors.submitFailed")} (${res.status})`;
           try {
             const data = await res.json();
             msg = data?.message ?? msg;
@@ -255,7 +257,7 @@ export default function NoticeCreatePageClient() {
       router.push(`${LIST_PATH}?toast=created`);
       return;
     } catch (e: any) {
-      toast.error(e?.message ?? "??? ??????.");
+      toast.error(e?.message ?? i18n("errors.submitFailed"));
     } finally {
       setSaving(false);
     }
@@ -271,27 +273,27 @@ export default function NoticeCreatePageClient() {
       <div className={styles.breadcrumb}>
         <span className={styles.homeIcon}>⌂</span>
         <span className={styles.sep}>&gt;</span>
-        <strong>공지사항 관리</strong>
+        <strong>{i18n("breadcrumbTitle")}</strong>
       </div>
 
       <div className={styles.card}>
         <div className={styles.headerRow}>
-          <h1 className={styles.pageTitle}>공지사항 등록</h1>
+          <h1 className={styles.pageTitle}>{i18n("title")}</h1>
           <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
-            목록으로
+            {i18n("buttons.list")}
           </Button>
         </div>
 
         <div className={styles.formTable}>
           <div className={styles.row}>
-            <div className={styles.labelCell}>제목</div>
+            <div className={styles.labelCell}>{i18n("labels.title")}</div>
             <div className={styles.contentCell}>
               <div className={styles.titleRow}>
                 <input
                   className={styles.titleInput}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="제목"
+                  placeholder={i18n("placeholders.title")}
                   disabled={saving}
                   maxLength={200}
                 />
@@ -302,7 +304,9 @@ export default function NoticeCreatePageClient() {
                   onChange={(e) => setCategoryId(e.target.value)}
                   disabled={saving || loadingCats}
                 >
-                  <option value="">{loadingCats ? "불러오는 중..." : "카테고리 선택"}</option>
+                  <option value="">
+                    {loadingCats ? i18n("placeholders.categoryLoading") : i18n("placeholders.category")}
+                  </option>
                   {categories.map((c) => (
                     <option key={c.categoryId} value={String(c.categoryId)}>
                       {c.name}
@@ -314,7 +318,7 @@ export default function NoticeCreatePageClient() {
           </div>
 
           <div className={styles.row}>
-            <div className={styles.labelCell}>게시기간</div>
+            <div className={styles.labelCell}>{i18n("labels.period")}</div>
             <div className={styles.contentCell}>
               <div className={styles.periodRow}>
                 <DatePicker
@@ -324,7 +328,7 @@ export default function NoticeCreatePageClient() {
                     if (d && displayEndAt && displayEndAt < d) setDisplayEndAt(d);
                   }}
                   dateFormat="yyyy-MM-dd"
-                  placeholderText="시작일"
+                  placeholderText={i18n("placeholders.startDate")}
                   customInput={<DateTextInput />}
                   disabled={saving}
                   isClearable
@@ -337,7 +341,7 @@ export default function NoticeCreatePageClient() {
                   selected={displayEndAt}
                   onChange={(d: Date | null) => setDisplayEndAt(d)}
                   dateFormat="yyyy-MM-dd"
-                  placeholderText="종료일"
+                  placeholderText={i18n("placeholders.endDate")}
                   customInput={<DateTextInput />}
                   disabled={saving}
                   minDate={displayStartAt ?? undefined}
@@ -349,7 +353,7 @@ export default function NoticeCreatePageClient() {
           </div>
 
           <div className={styles.row}>
-            <div className={styles.labelCell}>내용</div>
+            <div className={styles.labelCell}>{i18n("labels.content")}</div>
             <div className={styles.contentCell}>
               <div className={styles.editor}>
                 <div className={styles.toolbar}>
@@ -372,7 +376,7 @@ export default function NoticeCreatePageClient() {
                   className={styles.editorArea}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="내용을 입력하세요."
+                  placeholder={i18n("placeholders.content")}
                   disabled={saving}
                 />
               </div>
@@ -381,31 +385,31 @@ export default function NoticeCreatePageClient() {
 
           <div className={styles.row}>
             <div className={styles.labelCell}>
-              첨부
+              {i18n("labels.attachment")}
               <br />
-              파일
+              {i18n("labels.file")}
             </div>
             <div className={styles.contentCell}>
               <div className={styles.attachWrap}>
                 <div className={styles.attachTabs}>
                   <button type="button" className={styles.tabActive} disabled={saving}>
-                    내 PC
+                    {i18n("buttons.myPc")}
                   </button>
                 </div>
 
                 <div className={styles.dropzone}>
                   <div className={styles.dropText}>
-                    Drop here to attach or{" "}
+                    {i18n("help.dropPrefix")}{" "}
                     <button
                       type="button"
                       className={styles.uploadLink}
                       onClick={() => fileInputRef.current?.click()}
                       disabled={saving}
                     >
-                      upload
+                      {i18n("buttons.upload")}
                     </button>
                   </div>
-                  <div className={styles.maxSize}>Max size: 50MB</div>
+                  <div className={styles.maxSize}>{i18n("help.maxSize")}</div>
 
                   <input
                     ref={fileInputRef}
@@ -433,7 +437,7 @@ export default function NoticeCreatePageClient() {
                             onClick={() => removeFile(key)}
                             disabled={saving}
                           >
-                            삭제
+                            {i18n("buttons.deleteFile")}
                           </button>
                         </div>
                       );
@@ -447,10 +451,10 @@ export default function NoticeCreatePageClient() {
 
         <div className={styles.footerRow}>
           <Button variant="secondary" onClick={onCancel} disabled={saving}>
-            취소
+            {i18n("buttons.cancel")}
           </Button>
           <Button variant="primary" onClick={onSubmit} disabled={!canSubmit}>
-            {saving ? "등록 중..." : "등록"}
+            {saving ? i18n("buttons.creating") : i18n("buttons.create")}
           </Button>
         </div>
       </div>

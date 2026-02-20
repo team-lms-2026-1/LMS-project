@@ -6,10 +6,12 @@ import { NoticesTable } from "./NoticeTablePage";
 import { useNoticesList } from "../../hooks/useNoticeList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
+import { useI18n } from "@/i18n/useI18n";
 
 
 export default function NoticePageClient() {
   const { state, actions } = useNoticesList();
+  const t = useI18n("community.notices.student.list");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
@@ -41,7 +43,7 @@ export default function NoticePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>공지사항</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>
@@ -49,7 +51,7 @@ export default function NoticePageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="제목 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>

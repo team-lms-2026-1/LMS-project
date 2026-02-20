@@ -6,22 +6,24 @@ import { Button } from "@/components/button";
 import { Badge } from "@/components/badge";
 import type { QnaListItemDto, QnaTableProps } from "../../api/types";
 import styles from "./QnaTable.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 export function QnaTable({ items, loading, onDeleteClick }: QnaTableProps) {
   const router = useRouter();
+  const t = useI18n("community.qna.admin.table");
 
   const goDetail = (id: number) => {
     router.push(`/admin/community/qna/questions/${id}`);
   };
 
   const columns: Array<TableColumn<QnaListItemDto>> = [
-    { header: "번호", align: "center", render: (r) => r.questionId },
+    { header: t("headers.id"), align: "center", render: (r) => r.questionId },
     {
-      header: "분류",
+      header: t("headers.category"),
       align: "center",
       render: (r) => {
         const c = r.category;
-        if (!c) return "미분류";
+        if (!c) return t("uncategorized");
         return (
           <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
             {c.name}
@@ -30,7 +32,7 @@ export function QnaTable({ items, loading, onDeleteClick }: QnaTableProps) {
       },
     },
     {
-      header: "제목",
+      header: t("headers.title"),
       align: "center",
       render: (r) => (
         <button
@@ -45,19 +47,16 @@ export function QnaTable({ items, loading, onDeleteClick }: QnaTableProps) {
         </button>
       ),
     },
-
-    // ✅ 추가: 답변 여부(체크)
     {
-      header: "답변",
+      header: t("headers.answer"),
       width: 80,
       align: "center",
       render: (r) => (r.hasAnswer ? <span className={styles.check}>✓</span> : <span className={styles.dash}>-</span>),
     },
-
-    { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createdAt },
+    { header: t("headers.views"), align: "center", render: (r) => r.viewCount },
+    { header: t("headers.createdAt"), align: "center", render: (r) => r.createdAt },
     {
-      header: "관리",
+      header: t("headers.manage"),
       width: 140,
       align: "center",
       stopRowClick: true,
@@ -70,7 +69,7 @@ export function QnaTable({ items, loading, onDeleteClick }: QnaTableProps) {
               onDeleteClick(r.questionId);
             }}
           >
-            삭제
+            {t("buttons.delete")}
           </Button>
         </div>
       ),
@@ -84,7 +83,7 @@ export function QnaTable({ items, loading, onDeleteClick }: QnaTableProps) {
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.questionId}
-      emptyText="Q&A가 없습니다."
+      emptyText={t("emptyText")}
       onRowClick={(r) => goDetail(r.questionId)}
     />
   );

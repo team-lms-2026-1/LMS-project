@@ -4,23 +4,27 @@ import React from "react";
 import styles from "./DeleteModal.module.css";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
 import type { QnaDeleteModalProps } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function DeleteModal({
   open,
-  targetLabel = "질문",
+  targetLabel,
   targetTitle,
   onConfirm,
   onClose,
   loading = false,
 }: QnaDeleteModalProps) {
+  const t = useI18n("community.qna.student.deleteModal");
+  const resolvedTargetLabel = targetLabel ?? t("defaultTargetLabel");
+
   return (
     <ConfirmDialog
       open={open}
-      title={`${targetLabel} 삭제`}
+      title={t("title", { targetLabel: resolvedTargetLabel })}
       danger
       loading={loading}
-      confirmText="삭제"
-      cancelText="취소"
+      confirmText={t("confirmText")}
+      cancelText={t("cancelText")}
       onConfirm={onConfirm}
       onCancel={onClose}
       description={
@@ -30,14 +34,14 @@ export default function DeleteModal({
               <>
                 <b className={styles.emph}>&quot;{targetTitle}&quot;</b>
                 <br />
-                {targetLabel}을(를) 삭제할까요?
+                {t("question", { targetLabel: resolvedTargetLabel })}
               </>
             ) : (
-              <>{targetLabel}을(를) 삭제할까요?</>
+              <>{t("question", { targetLabel: resolvedTargetLabel })}</>
             )}
           </p>
 
-          <p className={styles.sub}>삭제 후에는 복구할 수 없습니다.</p>
+          <p className={styles.sub}>{t("warning")}</p>
         </div>
       }
     />

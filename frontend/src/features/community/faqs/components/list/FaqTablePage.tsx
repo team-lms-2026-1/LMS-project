@@ -9,9 +9,11 @@ import { Button } from "@/components/button";
 import { Badge } from "@/components/badge";
 import toast from "react-hot-toast";
 import DeleteModal from "../modal/DeleteModal.client";
+import { useI18n } from "@/i18n/useI18n";
 
 export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
   const router = useRouter();
+  const t = useI18n("community.faqs.admin.table");
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; title?: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -21,9 +23,7 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
   };
 
   const goEdit = (id: number) => {
-    // ✅ FaqEditPage.client.tsx가 연결된 라우트로 맞춰줘
-    const EDIT_PATH = `/admin/community/faqs/${id}/edit`;
-    router.push(EDIT_PATH);
+    router.push(`/admin/community/faqs/${id}/edit`);
   };
 
   const confirmDelete = async () => {
@@ -38,26 +38,28 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(text || `DELETE failed (${res.status})`);
+        throw new Error(text || `${t("toasts.deleteFailed")} (${res.status})`);
       }
 
       setDeleteTarget(null);
-      toast.success("FAQ가 삭제되었습니다.");
+      toast.success(t("toasts.deleteSuccess"));
       router.refresh();
       onReload?.();
     } catch (e: any) {
-      toast.error(e?.message ?? "삭제 실패");
+      toast.error(e?.message ?? t("toasts.deleteFailed"));
     } finally {
       setDeleting(false);
     }
   };
 
   const columns: Array<TableColumn<FaqListItemDto>> = [
-    { header: "번호", align: "center", render: (r) => r.faqId },
-    { header: "분류", align: "center", render: (r) => {
-
+    { header: t("headers.id"), align: "center", render: (r) => r.faqId },
+    {
+      header: t("headers.category"),
+      align: "center",
+      render: (r) => {
         const c = r.category;
-        if (!c) return "미분류"; // ✅ null/undefined 방어
+        if (!c) return t("uncategorized");
         return (
           <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
             {c.name}
@@ -66,7 +68,7 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
       },
     },
     {
-      header: "제목",
+      header: t("headers.title"),
       align: "center",
       render: (r) => (
         <button
@@ -81,10 +83,10 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
         </button>
       ),
     },
-    { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createdAt },
+    { header: t("headers.views"), align: "center", render: (r) => r.viewCount },
+    { header: t("headers.createdAt"), align: "center", render: (r) => r.createdAt },
     {
-      header: "관리",
+      header: t("headers.manage"),
       width: 180,
       align: "center",
       stopRowClick: true,
@@ -97,7 +99,7 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
               goEdit(r.faqId);
             }}
           >
-            수정
+            {t("buttons.edit")}
           </Button>
           <div className={styles.manageCell}>
             <Button
@@ -107,11 +109,10 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
                 setDeleteTarget({ id: r.faqId, title: r.title });
               }}
             >
-              삭제
+              {t("buttons.delete")}
             </Button>
           </div>
         </div>
-
       ),
     },
   ];
@@ -124,13 +125,13 @@ export function FaqsTable({ items, loading, onReload }: FaqsTableProps) {
         loading={loading}
         skeletonRowCount={10}
         rowKey={(r) => r.faqId}
-        emptyText="FAQ? ????."
+        emptyText={t("emptyText")}
         onRowClick={(r) => goDetail(r.faqId)}
       />
 
       <DeleteModal
         open={!!deleteTarget}
-        targetLabel="FAQ"
+        targetLabel={t("targetLabel")}
         targetTitle={deleteTarget?.title}
         loading={deleting}
         onClose={() => {

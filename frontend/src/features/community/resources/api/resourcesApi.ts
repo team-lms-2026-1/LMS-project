@@ -36,7 +36,7 @@ async function parseEnvelopeOrFallback<T>(
 
 async function assertOk(res: Response) {
   if (res.ok) return;
-  let msg = `요청 실패 (${res.status})`;
+  let msg = `Request failed (${res.status})`;
   try {
     const text = await res.text();
     if (text) msg = text;

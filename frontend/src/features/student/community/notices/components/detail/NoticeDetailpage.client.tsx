@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import styles from "./NoticeDetailPage.module.css";
 import type { NoticeListItemDto } from "../../api/types";
 import { fetchNoticeDetail } from "../../api/noticesApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
@@ -47,6 +48,7 @@ function formatDateTime(v: string) {
 
 export default function NoticeDetailpageClient() {
   const router = useRouter();
+  const t = useI18n("community.notices.student.detail");
   const params = useParams<{ noticeId?: string }>();
   const noticeId = useMemo(() => Number(params?.noticeId ?? 0), [params]);
 
@@ -58,7 +60,7 @@ export default function NoticeDetailpageClient() {
 
   useEffect(() => {
     if (!noticeId || Number.isNaN(noticeId)) {
-      setState({ loading: false, error: "잘못된 공지사항 ID입니다.", data: null });
+      setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
 
@@ -74,7 +76,7 @@ export default function NoticeDetailpageClient() {
         if (!alive) return;
         setState({
           loading: false,
-          error: e?.message ?? "공지사항을 불러오지 못했습니다.",
+          error: e?.message ?? t("errors.loadFailed"),
           data: null,
         });
       }
@@ -83,7 +85,7 @@ export default function NoticeDetailpageClient() {
     return () => {
       alive = false;
     };
-  }, [noticeId]);
+  }, [noticeId, t]);
 
   const data = state.data;
 
@@ -98,19 +100,19 @@ export default function NoticeDetailpageClient() {
       <div className={styles.card}>
         <div className={styles.breadcrumb}>
           <span className={styles.crumb} onClick={() => router.push("/student/community/notices")}>
-            공지사항
+            {t("title")}
           </span>
           <span className={styles.sep}>›</span>
-          <span className={styles.current}>상세페이지</span>
+          <span className={styles.current}>{t("breadcrumbCurrent")}</span>
         </div>
 
-        <h1 className={styles.title}>공지사항</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
         {state.loading && (
           <div className={styles.loadingBox}>
-            불러오는 중...
+            {t("loading")}
           </div>
         )}
 
@@ -118,22 +120,22 @@ export default function NoticeDetailpageClient() {
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {data.category?.name ?? t("uncategorized")}
               </span>
               <div className={styles.headTitle}>{data.title}</div>
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{t("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{t("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
             </div>
@@ -144,7 +146,7 @@ export default function NoticeDetailpageClient() {
 
             <div className={styles.attachBox}>
               <div className={styles.attachRow}>
-                <div className={styles.attachLabel}>첨부</div>
+                <div className={styles.attachLabel}>{t("labels.attachment")}</div>
 
                 <div className={styles.attachList}>
                   {Array.isArray(data.files) && data.files.length > 0 ? (
@@ -154,7 +156,9 @@ export default function NoticeDetailpageClient() {
                         const name =
                           typeof f === "string"
                             ? f
-                            : String(f?.fileName ?? f?.name ?? f?.originalName ?? `첨부파일 ${idx + 1}`);
+                            : String(
+                              f?.fileName ?? f?.name ?? f?.originalName ?? t("attachmentFallback", { index: idx + 1 })
+                            );
 
                         const url =
                           typeof f === "object"
@@ -175,7 +179,7 @@ export default function NoticeDetailpageClient() {
                       })}
                     </ul>
                   ) : (
-                    <div className={styles.attachEmpty}>첨부파일 없음</div>
+                    <div className={styles.attachEmpty}>{t("attachmentEmpty")}</div>
                   )}
                 </div>
               </div>
@@ -183,7 +187,7 @@ export default function NoticeDetailpageClient() {
 
             <div className={styles.footerRow}>
               <button className={styles.backBtn} onClick={() => router.push("/student/community/notices")}>
-                목록으로
+                {t("buttons.list")}
               </button>
             </div>
           </div>

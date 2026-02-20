@@ -8,6 +8,7 @@ import { fetchResourceDetail } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
 import DeleteModal from "../modal/DeleteModal.client";
+import { useI18n } from "@/i18n/useI18n";
 
 function normalizeDetail(payload: any): ResourceListItemDto {
   const raw = payload?.data ?? payload;
@@ -40,6 +41,7 @@ function formatDateTime(v: string) {
 
 export default function ResourceDetailpageClient() {
   const router = useRouter();
+  const t = useI18n("community.resources.admin.detail");
   const params = useParams<{ resourceId?: string }>();
   const resourceId = useMemo(() => Number(params?.resourceId ?? 0), [params]);
 
@@ -56,23 +58,23 @@ export default function ResourceDetailpageClient() {
   useEffect(() => {
     if (!resourceId || Number.isNaN(resourceId)) return;
 
-    const t = sp.get("toast");
-    if (!t) return;
+    const toastType = sp.get("toast");
+    if (!toastType) return;
 
     // ✅ StrictMode 중복 방지
-    if (toastOnceRef.current === t) return;
-    toastOnceRef.current = t;
+    if (toastOnceRef.current === toastType) return;
+    toastOnceRef.current = toastType;
 
-    if (t === "updated") toast.success("자료가 수정되었습니다.", { id: "resource-updated" });
-    if (t === "created") toast.success("자료가 등록되었습니다.", { id: "resource-created" });
-    if (t === "deleted") toast.success("자료가 삭제되었습니다.", { id: "resource-deleted" });
+    if (toastType === "updated") toast.success(t("toasts.updated"), { id: "resource-updated" });
+    if (toastType === "created") toast.success(t("toasts.created"), { id: "resource-created" });
+    if (toastType === "deleted") toast.success(t("toasts.deleted"), { id: "resource-deleted" });
 
     // ✅ toast query 제거
     const next = new URLSearchParams(sp.toString());
     next.delete("toast");
     const qs = next.toString();
     router.replace(qs ? `/admin/community/resources/${resourceId}?${qs}` : `/admin/community/resources/${resourceId}`);
-  }, [sp, router, resourceId]);
+  }, [sp, router, resourceId, t]);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -91,13 +93,13 @@ export default function ResourceDetailpageClient() {
       const res = await fetch(`/api/admin/community/resources/${resourceId}`, { method: "DELETE" });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(text || `삭제 실패 (${res.status})`);
+        throw new Error(text || `${t("errors.deleteFailed")} (${res.status})`);
       }
 
       setDeleteOpen(false);
       router.push("/admin/community/resources?toast=deleted");
     } catch (e: any) {
-      toast.error(e?.message ?? "삭제에 실패했습니다.");
+      toast.error(e?.message ?? t("errors.deleteFailed"));
     } finally {
       setDeleteLoading(false);
     }
@@ -106,7 +108,7 @@ export default function ResourceDetailpageClient() {
   // ✅ 상세 로드
   useEffect(() => {
     if (!resourceId || Number.isNaN(resourceId)) {
-      setLoad({ loading: false, error: "잘못된 자료실 ID입니다.", data: null });
+      setLoad({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
 
@@ -122,7 +124,7 @@ export default function ResourceDetailpageClient() {
         if (!alive) return;
         setLoad({
           loading: false,
-          error: e?.message ?? "자료실을 불러오지 못했습니다.",
+          error: e?.message ?? t("errors.loadFailed"),
           data: null,
         });
       }
@@ -131,7 +133,7 @@ export default function ResourceDetailpageClient() {
     return () => {
       alive = false;
     };
-  }, [resourceId]);
+  }, [resourceId, t]);
 
   const data = load.data;
 
@@ -147,43 +149,43 @@ export default function ResourceDetailpageClient() {
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
             <span className={styles.crumb} onClick={() => router.push("/admin/community/resources")}>
-              자료실
+              {t("title")}
             </span>
             <span className={styles.sep}>›</span>
-            <span className={styles.current}>상세페이지</span>
+            <span className={styles.current}>{t("breadcrumbCurrent")}</span>
           </div>
           <div className={styles.breadcrumbActions}>
             <Button variant="secondary" onClick={() => router.push("/admin/community/resources")}>
-              목록으로
+              {t("buttons.list")}
             </Button>
           </div>
         </div>
 
-        <h1 className={styles.title}>자료실</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {load.error && <div className={styles.errorMessage}>{load.error}</div>}
-        {load.loading && <div className={styles.loadingBox}>불러오는 중...</div>}
+        {load.loading && <div className={styles.loadingBox}>{t("loading")}</div>}
 
         {!load.loading && data && (
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {data.category?.name ?? t("uncategorized")}
               </span>
               <div className={styles.headTitle}>{data.title}</div>
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{t("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{t("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
             </div>
@@ -194,7 +196,7 @@ export default function ResourceDetailpageClient() {
 
             <div className={styles.attachBox}>
               <div className={styles.attachRow}>
-                <div className={styles.attachLabel}>첨부</div>
+                <div className={styles.attachLabel}>{t("labels.attachment")}</div>
 
                 <div className={styles.attachList}>
                   {Array.isArray(data.files) && data.files.length > 0 ? (
@@ -203,7 +205,9 @@ export default function ResourceDetailpageClient() {
                         const name =
                           typeof f === "string"
                             ? f
-                            : String(f?.fileName ?? f?.name ?? f?.originalName ?? `첨부파일 ${idx + 1}`);
+                            : String(
+                              f?.fileName ?? f?.name ?? f?.originalName ?? t("attachmentFallback", { index: idx + 1 })
+                            );
 
                         const url = typeof f === "object" ? f?.url ?? f?.downloadUrl ?? f?.path ?? "" : "";
 
@@ -221,7 +225,7 @@ export default function ResourceDetailpageClient() {
                       })}
                     </ul>
                   ) : (
-                    <div className={styles.attachEmpty}>첨부파일 없음</div>
+                    <div className={styles.attachEmpty}>{t("attachmentEmpty")}</div>
                   )}
                 </div>
               </div>
@@ -236,17 +240,17 @@ export default function ResourceDetailpageClient() {
           onClick={() => router.push(`/admin/community/resources/${resourceId}/edit`)}
           disabled={load.loading || !resourceId}
         >
-          수정
+          {t("buttons.edit")}
         </Button>
 
         <Button variant="danger" disabled={load.loading || !resourceId} onClick={openDelete}>
-          삭제
+          {t("buttons.delete")}
         </Button>
       </div>
 
       <DeleteModal
         open={deleteOpen}
-        targetLabel="자료"
+        targetLabel={t("targetLabel")}
         targetTitle={load.data?.title}
         loading={deleteLoading}
         onClose={closeDelete}

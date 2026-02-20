@@ -13,10 +13,12 @@ import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { fetchNoticeCategories } from "../../api/noticesApi";
 import type { Category } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function NoticePageClient() {
   const router = useRouter();
   const sp = useSearchParams();
+  const t = useI18n("community.notices.admin.list");
 
   const { state, actions } = useNoticesList();
 
@@ -31,22 +33,22 @@ export default function NoticePageClient() {
   const [catsLoading, setCatsLoading] = useState(false);
   const toastOnceRef = useRef<string | null>(null);
   useEffect(() => {
-    const t = sp.get("toast");
-    if (!t) return;
+    const toastType = sp.get("toast");
+    if (!toastType) return;
 
-    if (toastOnceRef.current === t) return;
-    toastOnceRef.current = t;
+    if (toastOnceRef.current === toastType) return;
+    toastOnceRef.current = toastType;
 
-    if (t === "created") toast.success("공지사항이 등록되었습니다.", { id: "notice-toast-created" });
-    else if (t === "updated") toast.success("공지사항이 수정되었습니다.", { id: "notice-toast-updated" });
-    else if (t === "deleted") toast.success("공지사항이 삭제되었습니다.", { id: "notice-toast-deleted" });
+    if (toastType === "created") toast.success(t("toasts.created"), { id: "notice-toast-created" });
+    else if (toastType === "updated") toast.success(t("toasts.updated"), { id: "notice-toast-updated" });
+    else if (toastType === "deleted") toast.success(t("toasts.deleted"), { id: "notice-toast-deleted" });
 
     const next = new URLSearchParams(sp.toString());
     next.delete("toast");
 
     const qs = next.toString();
     router.replace(qs ? `/admin/community/notices?${qs}` : "/admin/community/notices");
-  }, [sp, router]);
+  }, [sp, router, t]);
 
   useEffect(() => {
     let alive = true;
@@ -101,7 +103,7 @@ export default function NoticePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>공지사항</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchGroup}>
@@ -109,7 +111,7 @@ export default function NoticePageClient() {
               <Dropdown
                 value={categoryIdQs || ""}
                 options={categoryOptions}
-                placeholder="전체"
+                placeholder={t("categoryAll")}
                 loading={catsLoading}
                 disabled={catsLoading}
                 onChange={onChangeCategory}
@@ -121,7 +123,7 @@ export default function NoticePageClient() {
                 value={inputKeyword}
                 onChange={setInputKeyword}
                 onSearch={handleSearch}
-                placeholder="제목 검색"
+                placeholder={t("searchPlaceholder")}
               />
             </div>
           </div>
@@ -134,7 +136,7 @@ export default function NoticePageClient() {
         <div className={styles.footerRow}>
           <div className={styles.footerLeft}>
             <Button variant="secondary" onClick={goCategoryManage}>
-              카테고리 관리
+              {t("categoryManageButton")}
             </Button>
           </div>
 
@@ -149,7 +151,7 @@ export default function NoticePageClient() {
 
           <div className={styles.footerRight}>
             <Button variant="primary" onClick={goCreate}>
-              등록
+              {t("createButton")}
             </Button>
           </div>
         </div>

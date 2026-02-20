@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Category, CategoryListResponse, CategoryListQuery, CategoryScope, PageMeta } from "../api/types";
 import { categoriesApi } from "../api/categoriesApi";
+import { useI18n } from "@/i18n/useI18n";
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -34,6 +35,8 @@ function unwrapCategoryList(res: CategoryListResponse): { items: Category[]; met
 }
 
 export function useCategoryList(scope: CategoryScope) {
+  const t = useI18n("community.categories.hook");
+
   const [items, setItems] = useState<Category[]>([]);
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
@@ -75,13 +78,13 @@ export function useCategoryList(scope: CategoryScope) {
       });
     } catch (e: any) {
       console.error("[useCategoryList]", e);
-      setError(e?.message ?? "카테고리 목록 조회 실패");
+      setError(e?.message ?? t("listLoadFailed"));
       setItems([]);
       setMeta(defaultMeta);
     } finally {
       setLoading(false);
     }
-  }, [scope, query, page, size]);
+  }, [scope, query, page, size, t]);
 
   useEffect(() => {
     load();
