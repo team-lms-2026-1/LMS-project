@@ -351,6 +351,7 @@ export default function DignosisEditPageClient({ dignosisId }: DiagnosisEditPage
       setError(null);
       try {
         await updateDiagnosis(dignosisId, payload);
+        toast.success("진단지가 수정되었습니다.", { style: { zIndex: 9999 } });
       } catch (e: any) {
         const message = e?.message ?? "진단지 수정에 실패했습니다.";
         setError(message);
@@ -364,7 +365,7 @@ export default function DignosisEditPageClient({ dignosisId }: DiagnosisEditPage
 
   useEffect(() => {
     if (!error) return;
-    toast.error(error);
+    toast.error(error, { style: { zIndex: 9999 } });
   }, [error]);
 
   return (

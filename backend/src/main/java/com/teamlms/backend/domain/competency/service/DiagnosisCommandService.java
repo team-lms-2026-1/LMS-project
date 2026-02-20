@@ -85,11 +85,47 @@ public class DiagnosisCommandService {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SEMESTER_NOT_FOUND, semesterId));
 
-        // 학기별 진단 중복 검증
-        diagnosisRunRepository.findBySemesterSemesterId(semesterId)
-                .ifPresent(existing -> {
-                    throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
-                });
+        // 학기별 진단 중복 검증 (학과+학년 기준)
+        Integer normalizedGrade = (targetGrade != null && targetGrade > 0) ? targetGrade : null;
+        if (deptId == null) {
+            if (normalizedGrade != null) {
+                diagnosisRunRepository
+                        .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGrade(semesterId, normalizedGrade)
+                        .ifPresent(existing -> {
+                            throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                        });
+            } else {
+                diagnosisRunRepository
+                        .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGradeIsNull(semesterId)
+                        .ifPresent(existing -> {
+                            throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                        });
+                diagnosisRunRepository
+                        .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGrade(semesterId, 0)
+                        .ifPresent(existing -> {
+                            throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                        });
+            }
+        } else {
+            if (normalizedGrade != null) {
+                diagnosisRunRepository
+                        .findBySemesterSemesterIdAndDeptIdAndTargetGrade(semesterId, deptId, normalizedGrade)
+                        .ifPresent(existing -> {
+                            throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                        });
+            } else {
+                diagnosisRunRepository
+                        .findBySemesterSemesterIdAndDeptIdAndTargetGradeIsNull(semesterId, deptId)
+                        .ifPresent(existing -> {
+                            throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                        });
+                diagnosisRunRepository
+                        .findBySemesterSemesterIdAndDeptIdAndTargetGrade(semesterId, deptId, 0)
+                        .ifPresent(existing -> {
+                            throw new BusinessException(ErrorCode.DUPLICATE_DIAGNOSIS_FOR_SEMESTER);
+                        });
+            }
+        }
 
         // 날짜 유효성 검증
         validateDateRange(startedAt, endedAt);

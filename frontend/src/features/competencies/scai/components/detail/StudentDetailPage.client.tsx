@@ -26,7 +26,33 @@ import {
   YAxis,
 } from "recharts";
 
-const LINE_COLORS = ["#2563eb", "#16a34a", "#f97316", "#7c3aed", "#e11d48", "#0ea5e9"];
+const LINE_COLOR_CLASSES = [
+  styles.legendColorBlue,
+  styles.legendColorGreen,
+  styles.legendColorOrange,
+  styles.legendColorPurple,
+  styles.legendColorRed,
+  styles.legendColorSky,
+  styles.legendColorTeal,
+];
+const RADAR_COLOR_CLASSES = [styles.legendColorBlue, styles.legendColorOrange];
+const LINE_COLOR_VARS = [
+  "var(--series-blue)",
+  "var(--series-green)",
+  "var(--series-orange)",
+  "var(--series-purple)",
+  "var(--series-red)",
+  "var(--series-sky)",
+  "var(--series-teal)",
+];
+const RADAR_COLOR_VARS = ["var(--series-blue)", "var(--series-orange)"];
+const RADAR_CHART_MARGIN = { top: 8, right: 8, bottom: 24, left: 8 };
+const LINE_CHART_MARGIN = { top: 20, right: 20, left: 0, bottom: 10 };
+const RADAR_OUTER_RADIUS = "78%";
+const RADAR_LEGEND = {
+  myScore: "\uB0B4 \uC810\uC218",
+  deptAverage: "\uD559\uACFC \uD3C9\uADE0",
+};
 
 export default function StudentDetailPageClient() {
   const router = useRouter();
@@ -68,7 +94,7 @@ export default function StudentDetailPageClient() {
   const profile = data?.profile;
   const summary = data?.summary;
 
-  const radarData = useMemo(() => normalizeRadar(data?.radarChart ?? []), [data?.radarChart]);
+  const radarFallbackData = useMemo(() => normalizeRadar(data?.radarChart ?? []), [data?.radarChart]);
   const trendSeries = data?.trendChart?.series ?? [];
   const trendData = useMemo(
     () => normalizeTrend(data?.trendChart?.categories ?? [], trendSeries),
@@ -79,6 +105,32 @@ export default function StudentDetailPageClient() {
     () => normalizeMyStats(data?.myStatsTable ?? []),
     [data?.myStatsTable]
   );
+  const comparisonRows = useMemo(
+    () => normalizeMyStats(data?.comparisonTable ?? data?.myStatsTable ?? []),
+    [data?.comparisonTable, data?.myStatsTable]
+  );
+  const radarComparisonData = useMemo(
+    () =>
+      myStatsRows.map((row) => ({
+        name: row.name,
+        myScore: row.myScore ?? 0,
+        avgScore: row.avgScore ?? 0,
+      })),
+    [myStatsRows]
+  );
+  const computedMaxScore = useMemo(() => {
+    const values = myStatsRows
+      .map((row) => row.myMaxScore ?? row.myScore)
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    if (values.length === 0) {
+      const fallback = Number(summary?.maxScore);
+      return Number.isFinite(fallback) ? fallback : null;
+    }
+    return Math.max(...values);
+  }, [myStatsRows, summary?.maxScore]);
+  const hasRadarComparison = radarComparisonData.length > 0;
+  const radarData = hasRadarComparison ? radarComparisonData : radarFallbackData;
   if (loading) {
     return <div className={styles.page}>불러오는 중...</div>;
   }
@@ -122,7 +174,7 @@ export default function StudentDetailPageClient() {
             <div className={styles.summaryGrid}>
               <div className={styles.summaryBox}>
                 <div className={styles.summaryLabel}>내 최고 점수</div>
-                <div className={styles.summaryValue}>{formatScore(summary?.maxScore)}</div>
+                <div className={styles.summaryValue}>{formatScore(computedMaxScore)}</div>
               </div>
               <div className={styles.summaryBox}>
                 <div className={styles.summaryLabel}>최근 역량 평균</div>
@@ -146,11 +198,41 @@ export default function StudentDetailPageClient() {
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData} outerRadius="80%">
+                  <RadarChart data={radarData} outerRadius={RADAR_OUTER_RADIUS} margin={RADAR_CHART_MARGIN}>
                     <PolarGrid />
-                    <PolarAngleAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <PolarAngleAxis dataKey="name" tick={{ className: styles.radarTick }} />
                     <PolarRadiusAxis tick={false} axisLine={false} />
-                    <Radar dataKey="value" stroke="#2563eb" fill="#2563eb" fillOpacity={0.35} />
+                    {hasRadarComparison ? (
+                      <>
+                        <Radar
+                          name={RADAR_LEGEND.myScore}
+                          dataKey="myScore"
+                          stroke={RADAR_COLOR_VARS[0]}
+                          fill={RADAR_COLOR_VARS[0]}
+                          className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[0]} ${styles.radarFillStrong}`}
+                        />
+                        <Radar
+                          name={RADAR_LEGEND.deptAverage}
+                          dataKey="avgScore"
+                          stroke={RADAR_COLOR_VARS[1]}
+                          fill={RADAR_COLOR_VARS[1]}
+                          className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[1]} ${styles.radarFillSoft}`}
+                        />
+                        <Legend
+                          verticalAlign="bottom"
+                          height={12}
+                          content={renderRadarLegend}
+                        />
+                      </>
+                    ) : (
+                      <Radar
+                        name={RADAR_LEGEND.myScore}
+                        dataKey="value"
+                        stroke={RADAR_COLOR_VARS[0]}
+                        fill={RADAR_COLOR_VARS[0]}
+                        className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[0]} ${styles.radarFillStrong}`}
+                      />
+                    )}
                     <Tooltip formatter={(v) => formatScore(v)} />
                   </RadarChart>
                 </ResponsiveContainer>
@@ -167,19 +249,23 @@ export default function StudentDetailPageClient() {
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trendData} margin={{ top: 20, right: 20, left: 0, bottom: 10 }}>
-                    <CartesianGrid stroke="#eef2f6" strokeDasharray="3 3" />
-                    <XAxis dataKey="category" tick={{ fontSize: 12, fill: "#475467" }} />
-                    <YAxis tick={{ fontSize: 12, fill: "#475467" }} />
+                  <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
+                    <CartesianGrid className={styles.chartGrid} />
+                    <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
+                    <YAxis tick={{ className: styles.axisTick }} />
                     <Tooltip />
-                    <Legend />
+                    <Legend
+                      verticalAlign="bottom"
+                      align="center"
+                      content={renderLineLegend}
+                    />
                     {trendSeries.map((s, i) => (
                       <Line
                         key={s.name}
                         type="monotone"
                         dataKey={s.name}
-                        stroke={LINE_COLORS[i % LINE_COLORS.length]}
-                        strokeWidth={2}
+                        stroke={LINE_COLOR_VARS[i % LINE_COLOR_VARS.length]}
+                        className={`${styles.chartLine} ${LINE_COLOR_CLASSES[i % LINE_COLOR_CLASSES.length]}`}
                         dot={false}
                       />
                     ))}
@@ -226,7 +312,7 @@ export default function StudentDetailPageClient() {
               <h2 className={styles.panelTitle}>내 역량 비교</h2>
             </div>
             <div className={styles.tableWrap}>
-              {myStatsRows.length === 0 ? (
+              {comparisonRows.length === 0 ? (
                 <div className={styles.empty}>데이터가 없습니다.</div>
               ) : (
                 <table className={styles.statTable}>
@@ -239,7 +325,7 @@ export default function StudentDetailPageClient() {
                     </tr>
                   </thead>
                   <tbody>
-                    {myStatsRows.map((row) => (
+                    {comparisonRows.map((row) => (
                       <tr key={row.key}>
                         <td>{row.name}</td>
                         <td>{formatScore(row.myScore)}</td>
@@ -283,10 +369,87 @@ function normalizeMyStats(rows: StudentCompetencyStatRow[]) {
     myScore: pickNumber(row, ["myScore", "score", "value"]),
     myAvgScore: pickNumber(row, ["myAvgScore", "myAverage"]),
     myMaxScore: pickNumber(row, ["myMaxScore", "myMaximum"]),
-    avgScore: pickNumber(row, ["avgScore", "average", "avg"]),
-    maxScore: pickNumber(row, ["maxScore", "maximum", "max"]),
+    avgScore: pickNumber(row, ["avgScore", "average", "avg", "deptAvgScore", "deptAverage"]),
+    maxScore: pickNumber(row, ["maxScore", "maximum", "max", "deptMaxScore", "deptMaximum"]),
   }));
 }
+
+function renderCircleLegend(
+  props: any,
+  options: {
+    columns?: number;
+    showDash?: boolean;
+    variant?: "radar" | "line";
+    colorClasses?: string[];
+  } = {}
+) {
+  const payload = props?.payload ?? [];
+  if (!payload.length) return null;
+  const maxColumns = options.columns ?? payload.length;
+  const columnCount = Math.max(1, Math.min(maxColumns, payload.length));
+  const showDash = options.showDash ?? false;
+  const colorClasses = options.colorClasses ?? [];
+  const variantClass =
+    options.variant === "radar" ? styles.legendWrapRadar : styles.legendWrapLine;
+  const columnClass =
+    styles[`legendCols${columnCount}`] ?? styles.legendCols3 ?? "";
+  return (
+    <div className={`${styles.legendWrap} ${variantClass}`}>
+      <div className={`${styles.legendGrid} ${columnClass}`}>
+        {payload.map((entry: any, index: number) => {
+          const color = entry?.color ?? entry?.payload?.stroke ?? "#111827";
+          const label = entry?.value ?? entry?.payload?.name ?? "";
+          const colorKey = typeof color === "string" ? color.toLowerCase() : "";
+          const indexedClass = colorClasses.length
+            ? colorClasses[index % colorClasses.length]
+            : undefined;
+          const colorClass =
+            indexedClass ?? LEGEND_COLOR_CLASS[colorKey] ?? styles.legendColorDefault;
+          return (
+            <div
+              key={`${label || "legend"}-${index}`}
+              className={`${styles.legendItem} ${colorClass}`}
+            >
+              <span className={styles.legendIcon}>
+                {showDash ? <span className={styles.legendDash}>-</span> : null}
+                <span className={styles.legendDot} />
+              </span>
+              <span className={styles.legendLabel}>{label}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function renderLineLegend(props: any) {
+  return renderCircleLegend(props, {
+    columns: 3,
+    showDash: true,
+    variant: "line",
+    colorClasses: LINE_COLOR_CLASSES,
+  });
+}
+
+function renderRadarLegend(props: any) {
+  return renderCircleLegend(props, {
+    columns: 2,
+    variant: "radar",
+    colorClasses: RADAR_COLOR_CLASSES,
+  });
+}
+
+const LEGEND_COLOR_CLASS: Record<string, string> = {
+  "#2563eb": styles.legendColorBlue,
+  "#16a34a": styles.legendColorGreen,
+  "#f97316": styles.legendColorOrange,
+  "#7c3aed": styles.legendColorPurple,
+  "#e11d48": styles.legendColorRed,
+  "#0ea5e9": styles.legendColorSky,
+  "#10b981": styles.legendColorTeal,
+  "#facc15": styles.legendColorYellow,
+};
 
 function pickString(obj: any, keys: string[]) {
   for (const k of keys) {

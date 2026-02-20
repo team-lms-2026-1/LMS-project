@@ -64,4 +64,27 @@ public class AdminCompetencyController {
         competencySummaryService.recalculateAllSummaries(semesterId);
         return ApiResponse.ok(null);
     }
+
+    /**
+     * 0-4. 역량 종합 관리용 역량 통계 조회
+     */
+    @GetMapping("/api/v1/admin/competencies/statistics")
+    @PreAuthorize("hasAuthority('DIAGNOSIS_READ')")
+    public ApiResponse<CompetencyResultDashboardResponse> getCompetencyStatistics(
+            @RequestParam(required = false) Long diagnosisId,
+            @RequestParam(required = false, name = "dignosisId") Long dignosisId,
+            @RequestParam(required = false) Long semesterId,
+            @RequestParam(required = false) String semesterName,
+            @RequestParam(required = false) Long deptId,
+            @RequestParam(required = false) String deptName,
+            @RequestParam(required = false) String scope) {
+        Long resolvedDiagnosisId = diagnosisId != null ? diagnosisId : dignosisId;
+        return ApiResponse.ok(competencyQueryService.getCompetencyResultDashboard(
+                resolvedDiagnosisId,
+                semesterId,
+                semesterName,
+                deptId,
+                deptName,
+                scope));
+    }
 }

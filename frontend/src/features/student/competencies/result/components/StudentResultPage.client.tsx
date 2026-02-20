@@ -8,7 +8,6 @@ import type {
   StudentCompetencyStatRow,
   StudentCompetencyTrendSeries,
 } from "../api/types";
-import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import {
   CartesianGrid,
   Legend,
@@ -26,10 +25,11 @@ import {
 } from "recharts";
 
 const LINE_COLORS = ["#2563eb", "#16a34a", "#f97316", "#7c3aed", "#e11d48", "#0ea5e9"];
+const RADAR_LEGEND_LABEL = "내 점수";
 
 export default function StudentResultPageClient() {
-  const { state, actions } = useStudentResult();
-  const { data, loading, error, semesterId, semesterOptions, semesterLoading } = state;
+  const { state } = useStudentResult();
+  const { data, loading, error } = state;
 
   const profile = data?.profile;
   const summary = data?.summary;
@@ -46,6 +46,10 @@ export default function StudentResultPageClient() {
     () => normalizeMyStats(data?.myStatsTable ?? []),
     [data?.myStatsTable]
   );
+  const comparisonRows = useMemo(
+    () => normalizeMyStats(data?.comparisonTable ?? data?.myStatsTable ?? []),
+    [data?.comparisonTable, data?.myStatsTable]
+  );
 
   if (loading) {
     return <div className={styles.page}>불러오는 중...</div>;
@@ -54,32 +58,16 @@ export default function StudentResultPageClient() {
     return <div className={styles.page}>{error}</div>;
   }
 
-  const hasSelection = Boolean(semesterId);
-
   return (
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.topBar}>
           <h1 className={styles.title}>학생 역량 활동 조회</h1>
-          <div className={styles.topActions}>
-            <div className={styles.semesterSelect}>
-              <Dropdown
-                value={semesterId}
-                options={semesterOptions}
-                placeholder="학기 선택"
-                loading={semesterLoading}
-                onChange={actions.setSemesterId}
-              />
-            </div>
-          </div>
         </div>
 
-        {!hasSelection && <div className={styles.empty}>학기를 선택해 주세요.</div>}
-        {hasSelection && (!data || isEmpty) && (
-          <div className={styles.empty}>선택한 학기 결과가 없습니다.</div>
-        )}
+        {(!data || isEmpty) && <div className={styles.empty}>결과가 없습니다.</div>}
 
-        {hasSelection && data && !isEmpty && (
+        {data && !isEmpty && (
           <>
             <div className={styles.headerRow}>
               <div className={styles.sectionCard}>
@@ -132,8 +120,20 @@ export default function StudentResultPageClient() {
                         <PolarGrid />
                         <PolarAngleAxis dataKey="name" tick={{ fontSize: 11 }} />
                         <PolarRadiusAxis tick={false} axisLine={false} />
-                        <Radar dataKey="value" stroke="#2563eb" fill="#2563eb" fillOpacity={0.35} />
+                        <Radar
+                          name={RADAR_LEGEND_LABEL}
+                          dataKey="value"
+                          stroke="#2563eb"
+                          fill="#2563eb"
+                          fillOpacity={0.35}
+                        />
                         <Tooltip formatter={(v) => formatScore(v)} />
+                        <Legend
+                          verticalAlign="bottom"
+                          height={12}
+                          wrapperStyle={{ transform: "translateY(4px)" }}
+                          content={renderRadarLegend}
+                        />
                       </RadarChart>
                     </ResponsiveContainer>
                   )}
@@ -154,7 +154,12 @@ export default function StudentResultPageClient() {
                         <XAxis dataKey="category" tick={{ fontSize: 12, fill: "#475467" }} />
                         <YAxis tick={{ fontSize: 12, fill: "#475467" }} />
                         <Tooltip />
-                        <Legend />
+                        <Legend
+                          verticalAlign="bottom"
+                          align="center"
+                          wrapperStyle={{ paddingTop: 6 }}
+                          content={renderLineLegend}
+                        />
                         {trendSeries.map((s, i) => (
                           <Line
                             key={s.name}
@@ -173,7 +178,7 @@ export default function StudentResultPageClient() {
 
               <section className={styles.panel}>
                 <div className={styles.panelHeader}>
-                  <h2 className={styles.panelTitle}>역량 통계</h2>
+                  <h2 className={styles.panelTitle}>내 역량 통계</h2>
                 </div>
                 <div className={styles.tableWrap}>
                   {myStatsRows.length === 0 ? (
@@ -183,14 +188,46 @@ export default function StudentResultPageClient() {
                       <thead>
                         <tr>
                           <th>역량 이름</th>
-                          <th>나의 점수</th>
+                          <th>내 점수</th>
                           <th>평균</th>
-                          <th>최고 점수</th>
+                          <th>내 최고점수</th>
                         </tr>
                       </thead>
                       <tbody>
                         {myStatsRows.map((row) => (
                           <tr key={row.key}>
+                            <td>{row.name}</td>
+                            <td>{formatScore(row.myScore)}</td>
+                            <td>{formatScore(row.myAvgScore)}</td>
+                            <td>{formatScore(row.myMaxScore)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </section>
+
+              <section className={styles.panel}>
+                <div className={styles.panelHeader}>
+                  <h2 className={styles.panelTitle}>내 역량 비교</h2>
+                </div>
+                <div className={styles.tableWrap}>
+                  {comparisonRows.length === 0 ? (
+                    <div className={styles.empty}>통계 데이터가 없습니다.</div>
+                  ) : (
+                    <table className={styles.statTable}>
+                      <thead>
+                        <tr>
+                          <th>역량 이름</th>
+                          <th>내 점수</th>
+                          <th>학과 평균</th>
+                          <th>학과 최고점수</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comparisonRows.map((row) => (
+                          <tr key={`${row.key}-comparison`}>
                             <td>{row.name}</td>
                             <td>{formatScore(row.myScore)}</td>
                             <td>{formatScore(row.avgScore)}</td>
@@ -214,13 +251,16 @@ function isEmptyDashboard(data: {
   radarChart?: StudentCompetencyRadarItem[];
   trendChart?: { categories?: string[]; series?: StudentCompetencyTrendSeries[] };
   myStatsTable?: StudentCompetencyStatRow[];
+  comparisonTable?: StudentCompetencyStatRow[];
 }) {
   const radarEmpty = !data.radarChart || data.radarChart.length === 0;
   const trendEmpty =
     !data.trendChart ||
     (data.trendChart.categories?.length ?? 0) === 0 ||
     (data.trendChart.series?.length ?? 0) === 0;
-  const statsEmpty = !data.myStatsTable || data.myStatsTable.length === 0;
+  const statsEmpty =
+    (!data.myStatsTable || data.myStatsTable.length === 0) &&
+    (!data.comparisonTable || data.comparisonTable.length === 0);
   return radarEmpty && trendEmpty && statsEmpty;
 }
 
@@ -247,9 +287,83 @@ function normalizeMyStats(rows: StudentCompetencyStatRow[]) {
     key: `${pickString(row, ["name", "competencyName"]) || "row"}-${idx}`,
     name: pickString(row, ["name", "competencyName"]) || `역량 ${idx + 1}`,
     myScore: pickNumber(row, ["myScore", "score", "value"]),
-    avgScore: pickNumber(row, ["avgScore", "average", "avg"]),
-    maxScore: pickNumber(row, ["maxScore", "maximum", "max"]),
+    myAvgScore: pickNumber(row, ["myAvgScore", "myAverage"]),
+    myMaxScore: pickNumber(row, ["myMaxScore", "myMaximum"]),
+    avgScore: pickNumber(row, ["avgScore", "average", "avg", "deptAvgScore", "deptAverage"]),
+    maxScore: pickNumber(row, ["maxScore", "maximum", "max", "deptMaxScore", "deptMaximum"]),
   }));
+}
+
+function renderCircleLegend(
+  props: any,
+  options: { columns?: number; showDash?: boolean } = {}
+) {
+  const payload = props?.payload ?? [];
+  if (!payload.length) return null;
+  const maxColumns = options.columns ?? payload.length;
+  const columnCount = Math.max(1, Math.min(maxColumns, payload.length));
+  const showDash = options.showDash ?? false;
+  return (
+    <div style={{ width: "100%" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${columnCount}, max-content)`,
+          gap: "2px 6px",
+          justifyContent: "center",
+          justifyItems: "start",
+          alignItems: "center",
+          width: "fit-content",
+          margin: "0 auto",
+        }}
+      >
+        {payload.map((entry: any, index: number) => {
+          const color = entry?.color ?? entry?.payload?.stroke ?? "#111827";
+          const label = entry?.value ?? entry?.payload?.name ?? "";
+          return (
+            <div
+              key={`${label || "legend"}-${index}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "11px",
+                color,
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "3px",
+                }}
+              >
+                {showDash ? <span style={{ color, fontSize: "14px", lineHeight: 1 }}>-</span> : null}
+                <span
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    backgroundColor: color,
+                  }}
+                />
+              </span>
+              <span>{label}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function renderLineLegend(props: any) {
+  return renderCircleLegend(props, { columns: 3, showDash: true });
+}
+
+function renderRadarLegend(props: any) {
+  return renderCircleLegend(props, { columns: 2 });
 }
 
 function pickString(obj: any, keys: string[]) {
