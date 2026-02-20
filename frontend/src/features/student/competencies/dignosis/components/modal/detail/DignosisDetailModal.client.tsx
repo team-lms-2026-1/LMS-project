@@ -290,7 +290,7 @@ export function DignosisDetailModal({
                     ) : (
                       <div className={styles.scaleList}>
                         {SCALE_LABELS.map((label, idx) => {
-                          const optionValue = idx + 1;
+                          const optionValue = SCALE_LABELS.length - idx;
                           const checked = answer.scaleValue === optionValue;
                           return (
                             <label
