@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const BACKEND_URL = "http://localhost:8080";
+import { resolveBaseUrl } from "@/lib/bff";
 
-export const runtime = "nodejs";
+// Removed hardcoded BACKEND_URL
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
     try {
         const cookieStore = cookies();
         const token = cookieStore.get("access_token")?.value;
+        const backendUrl = resolveBaseUrl();
 
-        const res = await fetch(`${BACKEND_URL}/api/v1/accounts/me`, {
+        const res = await fetch(`${backendUrl}/api/v1/accounts/me`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

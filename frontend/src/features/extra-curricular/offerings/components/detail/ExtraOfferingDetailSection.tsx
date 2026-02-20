@@ -13,6 +13,8 @@ import type {
 import { updateExtraCurricularOfferingDetail } from "../../api/extraCurricularOfferingApi";
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
+import { useI18n } from "@/i18n/useI18n";
+import { stripSemesterSuffix } from "../../utils/semesterDisplayName";
 
 type Props = {
   offeringId?: number;
@@ -32,6 +34,9 @@ function pickDate(iso: string | null | undefined) {
 }
 
 export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.detail");
+  const tCommon = useI18n("curricular.common");
+
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -79,7 +84,7 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
     setExtraOfferingName(d.extraOfferingName ?? "");
 
     setSemesterId(d.semesterId ?? 0);
-    setSemesterDisplayName(d.semesterDisplayName ?? "");
+    setSemesterDisplayName(stripSemesterSuffix(d.semesterDisplayName ?? ""));
 
     setRewardPointDefault(d.rewardPointDefault ?? 0);
     setRecognizedHoursDefault(d.recognizedHoursDefault ?? 0);
@@ -106,25 +111,25 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
   }, [hostContactEmail]);
 
   const validate = (): string | null => {
-    if (!extraOfferingCode.trim()) return "운영코드를 입력하세요.";
-    if (!extraOfferingName.trim()) return "운영명을 입력하세요.";
-    if (semesterId <= 0) return "학기를 선택하세요.";
+    if (!extraOfferingCode.trim()) return t("messages.requiredOfferingCode");
+    if (!extraOfferingName.trim()) return t("messages.requiredOfferingName");
+    if (semesterId <= 0) return t("messages.requiredSemester");
 
-    if (rewardPointDefault < 0) return "포인트(기본)는 0 이상이어야 합니다.";
-    if (recognizedHoursDefault < 0) return "인정시간(기본)은 0 이상이어야 합니다.";
+    if (rewardPointDefault < 0) return t("messages.invalidRewardPoint");
+    if (recognizedHoursDefault < 0) return t("messages.invalidRecognizedHours");
 
-    if (!operationStartDate) return "운영 시작일을 선택하세요.";
-    if (!operationEndDate) return "운영 종료일을 선택하세요.";
-    if (operationStartDate > operationEndDate) return "시작일은 종료일보다 늦을 수 없습니다.";
+    if (!operationStartDate) return t("messages.requiredOperationStartDate");
+    if (!operationEndDate) return t("messages.requiredOperationEndDate");
+    if (operationStartDate > operationEndDate) return t("messages.invalidOperationPeriod");
 
-    if (!isValidEmail) return "담당자 이메일 형식이 올바르지 않습니다.";
+    if (!isValidEmail) return t("messages.invalidContactEmail");
     return null;
   };
 
   const handleEnterEdit = () => {
     setSubmitError(null);
     if (!editable) {
-      setSubmitError("DRAFT 상태에서만 수정할 수 있습니다.");
+      setSubmitError(t("messages.onlyDraft"));
       return;
     }
     setEditMode(true);
@@ -171,7 +176,7 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
       setEditMode(false);
       await onReload?.();
     } catch (e: any) {
-      setSubmitError(e?.error?.message ?? e?.message ?? "수정에 실패했습니다.");
+      setSubmitError(e?.error?.message ?? e?.message ?? t("messages.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -183,24 +188,24 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
 
       {/* 1) 비교과 마스터 */}
       <section className={styles.section}>
-        <Header title="비교과" />
+        <Header title={t("sections.program")} />
         <div className={styles.body}>
           <Row cols={3}>
-            <FieldView label="비교과코드" value={extraCurricularCode} />
-            <FieldView label="비교과명" value={extraCurricularName} />
-            <FieldView label="주관기관" value={hostOrgName} />
+            <FieldView label={t("fields.programCode")} value={extraCurricularCode} />
+            <FieldView label={t("fields.programName")} value={extraCurricularName} />
+            <FieldView label={t("fields.hostOrgName")} value={hostOrgName} />
           </Row>
         </div>
       </section>
 
       {/* 2) 운영 */}
       <section className={styles.section}>
-        <Header title="운영" />
+        <Header title={t("sections.operation")} />
         <div className={styles.body}>
           {/* ✅ 1줄(4칸): 운영코드/포인트/인정시간/등록인원 */}
           <Row cols={4}>
             {editMode ? (
-              <FieldEdit label="운영코드" disabled={formDisabled}>
+              <FieldEdit label={t("fields.offeringCode")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   value={extraOfferingCode}
@@ -209,11 +214,11 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="운영코드" value={extraOfferingCode} />
+              <FieldView label={t("fields.offeringCode")} value={extraOfferingCode} />
             )}
 
             {editMode ? (
-              <FieldEdit label="포인트" disabled={formDisabled}>
+              <FieldEdit label={t("fields.rewardPoint")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   type="number"
@@ -227,11 +232,11 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="포인트" value={rewardPointDefault} />
+              <FieldView label={t("fields.rewardPoint")} value={rewardPointDefault} />
             )}
 
             {editMode ? (
-              <FieldEdit label="인정시간" disabled={formDisabled}>
+              <FieldEdit label={t("fields.recognizedHours")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   type="number"
@@ -245,53 +250,53 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="인정시간" value={recognizedHoursDefault} />
+              <FieldView label={t("fields.recognizedHours")} value={recognizedHoursDefault} />
             )}
 
-            <FieldView label="등록인원" value={enrolledCount} readonly={editMode} />
+            <FieldView label={t("fields.enrolledCount")} value={enrolledCount} readonly={editMode} />
           </Row>
 
           {/* ✅ 2줄: 학기/운영시작일/운영종료일 */}
           <Row cols={3}>
             {editMode ? (
-              <FieldEditDropdown label="학기" disabled={formDisabled}>
+              <FieldEditDropdown label={t("fields.semester")} disabled={formDisabled}>
                 <SemesterFilterDropdown
                   value={semesterId > 0 ? String(semesterId) : ""}
                   onChange={(v) => setSemesterId(v ? Number(v) : 0)}
                 />
               </FieldEditDropdown>
             ) : (
-              <FieldView label="학기" value={semesterDisplayName} />
+              <FieldView label={t("fields.semester")} value={semesterDisplayName} />
             )}
 
             {editMode ? (
-              <FieldEditDropdown label="운영 시작일" disabled={formDisabled}>
+              <FieldEditDropdown label={t("fields.operationStartDate")} disabled={formDisabled}>
                 <DatePickerInput
                   value={operationStartDate}
                   onChange={(v) => {
                     setOperationStartDate(v);
                     if (operationEndDate && v > operationEndDate) setOperationEndDate("");
                   }}
-                  placeholder="시작일 선택"
+                  placeholder={t("fields.operationStartDatePlaceholder")}
                   disabled={formDisabled}
                 />
               </FieldEditDropdown>
             ) : (
-              <FieldView label="운영 시작일" value={operationStartDate} />
+              <FieldView label={t("fields.operationStartDate")} value={operationStartDate} />
             )}
 
             {editMode ? (
-              <FieldEditDropdown label="운영 종료일" disabled={formDisabled}>
+              <FieldEditDropdown label={t("fields.operationEndDate")} disabled={formDisabled}>
                 <DatePickerInput
                   value={operationEndDate}
                   onChange={setOperationEndDate}
-                  placeholder="종료일 선택"
+                  placeholder={t("fields.operationEndDatePlaceholder")}
                   min={operationStartDate || undefined}
                   disabled={formDisabled}
                 />
               </FieldEditDropdown>
             ) : (
-              <FieldView label="운영 종료일" value={operationEndDate} />
+              <FieldView label={t("fields.operationEndDate")} value={operationEndDate} />
             )}
           </Row>
         </div>
@@ -299,11 +304,11 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
 
       {/* 3) 담당자 */}
       <section className={styles.section}>
-        <Header title="담당자" />
+        <Header title={t("sections.contact")} />
         <div className={styles.body}>
           <Row cols={3}>
             {editMode ? (
-              <FieldEdit label="담당자명" disabled={formDisabled}>
+              <FieldEdit label={t("fields.contactName")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   value={hostContactName}
@@ -312,11 +317,11 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="담당자명" value={hostContactName || "-"} />
+              <FieldView label={t("fields.contactName")} value={hostContactName || "-"} />
             )}
 
             {editMode ? (
-              <FieldEdit label="담당자 전화" disabled={formDisabled}>
+              <FieldEdit label={t("fields.contactPhone")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   value={hostContactPhone}
@@ -325,11 +330,11 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="담당자 전화" value={hostContactPhone || "-"} />
+              <FieldView label={t("fields.contactPhone")} value={hostContactPhone || "-"} />
             )}
 
             {editMode ? (
-              <FieldEdit label="담당자 이메일" disabled={formDisabled}>
+              <FieldEdit label={t("fields.contactEmail")} disabled={formDisabled}>
                 <input
                   className={styles.control}
                   value={hostContactEmail}
@@ -338,7 +343,7 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
                 />
               </FieldEdit>
             ) : (
-              <FieldView label="담당자 이메일" value={hostContactEmail || "-"} />
+              <FieldView label={t("fields.contactEmail")} value={hostContactEmail || "-"} />
             )}
           </Row>
         </div>
@@ -346,10 +351,10 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
 
       {/* 4) 비고 + ✅ 버튼은 여기로 */}
       <section className={styles.section}>
-        <Header title="비고" />
+        <Header title={t("sections.remark")} />
         <div className={styles.body}>
           <div className={styles.descRow}>
-            <div className={styles.descLabel}>설명</div>
+            <div className={styles.descLabel}>{t("fields.description")}</div>
             <div className={`${styles.descBox} ${styles.readonlyBox}`}>{description || "-"}</div>
           </div>
         </div>
@@ -358,15 +363,15 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
           {editMode ? (
             <>
               <Button variant="primary" onClick={handleSave} loading={saving} disabled={formDisabled}>
-                저장
+                {tCommon("saveButton")}
               </Button>
               <Button variant="secondary" onClick={handleCancelEdit} disabled={saving}>
-                취소
+                {tCommon("cancelButton")}
               </Button>
             </>
           ) : (
             <Button variant="primary" onClick={handleEnterEdit} disabled={!editable}>
-              수정
+              {tCommon("editButton")}
             </Button>
           )}
         </div>

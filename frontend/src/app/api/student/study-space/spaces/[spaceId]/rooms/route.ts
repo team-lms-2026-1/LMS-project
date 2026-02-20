@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 type Ctx = { params: { spaceId: string } };
 
 const TAG = (spaceId: string) => `student:spaces:rooms:${spaceId}`;
+const STUDENT_RENTALS_TAG = "student:rentals";
+const ADMIN_RENTALS_TAG = "admin:spaces-rentals";
 
 function backendPath(ctx: Ctx) {
   return `/api/v1/student/spaces/${encodeURIComponent(ctx.params.spaceId)}/rooms`;
@@ -39,6 +41,8 @@ export async function POST(req: Request, ctx: Ctx) {
   // ✅ 성공하면 rooms 목록 캐시 무효화
   if (res.status >= 200 && res.status < 300) {
     revalidateTag(TAG(spaceId));
+    revalidateTag(STUDENT_RENTALS_TAG);
+    revalidateTag(ADMIN_RENTALS_TAG);
   }
 
   return res;

@@ -2,6 +2,13 @@
   width: 100%;
 }
 
+.manageCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
 .rowClickCell {
   width: 100%;
   display: block;

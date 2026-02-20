@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./StudentExtraCurricularOfferingPage.module.css"
@@ -24,11 +24,15 @@ export default function StudentExtraCurricularOfferingPageClient() {
 
   useEffect(() => {
     actions.goPage(page);
-  }, [page]);
+  }, [page, actions]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
-  }, [size, state.size]);
+  }, [size, state.size, actions]);
+
+  useEffect(() => {
+    actions.setSemesterId(semesterId ? Number(semesterId) : null);
+  }, [semesterId, actions]);
 
   const handleSearch = useCallback(() => {
     setPage(1);
@@ -39,7 +43,7 @@ export default function StudentExtraCurricularOfferingPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>비교과신청</h1>
+        <h1 className={styles.title}>비교과 신청</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>

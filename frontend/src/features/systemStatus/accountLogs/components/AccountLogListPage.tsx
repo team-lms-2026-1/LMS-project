@@ -11,6 +11,7 @@ import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
 import { StatusPill } from "@/components/status/StatusPill";
 import type { TableColumn } from "@/components/table/types";
+import { useI18n } from "@/i18n/useI18n";
 
 const PAGE_SIZE = 10;
 
@@ -25,6 +26,8 @@ type UiAccountRow = {
 
 export default function AccountLogListPage() {
   const router = useRouter();
+  const t = useI18n("systemStatus.accountLogs.list");
+  const tCommon = useI18n("systemStatus.accountLogs.common");
 
   // ✅ 입력창에 바인딩되는 값
   const [keywordInput, setKeywordInput] = useState("");
@@ -55,10 +58,10 @@ export default function AccountLogListPage() {
       })
       .catch((err) => {
         console.error(err);
-        toast.error("로그 목록을 불러오지 못했습니다.");
+        toast.error(t("messages.loadFailed"));
       })
       .finally(() => setLoading(false));
-  }, [page, keyword]);
+  }, [page, keyword, t]);
 
   /* ======================
      서버 데이터 → UI용 변환 (클라 필터 제거)
@@ -76,29 +79,44 @@ export default function AccountLogListPage() {
     }));
   }, [items]);
 
+  const getAccountTypeLabel = (accountType: string) => {
+    switch (accountType) {
+      case "ADMIN":
+        return tCommon("accountType.ADMIN");
+      case "PROFESSOR":
+        return tCommon("accountType.PROFESSOR");
+      case "STUDENT":
+        return tCommon("accountType.STUDENT");
+      case "STAFF":
+        return tCommon("accountType.STAFF");
+      default:
+        return accountType;
+    }
+  };
+
   const columns = useMemo<TableColumn<UiAccountRow>[]>(
     () => [
       {
-        header: "로그인 ID",
+        header: t("table.loginId"),
         field: "loginId",
         // Link 제거: 전체 행 클릭으로 대체
       },
-      { header: "계정 유형", field: "role" },
-      { header: "이름", field: "name" },
-      { header: "최근접속 일시", field: "lastAccessAt" },
+      { header: t("table.accountType"), field: "role", render: (row) => getAccountTypeLabel(row.role) },
+      { header: t("table.name"), field: "name" },
+      { header: t("table.lastAccessAt"), field: "lastAccessAt" },
       {
-        header: "로그인 유무",
+        header: t("table.loginState"),
         field: "status",
         align: "right",
         render: (row) =>
           row.status === "LOGGED_IN" ? (
-            <StatusPill status="ACTIVE" label="로그인중" />
+            <StatusPill status="ACTIVE" label={tCommon("loginStatus.LOGGED_IN")} />
           ) : (
-            <StatusPill status="INACTIVE" label="비로그인" />
+            <StatusPill status="INACTIVE" label={tCommon("loginStatus.LOGGED_OUT")} />
           ),
       },
     ],
-    []
+    [t, tCommon]
   );
 
   /* ======================
@@ -117,28 +135,28 @@ export default function AccountLogListPage() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>계정 로그 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <SearchBar
             value={keywordInput}
             onChange={setKeywordInput}
             onSearch={onSearch}
-            placeholder="아이디 및 이름으로 검색"
+            placeholder={t("searchPlaceholder")}
           />
         </div>
 
         {/* KPI */}
         <div className={styles.kpiGrid}>
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>총 계정 수</div>
+            <div className={styles.kpiLabel}>{t("kpi.totalAccounts")}</div>
             <div className={styles.kpiValue}>
               {summary.totalAccounts.toLocaleString()}
             </div>
           </div>
 
           <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>현 로그인중</div>
+            <div className={styles.kpiLabel}>{t("kpi.onlineAccounts")}</div>
             <div className={styles.kpiValue}>
               {summary.onlineAccounts.toLocaleString()}
             </div>
@@ -152,7 +170,7 @@ export default function AccountLogListPage() {
             rowKey={(r) => r.accountId}
             loading={loading}
             skeletonRowCount={10}
-            emptyText="검색 결과가 없습니다."
+            emptyText={t("emptyText")}
             onRowClick={(row) => router.push(`/admin/system-status/account-logs/${row.accountId}`)}
           />
         </div>

@@ -211,6 +211,12 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
 
+  // Profile Image State
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isImageDeleting, setIsImageDeleting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [depts, setDepts] = useState<Array<{ deptId: number; deptName: string }>>([]);
   const [majorsByDept, setMajorsByDept] = useState<Array<{ majorId: number; majorName: string }>>([]);
   const [majorsAll, setMajorsAll] = useState<Array<{ majorId: number; majorName: string }>>([]);
@@ -259,6 +265,16 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
         const detail = await accountsApi.detail(accountId);
         const next = makeFormFromDetail(detail);
         setForm(next);
+
+        // 학생 이미지 조회
+        if (next.accountType === "STUDENT") {
+          try {
+            const imgUrl = await accountsApi.getStudentProfileImage(accountId);
+            setImagePreview(imgUrl);
+          } catch (e) {
+            console.warn("Failed to fetch profile image", e);
+          }
+        }
 
         if (next.accountType === "STUDENT" && next.deptId) {
           const majorsDept = await accountsApi.listMajorsByDept(next.deptId).catch(() => []);
@@ -327,19 +343,19 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
   const onChange =
     (key: keyof FormState) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      const t = e.target as HTMLInputElement;
+      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const t = e.target as HTMLInputElement;
 
-      if (t.type === "checkbox") {
-        const checked = (t as HTMLInputElement).checked;
-        setForm((prev) => ({ ...prev, [key]: checked } as FormState));
-        return;
-      }
+        if (t.type === "checkbox") {
+          const checked = (t as HTMLInputElement).checked;
+          setForm((prev) => ({ ...prev, [key]: checked } as FormState));
+          return;
+        }
 
-      const raw = (e.target as HTMLInputElement).value;
-      const value = numericKeys.has(key) ? Number(raw) : raw;
-      setForm((prev) => ({ ...prev, [key]: value } as FormState));
-    };
+        const raw = (e.target as HTMLInputElement).value;
+        const value = numericKeys.has(key) ? Number(raw) : raw;
+        setForm((prev) => ({ ...prev, [key]: value } as FormState));
+      };
 
   const onDeptChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const nextDeptId = Number(e.target.value);
@@ -357,6 +373,43 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
     }
     const majorsDept = await accountsApi.listMajorsByDept(nextDeptId).catch(() => []);
     setMajorsByDept(majorsDept.map((m: any) => ({ majorId: m.majorId, majorName: m.majorName })));
+  };
+
+  const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // 업로드 직후 바로 반영 (계정 저장과는 별개로 이미지 API 호출 권장)
+    if (accountId) {
+      accountsApi.updateStudentProfileImage(accountId, file).catch((err) => {
+        console.error("Image PATCH failed", err);
+        alert("이미지 수정 중 오류가 발생했습니다.");
+      });
+    }
+  };
+
+  const onImageDelete = async () => {
+    if (!accountId) return;
+    if (!confirm("프로필 이미지를 삭제하시겠습니까?")) return;
+
+    setIsImageDeleting(true);
+    try {
+      await accountsApi.deleteStudentProfileImage(accountId);
+      setImagePreview(null);
+      setImageFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (e) {
+      alert("이미지 삭제 실패");
+    } finally {
+      setIsImageDeleting(false);
+    }
   };
 
   const canSave = useMemo(() => {
@@ -432,12 +485,12 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
       // ✅ profile 대신 studentProfile로 전송 (백엔드 DTO 차이 흡수)
       const body: any = {
         status: form.status,
-          ...buildBaseProfile(),
-          gradeLevel: Number(form.gradeLevel),
-          academicStatus: form.academicStatus,
-          deptId: form.deptId,
-          majors,
-        
+        ...buildBaseProfile(),
+        gradeLevel: Number(form.gradeLevel),
+        academicStatus: form.academicStatus,
+        deptId: form.deptId,
+        majors,
+
         ...buildPasswordPart(),
       };
 
@@ -664,6 +717,51 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
                   onChange={onChange("memo")}
                   placeholder="관리자 메모"
                 />
+              </div>
+            )}
+
+            {form.accountType === "STUDENT" && (
+              <div className={styles.imageSection}>
+                <label className={styles.label}>프로필 이미지</label>
+                <div className={styles.imageWrapper}>
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Profile Preview" className={styles.profileImage} />
+                  ) : (
+                    <div className={styles.placeholderIcon}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.imageActions}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    ref={fileInputRef}
+                    onChange={onImageChange}
+                  />
+                  <button
+                    type="button"
+                    className={styles.uploadBtn}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={loading || saving}
+                  >
+                    변경
+                  </button>
+                  {imagePreview && (
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      onClick={onImageDelete}
+                      disabled={loading || saving || isImageDeleting}
+                    >
+                      삭제
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </section>

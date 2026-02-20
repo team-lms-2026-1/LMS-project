@@ -1,0 +1,35 @@
+.manageCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.numberCell {
+  font-variant-numeric: tabular-nums;
+}
+
+.titleCell {
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.targetCell {
+  white-space: nowrap;
+}
+
+.periodCell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dateCell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.statusCell {
+  white-space: nowrap;
+}

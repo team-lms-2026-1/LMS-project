@@ -6,6 +6,7 @@ import { Button } from "@/components/button";
 import styles from "./ExtraCurricularEditModal.module.css";
 import { useExtraCurricularEdit } from "../../hooks/useExtraCurricularMaster";
 import { patchExtraCurricular } from "../../api/extraCurricularMasterApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -20,6 +21,9 @@ export function ExtraCurricularEditModal({
   onClose,
   onUpdated
 }: Props) {
+  const t = useI18n("extraCurricular.modal.programEdit");
+  const tStatus = useI18n("extraCurricular.status.active");
+  const tCommon = useI18n("extraCurricular.common");
   const { state } = useExtraCurricularEdit(extraCurricularId, open);
   const { data, loading, error } = state;
 
@@ -49,7 +53,7 @@ export function ExtraCurricularEditModal({
 
       onClose();
     } catch (e: any) {
-      setSubmitError(e?.message ?? "비교과 수정에 실패했습니다.");
+      setSubmitError(e?.message ?? t("submitFailed"));
     } finally {
       setSaving(false);
     }
@@ -88,13 +92,13 @@ export function ExtraCurricularEditModal({
   return (
     <Modal
       open={open}
-      title="비교과 수정"
+      title={t("title")}
       onClose={handleClose}
       size="md"
       headerRight={
         <label className={styles.headerToggle} aria-disabled={disabled}>
           <span className={styles.headerToggleLabel}>
-            {isActive ? "활성" : "비활성"}
+            {isActive ? tStatus("ACTIVE") : tStatus("INACTIVE")}
           </span>
 
           <input
@@ -103,7 +107,7 @@ export function ExtraCurricularEditModal({
             checked={isActive}
             disabled={disabled}
             onChange={(e) => setIsActive(e.target.checked)}
-            aria-label="활성 여부"
+            aria-label={t("activeAriaLabel")}
           />
 
           <span className={styles.headerToggleTrack} aria-hidden="true">
@@ -119,10 +123,10 @@ export function ExtraCurricularEditModal({
             loading={saving}
             disabled={disabled || saving}
           >
-            저장
+            {tCommon("saveButton")}
           </Button>
           <Button variant="secondary" onClick={handleClose} disabled={saving}>
-            닫기
+            {tCommon("closeButton")}
           </Button>
         </>
       }
@@ -133,7 +137,7 @@ export function ExtraCurricularEditModal({
       <div className={styles.form}>
         {/* ✅ 비교과 코드 (수정 불가) */}
         <label className={styles.field}>
-          <div className={styles.label}>비교과 코드</div>
+          <div className={styles.label}>{t("fields.programCode")}</div>
           <input
             className={styles.control}
             value={data?.extraCurricularCode ?? ""}
@@ -143,7 +147,7 @@ export function ExtraCurricularEditModal({
 
         {/* ✅ 비교과명 */}
         <label className={styles.field}>
-          <div className={styles.label}>비교과명</div>
+          <div className={styles.label}>{t("fields.programName")}</div>
           <input
             className={styles.control}
             value={extraCurricularName}
@@ -154,7 +158,7 @@ export function ExtraCurricularEditModal({
 
         {/* ✅ 주관기관명 */}
         <label className={styles.field}>
-          <div className={styles.label}>주관기관명</div>
+          <div className={styles.label}>{t("fields.hostOrgName")}</div>
           <input
             className={styles.control}
             value={hostOrgName}
@@ -165,7 +169,7 @@ export function ExtraCurricularEditModal({
 
         {/* ✅ 설명 */}
         <label className={styles.field}>
-          <div className={styles.label}>설명</div>
+          <div className={styles.label}>{t("fields.description")}</div>
           <textarea
             className={styles.control}
             value={description}

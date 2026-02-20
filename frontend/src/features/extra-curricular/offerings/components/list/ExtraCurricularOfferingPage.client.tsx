@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./ExtraCurricularOfferingPage.module.css"
@@ -11,12 +11,13 @@ import { useRouter } from "next/navigation";
 import { useExtraCurricularOfferingList } from "../../hooks/useExtraCurricularOfferingList";
 import { ExtraCurricularOfferingTable } from "./ExtraCurricularOfferingTable";
 import { ExtraCurricularOfferingCreateModal } from "./components/ExtraCurricularOfferingCreateModal";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function ExtraCurricularOfferingPageClient() {
   const router = useRouter();
   const { state, actions } = useExtraCurricularOfferingList();
+  const t = useI18n("extraCurricular.adminOfferings");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
 
   const handleCreated = async () => {
     await actions.reload();
@@ -52,7 +53,7 @@ export default function ExtraCurricularOfferingPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>비교과운영 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <SemesterFilterDropdown />
@@ -61,7 +62,7 @@ export default function ExtraCurricularOfferingPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="비교과운영명/코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
@@ -82,7 +83,7 @@ export default function ExtraCurricularOfferingPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            운영등록
+            {t("registerButton")}
           </OutButton>
         </div>
         <ExtraCurricularOfferingCreateModal

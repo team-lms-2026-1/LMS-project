@@ -3,9 +3,11 @@
 import { Table, type TableColumn } from "@/components/table";
 import { StatusPill } from "@/components/status";
 import styles from "./ExtraCompletionDetailTable.module.css";
+import { useLocale } from "@/hooks/useLocale";
+import { useI18n } from "@/i18n/useI18n";
+import { localizeSemesterOptionLabel } from "@/features/dropdowns/semesters/localeLabel";
 
 import type { ExtraCompletionListItemDto } from "../../../../api/types";
-import { extraCompletionStatusLabel } from "../../../../utils/extraStatusLabel";
 
 type Props = {
   items: ExtraCompletionListItemDto[];
@@ -13,19 +15,27 @@ type Props = {
 };
 
 export function ExtraCompletionDetailTable({ items, loading }: Props) {
+  const { locale } = useLocale();
+  const t = useI18n("extraCurricular.adminGrades.detail.table");
+  const tCompletion = useI18n("curricular.status.completion");
+
   const columns: Array<TableColumn<ExtraCompletionListItemDto>> = [
-    { header: "학기", align: "center", render: (r) => r.semesterName },
-    { header: "비교과코드", align: "center", render: (r) => r.extraOfferingCode },
-    { header: "비교과명", align: "center", render: (r) => r.extraOfferingName },
-    { header: "포인트", align: "center", render: (r) => r.rewardPointDefault },
-    { header: "인정시간", align: "center", render: (r) => r.recognizedHoursDefault },
     {
-      header: "수료여부",
+      header: t("semester"),
+      align: "center",
+      render: (r) => localizeSemesterOptionLabel(r.semesterName, locale),
+    },
+    { header: t("extraOfferingCode"), align: "center", render: (r) => r.extraOfferingCode },
+    { header: t("extraOfferingName"), align: "center", render: (r) => r.extraOfferingName },
+    { header: t("points"), align: "center", render: (r) => r.rewardPointDefault },
+    { header: t("recognizedHours"), align: "center", render: (r) => r.recognizedHoursDefault },
+    {
+      header: t("completionStatus"),
       align: "center",
       render: (r) => (
         <StatusPill
           status={r.completionStatus as any}
-          label={extraCompletionStatusLabel(r.completionStatus)}
+          label={tCompletion(r.completionStatus as any)}
         />
       ),
     },
@@ -38,7 +48,7 @@ export function ExtraCompletionDetailTable({ items, loading }: Props) {
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.applicationId}
-      emptyText="비교과 성적 정보가 없습니다."
+      emptyText={t("emptyText")}
     />
   );
 }

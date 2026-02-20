@@ -1,5 +1,5 @@
 export type LoginRequest = {
-  id: string;
+  loginId: string;
   password: string;
 };
 

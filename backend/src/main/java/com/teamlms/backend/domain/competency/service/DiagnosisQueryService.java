@@ -9,11 +9,15 @@ import com.teamlms.backend.domain.account.entity.StudentProfile;
 import com.teamlms.backend.domain.account.repository.StudentProfileRepository;
 import com.teamlms.backend.domain.competency.api.dto.*;
 import com.teamlms.backend.domain.competency.entitiy.*;
+import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 import com.teamlms.backend.domain.competency.repository.*;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
+import com.teamlms.backend.domain.competency.enums.DiagnosisTargetStatus;
+import com.teamlms.backend.domain.semester.entity.Semester;
+import java.util.Comparator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +42,8 @@ public class DiagnosisQueryService {
         private final DeptRepository deptRepository;
         private final SemesterCompetencyCohortStatRepository statRepository;
         private final SemesterStudentCompetencySummaryRepository summaryRepository;
+        private final CompetencySummaryService competencySummaryService;
+        private final CompetencyRepository competencyRepository;
 
         /**
          * 진단지 목록 조회
@@ -135,7 +141,8 @@ public class DiagnosisQueryService {
          * 내 진단 목록 조회 (학생용)
          */
         public List<MyDiagnosisListItem> listMyDiagnoses(Long accountId) {
-                List<DiagnosisTarget> targets = diagnosisTargetRepository.findByStudentAccountId(accountId);
+                List<DiagnosisTarget> targets = diagnosisTargetRepository
+                                .findByStudentAccountIdAndRunStatus(accountId, DiagnosisRunStatus.OPEN);
 
                 return targets.stream()
                                 .map(target -> MyDiagnosisListItem.builder()
@@ -145,6 +152,7 @@ public class DiagnosisQueryService {
                                                 .startedAt(target.getRun().getStartAt())
                                                 .endedAt(target.getRun().getEndAt())
                                                 .status(target.getStatus().name())
+                                                .diagnosisStatus(target.getRun().getStatus().name())
                                                 .build())
                                 .collect(Collectors.toList());
         }
@@ -159,7 +167,7 @@ public class DiagnosisQueryService {
                                 .orElseThrow(() -> new BusinessException(ErrorCode.DIAGNOSIS_NOT_FOUND, diagnosisId));
 
                 // 2. 이미 제출했는지 확인
-                if (target.getStatus() == com.teamlms.backend.domain.competency.enums.DiagnosisTargetStatus.SUBMITTED) {
+                if (target.getStatus() == DiagnosisTargetStatus.SUBMITTED) {
                         // RE-TAKE 정책이 따로 없다면 차단
                         // throw new BusinessException(ErrorCode.ALREADY_SUBMITTED_DIAGNOSIS);
                 }
@@ -170,6 +178,7 @@ public class DiagnosisQueryService {
         /**
          * 진단 리포트 조회
          */
+        @Transactional
         public DiagnosisReportResponse getDiagnosisReport(Long runId) {
                 DiagnosisRun run = diagnosisRunRepository.findById(runId)
                                 .orElseThrow(() -> new BusinessException(ErrorCode.DIAGNOSIS_NOT_FOUND, runId));
@@ -177,13 +186,17 @@ public class DiagnosisQueryService {
                 Long semesterId = run.getSemester().getSemesterId();
 
                 // 1. 역량 통계 데이터 조회 (현재 학기)
+                long targetCount = diagnosisTargetRepository.countByRunRunId(runId);
+                long responseCount = diagnosisSubmissionRepository.countByRunRunId(runId);
                 List<SemesterCompetencyCohortStat> currentStats = statRepository.findBySemesterSemesterId(semesterId);
+
+                if (currentStats.isEmpty() && responseCount > 0) {
+                        competencySummaryService.calculateCohortStatistics(semesterId);
+                        currentStats = statRepository.findBySemesterSemesterId(semesterId);
+                }
 
                 if (currentStats.isEmpty()) {
                         // 대략적인 대상자수만이라도 반환
-                        long targetCount = diagnosisTargetRepository.countByRunRunId(runId);
-                        long responseCount = diagnosisSubmissionRepository.countByRunRunId(runId);
-
                         return DiagnosisReportResponse.builder()
                                         .summary(DiagnosisReportSummary.builder()
                                                         .targetCount((int) targetCount)
@@ -224,13 +237,54 @@ public class DiagnosisQueryService {
                                 .collect(Collectors.toList());
 
                 // 4. 트렌드 차트 (간소화: 6개 역량의 현재 학기 평균을 시리즈로)
-                // 실제 트렌드는 과거 데이터가 필요하나, 우선 현재 학기 기준으로 구조만 잡음
-                List<String> categories = List.of(run.getSemester().getDisplayName()); // x축 (학기명)
-                List<CompetencyTrendSeries> series = currentStats.stream()
-                                .map(s -> CompetencyTrendSeries.builder()
-                                                .name(s.getCompetency().getName())
-                                                .data(List.of(s.getMean()))
-                                                .build())
+                // 4. 트렌드 차트 (학과 평균 추이 - CLOSED 상태 진단 기준)
+                List<Competency> allCompetencies = competencyRepository.findAll();
+                List<DiagnosisRun> closedRuns = diagnosisRunRepository
+                                .findByStatus(DiagnosisRunStatus.CLOSED);
+
+                // 현재 진단과 동일한 학과(또는 전체)인 실행만 필터링 + 학기별 중복 제거
+                List<Semester> trendSemesters = closedRuns.stream()
+                                .filter(r -> r.getDeptId() == null || r.getDeptId().equals(run.getDeptId()))
+                                .map(DiagnosisRun::getSemester)
+                                .distinct()
+                                .sorted(Comparator.comparing(
+                                                Semester::getSemesterId))
+                                .collect(Collectors.toList());
+
+                // 현재 학기가 목록에 없다면(아직 OPEN 등) 추가 고려? -> 기획상 '종료된' 학기 기준이므로 현재 진행중인건 제외될 수 있음.
+                // 하지만 리포트 조회 시점에는 보통 결과가 나온 뒤라 CLOSED일 가능성 높음.
+                // 만약 현재 진단이 CLOSED가 아니더라도 리포트에는 과거 추이 + 현재 결과가 보고 싶을 수 있음.
+                // 요청사항: "지금까지 진행한 학과별 학기 평균 점수"
+                // -> closedRuns에 현재 run이 포함되어 있다면 ok. 포함 안되어 있다면(OPEN 상태 등) 현재
+                // 통계(currentStats)를 마지막에 추가?
+                // 우선은 'CLOSED' 상태인 과거~현재 학기들을 보여주는 것으로 구현.
+
+                List<String> categories = trendSemesters.stream()
+                                .map(Semester::getDisplayName)
+                                .collect(Collectors.toList());
+
+                if (categories.isEmpty()) {
+                        categories = List.of("-");
+                }
+
+                List<CompetencyTrendSeries> series = allCompetencies.stream()
+                                .map(comp -> {
+                                        List<BigDecimal> data = new java.util.ArrayList<>();
+                                        for (Semester sem : trendSemesters) {
+                                                Double avgScore = summaryRepository.getDepartmentAverageScore(
+                                                                sem.getSemesterId(),
+                                                                comp.getCompetencyId(),
+                                                                run.getDeptId());
+                                                data.add(avgScore != null
+                                                                ? BigDecimal.valueOf(avgScore).setScale(2,
+                                                                                java.math.RoundingMode.HALF_UP)
+                                                                : BigDecimal.ZERO);
+                                        }
+                                        return CompetencyTrendSeries.builder()
+                                                        .name(comp.getName())
+                                                        .data(data)
+                                                        .build();
+                                })
                                 .collect(Collectors.toList());
 
                 // 5. 통계 테이블
@@ -338,6 +392,17 @@ public class DiagnosisQueryService {
                                 .text(question.getContent())
                                 .order(question.getSortOrder())
                                 .weights(weights)
+                                .shortAnswerKey(question.getShortAnswerKey())
+                                .label1(question.getLabel1())
+                                .label2(question.getLabel2())
+                                .label3(question.getLabel3())
+                                .label4(question.getLabel4())
+                                .label5(question.getLabel5())
+                                .score1(question.getScore1())
+                                .score2(question.getScore2())
+                                .score3(question.getScore3())
+                                .score4(question.getScore4())
+                                .score5(question.getScore5())
                                 .build();
         }
 }

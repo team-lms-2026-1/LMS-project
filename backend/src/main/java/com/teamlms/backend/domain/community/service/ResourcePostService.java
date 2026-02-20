@@ -118,7 +118,6 @@ public class ResourcePostService {
         if (request.getDeleteFileIds() != null && !request.getDeleteFileIds().isEmpty()) {
             List<ResourceAttachment> attachmentsToDelete = attachmentRepository.findAllById(request.getDeleteFileIds());
 
-            // ★ S3 파일 삭제 로직 추가
             for (ResourceAttachment att : attachmentsToDelete) {
                 String s3Key = extractKeyFromUrl(att.getStorageKey());
                 s3Service.delete(s3Key);
@@ -141,7 +140,6 @@ public class ResourcePostService {
         ResourcePost post = postRepository.findById(resourceId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        // ★ [수정됨] 게시글 삭제 시 S3 파일들도 같이 삭제
         for (ResourceAttachment att : post.getAttachments()) {
             String s3Key = extractKeyFromUrl(att.getStorageKey());
             s3Service.delete(s3Key);

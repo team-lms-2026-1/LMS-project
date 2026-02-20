@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { PaginationSimple, useListQuery } from "@/components/pagination";
-import { spacesApi } from "../../api/SpacesApi";
+import { spacesApi } from "../../api/spacesApi";
 import type { PageMeta, SpaceListItemDto } from "../../api/types";
 import { SpacesTable } from "./SpacesTable";
 import styles from "./SpacesPage.module.css";
@@ -16,7 +16,7 @@ export default function SpacesPageClient() {
   const sp = useSearchParams();
   const toastOnceRef = useRef<string | null>(null);
 
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 8 });
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
   const [rows, setRows] = useState<SpaceListItemDto[]>([]);
   const [meta, setMeta] = useState<PageMeta | null>(null);
@@ -80,7 +80,7 @@ export default function SpacesPageClient() {
     <div className={styles.page}>
       <div className={styles.headerRow}>
         <div>
-          <div className={styles.breadcrumb}>🏠 &gt; 학습공간 대여 관리</div>
+          <div className={styles.breadcrumb}>홈 &gt; 학습공간 대여 관리</div>
           <h1 className={styles.title}>학습공간 대여 관리</h1>
         </div>
       </div>
@@ -91,15 +91,17 @@ export default function SpacesPageClient() {
 
       <div className={styles.bottomRow}>
         <div className={styles.paginationWrap}>
-            <PaginationSimple page={page} totalPages={totalPages} onChange={(p) => setPage(p)} />
+          <PaginationSimple page={page} totalPages={totalPages} onChange={(p) => setPage(p)} />
         </div>
 
         <div className={styles.createWrap}>
-            <Button className={styles.createBtn} variant="primary" onClick={onClickCreate}>
+          <Button className={styles.createBtn} variant="primary" onClick={onClickCreate}>
             등록
-            </Button>
+          </Button>
         </div>
-        </div>
+      </div>
     </div>
   );
 }
+
+

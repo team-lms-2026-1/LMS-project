@@ -86,6 +86,8 @@ export default function AccountCreateModal({
   const [majorDeptLoading, setMajorDeptLoading] = useState(false);
   const [majorAllLoading, setMajorAllLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const idPrefix = PREFIX_MAP[tab];
   const fullLoginId = useMemo(() => {
@@ -98,12 +100,12 @@ export default function AccountCreateModal({
 
   const onChange =
     (key: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      const t = e.target as HTMLInputElement;
-      const value =
-        t.type === "checkbox" ? t.checked : t.type === "number" ? Number(t.value) : t.value;
-      setForm((prev) => ({ ...prev, [key]: value }));
-    };
+      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const t = e.target as HTMLInputElement;
+        const value =
+          t.type === "checkbox" ? t.checked : t.type === "number" ? Number(t.value) : t.value;
+        setForm((prev) => ({ ...prev, [key]: value }));
+      };
 
   const onChangePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((p) => ({ ...p, phone: formatPhone(e.target.value) }));
@@ -138,6 +140,8 @@ export default function AccountCreateModal({
       memo: "",
     });
     setMajorsByDept([]);
+    setImageFile(null);
+    setImagePreview(null);
   }, [open]);
 
   // ✅ 학과 목록 로드
@@ -220,6 +224,19 @@ export default function AccountCreateModal({
     return true;
   }, [saving, fullLoginId, form, emailOk, phoneOk, tab]);
 
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const onRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
   const onSubmit = async () => {
     if (!canSubmit) return;
 
@@ -254,6 +271,22 @@ export default function AccountCreateModal({
         };
 
         await accountsApi.create(payload);
+
+        if (imageFile) {
+          try {
+            // ✅ 백엔드 keyword 검색이 loginId를 지원하지 않으므로, 최근 생성된 목록에서 직접 찾음
+            const listRes = await accountsApi.list({ accountType: "STUDENT", size: 50 });
+            const found = listRes.items.find((it) => it.loginId === fullLoginId);
+
+            if (found?.accountId) {
+              await accountsApi.uploadStudentProfileImage(found.accountId, imageFile);
+            }
+          } catch (e) {
+            console.error("Image upload failed:", e);
+            alert("계정은 생성되었으나 프로필 이미지 업로드에 실패했습니다.");
+          }
+        }
+
         await onCreated();
         return;
       }
@@ -430,6 +463,41 @@ export default function AccountCreateModal({
 
           {/* 우 */}
           <section className={styles.col}>
+            {tab === "STUDENT" && (
+              <div className={styles.imageSection}>
+                <label className={styles.label}>프로필 이미지</label>
+                <div className={styles.imageWrapper}>
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className={styles.profileImage} />
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className={styles.placeholderIcon}
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <div className={styles.imageActions}>
+                  <label className={styles.uploadBtn}>
+                    {imagePreview ? "변경" : "이미지 선택"}
+                    <input type="file" accept="image/*" hidden onChange={onFileChange} disabled={saving} />
+                  </label>
+                  {imagePreview && (
+                    <button type="button" className={styles.deleteBtn} onClick={onRemoveImage} disabled={saving}>
+                      삭제
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {(tab === "STUDENT" || tab === "PROFESSOR") && (
               <div className={styles.field}>
                 <label className={styles.label}>소속 학과</label>

@@ -1,7 +1,5 @@
 package com.teamlms.backend.domain.curricular.api.dto;
 
-
-
 import com.teamlms.backend.domain.curricular.enums.DayOfWeekType;
 
 import jakarta.validation.constraints.Max;
@@ -9,37 +7,35 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
 
-@Getter
-public class CurricularOfferingCreateRequest {
-    
+public record CurricularOfferingCreateRequest(
     @NotBlank
     @Size(max = 50)
-    private String offeringCode;
+    String offeringCode,
 
     @NotNull
-    private Long curricularId;
+    Long curricularId,
 
     @NotNull
-    private Long semesterId;
+    Long semesterId,
 
     @NotNull
-    private DayOfWeekType dayOfWeek;
+    DayOfWeekType dayOfWeek,
 
     @NotNull
     @Min(1)
     @Max(6)
-    private Integer period;
+    Integer period,
 
     @NotNull
     @Min(1)
-    private Integer capacity;
+    Integer capacity,
 
     @NotBlank
     @Size(max = 255)
-    private String location;
+    String location,
 
     @NotNull
-    private Long professorAccountId;
+    Long professorAccountId
+) {
 }

@@ -23,4 +23,7 @@ public class MajorCreateRequest {
 
     @NotBlank
     private String description;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("isActive")
+    private boolean isActive;
 }

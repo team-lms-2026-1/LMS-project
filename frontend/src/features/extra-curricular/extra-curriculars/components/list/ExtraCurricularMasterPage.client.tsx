@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./ExtraCurricularMasterPage.module.css"
@@ -9,9 +9,11 @@ import { useExtraCurricularMasterList } from "../../hooks/useExtraCurricularMast
 import { ExtraCurricularMasterTable } from "./ExtraCurricularMasterTable";
 import { ExtraCurricularCreateModal } from "../modal/ExtraCurricularCreateModal";
 import { ExtraCurricularEditModal } from "../modal/ExtraCurricularEditModal";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function ExtraCurricularMasterPageClient() {
   const { state, actions } = useExtraCurricularMasterList();
+  const t = useI18n("extraCurricular.adminPrograms");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
@@ -42,7 +44,7 @@ export default function ExtraCurricularMasterPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>비교과 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>
@@ -50,7 +52,7 @@ export default function ExtraCurricularMasterPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="코드/비교과명 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
@@ -70,7 +72,7 @@ export default function ExtraCurricularMasterPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            교과운영 등록
+            {t("registerButton")}
           </OutButton>
         </div>
         <ExtraCurricularCreateModal
@@ -80,11 +82,11 @@ export default function ExtraCurricularMasterPageClient() {
         />
         <ExtraCurricularEditModal
           open={Boolean(editId)}
-          extraCurricularId = {editId ?? undefined}
+          extraCurricularId={editId ?? undefined}
           onClose={() => setEditId(null)}
-          onUpdated={ async () => {
+          onUpdated={async () => {
             await actions.reload();
-            setEditId(null)
+            setEditId(null);
           }}
         />
       </div>

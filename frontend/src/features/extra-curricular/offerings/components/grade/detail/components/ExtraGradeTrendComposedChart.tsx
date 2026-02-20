@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useMemo } from "react";
 import {
   ComposedChart,
   Line,
@@ -13,26 +14,41 @@ import {
 
 import type { ExtraGradeTrendItemDto } from "../../../../api/types";
 import styles from "./ExtraGradeTrendComposedChart.module.css";
+import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
+import { localizeSemesterOptionLabel } from "@/features/dropdowns/semesters/localeLabel";
 
 type Props = {
   items: ExtraGradeTrendItemDto[];
 };
 
 export function ExtraGradeTrendComposedChart({ items }: Props) {
+  const t = useI18n("extraCurricular.adminGrades.detail.trend");
+  const { locale } = useLocale();
+
+  const chartData = useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        semesterLabel: localizeSemesterOptionLabel(item.semesterName, locale),
+      })),
+    [items, locale]
+  );
+
   if (!items.length) {
-    return <div className={styles.empty}>차트 데이터가 없습니다.</div>;
+    return <div className={styles.empty}>{t("empty")}</div>;
   }
 
   return (
     <div className={styles.chartWrap}>
       <ResponsiveContainer width="100%" height={340}>
         <ComposedChart
-          data={items}
+          data={chartData}
           margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
         >
           <CartesianGrid stroke="#eef2f6" strokeDasharray="3 3" />
 
-          <XAxis dataKey="semesterName" tick={{ fontSize: 13, fill: "#475467" }} />
+          <XAxis dataKey="semesterLabel" tick={{ fontSize: 13, fill: "#475467" }} />
 
           <YAxis
             yAxisId="points"
@@ -73,15 +89,17 @@ export function ExtraGradeTrendComposedChart({ items }: Props) {
 }
 
 function CustomTooltip({ active, payload }: any) {
+  const t = useI18n("extraCurricular.adminGrades.detail.trend.tooltip");
+
   if (!active || !payload?.length) return null;
 
   const data = payload[0].payload;
 
   return (
     <div className={styles.tooltip}>
-      <div className={styles.tooltipTitle}>{data.semesterName}</div>
-      <div className={styles.tooltipRow}>이수 포인트: {data.semesterEarnedPoints}점</div>
-      <div className={styles.tooltipRow}>이수 시간: {data.semesterEarnedHours}시간</div>
+      <div className={styles.tooltipTitle}>{data.semesterLabel ?? data.semesterName}</div>
+      <div className={styles.tooltipRow}>{t("earnedPoints", { value: data.semesterEarnedPoints })}</div>
+      <div className={styles.tooltipRow}>{t("earnedHours", { value: data.semesterEarnedHours })}</div>
     </div>
   );
 }

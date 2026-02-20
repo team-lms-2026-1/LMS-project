@@ -56,14 +56,14 @@
   `JPQL + DTO 생성자 방식`으로 조회한다.
 - 필요한 컬럼만 명시적으로 select 하고, 조인은 쿼리에서 명확히 수행한다.
 - Spring Data Projection(interface)은 사용하지 않는다.
-- QueryDSL은 필요 시 별도 논의 후 도입한다.
+- QueryDSL은 필요 시 별도 논의 후 도입한다..
 
 ---
 
 ## 6. API 설계 규칙
 - 생성 / 수정 / 삭제 / 상태 변경 API는 관리자 전용으로 분리한다.
 - 프론트엔드는 역할에 따라 컬럼 표시 및 버튼 노출을 제어한다.
-- 서버는 항상 권한 검증으로 최종 방어를 수행한다.
+- 서버는 항상 권한 검증으로 최종 방어를 수행한다. 
 
 ---
 
@@ -111,3 +111,5 @@ ADMIN
   'Admin!2345'
 
 
+## swagger
+http://localhost:8080/swagger-ui/index.html

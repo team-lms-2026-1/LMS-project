@@ -1,0 +1,104 @@
+﻿export type ApiResponse<T, M = null> = {
+  data: T;
+  meta: M;
+};
+
+export type PageMeta = {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  sort: string[];
+};
+
+export type CompletionStatus = "IN_PROGRESS" | "PASSED" | "FAILED" | string;
+export type DayOfWeekType =
+  | "MONDAY"
+  | "TUESDAY"
+  | "WEDNESDAY"
+  | "THURSDAY"
+  | "FRIDAY"
+  | "SATURDAY"
+  | "SUNDAY"
+  | string;
+export type EnrollmentStatus = "ENROLLED" | "CANCELED" | string;
+export type OfferingStatus =
+  | "DRAFT"
+  | "OPEN"
+  | "ENROLLMENT_CLOSED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELED"
+  | string;
+export type CompetencyCode = "C1" | "C2" | "C3" | "C4" | "C5" | "C6" | string;
+export type Grade = "A" | "B" | "C" | "D" | "E" | "F" | string;
+
+export type CurricularOfferingListItemDto = {
+  offeringId: number;
+  offeringCode: string;
+  curricularName: string;
+  capacity: number;
+  professorName: string;
+  semesterName: string;
+  location: string;
+  credit: number;
+  status: OfferingStatus;
+};
+
+export type CurricularOfferingDetailDto = {
+  offeringId: number;
+  offeringCode: string;
+
+  curricularId: number;
+  curricularName: string;
+  credits: number;
+  description: string;
+
+  deptId: number;
+  deptName: string;
+
+  semesterId: number;
+  semesterName: string;
+
+  professorAccountId: number;
+  professorName: string;
+  email: string;
+  phone: string;
+
+  dayOfWeek: DayOfWeekType;
+  period: number;
+
+  capacity: number;
+  enrolledCount: number;
+
+  location: string;
+  status: OfferingStatus;
+};
+
+export type CurricularOfferingCompetencyDto = {
+  competencyId: number;
+  code: CompetencyCode;
+  name: string;
+  description: string;
+  weight: number | null;
+};
+
+export type CurricularOfferingStudentListItemDto = {
+  enrollmentId: number;
+  studentAccountId: number;
+  studentName: string;
+  studentNo: string;
+  gradeLevel: number;
+  deptName: string;
+  rawScore: number | null;
+  grade: Grade;
+  enrollmentStatus: EnrollmentStatus;
+  completionStatus: CompletionStatus;
+};
+
+export type CurricularOfferingListResponse = ApiResponse<CurricularOfferingListItemDto[], PageMeta>;
+export type CurricularDetailFormResponse = ApiResponse<CurricularOfferingDetailDto, null>;
+export type CurricularOfferingCompetencyResponse = ApiResponse<CurricularOfferingCompetencyDto[], null>;
+export type CurricularOfferingStudentResponse = ApiResponse<CurricularOfferingStudentListItemDto[], PageMeta>;

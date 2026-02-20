@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./CurricularGradePage.module.css"
@@ -11,10 +11,12 @@ import { useRouter } from "next/navigation";
 import { useCurricularGradeList } from "../../hooks/useCurricularGradeList";
 import { CurricularGradeTable } from "./CurricularGradeTable";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function CurricularGradePageClient() {
   const router = useRouter();
   const { state, actions } = useCurricularGradeList();
+  const t = useI18n("curricular.adminGrades");
 
   // pagination + search
 
@@ -46,7 +48,7 @@ export default function CurricularGradePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>교과성적 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <DeptFilterDropdown />
@@ -55,7 +57,7 @@ export default function CurricularGradePageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="학번/이름 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>

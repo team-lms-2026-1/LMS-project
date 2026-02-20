@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./FaqDetailPage.module.css";
 import type { FaqListItemDto } from "../../api/types";
-import { fetchFaqDetail } from "../../api/FaqsApi";
+import { fetchFaqDetail } from "../../api/faqsApi";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }

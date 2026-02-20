@@ -13,14 +13,17 @@ import {
 
 import { StudentGradeTrendItemDto } from "@/features/curricular-offering/api/types";
 import styles from "./GradeTrendComposedChart.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: StudentGradeTrendItemDto[];
 };
 
 export function GradeTrendComposedChart({ items }: Props) {
+  const t = useI18n("curricular.adminGrades.detail.trend");
+
   if (!items.length) {
-    return <div className={styles.empty}>차트 데이터가 없습니다.</div>;
+    return <div className={styles.empty}>{t("empty")}</div>;
   }
 
   return (
@@ -82,6 +85,8 @@ export function GradeTrendComposedChart({ items }: Props) {
 
 /* ===== Tooltip ===== */
 function CustomTooltip({ active, payload }: any) {
+  const t = useI18n("curricular.adminGrades.detail.trend.tooltip");
+
   if (!active || !payload?.length) return null;
 
   const data = payload[0].payload;
@@ -90,10 +95,10 @@ function CustomTooltip({ active, payload }: any) {
     <div className={styles.tooltip}>
       <div className={styles.tooltipTitle}>{data.semesterName}</div>
       <div className={styles.tooltipRow}>
-        GPA: {data.semesterGpa.toFixed(2)}
+        {t("gpa", { value: data.semesterGpa.toFixed(2) })}
       </div>
       <div className={styles.tooltipRow}>
-        이수학점: {data.semesterEarnedCredits}학점
+        {t("earnedCredits", { value: data.semesterEarnedCredits })}
       </div>
     </div>
   );

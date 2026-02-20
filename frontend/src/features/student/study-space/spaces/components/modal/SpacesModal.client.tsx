@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SpacesModal.module.css";
 import { Button } from "@/components/button";
-import { roomsApi } from "../../api/SpacesApi";
+import { roomsApi } from "../../api/spacesApi";
 import type { RoomDto } from "../../api/types";
+import toast from "react-hot-toast";
+import ReserveConfirmModal from "./ReserveConfirmModal.client";
 
 type Props = {
   open: boolean;
@@ -85,6 +87,13 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
   const [rooms, setRooms] = useState<RoomDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [submittingRoomId, setSubmittingRoomId] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<{
+    room: RoomDto;
+    rentalDate: string;
+    startTime: string;
+    endTime: string;
+  } | null>(null);
 
   // ✅ roomId -> selected date / start / end
   const [selectedDate, setSelectedDate] = useState<Record<number, string>>({});
@@ -195,19 +204,33 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
       return alert("운영시간 범위 내에서만 예약할 수 있습니다.");
     }
 
-    if (!confirm("예약을 신청할까요?")) return;
+    setConfirmTarget({ room, rentalDate, startTime, endTime });
+    setConfirmOpen(true);
+  };
+
+  const closeConfirm = () => {
+    if (submittingRoomId) return;
+    setConfirmOpen(false);
+    setConfirmTarget(null);
+  };
+
+  const confirmReserve = async () => {
+    if (!confirmTarget) return;
+    const { room, rentalDate, startTime, endTime } = confirmTarget;
 
     try {
-      setSubmittingRoomId(roomId);
+      setSubmittingRoomId(room.roomId);
 
-      await roomsApi.reserve(spaceId,{
-        roomId,
+      await roomsApi.reserve(spaceId, {
+        roomId: room.roomId,
         rentalDate,
         startTime,
         endTime,
       });
 
-      alert("예약 신청이 완료되었습니다.");
+      toast.success("신청되었습니다.");
+      setConfirmOpen(false);
+      setConfirmTarget(null);
       onClose();
     } catch (e: any) {
       console.error("[ReserveModal create]", e);
@@ -230,7 +253,8 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
   if (!open) return null;
 
   return (
-    <div className={styles.overlay} onMouseDown={onClose}>
+    <>
+      <div className={styles.overlay} onMouseDown={onClose}>
       <div
         className={styles.modal}
         role="dialog"
@@ -349,6 +373,18 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+
+      <ReserveConfirmModal
+        open={confirmOpen}
+        roomName={confirmTarget?.room.roomName}
+        rentalDate={confirmTarget?.rentalDate}
+        startTime={confirmTarget?.startTime}
+        endTime={confirmTarget?.endTime}
+        loading={submittingRoomId != null}
+        onClose={closeConfirm}
+        onConfirm={confirmReserve}
+      />
+    </>
   );
 }

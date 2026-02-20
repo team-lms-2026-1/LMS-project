@@ -34,13 +34,13 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
 
-  // ✅ 테이블(자식)에서 편집중 여부/토스트를 호출하기 위한 ref
+  // child table의 편집 상태/토스트를 제어하기 위한 ref
   const tableRef = useRef<CategoryTablePageHandle | null>(null);
 
   useEffect(() => {
     actions.goPage(page);
     if (state.size !== size) actions.setSize(size);
-  }, [page, size]);
+  }, [page, size, actions, state.size]);
 
   const handleSearch = useCallback(() => {
     setPage(1);
@@ -51,7 +51,7 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
   const title = `${SCOPE_LABEL[scope]} 관리`;
 
   const onConfirm = useCallback(() => {
-    // ✅ 편집중이면: 이동 막고 토스트
+    // 편집 중이면 이동하지 않고 토스트만 표시
     if (tableRef.current?.isDirty()) {
       tableRef.current.showLeaveToast();
       return;
@@ -69,7 +69,7 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.homeIcon}>⌂</span>
+        <span className={styles.homeIcon}>홈</span>
         <span className={styles.sep}>&gt;</span>
         <strong>{title}</strong>
       </div>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 
 import styles from "./StudentCurricularCurrentEnrollmentPage.module.css";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
@@ -26,7 +25,6 @@ export default function StudentCurricularCurrentEnrollmentPageClient() {
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size, actions]);
-
 
   // row 클릭 -> 운영 상세로 이동
   const handleRowClick = useCallback(

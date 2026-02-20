@@ -31,6 +31,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final com.teamlms.backend.domain.account.repository.StudentProfileRepository studentProfileRepository;
     private final com.teamlms.backend.domain.account.repository.ProfessorProfileRepository professorProfileRepository;
+    private final com.teamlms.backend.domain.account.repository.AdminProfileRepository adminProfileRepository;
     private final com.teamlms.backend.domain.dept.repository.DeptRepository deptRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -51,9 +52,7 @@ public class AccountService {
         }
     }
 
-    /**
-     * 로그인 인증 (계정 조회 -> 상태 검증 -> 비밀번호 검증)
-     */
+    // 로그인 인증
     public Account authenticate(String loginId, String rawPassword) {
         Account account = getByLoginIdOrThrow(loginId);
         validateActive(account);
@@ -65,26 +64,29 @@ public class AccountService {
     public Page<AdminAccountListItem> adminList(
             String keyword,
             AccountType accountType,
-            Pageable pageable
-    ) {
-        return accountRepository.searchAccounts(keyword, accountType, pageable);
+            Long deptId,
+            Pageable pageable) {
+        return accountRepository.searchAccounts(keyword, accountType, deptId, pageable);
     }
 
     // 상세 조회
     public Object adminDetail(Long accountId) {
         AccountType type = accountRepository.findAccountTypeById(accountId);
-        if (type == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
+        if (type == null)
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
 
         return switch (type) {
             case STUDENT -> buildStudentDetail(accountId);
             case PROFESSOR -> {
                 AdminProfessorDetailResponse dto = accountRepository.findProfessorDetail(accountId);
-                if (dto == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
+                if (dto == null)
+                    throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
                 yield dto;
             }
             case ADMIN -> {
                 AdminAdminAccountDetailResponse dto = accountRepository.findAdminDetail(accountId);
-                if (dto == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
+                if (dto == null)
+                    throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
                 yield dto;
             }
         };
@@ -92,10 +94,10 @@ public class AccountService {
 
     private AdminStudentDetailResponse buildStudentDetail(Long accountId) {
         AdminStudentDetailResponse base = accountRepository.findStudentBaseDetail(accountId);
-        if (base == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
+        if (base == null)
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
 
-        List<AdminStudentDetailResponse.MajorItem> majors =
-                accountRepository.findStudentMajors(accountId);
+        List<AdminStudentDetailResponse.MajorItem> majors = accountRepository.findStudentMajors(accountId);
 
         // PRIMARY 찾아서 dept/primaryMajor 채우기
         AdminStudentDetailResponse.DeptSimple dept = null;
@@ -132,42 +134,51 @@ public class AccountService {
                 .profile(newProfile)
                 .build();
     }
+
     // 내 정보 조회 (간단 버전)
     public com.teamlms.backend.domain.account.api.dto.MyProfileResponse getMyProfile(Long accountId) {
         AccountType type = accountRepository.findAccountTypeById(accountId);
-        if (type == null) throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
+        if (type == null)
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, accountId);
 
         var builder = com.teamlms.backend.domain.account.api.dto.MyProfileResponse.builder()
-            .accountId(accountId);
+                .accountId(accountId);
 
         if (type == AccountType.STUDENT) {
             studentProfileRepository.findById(accountId).ifPresent(p -> {
                 builder.name(p.getName())
-                       .email(p.getEmail())
-                       .phone(p.getPhone())
-                       .studentNo(p.getStudentNo())
-                       .gradeLevel(p.getGradeLevel());
-                
+                        .email(p.getEmail())
+                        .phone(p.getPhone())
+                        .studentNo(p.getStudentNo())
+                        .gradeLevel(p.getGradeLevel());
+
                 if (p.getDeptId() != null) {
                     deptRepository.findById(p.getDeptId())
-                        .ifPresent(d -> builder.deptName(d.getDeptName()));
+                            .ifPresent(d -> builder.deptName(d.getDeptName()));
                 }
-                
-                // Primary Major lookup could be added here if needed, but deptName matches modal requirements
+
+                // Primary Major lookup could be added here if needed, but deptName matches
+                // modal requirements
             });
         } else if (type == AccountType.PROFESSOR) {
             professorProfileRepository.findById(accountId).ifPresent(p -> {
-                 builder.name(p.getName())
+                builder.name(p.getName())
                         .email(p.getEmail())
                         .phone(p.getPhone());
-                        
-                 if (p.getDeptId() != null) {
+
+                if (p.getDeptId() != null) {
                     deptRepository.findById(p.getDeptId())
-                        .ifPresent(d -> builder.deptName(d.getDeptName()));
+                            .ifPresent(d -> builder.deptName(d.getDeptName()));
                 }
             });
+        } else if (type == AccountType.ADMIN) {
+            adminProfileRepository.findById(accountId).ifPresent(p -> {
+                builder.name(p.getName())
+                        .email(p.getEmail())
+                        .phone(p.getPhone());
+            });
         }
-        
+
         return builder.build();
     }
 }

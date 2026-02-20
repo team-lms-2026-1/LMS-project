@@ -5,6 +5,7 @@ import { ResourceListItemDto, type ResourceTableProps } from "../../api/types";
 import styles from "./ResourceTable.module.css";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
 import { useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import DeleteModal from "../modal/DeleteModal.client";
@@ -50,9 +51,11 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       }
 
       // ✅ 목록으로 이동 + toast
-      router.push("/admin/community/resources?toast=deleted");
       setDeleteOpen(false);
       setDeleteTarget(null);
+      onReload();
+      router.refresh();
+      router.push("/admin/community/resources?toast=deleted");
     } catch (e: any) {
       toast.error(e?.message ?? "삭제에 실패했습니다.");
     } finally {
@@ -63,7 +66,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
   const columns: Array<TableColumn<ResourceListItemDto>> = [
     {
       header: "번호",
-      align: "left",
+      align: "center",
       render: (r) => (
         <div
           className={styles.rowClickCell}
@@ -77,7 +80,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
     },
     {
       header: "분류",
-      align: "left",
+      align: "center",
       render: (r) => {
         const c = r.category;
         return (
@@ -90,9 +93,9 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
             {!c ? (
               "미분류"
             ) : (
-              <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
+              <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
                 {c.name}
-              </span>
+              </Badge>
             )}
           </div>
         );

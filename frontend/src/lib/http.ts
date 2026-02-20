@@ -1,4 +1,5 @@
 // src/lib/http.ts
+import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from "@/i18n/locale";
 export class ApiError extends Error {
   status: number;
   body: any;
@@ -42,6 +43,13 @@ export async function getJson<T>(input: string, init: JsonFetchOptions = {}): Pr
   // headers 병합
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
+
+  // Accept-Language 헤더 자동 추가
+  if (typeof window !== "undefined") {
+    const locale = localStorage.getItem(LOCALE_STORAGE_KEY) || DEFAULT_LOCALE;
+    headers.set("Accept-Language", locale);
+    console.log(`[HTTP] Accept-Language: ${locale} for ${method} ${input}`);
+  }
 
   // body가 있고 Content-Type 미지정이면 JSON으로 기본 설정
   if (hasBody && !headers.has("Content-Type") && typeof init.body === "string") {

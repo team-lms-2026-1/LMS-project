@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { rentalsApi } from "../api/RentalsApi";
+import { rentalsApi } from "../api/rentalsApi";
 import type {
   AuthMeDto,
   RentalDto,
@@ -9,6 +9,7 @@ import type {
   PageMeta,
   RentalRawDto,
 } from "../api/types";
+import toast from "react-hot-toast";
 
 function normalizeMe(res: any): AuthMeDto | null {
   const d = res?.data ?? res;
@@ -22,7 +23,7 @@ function normalizeMe(res: any): AuthMeDto | null {
   };
 }
 
-/** ✅ raw -> 화면용 flat */
+/** raw 응답을 화면용 평탄 구조로 변환 */
 function normalizeRental(raw: RentalRawDto): RentalDto {
   return {
     rentalId: raw.rentalId,
@@ -87,10 +88,10 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
 
       const listRaw: RentalRawDto[] = Array.isArray(res?.data) ? res.data : [];
 
-      // ✅ 1) raw를 먼저 flat으로 정규화
+      // cleaned comment
       const normalized = listRaw.map(normalizeRental);
 
-      // ✅ 2) 내 것만 필터 (applicant.accountId 기반)
+      // cleaned comment
       const filtered =
         typeof me?.accountId === "number"
           ? normalized.filter((r) => r.applicantAccountId === me.accountId)
@@ -122,14 +123,13 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
   };
 
   const cancelRental = async (rentalId: number) => {
-    if (!confirm("예약을 취소할까요?")) return;
     try {
       await rentalsApi.cancel(rentalId);
-      alert("취소되었습니다.");
+      toast.success("예약이 취소되었습니다.");
       fetchList();
     } catch (e: any) {
       console.error(e);
-      alert(e?.status ? `취소 중 오류가 발생했습니다. (HTTP ${e.status})` : "취소 중 오류가 발생했습니다.");
+      toast.error(e?.status ? `취소 중 오류가 발생했습니다. (HTTP ${e.status})` : "취소 중 오류가 발생했습니다.");
     }
   };
 

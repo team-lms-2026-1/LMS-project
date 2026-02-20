@@ -46,9 +46,10 @@ public class Major extends BaseEntity {
 
     
     /* ========= domain method ========= */
-    public void update(String majorName, String description) {
+    public void update(String majorName, String description, boolean isActive) {
         this.majorName = majorName;
         this.description = description;
+        this.active = isActive;
     }
 
 }

@@ -20,6 +20,7 @@ export default function LoginPage() {
     if (prefix === "s") return "/student/main";
     if (prefix === "p") return "/professor";
     // 예외: 규칙 밖이면 기본값으로 변경
+
     return "/";
   }
 
@@ -39,7 +40,7 @@ export default function LoginPage() {
 
     try {
       // 로그인은 1번만 호출
-      const res = await loginViaBff({ id: trimmedId, password: pw });
+      const res = await loginViaBff({ loginId: trimmedId, password: pw });
 
       // expiresAt이 있으면 자동 로그아웃 스케줄링
       const expiresAt = (res as any)?.expiresAt;

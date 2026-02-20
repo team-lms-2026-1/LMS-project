@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { rentalsApi } from "../api/RentalsApi";
+﻿import { useEffect, useState, useCallback } from "react";
+import { rentalsApi } from "../api/rentalsApi";
 import type { RentalDto, RentalListParams, PageMeta } from "../api/types";
 import toast from "react-hot-toast";
 
@@ -11,8 +11,10 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
 
   const [params, setParams] = useState<RentalListParams>(initialParams);
 
-  const fetchList = useCallback(async () => {
-    setLoading(true);
+  const fetchList = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) {
+      setLoading(true);
+    }
     setError("");
 
     try {
@@ -22,7 +24,7 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
     } catch (e: any) {
       console.error(e);
 
-      // ✅ Mock 제거: 실패하면 그냥 빈 리스트 + 에러 표시
+      // cleaned comment
       setData([]);
       setMeta(null);
 
@@ -32,12 +34,30 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
           : "목록을 불러오지 못했습니다.";
       setError(msg);
     } finally {
-      setLoading(false);
+      if (!opts?.silent) {
+        setLoading(false);
+      }
     }
   }, [params]);
 
   useEffect(() => {
     fetchList();
+  }, [fetchList]);
+
+  useEffect(() => {
+    const onFocus = () => fetchList({ silent: true });
+    window.addEventListener("focus", onFocus);
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchList({ silent: true });
+      }
+    }, 10000);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.clearInterval(intervalId);
+    };
   }, [fetchList]);
 
   const updateParams = (newParams: Partial<RentalListParams>) => {
@@ -57,14 +77,14 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
 
   const rejectRental = async (id: number, reason: string) => {
     try {
-        await rentalsApi.reject(id, reason);
-        toast.success("반려되었습니다.");
-        fetchList();
+      await rentalsApi.reject(id, reason);
+      toast.success("반려되었습니다.");
+      fetchList();
     } catch (e: any) {
-        console.error(e);
-        toast.error("처리 중 오류가 발생했습니다.");
+      console.error(e);
+      toast.error("처리 중 오류가 발생했습니다.");
     }
-    };
+  };
 
   return {
     data,

@@ -1,17 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import { Dropdown } from "../_shared";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
-import type { SelectOption } from "@/features/dropdowns/depts/types";
-
-const OPTIONS: SelectOption[] = [
-  { value: "1", label: "1교시" },
-  { value: "2", label: "2교시" },
-  { value: "3", label: "3교시" },
-  { value: "4", label: "4교시" },
-  { value: "5", label: "5교시" },
-  { value: "6", label: "6교시" },
-];
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getPeriodDropdownPlaceholder,
+  getPeriodOptions,
+} from "../localeLabel";
 
 type Props = {
   value?: string;            // "1" | "2" ...
@@ -20,13 +16,15 @@ type Props = {
 
 export function PeriodFilterDropdown({ value, onChange }: Props) {
   const { get, setFilters } = useFilterQuery(["period"]);
+  const { locale } = useLocale();
   const controlled = value !== undefined && onChange !== undefined;
+  const options = useMemo(() => getPeriodOptions(locale), [locale]);
 
   return (
     <Dropdown
-      placeholder="교시"
+      placeholder={getPeriodDropdownPlaceholder(locale)}
       value={controlled ? value : get("period")}
-      options={OPTIONS}
+      options={options}
       onChange={(v) => {
         if (controlled) onChange(v);
         else setFilters({ period: v });

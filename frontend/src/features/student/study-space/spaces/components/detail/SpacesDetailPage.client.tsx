@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./SpacesDetailPage.module.css";
 
-import { spacesApi } from "../../api/SpacesApi";
+import { spacesApi } from "../../api/spacesApi";
 import type { SpaceDetailDto } from "../../api/types";
 import { Button } from "@/components/button";
 import SpacesModal from "../modal/SpacesModal.client";

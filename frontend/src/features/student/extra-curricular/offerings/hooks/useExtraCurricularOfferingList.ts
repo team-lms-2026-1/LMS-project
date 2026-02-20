@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type {
@@ -18,12 +18,12 @@ import {
   fetchStudentExtraCurricularDetail,
   fetchStudentExtraSessionDetail,
   fetchStudentExtraSessionList,
-} from "../api/extraCuccicularApi";
+} from "../api/extraCurricularApi";
 
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -36,9 +36,10 @@ export function useExtraCurricularOfferingList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
 
   const [keyword, setKeyword] = useState("");
+  const [semesterId, setSemesterId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,10 +49,15 @@ export function useExtraCurricularOfferingList() {
       setLoading(true);
       setError(null);
 
-      const res = await fetchCurricularOfferingsList({ page, size });
+      const res = await fetchCurricularOfferingsList({
+        page,
+        size,
+        keyword: keyword || undefined,
+        semesterId: semesterId ?? undefined,
+      });
 
       setItems(res.data);
-      setMeta(res.meta ?? defaultMeta); // meta가 null일 가능성 있으면 방어
+      setMeta(res.meta ?? defaultMeta); // cleaned comment
     } catch (e: any) {
       console.error("[useCurricularCurrentEnrollmentsList]", e);
       setError(e?.message ?? "비교과운영 목록 조회 실패");
@@ -60,7 +66,7 @@ export function useExtraCurricularOfferingList() {
     } finally {
       setLoading(false);
     }
-  }, [page, size, keyword]);
+  }, [page, size, keyword, semesterId]);
 
   useEffect(() => {
     void load();
@@ -72,6 +78,7 @@ export function useExtraCurricularOfferingList() {
       meta,
       page,
       size,
+      semesterId,
       loading,
       error,
     },
@@ -79,8 +86,15 @@ export function useExtraCurricularOfferingList() {
       setKeyword,
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
+      setSemesterId: (id: number | null) => {
+        setPage(1);
+        setSemesterId((prev) => {
+          if (prev === id) return prev;
+          return id;
+        });
+      },
 
-      // ✅ PaginationBar size 변경용
+      // cleaned comment
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
@@ -93,7 +107,7 @@ export function useExtraCurricularOfferingList() {
 // 상세 기본
 export function useExtraCurricularDetail(offeringId?: number, enabled: boolean = true) {
   const [data, setData] = useState<ExtraCurricularOfferingDetailDto | null>(null);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,7 +124,7 @@ export function useExtraCurricularDetail(offeringId?: number, enabled: boolean =
       setLoading(false);
     }
   };
-  
+
   const reload = useCallback(async () => {
     if (!offeringId) return;
     await load(offeringId);
@@ -122,7 +136,7 @@ export function useExtraCurricularDetail(offeringId?: number, enabled: boolean =
     void load(offeringId);
   }, [offeringId, enabled]);
 
-  return { state : { data, loading, error }, actions: { load, reload, setData }};
+  return { state: { data, loading, error }, actions: { load, reload, setData } };
 }
 
 // session list (student)
@@ -131,7 +145,7 @@ export function useStudentExtraSessionList(offeringId?: number, enabled: boolean
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -274,7 +288,7 @@ export function useStudentExtraCurricularEnrollmentsList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -321,7 +335,7 @@ export function useStudentExtraCurricularCurrentEnrollmentsList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -361,3 +375,5 @@ export function useStudentExtraCurricularCurrentEnrollmentsList() {
     },
   };
 }
+
+

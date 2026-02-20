@@ -6,7 +6,10 @@ import org.springframework.data.repository.query.Param;
 
 import com.teamlms.backend.domain.competency.entitiy.DiagnosisRun;
 
+import java.util.List;
 import java.util.Optional;
+
+import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 
 public interface DiagnosisRunRepository extends JpaRepository<DiagnosisRun, Long> {
 
@@ -20,6 +23,6 @@ public interface DiagnosisRunRepository extends JpaRepository<DiagnosisRun, Long
                 WHERE dr.status = :status
                 ORDER BY dr.createdAt DESC
             """)
-    java.util.List<DiagnosisRun> findByStatus(
-            @Param("status") com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus status);
+    List<DiagnosisRun> findByStatus(
+            @Param("status") DiagnosisRunStatus status);
 }

@@ -6,11 +6,13 @@ import { useExtraCurricularGradeDetailHeader } from "@/features/extra-curricular
 import { ExtraGradeDetailInfoSection } from "./components/ExtraGradeDetailInfoSection";
 import { ExtraGradeTrendChartSection } from "./components/ExtraGradeTrendChartSection";
 import { ExtraGradeDetailListSection } from "./components/ExtraGradeDetailListSection";
+import { useI18n } from "@/i18n/useI18n";
 
 export function ExtraCurricularGradeDetailPageClient() {
   const router = useRouter();
   const params = useParams<{ studentAccountId: string }>();
   const studentAccountId = Number(params.studentAccountId);
+  const t = useI18n("extraCurricular.adminGrades.detail.page");
 
   const { state } = useExtraCurricularGradeDetailHeader(
     Number.isFinite(studentAccountId) ? studentAccountId : undefined,
@@ -20,19 +22,19 @@ export function ExtraCurricularGradeDetailPageClient() {
   const { data, loading, error } = state;
 
   if (!Number.isFinite(studentAccountId)) {
-    return <div className={styles.page}>잘못된 접근입니다.</div>;
+    return <div className={styles.page}>{t("invalidAccess")}</div>;
   }
 
-  if (loading) return <div className={styles.page}>불러오는 중...</div>;
-  if (error) return <div className={styles.page}>오류가 발생했습니다.</div>;
-  if (!data) return <div className={styles.page}>데이터가 없습니다.</div>;
+  if (loading) return <div className={styles.page}>{t("loading")}</div>;
+  if (error) return <div className={styles.page}>{t("loadError")}</div>;
+  if (!data) return <div className={styles.page}>{t("empty")}</div>;
 
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
-        <div className={styles.title}>비교과 성적 상세</div>
+        <div className={styles.title}>{t("title")}</div>
         <button className={styles.backBtn} type="button" onClick={() => router.back()}>
-          목록으로
+          {t("backButton")}
         </button>
       </div>
 

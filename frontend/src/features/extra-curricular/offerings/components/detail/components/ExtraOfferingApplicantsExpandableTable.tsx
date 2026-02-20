@@ -5,7 +5,7 @@ import styles from "./ExtraOfferingApplicantsExpandableTable.module.css";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
 import type { ExtraOfferingApplicantRowDto, ExtraOfferingApplicantSessionDto } from "../../../api/types";
-import { completionStatusLabel } from "@/features/curricular-offering/utils/studentStatusLable";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: ExtraOfferingApplicantRowDto[];
@@ -14,60 +14,91 @@ type Props = {
   onToggle: (row: ExtraOfferingApplicantRowDto) => void;
 };
 
-const applyStatusView = (v: string) => {
-  if (v === "APPLIED") return { status: "PENDING" as const, label: "신청" };
-  if (v === "CANCELED") return { status: "CANCELED" as const, label: "취소" };
-  return { status: "PENDING" as const, label: v };
-};
-
-const attendedView = (v: boolean) =>
-  v
-    ? { status: "ACTIVE" as const, label: "출석" }
-    : { status: "INACTIVE" as const, label: "미출석" };
-
-function SessionsTable({ sessions }: { sessions: ExtraOfferingApplicantSessionDto[] }) {
-  if (!sessions || sessions.length === 0) {
-    return <div className={styles.emptyInner}>회차가 없습니다.</div>;
-  }
-
-  return (
-    <table className={styles.innerTable} aria-label="extra-offering-sessions">
-      <colgroup>
-        <col style={{ width: "45%" }} />
-        <col style={{ width: "30%" }} />
-        <col style={{ width: "25%" }} />
-      </colgroup>
-      <thead className={styles.innerThead}>
-        <tr>
-          <th className={styles.innerTh}>회차명</th>
-          <th className={styles.innerTh}>회차상태</th>
-          <th className={styles.innerTh}>출석</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sessions.map((s) => (
-          <tr key={s.sessionId}>
-            <td className={styles.innerTd}>{s.sessionTitle}</td>
-            <td className={styles.innerTd}>
-              <StatusPill status={s.sessionStatus as any} label={s.sessionStatus} />
-            </td>
-            <td className={styles.innerTd}>
-              <StatusPill {...attendedView(s.isAttended)} />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
 export function ExtraOfferingApplicantsExpandableTable({
   items,
   loading,
   expandedApplicationId,
   onToggle,
 }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.students");
+  const tApply = useI18n("extraCurricular.status.apply");
+  const tSession = useI18n("extraCurricular.status.session");
+  const tAttended = useI18n("extraCurricular.status.attended");
+  const tCompletion = useI18n("curricular.status.completion");
   const colCount = 7;
+
+  const applyStatusView = (v: string) => {
+    if (v === "APPLIED") return { status: "PENDING" as const, label: tApply("APPLIED") };
+    if (v === "CANCELED") return { status: "CANCELED" as const, label: tApply("CANCELED") };
+    return { status: "PENDING" as const, label: v };
+  };
+
+  const attendedView = (v: boolean) =>
+    v
+      ? { status: "ACTIVE" as const, label: tAttended("ATTENDED") }
+      : { status: "INACTIVE" as const, label: tAttended("ABSENT") };
+
+  const completionStatusLabel = (value: string) => {
+    switch (value) {
+      case "IN_PROGRESS":
+        return tCompletion("IN_PROGRESS");
+      case "PASSED":
+        return tCompletion("PASSED");
+      case "FAILED":
+        return tCompletion("FAILED");
+      default:
+        return value;
+    }
+  };
+
+  const sessionStatusLabel = (value: string) => {
+    switch (value) {
+      case "OPEN":
+        return tSession("OPEN");
+      case "CLOSED":
+        return tSession("CLOSED");
+      case "CANCELED":
+        return tSession("CANCELED");
+      default:
+        return value;
+    }
+  };
+
+  const SessionsTable = ({ sessions }: { sessions: ExtraOfferingApplicantSessionDto[] }) => {
+    if (!sessions || sessions.length === 0) {
+      return <div className={styles.emptyInner}>{t("messages.noSessions")}</div>;
+    }
+
+    return (
+      <table className={styles.innerTable} aria-label="extra-offering-sessions">
+        <colgroup>
+          <col style={{ width: "45%" }} />
+          <col style={{ width: "30%" }} />
+          <col style={{ width: "25%" }} />
+        </colgroup>
+        <thead className={styles.innerThead}>
+          <tr>
+            <th className={styles.innerTh}>{t("innerHeaders.sessionName")}</th>
+            <th className={styles.innerTh}>{t("innerHeaders.sessionStatus")}</th>
+            <th className={styles.innerTh}>{t("innerHeaders.attendance")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sessions.map((s) => (
+            <tr key={s.sessionId}>
+              <td className={styles.innerTd}>{s.sessionTitle}</td>
+              <td className={styles.innerTd}>
+                <StatusPill status={s.sessionStatus as any} label={sessionStatusLabel(s.sessionStatus)} />
+              </td>
+              <td className={styles.innerTd}>
+                <StatusPill {...attendedView(s.isAttended)} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -84,13 +115,13 @@ export function ExtraOfferingApplicantsExpandableTable({
 
         <thead className={styles.thead}>
           <tr>
-            <th className={styles.th}>학생명</th>
-            <th className={styles.th}>학번</th>
-            <th className={styles.th}>학년</th>
-            <th className={styles.th}>소속학과</th>
-            <th className={styles.th}>신청상태</th>
-            <th className={styles.th}>이수상태</th>
-            <th className={styles.th}>출석조회</th>
+            <th className={styles.th}>{t("headers.studentName")}</th>
+            <th className={styles.th}>{t("headers.studentNo")}</th>
+            <th className={styles.th}>{t("headers.gradeLevel")}</th>
+            <th className={styles.th}>{t("headers.deptName")}</th>
+            <th className={styles.th}>{t("headers.applyStatus")}</th>
+            <th className={styles.th}>{t("headers.completionStatus")}</th>
+            <th className={styles.th}>{t("headers.attendanceAction")}</th>
           </tr>
         </thead>
 
@@ -110,7 +141,7 @@ export function ExtraOfferingApplicantsExpandableTable({
           ) : items.length === 0 ? (
             <tr>
               <td className={styles.empty} colSpan={colCount}>
-                신청 학생이 없습니다.
+                {t("emptyText")}
               </td>
             </tr>
           ) : (
@@ -133,12 +164,12 @@ export function ExtraOfferingApplicantsExpandableTable({
                     <td className={styles.tdCenter}>
                       <StatusPill
                         status={r.completionStatus as any}
-                        label={completionStatusLabel(r.completionStatus as any)}
+                        label={completionStatusLabel(r.completionStatus)}
                       />
                     </td>
                     <td className={styles.tdCenter} onClick={(e) => e.stopPropagation()}>
                       <Button variant="secondary" onClick={() => onToggle(r)}>
-                        {isExpanded ? "닫기" : "조회"}
+                        {isExpanded ? t("buttons.close") : t("buttons.view")}
                       </Button>
                     </td>
                   </tr>

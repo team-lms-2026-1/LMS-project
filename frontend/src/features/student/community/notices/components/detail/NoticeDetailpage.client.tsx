@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./NoticeDetailPage.module.css";
 import type { NoticeListItemDto } from "../../api/types";
-import { fetchNoticeDetail } from "../../api/NoticesApi";
+import { fetchNoticeDetail } from "../../api/noticesApi";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }

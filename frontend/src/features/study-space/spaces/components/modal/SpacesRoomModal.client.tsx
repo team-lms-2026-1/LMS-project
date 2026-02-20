@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./SpacesRoomModal.module.css";
 import { Button } from "@/components/button";
-import { roomsApi } from "../../api/SpacesApi";
+import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import toast from "react-hot-toast";
 import type {
   AdminRoomDto,
@@ -11,6 +11,7 @@ import type {
   UpdateAdminRoomRequestDto,
   SpaceRoomDto,
 } from "../../api/types";
+import { roomsApi } from "../../api/spacesApi";
 
 type RoomRowState = {
   roomId?: number;
@@ -294,7 +295,10 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
 
   const onClickDone = () => {
     const editing = rows.find((r) => r.isEditing);
-    if (editing) return alert("편집 중인 항목이 있습니다. 저장 또는 취소 후 완료하세요.");
+    if (editing) {
+      toast.error("편집 중인 항목이 있습니다. 저장 또는 취소 후 완료하세요.");
+      return;
+    }
     onClose();
   };
 
@@ -387,20 +391,20 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
                   {/* 3) 운영기간 */}
                   <div className={styles.cellPeriod}>
                     <div className={styles.periodWrap}>
-                      <input
-                        className={styles.dateInput}
-                        type="date"
+                      <DatePickerInput
                         value={r.startDate}
+                        onChange={(v) => setField(idx, "startDate", v)}
                         disabled={!r.isEditing}
-                        onChange={(e) => setField(idx, "startDate", e.target.value)}
+                        max={r.endDate}
+                        className={styles.dateInput}
                       />
                       <span className={styles.sep}>~</span>
-                      <input
-                        className={styles.dateInput}
-                        type="date"
+                      <DatePickerInput
                         value={r.endDate}
+                        onChange={(v) => setField(idx, "endDate", v)}
                         disabled={!r.isEditing}
-                        onChange={(e) => setField(idx, "endDate", e.target.value)}
+                        min={r.startDate}
+                        className={styles.dateInput}
                       />
                     </div>
                   </div>

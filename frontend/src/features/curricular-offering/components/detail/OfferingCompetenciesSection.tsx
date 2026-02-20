@@ -10,6 +10,12 @@ import { OfferingCompetencyRadarChart } from "./components/OfferingCompetencyRad
 
 import { useOfferingCompetencyMapping } from "../../hooks/useCurricularOfferingList";
 import { updateCurricularOfferingCompetency } from "../../api/curricularOfferingsApi";
+import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getLocalizedCompetencyDescription,
+  getLocalizedCompetencyName,
+} from "@/features/competencies/utils/competencyLocale";
 import type {
   CurricularOfferingCompetencyMappingBulkUpdateRequest,
   CurricularOfferingDetailDto,
@@ -21,6 +27,9 @@ type Props = {
 };
 
 export function OfferingCompetenciesSection({ offeringId, data }: Props) {
+  const t = useI18n("curricular.adminOfferingDetail.competencies");
+  const tCommon = useI18n("curricular.common");
+  const { locale } = useLocale();
   const { state, actions } = useOfferingCompetencyMapping(offeringId);
   const { data: mappingData, loading, error } = state;
 
@@ -100,7 +109,7 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
 
     try {
       await updateCurricularOfferingCompetency(offeringId, body);
-      toast.success("역량 맵핑이 저장되었습니다.");
+      toast.success(t("messages.saved"));
 
       // ✅ 저장 성공하면 다시 읽기 전용
       setIsEditing(false);
@@ -112,9 +121,9 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
       const code = e?.body?.error?.code;
 
       if (status === 409 && code === "OFFERING_COMPETENCY_WEIGHT_DUPLICATED") {
-        toast.error("이미 다른 역량이 사용 중인 점수입니다.");
+        toast.error(t("messages.duplicateWeight"));
       } else {
-        toast.error(e?.body?.error?.message || "저장 실패");
+        toast.error(e?.body?.error?.message || t("messages.saveFailed"));
       }
     } finally {
       setSaving(false);
@@ -140,10 +149,10 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
 
   // 버튼 라벨/동작 결정
   const primaryLabel = useMemo(() => {
-    if (saving) return "저장중...";
-    if (isEditing) return "저장";
-    return hasAnyWeight ? "수정" : "등록";
-  }, [saving, isEditing, hasAnyWeight]);
+    if (saving) return t("buttons.saving");
+    if (isEditing) return tCommon("saveButton");
+    return hasAnyWeight ? tCommon("editButton") : tCommon("registerButton");
+  }, [saving, isEditing, hasAnyWeight, t, tCommon]);
 
   const onPrimaryClick = () => {
     if (isEditing) {
@@ -153,17 +162,23 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
     }
   };
 
+  const getCompetencyName = (code: string, fallback: string) =>
+    getLocalizedCompetencyName(code, locale, fallback);
+
+  const getCompetencyDescription = (code: string, fallback: string) =>
+    getLocalizedCompetencyDescription(code, locale, fallback);
+
   return (
     <div className={styles.wrap}>
       {/* 상단 */}
       <div className={styles.section}>
         <Header title={`${data.curricularName} (${data.offeringCode} / ${data.semesterName})`} />
         <div className={styles.body}>
-          <span>담당교수 : {data.professorName}</span>
+          <span>{t("labels.professor")} : {data.professorName}</span>
           <span>
-            주역량 :{" "}
+            {t("labels.mainCompetencies")} :{" "}
             {mainCompetencies.length
-              ? mainCompetencies.map((c) => c.name).join(", ")
+              ? mainCompetencies.map((c) => getCompetencyName(c.code, c.name)).join(", ")
               : "-"}
           </span>
         </div>
@@ -173,17 +188,18 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
       <div className={styles.mainRow}>
         {/* 왼쪽 */}
         <div className={`${styles.section} ${styles.leftCol}`}>
-          <Header title="역량 맵핑" />
+          <Header title={t("titles.mapping")} />
           <div className={styles.body}>
-            {loading ? <div>불러오는 중...</div> : null}
-            {error ? <div>조회 실패</div> : null}
+            {loading ? <div>{t("messages.loading")}</div> : null}
+            {error ? <div>{t("messages.loadError")}</div> : null}
 
             {!loading && !error && mappingData?.length ? (
               <>
                 <ul className={styles.description}>
                   {mappingData.map((item) => (
                     <li key={item.competencyId}>
-                      <strong>{item.name}</strong> : {item.description}
+                      <strong>{getCompetencyName(item.code, item.name)}</strong> :{" "}
+                      {getCompetencyDescription(item.code, item.description)}
                     </li>
                   ))}
                 </ul>
@@ -195,7 +211,9 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
                     return (
                       <div key={item.competencyId} className={styles.mappingCard}>
                         <div className={styles.mappingTop}>
-                          <div className={styles.mappingName}>{item.name}</div>
+                          <div className={styles.mappingName}>
+                            {getCompetencyName(item.code, item.name)}
+                          </div>
                         </div>
 
                         <div className={styles.scoreRow}>
@@ -236,7 +254,7 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
                         onClick={onCancelEdit}
                         disabled={saving}
                       >
-                        취소
+                        {tCommon("cancelButton")}
                       </Button>
                     </>
                   ) : (
@@ -257,7 +275,7 @@ export function OfferingCompetenciesSection({ offeringId, data }: Props) {
 
         {/* 오른쪽 */}
         <div className={`${styles.section} ${styles.rightCol}`}>
-          <Header title="역량맵핑 레이더차트" />
+          <Header title={t("titles.radar")} />
           <div className={styles.body}>
             {!loading && !error && mappingData?.length ? (
               <OfferingCompetencyRadarChart items={mappingData} />

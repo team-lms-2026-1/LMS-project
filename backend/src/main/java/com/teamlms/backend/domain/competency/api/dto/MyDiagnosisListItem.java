@@ -13,4 +13,5 @@ public class MyDiagnosisListItem {
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private String status; // PENDING | SUBMITTED
+    private String diagnosisStatus; // DRAFT | OPEN | CLOSED
 }

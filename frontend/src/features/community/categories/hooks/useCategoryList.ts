@@ -1,12 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Category, CategoryListResponse, CategoryListQuery, CategoryScope, PageMeta } from "../api/types";
-import { categoriesApi } from "../api/CategoriesApi";
+import { categoriesApi } from "../api/categoriesApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -14,7 +14,7 @@ const defaultMeta: PageMeta = {
   sort: [],
 };
 
-/** 응답이 배열/페이지 형태 둘 다 가능하므로 공용으로 풀어주는 함수 */
+/** 응답이 배열/페이지 형태 모두 가능하므로 공통 리스트 형태로 정규화 */
 function unwrapCategoryList(res: CategoryListResponse): { items: Category[]; meta: PageMeta } {
   const data: any = (res as any)?.data;
 
@@ -26,7 +26,7 @@ function unwrapCategoryList(res: CategoryListResponse): { items: Category[]; met
 
   // case 2) ApiResponse<Category[]>
   if (Array.isArray(data)) {
-    // 배열 응답이면 meta가 없을 수 있으니 "현재 페이지 상태"는 훅에서 덮어씀
+    // cleaned comment
     return { items: data as Category[], meta: defaultMeta };
   }
 
@@ -38,7 +38,7 @@ export function useCategoryList(scope: CategoryScope) {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -63,7 +63,7 @@ export function useCategoryList(scope: CategoryScope) {
 
       setItems(list);
 
-      // 배열 응답이면 defaultMeta 그대로라서, 현재 page/size 반영해서 UI 안정화
+      // cleaned comment
       setMeta({
         ...m,
         page,
@@ -90,7 +90,7 @@ export function useCategoryList(scope: CategoryScope) {
   return {
     state: {
       items,
-      meta, // ✅ 항상 PageMeta
+      meta, // cleaned comment
       page,
       size,
       keyword,
@@ -112,3 +112,5 @@ export function useCategoryList(scope: CategoryScope) {
     },
   };
 }
+
+

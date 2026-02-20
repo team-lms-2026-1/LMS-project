@@ -7,50 +7,65 @@ on:
       - 'frontend/**' # frontend 폴더가 바뀔 때만 실행
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 1. 소스 코드를 EC2로 전송 (node_modules 제외)
-    - name: Copy Frontend Code to EC2
-      uses: appleboy/scp-action@master
+    # 1. GitHub Container Registry 로그인 (별도 비밀번호 설정 불필요)
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
       with:
-        host: ${{ secrets.HOST_PROD }}
-        username: ec2-user # 본인 EC2 계정에 맞게 수정 (ubuntu 또는 ec2-user)
-        key: ${{ secrets.SSH_KEY }}
-        source: "frontend/"
-        target: "/home/ec2-user/app_frontend" # EC2 내부 저장 경로
-        strip_components: 1 # frontend/ 폴더 껍데기 벗기고 내용물만 전송
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    # 2. EC2 접속 후 도커 빌드 & 실행
-    - name: Build & Run Docker on EC2
+    # 2. Docker 이미지 빌드 및 푸시
+    - name: Build and Push Docker Image
+      run: |
+        cd frontend
+        # 이미지 태그를 소문자로 설정 (ghcr.io는 대문자 허용 안함)
+        IMAGE_ID=ghcr.io/team-lms-2026-1/lms-frontend
+        
+        docker build -t $IMAGE_ID:latest \
+          -t $IMAGE_ID:${{ github.sha }} .
+        docker push $IMAGE_ID:latest
+        docker push $IMAGE_ID:${{ github.sha }}
+
+    # 3. EC2에서 이미지 pull 및 실행
+    - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST_PROD }}
         username: ec2-user
         key: ${{ secrets.SSH_KEY }}
         script: |
-          # 폴더 이동
-          cd /home/ec2-user/app_frontend
+          # 이미지 이름 정의
+          IMAGE_ID=ghcr.io/team-lms-2026-1/lms-frontend
 
-          # 기존 컨테이너 중지 및 삭제
+          # GitHub Container Registry 로그인 (EC2에서도 필요)
+          echo ${{ secrets.GITHUB_TOKEN }} | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          # 기존 컨테이너 정리
           sudo docker stop frontend-server || true
           sudo docker rm frontend-server || true
-          
-          # 기존 이미지 삭제 (공간 확보)
-          sudo docker rmi frontend-server || true
+          sudo docker rmi $IMAGE_ID:latest || true
 
-          # 도커 이미지 빌드 (현재 폴더 . 기준)
-          sudo docker build -t frontend-server .
+          # 이미지 pull
+          sudo docker pull $IMAGE_ID:latest
 
-          # 도커 컨테이너 실행 (3000번 포트)
-          # -e NEXT_PUBLIC_API_URL: 프론트가 백엔드에 요청 보낼 주소 (중요!)
+          # 실행
           sudo docker run -d --name frontend-server \
+            --network lms-network \
             -p 3000:3000 \
             -e NEXT_PUBLIC_API_URL=http://43.201.157.8:8080 \
-            frontend-server
+            -e API_BASE_URL=http://backend-server:8080 \
+            $IMAGE_ID:latest
           
-          # 불필요한 이미지 정리
+          # 정리
           sudo docker image prune -f

@@ -11,9 +11,13 @@ import {
 } from "recharts";
 
 import styles from "./OfferingCompetencyRadarChart.module.css";
+import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
+import { getLocalizedCompetencyName } from "@/features/competencies/utils/competencyLocale";
 
 type CompetencyItem = {
   competencyId: number;
+  code: string;
   name: string;
   weight: number | null;
 };
@@ -23,15 +27,18 @@ type Props = {
 };
 
 export function OfferingCompetencyRadarChart({ items }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.radar");
+  const { locale } = useLocale();
+
   const data = items.map((c) => ({
-    name: c.name,
+    name: getLocalizedCompetencyName(c.code, locale, c.name),
     value: c.weight ?? 0,
   }));
 
   const hasAnyValue = data.some((d) => d.value > 0);
 
   if (!hasAnyValue) {
-    return <div className={styles.empty}>역량 점수를 등록해주세요.</div>;
+    return <div className={styles.empty}>{t("empty")}</div>;
   }
 
   return (
@@ -51,7 +58,12 @@ export function OfferingCompetencyRadarChart({ items }: Props) {
 
           <Radar dataKey="value" stroke="#2563eb" fill="#2563eb" fillOpacity={0.35} />
 
-          <Tooltip formatter={(v) => `${v}점`} />
+          <Tooltip
+            formatter={(v) => {
+              const safeValue = Array.isArray(v) ? v[0] : (v ?? 0);
+              return t("tooltip", { value: safeValue });
+            }}
+          />
         </RadarChart>
       </ResponsiveContainer>
     </div>

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./SpacesCreatePage.module.css";
 
-import { spacesApi } from "../../api/SpacesApi";
+import { spacesApi } from "../../api/spacesApi";
 import type { CreateSpaceDetailRequestDto, SpaceRuleUpsertDto } from "../../api/types";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";

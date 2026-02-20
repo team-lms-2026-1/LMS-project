@@ -5,7 +5,7 @@ import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./QnaEditPage.module.css";
 import type { Category, UpdateQnaQuestionRequestDto, QnaDetailDto } from "../../api/types";
-import { fetchQnaCategories, fetchQnaDetail, updateQnaQuestion } from "../../api/QnasApi";
+import { fetchQnaCategories, fetchQnaDetail, updateQnaQuestion } from "../../api/qnasApi";
 import { Button } from "@/components/button";
 import { useAuth } from "@/features/auth/AuthProvider";
 
@@ -159,7 +159,7 @@ export default function QnaEditPageClient() {
     setSaving(true);
     try {
       await updateQnaQuestion(questionId, body);
-      router.push(DETAIL_PATH);
+      router.push(`${DETAIL_PATH}?toast=updated`);
       router.refresh();
     } catch (e: any) {
       setFormError(e?.message ?? "수정에 실패했습니다.");

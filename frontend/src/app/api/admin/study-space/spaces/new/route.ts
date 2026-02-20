@@ -5,6 +5,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const TAG = "admin:spaces";
+const STUDENT_LIST_TAG = "student:spaces:list";
 
 function isMultipart(req: Request) {
   const ct = req.headers.get("content-type") ?? "";
@@ -19,7 +20,10 @@ export async function POST(req: Request) {
       forwardQuery: false,
     });
 
-    if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+    if (res.status >= 200 && res.status < 300) {
+      revalidateTag(TAG);
+      revalidateTag(STUDENT_LIST_TAG);
+    }
     return res;
   }
 
@@ -31,6 +35,9 @@ export async function POST(req: Request) {
     cache: "no-store",
   });
 
-  if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+  if (res.status >= 200 && res.status < 300) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_LIST_TAG);
+  }
   return res;
 }

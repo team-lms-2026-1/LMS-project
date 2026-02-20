@@ -16,7 +16,6 @@ public class AuthPermissionQueryRepositoryImpl implements AuthPermissionQueryRep
     @Override
     public List<String> findPermissionCodesByAccountId(Long accountId) {
 
-        // ✅ V2 마이그레이션 테이블/컬럼 그대로 사용
         @SuppressWarnings("unchecked")
         List<String> codes = em.createNativeQuery("""
             select distinct p.code

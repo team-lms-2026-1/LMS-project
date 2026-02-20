@@ -1,9 +1,8 @@
 package com.teamlms.backend.domain.mentoring.entity;
 
+import com.teamlms.backend.global.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "mentoring_question")
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class MentoringQuestion {
+public class MentoringQuestion extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,12 +20,8 @@ public class MentoringQuestion {
     @Column(name = "matching_id", nullable = false)
     private Long matchingId;
 
-    @Column(name = "writer_id", nullable = false)
-    private Long writerId;
-
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    // writerId and createdAt are handled by BaseEntity
 }

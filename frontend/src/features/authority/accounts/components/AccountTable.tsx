@@ -2,6 +2,8 @@
 
 import styles from "../styles/AccountListPage.module.css";
 import { AccountRowView, AccountStatus } from "../types";
+import { ToggleSwitch } from "@/components/toggle/ToggleSwitch";
+import { Button } from "@/components/button/Button"; // ✅
 
 type Props = {
   rows: AccountRowView[];
@@ -56,31 +58,28 @@ export default function AccountTable({ rows, pendingIds, onToggleStatus, onClick
                   <td>{p?.email ?? "-"}</td>
                   <td>{row.account.createdAt.slice(0, 10)}</td>
                   <td>
-                    <label className={styles.switch} aria-disabled={isPending}>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        disabled={isPending}
-                        onChange={(e) =>
-                          onToggleStatus(
-                            row.account.accountId,
-                            row.account.status,
-                            e.target.checked ? "ACTIVE" : "INACTIVE"
-                          )
-                        }
-                      />
-                      <span className={styles.slider} />
-                    </label>
+                    <ToggleSwitch
+                      checked={checked}
+                      disabled={isPending}
+                      onChange={(chk) =>
+                        onToggleStatus(
+                          row.account.accountId,
+                          row.account.status,
+                          chk ? "ACTIVE" : "INACTIVE"
+                        )
+                      }
+                    />
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className={styles.smallBtn}
+                    {/* ✅ 공용 Button 교체 (secondary variant, small override) */}
+                    <Button
+                      variant="secondary"
+                      className={styles.customTableBtn}
                       onClick={() => onClickEdit(row.account.accountId)}
                       disabled={isPending}
                     >
                       수정
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               );

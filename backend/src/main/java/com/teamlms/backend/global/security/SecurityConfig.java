@@ -28,9 +28,12 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/error").permitAll()
+                .requestMatchers("/health").permitAll()
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                 //auth
                 .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers("/api/v1/auth/password-reset/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
                 .requestMatchers(HttpMethod.GET,  "/api/v1/auth/me").authenticated()
 

@@ -3,112 +3,118 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./professor-shell.module.css";
 
-type NavItem = { label: string; href: string };
-type NavSection = { key: string; title: string; items: NavItem[] };
+type NavItem = { labelKey: string; href: string };
+type NavSection = { key: string; titleKey: string; items: NavItem[] };
 
 const SECTIONS: NavSection[] = [
-    {
-        key: "community",
-        title: "커뮤니티",
-        items: [
-            { label: "공지사항", href: "/professor/community/notices" },
-            { label: "자료실", href: "/professor/community/resources" },
-            { label: "FAQ", href: "/professor/community/faqs" },
-            { label: "Q&A", href: "/professor/community/qna" },
-        ],
-    },
-    {
-        key: "competency",
-        title: "역량 관리",
-        items: [
-            { label: "역량 조회", href: "/professor/competencies" },
-        ],
-    },
-    {
-        key: "course",
-        title: "교과 관리",
-        items: [
-            { label: "내 강의 목록", href: "/professor/courses" },
-            { label: "강의 계획서", href: "/professor/syllabus" },
-            { label: "성적 입력", href: "/professor/grades" },
-            { label: "출석 관리", href: "/professor/attendance" },
-        ],
-    },
-    {
-        key: "mentoring",
-        title: "멘토링",
-        items: [
-            { label: "멘토 신청", href: "/professor/mentoring/apply" },
-            { label: "멘토링 채팅", href: "/professor/mentoring/chat" },
-        ],
-    },
+  {
+    key: "community",
+    titleKey: "sections.community.title",
+    items: [
+      { labelKey: "sections.community.items.notices", href: "/professor/community/notices" },
+      { labelKey: "sections.community.items.resources", href: "/professor/community/resources" },
+      { labelKey: "sections.community.items.faqs", href: "/professor/community/faqs" },
+      { labelKey: "sections.community.items.qna", href: "/professor/community/qna" },
+    ],
+  },
+  {
+    key: "competency",
+    titleKey: "sections.competency.title",
+    items: [{ labelKey: "sections.competency.items.dashboard", href: "/professor/competencies" }],
+  },
+  {
+    key: "course",
+    titleKey: "sections.course.title",
+    items: [
+      { labelKey: "sections.course.items.offerings", href: "/professor/curricular/offerings" },
+      { labelKey: "sections.course.items.syllabus", href: "/professor/syllabus" },
+      { labelKey: "sections.course.items.grades", href: "/professor/grades" },
+      { labelKey: "sections.course.items.attendance", href: "/professor/attendance" },
+    ],
+  },
+  {
+    key: "mentoring",
+    titleKey: "sections.mentoring.title",
+    items: [
+      { labelKey: "sections.mentoring.items.apply", href: "/professor/mentoring/apply" },
+      { labelKey: "sections.mentoring.items.chat", href: "/professor/mentoring/chat" },
+    ],
+  },
 ];
 
 function isActive(pathname: string, href: string) {
-    return pathname === href || pathname.startsWith(href + "/");
+  return pathname === href || pathname.startsWith(href + "/");
 }
 
 export default function ProfessorSidebar() {
-    const pathname = usePathname();
-    const [hoverOpenKey, setHoverOpenKey] = useState<string | null>(null);
+  const pathname = usePathname();
+  const t = useI18n("menu.professor");
+  const tCommon = useI18n("menu.common");
+  const [hoverOpenKey, setHoverOpenKey] = useState<string | null>(null);
 
-    const activeSectionKey = useMemo(() => {
-        for (const s of SECTIONS) {
-            if (s.items.some((it) => isActive(pathname, it.href))) return s.key;
-        }
-        return null;
-    }, [pathname]);
+  const activeSectionKey = useMemo(() => {
+    for (const section of SECTIONS) {
+      if (section.items.some((item) => isActive(pathname, item.href))) return section.key;
+    }
+    return null;
+  }, [pathname]);
 
-    return (
-        <div className={styles.sidebarInner}>
-            <div className={styles.sidebarTitle}>교수 메뉴</div>
+  return (
+    <div className={styles.sidebarInner}>
+      <div className={styles.sidebarHeader}>
+        <div className={styles.sidebarTitle}>{tCommon("sidebarTitle")}</div>
+        <Link href="/professor" className={styles.headerLogoLink}>
+          <img src="/logo.png" alt={tCommon("logoAlt.professor")} className={styles.headerLogoImage} />
+        </Link>
+      </div>
 
-            <div className={styles.sectionList}>
-                {SECTIONS.map((section) => {
-                    const open = hoverOpenKey === section.key;
+      <div className={styles.sectionList}>
+        {SECTIONS.map((section) => {
+          const open = hoverOpenKey === section.key;
 
+          return (
+            <div
+              key={section.key}
+              className={styles.section}
+              data-open={open ? "true" : "false"}
+              onMouseEnter={() => setHoverOpenKey(section.key)}
+              onMouseLeave={() => setHoverOpenKey(null)}
+            >
+              <div
+                className={[
+                  styles.sectionHeader,
+                  activeSectionKey === section.key ? styles.sectionHeaderActive : "",
+                  open ? styles.sectionHeaderOpen : "",
+                ].join(" ")}
+                aria-expanded={open}
+              >
+                <span className={styles.sectionHeaderText}>{t(section.titleKey)}</span>
+                <span className={open ? styles.chevUp : styles.chevDown} aria-hidden="true" />
+              </div>
+
+              {open && (
+                <div className={styles.sectionBody}>
+                  {section.items.map((item) => {
+                    const active = isActive(pathname, item.href);
                     return (
-                        <div
-                            key={section.key}
-                            className={styles.section}
-                            data-open={open ? "true" : "false"}
-                            onMouseEnter={() => setHoverOpenKey(section.key)}
-                            onMouseLeave={() => setHoverOpenKey(null)}
-                        >
-                            <div
-                                className={[
-                                    styles.sectionHeader,
-                                    activeSectionKey === section.key ? styles.sectionHeaderActive : "",
-                                    open ? styles.sectionHeaderOpen : "",
-                                ].join(" ")}
-                                aria-expanded={open}
-                            >
-                                <span className={styles.sectionHeaderText}>{section.title}</span>
-                                <span className={open ? styles.chevUp : styles.chevDown} aria-hidden="true" />
-                            </div>
-
-                            {open && (
-                                <div className={styles.sectionBody}>
-                                    {section.items.map((item) => {
-                                        const active = isActive(pathname, item.href);
-                                        return (
-                                            <Link
-                                                key={item.href + item.label}
-                                                href={item.href}
-                                                className={active ? styles.itemActive : styles.item}
-                                            >
-                                                {item.label}
-                                            </Link>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
+                      <Link
+                        key={item.href + item.labelKey}
+                        href={item.href}
+                        className={active ? styles.itemActive : styles.item}
+                      >
+                        {t(item.labelKey)}
+                      </Link>
                     );
-                })}
+                  })}
+                </div>
+              )}
             </div>
-        </div>
-    );
+          );
+        })}
+      </div>
+    </div>
+  );
 }

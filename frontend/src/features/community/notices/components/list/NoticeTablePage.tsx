@@ -6,6 +6,7 @@ import type { NoticeDeleteTarget, NoticeListItemDto, NoticeTableProps } from "..
 import styles from "./NoticeTable.module.css";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
 import toast from "react-hot-toast";
 
 import DeleteModal from "../modal/DeleteModal.client";
@@ -48,17 +49,17 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
   };
 
   const columns: Array<TableColumn<NoticeListItemDto>> = [
-    { header: "번호", align: "left", render: (r) => r.noticeId },
+    { header: "번호", align: "center", render: (r) => r.noticeId },
     {
       header: "분류",
-      align: "left",
+      align: "center",
       render: (r) => {
         const c = r.category;
         if (!c) return "미분류";
         return (
-          <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
+          <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
             {c.name}
-          </span>
+          </Badge>
         );
       },
     },

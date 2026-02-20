@@ -23,10 +23,12 @@ import com.teamlms.backend.domain.competency.entitiy.SemesterStudentCompetencySu
 import com.teamlms.backend.domain.competency.repository.CompetencyRepository;
 import com.teamlms.backend.domain.competency.repository.SemesterCompetencyCohortStatRepository;
 import com.teamlms.backend.domain.competency.repository.SemesterStudentCompetencySummaryRepository;
+import com.teamlms.backend.domain.competency.repository.DiagnosisRunRepository;
+import com.teamlms.backend.domain.competency.entitiy.DiagnosisRun;
+import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
 import com.teamlms.backend.domain.semester.entity.Semester;
-// import com.teamlms.backend.domain.semester.repository.SemesterRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 
@@ -43,6 +45,7 @@ public class CompetencyQueryService {
         private final CompetencyRepository competencyRepository;
         // private final SemesterRepository semesterRepository;
         private final DeptRepository deptRepository;
+        private final DiagnosisRunRepository diagnosisRunRepository;
 
         /**
          * 학생 목록 조회
@@ -71,6 +74,15 @@ public class CompetencyQueryService {
          * 학생 상세 역량 활동 조회 (대시보드)
          */
         public StudentCompetencyDashboardResponse getStudentDashboard(Long studentId) {
+                return getStudentDashboard(studentId, null);
+        }
+
+        public StudentCompetencyDashboardResponse getStudentDashboard(Long studentId, Long semesterId) {
+                return getStudentDashboard(studentId, semesterId, "STUDENT");
+        }
+
+        public StudentCompetencyDashboardResponse getStudentDashboard(Long studentId, Long semesterId,
+                        String trendMode) {
                 StudentProfile profile = studentProfileRepository.findById(studentId)
                                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, studentId));
 
@@ -86,112 +98,184 @@ public class CompetencyQueryService {
 
                 // 2. 모든 역량과 학생 요약 데이터 조회
                 List<Competency> allCompetencies = competencyRepository.findAll();
-                List<SemesterStudentCompetencySummary> summaries = summaryRepository.findByStudentAccountId(studentId);
-
-                if (summaries.isEmpty()) {
+                List<SemesterStudentCompetencySummary> allSummaries = summaryRepository
+                                .findByStudentAccountId(studentId);
+                if (allSummaries.isEmpty()) {
                         return emptyDashboard(profileInfo);
                 }
 
-                // 학기별 정렬
-                List<Long> semesterIds = summaries.stream()
-                                .map(s -> s.getSemester().getSemesterId())
-                                .distinct()
-                                .sorted(Comparator.reverseOrder())
-                                .collect(Collectors.toList());
+                Long selectedSemesterId;
+                List<SemesterStudentCompetencySummary> selectedSummaries;
 
-                Long latestSemesterId = semesterIds.get(0);
-                List<SemesterStudentCompetencySummary> latestSummaries = summaries.stream()
-                                .filter(s -> s.getSemester().getSemesterId().equals(latestSemesterId))
-                                .collect(Collectors.toList());
+                if (semesterId != null) {
+                        selectedSemesterId = semesterId;
+                        selectedSummaries = allSummaries.stream()
+                                        .filter(s -> s.getSemester().getSemesterId().equals(selectedSemesterId))
+                                        .collect(Collectors.toList());
+                        if (selectedSummaries.isEmpty()) {
+                                return emptyDashboard(profileInfo);
+                        }
+                } else {
+                        List<Long> semesterIds = allSummaries.stream()
+                                        .map(s -> s.getSemester().getSemesterId())
+                                        .distinct()
+                                        .sorted(Comparator.reverseOrder())
+                                        .collect(Collectors.toList());
 
-                // 3. 상단 요약 정보
-                BigDecimal maxTotalScore = summaries.stream()
+                        selectedSemesterId = semesterIds.get(0);
+                        selectedSummaries = allSummaries.stream()
+                                        .filter(s -> s.getSemester().getSemesterId().equals(selectedSemesterId))
+                                        .collect(Collectors.toList());
+                        if (selectedSummaries.isEmpty()) {
+                                return emptyDashboard(profileInfo);
+                        }
+                }
+
+                BigDecimal maxTotalScore = selectedSummaries.stream()
                                 .map(SemesterStudentCompetencySummary::getTotalScore)
                                 .max(BigDecimal::compareTo)
                                 .orElse(BigDecimal.ZERO);
 
-                BigDecimal avgTotalScore = summaries.stream()
+                BigDecimal avgTotalScore = selectedSummaries.stream()
                                 .map(SemesterStudentCompetencySummary::getTotalScore)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
-                                .divide(BigDecimal.valueOf(summaries.size()), 2, RoundingMode.HALF_UP);
+                                .divide(BigDecimal.valueOf(selectedSummaries.size()), 2, RoundingMode.HALF_UP);
 
                 CompetencySummaryInfo summaryInfo = CompetencySummaryInfo.builder()
                                 .maxScore(maxTotalScore)
                                 .recentAvg(avgTotalScore)
-                                .lastEvaluationDate(summaries.stream()
+                                .lastEvaluationDate(selectedSummaries.stream()
                                                 .map(SemesterStudentCompetencySummary::getCalculatedAt)
                                                 .max(LocalDateTime::compareTo)
                                                 .orElse(null))
                                 .build();
 
-                // 4. 레이더 차트 (최근 학기 기준)
-                List<CompetencyRadarItem> radarChart = latestSummaries.stream()
+                // 4. 레이더 차트 (선택 학기 기준)
+                List<CompetencyRadarItem> radarChart = selectedSummaries.stream()
                                 .map(s -> CompetencyRadarItem.builder()
                                                 .label(s.getCompetency().getName())
                                                 .score(s.getTotalScore())
                                                 .build())
                                 .collect(Collectors.toList());
 
-                // 5. 트렌드 차트 (학기별 추이)
-                List<Semester> sortedSemesters = summaries.stream()
-                                .map(SemesterStudentCompetencySummary::getSemester)
-                                .distinct()
-                                .sorted(Comparator.comparing(Semester::getSemesterId))
-                                .collect(Collectors.toList());
+                // 5. 트렌드 차트 (trendMode에 따라 분기)
+                List<String> categories;
+                List<CompetencyTrendSeries> series;
 
-                List<String> categories = sortedSemesters.stream()
-                                .map(Semester::getDisplayName)
-                                .collect(Collectors.toList());
+                if ("DEPARTMENT".equalsIgnoreCase(trendMode)) {
+                        // [DEPARTMENT 모드] 학과 평균 추이 (CLOSED 상태 진단 기준)
+                        List<DiagnosisRun> closedRuns = diagnosisRunRepository
+                                        .findByStatus(DiagnosisRunStatus.CLOSED);
 
-                List<CompetencyTrendSeries> series = allCompetencies.stream()
-                                .map(comp -> {
-                                        List<BigDecimal> data = new ArrayList<>();
-                                        for (Semester sem : sortedSemesters) {
-                                                BigDecimal score = summaries.stream()
-                                                                .filter(s -> s.getSemester().getSemesterId()
-                                                                                .equals(sem.getSemesterId())
-                                                                                && s.getCompetency().getCompetencyId()
-                                                                                                .equals(comp.getCompetencyId()))
-                                                                .map(SemesterStudentCompetencySummary::getTotalScore)
-                                                                .findFirst()
-                                                                .orElse(BigDecimal.ZERO);
-                                                data.add(score);
-                                        }
-                                        return CompetencyTrendSeries.builder()
-                                                        .name(comp.getName())
-                                                        .data(data)
-                                                        .build();
-                                })
-                                .collect(Collectors.toList());
+                        List<Semester> trendSemesters = closedRuns.stream()
+                                        .filter(run -> run.getDeptId() == null
+                                                        || run.getDeptId().equals(profile.getDeptId()))
+                                        .map(DiagnosisRun::getSemester)
+                                        .distinct()
+                                        .sorted(Comparator.comparing(Semester::getSemesterId))
+                                        .collect(Collectors.toList());
 
-                // 6. 통계 테이블 (최근 학기 기준)
-                List<SemesterCompetencyCohortStat> stats = statRepository.findBySemesterSemesterId(latestSemesterId);
-                Map<Long, SemesterCompetencyCohortStat> statMap = stats.stream()
+                        categories = trendSemesters.stream()
+                                        .map(Semester::getDisplayName)
+                                        .collect(Collectors.toList());
+
+                        if (categories.isEmpty()) {
+                                categories = List.of("-");
+                        }
+
+                        series = allCompetencies.stream()
+                                        .map(comp -> {
+                                                List<BigDecimal> data = new ArrayList<>();
+                                                for (Semester sem : trendSemesters) {
+                                                        Double avgScore = summaryRepository.getDepartmentAverageScore(
+                                                                        sem.getSemesterId(),
+                                                                        comp.getCompetencyId(),
+                                                                        profile.getDeptId());
+                                                        data.add(avgScore != null
+                                                                        ? BigDecimal.valueOf(avgScore).setScale(2,
+                                                                                        RoundingMode.HALF_UP)
+                                                                        : BigDecimal.ZERO);
+                                                }
+                                                return CompetencyTrendSeries.builder()
+                                                                .name(comp.getName())
+                                                                .data(data)
+                                                                .build();
+                                        })
+                                        .collect(Collectors.toList());
+                } else {
+                        // [STUDENT 모드] 학생 개인 점수 추이 (기본값)
+                        List<Semester> studentSemesters = allSummaries.stream()
+                                        .map(SemesterStudentCompetencySummary::getSemester)
+                                        .distinct()
+                                        .sorted(Comparator.comparing(Semester::getSemesterId))
+                                        .collect(Collectors.toList());
+
+                        categories = studentSemesters.stream()
+                                        .map(Semester::getDisplayName)
+                                        .collect(Collectors.toList());
+
+                        if (categories.isEmpty()) {
+                                categories = List.of("-");
+                        }
+
+                        series = allCompetencies.stream()
+                                        .map(comp -> {
+                                                List<BigDecimal> data = new ArrayList<>();
+                                                for (Semester sem : studentSemesters) {
+                                                        BigDecimal score = allSummaries.stream()
+                                                                        .filter(s -> s.getSemester().getSemesterId()
+                                                                                        .equals(sem.getSemesterId())
+                                                                                        && s.getCompetency()
+                                                                                                        .getCompetencyId()
+                                                                                                        .equals(comp.getCompetencyId()))
+                                                                        .map(SemesterStudentCompetencySummary::getTotalScore)
+                                                                        .findFirst()
+                                                                        .orElse(BigDecimal.ZERO);
+                                                        data.add(score);
+                                                }
+                                                return CompetencyTrendSeries.builder()
+                                                                .name(comp.getName())
+                                                                .data(data)
+                                                                .build();
+                                        })
+                                        .collect(Collectors.toList());
+                }
+
+                // 6. 통계 테이블 (선택 학기 기준)
+                List<SemesterCompetencyCohortStat> totalStats = statRepository
+                                .findBySemesterSemesterId(selectedSemesterId);
+                Map<Long, SemesterCompetencyCohortStat> totalStatMap = totalStats.stream()
                                 .collect(Collectors.toMap(s -> s.getCompetency().getCompetencyId(), s -> s));
 
-                List<CompetencyMyStatsTableItem> myStatsTable = latestSummaries.stream()
+                Map<Long, List<SemesterStudentCompetencySummary>> historyByCompetency = allSummaries.stream()
+                                .collect(Collectors.groupingBy(
+                                                s -> s.getCompetency().getCompetencyId()));
+
+                List<CompetencyMyStatsTableItem> myStatsTable = selectedSummaries.stream()
                                 .map(s -> {
-                                        SemesterCompetencyCohortStat stat = statMap
+                                        SemesterCompetencyCohortStat stat = totalStatMap
                                                         .get(s.getCompetency().getCompetencyId());
+                                        List<SemesterStudentCompetencySummary> history = historyByCompetency
+                                                        .getOrDefault(s.getCompetency().getCompetencyId(), List.of());
+
+                                        BigDecimal myMax = history.stream()
+                                                        .map(SemesterStudentCompetencySummary::getTotalScore)
+                                                        .max(BigDecimal::compareTo)
+                                                        .orElse(BigDecimal.ZERO);
+
+                                        BigDecimal myAvg = history.isEmpty() ? BigDecimal.ZERO
+                                                        : history.stream()
+                                                                        .map(SemesterStudentCompetencySummary::getTotalScore)
+                                                                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                                                        .divide(BigDecimal.valueOf(history.size()), 2,
+                                                                                        RoundingMode.HALF_UP);
                                         return CompetencyMyStatsTableItem.builder()
                                                         .competencyName(s.getCompetency().getName())
                                                         .myScore(s.getTotalScore())
                                                         .avgScore(stat != null ? stat.getMean() : BigDecimal.ZERO)
                                                         .maxScore(stat != null ? stat.getMaxScore() : BigDecimal.ZERO)
-                                                        .build();
-                                })
-                                .collect(Collectors.toList());
-
-                List<CompetencyComparisonTableItem> comparisonTable = latestSummaries.stream()
-                                .map(s -> {
-                                        SemesterCompetencyCohortStat stat = statMap
-                                                        .get(s.getCompetency().getCompetencyId());
-                                        return CompetencyComparisonTableItem.builder()
-                                                        .competencyName(s.getCompetency().getName())
-                                                        .myScore(s.getTotalScore())
-                                                        .deptAvgScore(stat != null ? stat.getMean() : BigDecimal.ZERO)
-                                                        .deptMaxScore(stat != null ? stat.getMaxScore()
-                                                                        : BigDecimal.ZERO)
+                                                        .myAvgScore(myAvg)
+                                                        .myMaxScore(myMax)
                                                         .build();
                                 })
                                 .collect(Collectors.toList());
@@ -205,7 +289,6 @@ public class CompetencyQueryService {
                                                 .series(series)
                                                 .build())
                                 .myStatsTable(myStatsTable)
-                                .comparisonTable(comparisonTable)
                                 .build();
         }
 
@@ -222,7 +305,6 @@ public class CompetencyQueryService {
                                                 .series(List.of())
                                                 .build())
                                 .myStatsTable(List.of())
-                                .comparisonTable(List.of())
                                 .build();
         }
 }

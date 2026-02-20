@@ -222,7 +222,7 @@ export default function ResourceCreatePageClient() {
                       key={t}
                       type="button"
                       className={styles.toolBtn}
-                      onClick={() => {}}
+                      onClick={() => { }}
                       disabled={saving}
                       aria-label={t}
                       title={t}

@@ -3,6 +3,12 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button, type ButtonProps } from "./Button";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getDeleteDefaultConfirmMessage,
+  getDeleteDefaultLabel,
+  getDeleteFailedMessage,
+} from "@/components/localeText";
 
 export type DeleteActionButtonProps = Omit<ButtonProps, "variant" | "onClick" | "children"> & {
   /** 실제 삭제 로직(필수): API 호출 등을 여기서 수행 */
@@ -26,8 +32,8 @@ export type DeleteActionButtonProps = Omit<ButtonProps, "variant" | "onClick" | 
 
 export function DeleteActionButton({
   onDelete,
-  confirmMessage = "정말 삭제하시겠습니까?",
-  label = "삭제",
+  confirmMessage,
+  label,
   onDeleted,
   refreshOnSuccess = true,
   onError,
@@ -35,13 +41,17 @@ export function DeleteActionButton({
   ...props
 }: DeleteActionButtonProps) {
   const router = useRouter();
+  const { locale } = useLocale();
   const [loading, setLoading] = React.useState(false);
+  const resolvedConfirmMessage = confirmMessage ?? getDeleteDefaultConfirmMessage(locale);
+  const resolvedLabel = label ?? getDeleteDefaultLabel(locale);
+  const failedMessage = getDeleteFailedMessage(locale);
 
   const handleClick = async () => {
     if (loading) return;
 
-    if (confirmMessage && confirmMessage.trim().length > 0) {
-      const ok = window.confirm(confirmMessage);
+    if (resolvedConfirmMessage && resolvedConfirmMessage.trim().length > 0) {
+      const ok = window.confirm(resolvedConfirmMessage);
       if (!ok) return;
     }
 
@@ -56,7 +66,7 @@ export function DeleteActionButton({
         onError(e);
       } else {
         // 프로젝트에 toast가 없다는 가정 하에 기본 alert
-        alert("삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        alert(failedMessage);
         console.error(e);
       }
     } finally {
@@ -72,7 +82,7 @@ export function DeleteActionButton({
       onClick={handleClick}
       {...props}
     >
-      {label}
+      {resolvedLabel}
     </Button>
   );
 }

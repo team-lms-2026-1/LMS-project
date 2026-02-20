@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./ExtraCurricularGradePage.module.css";
@@ -10,10 +10,12 @@ import { useRouter } from "next/navigation";
 import { useExtraCurricularGradeList } from "../../hooks/useExtraCurricularGradeList";
 import { ExtraCurricularGradeTable } from "./ExtraCurricularGradeTable";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function ExtraCurricularGradePageClient() {
   const router = useRouter();
   const { state, actions } = useExtraCurricularGradeList();
+  const t = useI18n("extraCurricular.adminGrades");
 
   const { get } = useFilterQuery(["deptId"]);
   const deptId = get("deptId");
@@ -42,7 +44,7 @@ export default function ExtraCurricularGradePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>비교과 성적 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <DeptFilterDropdown />
@@ -51,7 +53,7 @@ export default function ExtraCurricularGradePageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="학번/이름 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>

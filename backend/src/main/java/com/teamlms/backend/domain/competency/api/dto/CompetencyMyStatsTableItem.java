@@ -11,4 +11,6 @@ public class CompetencyMyStatsTableItem {
     private BigDecimal myScore;
     private BigDecimal avgScore;
     private BigDecimal maxScore;
+    private BigDecimal myAvgScore;
+    private BigDecimal myMaxScore;
 }

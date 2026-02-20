@@ -2,6 +2,7 @@ package com.teamlms.backend.domain.community.service;
 
 import com.teamlms.backend.domain.community.api.dto.ExternalCategoryRequest;
 import com.teamlms.backend.domain.community.entity.NoticeCategory;
+// import com.teamlms.backend.domain.community.entity.ResourceCategory;
 import com.teamlms.backend.domain.community.repository.NoticeCategoryRepository;
 import com.teamlms.backend.domain.community.repository.NoticeRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;

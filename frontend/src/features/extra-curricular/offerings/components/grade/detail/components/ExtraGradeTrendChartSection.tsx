@@ -3,13 +3,16 @@
 import type { ExtraGradeDetailHeaderDto } from "../../../../api/types";
 import styles from "./ExtraGradeTrendChartSection.module.css";
 import { ExtraGradeTrendComposedChart } from "./ExtraGradeTrendComposedChart";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = { data: ExtraGradeDetailHeaderDto };
 
 export function ExtraGradeTrendChartSection({ data }: Props) {
+  const t = useI18n("extraCurricular.adminGrades.detail.trend");
+
   return (
     <div className={styles.section}>
-      <Header title="학기별 이수 포인트/시간" />
+      <Header title={t("title")} />
       <div className={styles.body}>
         <ExtraGradeTrendComposedChart items={data.trend ?? []} />
       </div>

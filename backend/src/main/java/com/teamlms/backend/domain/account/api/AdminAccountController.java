@@ -1,7 +1,6 @@
 package com.teamlms.backend.domain.account.api;
 
 import com.teamlms.backend.domain.account.api.dto.AdminAccountCreateRequest;
-import com.teamlms.backend.domain.account.api.dto.AdminAccountCreateResponse;
 import com.teamlms.backend.domain.account.api.dto.AdminAccountStatusUpdateRequest;
 import com.teamlms.backend.domain.account.api.dto.AdminAccountStatusUpdateResponse;
 import com.teamlms.backend.domain.account.api.dto.AdminAccountUpdateRequest;
@@ -34,10 +33,6 @@ public class AdminAccountController {
         private final AccountCommandService accountCommandService;
         private final AccountService accountService;
 
-        /**
-         * 관리자: 계정 생성
-         * POST /api/v1/admin/accounts
-         */
         @PostMapping
         @ResponseStatus(HttpStatus.CREATED)
         public ApiResponse<SuccessResponse> create(@Valid @RequestBody AdminAccountCreateRequest request,
@@ -72,7 +67,8 @@ public class AdminAccountController {
                         @RequestParam(defaultValue = "1") int page,
                         @RequestParam(defaultValue = "20") int size,
                         @RequestParam(required = false) String keyword,
-                        @RequestParam(required = false) AccountType accountType) {
+                        @RequestParam(required = false) AccountType accountType,
+                        @RequestParam(required = false) Long deptId) {
                 int safePage = Math.max(page, 1);
                 int safeSize = Math.min(Math.max(size, 1), 100);
 
@@ -81,7 +77,7 @@ public class AdminAccountController {
                                 safeSize,
                                 Sort.by(Sort.Direction.DESC, "createdAt"));
 
-                Page<AdminAccountListItem> result = accountService.adminList(keyword, accountType, pageable);
+                Page<AdminAccountListItem> result = accountService.adminList(keyword, accountType, deptId, pageable);
 
                 return ApiResponse.of(
                                 result.getContent(),

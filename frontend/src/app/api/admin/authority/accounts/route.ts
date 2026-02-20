@@ -84,6 +84,7 @@ export async function GET(req: Request) {
   const page = Number(sp.get("page") ?? "0");
   const size = Number(sp.get("size") ?? "10");
   const accountType = (sp.get("accountType") ?? "").trim() || undefined;
+  const deptId = sp.get("deptId") ? Number(sp.get("deptId")) : undefined;
 
   const keywordRaw = pickKeyword(sp);
   const keyword = (keywordRaw ?? "").trim() || undefined;
@@ -93,6 +94,7 @@ export async function GET(req: Request) {
   upstreamGet.searchParams.set("size", String(size));
   if (accountType) upstreamGet.searchParams.set("accountType", accountType);
   if (keyword) upstreamGet.searchParams.set("keyword", keyword);
+  if (deptId) upstreamGet.searchParams.set("deptId", String(deptId));
 
   let resGet: Response;
   try {

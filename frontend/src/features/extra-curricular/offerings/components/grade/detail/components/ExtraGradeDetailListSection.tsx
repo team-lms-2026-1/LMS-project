@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./ExtraGradeDetailListSection.module.css";
@@ -11,12 +11,14 @@ import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
 import { ExtraCompletionDetailTable } from "./ExtraCompletionDetailTable";
 import { useExtraCurricularGradeDetailList } from "@/features/extra-curricular/offerings/hooks/useExtraCurricularGradeList";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   studentAccountId: number;
 };
 
 export function ExtraGradeDetailListSection({ studentAccountId }: Props) {
+  const t = useI18n("extraCurricular.adminGrades.detail.list");
   const { state, actions } = useExtraCurricularGradeDetailList({
     studentAccountId,
     enabled: true,
@@ -25,7 +27,7 @@ export function ExtraGradeDetailListSection({ studentAccountId }: Props) {
   const { get } = useFilterQuery(["semesterId"]);
   const semesterId = get("semesterId");
 
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 7 });
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export function ExtraGradeDetailListSection({ studentAccountId }: Props) {
 
   return (
     <div className={styles.section}>
-      <Header title="비교과 수료 리스트" />
+      <Header title={t("title")} />
 
       <div className={styles.body}>
         <div className={styles.searchRow}>
@@ -59,12 +61,12 @@ export function ExtraGradeDetailListSection({ studentAccountId }: Props) {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="비교과명/코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
 
-        {state.error && <div className={styles.errorMessage}>{state.error}</div>}
+        {state.error && <div className={styles.errorMessage}>{t("loadError")}</div>}
 
         <ExtraCompletionDetailTable items={state.items} loading={state.loading} />
 
@@ -88,3 +90,4 @@ function Header({ title }: { title: string }) {
     </div>
   );
 }
+

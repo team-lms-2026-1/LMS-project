@@ -1,4 +1,4 @@
-import { bffRequest } from "@/lib/bffClient";
+import { getJson, postJson, patchJson, deleteJson } from "@/lib/http";
 import { AccountStatus, AccountType } from "../types";
 import type {
   AccountsListResponseDto,
@@ -14,6 +14,7 @@ const BASE = "/api/admin/authority/accounts";
 type AccountsListParams = {
   accountType?: AccountType;
   keyword?: string;
+  deptId?: number; // ✅ 학과 필터 추가
   page?: number; // ✅ 0-based로 보내는 걸 권장 (프론트에서 page-1 변환)
   size?: number;
 };
@@ -110,12 +111,12 @@ function normalizeListResponse(raw: any): AccountsListResponseDto {
     Number(meta?.totalElements ?? meta?.total ?? undefined) ||
     Number(
       raw?.total ??
-        raw?.totalElements ??
-        raw?.count ??
-        raw?.data?.total ??
-        raw?.data?.totalElements ??
-        raw?.data?.count ??
-        undefined
+      raw?.totalElements ??
+      raw?.count ??
+      raw?.data?.total ??
+      raw?.data?.totalElements ??
+      raw?.data?.count ??
+      undefined
     ) ||
     items.length;
 
@@ -186,51 +187,44 @@ export const accountsApi = {
     const kw = (params?.keyword ?? "").trim();
     if (kw) qs.set("keyword", kw);
 
+    if (params?.deptId) qs.set("deptId", String(params.deptId));
+
     // ✅ 서버는 보통 0-based (프론트에서 page-1로 변환해서 넣는 걸 권장)
     qs.set("page", String(params?.page ?? 0));
-    qs.set("size", String(params?.size ?? 20));
+    qs.set("size", String(params?.size ?? 10));
 
     const url = `${BASE}?${qs.toString()}`;
-    const raw = await bffRequest<any>(url);
+    const raw = await getJson<any>(url);
     return normalizeListResponse(raw);
   },
 
   /** ✅ 수정 모달에서 "연락처/학과/주전공" 정확히 채우기 위해 상세 호출 */
   async detail(accountId: number): Promise<AccountRowDto> {
-    const raw = await bffRequest<any>(`${BASE}/${accountId}`);
+    const raw = await getJson<any>(`${BASE}/${accountId}`);
     const obj = raw?.data ?? raw; // {data:{...}} 대응
     return normalizeRow(obj);
   },
 
   create(body: CreateAccountRequestDto) {
-    return bffRequest<{ accountId: number }>(BASE, { method: "POST", body });
+    return postJson<{ accountId: number }>(BASE, body);
   },
 
   update(accountId: number, body: UpdateAccountRequestDto) {
     const payload = sanitizeUpdateBody(body);
-    return bffRequest<void>(`${BASE}/${accountId}`, { method: "PATCH", body: payload });
+    return patchJson<void>(`${BASE}/${accountId}`, payload);
   },
 
   updateStatus(accountId: number, status: AccountStatus) {
-    return bffRequest<void>(`${BASE}/${accountId}/status`, {
-      method: "PATCH",
-      body: { status },
-    });
+    return patchJson<void>(`${BASE}/${accountId}/status`, { status });
   },
 
   resetPassword(accountId: number) {
-    return bffRequest<void>(`${BASE}/${accountId}/password/reset`, {
-      method: "POST",
-      body: {},
-    });
+    return postJson<void>(`${BASE}/${accountId}/password/reset`, {});
   },
 
   /** ✅ 학과 드롭다운 */
   async listDepts(): Promise<DeptDto[]> {
-    const res = await fetch("/api/admin/authority/depts/dropdown", { cache: "no-store" });
-    if (!res.ok) throw new Error("학과 목록 조회 실패");
-
-    const json = await res.json();
+    const json = await getJson<any>("/api/admin/authority/depts/dropdown", { cache: "no-store" });
     const arr = unwrapArray(json);
 
     return arr.map((d: any) => ({
@@ -241,12 +235,9 @@ export const accountsApi = {
 
   /** ✅ 주전공(학과 선택 -> 해당 학과 전공만) */
   async listMajorsByDept(deptId: number): Promise<MajorDto[]> {
-    const res = await fetch(`/api/admin/authority/depts/${deptId}/majors/dropdown`, {
+    const json = await getJson<any>(`/api/admin/authority/depts/${deptId}/majors/dropdown`, {
       cache: "no-store",
     });
-    if (!res.ok) throw new Error("전공 목록 조회 실패");
-
-    const json = await res.json();
     const arr = unwrapArray(json);
 
     return arr.map((m: any) => ({
@@ -258,10 +249,7 @@ export const accountsApi = {
 
   /** ✅ 부/복수전공: 학과 무관 전체 전공 */
   async listMajorsAll(): Promise<MajorDto[]> {
-    const res = await fetch(`/api/admin/authority/majors/dropdown`, { cache: "no-store" });
-    if (!res.ok) throw new Error("전체 전공 목록 조회 실패");
-
-    const json = await res.json();
+    const json = await getJson<any>(`/api/admin/authority/majors/dropdown`, { cache: "no-store" });
     const arr = unwrapArray(json);
 
     return arr.map((m: any) => ({
@@ -269,5 +257,42 @@ export const accountsApi = {
       majorName: String(m.name ?? m.majorName ?? m.label ?? ""),
       deptId: m.deptId ?? m.departmentId ?? undefined,
     }));
+  },
+
+  /** ✅ 학생 프로필 이미지 업로드 */
+  async uploadStudentProfileImage(accountId: number, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) throw new Error("프로필 이미지 업로드 실패");
+    const json = await res.json();
+    return json.data; // imageUrl
+  },
+
+  async updateStudentProfileImage(accountId: number, file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`/api/admin/mypage/student/${accountId}/image`, {
+      method: "PATCH",
+      body: formData,
+    });
+    if (!res.ok) throw new Error("프로필 이미지 수정 실패");
+    const json = await res.json();
+    return json.data; // imageUrl
+  },
+
+  async getStudentProfileImage(accountId: number): Promise<string> {
+    const json = await getJson<any>(`/api/admin/mypage/student/${accountId}/image`);
+    return json.data; // presignedImageUrl
+  },
+
+  /** ✅ 학생 프로필 이미지 삭제 */
+  async deleteStudentProfileImage(accountId: number): Promise<void> {
+    await deleteJson<void>(`/api/admin/mypage/student/${accountId}/image`);
   },
 };

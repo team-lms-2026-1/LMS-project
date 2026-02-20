@@ -7,6 +7,7 @@ import styles from "./CurricularCreateModal.module.css";
 
 import { createCurricular } from "../../api/curricularsApi";
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
+import { useI18n } from "@/i18n/useI18n";
 
 
 type Props = {
@@ -16,6 +17,8 @@ type Props = {
 };
 
 export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
+  const t = useI18n("curricular.modal.curricularCreate");
+  const tCommon = useI18n("curricular.common");
 
   const [curricularCode, setCurricularCode] = useState<string>("");
   const [curricularName, setCurricularName] = useState<string>("");
@@ -46,11 +49,11 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
   };
 
   const validate = () => {
-    if (!curricularCode.trim()) return "교과코드를 입력하세요.";
-    if (!curricularName.trim()) return "교과이름을 입력하세요.";
-    if (deptId <= 0) return "주관학과를 선택하세요.";
-    if (credits <= 0) return "부여 학점을 입력하세요.";
-    if (!description.trim()) return "교과 설명을 입력하세요.";
+    if (!curricularCode.trim()) return t("validation.requiredCurricularCode");
+    if (!curricularName.trim()) return t("validation.requiredCurricularName");
+    if (deptId <= 0) return t("validation.requiredDept");
+    if (credits <= 0) return t("validation.requiredCredits");
+    if (!description.trim()) return t("validation.requiredDescription");
     return null;
   };
 
@@ -70,7 +73,7 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
       resetAll();
       onClose();
     } catch (e: any) {
-      setError(e?.error?.message ?? e?.message ?? "등록에 실패했습니다.");
+      setError(e?.error?.message ?? e?.message ?? t("submitFailed"));
     } finally {
       setLoading(false);
     }
@@ -79,16 +82,16 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
   return (
     <Modal
       open={open}
-      title="교과 등록"
+      title={t("title")}
       onClose={handleClose}
       size="md"
       footer={
         <>
           <Button onClick={handleSubmit} loading={loading}>
-            등록
+            {tCommon("registerButton")}
           </Button>
           <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
+            {tCommon("cancelButton")}
           </Button>
         </>
       }
@@ -99,29 +102,29 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
         {/* ✅ 2×2: 교과코드 / 교과명 / 주관학과 / 학점 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>교과코드</div>
+            <div className={styles.label}>{t("curricularCodeLabel")}</div>
             <input
               className={styles.control}
               value={curricularCode}
               onChange={(e) => setCurricularCode(e.target.value)}
-              placeholder="예) CS101"
+              placeholder={t("curricularCodePlaceholder")}
               autoComplete="off"
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>교과명</div>
+            <div className={styles.label}>{t("curricularNameLabel")}</div>
             <input
               className={styles.control}
               value={curricularName}
               onChange={(e) => setCurricularName(e.target.value)}
-              placeholder="예) 자료구조"
+              placeholder={t("curricularNamePlaceholder")}
               autoComplete="off"
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>주관학과</div>
+            <div className={styles.label}>{t("deptLabel")}</div>
               <DeptFilterDropdown
                 value={deptId > 0 ? String(deptId) : ""}
                 onChange={(v) => setDeptId(v ? Number(v) : 0)}
@@ -129,7 +132,7 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>학점</div>
+            <div className={styles.label}>{t("creditsLabel")}</div>
             <input
               className={styles.control}
               type="number"
@@ -138,7 +141,7 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
                 const v = e.target.value;
                 setCredits(v === "" ? 0 : Number(v));
               }}
-              placeholder="예) 3"
+              placeholder={t("creditsPlaceholder")}
               min={1}
               max={30}
             />
@@ -147,12 +150,12 @@ export function CurricularCreateModal({ open, onClose, onCreated }: Props) {
 
         {/* ✅ 설명: 전체 폭 */}
         <label className={styles.field}>
-          <div className={styles.label}>설명</div>
+          <div className={styles.label}>{t("descriptionLabel")}</div>
           <textarea
             className={styles.control}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="교과 설명을 입력하세요."
+            placeholder={t("descriptionPlaceholder")}
             rows={4}
           />
         </label>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./QnaCreatePage.module.css";
 import type { Category, CreateQnaQuestionRequestDto } from "../../api/types";
-import { createQnaQuestion, fetchQnaCategories } from "../../api/QnasApi";
+import { createQnaQuestion, fetchQnaCategories } from "../../api/qnasApi";
 
 const LIST_PATH = "/student/community/qna/questions"; // ✅ 너 프로젝트 목록 라우트에 맞춰 수정 가능
 
@@ -76,7 +76,7 @@ export default function QnaCreatePageClient() {
     setSaving(true);
     try {
       await createQnaQuestion(body);
-      router.push(LIST_PATH);
+      router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
       setError(e?.message ?? "등록에 실패했습니다.");
     } finally {

@@ -12,11 +12,13 @@
 
 .head {
   display: grid;
-  grid-template-columns: 70px 1.2fr 1fr 130px 160px 110px 150px;
+  grid-template-columns: 70px 1.2fr 1fr 130px 160px 110px 200px;
   gap: 0;
   padding: 12px 14px;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+  text-align: center;
   font-size: 12px;
   font-weight: 800;
   color: #6b7280;
@@ -24,11 +26,13 @@
 
 .row {
   display: grid;
-  grid-template-columns: 70px 1.2fr 1fr 130px 160px 110px 150px;
+  grid-template-columns: 70px 1.2fr 1fr 130px 160px 110px 200px;
   gap: 0;
   padding: 12px 14px;
   border-bottom: 1px solid #f3f4f6;
   align-items: center;
+  min-height: 56px;
+  text-align: center;
 }
 
 .row:last-child {
@@ -52,10 +56,19 @@
 .colRoom,
 .colDate,
 .colTime,
-.colStatus,
+.colStatus {
+  color: #111827;
+  font-size: 13px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .colActions {
   color: #111827;
   font-size: 13px;
+  min-width: 0;
 }
 
 .colDate,
@@ -65,8 +78,9 @@
 
 .colActions {
   display: flex;
-  justify-content: flex-start;
-  padding-left: 65px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
 /* 상태 배지 */
@@ -113,7 +127,7 @@
 @media (max-width: 1024px) {
   .head,
   .row {
-    grid-template-columns: 60px 1.2fr 1fr 120px 150px 100px 140px;
+    grid-template-columns: 60px 1.2fr 1fr 120px 150px 100px 180px;
   }
 }
 
@@ -134,10 +148,6 @@
 
   .colActions {
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
-}
-
-.head .colActions {
-  justify-content: flex-start;
-  padding-left: 70px;
 }

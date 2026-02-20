@@ -7,6 +7,7 @@ import { Modal } from "@/components/modal/Modal";
 import { OfferingStatus } from "@/features/curricular-offering/api/types";
 import { updateCurricularOfferingStatus } from "@/features/curricular-offering/api/curricularOfferingsApi";
 import styles from "./OfferingStatusDropdown.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   offeringId: number;
@@ -15,17 +16,10 @@ type Props = {
   disabled?: boolean;
 };
 
-const OPTIONS = [
-  { value: "DRAFT", label: "작성중" },
-  { value: "OPEN", label: "등록열림" },
-  { value: "ENROLLMENT_CLOSED", label: "등록마감" },
-  { value: "IN_PROGRESS", label: "진행중" },
-  { value: "COMPLETED", label: "완료(성적확정)" },
-  { value: "CANCELED", label: "취소" },
-];
-
-
 export function OfferingStatusDropdown({ offeringId, status, onChanged, disabled = false }: Props) {
+  const t = useI18n("curricular.adminOfferingDetail.status");
+  const tStatus = useI18n("curricular.status.offering");
+
   const [value, setValue] = useState<OfferingStatus>(status);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -73,7 +67,7 @@ export function OfferingStatusDropdown({ offeringId, status, onChanged, disabled
       setSubmitError(null);
       await onChanged?.();
     } catch (e: any) {
-      setSubmitError(e?.message ?? "상태변경에 실패했습니다.");
+      setSubmitError(e?.message ?? t("messages.updateFailed"));
 
       // UI는 원복(서버 상태로)
       setValue(status);
@@ -83,27 +77,39 @@ export function OfferingStatusDropdown({ offeringId, status, onChanged, disabled
     }
   };
 
+  const options = useMemo(
+    () => [
+      { value: "DRAFT", label: tStatus("DRAFT") },
+      { value: "OPEN", label: tStatus("OPEN") },
+      { value: "ENROLLMENT_CLOSED", label: tStatus("ENROLLMENT_CLOSED") },
+      { value: "IN_PROGRESS", label: tStatus("IN_PROGRESS") },
+      { value: "COMPLETED", label: tStatus("COMPLETED") },
+      { value: "CANCELED", label: tStatus("CANCELED") },
+    ],
+    [tStatus]
+  );
+
   return (
     <>
       <Dropdown
         value={value}
-        options={OPTIONS}
+        options={options}
         disabled={disabled || saving}
         onChange={handleSelect}
       />
 
       <Modal
         open={confirmOpen}
-        title="상태 변경"
+        title={t("title")}
         onClose={saving ? () => {} : handleCancel}
         size="sm"
         footer={
           <>
             <Button onClick={handleConfirm} loading={saving}>
-              예
+              {t("confirmYes")}
             </Button>
             <Button variant="secondary" onClick={handleCancel} disabled={saving}>
-              아니오
+              {t("confirmNo")}
             </Button>
           </>
         }
@@ -111,7 +117,7 @@ export function OfferingStatusDropdown({ offeringId, status, onChanged, disabled
       {submitError && <div className={styles.error}>{submitError}</div>}
         <div>
           <div style={{ marginBottom: 8 }}>
-            상태를변경하시겠습니까? (상태는 되돌릴 수 없습니다.)
+            {t("messages.confirmText")}
           </div>
         </div>
       </Modal>

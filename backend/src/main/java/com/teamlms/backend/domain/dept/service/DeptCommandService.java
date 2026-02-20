@@ -31,10 +31,10 @@ public class DeptCommandService {
     public Long create(String deptCode, String deptName, String description, Long actorAccountId) {
         // 중복 방지 (DB unique는 마지막 방어)
         if (deptRepository.existsByDeptCode(deptCode)) {
-            throw new IllegalStateException("이미 존재하는 학과 코드입니다. deptCode=" + deptCode);
+            throw new BusinessException(ErrorCode.DUPLICATE_DEPT_CODE);
         }
         if (deptRepository.existsByDeptName(deptName)) {
-            throw new IllegalStateException("이미 존재하는 학과명입니다. deptName=" + deptName);
+            throw new BusinessException(ErrorCode.DUPLICATE_DEPT_NAME);
         }
 
         Dept dept = Dept.builder()
@@ -55,6 +55,11 @@ public class DeptCommandService {
 
         Dept dept = deptRepository.findById(deptId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.DEPT_NOT_FOUND, deptId));
+
+        // 이름 변경 시 중복 체크
+        if (!dept.getDeptName().equals(deptName) && deptRepository.existsByDeptName(deptName)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_DEPT_NAME);
+        }
 
         if (headProfessorAccountId != null) {
             // 1) 교수 소속 검증 (최소)
@@ -83,20 +88,33 @@ public class DeptCommandService {
 
         // 비활성화로 전환하는 경우에만 “연관 데이터 존재 여부” 체크
         if (!isActive) {
-            boolean hasMajor = majorRepository.existsByDeptId(deptId);
+            boolean hasMajor = majorRepository.existsByDeptIdAndActiveTrue(deptId);
             boolean hasActiveProfessor = professorProfileRepository.existsActiveProfessorByDeptId(deptId);
             boolean hasEnrolledPrimaryStudent = studentMajorRepository.existsEnrolledPrimaryStudentByDeptId(deptId);
 
             if (hasMajor || hasActiveProfessor || hasEnrolledPrimaryStudent) {
-                throw new BusinessException(ErrorCode.DEPT_DEACTIVATE_NOT_ALLOWED, deptId);
+                throw new BusinessException(ErrorCode.DEPT_DEACTIVATE_NOT_ALLOWED);
             }
         }
 
 
         if (isActive) {
-            dept.activate();   // 없으면 active=true 세터 메서드 하나 추가
+            dept.activate();
         } else {
             dept.deactivate();
         }
+    }
+
+    // 담당교수 지정
+    public void updateHeadProfessor(Long deptId, Long professorAccountId) {
+        Dept dept = deptRepository.findById(deptId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.DEPT_NOT_FOUND, deptId));
+
+        // 교수 소속 검증
+        if (!professorProfileRepository.existsByAccountIdAndDeptId(professorAccountId, deptId)) {
+             throw new BusinessException(ErrorCode.INVALID_HEAD_PROFESSOR, professorAccountId, deptId);
+        }
+        
+        dept.assignHeadProfessor(professorAccountId);
     }
 }

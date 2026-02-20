@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 const BACKEND_PATH = "/api/v1/admin/spaces";
 
 const TAG = "admin:spaces";
+const STUDENT_LIST_TAG = "student:spaces:list";
 
 export async function GET(req: Request) {
   return proxyToBackend(req, BACKEND_PATH, {
@@ -34,7 +35,10 @@ export async function POST(req: Request) {
   });
 
   // ✅ 생성 성공 시 목록 캐시 무효화
-  if (res.status >= 200 && res.status < 300) revalidateTag(TAG);
+  if (res.status >= 200 && res.status < 300) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_LIST_TAG);
+  }
 
   return res;
 }

@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import styles from "../styles/studentMentoring.module.css";
-import { fetchStudentRecruitments } from "@/features/mentoring/lib/studentApi";
-import { MentoringRecruitment } from "@/features/mentoring/types";
+import { fetchRecruitments } from "@/features/mentoring/api/mentoringApi";
+import { MentoringRecruitment } from "@/features/mentoring/api/types";
 import toast from "react-hot-toast";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
@@ -36,13 +36,12 @@ export default function StudentMentoringList() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await fetchStudentRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: keywordInput });
-            if (res && res.content) {
-                setItems(res.content);
-                setTotalElements(res.totalElements);
+            const res = await fetchRecruitments("student", { page: page - 1, size: PAGE_SIZE, keyword: keywordInput, status: "OPEN" });
+            if (res && res.data) {
+                setItems(res.data);
+                setTotalElements(res.meta?.totalElements || 0);
             } else {
                 console.warn("No content in response", res);
-                // alert("데이터가 없습니다. (Response empty)");
             }
         } catch (e: any) {
             console.error(e);
@@ -60,19 +59,22 @@ export default function StudentMentoringList() {
 
     const columns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (r) => getSemesterLabel(r.semesterId) },
+            { header: "학기", field: "semesterName" },
             { header: "제목", field: "title" },
             { header: "모집기간", field: "recruitStartAt", render: (r) => `${r.recruitStartAt.split("T")[0]} ~ ${r.recruitEndAt.split("T")[0]}` },
             {
                 header: "모집상태",
                 field: "status",
                 render: (r) => {
+                    if (r.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
+                    if (r.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+
                     const now = new Date();
                     const start = new Date(r.recruitStartAt);
                     const end = new Date(r.recruitEndAt);
 
                     if (now < start) {
-                        return <StatusPill status="PENDING" label="대기" />;
+                        return <StatusPill status="DRAFT" label="DRAFT" />;
                     } else if (now >= start && now <= end) {
                         return <StatusPill status="ACTIVE" label="OPEN" />;
                     } else {

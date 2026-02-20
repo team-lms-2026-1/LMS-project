@@ -1,0 +1,351 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabButton {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabActive {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.statusWrap {
+  min-width: 120px;
+}
+
+.statusDropdown {
+  min-width: 120px;
+}
+
+.placeholder {
+  padding: 24px;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.formCard {
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px;
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.formTitle {
+  min-width: 200px;
+}
+
+.formTitleMain {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.formTitleSub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filterItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filterLabel {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.filterDropdown {
+  min-width: 120px;
+}
+
+.filterInput {
+  min-width: 180px;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dateInput {
+  min-width: 130px;
+  height: 42px;
+}
+
+.timeInput {
+  width: 90px;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 12px;
+  background: #fff;
+}
+
+.dateSep {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.questionArea {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.questionList {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addButton:hover {
+  background: #f9fafb;
+}
+
+.questionCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+}
+
+.questionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.questionInput {
+  flex: 1;
+  height: 38px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.typeSelect {
+  width: 110px;
+  height: 38px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.scaleList {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scaleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.scaleLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scaleBullet {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid #9ca3af;
+}
+
+.scaleLabel {
+  font-size: 13px;
+  color: #111827;
+}
+
+.scoreSelect {
+  width: 70px;
+  height: 30px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 6px;
+  font-size: 12px;
+  background: #fff;
+}
+
+.shortRow {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortLabel {
+  font-size: 12px;
+  color: #6b7280;
+  min-width: 36px;
+}
+
+.shortInput {
+  flex: 1;
+  height: 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.csRow {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.csGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.csItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #111827;
+}
+
+.csLabel {
+  white-space: nowrap;
+}
+
+.csSelect {
+  width: 64px;
+  height: 28px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 6px;
+  font-size: 12px;
+  background: #fff;
+}
+
+.csActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.iconButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconButton:hover {
+  background: #f9fafb;
+}
+
+.iconSvg {
+  width: 16px;
+  height: 16px;
+  color: #374151;
+}
+
+@media (max-width: 900px) {
+  .questionArea {
+    flex-direction: column;
+  }
+
+  .addButton {
+    align-self: flex-end;
+  }
+
+  .csGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

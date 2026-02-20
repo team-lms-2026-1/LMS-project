@@ -1,13 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { NoticeListItemDto, PageMeta } from "../api/types";
-import { fetchNoticesList } from "../api/NoticesApi";
+import { fetchNoticesList } from "../api/noticesApi";
 
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -20,7 +20,7 @@ export function useNoticesList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
 
   const [deptId, setDeptId] = useState<number | null>(null);
@@ -58,10 +58,10 @@ export function useNoticesList() {
   return {
     state: {
       items,
-      meta,   // ✅ 항상 PageMeta
+      meta,   // cleaned comment
       page,
-      size, 
-      deptId,  
+      size,
+      deptId,
       keyword,
       loading,
       error,
@@ -71,7 +71,7 @@ export function useNoticesList() {
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
 
-      // ✅ PaginationBar size 변경용
+      // cleaned comment
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
@@ -87,3 +87,4 @@ export function useNoticesList() {
   };
 
 }
+

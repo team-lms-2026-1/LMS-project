@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./CurricularsPage.module.css"
@@ -11,9 +11,11 @@ import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdow
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { CurricularCreateModal } from "../modal/CurricularCreateModal";
 import { CurricularEditModal } from "../modal/CurricularEditModal";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function CurricularPageClient() {
   const { state, actions } = useCurricularsList();
+  const t = useI18n("curricular.adminCurriculars");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
@@ -26,7 +28,7 @@ export default function CurricularPageClient() {
   const { get } = useFilterQuery(["deptId"])
   const deptId = get("deptId")
 
-  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 2 });
+  const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
   const [inputKeyword, setInputKeyword] = useState("");
 
@@ -38,7 +40,7 @@ export default function CurricularPageClient() {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size]);
 
-  // deptId 드롭다운 필터추가
+  // deptId 드롭다운 필터 적용
   useEffect(() => {
     actions.setDeptId(deptId ? Number(deptId) : null);
   }, [deptId, actions]);
@@ -52,7 +54,7 @@ export default function CurricularPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>교과 관리</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <DeptFilterDropdown />
@@ -61,7 +63,7 @@ export default function CurricularPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="학기명/코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
@@ -81,7 +83,7 @@ export default function CurricularPageClient() {
             disabled={state.loading}
           />
           <OutButton onClick={() => setIsModalOpen(true)}>
-            교과운영 등록
+            {t("registerButton")}
           </OutButton>
         </div>
         <CurricularCreateModal
@@ -91,11 +93,11 @@ export default function CurricularPageClient() {
         />
         <CurricularEditModal
           open={Boolean(editId)}
-          curricularId = {editId ?? undefined}
+          curricularId={editId ?? undefined}
           onClose={() => setEditId(null)}
-          onUpdated={ async () => {
+          onUpdated={async () => {
             await actions.reload();
-            setEditId(null)
+            setEditId(null);
           }}
         />
       </div>
@@ -103,3 +105,5 @@ export default function CurricularPageClient() {
     </div>
   )
 }
+
+

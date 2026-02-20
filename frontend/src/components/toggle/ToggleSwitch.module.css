@@ -1,64 +1,52 @@
+/* Table Toggle Switch - shared by Account & Department lists */
 .switch {
   position: relative;
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
 
-  width: 120px;
-  height: 44px;
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
 
-  border-radius: 999px;
-  border: 0;
-
+.slider {
+  position: absolute;
   cursor: pointer;
-  user-select: none;
-
-  transition: background-color 150ms ease, opacity 120ms ease;
-}
-
-.label {
-  position: absolute;
-  font-weight: 800;
-  font-size: 18px;
-  color: #111827;
-  text-transform: lowercase;
-}
-
-/* knob */
-.knob {
-  position: absolute;
-  width: 34px;
-  height: 34px;
+  inset: 0;
+  background-color: #e5e7eb;
   border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-  transition: transform 150ms ease;
+  transition: 0.2s;
 }
 
-/* OFF (핑크) */
-.off {
-  background: #f87171; /* pink/red tone */
-}
-.off .label {
-  right: 18px;
-}
-.off .knob {
-  left: 6px;
-  transform: translateX(0);
-}
-
-/* ON (블루) */
-.on {
-  background: #6366f1; /* indigo/blue tone */
-}
-.on .label {
-  left: 18px;
-}
-.on .knob {
-  left: 6px;
-  transform: translateX(74px); /* 120 - 6 - 34 - 6 = 74 */
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-.disabled {
+.switch input:checked+.slider {
+  background-color: #2563eb;
+}
+
+.switch input:checked+.slider:before {
+  transform: translateX(20px);
+}
+
+.switch[aria-disabled="true"] {
   opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.switch[aria-disabled="true"] .slider {
   cursor: not-allowed;
 }

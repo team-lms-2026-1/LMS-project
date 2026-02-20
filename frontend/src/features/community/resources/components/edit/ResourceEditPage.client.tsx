@@ -36,10 +36,10 @@ function normalizeExistingFiles(files: any[]): ExistingFile[] {
 
     const fileName = String(
       (dto as any)?.originalName ??
-        (dto as any)?.originaName ?? 
-        (dto as any)?.fileName ??
-        (dto as any)?.name ??
-        `첨부파일 ${idx + 1}`
+      (dto as any)?.originaName ??
+      (dto as any)?.fileName ??
+      (dto as any)?.name ??
+      `첨부파일 ${idx + 1}`
     );
 
     const url =

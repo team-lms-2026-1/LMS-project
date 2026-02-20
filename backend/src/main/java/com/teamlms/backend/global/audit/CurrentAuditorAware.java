@@ -26,12 +26,10 @@ public class CurrentAuditorAware implements AuditorAware<Long> {
 
         Object principal = auth.getPrincipal();
 
-        // ✅ 1) AuthUser (지금 네 프로젝트의 정답)
         if (principal instanceof AuthUser u) {
             return Optional.of(u.getAccountId());
         }
 
-        // ✅ 2) 혹시 principal이 Long으로 들어오는 경우
         if (principal instanceof Long accountId) {
             return Optional.of(accountId);
         }

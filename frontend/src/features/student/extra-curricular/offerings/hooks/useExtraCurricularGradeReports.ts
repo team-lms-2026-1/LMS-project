@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type {
@@ -10,11 +10,11 @@ import type {
 import {
   fetchStudentExtraGradeMeHeader,
   fetchStudentExtraGradeMeList,
-} from "../api/extraCuccicularApi";
+} from "../api/extraCurricularApi";
 
 const defaultMeta: PageMeta = {
   page: 1,
-  size: 20,
+  size: 10,
   totalElements: 0,
   totalPages: 1,
   hasNext: false,
@@ -54,7 +54,7 @@ export function useStudentExtraGradeMeList() {
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(20);
+  const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
   const [semesterId, setSemesterId] = useState<number | null>(null);
 
@@ -103,3 +103,5 @@ export function useStudentExtraGradeMeList() {
     },
   };
 }
+
+

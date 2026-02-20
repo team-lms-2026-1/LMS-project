@@ -2,6 +2,11 @@
 
 import * as React from "react";
 import styles from "./PaginationSimple.module.css";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getPaginationAriaLabel,
+  getPaginationControlLabel,
+} from "@/components/localeText";
 
 export type PaginationSimpleProps = {
   page: number; // 1-base
@@ -81,15 +86,6 @@ function buildItems(page: number, totalPages: number, siblingCount: number, boun
   return items;
 }
 
-function label(k: "prev" | "next" | "first" | "last") {
-  switch (k) {
-    case "first": return "처음";
-    case "prev": return "이전";
-    case "next": return "다음";
-    case "last": return "끝";
-  }
-}
-
 export function PaginationSimple({
   page,
   totalPages,
@@ -99,8 +95,10 @@ export function PaginationSimple({
   disabled = false,
   className,
 }: PaginationSimpleProps) {
+  const { locale } = useLocale();
   const safeTotal = Math.max(1, Number.isFinite(totalPages) ? totalPages : 1);
   const current = clamp(Number(page) || 1, 1, safeTotal);
+  const ariaLabel = getPaginationAriaLabel(locale);
 
   const items = React.useMemo(
     () => buildItems(current, safeTotal, siblingCount, boundaryCount),
@@ -122,7 +120,7 @@ export function PaginationSimple({
   };
 
   return (
-    <nav className={`${styles.wrap} ${className ?? ""}`} aria-label="Pagination">
+    <nav className={`${styles.wrap} ${className ?? ""}`} aria-label={ariaLabel}>
       <div className={styles.inner}>
         {items.map((it) => {
           if (it.type === "ellipsis") {
@@ -143,7 +141,7 @@ export function PaginationSimple({
                 onClick={() => onControl(it.key)}
                 disabled={isDisabled}
               >
-                {label(it.key)}
+                {getPaginationControlLabel(locale, it.key)}
               </button>
             );
           }

@@ -1,55 +1,53 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import styles from "../styles/mentoring.module.css";
 import {
-    fetchRecruitments,
     createRecruitment,
     updateRecruitment,
     deleteRecruitment
-} from "../lib/api";
-import type { MentoringRecruitment, MentoringRecruitmentCreateRequest } from "../types";
-import { Table } from "@/components/table/Table";
+} from "../api/mentoringApi";
+import { useMentoringRecruitmentList } from "../hooks/useMentoringRecruitmentList";
+import { MentoringRecruitmentsTable } from "./MentoringRecruitmentsTable";
+import type { MentoringRecruitment, MentoringRecruitmentCreateRequest } from "../api/types";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
-import { StatusPill } from "@/components/status/StatusPill";
 import { Modal } from "@/components/modal/Modal";
-import { Button } from "@/components/button/Button";
+import { Button } from "@/components/button";
 import { SearchBar } from "@/components/searchbar/SearchBar";
-import type { TableColumn } from "@/components/table/types";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
+import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
+import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
+import { Dropdown } from "@/features/dropdowns/_shared";
 
 const PAGE_SIZE = 10;
 
-const SEMESTER_OPTIONS = [
-    { label: "1학기", value: 1 },
-    { label: "여름학기", value: 2 },
-    { label: "2학기", value: 3 },
-    { label: "겨울학기", value: 4 },
-];
-
-const getSemesterLabel = (id: number) => {
-    return SEMESTER_OPTIONS.find(opt => opt.value === id)?.label || `${id}학기`;
-};
-
 export default function MentoringRecruitmentList() {
-    const router = useRouter();
+    const {
+        items,
+        meta,
+        loading: listLoading,
+        page,
+        setPage,
+        searchKeyword,
+        setSearchKeyword,
+        handleSearch,
+        refresh,
+        status,
+        setStatus
+    } = useMentoringRecruitmentList(PAGE_SIZE);
 
-    const [page, setPage] = useState(1);
-    const [items, setItems] = useState<MentoringRecruitment[]>([]);
-    const [totalElements, setTotalElements] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const [searchKeyword, setSearchKeyword] = useState("");
+    const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
     const [deleting, setDeleting] = useState(false);
+    const [closeSignal, setCloseSignal] = useState(0);
 
     const [formData, setFormData] = useState<MentoringRecruitmentCreateRequest & { status?: string }>({
-        semesterId: 1, // Default or select
+        semesterId: 0,
         title: "",
         description: "",
         recruitStartAt: "",
@@ -57,24 +55,15 @@ export default function MentoringRecruitmentList() {
         status: "DRAFT"
     });
 
-    const fetchData = () => {
-        setLoading(true);
-        fetchRecruitments({ page: page - 1, size: PAGE_SIZE, keyword: searchKeyword }) // Spring Page is 0-indexed
-            .then((res: any) => {
-                setItems(res.content || []);
-                setTotalElements(res.totalElements || 0);
-            })
-            .catch((err) => console.error(err))
-            .finally(() => setLoading(false));
-    };
-
     useEffect(() => {
-        fetchData();
-    }, [page]);
+        if (semesterOptions.length > 0 && !editingId && formData.semesterId === 0) {
+            setFormData(prev => ({ ...prev, semesterId: Number(semesterOptions[0].value) }));
+        }
+    }, [semesterOptions, editingId, formData.semesterId]);
 
     const resetForm = () => {
         setFormData({
-            semesterId: 1,
+            semesterId: semesterOptions.length > 0 ? Number(semesterOptions[0].value) : 0,
             title: "",
             description: "",
             recruitStartAt: "",
@@ -95,15 +84,17 @@ export default function MentoringRecruitmentList() {
             semesterId: recruitment.semesterId,
             title: recruitment.title,
             description: recruitment.description,
-            recruitStartAt: recruitment.recruitStartAt ? recruitment.recruitStartAt.substring(0, 16) : "",
-            recruitEndAt: recruitment.recruitEndAt ? recruitment.recruitEndAt.substring(0, 16) : "",
+            // DatePickerInput expects "yyyy-MM-dd"
+            recruitStartAt: recruitment.recruitStartAt ? recruitment.recruitStartAt.substring(0, 10) : "",
+            recruitEndAt: recruitment.recruitEndAt ? recruitment.recruitEndAt.substring(0, 10) : "",
             status: recruitment.status
         });
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id: number) => {
-        setDeleteTargetId(id);
+    const handleCloseModal = () => {
+        setCloseSignal(v => v + 1);
+        setIsModalOpen(false);
     };
 
     const confirmDelete = async () => {
@@ -115,7 +106,7 @@ export default function MentoringRecruitmentList() {
             setDeleting(true);
             await deleteRecruitment(id);
             toast.success("삭제되었습니다.");
-            fetchData();
+            refresh();
         } catch (e: any) {
             console.error(e);
             toast.error("삭제 실패: " + (e.message || "Unknown error"));
@@ -125,12 +116,20 @@ export default function MentoringRecruitmentList() {
     };
 
     const handleSave = async () => {
+        if (formData.semesterId === 0) {
+            toast.error("학기를 선택해주세요.");
+            return;
+        }
+        if (!formData.recruitStartAt || !formData.recruitEndAt) {
+            toast.error("모집 기간을 선택해주세요.");
+            return;
+        }
+
         try {
-            const formatDateTime = (dt: string) => (dt && dt.length === 16 ? dt + ":00" : dt);
             const payload = {
                 ...formData,
-                recruitStartAt: formatDateTime(formData.recruitStartAt),
-                recruitEndAt: formatDateTime(formData.recruitEndAt),
+                recruitStartAt: `${formData.recruitStartAt}T00:00:00`,
+                recruitEndAt: `${formData.recruitEndAt}T23:59:59`,
             };
 
             if (editingId) {
@@ -141,75 +140,23 @@ export default function MentoringRecruitmentList() {
                 toast.success("등록되었습니다.");
             }
 
-            setIsModalOpen(false);
+            handleCloseModal();
             resetForm();
-            fetchData();
+            refresh();
         } catch (e: any) {
             console.error(e);
             toast.error("저장 실패: " + (e.message || "Unknown error"));
         }
     };
 
-    const columns = useMemo<TableColumn<MentoringRecruitment>[]>(
-        () => [
-            { header: "학기", field: "semesterId", render: (row) => getSemesterLabel(row.semesterId) },
-            { header: "제목", field: "title" },
-            {
-                header: "모집기간",
-                field: "recruitStartAt",
-                render: (row) => {
-                    const format = (dt: string) => dt ? dt.replace("T", " ").substring(0, 16) : "-";
-                    return `${format(row.recruitStartAt)} ~ ${format(row.recruitEndAt)}`;
-                }
-            },
-            {
-                header: "상태",
-                field: "status",
-                align: "center",
-                render: (row) => {
-                    const now = new Date();
-                    const start = new Date(row.recruitStartAt);
-                    const end = new Date(row.recruitEndAt);
+    const totalPages = meta?.totalPages || 1;
 
-                    if (now < start) {
-                        return <StatusPill status="PENDING" label="대기" />;
-                    } else if (now >= start && now <= end) {
-                        return <StatusPill status="ACTIVE" label="OPEN" />;
-                    } else {
-                        return <StatusPill status="INACTIVE" label="CLOSED" />;
-                    }
-                }
-            },
-            {
-                header: "관리",
-                field: "recruitmentId", // dummy
-                align: "center",
-                width: "220px",
-                stopRowClick: true,
-                render: (row) => (
-                    <div style={{ display: "flex", gap: "4px", justifyContent: "center" }}>
-                        <Button
-                            variant="secondary"
-                            className={styles.smBtn}
-                            onClick={() => handleOpenEdit(row)}
-                        >
-                            수정
-                        </Button>
-                        <Button
-                            variant="danger"
-                            className={styles.smBtn}
-                            onClick={() => handleDelete(row.recruitmentId)}
-                        >
-                            삭제
-                        </Button>
-                    </div>
-                )
-            }
-        ],
-        [router]
-    );
-
-    const totalPages = Math.max(1, Math.ceil(totalElements / PAGE_SIZE));
+    const STATUS_OPTIONS = [
+        { value: "ALL", label: "전체 상태" },
+        { value: "DRAFT", label: "작성중 (DRAFT)" },
+        { value: "OPEN", label: "모집중 (OPEN)" },
+        { value: "CLOSED", label: "마감 (CLOSED)" },
+    ];
 
     return (
         <div className={styles.page}>
@@ -217,22 +164,38 @@ export default function MentoringRecruitmentList() {
                 <h1 className={styles.title}>멘토링 모집 공고 등록</h1>
 
                 <div className={styles.searchRow}>
-                    <SearchBar
-                        value={searchKeyword}
-                        onChange={setSearchKeyword}
-                        onSearch={fetchData}
-                        placeholder="모집 공고 검색..."
-                    />
+                    <div className={styles.searchGroup}>
+                        <div className={styles.dropdownWrap}>
+                            <Dropdown
+                                value={status}
+                                onChange={(val) => {
+                                    setStatus(val);
+                                    setPage(1);
+                                }}
+                                options={STATUS_OPTIONS}
+                                placeholder="상태 선택"
+                                clearable={false}
+                                showPlaceholder={false}
+                            />
+                        </div>
+                        <div className={styles.searchBarWrap}>
+                            <SearchBar
+                                value={searchKeyword}
+                                onChange={setSearchKeyword}
+                                onSearch={() => handleSearch(searchKeyword)}
+                                placeholder="모집 공고 검색..."
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className={styles.tableWrap}>
-                    <Table
-                        columns={columns}
+                    <MentoringRecruitmentsTable
                         items={items}
-                        rowKey={(r) => r.recruitmentId}
-                        loading={loading}
-                        skeletonRowCount={PAGE_SIZE}
-                        emptyText="모집 공고가 없습니다."
+                        loading={listLoading || semesterLoading}
+                        onEdit={handleOpenEdit}
+                        onDelete={(id) => setDeleteTargetId(id)}
+                        semesterOptions={semesterOptions}
                     />
                 </div>
 
@@ -254,11 +217,11 @@ export default function MentoringRecruitmentList() {
             {/* Create/Edit Modal */}
             <Modal
                 open={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleCloseModal}
                 title={editingId ? "멘토링 모집 수정" : "멘토링 모집 등록"}
                 footer={
                     <>
-                        <Button variant="secondary" onClick={() => setIsModalOpen(false)}>취소</Button>
+                        <Button variant="secondary" onClick={handleCloseModal}>취소</Button>
                         <Button onClick={handleSave}>{editingId ? "수정" : "등록"}</Button>
                     </>
                 }
@@ -279,7 +242,8 @@ export default function MentoringRecruitmentList() {
                         value={formData.semesterId}
                         onChange={(e) => setFormData({ ...formData, semesterId: Number(e.target.value) })}
                     >
-                        {SEMESTER_OPTIONS.map(opt => (
+                        <option value={0} disabled>학기를 선택해주세요</option>
+                        {semesterOptions.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
@@ -290,28 +254,36 @@ export default function MentoringRecruitmentList() {
                         className={styles.textarea}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        placeholder="설명을 입력해주세요"
+                        rows={4}
                     />
                 </div>
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>모집 시작일</label>
-                    <input
-                        type="datetime-local"
-                        className={styles.input}
-                        value={formData.recruitStartAt}
-                        onChange={(e) => setFormData({ ...formData, recruitStartAt: e.target.value })}
-                    />
+                <div className={styles.grid2}>
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>시작 일시</label>
+                        <DatePickerInput
+                            value={formData.recruitStartAt}
+                            onChange={(v) => {
+                                setFormData({ ...formData, recruitStartAt: v });
+                                if (formData.recruitEndAt && v > formData.recruitEndAt) {
+                                    setFormData(prev => ({ ...prev, recruitEndAt: "" }));
+                                }
+                            }}
+                            placeholder="시작일 선택"
+                            closeSignal={closeSignal}
+                        />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>종료 일시</label>
+                        <DatePickerInput
+                            value={formData.recruitEndAt}
+                            onChange={(v) => setFormData({ ...formData, recruitEndAt: v })}
+                            placeholder="종료일 선택"
+                            min={formData.recruitStartAt || undefined}
+                            closeSignal={closeSignal}
+                        />
+                    </div>
                 </div>
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>모집 종료일</label>
-                    <input
-                        type="datetime-local"
-                        className={styles.input}
-                        value={formData.recruitEndAt}
-                        onChange={(e) => setFormData({ ...formData, recruitEndAt: e.target.value })}
-                    />
-                </div>
-
-
             </Modal>
 
             <ConfirmModal

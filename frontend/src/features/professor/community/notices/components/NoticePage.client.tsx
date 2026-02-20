@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useCallback, useEffect, useState } from "react";
 import styles from "./NoticePage.module.css"
@@ -10,7 +10,7 @@ import { SearchBar } from "@/components/searchbar";
 
 export default function NoticePageClient() {
     const { state, actions } = useNoticesList();
-    // 교수는 공지사항 작성/수정 불가하므로 관련 state 제거 또는 미사용
+    // 교수는 공지사항 작성/수정 기능이 없어서 관리 state는 미사용
     // const [editId, setEditId] = useState<number | null>(null);
 
     const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
