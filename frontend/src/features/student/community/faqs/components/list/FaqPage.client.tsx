@@ -1,47 +1,38 @@
-﻿"use client"
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
-import styles from "./FaqPage.module.css"
+import styles from "./FaqPage.module.css";
 import { FaqTable } from "./FaqTablePage";
 import { useFaqsList } from "../../hooks/useFaqList";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
-
+import { useI18n } from "@/i18n/useI18n";
 
 export default function ResoucePageClient() {
   const { state, actions } = useFaqsList();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
-
-  const handleCreated = async () => {
-    await actions.reload();
-  };
-
-  // pagination + search
+  const t = useI18n("community.faqs.student.list");
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
-
   const [inputKeyword, setInputKeyword] = useState("");
 
   useEffect(() => {
     actions.goPage(page);
-  }, [page]);
+  }, [page, actions]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
-  }, [size, state.size]);
-
+  }, [size, state.size, actions]);
 
   const handleSearch = useCallback(() => {
     setPage(1);
     actions.goPage(1);
-    actions.setKeyword(inputKeyword)
+    actions.setKeyword(inputKeyword);
   }, [inputKeyword, setPage, actions]);
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>FAQ</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>
@@ -49,17 +40,13 @@ export default function ResoucePageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="제목 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
-        <FaqTable
-          items={state.items}
-          loading={state.loading}
-          onEditClick={(id) => setEditId(id)}
-        />
+        <FaqTable items={state.items} loading={state.loading} onEditClick={() => {}} />
 
         <div className={styles.footerRow}>
           <PaginationSimple
@@ -70,7 +57,6 @@ export default function ResoucePageClient() {
           />
         </div>
       </div>
-
     </div>
-  )
+  );
 }

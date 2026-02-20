@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { QnaListItemDto, PageMeta } from "../api/types";
-import { fetchQnaList, deleteQnaQuestion } from "../api/QnasApi";
+import type { PageMeta, QnaListItemDto } from "../api/types";
+import { deleteQnaQuestion, fetchQnaList } from "../api/QnasApi";
+import { useI18n } from "@/i18n/useI18n";
 
 const defaultMeta: PageMeta = {
   page: 1,
@@ -15,16 +16,15 @@ const defaultMeta: PageMeta = {
 };
 
 export function useQnaList() {
+  const t = useI18n("community.qna.admin.hook");
+
   const [items, setItems] = useState<QnaListItemDto[]>([]);
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [keyword, setKeyword] = useState("");
-
-  // cleaned comment
   const [categoryId, setCategoryId] = useState<number | null>(null);
-
   const [deptId, setDeptId] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -46,19 +46,18 @@ export function useQnaList() {
       setMeta(res.meta ?? defaultMeta);
     } catch (e: any) {
       console.error("[useQnaList]", e);
-      setError(e?.message ?? "Q&A 목록 조회 실패");
+      setError(e?.message ?? t("listLoadFailed"));
       setItems([]);
       setMeta(defaultMeta);
     } finally {
       setLoading(false);
     }
-  }, [page, size, keyword, categoryId]);
+  }, [page, size, keyword, categoryId, t]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  /** 질문 삭제 */
   const deleteQuestion = useCallback(
     async (questionId: number) => {
       const prev = items;
@@ -83,35 +82,28 @@ export function useQnaList() {
       size,
       deptId,
       keyword,
-      categoryId, 
+      categoryId,
       loading,
       error,
     },
     actions: {
       setKeyword,
       deleteQuestion,
-
       setCategoryId: (cid: number | null) => {
         setPage(1);
         setCategoryId(cid);
       },
-
       search: () => setPage(1),
       goPage: (p: number) => setPage(p),
-
       setSize: (s: number) => {
         setPage(1);
         setSize(s);
       },
-
       setDeptId: (id: number | null) => {
         setPage(1);
         setDeptId(id);
       },
-
       reload: load,
     },
   };
 }
-
-

@@ -8,11 +8,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
 import { Badge } from "@/components/badge";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 import DeleteModal from "../modal/DeleteModal.client";
 
 export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
   const router = useRouter();
+  const t = useI18n("community.notices.admin.table");
 
   const [deleteTarget, setDeleteTarget] = useState<NoticeDeleteTarget | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -38,24 +40,24 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
       }
 
       setDeleteTarget(null);
-      toast.success("공지사항이 삭제되었습니다.");
+      toast.success(t("toasts.deleteSuccess"));
       router.refresh();
       onReload?.();
     } catch (e: any) {
-      toast.error(e?.message ?? "삭제 실패");
+      toast.error(e?.message ?? t("toasts.deleteFailed"));
     } finally {
       setDeleting(false);
     }
   };
 
   const columns: Array<TableColumn<NoticeListItemDto>> = [
-    { header: "번호", align: "center", render: (r) => r.noticeId },
+    { header: t("headers.id"), align: "center", render: (r) => r.noticeId },
     {
-      header: "분류",
+      header: t("headers.category"),
       align: "center",
       render: (r) => {
         const c = r.category;
-        if (!c) return "미분류";
+        if (!c) return t("uncategorized");
         return (
           <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
             {c.name}
@@ -64,7 +66,7 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
       },
     },
     {
-      header: "제목",
+      header: t("headers.title"),
       align: "center",
       render: (r) => (
         <button
@@ -79,10 +81,10 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
         </button>
       ),
     },
-    { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createdAt },
+    { header: t("headers.views"), align: "center", render: (r) => r.viewCount },
+    { header: t("headers.createdAt"), align: "center", render: (r) => r.createdAt },
     {
-      header: "관리",
+      header: t("headers.manage"),
       width: 180,
       align: "center",
       stopRowClick: true,
@@ -95,7 +97,7 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
               goEdit(r.noticeId);
             }}
           >
-            수정
+            {t("buttons.edit")}
           </Button>
 
           <Button
@@ -105,7 +107,7 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
               setDeleteTarget({ id: r.noticeId, title: r.title });
             }}
           >
-            삭제
+            {t("buttons.delete")}
           </Button>
         </div>
       ),
@@ -120,13 +122,13 @@ export function NoticesTable({ items, loading, onReload }: NoticeTableProps) {
         loading={loading}
         skeletonRowCount={10}
         rowKey={(r) => r.noticeId}
-        emptyText="공지사항이 없습니다."
+        emptyText={t("emptyText")}
         onRowClick={(r) => goDetail(r.noticeId)}
       />
 
       <DeleteModal
         open={!!deleteTarget}
-        targetLabel="공지사항"
+        targetLabel={t("targetLabel")}
         targetTitle={deleteTarget?.title}
         loading={deleting}
         onClose={() => {

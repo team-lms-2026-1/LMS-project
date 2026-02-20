@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { FaqListItemDto, PageMeta } from "../api/types";
 import { fetchFaqList } from "../api/faqsApi";
+import { useI18n } from "@/i18n/useI18n";
 
 const defaultMeta: PageMeta = {
     page: 1,
@@ -15,6 +16,8 @@ const defaultMeta: PageMeta = {
 };
 
 export function useFaqList() {
+    const t = useI18n("community.faqs.professor.hook");
+
     const [items, setItems] = useState<FaqListItemDto[]>([]);
     const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
@@ -42,13 +45,13 @@ export function useFaqList() {
             setMeta(res.meta);
         } catch (e: any) {
             console.error("[useFaqList]", e);
-            setError(e.message ?? "FAQ 목록 조회 실패");
+            setError(e.message ?? t("listLoadFailed"));
             setItems([]);
             setMeta(defaultMeta);
         } finally {
             setLoading(false);
         }
-    }, [page, size, keyword, categoryId]);
+    }, [page, size, keyword, categoryId, t]);
 
     useEffect(() => {
         load();

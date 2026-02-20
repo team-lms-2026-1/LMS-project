@@ -1001,5 +1001,1007 @@
         }
       }
     }
+  },
+  "community": {
+    "categories": {
+      "hook": {
+        "listLoadFailed": "Failed to load category list."
+      },
+      "page": {
+        "breadcrumbHome": "Home",
+        "title": "{scope} Management",
+        "searchPlaceholder": "Enter search keyword...",
+        "confirmButton": "Confirm",
+        "scopes": {
+          "notices": "Notices",
+          "resources": "Resources",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "table": {
+        "leaveGuard": "There is an item being edited.\nSave or cancel before confirming.",
+        "headers": {
+          "id": "No.",
+          "category": "Category",
+          "manage": "Manage"
+        },
+        "placeholders": {
+          "name": "Category name..."
+        },
+        "labels": {
+          "bgColor": "Background",
+          "textColor": "Text",
+          "preview": "Preview"
+        },
+        "buttons": {
+          "save": "Save",
+          "cancel": "Cancel",
+          "edit": "Edit",
+          "delete": "Delete",
+          "done": "Done",
+          "addCategory": "Add Category"
+        },
+        "emptyText": "No categories.",
+        "targetLabel": "Category",
+        "toasts": {
+          "added": "Category added.",
+          "updated": "Category updated.",
+          "deleted": "Category deleted."
+        },
+        "errors": {
+          "nameRequired": "Please enter a category name.",
+          "colorRequired": "Please select colors.",
+          "addFailed": "Failed to add category.",
+          "updateFailed": "Failed to update category.",
+          "deleteFailed": "Failed to delete category."
+        }
+      },
+      "deleteModal": {
+        "defaultTargetLabel": "Category",
+        "title": "{targetLabel} Delete",
+        "confirmText": "Delete",
+        "cancelText": "Cancel",
+        "question": "Delete this {targetLabel}?",
+        "warning": "Deleted data cannot be restored."
+      }
+    },
+    "notices": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "Failed to load notice list."
+        },
+        "list": {
+          "title": "Notices",
+          "categoryAll": "All",
+          "searchPlaceholder": "Search by title",
+          "categoryManageButton": "Manage Categories",
+          "createButton": "Create",
+          "toasts": {
+            "created": "Notice created.",
+            "updated": "Notice updated.",
+            "deleted": "Notice deleted."
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At",
+            "manage": "Manage"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No notices.",
+          "buttons": {
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "toasts": {
+            "deleteSuccess": "Notice deleted.",
+            "deleteFailed": "Delete failed."
+          },
+          "targetLabel": "Notice"
+        },
+        "detail": {
+          "title": "Notices",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "period": "Display Period",
+            "attachment": "Attachments"
+          },
+          "attachmentFallback": "Attachment {index}",
+          "attachmentEmpty": "No attachments",
+          "buttons": {
+            "list": "Back to List",
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "errors": {
+            "invalidId": "Invalid notice ID.",
+            "loadFailed": "Failed to load notice.",
+            "deleteFailed": "Delete failed."
+          },
+          "toasts": {
+            "deleteSuccess": "Notice deleted."
+          }
+        },
+        "create": {
+          "breadcrumbTitle": "Notice Management",
+          "title": "Create Notice",
+          "labels": {
+            "title": "Title",
+            "period": "Display Period",
+            "content": "Content",
+            "attachment": "Attachment",
+            "file": "File"
+          },
+          "placeholders": {
+            "title": "Title",
+            "category": "Select category",
+            "startDate": "Start date",
+            "endDate": "End date",
+            "content": "Enter content.",
+            "categoryLoading": "Loading..."
+          },
+          "buttons": {
+            "list": "Back to List",
+            "myPc": "My PC",
+            "upload": "upload",
+            "deleteFile": "Delete",
+            "cancel": "Cancel",
+            "create": "Create",
+            "creating": "Creating..."
+          },
+          "help": {
+            "dropPrefix": "Drop here to attach or",
+            "maxSize": "Max size: 50MB"
+          },
+          "errors": {
+            "leaveGuard": "You are editing a notice.",
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "periodRequired": "Please select a display period.",
+            "submitFailed": "Failed to create notice."
+          }
+        },
+        "edit": {
+          "title": "Notices",
+          "breadcrumbCurrent": "Edit",
+          "loading": "Loading...",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "category": "Category",
+            "period": "Display Period",
+            "attachment": "Attachments"
+          },
+          "placeholders": {
+            "title": "Title",
+            "content": "Enter content.",
+            "startDate": "Start date",
+            "endDate": "End date",
+            "categoryLoading": "Loading...",
+            "uncategorized": "Uncategorized"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "myPc": "My PC",
+            "upload": "upload",
+            "open": "Open",
+            "deleteFile": "Delete",
+            "deleteFileCancel": "Cancel delete",
+            "cancel": "Cancel",
+            "save": "Save",
+            "saving": "Saving..."
+          },
+          "texts": {
+            "uncategorized": "Uncategorized",
+            "noExistingFiles": "No existing attachments",
+            "attachmentFallback": "Attachment {index}"
+          },
+          "errors": {
+            "leaveGuard": "You are editing a notice.",
+            "invalidId": "Invalid notice ID.",
+            "loadFailed": "Failed to load notice.",
+            "missingAttachmentId": "This attachment cannot be deleted because it has no attachmentId.",
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "invalidPeriod": "Invalid display period. End date must be on or after start date.",
+            "saveFailed": "Failed to save changes."
+          },
+          "toasts": {
+            "saveSuccess": "Notice updated."
+          },
+          "help": {
+            "dropPrefix": "Drop here to attach or",
+            "maxSize": "Max size: 50MB"
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "Notice",
+          "title": "{targetLabel} Delete",
+          "confirmText": "Delete",
+          "cancelText": "Cancel",
+          "question": "Delete this {targetLabel}?",
+          "warning": "Deleted data cannot be restored."
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "Failed to load notice list."
+        },
+        "list": {
+          "title": "Notices",
+          "searchPlaceholder": "Search by title"
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No notices."
+        },
+        "detail": {
+          "title": "Notices",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "attachment": "Attachments"
+          },
+          "attachmentFallback": "Attachment {index}",
+          "attachmentEmpty": "No attachments",
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid notice ID.",
+            "loadFailed": "Failed to load notice."
+          }
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "Failed to load notice list."
+        },
+        "list": {
+          "title": "Notices",
+          "searchPlaceholder": "Search by title"
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No notices."
+        },
+        "detail": {
+          "title": "Notices",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "attachment": "Attachments"
+          },
+          "attachmentFallback": "Attachment {index}",
+          "attachmentEmpty": "No attachments",
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid notice ID.",
+            "loadFailed": "Failed to load notice."
+          }
+        }
+      }
+    },
+    "resources": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "Failed to load resource list."
+        },
+        "list": {
+          "title": "Resources",
+          "categoryAll": "All",
+          "searchPlaceholder": "Search by title",
+          "categoryManageButton": "Manage Categories",
+          "createButton": "Create",
+          "toasts": {
+            "created": "Resource created.",
+            "updated": "Resource updated.",
+            "deleted": "Resource deleted."
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At",
+            "manage": "Manage"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No resources.",
+          "buttons": {
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "errors": {
+            "deleteFailed": "Delete failed."
+          },
+          "targetLabel": "Resource"
+        },
+        "detail": {
+          "title": "Resources",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "attachment": "Attachments"
+          },
+          "attachmentFallback": "Attachment {index}",
+          "attachmentEmpty": "No attachments",
+          "buttons": {
+            "list": "Back to List",
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "errors": {
+            "invalidId": "Invalid resource ID.",
+            "loadFailed": "Failed to load resource.",
+            "deleteFailed": "Delete failed."
+          },
+          "toasts": {
+            "created": "Resource created.",
+            "updated": "Resource updated.",
+            "deleted": "Resource deleted."
+          },
+          "targetLabel": "Resource"
+        },
+        "create": {
+          "breadcrumbTitle": "Resource Management",
+          "title": "Create Resource",
+          "labels": {
+            "title": "Title",
+            "content": "Content",
+            "attachment": "Attachments",
+            "file": "File"
+          },
+          "placeholders": {
+            "title": "Title",
+            "category": "Select category",
+            "content": "Enter content.",
+            "categoryLoading": "Loading..."
+          },
+          "buttons": {
+            "list": "Back to List",
+            "myPc": "My PC",
+            "upload": "Upload",
+            "deleteFile": "Delete",
+            "cancel": "Cancel",
+            "create": "Create",
+            "creating": "Creating..."
+          },
+          "help": {
+            "dropPrefix": "Drop here to attach or",
+            "maxSize": "Max size: 50MB"
+          },
+          "errors": {
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "submitFailed": "Failed to create resource."
+          }
+        },
+        "edit": {
+          "title": "Resources",
+          "breadcrumbCurrent": "Edit",
+          "loading": "Loading...",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "category": "Category",
+            "attachment": "Attachments"
+          },
+          "placeholders": {
+            "title": "Title",
+            "content": "Enter content.",
+            "categoryLoading": "Loading...",
+            "uncategorized": "Uncategorized"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "myPc": "My PC",
+            "upload": "Upload",
+            "open": "Open",
+            "deleteFile": "Delete",
+            "deleteFileCancel": "Cancel delete",
+            "cancel": "Cancel",
+            "save": "Save",
+            "saving": "Saving..."
+          },
+          "texts": {
+            "uncategorized": "Uncategorized",
+            "noExistingFiles": "No existing attachments",
+            "attachmentFallback": "Attachment {index}"
+          },
+          "errors": {
+            "invalidId": "Invalid resource ID.",
+            "loadFailed": "Failed to load resource.",
+            "missingFileId": "This file cannot be deleted because it has no fileId.",
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "saveFailed": "Failed to save changes."
+          },
+          "help": {
+            "dropPrefix": "Drop here to attach or",
+            "maxSize": "Max size: 50MB"
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "Resource",
+          "title": "{targetLabel} Delete",
+          "confirmText": "Delete",
+          "cancelText": "Cancel",
+          "question": "Delete this {targetLabel}?",
+          "warning": "Deleted data cannot be restored."
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "Failed to load resource list."
+        },
+        "list": {
+          "title": "Resources",
+          "searchPlaceholder": "Search by title"
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No resources."
+        },
+        "detail": {
+          "title": "Resources",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "attachment": "Attachments"
+          },
+          "attachmentFallback": "Attachment {index}",
+          "attachmentEmpty": "No attachments",
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid resource ID.",
+            "loadFailed": "Failed to load resource."
+          }
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "Failed to load resource list."
+        },
+        "list": {
+          "title": "Resources",
+          "searchPlaceholder": "Search by title"
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No resources."
+        },
+        "detail": {
+          "title": "Resources",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "attachment": "Attachments"
+          },
+          "attachmentFallback": "Attachment {index}",
+          "attachmentEmpty": "No attachments",
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid resource ID.",
+            "loadFailed": "Failed to load resource."
+          }
+        }
+      }
+    },
+    "faqs": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "Failed to load FAQ list."
+        },
+        "list": {
+          "title": "FAQ",
+          "categoryAll": "All",
+          "searchPlaceholder": "Search by title",
+          "categoryManageButton": "Manage Categories",
+          "createButton": "Create",
+          "toasts": {
+            "created": "FAQ created.",
+            "updated": "FAQ updated.",
+            "deleted": "FAQ deleted."
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At",
+            "manage": "Manage"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No FAQs.",
+          "buttons": {
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "toasts": {
+            "deleteSuccess": "FAQ deleted.",
+            "deleteFailed": "Delete failed."
+          },
+          "targetLabel": "FAQ"
+        },
+        "detail": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "errors": {
+            "invalidId": "Invalid FAQ ID.",
+            "loadFailed": "Failed to load FAQ.",
+            "deleteFailed": "Delete failed."
+          },
+          "toasts": {
+            "deleteSuccess": "FAQ deleted."
+          },
+          "targetLabel": "FAQ"
+        },
+        "create": {
+          "breadcrumbTitle": "FAQ Management",
+          "title": "Create FAQ",
+          "labels": {
+            "title": "Title",
+            "content": "Content"
+          },
+          "placeholders": {
+            "title": "Title",
+            "category": "Select category",
+            "content": "Enter content.",
+            "categoryLoading": "Loading..."
+          },
+          "buttons": {
+            "list": "Back to List",
+            "cancel": "Cancel",
+            "create": "Create",
+            "creating": "Creating..."
+          },
+          "errors": {
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "submitFailed": "Failed to create FAQ."
+          }
+        },
+        "edit": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "Edit",
+          "loading": "Loading...",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views",
+            "category": "Category"
+          },
+          "placeholders": {
+            "title": "Title",
+            "content": "Enter content.",
+            "categoryLoading": "Loading...",
+            "uncategorized": "Uncategorized"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "cancel": "Cancel",
+            "save": "Save",
+            "saving": "Saving..."
+          },
+          "texts": {
+            "uncategorized": "Uncategorized"
+          },
+          "errors": {
+            "invalidId": "Invalid FAQ ID.",
+            "loadFailed": "Failed to load FAQ.",
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "saveFailed": "Failed to save changes."
+          },
+          "toasts": {
+            "saveSuccess": "FAQ updated."
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "FAQ",
+          "title": "{targetLabel} Delete",
+          "confirmText": "Delete",
+          "cancelText": "Cancel",
+          "question": "Delete this {targetLabel}?",
+          "warning": "Deleted data cannot be restored."
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "Failed to load FAQ list."
+        },
+        "list": {
+          "title": "FAQ",
+          "searchPlaceholder": "Search by title"
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No FAQs."
+        },
+        "detail": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid FAQ ID.",
+            "loadFailed": "Failed to load FAQ."
+          }
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "Failed to load FAQ list."
+        },
+        "list": {
+          "title": "FAQ",
+          "searchPlaceholder": "Search by title"
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No FAQs."
+        },
+        "detail": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid FAQ ID.",
+            "loadFailed": "Failed to load FAQ."
+          }
+        }
+      }
+    },
+    "qna": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "Failed to load Q&A list."
+        },
+        "list": {
+          "title": "Q&A",
+          "categoryAll": "All",
+          "searchPlaceholder": "Search by title",
+          "categoryManageButton": "Manage Categories",
+          "targetLabel": "Q&A",
+          "toasts": {
+            "created": "Q&A created.",
+            "updated": "Q&A updated.",
+            "deleted": "Q&A deleted.",
+            "deleteFailed": "Delete failed."
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "answer": "Answer",
+            "views": "Views",
+            "createdAt": "Created At",
+            "manage": "Manage"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No Q&A posts.",
+          "buttons": {
+            "delete": "Delete"
+          }
+        },
+        "detail": {
+          "title": "Q&A",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "deleteQuestion": "Delete Question",
+            "answerEdit": "Edit",
+            "answerDelete": "Delete",
+            "answerSubmit": "Answer",
+            "answerSave": "Save",
+            "answerCancel": "Cancel",
+            "list": "Back to List"
+          },
+          "texts": {
+            "answerTitle": "Answer",
+            "answerPlaceholder": "Write your answer here..."
+          },
+          "targetLabels": {
+            "answer": "Answer",
+            "question": "Q&A"
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question.",
+            "deleteFailed": "Delete failed.",
+            "answerRequired": "Please enter answer content.",
+            "answerSaveFailed": "Failed to save answer."
+          },
+          "toasts": {
+            "answerDeleted": "Answer deleted.",
+            "answerUpdated": "Answer updated.",
+            "answerCreated": "Answer created."
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "Q&A",
+          "title": "Delete {targetLabel}",
+          "confirmText": "Delete",
+          "cancelText": "Cancel",
+          "question": "Delete this {targetLabel}?",
+          "warning": "Deleted data cannot be restored."
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "Failed to load Q&A list."
+        },
+        "list": {
+          "title": "Q&A",
+          "searchPlaceholder": "Search by title",
+          "createButton": "Create Question",
+          "toasts": {
+            "created": "Question created.",
+            "updated": "Question updated.",
+            "deleted": "Question deleted."
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "emptyText": "No Q&A posts."
+        },
+        "detail": {
+          "title": "Q&A",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question.",
+            "deleteFailed": "An error occurred while deleting."
+          },
+          "toasts": {
+            "updated": "Question updated."
+          },
+          "targetLabel": "Question"
+        },
+        "create": {
+          "title": "Create Question",
+          "labels": {
+            "category": "Category",
+            "title": "Title",
+            "content": "Content"
+          },
+          "placeholders": {
+            "categoryLoading": "Loading...",
+            "uncategorized": "Uncategorized",
+            "title": "Enter a title",
+            "content": "Enter your question"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "submit": "Create",
+            "submitting": "Creating..."
+          },
+          "errors": {
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "submitFailed": "Failed to create question."
+          }
+        },
+        "edit": {
+          "title": "Edit Question",
+          "breadcrumbCurrent": "Edit",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "category": "Category"
+          },
+          "placeholders": {
+            "title": "Title",
+            "content": "Enter content.",
+            "categoryLoading": "Loading...",
+            "uncategorized": "Uncategorized"
+          },
+          "buttons": {
+            "cancel": "Cancel",
+            "save": "Save",
+            "saving": "Saving..."
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question.",
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "ownerOnlyAlert": "Only your own posts can be edited.",
+            "saveFailed": "Failed to save changes."
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "Question",
+          "title": "Delete {targetLabel}",
+          "confirmText": "Delete",
+          "cancelText": "Cancel",
+          "question": "Delete this {targetLabel}?",
+          "warning": "Deleted data cannot be restored."
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "Failed to load Q&A list."
+        },
+        "list": {
+          "title": "Q&A",
+          "searchPlaceholder": "Search by title"
+        },
+        "table": {
+          "headers": {
+            "id": "No.",
+            "category": "Category",
+            "title": "Title",
+            "author": "Author",
+            "answerStatus": "Answer",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "answerDone": "Answered",
+          "answerPending": "Pending",
+          "uncategorized": "Uncategorized",
+          "emptyText": "No Q&A posts."
+        },
+        "detail": {
+          "title": "Q&A",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question."
+          }
+        }
+      }
+    }
   }
 }

@@ -1,36 +1,41 @@
 "use client";
 
-import { Table, type TableColumn } from "@/components/table";
-import { QnaListItemDto } from "../../api/types";
-import styles from "./QnaTable.module.css";
 import { useRouter } from "next/navigation";
+import { Table, type TableColumn } from "@/components/table";
+import type { QnaListItemDto } from "../../api/types";
+import styles from "./QnaTable.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: QnaListItemDto[];
   loading: boolean;
-  onEditClick: (id: number) => void;
 };
 
-export function QnaTable({ items, loading, onEditClick }: Props) {
+export function QnaTable({ items, loading }: Props) {
   const router = useRouter();
+  const t = useI18n("community.qna.student.table");
+
   const goDetail = (id: number) => {
     router.push(`/student/community/qna/questions/${id}`);
   };
+
   const columns: Array<TableColumn<QnaListItemDto>> = [
-    { header: "번호", align: "center", render: (r) => r.questionId },
-    { header: "분류", align: "center", render: (r) => {
+    { header: t("headers.id"), align: "center", render: (r) => r.questionId },
+    {
+      header: t("headers.category"),
+      align: "center",
+      render: (r) => {
         const c = r.category;
-        if (!c) return "미분류"; // ✅ null/undefined 방어
+        if (!c) return t("uncategorized");
         return (
-          <span
-            className={styles.badge}
-            style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}
-          >{c.name}</span>
+          <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
+            {c.name}
+          </span>
         );
       },
     },
     {
-      header: "제목",
+      header: t("headers.title"),
       align: "center",
       render: (r) => (
         <button
@@ -45,8 +50,8 @@ export function QnaTable({ items, loading, onEditClick }: Props) {
         </button>
       ),
     },
-    { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createdAt },
+    { header: t("headers.views"), align: "center", render: (r) => r.viewCount },
+    { header: t("headers.createdAt"), align: "center", render: (r) => r.createdAt },
   ];
 
   return (
@@ -56,7 +61,7 @@ export function QnaTable({ items, loading, onEditClick }: Props) {
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.questionId}
-      emptyText="Q&A가 없습니다."
+      emptyText={t("emptyText")}
       onRowClick={(r) => goDetail(r.questionId)}
     />
   );

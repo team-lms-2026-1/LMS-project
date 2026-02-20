@@ -5,18 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import styles from "./FaqDetailPage.module.css";
 import type { FaqListItemDto } from "../../api/types";
 import { fetchFaqDetail } from "../../api/faqsApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
   | { loading: false; error: string | null; data: FaqListItemDto | null };
 
 function normalizeDetail(payload: any): FaqListItemDto {
-  // 응답 형태가 {data:{...}} / {...} 섞여도 동작하게 방어
   const raw = payload?.data ?? payload;
-
-  // 최소 필드 보정(백엔드가 createdAt/cerateAt 등 오타 섞이는 경우 대비)
-  const created =
-    raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+  const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
 
   return {
     faqId: Number(raw?.faqId ?? 0),
@@ -30,7 +27,6 @@ function normalizeDetail(payload: any): FaqListItemDto {
 }
 
 function formatDateTime(v: string) {
-  // "2026-01-21 08:13" 같이 이미 포맷이면 그대로, ISO면 간단 변환
   if (!v) return "-";
   if (v.includes(" ")) return v;
   const d = new Date(v);
@@ -45,6 +41,7 @@ function formatDateTime(v: string) {
 
 export default function FaqDetailpageClient() {
   const router = useRouter();
+  const t = useI18n("community.faqs.student.detail");
   const params = useParams<{ faqId?: string }>();
   const faqId = useMemo(() => Number(params?.faqId ?? 0), [params]);
 
@@ -56,7 +53,7 @@ export default function FaqDetailpageClient() {
 
   useEffect(() => {
     if (!faqId || Number.isNaN(faqId)) {
-      setState({ loading: false, error: "잘못된 FAQ ID입니다.", data: null });
+      setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
 
@@ -72,7 +69,7 @@ export default function FaqDetailpageClient() {
         if (!alive) return;
         setState({
           loading: false,
-          error: e?.message ?? "자료을 불러오지 못했습니다.",
+          error: e?.message ?? t("errors.loadFailed"),
           data: null,
         });
       }
@@ -81,7 +78,7 @@ export default function FaqDetailpageClient() {
     return () => {
       alive = false;
     };
-  }, [faqId]);
+  }, [faqId, t]);
 
   const data = state.data;
 
@@ -96,42 +93,38 @@ export default function FaqDetailpageClient() {
       <div className={styles.card}>
         <div className={styles.breadcrumb}>
           <span className={styles.crumb} onClick={() => router.push("/student/community/faqs")}>
-            FAQ
+            {t("title")}
           </span>
-          <span className={styles.sep}>›</span>
-          <span className={styles.current}>상세페이지</span>
+          <span className={styles.sep}>&gt;</span>
+          <span className={styles.current}>{t("breadcrumbCurrent")}</span>
         </div>
 
-        <h1 className={styles.title}>FAQ</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
-        {state.loading && (
-          <div className={styles.loadingBox}>
-            불러오는 중...
-          </div>
-        )}
+        {state.loading && <div className={styles.loadingBox}>{t("loading")}</div>}
 
         {!state.loading && data && (
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {data.category?.name ?? t("uncategorized")}
               </span>
               <div className={styles.headTitle}>{data.title}</div>
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{t("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{t("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
             </div>
@@ -142,7 +135,7 @@ export default function FaqDetailpageClient() {
 
             <div className={styles.footerRow}>
               <button className={styles.backBtn} onClick={() => router.push("/student/community/faqs")}>
-                목록으로
+                {t("buttons.list")}
               </button>
             </div>
           </div>

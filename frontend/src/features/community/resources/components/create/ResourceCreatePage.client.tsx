@@ -7,6 +7,7 @@ import styles from "./ResourceCreatePage.module.css";
 import type { Category, CreateResourceRequestDto } from "../../api/types";
 import { createResource, fetchResourceCategories } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 const LIST_PATH = "/admin/community/resources";
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
@@ -31,6 +32,7 @@ function formatBytes(bytes: number) {
 
 export default function ResourceCreatePageClient() {
   const router = useRouter();
+  const i18n = useI18n("community.resources.admin.create");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [title, setTitle] = useState("");
@@ -101,8 +103,8 @@ export default function ResourceCreatePageClient() {
 
     const t = title.trim();
     const c = content.trim();
-    if (!t) return setError("제목을 입력하세요.");
-    if (!c) return setError("내용을 입력하세요.");
+    if (!t) return setError(i18n("errors.titleRequired"));
+    if (!c) return setError(i18n("errors.contentRequired"));
 
     setSaving(true);
     try {
@@ -128,7 +130,7 @@ export default function ResourceCreatePageClient() {
         });
 
         if (!res.ok) {
-          let msg = `등록 실패 (${res.status})`;
+          let msg = `${i18n("errors.submitFailed")} (${res.status})`;
           try {
             const data = await res.json();
             msg = data?.message ?? msg;
@@ -151,7 +153,7 @@ export default function ResourceCreatePageClient() {
 
       router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
-      setError(e?.message ?? "??? ??????.");
+      setError(e?.message ?? i18n("errors.submitFailed"));
     } finally {
       setSaving(false);
     }
@@ -164,14 +166,14 @@ export default function ResourceCreatePageClient() {
       <div className={styles.breadcrumb}>
         <span className={styles.homeIcon}>⌂</span>
         <span className={styles.sep}>&gt;</span>
-        <strong>자료실 관리</strong>
+        <strong>{i18n("breadcrumbTitle")}</strong>
       </div>
 
       <div className={styles.card}>
         <div className={styles.headerRow}>
-          <h1 className={styles.pageTitle}>자료실 등록</h1>
+          <h1 className={styles.pageTitle}>{i18n("title")}</h1>
           <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
-            목록으로
+            {i18n("buttons.list")}
           </Button>
         </div>
 
@@ -180,14 +182,14 @@ export default function ResourceCreatePageClient() {
         <div className={styles.formTable}>
           {/* 제목 row */}
           <div className={styles.row}>
-            <div className={styles.labelCell}>제목</div>
+            <div className={styles.labelCell}>{i18n("labels.title")}</div>
             <div className={styles.contentCell}>
               <div className={styles.titleRow}>
                 <input
                   className={styles.titleInput}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="제목"
+                  placeholder={i18n("placeholders.title")}
                   disabled={saving}
                   maxLength={200}
                 />
@@ -198,7 +200,7 @@ export default function ResourceCreatePageClient() {
                   onChange={(e) => setCategoryId(e.target.value)}
                   disabled={saving || loadingCats}
                 >
-                  <option value="">{loadingCats ? "불러오는 중..." : "카테고리 선택"}</option>
+                  <option value="">{loadingCats ? i18n("placeholders.categoryLoading") : i18n("placeholders.category")}</option>
                   {categories.map((c) => (
                     <option key={c.categoryId} value={String(c.categoryId)}>
                       {c.name}
@@ -213,7 +215,7 @@ export default function ResourceCreatePageClient() {
 
           {/* 내용 row */}
           <div className={styles.row}>
-            <div className={styles.labelCell}>내용</div>
+            <div className={styles.labelCell}>{i18n("labels.content")}</div>
             <div className={styles.contentCell}>
               <div className={styles.editor}>
                 <div className={styles.toolbar}>
@@ -236,7 +238,7 @@ export default function ResourceCreatePageClient() {
                   className={styles.editorArea}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="내용을 입력하세요."
+                  placeholder={i18n("placeholders.content")}
                   disabled={saving}
                 />
               </div>
@@ -246,31 +248,31 @@ export default function ResourceCreatePageClient() {
           {/* 첨부파일 row */}
           <div className={styles.row}>
             <div className={styles.labelCell}>
-              첨부
+              {i18n("labels.attachment")}
               <br />
-              파일
+              {i18n("labels.file")}
             </div>
             <div className={styles.contentCell}>
               <div className={styles.attachWrap}>
                 <div className={styles.attachTabs}>
                   <button type="button" className={styles.tabActive} disabled={saving}>
-                    내 PC
+                    {i18n("buttons.myPc")}
                   </button>
                 </div>
 
                 <div className={styles.dropzone}>
                   <div className={styles.dropText}>
-                    Drop here to attach or{" "}
+                    {i18n("help.dropPrefix")}{" "}
                     <button
                       type="button"
                       className={styles.uploadLink}
                       onClick={() => fileInputRef.current?.click()}
                       disabled={saving}
                     >
-                      upload
+                      {i18n("buttons.upload")}
                     </button>
                   </div>
-                  <div className={styles.maxSize}>Max size: 50MB</div>
+                  <div className={styles.maxSize}>{i18n("help.maxSize")}</div>
 
                   <input
                     ref={fileInputRef}
@@ -299,7 +301,7 @@ export default function ResourceCreatePageClient() {
                             onClick={() => removeFile(key)}
                             disabled={saving}
                           >
-                            삭제
+                            {i18n("buttons.deleteFile")}
                           </button>
                         </div>
                       );
@@ -313,10 +315,10 @@ export default function ResourceCreatePageClient() {
 
         <div className={styles.footerRow}>
           <Button variant="secondary" onClick={onCancel} disabled={saving}>
-            취소
+            {i18n("buttons.cancel")}
           </Button>
           <Button variant="primary" onClick={onSubmit} disabled={!canSubmit}>
-            {saving ? "등록 중..." : "등록"}
+            {saving ? i18n("buttons.creating") : i18n("buttons.create")}
           </Button>
         </div>
       </div>
