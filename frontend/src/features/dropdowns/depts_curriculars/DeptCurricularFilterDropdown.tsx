@@ -4,6 +4,8 @@ import * as React from "react";
 import { useDeptCurricularDropdownOptions } from "./hooks";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { Dropdown } from "../_shared";
+import { useLocale } from "@/hooks/useLocale";
+import { getCurricularDropdownPlaceholder } from "../localeLabel";
 
 type Props = {
   /** 모달에서 사용할 때 (controlled) */
@@ -14,6 +16,7 @@ type Props = {
 
 export function DeptCurricularFilterDropdown({ deptId, value, onChange }: Props) {
   const { get, setFilters } = useFilterQuery(["deptId", "curricularId"]);
+  const { locale } = useLocale();
 
   const controlled = value !== undefined && onChange !== undefined;
 
@@ -32,7 +35,7 @@ export function DeptCurricularFilterDropdown({ deptId, value, onChange }: Props)
 
   return (
     <Dropdown
-      placeholder="교과"
+      placeholder={getCurricularDropdownPlaceholder(locale)}
       loading={loading}
       disabled={!deptIdNum}
       value={controlled ? value : get("curricularId")}

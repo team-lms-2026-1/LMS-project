@@ -3,6 +3,12 @@
 import { Modal } from "./Modal";
 import { Button } from "../button/Button";
 import styles from "./Modal.module.css";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getConfirmDefaultCancelText,
+  getConfirmDefaultConfirmText,
+  getConfirmDefaultTitle,
+} from "@/components/localeText";
 
 interface ConfirmModalProps {
     open: boolean;
@@ -18,32 +24,37 @@ interface ConfirmModalProps {
 
 export function ConfirmModal({
     open,
-    title = "확인",
+    title,
     message,
     onConfirm,
     onCancel,
-    confirmText = "확인",
-    cancelText = "취소",
+    confirmText,
+    cancelText,
     loading = false,
     type = "primary"
 }: ConfirmModalProps) {
+    const { locale } = useLocale();
+    const resolvedTitle = title ?? getConfirmDefaultTitle(locale);
+    const resolvedConfirmText = confirmText ?? getConfirmDefaultConfirmText(locale);
+    const resolvedCancelText = cancelText ?? getConfirmDefaultCancelText(locale);
+
     return (
         <Modal
             open={open}
             onClose={onCancel}
-            title={title}
+            title={resolvedTitle}
             size="sm"
             footer={
                 <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", width: "100%" }}>
                     <Button variant="secondary" onClick={onCancel} disabled={loading}>
-                        {cancelText}
+                        {resolvedCancelText}
                     </Button>
                     <Button
                         variant={type === "danger" ? "danger" : "primary"}
                         onClick={onConfirm}
                         loading={loading}
                     >
-                        {confirmText}
+                        {resolvedConfirmText}
                     </Button>
                 </div>
             }

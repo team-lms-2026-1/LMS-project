@@ -4,18 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
 import styles from "./SemesterCreateModal.module.css";
+import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
 
 import { createSemester } from "../../api/semestersApi";
 import { DatePickerInput } from "../ui/DatePickerInput";
+import { SEMESTER_TERMS, termToLabel } from "../../utils/semesterLabel";
 
 type TermType = "FIRST" | "SECOND" | "SUMMER" | "WINTER";
-
-const TERM_OPTIONS: Array<{ value: TermType; label: string }> = [
-  { value: "FIRST", label: "1학기" },
-  { value: "SECOND", label: "2학기" },
-  { value: "SUMMER", label: "여름학기" },
-  { value: "WINTER", label: "겨울학기" },
-];
 
 type Props = {
   open: boolean;
@@ -25,6 +21,8 @@ type Props = {
 
 export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
   const thisYear = useMemo(() => new Date().getFullYear(), []);
+  const t = useI18n("authority.semesters.createModal");
+  const { locale } = useLocale();
 
   const [year, setYear] = useState<number>(thisYear);
   const [term, setTerm] = useState<TermType>("FIRST");
@@ -58,10 +56,10 @@ export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
   };
 
   const validate = () => {
-    if (!year || Number.isNaN(year)) return "연도를 입력하세요.";
-    if (!startDate) return "시작일을 선택하세요.";
-    if (!endDate) return "종료일을 선택하세요.";
-    if (startDate > endDate) return "시작일은 종료일보다 늦을 수 없습니다.";
+    if (!year || Number.isNaN(year)) return t("validation.requiredYear");
+    if (!startDate) return t("validation.requiredStartDate");
+    if (!endDate) return t("validation.requiredEndDate");
+    if (startDate > endDate) return t("validation.invalidPeriod");
     return null;
   };
 
@@ -85,7 +83,7 @@ export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
       onClose();
     } catch (e: any) {
       // 팀 공통 에러 포맷({ error: { message } }) 대응 + fallback
-      setError(e?.error?.message ?? e?.message ?? "등록에 실패했습니다.");
+      setError(e?.error?.message ?? e?.message ?? t("messages.submitFailed"));
     } finally {
       setLoading(false);
     }
@@ -94,16 +92,16 @@ export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
   return (
     <Modal
       open={open}
-      title="학기 등록"
+      title={t("title")}
       onClose={handleClose}
       size="md"
       footer={
         <>
           <Button onClick={handleSubmit} loading={loading}>
-            등록
+            {t("buttons.create")}
           </Button>
           <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
+            {t("buttons.cancel")}
           </Button>
         </>
       }
@@ -114,7 +112,7 @@ export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
         {/* ✅ 2×2: 연도/학기/시작일/종료일 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>연도</div>
+            <div className={styles.label}>{t("fields.year")}</div>
             <input
               className={styles.control}
               type="number"
@@ -126,22 +124,22 @@ export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>학기</div>
+            <div className={styles.label}>{t("fields.term")}</div>
             <select
               className={styles.control}
               value={term}
               onChange={(e) => setTerm(e.target.value as TermType)}
             >
-              {TERM_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              {SEMESTER_TERMS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {termToLabel(opt, locale)}
                 </option>
               ))}
             </select>
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>시작일</div>
+            <div className={styles.label}>{t("fields.startDate")}</div>
             <DatePickerInput
               value={startDate}
               onChange={(v) => {
@@ -149,17 +147,17 @@ export function SemesterCreateModal({ open, onClose, onCreated }: Props) {
                 // ✅ 시작일 변경 시 종료일이 더 빠르면 초기화
                 if (endDate && v > endDate) setEndDate("");
               }}
-              placeholder="시작일 선택"
+              placeholder={t("placeholders.startDate")}
               closeSignal={closeSignal}
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>종료일</div>
+            <div className={styles.label}>{t("fields.endDate")}</div>
             <DatePickerInput
               value={endDate}
               onChange={setEndDate}
-              placeholder="종료일 선택"
+              placeholder={t("placeholders.endDate")}
               min={startDate || undefined} // ✅ 종료일은 시작일 이후만
               closeSignal={closeSignal}
             />

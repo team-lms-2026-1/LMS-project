@@ -2,10 +2,13 @@
 
 import type { ExtraGradeDetailHeaderDto } from "../../../../api/types";
 import styles from "./ExtraGradeDetailInfoSection.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = { data: ExtraGradeDetailHeaderDto };
 
 export function ExtraGradeDetailInfoSection({ data }: Props) {
+  const t = useI18n("extraCurricular.adminGrades.detail.info");
+
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
@@ -17,15 +20,23 @@ export function ExtraGradeDetailInfoSection({ data }: Props) {
           <div className={styles.headerMeta}>
             <span className={styles.metaItem}>{data.deptName}</span>
             <span className={styles.dot}>·</span>
-            <span className={styles.metaItem}>{data.gradeLevel}학년</span>
+            <span className={styles.metaItem}>{t("gradeLevel", { value: data.gradeLevel })}</span>
           </div>
         </div>
       </div>
 
       <div className={styles.body}>
         <div className={styles.metrics}>
-          <Metric label="총이수 포인트" value={data.totalEarnedPoints} suffix="점" />
-          <Metric label="총이수 시간" value={data.totalEarnedHours} suffix="시간" />
+          <Metric
+            label={t("metrics.totalEarnedPoints")}
+            value={data.totalEarnedPoints}
+            suffix={t("pointUnit")}
+          />
+          <Metric
+            label={t("metrics.totalEarnedHours")}
+            value={data.totalEarnedHours}
+            suffix={t("hourUnit")}
+          />
         </div>
       </div>
     </div>

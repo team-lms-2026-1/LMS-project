@@ -2,6 +2,11 @@
 
 import * as React from "react";
 import styles from "./dropdown.module.css";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getDropdownDefaultPlaceholder,
+  getDropdownLoadingLabel,
+} from "../localeLabel";
 
 export type DropdownOption = {
   value: string;
@@ -27,7 +32,7 @@ export type DropdownProps = {
 export function Dropdown({
   value,
   options,
-  placeholder = "선택",
+  placeholder,
   loading = false,
   disabled = false,
   clearable = true,
@@ -36,7 +41,10 @@ export function Dropdown({
   onClear,
   className,
 }: DropdownProps) {
+  const { locale } = useLocale();
   const isDisabled = disabled || loading;
+  const resolvedPlaceholder = placeholder ?? getDropdownDefaultPlaceholder(locale);
+  const loadingLabel = getDropdownLoadingLabel(locale);
 
   const selectedLabel =
     value === ""
@@ -45,7 +53,7 @@ export function Dropdown({
 
   return (
     <div className={`${styles.wrap} ${className ?? ""}`}>
-      <label className={styles.srOnly}>{placeholder}</label>
+      <label className={styles.srOnly}>{resolvedPlaceholder}</label>
 
       <div className={styles.control}>
         <select
@@ -56,7 +64,7 @@ export function Dropdown({
           aria-busy={loading ? true : undefined}
         >
           {(showPlaceholder || loading) && (
-            <option value="">{loading ? "불러오는 중..." : placeholder}</option>
+            <option value="">{loading ? loadingLabel : resolvedPlaceholder}</option>
           )}
           {options.map((o) => (
             <option key={o.value} value={o.value} disabled={o.disabled}>

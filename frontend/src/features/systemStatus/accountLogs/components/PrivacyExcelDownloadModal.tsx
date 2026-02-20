@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import styles from "../styles/privacyExcelModal.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function PrivacyExcelDownloadModal({ open, onClose, onConfirmDownload }: Props) {
+  const t = useI18n("systemStatus.accountLogs.privacyModal");
   const [agreed, setAgreed] = useState(false);
   const [reason, setReason] = useState("");
 
@@ -27,34 +29,34 @@ export default function PrivacyExcelDownloadModal({ open, onClose, onConfirmDown
   return (
     <div className={styles.backdrop} role="dialog" aria-modal="true">
       <div className={styles.modal}>
-        <div className={styles.title}>개인정보 이용 안내</div>
+        <div className={styles.title}>{t("title")}</div>
 
         <div className={styles.desc}>
-          <p>본 엑셀 파일에는 학생의 개인정보가 포함되어 있습니다.</p>
-          <p>해당 정보는 학사 행정 및 내부 업무 목적으로만 사용 가능하며, 목적 외 사용, 제3자 제공, 무단 저장 및 외부 유출을 금지합니다.</p>
-          <p>관련 법령에 따라 개인정보 접근 및 다운로드 이력은 관리자로 로그로 기록·관리되며, 위반 시 법적 책임이 발생할 수 있습니다.</p>
-          <p>위 내용을 충분히 숙지하였으며, 개인정보 이용에 동의합니다.</p>
+          <p>{t("desc.line1")}</p>
+          <p>{t("desc.line2")}</p>
+          <p>{t("desc.line3")}</p>
+          <p>{t("desc.line4")}</p>
         </div>
 
         <label className={styles.checkRow}>
           <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
-          <span>위 개인정보 이용에 동의합니다.</span>
+          <span>{t("agreeLabel")}</span>
         </label>
 
-        <div className={styles.reasonTitle}>다운로드 사유</div>
+        <div className={styles.reasonTitle}>{t("reasonTitle")}</div>
         <textarea
           className={styles.textarea}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="다운로드 사유를 입력하세요."
+          placeholder={t("reasonPlaceholder")}
         />
 
         <div className={styles.actions}>
           <button className={styles.cancelBtn} onClick={onClose}>
-            취소
+            {t("buttons.cancel")}
           </button>
           <button className={styles.downloadBtn} disabled={!canDownload} onClick={() => onConfirmDownload(reason)}>
-            다운로드
+            {t("buttons.download")}
           </button>
         </div>
       </div>

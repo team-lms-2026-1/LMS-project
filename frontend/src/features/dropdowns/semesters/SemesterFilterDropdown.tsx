@@ -3,6 +3,8 @@
 import { useSemestersDropdownOptions } from "./hooks";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { Dropdown } from "../_shared";
+import { useLocale } from "@/hooks/useLocale";
+import { getSemesterDropdownPlaceholder } from "./localeLabel";
 
 type Props = {
   /** 모달에서 사용할 때 */
@@ -12,13 +14,14 @@ type Props = {
 
 export function SemesterFilterDropdown({ value, onChange }: Props) {
   const { options, loading } = useSemestersDropdownOptions();
+  const { locale } = useLocale();
   const { get, setFilters } = useFilterQuery(["semesterId"]);
 
   const controlled = value !== undefined && onChange !== undefined;
 
   return (
     <Dropdown
-      placeholder="학기"
+      placeholder={getSemesterDropdownPlaceholder(locale)}
       loading={loading}
       value={controlled ? value : get("semesterId")}
       options={options}

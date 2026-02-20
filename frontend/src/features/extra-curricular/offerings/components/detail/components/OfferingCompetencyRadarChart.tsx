@@ -12,9 +12,12 @@ import {
 
 import styles from "./OfferingCompetencyRadarChart.module.css";
 import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
+import { getLocalizedCompetencyName } from "@/features/competencies/utils/competencyLocale";
 
 type CompetencyItem = {
   competencyId: number;
+  code: string;
   name: string;
   weight: number | null;
 };
@@ -25,9 +28,10 @@ type Props = {
 
 export function OfferingCompetencyRadarChart({ items }: Props) {
   const t = useI18n("extraCurricular.adminOfferingDetail.radar");
+  const { locale } = useLocale();
 
   const data = items.map((c) => ({
-    name: c.name,
+    name: getLocalizedCompetencyName(c.code, locale, c.name),
     value: c.weight ?? 0,
   }));
 

@@ -2,6 +2,16 @@
 
 import * as React from "react";
 import styles from "./SearchBar.module.css";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getSearchAriaLabel,
+  getSearchButtonText,
+  getSearchClearAriaLabel,
+  getSearchClearTitle,
+  getSearchEmptyHint,
+  getSearchLoadingText,
+  getSearchPlaceholder,
+} from "@/components/localeText";
 
 export type SearchBarProps = {
   value: string;
@@ -35,7 +45,7 @@ export function SearchBar({
   value,
   onChange,
   onSearch,
-  placeholder = "검색어를 입력하세요",
+  placeholder,
   disabled = false,
   loading = false,
   searchOnEnter = true,
@@ -44,11 +54,19 @@ export function SearchBar({
   onClear,
   inputId,
   inputName,
-  ariaLabel = "검색어",
+  ariaLabel,
   className,
 }: SearchBarProps) {
+  const { locale } = useLocale();
   const isDisabled = Boolean(disabled || loading);
   const canSearch = allowEmptySearch ? true : value.trim().length > 0;
+  const resolvedPlaceholder = placeholder ?? getSearchPlaceholder(locale);
+  const resolvedAriaLabel = ariaLabel ?? getSearchAriaLabel(locale);
+  const clearAriaLabel = getSearchClearAriaLabel(locale);
+  const clearTitle = getSearchClearTitle(locale);
+  const searchText = getSearchButtonText(locale);
+  const searchingText = getSearchLoadingText(locale);
+  const emptyHint = getSearchEmptyHint(locale);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,7 +91,7 @@ export function SearchBar({
   return (
     <form className={[styles.wrap, className].filter(Boolean).join(" ")} onSubmit={handleSubmit}>
       <label className={styles.srOnly} htmlFor={inputId}>
-        {ariaLabel}
+        {resolvedAriaLabel}
       </label>
 
       <div className={styles.inputRow}>
@@ -83,10 +101,10 @@ export function SearchBar({
           className={styles.input}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={isDisabled}
           onKeyDown={handleKeyDown}
-          aria-label={ariaLabel}
+          aria-label={resolvedAriaLabel}
         />
 
         {showClear && value.length > 0 ? (
@@ -95,8 +113,8 @@ export function SearchBar({
             className={styles.clearBtn}
             onClick={handleClear}
             disabled={isDisabled}
-            aria-label="검색어 지우기"
-            title="지우기"
+            aria-label={clearAriaLabel}
+            title={clearTitle}
           >
             ×
           </button>
@@ -108,12 +126,12 @@ export function SearchBar({
           disabled={isDisabled || !canSearch}
           aria-busy={loading ? true : undefined}
         >
-          {loading ? "검색 중..." : "검색"}
+          {loading ? searchingText : searchText}
         </button>
       </div>
 
       {!allowEmptySearch && value.trim().length === 0 ? (
-        <div className={styles.hint}>검색어를 입력해주세요.</div>
+        <div className={styles.hint}>{emptyHint}</div>
       ) : null}
     </form>
   );

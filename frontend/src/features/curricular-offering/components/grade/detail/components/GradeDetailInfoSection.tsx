@@ -2,10 +2,13 @@
 
 import { StudentGradeDetailHeaderDto } from "@/features/curricular-offering/api/types";
 import styles from "./GradeDetailInfoSection.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = { data: StudentGradeDetailHeaderDto };
 
 export function GradeDetailInfoSection({ data }: Props) {
+  const t = useI18n("curricular.adminGrades.detail.info");
+
   return (
     <div className={styles.section}>
       {/* Header */}
@@ -21,7 +24,7 @@ export function GradeDetailInfoSection({ data }: Props) {
           <div className={styles.headerMeta}>
             <span className={styles.metaItem}>{data.deptName}</span>
             <span className={styles.dot}>•</span>
-            <span className={styles.metaItem}>{data.gradeLevel}학년</span>
+            <span className={styles.metaItem}>{t("gradeLevel", { value: data.gradeLevel })}</span>
           </div>
         </div>
       </div>
@@ -29,12 +32,12 @@ export function GradeDetailInfoSection({ data }: Props) {
       {/* Body */}
       <div className={styles.body}>
         <div className={styles.metrics}>
-          <Metric label="최고 학점" value={data.maxSemesterGpa} format="gpa" />
-          <Metric label="평균 학점" value={data.overallGpa} format="gpa" />
+          <Metric label={t("metrics.maxGpa")} value={data.maxSemesterGpa} format="gpa" />
+          <Metric label={t("metrics.overallGpa")} value={data.overallGpa} format="gpa" />
           <Metric
-            label="총 이수 학점"
+            label={t("metrics.totalEarnedCredits")}
             value={data.totalEarnedCredits}
-            suffix="학점"
+            suffix={t("creditUnit")}
             format="int"
           />
         </div>

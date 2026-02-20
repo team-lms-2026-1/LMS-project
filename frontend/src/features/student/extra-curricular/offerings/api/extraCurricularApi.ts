@@ -15,6 +15,7 @@ export type ExtraCurricularOfferingUserListQuery = {
   page?: number;
   size?: number;
   keyword?: string;
+  semesterId?: number;
 };
 
 // list
@@ -23,6 +24,9 @@ export async function fetchCurricularOfferingsList(query: ExtraCurricularOfferin
   if (query.page) sp.set("page", String(query.page));
   if (query.size) sp.set("size", String(query.size));
   if (query.keyword) sp.set("keyword", query.keyword);
+  if (query.semesterId != null) {
+    sp.set("semesterId", String(query.semesterId));
+  }
 
   const qs = sp.toString();
   const url = qs ? `/api/student/extra-curricular/offerings?${qs}` : `/api/student/extra-curricular/offerings`;

@@ -11,12 +11,14 @@ import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
 import { GradeDetailTable } from "./GradeDetailTable";
 import { useCurricularGradeDetailList } from "@/features/curricular-offering/hooks/useCurricularGradeList";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   studentAccountId: number;
 };
 
 export function GradeDetailListSection({ studentAccountId }: Props) {
+  const t = useI18n("curricular.adminGrades.detail.list");
   const { state, actions } = useCurricularGradeDetailList({
     studentAccountId,
     enabled: true,
@@ -55,7 +57,7 @@ export function GradeDetailListSection({ studentAccountId }: Props) {
 
   return (
     <div className={styles.section}>
-      <Header title="과목 성적 리스트" />
+      <Header title={t("title")} />
 
       <div className={styles.body}>
         <div className={styles.searchRow}>
@@ -67,12 +69,12 @@ export function GradeDetailListSection({ studentAccountId }: Props) {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="교과목 코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
 
-        {state.error && <div className={styles.errorMessage}>{state.error}</div>}
+        {state.error && <div className={styles.errorMessage}>{t("loadError")}</div>}
 
         <GradeDetailTable items={state.items} loading={state.loading} />
 

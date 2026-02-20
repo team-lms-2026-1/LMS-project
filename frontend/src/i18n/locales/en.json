@@ -194,6 +194,153 @@
       }
     }
   },
+  "authority": {
+    "semesters": {
+      "page": {
+        "title": "Semester Management",
+        "registerButton": "Register Semester"
+      },
+      "table": {
+        "year": "Year",
+        "term": "Semester",
+        "period": "Period",
+        "status": "Status",
+        "manage": "Manage",
+        "editButton": "Edit",
+        "emptyText": "No semesters."
+      },
+      "createModal": {
+        "title": "Register Semester",
+        "buttons": {
+          "create": "Register",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "year": "Year",
+          "term": "Semester",
+          "startDate": "Start Date",
+          "endDate": "End Date"
+        },
+        "placeholders": {
+          "startDate": "Select start date",
+          "endDate": "Select end date"
+        },
+        "validation": {
+          "requiredYear": "Please enter a year.",
+          "requiredStartDate": "Please select a start date.",
+          "requiredEndDate": "Please select an end date.",
+          "invalidPeriod": "Start date cannot be later than end date."
+        },
+        "messages": {
+          "submitFailed": "Registration failed."
+        }
+      },
+      "editModal": {
+        "title": "Edit Semester",
+        "buttons": {
+          "save": "Save",
+          "close": "Close"
+        },
+        "fields": {
+          "year": "Year",
+          "term": "Semester",
+          "status": "Status",
+          "startDate": "Start Date",
+          "endDate": "End Date"
+        },
+        "placeholders": {
+          "startDate": "Select start date",
+          "endDate": "Select end date"
+        },
+        "messages": {
+          "submitFailed": "Failed to update semester."
+        }
+      },
+      "errors": {
+        "listLoadFailed": "Failed to load semester list.",
+        "detailLoadFailed": "Failed to load."
+      }
+    }
+  },
+  "systemStatus": {
+    "accountLogs": {
+      "common": {
+        "accountType": {
+          "ADMIN": "Admin",
+          "PROFESSOR": "Professor",
+          "STUDENT": "Student",
+          "STAFF": "Staff"
+        },
+        "loginStatus": {
+          "LOGGED_IN": "Logged In",
+          "LOGGED_OUT": "Logged Out"
+        }
+      },
+      "list": {
+        "title": "Account Logs",
+        "searchPlaceholder": "Search by login ID or name",
+        "kpi": {
+          "totalAccounts": "Total Accounts",
+          "onlineAccounts": "Currently Logged In"
+        },
+        "table": {
+          "loginId": "Login ID",
+          "accountType": "Account Type",
+          "name": "Name",
+          "lastAccessAt": "Last Access",
+          "loginState": "Login Status"
+        },
+        "emptyText": "No results found.",
+        "messages": {
+          "loadFailed": "Failed to load log list."
+        }
+      },
+      "detail": {
+        "loading": "Loading...",
+        "notFound": "Account does not exist. (ID: {accountId})",
+        "title": "Account Log Detail",
+        "summary": {
+          "accountType": "Account Type:",
+          "name": "Name:",
+          "loginId": "ID:",
+          "departmentName": "Department:"
+        },
+        "searchPlaceholder": "Enter search keyword",
+        "table": {
+          "logId": "No.",
+          "accessedAt": "Date/Time",
+          "accessUrl": "Access URL",
+          "ip": "IP",
+          "os": "Environment",
+          "emptyText": "No logs."
+        },
+        "buttons": {
+          "backToList": "Back to list",
+          "excelDownload": "Download Excel"
+        },
+        "messages": {
+          "loadFailed": "Failed to load detailed logs.",
+          "downloadFailed": "Download failed."
+        }
+      },
+      "privacyModal": {
+        "title": "Personal Data Usage Notice",
+        "desc": {
+          "line1": "This Excel file contains students' personal data.",
+          "line2": "This information may be used only for academic administration and internal operations. Any use beyond purpose, third-party sharing, unauthorized storage, or external leakage is prohibited.",
+          "line3": "In accordance with relevant laws, access and download history for personal data is recorded and managed as administrator logs. Violations may result in legal liability.",
+          "line4": "I have fully understood the above and agree to the use of personal data."
+        },
+        "agreeLabel": "I agree to the above use of personal data.",
+        "reasonTitle": "Download Reason",
+        "reasonPlaceholder": "Enter the reason for download.",
+        "buttons": {
+          "cancel": "Cancel",
+          "download": "Download"
+        }
+      }
+    }
+  },
   "curricular": {
     "common": {
       "manageHeader": "Manage",
@@ -327,6 +474,45 @@
         "name": "Name",
         "gpa": "GPA",
         "emptyText": "No course grade records."
+      },
+      "detail": {
+        "page": {
+          "invalidAccess": "Invalid access.",
+          "loading": "Loading...",
+          "loadError": "An error occurred.",
+          "empty": "No data available.",
+          "title": "Course Grade Detail",
+          "backButton": "Back to list"
+        },
+        "info": {
+          "gradeLevel": "Year {value}",
+          "metrics": {
+            "maxGpa": "Highest GPA",
+            "overallGpa": "Average GPA",
+            "totalEarnedCredits": "Total Earned Credits"
+          },
+          "creditUnit": "credits"
+        },
+        "trend": {
+          "title": "Semester Grade Trend",
+          "empty": "No chart data.",
+          "tooltip": {
+            "gpa": "GPA: {value}",
+            "earnedCredits": "Earned Credits: {value} credits"
+          }
+        },
+        "list": {
+          "title": "Course Grade List",
+          "searchPlaceholder": "Search course code",
+          "loadError": "Failed to load."
+        },
+        "table": {
+          "curricularCode": "Course Code",
+          "curricularName": "Course Name",
+          "credits": "Credits",
+          "grade": "Grade",
+          "emptyText": "No grade records."
+        }
       }
     },
     "adminOfferingDetail": {
@@ -517,6 +703,174 @@
       "attended": {
         "ATTENDED": "Attended",
         "ABSENT": "Absent"
+      },
+      "active": {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive"
+      }
+    },
+    "common": {
+      "manageHeader": "Manage",
+      "detailButton": "Detail",
+      "editButton": "Edit",
+      "registerButton": "Register",
+      "saveButton": "Save",
+      "cancelButton": "Cancel",
+      "closeButton": "Close"
+    },
+    "adminPrograms": {
+      "title": "Extra-Curricular Program Management",
+      "searchPlaceholder": "Search by code/program name",
+      "registerButton": "Register Program",
+      "table": {
+        "programCode": "Program Code",
+        "programName": "Program Name",
+        "hostOrgName": "Host Organization",
+        "status": "Status",
+        "emptyText": "No extra-curricular programs."
+      }
+    },
+    "adminOfferings": {
+      "title": "Extra-Curricular Offering Management",
+      "searchPlaceholder": "Search by offering name/code",
+      "registerButton": "Register Offering",
+      "table": {
+        "offeringCode": "Offering Code",
+        "offeringName": "Offering Name",
+        "hostContactName": "Contact Name",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "status": "Status",
+        "emptyText": "No extra-curricular offerings."
+      }
+    },
+    "adminGrades": {
+      "title": "Program Grade Management",
+      "searchPlaceholder": "Search by student ID/name",
+      "table": {
+        "studentNo": "Student ID",
+        "deptName": "Department",
+        "gradeLevel": "Year",
+        "name": "Name",
+        "totalEarnedPoints": "Total Earned Points",
+        "totalEarnedHours": "Total Earned Hours",
+        "emptyText": "No program grade records."
+      },
+      "detail": {
+        "page": {
+          "invalidAccess": "Invalid access.",
+          "loading": "Loading...",
+          "loadError": "An error occurred.",
+          "empty": "No data available.",
+          "title": "Program Grade Detail",
+          "backButton": "Back to list"
+        },
+        "info": {
+          "gradeLevel": "Year {value}",
+          "metrics": {
+            "totalEarnedPoints": "Total Earned Points",
+            "totalEarnedHours": "Total Earned Hours"
+          },
+          "pointUnit": "points",
+          "hourUnit": "hours"
+        },
+        "trend": {
+          "title": "Semester Points/Hours Trend",
+          "empty": "No chart data.",
+          "tooltip": {
+            "earnedPoints": "Earned Points: {value} points",
+            "earnedHours": "Earned Hours: {value} hours"
+          }
+        },
+        "list": {
+          "title": "Program Completion List",
+          "searchPlaceholder": "Search by program name/code",
+          "loadError": "Failed to load."
+        },
+        "table": {
+          "semester": "Semester",
+          "extraOfferingCode": "Program Code",
+          "extraOfferingName": "Program Name",
+          "points": "Points",
+          "recognizedHours": "Recognized Hours",
+          "completionStatus": "Completion",
+          "emptyText": "No program grade records."
+        }
+      }
+    },
+    "modal": {
+      "programCreate": {
+        "title": "Register Program",
+        "fields": {
+          "programCode": "Program Code",
+          "programName": "Program Name",
+          "hostOrgName": "Host Organization",
+          "description": "Description"
+        },
+        "placeholders": {
+          "programCode": "e.g. EX001",
+          "programName": "e.g. Startup Special Lecture",
+          "hostOrgName": "e.g. Industry-Academic Cooperation Foundation",
+          "description": "Enter a program description."
+        },
+        "submitFailed": "Registration failed.",
+        "validation": {
+          "requiredProgramCode": "Please enter a program code.",
+          "requiredProgramName": "Please enter a program name.",
+          "requiredHostOrgName": "Please enter a host organization name.",
+          "requiredDescription": "Please enter a description."
+        }
+      },
+      "programEdit": {
+        "title": "Edit Program",
+        "activeAriaLabel": "Active status",
+        "fields": {
+          "programCode": "Program Code",
+          "programName": "Program Name",
+          "hostOrgName": "Host Organization",
+          "description": "Description"
+        },
+        "submitFailed": "Failed to update program."
+      },
+      "offeringCreate": {
+        "title": "Register Offering",
+        "fields": {
+          "extraCurricular": "Program",
+          "offeringCode": "Offering Code",
+          "offeringName": "Offering Name",
+          "semester": "Semester",
+          "rewardPointDefault": "Default Points",
+          "recognizedHoursDefault": "Default Recognized Hours",
+          "operationStartDate": "Operation Start Date",
+          "operationEndDate": "Operation End Date",
+          "hostContactName": "Contact Name",
+          "hostContactPhone": "Contact Phone",
+          "hostContactEmail": "Contact Email"
+        },
+        "placeholders": {
+          "offeringCode": "e.g. EXTRA-2026-001",
+          "offeringName": "e.g. Freshman Competency Camp - Round 1",
+          "rewardPointDefault": "e.g. 10",
+          "recognizedHoursDefault": "e.g. 2",
+          "operationStartDate": "Select start date",
+          "operationEndDate": "Select end date",
+          "hostContactName": "e.g. Hong Gil-dong",
+          "hostContactPhone": "e.g. 010-1234-5678",
+          "hostContactEmail": "e.g. manager@school.ac.kr"
+        },
+        "submitFailed": "Registration failed.",
+        "validation": {
+          "requiredExtraCurricular": "Please select a program.",
+          "requiredOfferingCode": "Please enter an offering code.",
+          "requiredOfferingName": "Please enter an offering name.",
+          "requiredSemester": "Please select a semester.",
+          "requiredOperationStartDate": "Please select an operation start date.",
+          "requiredOperationEndDate": "Please select an operation end date.",
+          "invalidOperationPeriod": "Start date cannot be later than end date.",
+          "invalidRewardPoint": "Default points must be 0 or greater.",
+          "invalidRecognizedHours": "Default recognized hours must be 0 or greater.",
+          "invalidHostContactEmail": "Contact email format is invalid."
+        }
       }
     },
     "adminOfferingDetail": {

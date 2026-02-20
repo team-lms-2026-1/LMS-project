@@ -6,6 +6,8 @@ import type { RowKey, TableColumn, TableRowClassName } from "./types";
 import { cn, isEmptyValue, toCssWidth } from "./utils";
 import { TableEmptyRow } from "./TableEmptyRow";
 import { TableSkeleton } from "./TableSkeleton";
+import { useLocale } from "@/hooks/useLocale";
+import { getTableAriaLabel, getTableDefaultEmptyText } from "@/components/localeText";
 
 type Props<T> = {
   columns: Array<TableColumn<T>>;
@@ -19,7 +21,6 @@ type Props<T> = {
   useColGroup?: boolean;
   ariaLabel?: string;
 
-  /** ✅ 추가 */
   loading?: boolean;
   skeletonRowCount?: number;
 };
@@ -36,20 +37,23 @@ export function Table<T>({
   rowKey,
   onRowClick,
   rowClassName,
-  emptyText = "데이터가 없습니다.",
+  emptyText,
   wrapperClassName,
   tableClassName,
   useColGroup = true,
-  ariaLabel = "table",
+  ariaLabel,
   loading = false,
   skeletonRowCount = 8,
 }: Props<T>) {
+  const { locale } = useLocale();
   const hasRowClick = typeof onRowClick === "function";
   const colCount = columns.length;
+  const resolvedEmptyText = emptyText ?? getTableDefaultEmptyText(locale);
+  const resolvedAriaLabel = ariaLabel ?? getTableAriaLabel(locale);
 
   return (
     <div className={cn(styles.tableWrapper, wrapperClassName)}>
-      <table className={cn(styles.table, tableClassName)} aria-label={ariaLabel}>
+      <table className={cn(styles.table, tableClassName)} aria-label={resolvedAriaLabel}>
         {useColGroup && (
           <colgroup>
             {columns.map((c, i) => (
@@ -129,7 +133,7 @@ export function Table<T>({
               })}
 
               {items.length === 0 && (
-                <TableEmptyRow colSpan={colCount}>{emptyText}</TableEmptyRow>
+                <TableEmptyRow colSpan={colCount}>{resolvedEmptyText}</TableEmptyRow>
               )}
             </>
           )}

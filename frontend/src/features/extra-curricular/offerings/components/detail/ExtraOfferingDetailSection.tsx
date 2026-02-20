@@ -14,6 +14,7 @@ import { updateExtraCurricularOfferingDetail } from "../../api/extraCurricularOf
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
+import { stripSemesterSuffix } from "../../utils/semesterDisplayName";
 
 type Props = {
   offeringId?: number;
@@ -83,7 +84,7 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
     setExtraOfferingName(d.extraOfferingName ?? "");
 
     setSemesterId(d.semesterId ?? 0);
-    setSemesterDisplayName(d.semesterDisplayName ?? "");
+    setSemesterDisplayName(stripSemesterSuffix(d.semesterDisplayName ?? ""));
 
     setRewardPointDefault(d.rewardPointDefault ?? 0);
     setRecognizedHoursDefault(d.recognizedHoursDefault ?? 0);
