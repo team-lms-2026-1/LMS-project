@@ -7,6 +7,7 @@ import type { Category, FaqListItemDto, LoadState, UpdateFaqRequestDto } from ".
 import { fetchFaqCategories, fetchFaqDetail, updateFaq } from "../../api/FaqsApi";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 function normalizeDetail(payload: any): FaqListItemDto {
   const raw = payload?.data ?? payload;
@@ -26,6 +27,7 @@ function normalizeDetail(payload: any): FaqListItemDto {
 
 export default function FaqEditPageClient() {
   const router = useRouter();
+  const t = useI18n("community.faqs.admin.edit");
   const params = useParams<{ faqId?: string }>();
   const faqId = useMemo(() => Number(params?.faqId ?? 0), [params]);
 
@@ -34,11 +36,9 @@ export default function FaqEditPageClient() {
 
   const [load, setLoad] = useState<LoadState<FaqListItemDto>>({ loading: true, error: null, data: null });
 
-  // 폼 상태
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  // 카테고리
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
@@ -46,10 +46,9 @@ export default function FaqEditPageClient() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string>("");
 
-  // 상세 로드
   useEffect(() => {
     if (!faqId || Number.isNaN(faqId)) {
-      setLoad({ loading: false, error: "잘못된 FAQ ID입니다.", data: null });
+      setLoad({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
 
@@ -62,8 +61,6 @@ export default function FaqEditPageClient() {
         if (!alive) return;
 
         setLoad({ loading: false, error: null, data });
-
-        // 초기값 세팅
         setTitle(data.title ?? "");
         setContent(data.content ?? "");
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
@@ -71,7 +68,7 @@ export default function FaqEditPageClient() {
         if (!alive) return;
         setLoad({
           loading: false,
-          error: e?.message ?? "FAQ를 불러오지 못했습니다.",
+          error: e?.message ?? t("errors.loadFailed"),
           data: null,
         });
       }
@@ -80,9 +77,8 @@ export default function FaqEditPageClient() {
     return () => {
       alive = false;
     };
-  }, [faqId]);
+  }, [faqId, t]);
 
-  // 카테고리 목록 로드
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -116,24 +112,24 @@ export default function FaqEditPageClient() {
   const onSave = async () => {
     setFormError("");
 
-    const t = title.trim();
-    const c = content.trim();
-    if (!t) return setFormError("제목을 입력하세요.");
-    if (!c) return setFormError("내용을 입력하세요.");
+    const normalizedTitle = title.trim();
+    const normalizedContent = content.trim();
+    if (!normalizedTitle) return setFormError(t("errors.titleRequired"));
+    if (!normalizedContent) return setFormError(t("errors.contentRequired"));
 
     const body: UpdateFaqRequestDto = {
-      title: t,
-      content: c,
+      title: normalizedTitle,
+      content: normalizedContent,
       categoryId: categoryId ? Number(categoryId) : undefined,
     };
 
     setSaving(true);
     try {
       await updateFaq(faqId, body);
-      toast.success("FAQ가 수정되었습니다.");
+      toast.success(t("toasts.saveSuccess"));
       router.push(DETAIL_PATH);
     } catch (e: any) {
-      setFormError(e?.message ?? "수정에 실패했습니다.");
+      setFormError(e?.message ?? t("errors.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -150,33 +146,32 @@ export default function FaqEditPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        {/* ✅ 상단 라인: breadcrumb + 우측 목록으로 */}
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
             <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
-              공지사항
+              {t("title")}
             </span>
-            <span className={styles.sep}>›</span>
-            <span className={styles.current}>수정페이지</span>
+            <span className={styles.sep}>&gt;</span>
+            <span className={styles.current}>{t("breadcrumbCurrent")}</span>
           </div>
 
           <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
-            목록으로
+            {t("buttons.list")}
           </Button>
         </div>
 
-        <h1 className={styles.title}>공지사항</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {load.error && <div className={styles.errorMessage}>{load.error}</div>}
         {formError && <div className={styles.errorMessage}>{formError}</div>}
 
-        {load.loading && <div className={styles.loadingBox}>불러오는 중...</div>}
+        {load.loading && <div className={styles.loadingBox}>{t("loading")}</div>}
 
         {!load.loading && data && (
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {data.category?.name ?? t("texts.uncategorized")}
               </span>
 
               <input
@@ -184,34 +179,34 @@ export default function FaqEditPageClient() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={saving}
-                placeholder="제목"
+                placeholder={t("placeholders.title")}
                 maxLength={200}
               />
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{t("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{data.createdAt || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{t("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
 
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>분류</span>
+                <span className={styles.metaLabel}>{t("labels.category")}</span>
                 <select
                   className={styles.categorySelect}
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
                   disabled={saving || loadingCats}
                 >
-                  <option value="">{loadingCats ? "불러오는 중..." : "미분류"}</option>
+                  <option value="">{loadingCats ? t("placeholders.categoryLoading") : t("placeholders.uncategorized")}</option>
                   {categories.map((c) => (
                     <option key={c.categoryId} value={String(c.categoryId)}>
                       {c.name}
@@ -227,18 +222,17 @@ export default function FaqEditPageClient() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 disabled={saving}
-                placeholder="내용을 입력하세요."
+                placeholder={t("placeholders.content")}
                 rows={12}
               />
             </div>
 
-            {/* ✅ 하단: 취소 / 수정 */}
             <div className={styles.footerRow}>
               <Button variant="secondary" onClick={onCancel} disabled={saving}>
-                취소
+                {t("buttons.cancel")}
               </Button>
               <Button variant="primary" onClick={onSave} disabled={!canSubmit}>
-                {saving ? "수정 중..." : "수정"}
+                {saving ? t("buttons.saving") : t("buttons.save")}
               </Button>
             </div>
           </div>

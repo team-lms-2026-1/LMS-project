@@ -4,6 +4,7 @@ import { Table, type TableColumn } from "@/components/table";
 import { FaqListItemDto } from "../../api/types";
 import styles from "./FaqTable.module.css";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: FaqListItemDto[];
@@ -11,26 +12,31 @@ type Props = {
   onEditClick: (id: number) => void;
 };
 
-export function FaqTable({ items, loading, onEditClick }: Props) {
+export function FaqTable({ items, loading, onEditClick: _onEditClick }: Props) {
   const router = useRouter();
+  const t = useI18n("community.faqs.student.table");
+
   const goDetail = (id: number) => {
     router.push(`/student/community/faqs/${id}`);
   };
+
   const columns: Array<TableColumn<FaqListItemDto>> = [
-    { header: "번호", align: "center", render: (r) => r.faqId },
-    { header: "분류", align: "center", render: (r) => {
+    { header: t("headers.id"), align: "center", render: (r) => r.faqId },
+    {
+      header: t("headers.category"),
+      align: "center",
+      render: (r) => {
         const c = r.category;
-        if (!c) return "미분류"; // ✅ null/undefined 방어
+        if (!c) return t("uncategorized");
         return (
-          <span
-            className={styles.badge}
-            style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}
-          >{c.name}</span>
+          <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
+            {c.name}
+          </span>
         );
       },
     },
     {
-      header: "제목",
+      header: t("headers.title"),
       align: "center",
       render: (r) => (
         <button
@@ -45,8 +51,8 @@ export function FaqTable({ items, loading, onEditClick }: Props) {
         </button>
       ),
     },
-    { header: "조회수", align: "center", render: (r) => r.viewCount },
-    { header: "작성일", align: "center", render: (r) => r.createdAt },
+    { header: t("headers.views"), align: "center", render: (r) => r.viewCount },
+    { header: t("headers.createdAt"), align: "center", render: (r) => r.createdAt },
   ];
 
   return (
@@ -56,7 +62,7 @@ export function FaqTable({ items, loading, onEditClick }: Props) {
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.faqId}
-      emptyText="FAQ가 없습니다."
+      emptyText={t("emptyText")}
       onRowClick={(r) => goDetail(r.faqId)}
     />
   );

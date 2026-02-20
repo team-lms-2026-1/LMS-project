@@ -7,6 +7,7 @@ import styles from "./ResourceEditPage.module.css";
 import type { Category, ResourceListItemDto, ResourceFileDto, ExistingFile, LoadState, } from "../../api/types";
 import { fetchResourceCategories, fetchResourceDetail, updateResource } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 function normalizeDetail(payload: any): ResourceListItemDto {
   const raw = payload?.data ?? payload;
@@ -24,7 +25,7 @@ function normalizeDetail(payload: any): ResourceListItemDto {
   };
 }
 
-function normalizeExistingFiles(files: any[]): ExistingFile[] {
+function normalizeExistingFiles(files: any[], fallbackFileName: (index: number) => string): ExistingFile[] {
   if (!Array.isArray(files)) return [];
 
   return files.map((f: any, idx: number) => {
@@ -39,7 +40,7 @@ function normalizeExistingFiles(files: any[]): ExistingFile[] {
       (dto as any)?.originaName ??
       (dto as any)?.fileName ??
       (dto as any)?.name ??
-      `첨부파일 ${idx + 1}`
+      fallbackFileName(idx + 1)
     );
 
     const url =
@@ -68,6 +69,7 @@ function formatBytes(bytes: number) {
 
 export default function ResourceEditPageClient() {
   const router = useRouter();
+  const i18n = useI18n("community.resources.admin.edit");
   const params = useParams<{ resourceId?: string }>();
   const resourceId = useMemo(() => Number(params?.resourceId ?? 0), [params]);
 
@@ -101,7 +103,7 @@ export default function ResourceEditPageClient() {
   // 상세 로드
   useEffect(() => {
     if (!resourceId || Number.isNaN(resourceId)) {
-      setLoad({ loading: false, error: "잘못된 자료실 ID입니다.", data: null });
+      setLoad({ loading: false, error: i18n("errors.invalidId"), data: null });
       return;
     }
 
@@ -121,14 +123,16 @@ export default function ResourceEditPageClient() {
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
 
         // ✅ 첨부 초기화
-        setExistingFiles(normalizeExistingFiles(data.files ?? []));
+        setExistingFiles(
+          normalizeExistingFiles(data.files ?? [], (index) => i18n("texts.attachmentFallback", { index }))
+        );
         setDeletedFileIds([]);
         setNewFiles([]);
       } catch (e: any) {
         if (!alive) return;
         setLoad({
           loading: false,
-          error: e?.message ?? "자료실을 불러오지 못했습니다.",
+          error: e?.message ?? i18n("errors.loadFailed"),
           data: null,
         });
       }
@@ -137,7 +141,7 @@ export default function ResourceEditPageClient() {
     return () => {
       alive = false;
     };
-  }, [resourceId]);
+  }, [resourceId, i18n]);
 
   // 카테고리 목록
   useEffect(() => {
@@ -196,7 +200,7 @@ export default function ResourceEditPageClient() {
   const toggleDeleteExisting = (f: ExistingFile) => {
     const id = f.fileId;
     if (typeof id !== "number") {
-      alert("이 첨부파일은 fileId(또는 id)가 없어 삭제할 수 없습니다. 백엔드 응답에 식별자가 필요합니다.");
+      alert(i18n("errors.missingFileId"));
       return;
     }
     setDeletedFileIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -207,8 +211,8 @@ export default function ResourceEditPageClient() {
 
     const t = title.trim();
     const c = content.trim();
-    if (!t) return setFormError("제목을 입력하세요.");
-    if (!c) return setFormError("내용을 입력하세요.");
+    if (!t) return setFormError(i18n("errors.titleRequired"));
+    if (!c) return setFormError(i18n("errors.contentRequired"));
 
     // ✅ 새 파일이 있을 때만 files 파트를 보냄
     const filesToSend = newFiles.length > 0 ? newFiles : undefined;
@@ -231,7 +235,7 @@ export default function ResourceEditPageClient() {
 
       router.push(`/admin/community/resources/${nextId}?toast=updated`);
     } catch (e: any) {
-      setFormError(e?.message ?? "수정에 실패했습니다.");
+      setFormError(e?.message ?? i18n("errors.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -251,29 +255,29 @@ export default function ResourceEditPageClient() {
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
             <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
-              자료실
+              {i18n("title")}
             </span>
             <span className={styles.sep}>›</span>
-            <span className={styles.current}>수정페이지</span>
+            <span className={styles.current}>{i18n("breadcrumbCurrent")}</span>
           </div>
 
           <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
-            목록으로
+            {i18n("buttons.list")}
           </Button>
         </div>
 
-        <h1 className={styles.title}>자료실</h1>
+        <h1 className={styles.title}>{i18n("title")}</h1>
 
         {load.error && <div className={styles.errorMessage}>{load.error}</div>}
         {formError && <div className={styles.errorMessage}>{formError}</div>}
 
-        {load.loading && <div className={styles.loadingBox}>불러오는 중...</div>}
+        {load.loading && <div className={styles.loadingBox}>{i18n("loading")}</div>}
 
         {!load.loading && data && (
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {data.category?.name ?? i18n("texts.uncategorized")}
               </span>
 
               <input
@@ -281,34 +285,34 @@ export default function ResourceEditPageClient() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 disabled={saving}
-                placeholder="제목"
+                placeholder={i18n("placeholders.title")}
                 maxLength={200}
               />
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{i18n("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{i18n("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{data.createdAt || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{i18n("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
 
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>분류</span>
+                <span className={styles.metaLabel}>{i18n("labels.category")}</span>
                 <select
                   className={styles.categorySelect}
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
                   disabled={saving || loadingCats}
                 >
-                  <option value="">{loadingCats ? "불러오는 중..." : "미분류"}</option>
+                  <option value="">{loadingCats ? i18n("placeholders.categoryLoading") : i18n("placeholders.uncategorized")}</option>
                   {categories.map((c) => (
                     <option key={c.categoryId} value={String(c.categoryId)}>
                       {c.name}
@@ -324,7 +328,7 @@ export default function ResourceEditPageClient() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 disabled={saving}
-                placeholder="내용을 입력하세요."
+                placeholder={i18n("placeholders.content")}
                 rows={12}
               />
             </div>
@@ -332,28 +336,28 @@ export default function ResourceEditPageClient() {
             {/* ✅ 첨부 */}
             <div className={styles.attachBox}>
               <div className={styles.attachRow}>
-                <div className={styles.attachLabel}>첨부</div>
+                <div className={styles.attachLabel}>{i18n("labels.attachment")}</div>
 
                 <div className={styles.attachWrap}>
                   <div className={styles.attachTabs}>
                     <button type="button" className={styles.tabActive} disabled={saving}>
-                      내 PC
+                      {i18n("buttons.myPc")}
                     </button>
                   </div>
 
                   <div className={styles.dropzone}>
                     <div className={styles.dropText}>
-                      Drop here to attach or{" "}
+                      {i18n("help.dropPrefix")}{" "}
                       <button
                         type="button"
                         className={styles.uploadLink}
                         onClick={() => fileInputRef.current?.click()}
                         disabled={saving}
                       >
-                        upload
+                        {i18n("buttons.upload")}
                       </button>
                     </div>
-                    <div className={styles.maxSize}>Max size: 50MB</div>
+                    <div className={styles.maxSize}>{i18n("help.maxSize")}</div>
 
                     <input
                       ref={fileInputRef}
@@ -385,7 +389,7 @@ export default function ResourceEditPageClient() {
                               </span>
                               {f.url ? (
                                 <a className={styles.fileLink} href={f.url} target="_blank" rel="noreferrer">
-                                  열기
+                                  {i18n("buttons.open")}
                                 </a>
                               ) : null}
                             </div>
@@ -396,13 +400,13 @@ export default function ResourceEditPageClient() {
                               onClick={() => toggleDeleteExisting(f)}
                               disabled={saving}
                             >
-                              {deleted ? "삭제 취소" : "삭제"}
+                              {deleted ? i18n("buttons.deleteFileCancel") : i18n("buttons.deleteFile")}
                             </button>
                           </div>
                         );
                       })
                     ) : (
-                      <div className={styles.attachEmpty}>기존 첨부파일 없음</div>
+                      <div className={styles.attachEmpty}>{i18n("texts.noExistingFiles")}</div>
                     )}
                   </div>
 
@@ -423,7 +427,7 @@ export default function ResourceEditPageClient() {
                               onClick={() => removeNewFile(key)}
                               disabled={saving}
                             >
-                              삭제
+                              {i18n("buttons.deleteFile")}
                             </button>
                           </div>
                         );
@@ -436,10 +440,10 @@ export default function ResourceEditPageClient() {
 
             <div className={styles.footerRow}>
               <Button variant="secondary" onClick={onCancel} disabled={saving}>
-                취소
+                {i18n("buttons.cancel")}
               </Button>
               <Button variant="primary" onClick={onSave} disabled={!canSubmit}>
-                {saving ? "수정 중..." : "수정"}
+                {saving ? i18n("buttons.saving") : i18n("buttons.save")}
               </Button>
             </div>
           </div>

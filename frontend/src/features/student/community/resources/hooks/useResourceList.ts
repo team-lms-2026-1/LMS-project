@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ResourceListItemDto, PageMeta } from "../api/types";
 import { fetchResourcesList } from "../api/resourcesApi";
+import { useI18n } from "@/i18n/useI18n";
 
 
 const defaultMeta: PageMeta = {
@@ -16,6 +17,8 @@ const defaultMeta: PageMeta = {
 };
 
 export function useResourcesList() {
+  const t = useI18n("community.resources.student.hook");
+
   const [items, setItems] = useState<ResourceListItemDto[]>([]);
   const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
@@ -41,13 +44,13 @@ export function useResourcesList() {
       setMeta(res.meta);
     } catch (e: any) {
       console.error("[useResourcesList]", e);
-      setError(e.message ?? "자료실 목록 조회 실패");
+      setError(e.message ?? t("listLoadFailed"));
       setItems([]);
       setMeta(defaultMeta);
     } finally {
       setLoading(false);
     }
-  }, [page, size, keyword]);
+  }, [page, size, keyword, t]);
 
   useEffect(() => {
     load();

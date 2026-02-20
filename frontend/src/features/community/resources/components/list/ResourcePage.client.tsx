@@ -15,9 +15,11 @@ import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 
 import { fetchResourceCategories } from "../../api/resourcesApi";
 import type { Category } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function ResourcePageClient() {
   const router = useRouter();
+  const t = useI18n("community.resources.admin.list");
   const { state, actions } = useResourcesList();
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
@@ -33,18 +35,18 @@ export default function ResourcePageClient() {
   const toastOnceRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const t = sp.get("toast");
-    if (!t) return;
-    if (toastOnceRef.current === t) return;
-    toastOnceRef.current = t;
-    if (t === "created") toast.success("자료가 등록되었습니다.", { id: "resource-toast-created" });
-    else if (t === "updated") toast.success("자료가 수정되었습니다.", { id: "resource-toast-updated" });
-    else if (t === "deleted") toast.success("자료가 삭제되었습니다.", { id: "resource-toast-deleted" });
+    const toastType = sp.get("toast");
+    if (!toastType) return;
+    if (toastOnceRef.current === toastType) return;
+    toastOnceRef.current = toastType;
+    if (toastType === "created") toast.success(t("toasts.created"), { id: "resource-toast-created" });
+    else if (toastType === "updated") toast.success(t("toasts.updated"), { id: "resource-toast-updated" });
+    else if (toastType === "deleted") toast.success(t("toasts.deleted"), { id: "resource-toast-deleted" });
     const next = new URLSearchParams(sp.toString());
     next.delete("toast");
     const qs = next.toString();
     router.replace(qs ? `/admin/community/resources?${qs}` : "/admin/community/resources");
-  }, [sp, router]);
+  }, [sp, router, t]);
 
   useEffect(() => {
     let alive = true;
@@ -100,7 +102,7 @@ export default function ResourcePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>자료실</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchGroup}>
@@ -108,7 +110,7 @@ export default function ResourcePageClient() {
               <Dropdown
                 value={categoryIdQs || ""}
                 options={categoryOptions}
-                placeholder="전체"
+                placeholder={t("categoryAll")}
                 loading={catsLoading}
                 disabled={catsLoading}
                 onChange={onChangeCategory}
@@ -120,7 +122,7 @@ export default function ResourcePageClient() {
                 value={inputKeyword}
                 onChange={setInputKeyword}
                 onSearch={handleSearch}
-                placeholder="제목 검색"
+                placeholder={t("searchPlaceholder")}
               />
             </div>
           </div>
@@ -133,7 +135,7 @@ export default function ResourcePageClient() {
         <div className={styles.footerRow}>
           <div className={styles.footerLeft}>
             <Button variant="secondary" onClick={goCategoryManage}>
-              카테고리 관리
+              {t("categoryManageButton")}
             </Button>
           </div>
 
@@ -148,7 +150,7 @@ export default function ResourcePageClient() {
 
           <div className={styles.footerRight}>
             <Button variant="primary" onClick={goCreate}>
-              등록
+              {t("createButton")}
             </Button>
           </div>
         </div>

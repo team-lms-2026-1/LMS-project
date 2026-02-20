@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { NoticeListItemDto, PageMeta } from "../api/types";
 import { fetchNoticesList } from "../api/noticesApi";
+import { useI18n } from "@/i18n/useI18n";
 
 const defaultMeta: PageMeta = {
     page: 1,
@@ -15,6 +16,8 @@ const defaultMeta: PageMeta = {
 };
 
 export function useNoticesList() {
+    const t = useI18n("community.notices.professor.hook");
+
     const [items, setItems] = useState<NoticeListItemDto[]>([]);
     const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
@@ -40,13 +43,13 @@ export function useNoticesList() {
             setMeta(res.meta);
         } catch (e: any) {
             console.error("[useNoticesList]", e);
-            setError(e.message ?? "공지사항 목록 조회 실패");
+            setError(e.message ?? t("listLoadFailed"));
             setItems([]);
             setMeta(defaultMeta);
         } finally {
             setLoading(false);
         }
-    }, [page, size, keyword]);
+    }, [page, size, keyword, t]);
 
     useEffect(() => {
         load();

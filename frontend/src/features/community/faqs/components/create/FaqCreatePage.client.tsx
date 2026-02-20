@@ -1,26 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./FaqCreatePage.module.css";
 import type { Category, CreateFaqRequestDto } from "../../api/types";
 import { createFaq, fetchFaqCategories } from "../../api/FaqsApi";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
-const LIST_PATH = "/admin/community/faqs"; // 
-
+const LIST_PATH = "/admin/community/faqs";
 const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
 
 export default function FaqCreatePageClient() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const t = useI18n("community.faqs.admin.create");
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [displayStartAt, setDisplayStartAt] = useState<string>("");
-  const [displayEndAt, setDisplayEndAt] = useState<string>("");
 
-  // ✅ 카테고리
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
@@ -60,14 +57,14 @@ export default function FaqCreatePageClient() {
   const onSubmit = async () => {
     setError("");
 
-    const t = title.trim();
-    const c = content.trim();
-    if (!t) return setError("제목을 입력하세요.");
-    if (!c) return setError("내용을 입력하세요.");
+    const normalizedTitle = title.trim();
+    const normalizedContent = content.trim();
+    if (!normalizedTitle) return setError(t("errors.titleRequired"));
+    if (!normalizedContent) return setError(t("errors.contentRequired"));
 
     const body: CreateFaqRequestDto = {
-      title: t,
-      content: c,
+      title: normalizedTitle,
+      content: normalizedContent,
       categoryId: categoryId ? Number(categoryId) : undefined,
     };
 
@@ -76,7 +73,7 @@ export default function FaqCreatePageClient() {
       await createFaq(body);
       router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
-      setError(e?.message ?? "??? ??????.");
+      setError(e?.message ?? t("errors.submitFailed"));
     } finally {
       setSaving(false);
     }
@@ -89,32 +86,31 @@ export default function FaqCreatePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.homeIcon}>⌂</span>
+        <span className={styles.homeIcon}>&gt;</span>
         <span className={styles.sep}>&gt;</span>
-        <strong>FAQ 관리</strong>
+        <strong>{t("breadcrumbTitle")}</strong>
       </div>
 
       <div className={styles.card}>
         <div className={styles.headerRow}>
-          <h1 className={styles.pageTitle}>FAQ 등록</h1>
+          <h1 className={styles.pageTitle}>{t("title")}</h1>
           <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
-            목록으로
+            {t("buttons.list")}
           </Button>
         </div>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
 
         <div className={styles.formTable}>
-          {/* 제목 row */}
           <div className={styles.row}>
-            <div className={styles.labelCell}>제목</div>
+            <div className={styles.labelCell}>{t("labels.title")}</div>
             <div className={styles.contentCell}>
               <div className={styles.titleRow}>
                 <input
                   className={styles.titleInput}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="제목"
+                  placeholder={t("placeholders.title")}
                   disabled={saving}
                   maxLength={200}
                 />
@@ -125,7 +121,7 @@ export default function FaqCreatePageClient() {
                   onChange={(e) => setCategoryId(e.target.value)}
                   disabled={saving || loadingCats}
                 >
-                  <option value="">{loadingCats ? "불러오는 중..." : "카테고리 선택"}</option>
+                  <option value="">{loadingCats ? t("placeholders.categoryLoading") : t("placeholders.category")}</option>
                   {categories.map((c) => (
                     <option key={c.categoryId} value={String(c.categoryId)}>
                       {c.name}
@@ -136,23 +132,22 @@ export default function FaqCreatePageClient() {
             </div>
           </div>
 
-          {/* 내용 row */}
           <div className={styles.row}>
-            <div className={styles.labelCell}>내용</div>
+            <div className={styles.labelCell}>{t("labels.content")}</div>
             <div className={styles.contentCell}>
               <div className={styles.editor}>
                 <div className={styles.toolbar}>
-                  {TOOLBAR.map((t) => (
+                  {TOOLBAR.map((tool) => (
                     <button
-                      key={t}
+                      key={tool}
                       type="button"
                       className={styles.toolBtn}
                       onClick={() => {}}
                       disabled={saving}
-                      aria-label={t}
-                      title={t}
+                      aria-label={tool}
+                      title={tool}
                     >
-                      {t}
+                      {tool}
                     </button>
                   ))}
                 </div>
@@ -161,7 +156,7 @@ export default function FaqCreatePageClient() {
                   className={styles.editorArea}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="내용을 입력하세요."
+                  placeholder={t("placeholders.content")}
                   disabled={saving}
                 />
               </div>
@@ -171,10 +166,10 @@ export default function FaqCreatePageClient() {
 
         <div className={styles.footerRow}>
           <Button variant="secondary" onClick={onCancel} disabled={saving}>
-            취소
+            {t("buttons.cancel")}
           </Button>
           <Button variant="primary" onClick={onSubmit} disabled={!canSubmit}>
-            {saving ? "등록 중..." : "등록"}
+            {saving ? t("buttons.creating") : t("buttons.create")}
           </Button>
         </div>
       </div>

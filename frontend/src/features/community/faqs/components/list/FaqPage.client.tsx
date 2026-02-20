@@ -13,36 +13,40 @@ import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
 import { fetchFaqCategories } from "../../api/FaqsApi";
 import type { Category } from "../../api/types";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function FaqPageClient() {
   const router = useRouter();
   const sp = useSearchParams();
+  const t = useI18n("community.faqs.admin.list");
+
   const { state, actions } = useFaqsList();
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
   const [inputKeyword, setInputKeyword] = useState("");
+
   const { get, setFilters } = useFilterQuery(["categoryId"]);
-  const categoryIdQs = get("categoryId"); 
+  const categoryIdQs = get("categoryId");
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [catsLoading, setCatsLoading] = useState(false);
   const toastOnceRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const t = sp.get("toast");
-    if (!t) return;
+    const toastType = sp.get("toast");
+    if (!toastType) return;
 
-    if (toastOnceRef.current === t) return;
-    toastOnceRef.current = t;
+    if (toastOnceRef.current === toastType) return;
+    toastOnceRef.current = toastType;
 
-    if (t === "created") toast.success("FAQ가 등록되었습니다.", { id: "faq-toast-created" });
-    else if (t === "updated") toast.success("FAQ가 수정되었습니다.", { id: "faq-toast-updated" });
-    else if (t === "deleted") toast.success("FAQ가 삭제되었습니다.", { id: "faq-toast-deleted" });
+    if (toastType === "created") toast.success(t("toasts.created"), { id: "faq-toast-created" });
+    else if (toastType === "updated") toast.success(t("toasts.updated"), { id: "faq-toast-updated" });
+    else if (toastType === "deleted") toast.success(t("toasts.deleted"), { id: "faq-toast-deleted" });
 
     const next = new URLSearchParams(sp.toString());
     next.delete("toast");
-
     const qs = next.toString();
     router.replace(qs ? `/admin/community/faqs?${qs}` : "/admin/community/faqs");
-  }, [sp, router]);
+  }, [sp, router, t]);
 
   useEffect(() => {
     let alive = true;
@@ -94,13 +98,14 @@ export default function FaqPageClient() {
   }, [categories]);
 
   const onChangeCategory = (nextValue: string) => {
+    setPage(1);
     setFilters({ categoryId: nextValue || null });
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>FAQ</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchGroup}>
@@ -108,7 +113,7 @@ export default function FaqPageClient() {
               <Dropdown
                 value={categoryIdQs || ""}
                 options={categoryOptions}
-                placeholder="전체"
+                placeholder={t("categoryAll")}
                 loading={catsLoading}
                 disabled={catsLoading}
                 onChange={onChangeCategory}
@@ -119,7 +124,7 @@ export default function FaqPageClient() {
                 value={inputKeyword}
                 onChange={setInputKeyword}
                 onSearch={handleSearch}
-                placeholder="제목 검색"
+                placeholder={t("searchPlaceholder")}
               />
             </div>
           </div>
@@ -132,7 +137,7 @@ export default function FaqPageClient() {
         <div className={styles.footerRow}>
           <div className={styles.footerLeft}>
             <Button variant="secondary" onClick={goCategoryManage}>
-              카테고리 관리
+              {t("categoryManageButton")}
             </Button>
           </div>
 
@@ -147,7 +152,7 @@ export default function FaqPageClient() {
 
           <div className={styles.footerRight}>
             <Button variant="primary" onClick={goCreate}>
-              등록
+              {t("createButton")}
             </Button>
           </div>
         </div>

@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 
 import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 import styles from "./CategoryTable.module.css";
 import type {
@@ -47,8 +48,6 @@ function safeHex(v: string, fallback: string) {
   return isHex6(v) ? v.toUpperCase() : fallback;
 }
 
-const LEAVE_MSG = "편집 중인 항목이 있습니다. \n저장 또는 취소 후 확인하세요.";
-
 export type CategoryTablePageHandle = {
   isDirty: () => boolean;
   showLeaveToast: () => void;
@@ -56,6 +55,8 @@ export type CategoryTablePageHandle = {
 
 export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
   function CategoryTablePageInner({ scope, items, loading, onReload }: Props, ref) {
+    const t = useI18n("community.categories.table");
+
     // add/edit 상태
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -98,8 +99,8 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
 
     // ✅ 학과 관리처럼 react-hot-toast로 통일
     const toastLeave = useCallback(() => {
-      toast.error(LEAVE_MSG);
-    }, []);
+      toast.error(t("leaveGuard"));
+    }, [t]);
 
     const toastApiError = useCallback((e: any, fallback: string) => {
       toast.error(e?.body?.error?.message || e?.message || fallback);
@@ -183,18 +184,18 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
       const bg = sanitizeHexInput(bgColorHex);
       const tx = sanitizeHexInput(textColorHex);
 
-      if (!n) return toast.error("카테고리 이름을 입력하세요.");
-      if (!bg || !tx) return toast.error("색상을 지정하세요.");
+      if (!n) return toast.error(t("errors.nameRequired"));
+      if (!bg || !tx) return toast.error(t("errors.colorRequired"));
 
       const body: CreateCategoryRequestDto = { name: n, bgColorHex: bg, textColorHex: tx };
 
       try {
         await categoriesApi.create(scope, body);
-        toast.success("카테고리가 추가되었습니다.");
+        toast.success(t("toasts.added"));
         await onReload();
         cancelInline();
       } catch (e: any) {
-        toastApiError(e, "카테고리 추가 실패");
+        toastApiError(e, t("errors.addFailed"));
       }
     };
 
@@ -203,18 +204,18 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
       const bg = sanitizeHexInput(bgColorHex);
       const tx = sanitizeHexInput(textColorHex);
 
-      if (!n) return toast.error("카테고리 이름을 입력하세요.");
-      if (!bg || !tx) return toast.error("색상을 지정하세요.");
+      if (!n) return toast.error(t("errors.nameRequired"));
+      if (!bg || !tx) return toast.error(t("errors.colorRequired"));
 
       const body: UpdateCategoryRequestDto = { name: n, bgColorHex: bg, textColorHex: tx };
 
       try {
         await categoriesApi.update(scope, id, body);
-        toast.success("카테고리가 수정되었습니다.");
+        toast.success(t("toasts.updated"));
         await onReload();
         cancelInline();
       } catch (e: any) {
-        toastApiError(e, "카테고리 수정 실패");
+        toastApiError(e, t("errors.updateFailed"));
       }
     };
 
@@ -246,11 +247,11 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
       setDeleteLoading(true);
       try {
         await categoriesApi.remove(scope, deleteTarget.categoryId);
-        toast.success("카테고리가 삭제되었습니다.");
+        toast.success(t("toasts.deleted"));
         await onReload();
         closeDelete();
       } catch (e: any) {
-        toastApiError(e, "카테고리 삭제 실패");
+        toastApiError(e, t("errors.deleteFailed"));
       } finally {
         setDeleteLoading(false);
       }
@@ -258,9 +259,9 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
 
     const columns: Array<TableColumn<Category>> = useMemo(
       () => [
-        { header: "번호", align: "left", width: 120, render: (r) => r.categoryId },
+        { header: t("headers.id"), align: "left", width: 120, render: (r) => r.categoryId },
         {
-          header: "분류",
+          header: t("headers.category"),
           align: "left",
           render: (r) => {
             if (isEditing(r.categoryId)) {
@@ -270,14 +271,14 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
                     className={styles.nameInput}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="카테고리 제목..."
+                    placeholder={t("placeholders.name")}
                     maxLength={40}
                     disabled={loading}
                   />
 
                   <div className={styles.colorRow}>
                     <div className={styles.colorPickerGroup}>
-                      <span className={styles.colorLabel}>배경</span>
+                      <span className={styles.colorLabel}>{t("labels.bgColor")}</span>
                       <input
                         type="color"
                         className={styles.colorInput}
@@ -294,7 +295,7 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
                     </div>
 
                     <div className={styles.colorPickerGroup}>
-                      <span className={styles.colorLabel}>글자</span>
+                      <span className={styles.colorLabel}>{t("labels.textColor")}</span>
                       <input
                         type="color"
                         className={styles.colorInput}
@@ -313,7 +314,7 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
 
                   <div className={styles.previewRow}>
                     <span className={styles.badge} style={{ backgroundColor: bgColorHex, color: textColorHex }}>
-                      {name || "미리보기"}
+                      {name || t("labels.preview")}
                     </span>
                   </div>
                 </div>
@@ -328,7 +329,7 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
           },
         },
         {
-          header: "관리",
+          header: t("headers.manage"),
           align: "center",
           width: 220,
           stopRowClick: true,
@@ -339,10 +340,10 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
               return (
                 <div className={styles.manageCell}>
                   <Button variant="primary" onClick={() => submitEdit(r.categoryId)} disabled={loading}>
-                    저장
+                    {t("buttons.save")}
                   </Button>
                   <Button variant="danger" onClick={cancelInline} disabled={loading}>
-                    취소
+                    {t("buttons.cancel")}
                   </Button>
                 </div>
               );
@@ -351,21 +352,21 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
             return (
               <div className={styles.manageCell}>
                 <Button variant="secondary" onClick={() => openEdit(r)} disabled={loading || isAdding}>
-                  수정
+                  {t("buttons.edit")}
                 </Button>
                 <Button
                   variant="danger"
                   onClick={() => openDelete(r)}
                   disabled={loading || isAdding || editingId !== null || deleteLoading}
                 >
-                  삭제
+                  {t("buttons.delete")}
                 </Button>
               </div>
             );
           },
         },
       ],
-      [bgColorHex, deleteLoading, editingId, isAdding, loading, name, textColorHex]
+      [bgColorHex, deleteLoading, editingId, isAdding, loading, name, t, textColorHex]
     );
 
     return (
@@ -376,7 +377,7 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
           loading={loading}
           skeletonRowCount={8}
           rowKey={(r) => r.categoryId}
-          emptyText="카테고리가 없습니다."
+          emptyText={t("emptyText")}
         />
 
         <div className={styles.addArea}>
@@ -387,14 +388,14 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
                   className={styles.nameInput}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="카테고리 제목..."
+                  placeholder={t("placeholders.name")}
                   maxLength={40}
                   disabled={loading}
                 />
 
                 <div className={styles.colorRow}>
                   <div className={styles.colorPickerGroup}>
-                    <span className={styles.colorLabel}>배경</span>
+                    <span className={styles.colorLabel}>{t("labels.bgColor")}</span>
                     <input
                       type="color"
                       className={styles.colorInput}
@@ -411,7 +412,7 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
                   </div>
 
                   <div className={styles.colorPickerGroup}>
-                    <span className={styles.colorLabel}>글자</span>
+                    <span className={styles.colorLabel}>{t("labels.textColor")}</span>
                     <input
                       type="color"
                       className={styles.colorInput}
@@ -430,24 +431,24 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
 
                 <div className={styles.previewRow}>
                   <span className={styles.badge} style={{ backgroundColor: bgColorHex, color: textColorHex }}>
-                    {name || "미리보기"}
+                    {name || t("labels.preview")}
                   </span>
                 </div>
               </div>
 
               <div className={styles.addFormRight}>
                 <Button variant="primary" onClick={submitAdd} disabled={loading}>
-                  완료
+                  {t("buttons.done")}
                 </Button>
                 <Button variant="danger" onClick={cancelInline} disabled={loading}>
-                  취소
+                  {t("buttons.cancel")}
                 </Button>
               </div>
             </div>
           ) : (
             <button type="button" className={styles.addButton} onClick={openAdd} disabled={loading || editingId !== null}>
               <span className={styles.plus}>＋</span>
-              <span className={styles.addText}>카테고리 추가하기</span>
+              <span className={styles.addText}>{t("buttons.addCategory")}</span>
             </button>
           )}
         </div>
@@ -455,7 +456,7 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
         {/* ✅ 삭제 확인 모달 */}
         <DeleteModal
           open={deleteOpen}
-          targetLabel="카테고리"
+          targetLabel={t("targetLabel")}
           targetTitle={deleteTarget?.name}
           loading={deleteLoading}
           onConfirm={confirmDelete}

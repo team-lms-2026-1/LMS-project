@@ -1,4 +1,4 @@
-﻿{
+{
   "topbar": {
     "todayTitle": "今日の日付",
     "sessionTitle": "自動ログアウトまでの残り時間",
@@ -1001,6 +1001,1007 @@
         }
       }
     }
+  },
+  "community": {
+    "categories": {
+      "hook": {
+        "listLoadFailed": "カテゴリ一覧の取得に失敗しました。"
+      },
+      "page": {
+        "breadcrumbHome": "ホーム",
+        "title": "{scope} 管理",
+        "searchPlaceholder": "検索語を入力...",
+        "confirmButton": "確認",
+        "scopes": {
+          "notices": "????",
+          "resources": "???",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "table": {
+        "leaveGuard": "編集中の項目があります。\n保存またはキャンセル後に確認してください。",
+        "headers": {
+          "id": "番号",
+          "category": "分類",
+          "manage": "管理"
+        },
+        "placeholders": {
+          "name": "カテゴリ名..."
+        },
+        "labels": {
+          "bgColor": "背景",
+          "textColor": "文字",
+          "preview": "プレビュー"
+        },
+        "buttons": {
+          "save": "保存",
+          "cancel": "キャンセル",
+          "edit": "修正",
+          "delete": "削除",
+          "done": "完了",
+          "addCategory": "カテゴリを追加"
+        },
+        "emptyText": "カテゴリがありません。",
+        "targetLabel": "カテゴリ",
+        "toasts": {
+          "added": "カテゴリが追加されました。",
+          "updated": "カテゴリが修正されました。",
+          "deleted": "カテゴリが削除されました。"
+        },
+        "errors": {
+          "nameRequired": "カテゴリ名を入力してください。",
+          "colorRequired": "色を指定してください。",
+          "addFailed": "カテゴリ追加に失敗しました。",
+          "updateFailed": "カテゴリ修正に失敗しました。",
+          "deleteFailed": "カテゴリ削除に失敗しました。"
+        }
+      },
+      "deleteModal": {
+        "defaultTargetLabel": "カテゴリ",
+        "title": "{targetLabel} 削除",
+        "confirmText": "削除",
+        "cancelText": "キャンセル",
+        "question": "{targetLabel}を削除しますか？",
+        "warning": "削除したデータは復元できません。"
+      }
+    },
+    "notices": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "お知らせ一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "お知らせ",
+          "categoryAll": "すべて",
+          "searchPlaceholder": "タイトル検索",
+          "categoryManageButton": "カテゴリ管理",
+          "createButton": "登録",
+          "toasts": {
+            "created": "お知らせが登録されました。",
+            "updated": "お知らせが修正されました。",
+            "deleted": "お知らせが削除されました。"
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日",
+            "manage": "管理"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "お知らせがありません。",
+          "buttons": {
+            "edit": "修正",
+            "delete": "削除"
+          },
+          "toasts": {
+            "deleteSuccess": "お知らせが削除されました。",
+            "deleteFailed": "削除に失敗しました。"
+          },
+          "targetLabel": "お知らせ"
+        },
+        "detail": {
+          "title": "お知らせ",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "period": "掲示期間",
+            "attachment": "添付"
+          },
+          "attachmentFallback": "添付ファイル {index}",
+          "attachmentEmpty": "添付ファイルなし",
+          "buttons": {
+            "list": "一覧へ",
+            "edit": "修正",
+            "delete": "削除"
+          },
+          "errors": {
+            "invalidId": "無効なお知らせIDです。",
+            "loadFailed": "お知らせを読み込めませんでした。",
+            "deleteFailed": "削除に失敗しました。"
+          },
+          "toasts": {
+            "deleteSuccess": "お知らせが削除されました。"
+          }
+        },
+        "create": {
+          "breadcrumbTitle": "お知らせ管理",
+          "title": "お知らせ登録",
+          "labels": {
+            "title": "タイトル",
+            "period": "掲示期間",
+            "content": "内容",
+            "attachment": "添付",
+            "file": "ファイル"
+          },
+          "placeholders": {
+            "title": "タイトル",
+            "category": "カテゴリ選択",
+            "startDate": "開始日",
+            "endDate": "終了日",
+            "content": "内容を入力してください。",
+            "categoryLoading": "読み込み中..."
+          },
+          "buttons": {
+            "list": "一覧へ",
+            "myPc": "マイPC",
+            "upload": "アップロード",
+            "deleteFile": "削除",
+            "cancel": "キャンセル",
+            "create": "登録",
+            "creating": "登録中..."
+          },
+          "help": {
+            "dropPrefix": "ここにドロップするか",
+            "maxSize": "最大容量: 50MB"
+          },
+          "errors": {
+            "leaveGuard": "登録内容を編集中です。",
+            "titleRequired": "タイトルを入力してください。",
+            "contentRequired": "内容を入力してください。",
+            "periodRequired": "掲示期間を設定してください。",
+            "submitFailed": "登録に失敗しました。"
+          }
+        },
+        "edit": {
+          "title": "お知らせ",
+          "breadcrumbCurrent": "修正ページ",
+          "loading": "読み込み中...",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "category": "分類",
+            "period": "掲示期間",
+            "attachment": "添付"
+          },
+          "placeholders": {
+            "title": "タイトル",
+            "content": "内容を入力してください。",
+            "startDate": "開始日",
+            "endDate": "終了日",
+            "categoryLoading": "読み込み中...",
+            "uncategorized": "未分類"
+          },
+          "buttons": {
+            "list": "一覧へ",
+            "myPc": "マイPC",
+            "upload": "アップロード",
+            "open": "開く",
+            "deleteFile": "削除",
+            "deleteFileCancel": "削除取り消し",
+            "cancel": "キャンセル",
+            "save": "修正",
+            "saving": "修正中..."
+          },
+          "texts": {
+            "uncategorized": "未分類",
+            "noExistingFiles": "既存の添付ファイルなし",
+            "attachmentFallback": "添付ファイル {index}"
+          },
+          "errors": {
+            "leaveGuard": "お知らせを修正中です。",
+            "invalidId": "無効なお知らせIDです。",
+            "loadFailed": "お知らせを読み込めませんでした。",
+            "missingAttachmentId": "この添付ファイルはattachmentIdがないため削除できません。",
+            "titleRequired": "タイトルを入力してください。",
+            "contentRequired": "内容を入力してください。",
+            "invalidPeriod": "掲示期間が正しくありません。終了日は開始日以降である必要があります。",
+            "saveFailed": "修正に失敗しました。"
+          },
+          "toasts": {
+            "saveSuccess": "お知らせが修正されました。"
+          },
+          "help": {
+            "dropPrefix": "ここにドロップするか",
+            "maxSize": "最大容量: 50MB"
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "お知らせ",
+          "title": "{targetLabel} 削除",
+          "confirmText": "削除",
+          "cancelText": "キャンセル",
+          "question": "{targetLabel}を削除しますか？",
+          "warning": "削除したデータは復元できません。"
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "お知らせ一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "お知らせ",
+          "searchPlaceholder": "タイトル検索"
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "お知らせがありません。"
+        },
+        "detail": {
+          "title": "お知らせ",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "attachment": "添付"
+          },
+          "attachmentFallback": "添付ファイル {index}",
+          "attachmentEmpty": "添付ファイルなし",
+          "buttons": {
+            "list": "一覧へ"
+          },
+          "errors": {
+            "invalidId": "無効なお知らせIDです。",
+            "loadFailed": "お知らせを読み込めませんでした。"
+          }
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "お知らせ一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "お知らせ",
+          "searchPlaceholder": "タイトル検索"
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "お知らせがありません。"
+        },
+        "detail": {
+          "title": "お知らせ",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "attachment": "添付"
+          },
+          "attachmentFallback": "添付ファイル {index}",
+          "attachmentEmpty": "添付ファイルなし",
+          "buttons": {
+            "list": "一覧へ"
+          },
+          "errors": {
+            "invalidId": "無効なお知らせIDです。",
+            "loadFailed": "お知らせを読み込めませんでした。"
+          }
+        }
+      }
+    },
+    "resources": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "資料室一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "資料室",
+          "categoryAll": "すべて",
+          "searchPlaceholder": "タイトル検索",
+          "categoryManageButton": "カテゴリ管理",
+          "createButton": "登録",
+          "toasts": {
+            "created": "資料が登録されました。",
+            "updated": "資料が修正されました。",
+            "deleted": "資料が削除されました。"
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日",
+            "manage": "管理"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "資料がありません。",
+          "buttons": {
+            "edit": "修正",
+            "delete": "削除"
+          },
+          "errors": {
+            "deleteFailed": "削除に失敗しました。"
+          },
+          "targetLabel": "資料"
+        },
+        "detail": {
+          "title": "資料室",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "attachment": "添付"
+          },
+          "attachmentFallback": "添付ファイル {index}",
+          "attachmentEmpty": "添付ファイルなし",
+          "buttons": {
+            "list": "一覧へ",
+            "edit": "修正",
+            "delete": "削除"
+          },
+          "errors": {
+            "invalidId": "無効な資料IDです。",
+            "loadFailed": "資料を読み込めませんでした。",
+            "deleteFailed": "削除に失敗しました。"
+          },
+          "toasts": {
+            "created": "資料が登録されました。",
+            "updated": "資料が修正されました。",
+            "deleted": "資料が削除されました。"
+          },
+          "targetLabel": "資料"
+        },
+        "create": {
+          "breadcrumbTitle": "資料室管理",
+          "title": "資料登録",
+          "labels": {
+            "title": "タイトル",
+            "content": "内容",
+            "attachment": "添付",
+            "file": "ファイル"
+          },
+          "placeholders": {
+            "title": "タイトル",
+            "category": "カテゴリ選択",
+            "content": "内容を入力してください。",
+            "categoryLoading": "読み込み中..."
+          },
+          "buttons": {
+            "list": "一覧へ",
+            "myPc": "マイPC",
+            "upload": "アップロード",
+            "deleteFile": "削除",
+            "cancel": "キャンセル",
+            "create": "登録",
+            "creating": "登録中..."
+          },
+          "help": {
+            "dropPrefix": "ここにドロップするか",
+            "maxSize": "最大容量: 50MB"
+          },
+          "errors": {
+            "titleRequired": "タイトルを入力してください。",
+            "contentRequired": "内容を入力してください。",
+            "submitFailed": "登録に失敗しました。"
+          }
+        },
+        "edit": {
+          "title": "資料室",
+          "breadcrumbCurrent": "修正ページ",
+          "loading": "読み込み中...",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "category": "分類",
+            "attachment": "添付"
+          },
+          "placeholders": {
+            "title": "タイトル",
+            "content": "内容を入力してください。",
+            "categoryLoading": "読み込み中...",
+            "uncategorized": "未分類"
+          },
+          "buttons": {
+            "list": "一覧へ",
+            "myPc": "マイPC",
+            "upload": "アップロード",
+            "open": "開く",
+            "deleteFile": "削除",
+            "deleteFileCancel": "削除取り消し",
+            "cancel": "キャンセル",
+            "save": "修正",
+            "saving": "修正中..."
+          },
+          "texts": {
+            "uncategorized": "未分類",
+            "noExistingFiles": "既存の添付ファイルなし",
+            "attachmentFallback": "添付ファイル {index}"
+          },
+          "errors": {
+            "invalidId": "無効な資料IDです。",
+            "loadFailed": "資料を読み込めませんでした。",
+            "missingFileId": "このファイルはfileIdがないため削除できません。",
+            "titleRequired": "タイトルを入力してください。",
+            "contentRequired": "内容を入力してください。",
+            "saveFailed": "修正に失敗しました。"
+          },
+          "help": {
+            "dropPrefix": "ここにドロップするか",
+            "maxSize": "最大容量: 50MB"
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "資料",
+          "title": "{targetLabel} 削除",
+          "confirmText": "削除",
+          "cancelText": "キャンセル",
+          "question": "{targetLabel}を削除しますか？",
+          "warning": "削除したデータは復元できません。"
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "資料室一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "資料室",
+          "searchPlaceholder": "タイトル検索"
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "資料がありません。"
+        },
+        "detail": {
+          "title": "資料室",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "attachment": "添付"
+          },
+          "attachmentFallback": "添付ファイル {index}",
+          "attachmentEmpty": "添付ファイルなし",
+          "buttons": {
+            "list": "一覧へ"
+          },
+          "errors": {
+            "invalidId": "無効な資料IDです。",
+            "loadFailed": "資料を読み込めませんでした。"
+          }
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "資料室一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "資料室",
+          "searchPlaceholder": "タイトル検索"
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "資料がありません。"
+        },
+        "detail": {
+          "title": "資料室",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "attachment": "添付"
+          },
+          "attachmentFallback": "添付ファイル {index}",
+          "attachmentEmpty": "添付ファイルなし",
+          "buttons": {
+            "list": "一覧へ"
+          },
+          "errors": {
+            "invalidId": "無効な資料IDです。",
+            "loadFailed": "資料を読み込めませんでした。"
+          }
+        }
+      }
+    },
+    "faqs": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "FAQ一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "FAQ",
+          "categoryAll": "すべて",
+          "searchPlaceholder": "タイトル検索",
+          "categoryManageButton": "カテゴリ管理",
+          "createButton": "登録",
+          "toasts": {
+            "created": "FAQが登録されました。",
+            "updated": "FAQが修正されました。",
+            "deleted": "FAQが削除されました。"
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日",
+            "manage": "管理"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "FAQがありません。",
+          "buttons": {
+            "edit": "修正",
+            "delete": "削除"
+          },
+          "toasts": {
+            "deleteSuccess": "FAQが削除されました。",
+            "deleteFailed": "削除に失敗しました。"
+          },
+          "targetLabel": "FAQ"
+        },
+        "detail": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数"
+          },
+          "buttons": {
+            "list": "一覧へ",
+            "edit": "修正",
+            "delete": "削除"
+          },
+          "errors": {
+            "invalidId": "無効なFAQ IDです。",
+            "loadFailed": "FAQを読み込めませんでした。",
+            "deleteFailed": "削除に失敗しました。"
+          },
+          "toasts": {
+            "deleteSuccess": "FAQが削除されました。"
+          },
+          "targetLabel": "FAQ"
+        },
+        "create": {
+          "breadcrumbTitle": "FAQ管理",
+          "title": "FAQ登録",
+          "labels": {
+            "title": "タイトル",
+            "content": "内容"
+          },
+          "placeholders": {
+            "title": "タイトル",
+            "category": "カテゴリ選択",
+            "content": "内容を入力してください。",
+            "categoryLoading": "読み込み中..."
+          },
+          "buttons": {
+            "list": "一覧へ",
+            "cancel": "キャンセル",
+            "create": "登録",
+            "creating": "登録中..."
+          },
+          "errors": {
+            "titleRequired": "タイトルを入力してください。",
+            "contentRequired": "内容を入力してください。",
+            "submitFailed": "登録に失敗しました。"
+          }
+        },
+        "edit": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "修正ページ",
+          "loading": "読み込み中...",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数",
+            "category": "分類"
+          },
+          "placeholders": {
+            "title": "タイトル",
+            "content": "内容を入力してください。",
+            "categoryLoading": "読み込み中...",
+            "uncategorized": "未分類"
+          },
+          "buttons": {
+            "list": "一覧へ",
+            "cancel": "キャンセル",
+            "save": "修正",
+            "saving": "修正中..."
+          },
+          "texts": {
+            "uncategorized": "未分類"
+          },
+          "errors": {
+            "invalidId": "無効なFAQ IDです。",
+            "loadFailed": "FAQを読み込めませんでした。",
+            "titleRequired": "タイトルを入力してください。",
+            "contentRequired": "内容を入力してください。",
+            "saveFailed": "修正に失敗しました。"
+          },
+          "toasts": {
+            "saveSuccess": "FAQが修正されました。"
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "FAQ",
+          "title": "{targetLabel} 削除",
+          "confirmText": "削除",
+          "cancelText": "キャンセル",
+          "question": "{targetLabel}を削除しますか？",
+          "warning": "削除したデータは復元できません。"
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "FAQ一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "FAQ",
+          "searchPlaceholder": "タイトル検索"
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "FAQがありません。"
+        },
+        "detail": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数"
+          },
+          "buttons": {
+            "list": "一覧へ"
+          },
+          "errors": {
+            "invalidId": "無効なFAQ IDです。",
+            "loadFailed": "FAQを読み込めませんでした。"
+          }
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "FAQ一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "FAQ",
+          "searchPlaceholder": "タイトル検索"
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "FAQがありません。"
+        },
+        "detail": {
+          "title": "FAQ",
+          "breadcrumbCurrent": "詳細ページ",
+          "loading": "読み込み中...",
+          "uncategorized": "未分類",
+          "labels": {
+            "author": "作成者",
+            "createdAt": "作成日",
+            "views": "閲覧数"
+          },
+          "buttons": {
+            "list": "一覧へ"
+          },
+          "errors": {
+            "invalidId": "無効なFAQ IDです。",
+            "loadFailed": "FAQを読み込めませんでした。"
+          }
+        }
+      }
+    },
+    "qna": {
+      "admin": {
+        "hook": {
+          "listLoadFailed": "Q&A一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "Q&A",
+          "categoryAll": "すべて",
+          "searchPlaceholder": "タイトル検索",
+          "categoryManageButton": "カテゴリ管理",
+          "targetLabel": "Q&A",
+          "toasts": {
+            "created": "Q&Aを登録しました。",
+            "updated": "Q&Aを更新しました。",
+            "deleted": "Q&Aを削除しました。",
+            "deleteFailed": "削除に失敗しました。"
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "answer": "回答",
+            "views": "閲覧数",
+            "createdAt": "作成日",
+            "manage": "管理"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "Q&Aがありません。",
+          "buttons": {
+            "delete": "削除"
+          }
+        },
+        "detail": {
+          "title": "Q&A",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "deleteQuestion": "Delete Question",
+            "answerEdit": "Edit",
+            "answerDelete": "Delete",
+            "answerSubmit": "Answer",
+            "answerSave": "Save",
+            "answerCancel": "Cancel",
+            "list": "Back to List"
+          },
+          "texts": {
+            "answerTitle": "Answer",
+            "answerPlaceholder": "Write your answer here..."
+          },
+          "targetLabels": {
+            "answer": "Answer",
+            "question": "Q&A"
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question.",
+            "deleteFailed": "Delete failed.",
+            "answerRequired": "Please enter answer content.",
+            "answerSaveFailed": "Failed to save answer."
+          },
+          "toasts": {
+            "answerDeleted": "Answer deleted.",
+            "answerUpdated": "Answer updated.",
+            "answerCreated": "Answer created."
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "Q&A",
+          "title": "{targetLabel}削除",
+          "confirmText": "削除",
+          "cancelText": "キャンセル",
+          "question": "{targetLabel}を削除しますか？",
+          "warning": "削除したデータは復元できません。"
+        }
+      },
+      "student": {
+        "hook": {
+          "listLoadFailed": "Q&A一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "Q&A",
+          "searchPlaceholder": "タイトル検索",
+          "createButton": "質問登録",
+          "toasts": {
+            "created": "質問を登録しました。",
+            "updated": "質問を更新しました。",
+            "deleted": "質問を削除しました。"
+          }
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "emptyText": "Q&Aがありません。"
+        },
+        "detail": {
+          "title": "Q&A",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question.",
+            "deleteFailed": "An error occurred while deleting."
+          },
+          "toasts": {
+            "updated": "Question updated."
+          },
+          "targetLabel": "Question"
+        },
+        "create": {
+          "title": "Create Question",
+          "labels": {
+            "category": "Category",
+            "title": "Title",
+            "content": "Content"
+          },
+          "placeholders": {
+            "categoryLoading": "Loading...",
+            "uncategorized": "Uncategorized",
+            "title": "Enter a title",
+            "content": "Enter your question"
+          },
+          "buttons": {
+            "list": "Back to List",
+            "submit": "Create",
+            "submitting": "Creating..."
+          },
+          "errors": {
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "submitFailed": "Failed to create question."
+          }
+        },
+        "edit": {
+          "title": "Edit Question",
+          "breadcrumbCurrent": "Edit",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "category": "Category"
+          },
+          "placeholders": {
+            "title": "Title",
+            "content": "Enter content.",
+            "categoryLoading": "Loading...",
+            "uncategorized": "Uncategorized"
+          },
+          "buttons": {
+            "cancel": "Cancel",
+            "save": "Save",
+            "saving": "Saving..."
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question.",
+            "titleRequired": "Please enter a title.",
+            "contentRequired": "Please enter content.",
+            "ownerOnlyAlert": "Only your own posts can be edited.",
+            "saveFailed": "Failed to save changes."
+          }
+        },
+        "deleteModal": {
+          "defaultTargetLabel": "質問",
+          "title": "{targetLabel}削除",
+          "confirmText": "削除",
+          "cancelText": "キャンセル",
+          "question": "{targetLabel}を削除しますか？",
+          "warning": "削除後は復元できません。"
+        }
+      },
+      "professor": {
+        "hook": {
+          "listLoadFailed": "Q&A一覧の取得に失敗しました。"
+        },
+        "list": {
+          "title": "Q&A",
+          "searchPlaceholder": "タイトル検索"
+        },
+        "table": {
+          "headers": {
+            "id": "番号",
+            "category": "分類",
+            "title": "タイトル",
+            "author": "作成者",
+            "answerStatus": "回答有無",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "answerDone": "回答完了",
+          "answerPending": "待機中",
+          "uncategorized": "未分類",
+          "emptyText": "登録された質問がありません。"
+        },
+        "detail": {
+          "title": "Q&A",
+          "breadcrumbCurrent": "Detail",
+          "loading": "Loading...",
+          "uncategorized": "Uncategorized",
+          "labels": {
+            "author": "Author",
+            "createdAt": "Created At",
+            "views": "Views"
+          },
+          "buttons": {
+            "list": "Back to List"
+          },
+          "errors": {
+            "invalidId": "Invalid question ID.",
+            "loadFailed": "Failed to load question."
+          }
+        }
+      }
+    }
   }
 }
-
