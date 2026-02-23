@@ -1182,6 +1182,7 @@
             "views": "조회수",
             "category": "분류",
             "period": "게시기간",
+            "content": "내용",
             "attachment": "첨부"
           },
           "placeholders": {
@@ -1889,6 +1890,10 @@
             "list": "Back to List",
             "edit": "Edit",
             "delete": "Delete"
+          },
+          "texts": {
+            "answerTitle": "답변",
+            "answerEmpty": "아직 답변이 없습니다."
           },
           "errors": {
             "invalidId": "Invalid question ID.",

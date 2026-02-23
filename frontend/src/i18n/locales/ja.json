@@ -1181,6 +1181,7 @@
             "views": "閲覧数",
             "category": "分類",
             "period": "掲示期間",
+            "content": "内容",
             "attachment": "添付"
           },
           "placeholders": {
@@ -1888,6 +1889,10 @@
             "list": "Back to List",
             "edit": "Edit",
             "delete": "Delete"
+          },
+          "texts": {
+            "answerTitle": "回答",
+            "answerEmpty": "まだ回答がありません。"
           },
           "errors": {
             "invalidId": "Invalid question ID.",

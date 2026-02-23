@@ -62,6 +62,7 @@ export function QnaTable({ items, loading }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.questionId}
       emptyText={t("emptyText")}
+      rowClassName={styles.rowTall}
       onRowClick={(r) => goDetail(r.questionId)}
     />
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./NoticeDetailPage.module.css";
 import type { NoticeListItemDto } from "../../api/types";
@@ -51,6 +51,7 @@ export default function NoticeDetailpageClient() {
   const t = useI18n("community.notices.student.detail");
   const params = useParams<{ noticeId?: string }>();
   const noticeId = useMemo(() => Number(params?.noticeId ?? 0), [params]);
+  const fetchedIdRef = useRef<number | null>(null);
 
   const [state, setState] = useState<LoadState>({
     loading: true,
@@ -63,6 +64,9 @@ export default function NoticeDetailpageClient() {
       setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
+
+    if (fetchedIdRef.current === noticeId) return;
+    fetchedIdRef.current = noticeId;
 
     let alive = true;
     (async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./FaqDetailPage.module.css";
 import type { FaqListItemDto } from "../../api/types";
@@ -44,6 +44,7 @@ export default function FaqDetailpageClient() {
   const t = useI18n("community.faqs.student.detail");
   const params = useParams<{ faqId?: string }>();
   const faqId = useMemo(() => Number(params?.faqId ?? 0), [params]);
+  const fetchedIdRef = useRef<number | null>(null);
 
   const [state, setState] = useState<LoadState>({
     loading: true,
@@ -56,6 +57,9 @@ export default function FaqDetailpageClient() {
       setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
+
+    if (fetchedIdRef.current === faqId) return;
+    fetchedIdRef.current = faqId;
 
     let alive = true;
     (async () => {

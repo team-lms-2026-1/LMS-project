@@ -9,7 +9,10 @@ import { Button } from "@/components/button";
 import { useI18n } from "@/i18n/useI18n";
 
 const LIST_PATH = "/admin/community/faqs";
-const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
+const TITLE_MAX = 100;
+const CONTENT_MAX = 2000;
+
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
 
 export default function FaqCreatePageClient() {
   const router = useRouter();
@@ -109,10 +112,10 @@ export default function FaqCreatePageClient() {
                 <input
                   className={styles.titleInput}
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
                   placeholder={t("placeholders.title")}
                   disabled={saving}
-                  maxLength={200}
+                  maxLength={TITLE_MAX}
                 />
 
                 <select
@@ -136,28 +139,13 @@ export default function FaqCreatePageClient() {
             <div className={styles.labelCell}>{t("labels.content")}</div>
             <div className={styles.contentCell}>
               <div className={styles.editor}>
-                <div className={styles.toolbar}>
-                  {TOOLBAR.map((tool) => (
-                    <button
-                      key={tool}
-                      type="button"
-                      className={styles.toolBtn}
-                      onClick={() => {}}
-                      disabled={saving}
-                      aria-label={tool}
-                      title={tool}
-                    >
-                      {tool}
-                    </button>
-                  ))}
-                </div>
-
                 <textarea
                   className={styles.editorArea}
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
                   placeholder={t("placeholders.content")}
                   disabled={saving}
+                  maxLength={CONTENT_MAX}
                 />
               </div>
             </div>

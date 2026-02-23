@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import styles from "./QnaDetailPage.module.css";
@@ -63,6 +63,7 @@ export default function QnaDetailPageClient() {
   const params = useParams<{ questionId?: string }>();
   const questionId = useMemo(() => Number(params?.questionId ?? 0), [params]);
   const t = useI18n("community.qna.admin.detail");
+  const initialFetchRef = useRef<number | null>(null);
 
   const [state, setState] = useState<LoadState<QnaDetailDto>>({
     loading: true,
@@ -82,10 +83,15 @@ export default function QnaDetailPageClient() {
     router.push("/admin/community/qna");
   }, [router]);
 
-  const loadDetail = useCallback(async () => {
+  const loadDetail = useCallback(async (options?: { force?: boolean }) => {
     if (!questionId || Number.isNaN(questionId)) {
       setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
+    }
+
+    if (!options?.force) {
+      if (initialFetchRef.current === questionId) return;
+      initialFetchRef.current = questionId;
     }
 
     try {
@@ -137,7 +143,7 @@ export default function QnaDetailPageClient() {
 
       await deleteQnaAnswer(questionId);
       toast.success(t("toasts.answerDeleted"));
-      await loadDetail();
+      await loadDetail({ force: true });
     } catch (e: any) {
       toast.error(e?.message ?? t("errors.deleteFailed"));
     } finally {
@@ -158,7 +164,7 @@ export default function QnaDetailPageClient() {
         await createQnaAnswer(questionId, { content: answerText });
       }
 
-      await loadDetail();
+      await loadDetail({ force: true });
       toast.success(hasAnswer ? t("toasts.answerUpdated") : t("toasts.answerCreated"));
     } catch (e: any) {
       toast.error(e?.message ?? t("errors.answerSaveFailed"));

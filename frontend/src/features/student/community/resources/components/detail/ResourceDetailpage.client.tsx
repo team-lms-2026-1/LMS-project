@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./ResourceDetailPage.module.css";
 import type { ResourceListItemDto } from "../../api/types";
@@ -45,6 +45,7 @@ export default function ResourceDetailpageClient() {
   const t = useI18n("community.resources.student.detail");
   const params = useParams<{ resourceId?: string }>();
   const resourceId = useMemo(() => Number(params?.resourceId ?? 0), [params]);
+  const fetchedIdRef = useRef<number | null>(null);
 
   const [state, setState] = useState<LoadState>({
     loading: true,
@@ -57,6 +58,9 @@ export default function ResourceDetailpageClient() {
       setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
+
+    if (fetchedIdRef.current === resourceId) return;
+    fetchedIdRef.current = resourceId;
 
     let alive = true;
     (async () => {

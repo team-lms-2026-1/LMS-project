@@ -59,6 +59,7 @@ export function NoticesTable({ items, loading, onEditClick }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.noticeId}
       emptyText={t("emptyText")}
+      rowClassName={styles.rowTall}
       onRowClick={(r) => goDetail(r.noticeId)}
     />
   );

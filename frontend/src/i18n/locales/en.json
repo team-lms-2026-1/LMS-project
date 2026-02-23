@@ -1181,6 +1181,7 @@
             "views": "Views",
             "category": "Category",
             "period": "Display Period",
+            "content": "Content",
             "attachment": "Attachments"
           },
           "placeholders": {
@@ -1888,6 +1889,10 @@
             "list": "Back to List",
             "edit": "Edit",
             "delete": "Delete"
+          },
+          "texts": {
+            "answerTitle": "Answer",
+            "answerEmpty": "No answer yet."
           },
           "errors": {
             "invalidId": "Invalid question ID.",

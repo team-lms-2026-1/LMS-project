@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, forwardRef, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 import styles from "./NoticeCreatePage.module.css";
 import type { Category, CreateNoticeRequestDto } from "../../api/types";
-import { createNotice, fetchNoticeCategories } from "../../api/noticesApi";
+import { createNotice, fetchNoticeCategories } from "../../api/NoticesApi";
 import { Button } from "@/components/button";
-import DatePicker from "react-datepicker";
+import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
 
 const LIST_PATH = "/admin/community/notices";
-const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
+const TITLE_MAX = 100;
+const CONTENT_MAX = 2000;
+
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
 
 function toMidnightLocalDateTime(dateOnly: string) {
   if (!dateOnly) return "";
@@ -31,17 +34,6 @@ function formatBytes(bytes: number) {
   return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-function formatYmd(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-const DateTextInput = forwardRef<HTMLInputElement, any>(function DateTextInput(props, ref) {
-  return <input ref={ref} {...props} className={styles.date} readOnly />;
-});
-
 export default function NoticeCreatePageClient() {
   const router = useRouter();
   const i18n = useI18n("community.notices.admin.create");
@@ -50,8 +42,8 @@ export default function NoticeCreatePageClient() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const [displayStartAt, setDisplayStartAt] = useState<Date | null>(null);
-  const [displayEndAt, setDisplayEndAt] = useState<Date | null>(null);
+  const [displayStartAt, setDisplayStartAt] = useState("");
+  const [displayEndAt, setDisplayEndAt] = useState("");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
@@ -205,8 +197,8 @@ export default function NoticeCreatePageClient() {
     if (!c) return toast.error(i18n("errors.contentRequired"));
     if (!displayStartAt && !displayEndAt) return toast.error(i18n("errors.periodRequired"));
 
-    const displayStartAtIso = displayStartAt ? toMidnightLocalDateTime(formatYmd(displayStartAt)) : "";
-    const displayEndAtIso = displayEndAt ? toMidnightLocalDateTime(formatYmd(displayEndAt)) : "";
+    const displayStartAtIso = displayStartAt ? toMidnightLocalDateTime(displayStartAt) : "";
+    const displayEndAtIso = displayEndAt ? toMidnightLocalDateTime(displayEndAt) : "";
 
     setSaving(true);
     try {
@@ -292,10 +284,10 @@ export default function NoticeCreatePageClient() {
                 <input
                   className={styles.titleInput}
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
                   placeholder={i18n("placeholders.title")}
                   disabled={saving}
-                  maxLength={200}
+                  maxLength={TITLE_MAX}
                 />
 
                 <select
@@ -321,32 +313,26 @@ export default function NoticeCreatePageClient() {
             <div className={styles.labelCell}>{i18n("labels.period")}</div>
             <div className={styles.contentCell}>
               <div className={styles.periodRow}>
-                <DatePicker
-                  selected={displayStartAt}
-                  onChange={(d: Date | null) => {
-                    setDisplayStartAt(d);
-                    if (d && displayEndAt && displayEndAt < d) setDisplayEndAt(d);
+                <DatePickerInput
+                  value={displayStartAt}
+                  onChange={(value) => {
+                    setDisplayStartAt(value);
+                    if (value && displayEndAt && displayEndAt < value) setDisplayEndAt(value);
                   }}
-                  dateFormat="yyyy-MM-dd"
-                  placeholderText={i18n("placeholders.startDate")}
-                  customInput={<DateTextInput />}
+                  placeholder={i18n("placeholders.startDate")}
                   disabled={saving}
-                  isClearable
-                  popperPlacement="bottom-start"
+                  className={styles.dateInput}
                 />
 
                 <span className={styles.tilde}>~</span>
 
-                <DatePicker
-                  selected={displayEndAt}
-                  onChange={(d: Date | null) => setDisplayEndAt(d)}
-                  dateFormat="yyyy-MM-dd"
-                  placeholderText={i18n("placeholders.endDate")}
-                  customInput={<DateTextInput />}
+                <DatePickerInput
+                  value={displayEndAt}
+                  onChange={setDisplayEndAt}
+                  placeholder={i18n("placeholders.endDate")}
                   disabled={saving}
-                  minDate={displayStartAt ?? undefined}
-                  isClearable
-                  popperPlacement="bottom-start"
+                  min={displayStartAt || undefined}
+                  className={styles.dateInput}
                 />
               </div>
             </div>
@@ -356,28 +342,13 @@ export default function NoticeCreatePageClient() {
             <div className={styles.labelCell}>{i18n("labels.content")}</div>
             <div className={styles.contentCell}>
               <div className={styles.editor}>
-                <div className={styles.toolbar}>
-                  {TOOLBAR.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      className={styles.toolBtn}
-                      onClick={() => { }}
-                      disabled={saving}
-                      aria-label={t}
-                      title={t}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-
                 <textarea
                   className={styles.editorArea}
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
                   placeholder={i18n("placeholders.content")}
                   disabled={saving}
+                  maxLength={CONTENT_MAX}
                 />
               </div>
             </div>
@@ -392,14 +363,18 @@ export default function NoticeCreatePageClient() {
             <div className={styles.contentCell}>
               <div className={styles.attachWrap}>
                 <div className={styles.attachTabs}>
-                  <button type="button" className={styles.tabActive} disabled={saving}>
+                  <button
+                    type="button"
+                    className={styles.tabActive}
+                    disabled={saving}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     {i18n("buttons.myPc")}
                   </button>
                 </div>
 
                 <div className={styles.dropzone}>
                   <div className={styles.dropText}>
-                    {i18n("help.dropPrefix")}{" "}
                     <button
                       type="button"
                       className={styles.uploadLink}
