@@ -9,6 +9,7 @@ public interface CurricularOfferingRepository
                 CurricularOfferingRepositoryCustom {
 
     boolean existsByOfferingCode(String offeringCode);
+    boolean existsByCurricularId(Long curricularId);
     
     // 같은 학기에 같은 교과 중복 개설 방지
     boolean existsByCurricularIdAndSemesterId(Long curricularId, Long semesterId);

@@ -869,6 +869,7 @@
           "invalidOperationPeriod": "Start date cannot be later than end date.",
           "invalidRewardPoint": "Default points must be 0 or greater.",
           "invalidRecognizedHours": "Default recognized hours must be 0 or greater.",
+          "invalidHostContactPhone": "Contact phone format is invalid.",
           "invalidHostContactEmail": "Contact email format is invalid."
         }
       }
@@ -921,6 +922,7 @@
           "requiredOperationStartDate": "Please select an operation start date.",
           "requiredOperationEndDate": "Please select an operation end date.",
           "invalidOperationPeriod": "Start date cannot be later than end date.",
+          "invalidContactPhone": "Contact phone format is invalid.",
           "invalidContactEmail": "Contact email format is invalid.",
           "onlyDraft": "Editable only in Draft status.",
           "saveFailed": "Failed to update."

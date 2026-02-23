@@ -180,10 +180,10 @@ function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[
     scaleOptions:
       q.scaleOptions && q.scaleOptions.length > 0
         ? q.scaleOptions.map((opt, idx) => ({
-            id: opt.id || makeId(),
-            label: opt.label ?? SCALE_LABELS[idx] ?? "",
-            score: opt.score ?? SCORE_OPTIONS[SCORE_OPTIONS.length - 1 - idx] ?? 1,
-          }))
+          id: opt.id || makeId(),
+          label: opt.label ?? SCALE_LABELS[idx] ?? "",
+          score: opt.score ?? SCORE_OPTIONS[SCORE_OPTIONS.length - 1 - idx] ?? 1,
+        }))
         : createScaleOptions(),
     shortAnswer: q.shortAnswer ?? "",
     csScores: {
@@ -371,24 +371,36 @@ export function DignosisEditModal({
     }
 
     if (!title.trim()) {
-      window.alert("제목을 입력해 주세요.");
+      toast.error("제목을 입력해 주세요.");
       return;
     }
     if (!semesterValue) {
-      window.alert("학기를 선택해 주세요.");
+      toast.error("학기를 선택해 주세요.");
       return;
     }
     if (!deptValue || deptValue === "All") {
-      window.alert("학과를 선택해 주세요.");
+      toast.error("학과를 선택해 주세요.");
       return;
     }
     if (!gradeValue || gradeValue === "ALL") {
-      window.alert("학년을 선택해 주세요.");
+      toast.error("학년을 선택해 주세요.");
       return;
     }
     if (!startedAt || !endedAt) {
-      window.alert("기간을 선택해 주세요.");
+      toast.error("기간을 선택해 주세요.");
       return;
+    }
+
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+      if (!q.title.trim()) {
+        toast.error(`${i + 1}번 질문의 제목을 입력해 주세요.`);
+        return;
+      }
+      if (q.type === "SHORT" && !q.shortAnswer.trim()) {
+        toast.error(`${i + 1}번 질문의 정답을 입력해 주세요.`);
+        return;
+      }
     }
 
     const shouldSendQuestions = status === "DRAFT";
@@ -592,19 +604,7 @@ export function DignosisEditModal({
                               <span className={styles.scaleBullet} />
                               <span className={styles.scaleLabel}>{opt.label}</span>
                             </div>
-                            <select
-                              className={styles.scoreSelect}
-                              value={opt.score}
-                              onChange={(e) =>
-                                handleChangeScaleScore(q.id, opt.id, Number(e.target.value))
-                              }
-                            >
-                              {SCORE_OPTIONS.map((s) => (
-                                <option key={s} value={s}>
-                                  {s}점
-                                </option>
-                              ))}
-                            </select>
+                            <span className={styles.fixedScore}>{opt.score}점</span>
                           </div>
                         ))}
                       </div>

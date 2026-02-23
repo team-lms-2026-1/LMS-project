@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.teamlms.backend.domain.curricular.entity.Enrollment;
+import com.teamlms.backend.domain.curricular.enums.DayOfWeekType;
 import com.teamlms.backend.domain.curricular.enums.EnrollmentStatus;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long>, EnrollmentRepositoryCustom {
@@ -34,4 +35,22 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long>, E
   java.util.List<Enrollment> findByStudentAccountIdAndSemesterId(
       @org.springframework.data.repository.query.Param("studentAccountId") Long studentAccountId,
       @org.springframework.data.repository.query.Param("semesterId") Long semesterId);
+
+  @org.springframework.data.jpa.repository.Query("""
+      SELECT count(e)
+      FROM Enrollment e
+      JOIN CurricularOffering o ON e.offeringId = o.offeringId
+      WHERE e.studentAccountId = :studentAccountId
+        AND e.enrollmentStatus = com.teamlms.backend.domain.curricular.enums.EnrollmentStatus.ENROLLED
+        AND o.semesterId = :semesterId
+        AND o.dayOfWeek = :dayOfWeek
+        AND o.period = :period
+        AND o.offeringId <> :offeringId
+      """)
+  long countScheduleConflictEnrollment(
+      @org.springframework.data.repository.query.Param("studentAccountId") Long studentAccountId,
+      @org.springframework.data.repository.query.Param("semesterId") Long semesterId,
+      @org.springframework.data.repository.query.Param("dayOfWeek") DayOfWeekType dayOfWeek,
+      @org.springframework.data.repository.query.Param("period") Integer period,
+      @org.springframework.data.repository.query.Param("offeringId") Long offeringId);
 }

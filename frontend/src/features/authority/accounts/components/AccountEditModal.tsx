@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "../styles/AccountModal.module.css";
 import type { AccountType, MajorType } from "../types";
 import { accountsApi } from "../api/accountsApi";
+import toast from "react-hot-toast";
 
 export type AccountEditModalProps = {
   open: boolean;
@@ -388,16 +389,18 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
     // 업로드 직후 바로 반영 (계정 저장과는 별개로 이미지 API 호출 권장)
     if (accountId) {
-      accountsApi.updateStudentProfileImage(accountId, file).catch((err) => {
-        console.error("Image PATCH failed", err);
-        alert("이미지 수정 중 오류가 발생했습니다.");
-      });
+      accountsApi.updateStudentProfileImage(accountId, file).then(() => {
+        toast.success("프로필 이미지가 변경되었습니다.");
+      })
+        .catch((err) => {
+          console.error("Image PATCH failed", err);
+          toast.error("이미지 수정 중 오류가 발생했습니다.");
+        });
     }
   };
 
   const onImageDelete = async () => {
     if (!accountId) return;
-    if (!confirm("프로필 이미지를 삭제하시겠습니까?")) return;
 
     setIsImageDeleting(true);
     try {
@@ -405,8 +408,9 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
       setImagePreview(null);
       setImageFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      toast.success("프로필 이미지가 삭제되었습니다.");
     } catch (e) {
-      alert("이미지 삭제 실패");
+      toast.error("이미지 삭제 실패");
     } finally {
       setIsImageDeleting(false);
     }
