@@ -12,4 +12,5 @@ public interface MentoringRecruitmentRepository extends JpaRepository<MentoringR
     Page<MentoringRecruitment> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
     Page<MentoringRecruitment> findByStatus(MentoringRecruitmentStatus status, Pageable pageable);
     Page<MentoringRecruitment> findByStatusAndTitleContainingIgnoreCase(MentoringRecruitmentStatus status, String keyword, Pageable pageable);
+    boolean existsBySemesterId(Long semesterId);
 }

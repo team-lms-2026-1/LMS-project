@@ -52,20 +52,16 @@ export default function SurveyListPageClient() {
 
     useEffect(() => {
         actions.goPage(page);
-    }, [page, actions]);
+    }, [page]);
 
     useEffect(() => {
         if (state.size !== size) actions.setSize(size);
-    }, [size, state.size, actions]);
-
-    useEffect(() => {
-        actions.setKeyword(keyword);
-    }, [keyword, actions]);
+    }, [size]);
 
     const handleSearch = useCallback(() => {
         setPage(1);
-        actions.goPage(1);
         actions.setKeyword(inputKeyword);
+        actions.search();
     }, [inputKeyword, setPage, actions]);
 
     const handleEdit = (id: number) => {
