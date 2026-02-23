@@ -45,9 +45,11 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                         s.type,
                         s.title,
                         new CaseBuilder()
-                                .when(s.startAt.after(now).or(s.endAt.before(now)))
+                                .when(s.startAt.after(now))   // 아직 시작 안 함 → DRAFT
+                                .then(SurveyStatus.DRAFT)
+                                .when(s.endAt.before(now))    // 종료됨 → CLOSED
                                 .then(SurveyStatus.CLOSED)
-                                .otherwise(s.status),
+                                .otherwise(s.status),          // 진행 중 → DB 값 사용
                         s.startAt,
                         s.endAt,
                         s.viewCount,
@@ -89,9 +91,11 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                         s.type,
                         s.title,
                         new CaseBuilder()
-                                .when(s.startAt.after(now).or(s.endAt.before(now)))
+                                .when(s.startAt.after(now))   // 아직 시작 안 함 → DRAFT
+                                .then(SurveyStatus.DRAFT)
+                                .when(s.endAt.before(now))    // 종료됨 → CLOSED
                                 .then(SurveyStatus.CLOSED)
-                                .otherwise(s.status),
+                                .otherwise(s.status),          // 진행 중 → DB 값 사용
                         s.startAt,
                         s.endAt,
                         s.viewCount,
@@ -102,6 +106,9 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                 .join(t).on(t.surveyId.eq(s.surveyId))
                 .where(
                         t.targetAccountId.eq(userId),
+                        s.status.eq(SurveyStatus.OPEN),   // OPEN 상태인 설문만
+                        s.startAt.loe(now),               // 시작일 <= 현재
+                        s.endAt.goe(now),                 // 종료일 >= 현재
                         titleLike(keyword),
                         typeEq(type)
                 )

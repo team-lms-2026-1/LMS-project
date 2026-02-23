@@ -90,7 +90,9 @@ public class AdminSurveyController {
     }
 
     // 설문 삭제
+    @DeleteMapping("/{surveyId}")
     public ApiResponse<SuccessResponse> delete(
+            @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId) {
         commandService.deleteSurvey(surveyId);
         return ApiResponse.ok(new SuccessResponse());
