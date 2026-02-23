@@ -84,7 +84,7 @@ export async function POST(req: Request) {
   const cookieStore = await cookies();
   cookieStore.set("access_token", data.accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.COOKIE_SECURE === "true", // EC2 등 HTTP 접근 시 쿠키 차단 방지
     sameSite: "lax",
     path: "/",
     maxAge: data.expiresInSeconds,
