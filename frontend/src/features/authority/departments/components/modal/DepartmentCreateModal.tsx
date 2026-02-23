@@ -21,11 +21,27 @@ export function DepartmentCreateModal({ open, onClose, onSuccess }: Props) {
         description: "",
     });
     const [loading, setLoading] = useState(false);
+    const [codeError, setCodeError] = useState("");
+
+    const handleDeptCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // 영어 대문자만 허용, 최대 5자
+        const raw = e.target.value.replace(/[^A-Z]/g, "").slice(0, 5);
+        setForm({ ...form, deptCode: raw });
+        if (raw.length === 0) {
+            setCodeError("학과 코드는 필수입니다.");
+        } else {
+            setCodeError("");
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.deptCode || !form.deptName) {
             toast.error("필수 항목을 입력해주세요.");
+            return;
+        }
+        if (!/^[A-Z]{1,5}$/.test(form.deptCode)) {
+            toast.error("학과 코드는 영어 대문자 1~5자여야 합니다.");
             return;
         }
 
@@ -74,10 +90,18 @@ export function DepartmentCreateModal({ open, onClose, onSuccess }: Props) {
                     <input
                         className={styles.input}
                         value={form.deptCode}
-                        onChange={(e) => setForm({ ...form, deptCode: e.target.value })}
-                        placeholder="학과 코드 입력"
+                        onChange={handleDeptCodeChange}
+                        placeholder="예: CSE, MATH (영문 대문자 5자 이내)"
+                        maxLength={5}
                         disabled={loading}
+                        style={{ textTransform: "uppercase" }}
                     />
+                    {codeError
+                        ? <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>{codeError}</span>
+                        : <span style={{ color: "#9ca3af", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                            영문 대문자만 입력 가능 · 최대 5자 ({form.deptCode.length}/5)
+                        </span>
+                    }
                 </div>
 
                 <div className={styles.field}>

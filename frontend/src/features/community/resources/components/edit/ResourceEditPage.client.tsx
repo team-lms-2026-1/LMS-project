@@ -67,6 +67,10 @@ function formatBytes(bytes: number) {
   return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
+const TITLE_MAX = 100;
+const CONTENT_MAX = 2000;
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
+
 export default function ResourceEditPageClient() {
   const router = useRouter();
   const i18n = useI18n("community.resources.admin.edit");
@@ -118,8 +122,8 @@ export default function ResourceEditPageClient() {
         setLoad({ loading: false, error: null, data });
 
         // 초기값
-        setTitle(data.title ?? "");
-        setContent(data.content ?? "");
+        setTitle(clampText(data.title ?? "", TITLE_MAX));
+        setContent(clampText(data.content ?? "", CONTENT_MAX));
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
 
         // ✅ 첨부 초기화
@@ -283,10 +287,10 @@ export default function ResourceEditPageClient() {
               <input
                 className={styles.headTitleInput}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
                 disabled={saving}
                 placeholder={i18n("placeholders.title")}
-                maxLength={200}
+                maxLength={TITLE_MAX}
               />
             </div>
 
@@ -326,10 +330,11 @@ export default function ResourceEditPageClient() {
               <textarea
                 className={styles.contentTextarea}
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
                 disabled={saving}
                 placeholder={i18n("placeholders.content")}
                 rows={12}
+                maxLength={CONTENT_MAX}
               />
             </div>
 

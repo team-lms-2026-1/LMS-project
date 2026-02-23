@@ -1,3 +1,5 @@
+import ProfessorDashboard from "@/features/professor/main/components/ProfessorDashboard";
+
 export default function ProfessorPage() {
-    return <div>교수 홈</div>;
+    return <ProfessorDashboard />;
 }

@@ -21,7 +21,7 @@ function formatPeriod(start?: string, end?: string) {
 }
 
 function formatNumber(id: number) {
-  return String(id).padStart(5, "0");
+  return String(id);
 }
 
 function getDisplayNumber(item: DiagnosisListItemDto, index: number) {

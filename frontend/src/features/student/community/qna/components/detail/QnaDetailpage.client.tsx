@@ -6,18 +6,42 @@ import toast from "react-hot-toast";
 import styles from "./QnaDetailPage.module.css";
 import { Button } from "@/components/button";
 import { useAuth } from "@/features/auth/AuthProvider";
-import type { QnaListItemDto } from "../../api/types";
+import type { QnaDetailDto } from "../../api/types";
 import { deleteQnaQuestion, fetchQnaDetail } from "../../api/qnasApi";
 import DeleteModal from "../modal/DeleteModal.client";
 import { useI18n } from "@/i18n/useI18n";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
-  | { loading: false; error: string | null; data: QnaListItemDto | null };
+  | { loading: false; error: string | null; data: QnaDetailDto | null };
 
-function normalizeDetail(payload: any): QnaListItemDto {
+function pickCreatedAt(raw: any) {
+  return raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+}
+
+function normalizeDetail(payload: any): QnaDetailDto {
   const raw = payload?.data ?? payload;
-  const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+  const answerRaw = raw?.answer ?? raw?.answerDto ?? raw?.answerInfo ?? raw?.answerContent ?? null;
+
+  const answer =
+    answerRaw && typeof answerRaw === "string"
+      ? {
+          answerId: 0,
+          content: String(answerRaw),
+          authorName: String(raw?.answerAuthorName ?? ""),
+          createdAt: String(raw?.answerCreatedAt ?? ""),
+        }
+      : answerRaw
+        ? {
+            answerId: Number(answerRaw.answerId ?? 0),
+            content: String(answerRaw.content ?? answerRaw.answerContent ?? ""),
+            authorName: String(answerRaw.authorName ?? ""),
+            createdAt: String(pickCreatedAt(answerRaw)),
+            updatedAt: answerRaw?.updatedAt ? String(answerRaw.updatedAt) : undefined,
+          }
+        : null;
+
+  const hasAnswer = typeof raw?.hasAnswer === "boolean" ? raw.hasAnswer : Boolean(answer?.content?.trim());
 
   return {
     questionId: Number(raw?.questionId ?? 0),
@@ -28,8 +52,9 @@ function normalizeDetail(payload: any): QnaListItemDto {
     authorLoginId: raw?.authorLoginId ?? raw?.author_login_id ?? null,
     authorId: raw?.authorId ?? raw?.authorAccountId ?? null,
     viewCount: Number(raw?.viewCount ?? 0),
-    createdAt: String(created),
-    hasAnswer: Boolean(raw?.hasAnswer ?? false),
+    createdAt: String(pickCreatedAt(raw)),
+    answer,
+    hasAnswer,
   };
 }
 
@@ -53,6 +78,7 @@ export default function QnaDetailpageClient() {
   const sp = useSearchParams();
   const t = useI18n("community.qna.student.detail");
   const toastOnceRef = useRef<string | null>(null);
+  const inFlightRef = useRef<{ id: number; promise: Promise<QnaDetailDto> } | null>(null);
 
   const { state: authState } = useAuth();
   const me = authState.me;
@@ -75,8 +101,21 @@ export default function QnaDetailpageClient() {
     (async () => {
       try {
         setState({ loading: true, error: null, data: null });
-        const res = await fetchQnaDetail(questionId);
-        const data = normalizeDetail(res);
+        const promise = (() => {
+          const inFlight = inFlightRef.current;
+          if (inFlight && inFlight.id === questionId) return inFlight.promise;
+
+          const nextPromise = fetchQnaDetail(questionId).then(normalizeDetail);
+          inFlightRef.current = { id: questionId, promise: nextPromise };
+          nextPromise.finally(() => {
+            if (inFlightRef.current?.id === questionId && inFlightRef.current?.promise === nextPromise) {
+              inFlightRef.current = null;
+            }
+          });
+          return nextPromise;
+        })();
+
+        const data = await promise;
         if (!alive) return;
         setState({ loading: false, error: null, data });
       } catch (e: any) {
@@ -112,6 +151,9 @@ export default function QnaDetailpageClient() {
   }, [sp, router, questionId, t]);
 
   const data = state.data;
+  const answer = data?.answer ?? null;
+  const answerContent = answer?.content?.trim() ?? "";
+  const hasAnswerContent = Boolean(answerContent);
 
   const badgeStyle = useMemo(() => {
     const bg = data?.category?.bgColorHex ?? "#EEF2F7";
@@ -163,7 +205,7 @@ export default function QnaDetailpageClient() {
           <span className={styles.crumb} onClick={() => router.push("/student/community/qna/questions")}>
             Q&A
           </span>
-          <span className={styles.sep}>›</span>
+          <span className={styles.sep}>&gt;</span>
           <span className={styles.current}>{t("breadcrumbCurrent")}</span>
         </div>
 
@@ -173,54 +215,85 @@ export default function QnaDetailpageClient() {
         {state.loading && <div className={styles.loadingBox}>{t("loading")}</div>}
 
         {!state.loading && data && (
-          <div className={styles.detailBox}>
-            <div className={styles.headRow}>
-              <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? t("uncategorized")}
-              </span>
-              <div className={styles.headTitle}>{data.title}</div>
-            </div>
-
-            <div className={styles.metaRow}>
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>{t("labels.author")}</span>
-                <span className={styles.metaValue}>{data.authorName || "-"}</span>
+          <>
+            <div className={styles.detailBox}>
+              <div className={styles.headRow}>
+                <span className={styles.badge} style={badgeStyle}>
+                  {data.category?.name ?? t("uncategorized")}
+                </span>
+                <div className={styles.headTitle}>{data.title}</div>
               </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
-                <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
-              </div>
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>{t("labels.views")}</span>
-                <span className={styles.metaValue}>{data.viewCount}</span>
-              </div>
-            </div>
 
-            <div className={styles.contentBox}>
-              <div className={styles.contentText}>{data.content}</div>
-            </div>
-
-            <div className={styles.footerRow}>
-              <Button type="button" onClick={() => router.push("/student/community/qna/questions")}>
-                {t("buttons.list")}
-              </Button>
-
-              {isMine && (
-                <div className={styles.ownerActions}>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => router.push(`/student/community/qna/questions/${data.questionId}/edit`)}
-                  >
-                    {t("buttons.edit")}
-                  </Button>
-                  <Button type="button" variant="danger" onClick={handleDelete}>
-                    {t("buttons.delete")}
-                  </Button>
+              <div className={styles.metaRow}>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>{t("labels.author")}</span>
+                  <span className={styles.metaValue}>{data.authorName || "-"}</span>
                 </div>
-              )}
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
+                  <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
+                </div>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>{t("labels.views")}</span>
+                  <span className={styles.metaValue}>{data.viewCount}</span>
+                </div>
+              </div>
+
+              <div className={styles.contentBox}>
+                <div className={styles.contentText}>{data.content}</div>
+              </div>
+
+              <div className={styles.footerRow}>
+                <Button type="button" onClick={() => router.push("/student/community/qna/questions")}>
+                  {t("buttons.list")}
+                </Button>
+
+                {isMine && (
+                  <div className={styles.ownerActions}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => router.push(`/student/community/qna/questions/${data.questionId}/edit`)}
+                    >
+                      {t("buttons.edit")}
+                    </Button>
+                    <Button type="button" variant="danger" onClick={handleDelete}>
+                      {t("buttons.delete")}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+
+            <div className={styles.answerPanel}>
+              <div className={styles.answerHeader}>
+                <div className={styles.answerTitle}>{t("texts.answerTitle")}</div>
+                {hasAnswerContent && (
+                  <div className={styles.answerMeta}>
+                    {answer?.authorName && (
+                      <>
+                        <span className={styles.answerMetaLabel}>{t("labels.author")}</span>
+                        <span className={styles.answerMetaValue}>{answer.authorName}</span>
+                      </>
+                    )}
+                    {answer?.createdAt && (
+                      <>
+                        <span className={styles.answerMetaLabel}>{t("labels.createdAt")}</span>
+                        <span className={styles.answerMetaValue}>{formatDateTime(answer.createdAt)}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className={styles.answerViewBox}>
+                {hasAnswerContent ? (
+                  <div className={styles.answerViewText}>{answerContent}</div>
+                ) : (
+                  <div className={styles.answerEmpty}>{t("texts.answerEmpty")}</div>
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         <DeleteModal

@@ -67,12 +67,14 @@ public enum ErrorCode {
     // =========================
     SEMESTER_ALREADY_EXISTS(HttpStatus.CONFLICT, "SEMESTER_ALREADY_EXISTS", "해당 연도와 학기의 학기가 이미 존재합니다.", "semester.alreadyExists"),
     SEMESTER_NOT_FOUND(HttpStatus.NOT_FOUND, "SEMESTER_NOT_FOUND", "학기를 찾을 수 없습니다.", "semester.notFound"),
+    SEMESTER_DEACTIVATE_NOT_ALLOWED(HttpStatus.CONFLICT, "SEMESTER_DEACTIVATE_NOT_ALLOWED", "연관 데이터가 존재하여 학기를 비활성화할 수 없습니다.", "semester.deactivate.notAllowed"),
 
     // =========================
     // Domain: Curricular
     // =========================
     CURRICULAR_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_CODE_ALREADY_EXISTS", "이미 사용 중인 교과목 코드입니다.", "curricular.code.alreadyExists"),
     CURRICULAR_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_NOT_FOUND", "교과목을 찾을 수 없습니다.", "curricular.notFound"),
+    CURRICULAR_DEACTIVATE_NOT_ALLOWED(HttpStatus.CONFLICT, "CURRICULAR_DEACTIVATE_NOT_ALLOWED", "연관 데이터가 존재하여 교과를 비활성화할 수 없습니다.", "curricular.deactivate.notAllowed"),
     CURRICULAR_OFFERING_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_CODE_ALREADY_EXISTS", "이미 사용 중인 개설코드입니다.", "curricular.offering.code.alreadyExists"),
     CURRICULAR_OFFERING_NOT_FOUND(HttpStatus.NOT_FOUND, "CURRICULAR_OFFERING_NOT_FOUND", "해당 교과운영을 찾을 수 없습니다.", "curricular.offering.notFound"),
     CURRICULAR_OFFERING_ALREADY_EXISTS(HttpStatus.CONFLICT, "CURRICULAR_OFFERING_ALREADY_EXISTS", "이미 해당 학기에 개설된 교과입니다.", "curricular.offering.already.exists"),
@@ -85,6 +87,7 @@ public enum ErrorCode {
     OFFERING_CAPACITY_FULL(HttpStatus.CONFLICT, "OFFERING_CAPACITY_FULL", "수강 정원이 초과되었습니다.", "offering.capacity.full"),
     ENROLLMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "ENROLLMENT_NOT_FOUND", "수강 신청 내역이 존재하지 않습니다.", "enrollment.notFound"),
     ENROLLMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "ENROLLMENT_ALREADY_EXISTS", "이미 수강 신청된 교과입니다.", "enrollment.already.exists"),
+    ENROLLMENT_SCHEDULE_CONFLICT(HttpStatus.CONFLICT, "ENROLLMENT_SCHEDULE_CONFLICT", "동일 요일/교시의 교과를 이미 신청하여 수강 신청할 수 없습니다.", "enrollment.schedule.conflict"),
     ENROLLMENT_OFFERING_MISMATCH(HttpStatus.CONFLICT, "ENROLLMENT_OFFERING_MISMATCH", "해당 수강정보는 요청한 교과 운영에 속하지 않습니다.", "enrollment.offering.mismatch"),
     ENROLLMENT_NOT_GRADEABLE(HttpStatus.CONFLICT, "ENROLLMENT_NOT_GRADEABLE", "취소된 수강 정보에는 성적을 입력할 수 없습니다.", "enrollment.not.gradeable"),
     ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS(HttpStatus.FORBIDDEN, "ENROLLMENT_CANCEL_NOT_ALLOWED_STATUS", "현재 교과 운영 상태에서는 수강 신청을 취소할 수 없습니다.", "enrollment.cancel.notAllowedStatus"),

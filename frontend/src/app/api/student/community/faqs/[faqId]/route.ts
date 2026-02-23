@@ -2,17 +2,23 @@ import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "student:faqs";
+const ADMIN_TAG = "admin:faqs";
 
 type Ctx = { params: { faqId: string } };
 
 export async function GET(req: Request, ctx: Ctx) {
   const faqId = ctx.params.faqId;
 
-  return proxyToBackend(req, `/api/v1/student/community/faqs/${encodeURIComponent(faqId)}`, {
+  const res = await proxyToBackend(req, `/api/v1/student/community/faqs/${encodeURIComponent(faqId)}`, {
     method: "GET",
-    cache: "force-cache",
-    next: { revalidate: 600, tags: [TAG] },
+    cache: "no-store",
   });
+
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(ADMIN_TAG);
+  }
+  return res;
 }
 
 export async function PUT(req: Request, ctx: Ctx) {

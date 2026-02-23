@@ -869,6 +869,7 @@
           "invalidOperationPeriod": "運営開始日は終了日より後にできません。",
           "invalidRewardPoint": "ポイント(基本)は0以上で入力してください。",
           "invalidRecognizedHours": "認定時間(基本)は0以上で入力してください。",
+          "invalidHostContactPhone": "担当者電話番号の形式が正しくありません。",
           "invalidHostContactEmail": "担当者メールの形式が正しくありません。"
         }
       }
@@ -921,6 +922,7 @@
           "requiredOperationStartDate": "運営開始日を選択してください。",
           "requiredOperationEndDate": "運営終了日を選択してください。",
           "invalidOperationPeriod": "開始日は終了日より後にできません。",
+          "invalidContactPhone": "担当者電話番号の形式が正しくありません。",
           "invalidContactEmail": "担当者メールの形式が正しくありません。",
           "onlyDraft": "DRAFT状態でのみ修正できます。",
           "saveFailed": "修正に失敗しました。"
@@ -1181,6 +1183,7 @@
             "views": "閲覧数",
             "category": "分類",
             "period": "掲示期間",
+            "content": "内容",
             "attachment": "添付"
           },
           "placeholders": {
@@ -1888,6 +1891,10 @@
             "list": "Back to List",
             "edit": "Edit",
             "delete": "Delete"
+          },
+          "texts": {
+            "answerTitle": "回答",
+            "answerEmpty": "まだ回答がありません。"
           },
           "errors": {
             "invalidId": "Invalid question ID.",

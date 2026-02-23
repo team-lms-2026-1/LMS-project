@@ -25,6 +25,10 @@ function normalizeDetail(payload: any): FaqListItemDto {
   };
 }
 
+const TITLE_MAX = 100;
+const CONTENT_MAX = 2000;
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
+
 export default function FaqEditPageClient() {
   const router = useRouter();
   const t = useI18n("community.faqs.admin.edit");
@@ -61,8 +65,8 @@ export default function FaqEditPageClient() {
         if (!alive) return;
 
         setLoad({ loading: false, error: null, data });
-        setTitle(data.title ?? "");
-        setContent(data.content ?? "");
+        setTitle(clampText(data.title ?? "", TITLE_MAX));
+        setContent(clampText(data.content ?? "", CONTENT_MAX));
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
       } catch (e: any) {
         if (!alive) return;
@@ -177,10 +181,10 @@ export default function FaqEditPageClient() {
               <input
                 className={styles.headTitleInput}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
                 disabled={saving}
                 placeholder={t("placeholders.title")}
-                maxLength={200}
+                maxLength={TITLE_MAX}
               />
             </div>
 
@@ -220,10 +224,11 @@ export default function FaqEditPageClient() {
               <textarea
                 className={styles.contentTextarea}
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
                 disabled={saving}
                 placeholder={t("placeholders.content")}
                 rows={12}
+                maxLength={CONTENT_MAX}
               />
             </div>
 

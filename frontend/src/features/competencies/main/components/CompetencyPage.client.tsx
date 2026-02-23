@@ -86,9 +86,9 @@ export default function CompetencyPageClient() {
           <p className={styles.paragraph}>
             (진단지 점수 + 비교과 활동 점수 + 교과 활동 점수) = 6cs 총점
           </p>
-          <h2 className={styles.sectionTitle}>
+          <div className={styles.sectionTitle}>
             총점을 기준으로 중간값, 평균값 등을 계산하여 6cs 각각의 점수를 산출한다.
-          </h2>
+          </div>
         </section>
       </div>
 

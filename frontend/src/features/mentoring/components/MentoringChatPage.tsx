@@ -111,8 +111,13 @@ export default function MentoringChatPage({ userRole }: Props) {
                                 className={`${styles.roomItem} ${selectedId === room.matchingId ? styles.active : ""}`}
                                 onClick={() => setSelectedId(room.matchingId)}
                             >
+                                <div className={styles.roomAvatar}>
+                                    {room.partnerName?.charAt(0) ?? "?"}
+                                </div>
                                 <div className={styles.roomInfo}>
-                                    <span className={styles.partnerName}>{room.partnerName} ({room.role === "MENTOR" ? "멘티" : "멘토"})</span>
+                                    <span className={styles.partnerName}>
+                                        {room.partnerName} <span style={{ fontWeight: 400, color: '#9aa3b0' }}>({room.role === "MENTOR" ? "멘티" : "멘토"})</span>
+                                    </span>
                                     <span className={styles.recruitmentTitle}>{room.recruitmentTitle}</span>
                                 </div>
                             </div>
@@ -125,8 +130,13 @@ export default function MentoringChatPage({ userRole }: Props) {
                 {activeRoom ? (
                     <>
                         <div className={styles.chatHeader}>
-                            <div className={styles.chatPartnerName}>{activeRoom.partnerName}</div>
-                            <div className={styles.chatInfo}>{activeRoom.recruitmentTitle}</div>
+                            <div className={styles.chatHeaderAvatar}>
+                                {activeRoom.partnerName?.charAt(0) ?? "?"}
+                            </div>
+                            <div className={styles.chatHeaderInfo}>
+                                <div className={styles.chatPartnerName}>{activeRoom.partnerName}</div>
+                                <div className={styles.chatInfo}>{activeRoom.recruitmentTitle}</div>
+                            </div>
                         </div>
 
                         <div className={styles.messageArea}>
@@ -164,6 +174,7 @@ export default function MentoringChatPage({ userRole }: Props) {
                                 className={styles.textarea}
                                 placeholder="메시지를 입력하세요..."
                                 value={inputValue}
+                                maxLength={200}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && !e.shiftKey) {
@@ -172,13 +183,20 @@ export default function MentoringChatPage({ userRole }: Props) {
                                     }
                                 }}
                             />
-                            <button
-                                className={styles.sendButton}
-                                onClick={handleSend}
-                                disabled={!inputValue.trim() || sending}
-                            >
-                                전송
-                            </button>
+                            <div className={styles.inputFooter}>
+                                <span className={styles.charCount}
+                                    style={{ color: inputValue.length >= 200 ? "#ef4444" : undefined }}
+                                >
+                                    {inputValue.length}/200
+                                </span>
+                                <button
+                                    className={styles.sendButton}
+                                    onClick={handleSend}
+                                    disabled={!inputValue.trim() || sending}
+                                >
+                                    전송
+                                </button>
+                            </div>
                         </div>
                     </>
                 ) : (

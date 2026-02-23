@@ -23,6 +23,10 @@ public record ExtraCurricularOfferingCreateRequest(
 
     @NotBlank
     @Size(max = 50)
+    @Pattern(
+        regexp = "^(01[016789]-?\\d{3,4}-?\\d{4}|0[2-9]-?\\d{3,4}-?\\d{4})$",
+        message = "{validation.extraCurricular.hostContactPhone.pattern}"
+    )
     String hostContactPhone,
 
     @NotBlank

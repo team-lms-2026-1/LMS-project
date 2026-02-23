@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface SemesterStudentCompetencySummaryRepository
     extends JpaRepository<SemesterStudentCompetencySummary, Long> {
 
+  boolean existsBySemesterSemesterId(Long semesterId);
+
   // 특정 학기, 특정 학생의 역량 요약 목록 조회
   List<SemesterStudentCompetencySummary> findBySemesterSemesterIdAndStudentAccountId(
       Long semesterId,

@@ -5,7 +5,6 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -13,6 +12,7 @@ import toast from "react-hot-toast";
 
 import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
 import { useI18n } from "@/i18n/useI18n";
 
 import styles from "./CategoryTable.module.css";
@@ -56,6 +56,11 @@ export type CategoryTablePageHandle = {
 export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
   function CategoryTablePageInner({ scope, items, loading, onReload }: Props, ref) {
     const t = useI18n("community.categories.table");
+    const MAX_CATEGORY_NAME_LEN = 15;
+
+    const clampCategoryName = (value: string) => {
+      return Array.from(value ?? "").slice(0, MAX_CATEGORY_NAME_LEN).join("");
+    };
 
     // add/edit 상태
     const [isAdding, setIsAdding] = useState(false);
@@ -257,117 +262,114 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
       }
     };
 
-    const columns: Array<TableColumn<Category>> = useMemo(
-      () => [
-        { header: t("headers.id"), align: "left", width: 120, render: (r) => r.categoryId },
-        {
-          header: t("headers.category"),
-          align: "left",
-          render: (r) => {
-            if (isEditing(r.categoryId)) {
-              return (
-                <div className={styles.inlineForm}>
-                  <input
-                    className={styles.nameInput}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder={t("placeholders.name")}
-                    maxLength={40}
-                    disabled={loading}
-                  />
-
-                  <div className={styles.colorRow}>
-                    <div className={styles.colorPickerGroup}>
-                      <span className={styles.colorLabel}>{t("labels.bgColor")}</span>
-                      <input
-                        type="color"
-                        className={styles.colorInput}
-                        value={bgColorHex}
-                        onChange={(e) => setBgColorHex(e.target.value)}
-                        disabled={loading}
-                      />
-                      <input
-                        className={styles.hexInput}
-                        value={bgColorHex}
-                        onChange={(e) => setBgColorHex(sanitizeHexInput(e.target.value))}
-                        disabled={loading}
-                      />
-                    </div>
-
-                    <div className={styles.colorPickerGroup}>
-                      <span className={styles.colorLabel}>{t("labels.textColor")}</span>
-                      <input
-                        type="color"
-                        className={styles.colorInput}
-                        value={textColorHex}
-                        onChange={(e) => setTextColorHex(e.target.value)}
-                        disabled={loading}
-                      />
-                      <input
-                        className={styles.hexInput}
-                        value={textColorHex}
-                        onChange={(e) => setTextColorHex(sanitizeHexInput(e.target.value))}
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.previewRow}>
-                    <span className={styles.badge} style={{ backgroundColor: bgColorHex, color: textColorHex }}>
-                      {name || t("labels.preview")}
-                    </span>
-                  </div>
-                </div>
-              );
-            }
-
+    const columns: Array<TableColumn<Category>> = [
+      { header: t("headers.id"), align: "center", width: 120, render: (r) => r.categoryId },
+      {
+        header: t("headers.category"),
+        align: "center",
+        render: (r) => {
+          if (isEditing(r.categoryId)) {
             return (
-              <span className={styles.badge} style={{ backgroundColor: r.bgColorHex, color: r.textColorHex }}>
-                {r.name}
-              </span>
-            );
-          },
-        },
-        {
-          header: t("headers.manage"),
-          align: "center",
-          width: 220,
-          stopRowClick: true,
-          render: (r) => {
-            const editing = isEditing(r.categoryId);
+              <div className={styles.inlineForm}>
+                <input
+                  className={styles.nameInput}
+                  value={name}
+                  onChange={(e) => setName(clampCategoryName(e.target.value))}
+                  placeholder={t("placeholders.name")}
+                  maxLength={MAX_CATEGORY_NAME_LEN}
+                  disabled={loading}
+                />
 
-            if (editing) {
-              return (
-                <div className={styles.manageCell}>
-                  <Button variant="primary" onClick={() => submitEdit(r.categoryId)} disabled={loading}>
-                    {t("buttons.save")}
-                  </Button>
-                  <Button variant="danger" onClick={cancelInline} disabled={loading}>
-                    {t("buttons.cancel")}
-                  </Button>
+                <div className={styles.colorRow}>
+                  <div className={styles.colorPickerGroup}>
+                    <span className={styles.colorLabel}>{t("labels.bgColor")}</span>
+                    <input
+                      type="color"
+                      className={styles.colorInput}
+                      value={bgColorHex}
+                      onChange={(e) => setBgColorHex(e.target.value)}
+                      disabled={loading}
+                    />
+                    <input
+                      className={styles.hexInput}
+                      value={bgColorHex}
+                      onChange={(e) => setBgColorHex(sanitizeHexInput(e.target.value))}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className={styles.colorPickerGroup}>
+                    <span className={styles.colorLabel}>{t("labels.textColor")}</span>
+                    <input
+                      type="color"
+                      className={styles.colorInput}
+                      value={textColorHex}
+                      onChange={(e) => setTextColorHex(e.target.value)}
+                      disabled={loading}
+                    />
+                    <input
+                      className={styles.hexInput}
+                      value={textColorHex}
+                      onChange={(e) => setTextColorHex(sanitizeHexInput(e.target.value))}
+                      disabled={loading}
+                    />
+                  </div>
                 </div>
-              );
-            }
 
+                <div className={styles.previewRow}>
+                  <span className={styles.badge} style={{ backgroundColor: bgColorHex, color: textColorHex }}>
+                    {name || t("labels.preview")}
+                  </span>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <Badge bgColor={r.bgColorHex} textColor={r.textColorHex}>
+              {r.name}
+            </Badge>
+          );
+        },
+      },
+      {
+        header: t("headers.manage"),
+        align: "center",
+        width: 220,
+        stopRowClick: true,
+        render: (r) => {
+          const editing = isEditing(r.categoryId);
+
+          if (editing) {
             return (
               <div className={styles.manageCell}>
-                <Button variant="secondary" onClick={() => openEdit(r)} disabled={loading || isAdding}>
-                  {t("buttons.edit")}
+                <Button variant="primary" onClick={() => submitEdit(r.categoryId)} disabled={loading}>
+                  {t("buttons.save")}
                 </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => openDelete(r)}
-                  disabled={loading || isAdding || editingId !== null || deleteLoading}
-                >
-                  {t("buttons.delete")}
+                <Button variant="danger" onClick={cancelInline} disabled={loading}>
+                  {t("buttons.cancel")}
                 </Button>
               </div>
             );
-          },
+          }
+
+          return (
+            <div className={styles.manageCell}>
+              <Button variant="secondary" onClick={() => openEdit(r)} disabled={loading || isAdding}>
+                {t("buttons.edit")}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => openDelete(r)}
+                disabled={loading || isAdding || editingId !== null || deleteLoading}
+              >
+                {t("buttons.delete")}
+              </Button>
+            </div>
+          );
         },
-      ],
-      [bgColorHex, deleteLoading, editingId, isAdding, loading, name, t, textColorHex]
-    );
+      },
+    ];
 
     return (
       <div className={styles.wrap}>
@@ -387,9 +389,9 @@ export const CategoryTablePage = forwardRef<CategoryTablePageHandle, Props>(
                 <input
                   className={styles.nameInput}
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => setName(clampCategoryName(e.target.value))}
                   placeholder={t("placeholders.name")}
-                  maxLength={40}
+                  maxLength={MAX_CATEGORY_NAME_LEN}
                   disabled={loading}
                 />
 

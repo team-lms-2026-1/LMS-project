@@ -25,3 +25,9 @@
 .table :global(tbody tr:hover td) {
   background-color: #f9fafb;
 }
+
+.rowTall td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  height: 60px;
+}

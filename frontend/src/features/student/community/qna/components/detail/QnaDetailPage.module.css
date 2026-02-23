@@ -196,3 +196,64 @@
 .backBtn:hover {
   background: #f9fafb;
 }
+
+.answerPanel {
+  margin-top: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  padding: 14px;
+}
+
+.answerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.answerTitle {
+  font-weight: 800;
+  font-size: 14px;
+  color: #111827;
+}
+
+.answerMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.answerMetaLabel {
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.answerMetaValue {
+  font-weight: 700;
+  color: #111827;
+}
+
+.answerViewBox {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  padding: 12px;
+}
+
+.answerViewText {
+  white-space: pre-wrap;
+  line-height: 1.65;
+  font-size: 13px;
+  color: #111827;
+}
+
+.answerEmpty {
+  font-size: 13px;
+  color: #9ca3af;
+}

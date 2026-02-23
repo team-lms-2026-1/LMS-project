@@ -3,15 +3,21 @@ import { proxyToBackend } from "@/lib/bff";
 import { revalidateTag } from "next/cache";
 
 const TAG = "admin:questions";
+const STUDENT_TAG = "student:questions";
 type Ctx = { params: { questionId: string } };
 
 export async function GET(req: Request, ctx: Ctx) {
   const { questionId } = ctx.params;
-  return proxyToBackend(req, `/api/v1/admin/community/qna/questions/${encodeURIComponent(questionId)}`, {
+  const res = await proxyToBackend(req, `/api/v1/admin/community/qna/questions/${encodeURIComponent(questionId)}`, {
     method: "GET",
-    cache: "force-cache",
-    next: { revalidate: 600, tags: [TAG] },
+    cache: "no-store",
   });
+
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
+  return res;
 }
 
 export async function PATCH(req: Request, ctx: Ctx) {

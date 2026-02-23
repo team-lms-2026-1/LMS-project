@@ -44,6 +44,7 @@ export default function ResourceDetailpageClient() {
   const t = useI18n("community.resources.admin.detail");
   const params = useParams<{ resourceId?: string }>();
   const resourceId = useMemo(() => Number(params?.resourceId ?? 0), [params]);
+  const inFlightRef = useRef<{ id: number; promise: Promise<ResourceListItemDto> } | null>(null);
 
   const [load, setLoad] = useState<LoadState<ResourceListItemDto>>({
     loading: true,
@@ -116,8 +117,21 @@ export default function ResourceDetailpageClient() {
     (async () => {
       try {
         setLoad({ loading: true, error: null, data: null });
-        const res = await fetchResourceDetail(resourceId);
-        const data = normalizeDetail(res);
+        const promise = (() => {
+          const inFlight = inFlightRef.current;
+          if (inFlight && inFlight.id === resourceId) return inFlight.promise;
+
+          const nextPromise = fetchResourceDetail(resourceId).then(normalizeDetail);
+          inFlightRef.current = { id: resourceId, promise: nextPromise };
+          nextPromise.finally(() => {
+            if (inFlightRef.current?.id === resourceId && inFlightRef.current?.promise === nextPromise) {
+              inFlightRef.current = null;
+            }
+          });
+          return nextPromise;
+        })();
+
+        const data = await promise;
         if (!alive) return;
         setLoad({ loading: false, error: null, data });
       } catch (e: any) {
