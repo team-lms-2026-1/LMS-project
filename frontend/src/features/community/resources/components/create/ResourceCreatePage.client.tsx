@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
@@ -10,10 +10,13 @@ import { Button } from "@/components/button";
 import { useI18n } from "@/i18n/useI18n";
 
 const LIST_PATH = "/admin/community/resources";
-const TOOLBAR = ["B", "i", "U", "S", "A", "•", "1.", "↺", "↻", "🔗", "🖼️", "▦"];
+const TITLE_MAX = 100;
+const CONTENT_MAX = 2000;
 
-// ✅ 리소스 업로드 multipart key가 공지랑 다르면 여기만 바꿔
-// 예) 백엔드가 request 대신 "resourceRequest"를 요구하면 REQUEST_PART_NAME = "resourceRequest"
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
+
+// 리소스 등록 multipart key가 고정되어 있으면 그대로 사용
+// 백엔드에서 request 이름을 "resourceRequest"로 요구하면 REQUEST_PART_NAME = "resourceRequest"
 const REQUEST_PART_NAME = "request";
 const FILE_PART_NAME = "files";
 
@@ -38,12 +41,12 @@ export default function ResourceCreatePageClient() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  // ✅ 카테고리
+  // 카테고리
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
   const [loadingCats, setLoadingCats] = useState(false);
 
-  // ✅ 파일 상태
+  // 파일 상태
   const [files, setFiles] = useState<File[]>([]);
 
   const [saving, setSaving] = useState(false);
@@ -108,7 +111,7 @@ export default function ResourceCreatePageClient() {
 
     setSaving(true);
     try {
-      // ✅ 파일 있으면 multipart 전송
+      // 파일이 있으면 multipart 전송
       if (files.length > 0) {
         const fd = new FormData();
 
@@ -141,7 +144,7 @@ export default function ResourceCreatePageClient() {
           throw new Error(msg);
         }
       } else {
-        // ✅ 파일 없으면 기존 JSON 등록 API 사용
+        // 파일이 없으면 기존 JSON 등록 API 사용
         const body: CreateResourceRequestDto = {
           title: t,
           content: c,
@@ -164,7 +167,7 @@ export default function ResourceCreatePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.homeIcon}>⌂</span>
+        <span className={styles.homeIcon}>&gt;</span>
         <span className={styles.sep}>&gt;</span>
         <strong>{i18n("breadcrumbTitle")}</strong>
       </div>
@@ -188,10 +191,10 @@ export default function ResourceCreatePageClient() {
                 <input
                   className={styles.titleInput}
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
                   placeholder={i18n("placeholders.title")}
                   disabled={saving}
-                  maxLength={200}
+                  maxLength={TITLE_MAX}
                 />
 
                 <select
@@ -211,35 +214,20 @@ export default function ResourceCreatePageClient() {
             </div>
           </div>
 
-          {/* ✅ 게시기간 row 제거됨 */}
+          {/* 게시기간 row 제거 */}
 
           {/* 내용 row */}
           <div className={styles.row}>
             <div className={styles.labelCell}>{i18n("labels.content")}</div>
             <div className={styles.contentCell}>
               <div className={styles.editor}>
-                <div className={styles.toolbar}>
-                  {TOOLBAR.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      className={styles.toolBtn}
-                      onClick={() => { }}
-                      disabled={saving}
-                      aria-label={t}
-                      title={t}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-
                 <textarea
                   className={styles.editorArea}
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
                   placeholder={i18n("placeholders.content")}
                   disabled={saving}
+                  maxLength={CONTENT_MAX}
                 />
               </div>
             </div>
@@ -284,7 +272,7 @@ export default function ResourceCreatePageClient() {
                   />
                 </div>
 
-                {/* ✅ 선택된 파일 목록 */}
+                {/* 선택된 파일 목록 */}
                 {files.length > 0 && (
                   <div className={styles.fileList}>
                     {files.map((f) => {
@@ -325,3 +313,4 @@ export default function ResourceCreatePageClient() {
     </div>
   );
 }
+

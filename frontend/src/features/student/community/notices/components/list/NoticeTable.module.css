@@ -45,3 +45,9 @@
 .clickableRow:hover {
   background: #f9fafb;
 }
+
+.rowTall td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  height: 60px;
+}

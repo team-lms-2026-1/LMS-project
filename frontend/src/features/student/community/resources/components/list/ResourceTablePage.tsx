@@ -92,6 +92,7 @@ export function ResourceTable({ items, loading, onEditClick: _onEditClick }: Pro
         skeletonRowCount={10}
         rowKey={(r) => r.resourceId}
         emptyText={t("emptyText")}
+        rowClassName={styles.rowTall}
       />
     </div>
   );

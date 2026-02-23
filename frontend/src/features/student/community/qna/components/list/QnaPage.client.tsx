@@ -58,18 +58,16 @@ export default function QnaPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.topRow}>
-          <h1 className={styles.title}>{t("title")}</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
-          <div className={styles.rightControls}>
-            <div className={styles.searchBarWrap}>
-              <SearchBar
-                value={inputKeyword}
-                onChange={setInputKeyword}
-                onSearch={handleSearch}
-                placeholder={t("searchPlaceholder")}
-              />
-            </div>
+        <div className={styles.searchRow}>
+          <div className={styles.searchBarWrap}>
+            <SearchBar
+              value={inputKeyword}
+              onChange={setInputKeyword}
+              onSearch={handleSearch}
+              placeholder={t("searchPlaceholder")}
+            />
           </div>
         </div>
 
