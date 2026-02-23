@@ -78,7 +78,7 @@ export default function QnaDetailpageClient() {
   const sp = useSearchParams();
   const t = useI18n("community.qna.student.detail");
   const toastOnceRef = useRef<string | null>(null);
-  const fetchedIdRef = useRef<number | null>(null);
+  const inFlightRef = useRef<{ id: number; promise: Promise<QnaDetailDto> } | null>(null);
 
   const { state: authState } = useAuth();
   const me = authState.me;
@@ -97,15 +97,25 @@ export default function QnaDetailpageClient() {
       return;
     }
 
-    if (fetchedIdRef.current === questionId) return;
-    fetchedIdRef.current = questionId;
-
     let alive = true;
     (async () => {
       try {
         setState({ loading: true, error: null, data: null });
-        const res = await fetchQnaDetail(questionId);
-        const data = normalizeDetail(res);
+        const promise = (() => {
+          const inFlight = inFlightRef.current;
+          if (inFlight && inFlight.id === questionId) return inFlight.promise;
+
+          const nextPromise = fetchQnaDetail(questionId).then(normalizeDetail);
+          inFlightRef.current = { id: questionId, promise: nextPromise };
+          nextPromise.finally(() => {
+            if (inFlightRef.current?.id === questionId && inFlightRef.current?.promise === nextPromise) {
+              inFlightRef.current = null;
+            }
+          });
+          return nextPromise;
+        })();
+
+        const data = await promise;
         if (!alive) return;
         setState({ loading: false, error: null, data });
       } catch (e: any) {

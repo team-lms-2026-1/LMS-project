@@ -45,7 +45,7 @@ export default function ResourceDetailpageClient() {
   const t = useI18n("community.resources.student.detail");
   const params = useParams<{ resourceId?: string }>();
   const resourceId = useMemo(() => Number(params?.resourceId ?? 0), [params]);
-  const fetchedIdRef = useRef<number | null>(null);
+  const inFlightRef = useRef<{ id: number; promise: Promise<ResourceListItemDto> } | null>(null);
 
   const [state, setState] = useState<LoadState>({
     loading: true,
@@ -59,15 +59,25 @@ export default function ResourceDetailpageClient() {
       return;
     }
 
-    if (fetchedIdRef.current === resourceId) return;
-    fetchedIdRef.current = resourceId;
-
     let alive = true;
     (async () => {
       try {
         setState({ loading: true, error: null, data: null });
-        const res = await fetchResourceDetail(resourceId);
-        const data = normalizeDetail(res);
+        const promise = (() => {
+          const inFlight = inFlightRef.current;
+          if (inFlight && inFlight.id === resourceId) return inFlight.promise;
+
+          const nextPromise = fetchResourceDetail(resourceId).then(normalizeDetail);
+          inFlightRef.current = { id: resourceId, promise: nextPromise };
+          nextPromise.finally(() => {
+            if (inFlightRef.current?.id === resourceId && inFlightRef.current?.promise === nextPromise) {
+              inFlightRef.current = null;
+            }
+          });
+          return nextPromise;
+        })();
+
+        const data = await promise;
         if (!alive) return;
         setState({ loading: false, error: null, data });
       } catch (e: any) {

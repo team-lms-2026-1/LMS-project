@@ -63,7 +63,7 @@ export default function QnaDetailPageClient() {
   const params = useParams<{ questionId?: string }>();
   const questionId = useMemo(() => Number(params?.questionId ?? 0), [params]);
   const t = useI18n("community.qna.admin.detail");
-  const initialFetchRef = useRef<number | null>(null);
+  const inFlightRef = useRef<{ id: number; promise: Promise<QnaDetailDto> } | null>(null);
 
   const [state, setState] = useState<LoadState<QnaDetailDto>>({
     loading: true,
@@ -89,15 +89,25 @@ export default function QnaDetailPageClient() {
       return;
     }
 
-    if (!options?.force) {
-      if (initialFetchRef.current === questionId) return;
-      initialFetchRef.current = questionId;
-    }
-
     try {
       setState({ loading: true, error: null, data: null });
-      const res = await fetchQnaDetail(questionId);
-      const data = normalizeDetail(res);
+      const promise = (() => {
+        if (!options?.force) {
+          const inFlight = inFlightRef.current;
+          if (inFlight && inFlight.id === questionId) return inFlight.promise;
+        }
+
+        const nextPromise = fetchQnaDetail(questionId).then(normalizeDetail);
+        inFlightRef.current = { id: questionId, promise: nextPromise };
+        nextPromise.finally(() => {
+          if (inFlightRef.current?.id === questionId && inFlightRef.current?.promise === nextPromise) {
+            inFlightRef.current = null;
+          }
+        });
+        return nextPromise;
+      })();
+
+      const data = await promise;
 
       setState({ loading: false, error: null, data });
 
