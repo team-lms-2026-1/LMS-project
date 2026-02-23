@@ -82,6 +82,11 @@ export function ExtraCurricularOfferingCreateModal({
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   };
 
+  const isValidPhone = (phone: string) => {
+    if (!phone.trim()) return false;
+    return /^(01[016789]-?\d{3,4}-?\d{4}|0[2-9]-?\d{3,4}-?\d{4})$/.test(phone.trim());
+  };
+
   const validate = (): string | null => {
     if (extraCurricularId <= 0) return t("validation.requiredExtraCurricular");
     if (!extraOfferingCode.trim()) return t("validation.requiredOfferingCode");
@@ -95,6 +100,9 @@ export function ExtraCurricularOfferingCreateModal({
 
     if (rewardPointDefault < 0) return t("validation.invalidRewardPoint");
     if (recognizedHoursDefault < 0) return t("validation.invalidRecognizedHours");
+
+    if (!isValidPhone(hostContactPhone))
+      return t("validation.invalidHostContactPhone");
 
     if (!isValidEmail(hostContactEmail))
       return t("validation.invalidHostContactEmail");
@@ -279,8 +287,10 @@ export function ExtraCurricularOfferingCreateModal({
             <div className={styles.label}>{t("fields.hostContactPhone")}</div>
             <input
               className={styles.control}
+              type="tel"
+              inputMode="numeric"
               value={hostContactPhone}
-              onChange={(e) => setHostContactPhone(e.target.value)}
+              onChange={(e) => setHostContactPhone(e.target.value.replace(/[^0-9-]/g, ""))}
               placeholder={t("placeholders.hostContactPhone")}
               autoComplete="off"
             />

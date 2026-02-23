@@ -110,6 +110,11 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(hostContactEmail.trim());
   }, [hostContactEmail]);
 
+  const isValidPhone = useMemo(() => {
+    if (!hostContactPhone.trim()) return true;
+    return /^(01[016789]-?\d{3,4}-?\d{4}|0[2-9]-?\d{3,4}-?\d{4})$/.test(hostContactPhone.trim());
+  }, [hostContactPhone]);
+
   const validate = (): string | null => {
     if (!extraOfferingCode.trim()) return t("messages.requiredOfferingCode");
     if (!extraOfferingName.trim()) return t("messages.requiredOfferingName");
@@ -122,6 +127,7 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
     if (!operationEndDate) return t("messages.requiredOperationEndDate");
     if (operationStartDate > operationEndDate) return t("messages.invalidOperationPeriod");
 
+    if (!isValidPhone) return t("messages.invalidContactPhone");
     if (!isValidEmail) return t("messages.invalidContactEmail");
     return null;
   };
@@ -324,9 +330,11 @@ export function ExtraOfferingDetailSection({ offeringId, data, onReload }: Props
               <FieldEdit label={t("fields.contactPhone")} disabled={formDisabled}>
                 <input
                   className={styles.control}
+                  type="tel"
+                  inputMode="numeric"
                   value={hostContactPhone}
                   disabled={formDisabled}
-                  onChange={(e) => setHostContactPhone(e.target.value)}
+                  onChange={(e) => setHostContactPhone(e.target.value.replace(/[^0-9-]/g, ""))}
                 />
               </FieldEdit>
             ) : (
