@@ -8,10 +8,10 @@ interface Props {
 }
 
 export default function MypageTimetable({ timetable }: Props) {
-    const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'] as const;
+    const periods = [1, 2, 3, 4, 5, 6, 7];
+    const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
     const daysLabel: { [key: string]: string } = {
-        'MONDAY': '월', 'TUESDAY': '화', 'WEDNESDAY': '수', 'THURSDAY': '목', 'FRIDAY': '금'
+        'MONDAY': '월', 'TUESDAY': '화', 'WEDNESDAY': '수', 'THURSDAY': '목', 'FRIDAY': '금', 'SATURDAY': '토', 'SUNDAY': '일'
     };
 
     const getCourseForCell = (day: string, period: number) => {
@@ -25,13 +25,13 @@ export default function MypageTimetable({ timetable }: Props) {
         {
             header: "교시",
             field: "period",
-            width: 80,
+            width: 70,
             align: "center",
             cellClassName: styles.periodCell,
         },
         ...days.map(day => ({
             header: daysLabel[day],
-            width: 150,
+            width: 140,
             align: "center" as const,
             cellClassName: styles.timetableCell,
             render: (row: TimetableRow) => {
@@ -53,11 +53,13 @@ export default function MypageTimetable({ timetable }: Props) {
     return (
         <div className={`${styles.card} ${styles.section}`}>
             <h3 className={styles.title}>이번 학기 시간표</h3>
-            <Table<TimetableRow>
-                columns={columns}
-                items={items}
-                rowKey={(row) => row.period}
-            />
+            <div className={styles.timetableWrapper}>
+                <Table<TimetableRow>
+                    columns={columns}
+                    items={items}
+                    rowKey={(row) => row.period}
+                />
+            </div>
         </div>
     );
 }
