@@ -8,6 +8,8 @@ import MypageTimetable from './MypageTimetable';
 import styles from './Mypage.module.css';
 
 
+
+
 const MypageContainer = () => {
     const { data: studentData, loading, error } = useStudentMypage();
 
