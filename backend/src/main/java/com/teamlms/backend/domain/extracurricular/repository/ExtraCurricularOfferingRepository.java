@@ -19,6 +19,8 @@ public interface ExtraCurricularOfferingRepository extends JpaRepository<ExtraCu
     boolean existsByExtraOfferingCode(String extraOfferingCode);
 
     boolean existsByExtraOfferingCodeAndExtraOfferingIdNot(String extraOfferingCode, Long extraOfferingId);
+
+    boolean existsBySemesterId(Long semesterId);
     
     // 목록  (user) open만 
     @Query("""

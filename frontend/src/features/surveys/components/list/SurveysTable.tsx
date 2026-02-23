@@ -28,28 +28,9 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
         {
             header: "번호",
             field: "surveyId",
-            width: "80px",
+            width: "60px",
             align: "center",
-            render: (_, idx) => String((idx + 1) + (page - 1) * size).padStart(5, "0"),
-        },
-        {
-            header: "상태",
-            field: "status",
-            width: "100px",
-            align: "center",
-            render: (row) => {
-                const now = new Date();
-                const start = new Date(row.startAt);
-                const end = new Date(row.endAt);
-
-                if (now < start) {
-                    return <StatusPill status="PENDING" label="대기" />;
-                } else if (now >= start && now <= end) {
-                    return <StatusPill status="ACTIVE" label="OPEN" />;
-                } else {
-                    return <StatusPill status="INACTIVE" label="CLOSED" />;
-                }
-            }
+            render: (_, idx) => String((idx + 1) + (page - 1) * size),
         },
         {
             header: "유형",
@@ -93,6 +74,28 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
                     {new Date(row.startAt).toLocaleDateString()} ~ {new Date(row.endAt).toLocaleDateString()}
                 </span>
             ),
+        },
+        {
+            header: "상태",
+            field: "status",
+            width: "100px",
+            align: "center",
+            render: (row) => {
+                if (row.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
+                if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+
+                const now = new Date();
+                const start = new Date(row.startAt);
+                const end = new Date(row.endAt);
+
+                if (now < start) {
+                    return <StatusPill status="DRAFT" label="DRAFT" />;
+                } else if (now >= start && now <= end) {
+                    return <StatusPill status="ACTIVE" label="OPEN" />;
+                } else {
+                    return <StatusPill status="INACTIVE" label="CLOSED" />;
+                }
+            }
         },
         {
             header: "관리",
