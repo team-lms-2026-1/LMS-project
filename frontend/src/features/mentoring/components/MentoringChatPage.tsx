@@ -174,6 +174,7 @@ export default function MentoringChatPage({ userRole }: Props) {
                                 className={styles.textarea}
                                 placeholder="메시지를 입력하세요..."
                                 value={inputValue}
+                                maxLength={200}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && !e.shiftKey) {
@@ -182,13 +183,20 @@ export default function MentoringChatPage({ userRole }: Props) {
                                     }
                                 }}
                             />
-                            <button
-                                className={styles.sendButton}
-                                onClick={handleSend}
-                                disabled={!inputValue.trim() || sending}
-                            >
-                                전송
-                            </button>
+                            <div className={styles.inputFooter}>
+                                <span className={styles.charCount}
+                                    style={{ color: inputValue.length >= 200 ? "#ef4444" : undefined }}
+                                >
+                                    {inputValue.length}/200
+                                </span>
+                                <button
+                                    className={styles.sendButton}
+                                    onClick={handleSend}
+                                    disabled={!inputValue.trim() || sending}
+                                >
+                                    전송
+                                </button>
+                            </div>
                         </div>
                     </>
                 ) : (

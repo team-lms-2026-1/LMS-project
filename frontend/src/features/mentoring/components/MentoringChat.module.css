@@ -258,8 +258,8 @@
     background: #ffffff;
     border-top: 1px solid var(--border-base, #e8eaed);
     display: flex;
-    gap: 10px;
-    align-items: flex-end;
+    flex-direction: column;
+    gap: 8px;
     flex-shrink: 0;
 }
 
@@ -311,6 +311,20 @@
 .sendButton:disabled {
     opacity: 0.45;
     cursor: default;
+}
+
+.inputFooter {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+.charCount {
+    font-size: 0.78rem;
+    color: #9aa3b0;
+    flex-shrink: 0;
+    transition: color 0.15s;
 }
 
 /* ══════════════════════════════════
