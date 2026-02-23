@@ -14,6 +14,7 @@ import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
 public interface DiagnosisRunRepository extends JpaRepository<DiagnosisRun, Long> {
 
     // 학기별 진단 실행 조회
+    boolean existsBySemesterSemesterId(Long semesterId);
     Optional<DiagnosisRun> findBySemesterSemesterId(Long semesterId);
     List<DiagnosisRun> findAllBySemesterSemesterId(Long semesterId);
     Optional<DiagnosisRun> findBySemesterSemesterIdAndDeptId(Long semesterId, Long deptId);
