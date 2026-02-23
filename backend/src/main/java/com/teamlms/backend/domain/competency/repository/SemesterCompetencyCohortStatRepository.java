@@ -11,14 +11,14 @@ import java.util.Optional;
 
 public interface SemesterCompetencyCohortStatRepository extends JpaRepository<SemesterCompetencyCohortStat, Long> {
 
-    // 특정 학기, 특정 역량 통계 조회
+    boolean existsBySemesterSemesterId(Long semesterId);
+
     Optional<SemesterCompetencyCohortStat> findBySemesterSemesterIdAndCompetencyCompetencyId(
             Long semesterId,
             Long competencyId);
 
     List<SemesterCompetencyCohortStat> findBySemesterSemesterId(Long semesterId);
 
-    // 특정 역량의 전체 학기 통계 조회 (트렌드 분석용)
     @Query("""
                 SELECT s
                 FROM SemesterCompetencyCohortStat s
