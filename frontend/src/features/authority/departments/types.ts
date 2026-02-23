@@ -1,14 +1,14 @@
-/* =========================
- *  Î∞±Ïóî???ëÎãµ ?Ä??
+Ôªø/* =========================
+ * Backend API response types
  * ========================= */
 
-// ?ôÍ≥º Î™©Î°ù API ?ÑÏ≤¥ ?ëÎãµ
+// Department list API response
 export type DeptListResponse = {
   data: DeptItem[];
   meta: PageMeta;
 };
 
-// ?ôÍ≥º ?®Í±¥ (Î∞±Ïóî??DTO Í∑∏Î?Î°?
+// Department item (matches backend DTO)
 export type DeptItem = {
   deptId: number;
   deptCode: string;
@@ -19,7 +19,7 @@ export type DeptItem = {
   isActive?: boolean;
 };
 
-// ?òÏù¥ÏßÄ Î©îÌ? ?ïÎ≥¥
+// Pagination metadata
 export type PageMeta = {
   page: number;
   size: number;
@@ -31,12 +31,12 @@ export type PageMeta = {
 };
 
 /* =========================
- *  ?îÎ©¥ ?ÑÏö© ?Ä??
+ * UI model types
  * ========================= */
 
-// ?îÎ©¥(DeptsPage)?êÏÑú ?¨Ïö©?òÎäî ?ôÍ≥º ?Ä??
+// Department model used in the UI
 export type Department = {
-  id: string;              // ?îÎ©¥?êÏÑú??string ID ?¨Ïö©
+  id: string;              // UI uses string IDs
   code: string;
   name: string;
   description?: string;
@@ -49,13 +49,13 @@ export type Department = {
 };
 
 /* =========================
- *  Îß§Ìïë ?®Ïàò
+ * Mapping helpers
  * ========================= */
 
-// Î∞±Ïóî??DeptItem ???îÎ©¥ Department
+// Backend DeptItem -> UI Department
 export function mapDeptItemToDepartment(item: DeptItem): Department {
   return {
-    id: String(item.deptId),                // number ??string
+    id: String(item.deptId),                // number -> string
     code: item.deptCode,
     name: item.deptName,
     headProfessor: item.headProfessorName ?? "",
@@ -65,7 +65,7 @@ export function mapDeptItemToDepartment(item: DeptItem): Department {
   };
 }
 
-// Î∞∞Ïó¥??Îß§Ìïë (?†ÌÉù)
+// Map list
 export function mapDeptItemsToDepartments(
   items: DeptItem[]
 ): Department[] {
@@ -99,6 +99,4 @@ export type DepartmentDetail = {
   majors: Major[];
 };
 
-
 export type DepartmentStatus = "ACTIVE" | "INACTIVE" | string;
-
