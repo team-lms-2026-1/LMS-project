@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./FaqDetailPage.module.css";
 import type { FaqListItemDto } from "../../api/types";
@@ -44,6 +44,7 @@ export default function FaqDetailpageClient() {
   const t = useI18n("community.faqs.student.detail");
   const params = useParams<{ faqId?: string }>();
   const faqId = useMemo(() => Number(params?.faqId ?? 0), [params]);
+  const inFlightRef = useRef<{ id: number; promise: Promise<FaqListItemDto> } | null>(null);
 
   const [state, setState] = useState<LoadState>({
     loading: true,
@@ -61,8 +62,21 @@ export default function FaqDetailpageClient() {
     (async () => {
       try {
         setState({ loading: true, error: null, data: null });
-        const res = await fetchFaqDetail(faqId);
-        const data = normalizeDetail(res);
+        const promise = (() => {
+          const inFlight = inFlightRef.current;
+          if (inFlight && inFlight.id === faqId) return inFlight.promise;
+
+          const nextPromise = fetchFaqDetail(faqId).then(normalizeDetail);
+          inFlightRef.current = { id: faqId, promise: nextPromise };
+          nextPromise.finally(() => {
+            if (inFlightRef.current?.id === faqId && inFlightRef.current?.promise === nextPromise) {
+              inFlightRef.current = null;
+            }
+          });
+          return nextPromise;
+        })();
+
+        const data = await promise;
         if (!alive) return;
         setState({ loading: false, error: null, data });
       } catch (e: any) {

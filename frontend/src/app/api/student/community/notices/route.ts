@@ -4,10 +4,10 @@ import { revalidateTag } from "next/cache";
 const TAG = "student:notices";
 
 export async function GET(req: Request) {
-  return proxyToBackend(req, "/api/v1/student/community/notices", { 
+  return proxyToBackend(req, "/api/v1/student/community/notices", {
     method: "GET",
     cache: "force-cache",
-    next: {revalidate: 600, tags: [TAG]}
+    next: { revalidate: 600, tags: [TAG] },
   });
 }
 

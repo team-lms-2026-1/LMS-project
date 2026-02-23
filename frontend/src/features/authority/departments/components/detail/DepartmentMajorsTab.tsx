@@ -23,7 +23,7 @@ type Props = {
 export default function DepartmentMajorsTab({ deptId }: Props) {
     const { majors, meta, page, keyword, loading, setPage, setKeyword, reload } = useDepartmentMajors(deptId);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [editMajorId, setEditMajorId] = useState<number | null>(null);
+    const [editMajor, setEditMajor] = useState<MajorListItem | null>(null);
     const [deleteMajorId, setDeleteMajorId] = useState<number | null>(null);
 
     const handleDeleteClick = (majorId: number) => {
@@ -66,7 +66,7 @@ export default function DepartmentMajorsTab({ deptId }: Props) {
                     <Button
                         variant="secondary"
                         className="px-2 py-1 text-xs"
-                        onClick={() => setEditMajorId(row.majorId)}
+                        onClick={() => setEditMajor(row)}
                     >
                         수정
                     </Button>
@@ -119,13 +119,14 @@ export default function DepartmentMajorsTab({ deptId }: Props) {
                 />
             )}
 
-            {editMajorId !== null && (
+            {editMajor !== null && (
                 <MajorUpdateModal
                     deptId={deptId}
-                    majorId={editMajorId}
-                    open={editMajorId !== null}
-                    onClose={() => setEditMajorId(null)}
-                    onSuccess={() => { setEditMajorId(null); reload(); }}
+                    majorId={editMajor.majorId}
+                    enrolledStudentCount={editMajor.enrolledStudentCount}
+                    open={editMajor !== null}
+                    onClose={() => setEditMajor(null)}
+                    onSuccess={() => { setEditMajor(null); reload(); }}
                 />
             )}
 

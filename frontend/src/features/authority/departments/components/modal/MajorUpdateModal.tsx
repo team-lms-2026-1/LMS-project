@@ -12,20 +12,23 @@ import { Modal } from "@/components/modal/Modal";
 type Props = {
     deptId: number;
     majorId: number | null;
+    enrolledStudentCount?: number;
     open: boolean;
     onClose: () => void;
     onSuccess: () => void;
 };
 
-export function MajorUpdateModal({ deptId, majorId, open, onClose, onSuccess }: Props) {
+export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, open, onClose, onSuccess }: Props) {
     const [form, setForm] = useState<UpdateMajorRequest>({
         majorName: "",
         description: "",
-        isActive: true,
+        isActive: true,   // 기본값: 활성
     });
     const [originalCode, setOriginalCode] = useState("");
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(false);
+
+    const hasStudents = enrolledStudentCount > 0;
 
     useEffect(() => {
         if (open && deptId && majorId) {
@@ -41,7 +44,7 @@ export function MajorUpdateModal({ deptId, majorId, open, onClose, onSuccess }: 
             setForm({
                 majorName: data.majorName,
                 description: data.description || "",
-                isActive: data.isActive,
+                isActive: true,   // 수정 시 항상 활성이 디폴트
             });
             setOriginalCode(data.majorCode);
         } catch (e: any) {
@@ -50,6 +53,14 @@ export function MajorUpdateModal({ deptId, majorId, open, onClose, onSuccess }: 
         } finally {
             setFetching(false);
         }
+    };
+
+    const handleToggleActive = (checked: boolean) => {
+        if (!checked && hasStudents) {
+            toast.error(`재학생이 ${enrolledStudentCount}명 있는 전공은 비활성화할 수 없습니다.`);
+            return;
+        }
+        setForm({ ...form, isActive: checked });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -132,12 +143,18 @@ export function MajorUpdateModal({ deptId, majorId, open, onClose, onSuccess }: 
                             <label className={styles.label} style={{ marginBottom: 0 }}>사용 여부</label>
                             <ToggleSwitch
                                 checked={form.isActive}
-                                onChange={(chk) => setForm({ ...form, isActive: chk })}
+                                onChange={handleToggleActive}
+                                disabled={hasStudents && !form.isActive === false}
                             />
                             <span style={{ fontSize: '12px', color: '#6b7280' }}>
                                 {form.isActive ? "활성" : "비활성"}
                             </span>
                         </div>
+                        {hasStudents && (
+                            <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px' }}>
+                                재학생 {enrolledStudentCount}명이 있어 비활성화할 수 없습니다.
+                            </p>
+                        )}
                     </div>
 
                     <div className={styles.field}>

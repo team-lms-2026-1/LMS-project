@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchAvailableSurveys, fetchSurveyTypes } from "@/features/surveys/api/studentSurveysApi";
-import { SurveyListItemDto, SurveyTypeResponse } from "@/features/surveys/api/types";
+import { SurveyListItemDto, SurveyTypeResponse, SurveyTypeLabel } from "@/features/surveys/api/types";
 import styles from "./SurveyListPage.client.module.css";
 import { Table } from "@/components/table";
 import { TableColumn } from "@/components/table/types";
 import { SearchBar } from "@/components/searchbar";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { Button } from "@/components/button";
+import { Badge } from "@/components/badge";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import toast from "react-hot-toast";
 
@@ -76,32 +77,39 @@ export default function StudentSurveyListPageClient() {
         setKeyword(inputKeyword);
     }, [inputKeyword, setPage, setKeyword]);
 
+    const SURVEY_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
+        SATISFACTION: { bg: "#eff6ff", text: "#1d4ed8" },
+        COURSE: { bg: "#f0fdf4", text: "#15803d" },
+        SERVICE: { bg: "#f5f3ff", text: "#7c3aed" },
+        ETC: { bg: "#f3f4f6", text: "#374151" },
+    };
+
     const columns: TableColumn<SurveyListItemDto>[] = [
         {
             header: "번호",
             field: "surveyId",
-            width: "80px",
+            width: "60px",
             align: "center",
-            render: (_, idx) => String((idx + 1) + (page - 1) * 10).padStart(5, "0"),
+            render: (_, idx) => String((idx + 1) + (page - 1) * 10),
         },
         {
             header: "유형",
             field: "type",
-            width: "120px",
+            width: "130px",
             align: "center",
             render: (row) => {
-                switch (row.type) {
-                    case "SATISFACTION": return "만족도 조사";
-                    case "COURSE": return "수강 설문";
-                    case "SERVICE": return "서비스 이용 조사";
-                    default: return "기타";
-                }
+                const colors = SURVEY_TYPE_COLORS[row.type] || SURVEY_TYPE_COLORS.ETC;
+                return (
+                    <Badge bgColor={colors.bg} textColor={colors.text}>
+                        {SurveyTypeLabel[row.type] || row.type}
+                    </Badge>
+                );
             }
         },
         {
             header: "제목",
             field: "title",
-            align: "left",
+            align: "center",
             render: (row) => (
                 <span style={{ fontWeight: 500 }}>{row.title}</span>
             )

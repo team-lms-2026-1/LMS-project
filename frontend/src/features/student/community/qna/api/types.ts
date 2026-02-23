@@ -20,6 +20,14 @@ export type Category = {
   textColorHex: string;
 };
 
+export type QnaAnswerDto = {
+  answerId: number;
+  content: string;
+  authorName: string;
+  createdAt: string;
+  updatedAt?: string;
+};
+
 /** ✅ 공통: 작성자 식별자(백엔드가 주면 사용) */
 export type AuthorIdentity = {
   authorId?: number | null;        // accountId 같은 숫자
@@ -41,7 +49,8 @@ export type QnaListItemDto = {
 
   viewCount: number;
   createdAt: string;
-  hasAnswer: boolean;
+  answer?: QnaAnswerDto | null;
+  hasAnswer?: boolean;
 };
 
 /** ✅ Me */
@@ -79,7 +88,8 @@ export type QnaDetailDto = {
 
   viewCount: number;
   createdAt: string;
-  hasAnswer: boolean;
+  answer?: QnaAnswerDto | null;
+  hasAnswer?: boolean;
 };
 
 export type UpdateQnaQuestionRequestDto = {

@@ -42,7 +42,8 @@ export function useNoticesList() {
         keyword: keyword || undefined,
       });
 
-      setItems(res.data);
+      const list = Array.isArray(res.data) ? res.data : [];
+      setItems(list);
       setMeta(res.meta);
     } catch (e: any) {
       console.error("[useNoticesList]", e);

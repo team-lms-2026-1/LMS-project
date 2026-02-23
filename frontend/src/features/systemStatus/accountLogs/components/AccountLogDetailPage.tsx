@@ -11,6 +11,7 @@ import { SearchBar } from "@/components/searchbar/SearchBar";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
 import { Button } from "@/components/button/Button";
+import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import type { TableColumn } from "@/components/table/types";
 import { useI18n } from "@/i18n/useI18n";
 
@@ -169,9 +170,19 @@ export default function AccountLogDetailPage({ accountId }: Props) {
           <div className={styles.summaryCell}>{t("summary.departmentName")} <b>{account?.departmentName ?? "-"}</b></div>
 
           <div className={styles.controls}>
-            <input className={styles.dateInput} type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <DatePickerInput
+              value={from}
+              onChange={setFrom}
+              placeholder="시작일"
+              max={to}
+            />
             <span className={styles.wave}>~</span>
-            <input className={styles.dateInput} type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <DatePickerInput
+              value={to}
+              onChange={setTo}
+              placeholder="종료일"
+              min={from}
+            />
 
             <SearchBar
               value={keywordInput}
