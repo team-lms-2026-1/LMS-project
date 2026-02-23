@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function MypageTimetable({ timetable }: Props) {
-    const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const periods = [1, 2, 3, 4, 5, 6];
     const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'] as const;
     const daysLabel: { [key: string]: string } = {
         'MONDAY': '월', 'TUESDAY': '화', 'WEDNESDAY': '수', 'THURSDAY': '목', 'FRIDAY': '금'
