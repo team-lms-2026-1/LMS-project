@@ -185,7 +185,7 @@ export default function ResultPageClient() {
     const sorted = Array.from(names)
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b));
-    return [{ value: "ALL", label: "전체" }, ...sorted.map((dept) => ({ value: dept, label: dept }))];
+    return sorted.map((dept) => ({ value: dept, label: dept }));
   }, [deptOptionsRaw, radarSourceData, radarSeries]);
   useEffect(() => {
     if (radarDeptValue === "ALL") return;
@@ -305,7 +305,7 @@ export default function ResultPageClient() {
                     value={radarDeptValue}
                     onChange={setRadarDeptValue}
                     options={radarDeptOptions}
-                    placeholder="전체"
+                    placeholder="학과"
                     loading={deptLoading}
                     className={styles.dropdownWrap}
                   />
@@ -337,9 +337,8 @@ export default function ResultPageClient() {
                         dataKey={series.deptName}
                         stroke={RADAR_COLOR_VARS[index % RADAR_COLOR_VARS.length]}
                         fill={RADAR_COLOR_VARS[index % RADAR_COLOR_VARS.length]}
-                        className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[index % RADAR_COLOR_CLASSES.length]} ${
-                          isSingleRadarSeries ? styles.radarFillSingle : styles.radarFillAll
-                        }`}
+                        className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[index % RADAR_COLOR_CLASSES.length]} ${isSingleRadarSeries ? styles.radarFillSingle : styles.radarFillAll
+                          }`}
                       />
                     ))}
                   </RadarChart>
@@ -396,7 +395,7 @@ export default function ResultPageClient() {
 
         <section className={styles.tableSection}>
           <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>역량 통계</h2>
+            <h2 className={styles.panelTitle}>역량 통계</h2>
           </div>
           <div className={styles.tableWrap}>
             {statsRows.length === 0 ? (
