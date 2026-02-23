@@ -54,6 +54,9 @@ const GRADE_OPTIONS = [
   { value: "4", label: "4학년" },
 ];
 
+const DEFAULT_SCALE_COUNT = 10;
+const DEFAULT_SHORT_COUNT = 10;
+
 function makeId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -66,12 +69,12 @@ function createScaleOptions(): DiagnosisScaleOption[] {
   }));
 }
 
-function createDefaultQuestion(): DiagnosisQuestion {
+function createDefaultQuestion(type: DiagnosisQuestionType = "SCALE"): DiagnosisQuestion {
   return {
     id: makeId(),
     title: "",
-    type: "SCALE",
-    scaleOptions: createScaleOptions(),
+    type,
+    scaleOptions: type === "SCALE" ? createScaleOptions() : [],
     shortAnswer: "",
     csScores: {
       criticalThinking: 5,
@@ -82,6 +85,13 @@ function createDefaultQuestion(): DiagnosisQuestion {
       convergence: 5,
     },
   };
+}
+
+function createInitialQuestions(): DiagnosisQuestion[] {
+  return [
+    ...Array.from({ length: DEFAULT_SCALE_COUNT }, () => createDefaultQuestion("SCALE")),
+    ...Array.from({ length: DEFAULT_SHORT_COUNT }, () => createDefaultQuestion("SHORT")),
+  ];
 }
 
 function toNumber(value: string, fallback: number = 0) {
@@ -152,7 +162,7 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
   const [status, setStatus] = useState("DRAFT");
   const [startedAt, setStartedAt] = useState("");
   const [endedAt, setEndedAt] = useState("");
-  const [questions, setQuestions] = useState<DiagnosisQuestion[]>([createDefaultQuestion()]);
+  const [questions, setQuestions] = useState<DiagnosisQuestion[]>(createInitialQuestions);
   const [closeSignal, setCloseSignal] = useState(0);
 
   const resetAll = () => {
@@ -166,7 +176,7 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
     setStatus("DRAFT");
     setStartedAt("");
     setEndedAt("");
-    setQuestions([createDefaultQuestion()]);
+    setQuestions(createInitialQuestions());
   };
 
   useEffect(() => {
@@ -259,13 +269,14 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
       return;
     }
 
-    for (const q of questions) {
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
       if (!q.title.trim()) {
-        toast.error("질문의 제목을 넣어주세요.");
+        toast.error(`${i + 1}번 질문의 제목을 입력해 주세요.`);
         return;
       }
       if (q.type === "SHORT" && !q.shortAnswer.trim()) {
-        toast.error("정답을 작성해주세요.");
+        toast.error(`${i + 1}번 질문의 정답을 입력해 주세요.`);
         return;
       }
     }
@@ -406,7 +417,7 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
                         onChange={setStartedAt}
                         placeholder="시작일"
                         className={styles.dateInput}
-                      closeSignal={closeSignal}
+                        closeSignal={closeSignal}
                       />
                       <input
                         type="time"
@@ -421,7 +432,7 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
                         placeholder="종료일"
                         min={startedAt || undefined}
                         className={styles.dateInput}
-                      closeSignal={closeSignal}
+                        closeSignal={closeSignal}
                       />
                       <input
                         type="time"
@@ -471,19 +482,7 @@ export function DignosisCreateModal({ open, onClose, onSubmit }: Props) {
                               <span className={styles.scaleBullet} />
                               <span className={styles.scaleLabel}>{opt.label}</span>
                             </div>
-                            <select
-                              className={styles.scoreSelect}
-                              value={opt.score}
-                              onChange={(e) =>
-                                handleChangeScaleScore(q.id, opt.id, Number(e.target.value))
-                              }
-                            >
-                              {SCORE_OPTIONS.map((s) => (
-                                <option key={s} value={s}>
-                                  {s}점
-                                </option>
-                              ))}
-                            </select>
+                            <span className={styles.fixedScore}>{opt.score}점</span>
                           </div>
                         ))}
                       </div>

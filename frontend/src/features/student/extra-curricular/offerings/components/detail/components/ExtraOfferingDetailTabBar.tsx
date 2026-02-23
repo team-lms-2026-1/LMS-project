@@ -1,7 +1,7 @@
 "use client";
 import styles from "./ExtraOfferingDetailTabBar.module.css";
 
-type Tab = "detail" | "session" | "students" | "competencies";
+type Tab = "detail" | "session" | "competencies";
 type Props = { value: Tab; onChange: (v: Tab) => void };
 
 export function ExtraOfferingDetailTabBar({ value, onChange }: Props) {
@@ -20,13 +20,6 @@ export function ExtraOfferingDetailTabBar({ value, onChange }: Props) {
         onClick={() => onChange("session")}
       >
         회차
-      </button>
-      <button
-        className={`${styles.tab} ${value === "students" ? styles.active : ""}`}
-        type="button"
-        onClick={() => onChange("students")}
-      >
-        학생
       </button>
       <button
         className={`${styles.tab} ${value === "competencies" ? styles.active : ""}`}

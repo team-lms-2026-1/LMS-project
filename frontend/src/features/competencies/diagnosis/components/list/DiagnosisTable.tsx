@@ -29,7 +29,7 @@ function formatDeptGrade(deptName?: string, targetGrade?: string) {
 }
 
 function formatNumber(id: number) {
-  return String(id).padStart(5, "0");
+  return String(id);
 }
 
 function canEdit(status: DiagnosisStatus) {

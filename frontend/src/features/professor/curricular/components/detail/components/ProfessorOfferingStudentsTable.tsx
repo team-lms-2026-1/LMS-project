@@ -3,7 +3,7 @@
 import { StatusPill } from "@/components/status";
 import { Table, type TableColumn } from "@/components/table";
 
-import type { CurricularOfferingStudentListItemDto } from "../../api/types";
+import type { CurricularOfferingStudentListItemDto } from "../../../api/types";
 import { completionStatusLabel, enrollmentStatusLabel } from "../../../utils/statusLabel";
 import styles from "./ProfessorOfferingStudentsTable.module.css";
 

@@ -67,6 +67,7 @@ jobs:
               -p 8080:8080 \
               -v /home/${{ secrets.USERNAME }}/app/app.jar:/app.jar \
               -e SPRING_PROFILES_ACTIVE=prod \
+              -e TZ=Asia/Seoul \
               -e RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} \
               -e DB_USER=${{ secrets.DB_USER }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \

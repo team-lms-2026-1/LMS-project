@@ -1,0 +1,86 @@
+.page {
+    padding: var(--spacing-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pageTitle {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-base);
+    margin-bottom: var(--spacing-6);
+}
+
+.section {
+    background: var(--surface-base);
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-base);
+}
+
+.tableWrap {
+    border: 1px solid var(--border-base);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.timetableCell {
+    padding: 2px !important;
+    height: 100px !important;
+    vertical-align: top !important;
+}
+
+.periodCell {
+    background: #fafafa;
+    text-align: center;
+    vertical-align: middle !important;
+    font-weight: 600;
+    color: #777;
+}
+
+.courseItem {
+    background: #eaf6ff;
+    border: 1px solid #d0e8ff;
+    color: #2980b9;
+    padding: 0.5rem;
+    border-radius: 6px;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+}
+
+.courseName {
+    font-weight: 700;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.courseDetail {
+    font-size: 0.75rem;
+    color: #5d9bc9;
+}

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ExtraCurricularOfferingPatchRequest(
@@ -18,6 +19,10 @@ public record ExtraCurricularOfferingPatchRequest(
     String hostContactName,
 
     @Size(max = 50)
+    @Pattern(
+        regexp = "^(01[016789]-?\\d{3,4}-?\\d{4}|0[2-9]-?\\d{3,4}-?\\d{4})$",
+        message = "{validation.extraCurricular.hostContactPhone.pattern}"
+    )
     String hostContactPhone,
 
     @Email
