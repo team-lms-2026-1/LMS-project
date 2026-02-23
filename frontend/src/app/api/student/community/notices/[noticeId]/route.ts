@@ -10,7 +10,6 @@ export async function GET(req: Request, ctx: Ctx) {
 
   return proxyToBackend(req, `/api/v1/student/community/notices/${encodeURIComponent(noticeId)}`, {
     method: "GET",
-    cache: "force-cache",
     next: { revalidate: 600, tags: [TAG] },
   });
 }

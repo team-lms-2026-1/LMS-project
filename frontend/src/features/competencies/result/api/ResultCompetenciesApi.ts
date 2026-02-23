@@ -1,24 +1,24 @@
 import { getJson } from "@/lib/http";
-import type { ApiResponse } from "./types";
-import type { ResultCompetencyDashboardResponse } from "./types";
+import type { ApiResponse, ResultCompetencyDashboardResponse } from "./types";
 
 export type ResultCompetencyQuery = {
-  dignosisId: string;
+  dignosisId?: string;
   deptId?: string;
   deptName?: string;
   semesterId?: string;
   semesterName?: string;
 };
 
-export async function fetchResultCompetencyDashboard(query: ResultCompetencyQuery) {
+export async function fetchResultCompetencyDashboard(query: ResultCompetencyQuery = {}) {
   const sp = new URLSearchParams();
+  if (query?.dignosisId) sp.set("dignosisId", query.dignosisId);
   if (query?.deptId) sp.set("deptId", query.deptId);
   if (query?.deptName) sp.set("deptName", query.deptName);
   if (query?.semesterId) sp.set("semesterId", query.semesterId);
   if (query?.semesterName) sp.set("semesterName", query.semesterName);
 
   const qs = sp.toString();
-  const base = `/api/admin/competencies/dignosis/${encodeURIComponent(query.dignosisId)}/report`;
+  const base = `/api/admin/competencies/statistics`;
   const url = qs ? `${base}?${qs}` : base;
   return getJson<ResultCompetencyDashboardResponse>(url);
 }

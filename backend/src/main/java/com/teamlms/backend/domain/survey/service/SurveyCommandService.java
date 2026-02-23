@@ -3,6 +3,8 @@ package com.teamlms.backend.domain.survey.service;
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.domain.survey.api.dto.SurveyCreateRequest;
 import com.teamlms.backend.domain.survey.api.dto.SurveyQuestionDto;
 import com.teamlms.backend.domain.survey.api.dto.SurveyTargetFilterDto;
@@ -33,6 +35,7 @@ public class SurveyCommandService {
     private final SurveyQuestionRepository questionRepository;
     private final SurveyTargetRepository targetRepository;
     private final AccountRepository accountRepository;
+    private final AlarmCommandService alarmCommandService;
 
     // 1. 설문 생성
     public void createAndPublishSurvey(Long accountId, SurveyCreateRequest request) {
@@ -71,7 +74,11 @@ public class SurveyCommandService {
 
         questionRepository.saveAll(questions);
         if (request.targetFilter() != null) {
-            createTargetSnapshot(savedSurvey, request.targetFilter());
+            List<Account> targets = resolveTargets(request.targetFilter());
+            if (!targets.isEmpty()) {
+                createTargetSnapshot(savedSurvey, targets);
+                notifySurveyCreated(savedSurvey, targets);
+            }
         }
 
     }
@@ -136,28 +143,35 @@ public class SurveyCommandService {
         surveyRepository.delete(survey);
     }
 
-    private void createTargetSnapshot(Survey survey, SurveyTargetFilterDto filter) {
-        List<Account> targets;
+    private List<Account> resolveTargets(SurveyTargetFilterDto filter) {
+        if (filter == null) {
+            return Collections.emptyList();
+        }
+
         SurveyTargetGenType genType = filter.genType() != null ? filter.genType() : SurveyTargetGenType.ALL;
 
         if (genType == SurveyTargetGenType.ALL) {
-            targets = accountRepository.findAllByAccountType(AccountType.STUDENT);
+            return accountRepository.findAllByAccountType(AccountType.STUDENT);
         } else if (genType == SurveyTargetGenType.DEPT) {
-            targets = selectByDepts(filter.deptIds());
+            return selectByDepts(filter.deptIds());
         } else if (genType == SurveyTargetGenType.GRADE) {
-            targets = selectByGrades(filter.gradeLevels());
+            return selectByGrades(filter.gradeLevels());
         } else if (genType == SurveyTargetGenType.DEPT_GRADE) {
-            targets = selectByDeptAndGrades(filter.deptIds(), filter.gradeLevels());
-        } else {
-            // USER (직접 개별 선택)
-            if (filter.userIds() != null && !filter.userIds().isEmpty()) {
-                targets = accountRepository.findAllById(filter.userIds());
-            } else {
-                targets = Collections.emptyList();
-            }
+            return selectByDeptAndGrades(filter.deptIds(), filter.gradeLevels());
         }
 
-        if (targets.isEmpty()) return;
+        // USER (직접 개별 선택)
+        if (filter.userIds() != null && !filter.userIds().isEmpty()) {
+            return accountRepository.findAllById(filter.userIds());
+        }
+
+        return Collections.emptyList();
+    }
+
+    private void createTargetSnapshot(Survey survey, List<Account> targets) {
+        if (survey == null || targets == null || targets.isEmpty()) {
+            return;
+        }
 
         List<SurveyTarget> surveyTargets = targets.stream()
                 .map(account -> SurveyTarget.builder()
@@ -169,6 +183,46 @@ public class SurveyCommandService {
                 .collect(Collectors.toList());
 
         targetRepository.saveAll(surveyTargets);
+    }
+
+    private void notifySurveyCreated(Survey survey, List<Account> targets) {
+        if (survey == null || targets == null || targets.isEmpty()) {
+            return;
+        }
+
+        String title = survey.getTitle() != null ? survey.getTitle() : "설문";
+        String message = buildSurveyMessage(survey.getDescription());
+        String linkUrl = "/surveys/" + survey.getSurveyId();
+
+        targets.stream()
+                .map(Account::getAccountId)
+                .filter(id -> id != null)
+                .distinct()
+                .forEach(recipientId -> alarmCommandService.createAlarm(
+                        recipientId,
+                        AlarmType.SURVEY_NEW,
+                        title,
+                        message,
+                        linkUrl));
+    }
+
+    private String buildSurveyMessage(String description) {
+        if (description == null) {
+            return "새 설문이 등록되었습니다.";
+        }
+
+        String normalized = description.replaceAll("<[^>]*>", " ");
+        normalized = normalized.replaceAll("\\s+", " ").trim();
+        if (normalized.isEmpty()) {
+            return "새 설문이 등록되었습니다.";
+        }
+
+        int maxLen = 80;
+        if (normalized.length() <= maxLen) {
+            return normalized;
+        }
+
+        return normalized.substring(0, maxLen) + "...";
     }
 
     private List<Account> selectByDepts(List<Long> deptIds) {

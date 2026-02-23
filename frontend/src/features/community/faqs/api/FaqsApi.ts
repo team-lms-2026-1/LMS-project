@@ -48,7 +48,7 @@ export async function createFaq(body: CreateFaqRequestDto) {
   });
 
   if (!res.ok) {
-    let msg = `요청 실패 (${res.status})`;
+    let msg = `Request failed (${res.status})`;
     try {
       const text = await res.text();
       if (text) msg = text;
@@ -73,7 +73,7 @@ export async function updateFaq(faqId: number, body: UpdateFaqRequestDto) {
   });
 
   if (!res.ok) {
-    let msg = `요청 실패 (${res.status})`;
+    let msg = `Request failed (${res.status})`;
     try {
       const text = await res.text();
       if (text) msg = text;
@@ -92,7 +92,7 @@ export async function deleteFaq(faqId: number) {
   });
 
   if (!res.ok) {
-    let msg = `요청 실패 (${res.status})`;
+    let msg = `Request failed (${res.status})`;
     try {
       const text = await res.text();
       if (text) msg = text;

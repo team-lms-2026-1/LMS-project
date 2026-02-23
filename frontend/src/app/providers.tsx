@@ -1,4 +1,4 @@
-// src/app/providers.tsx
+﻿// src/app/providers.tsx
 "use client";
 
 import React from "react";
@@ -24,6 +24,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   return (
+
     <NextIntlClientProvider locale={activeLocale} messages={messages}>
       <AuthProvider>
         {children}

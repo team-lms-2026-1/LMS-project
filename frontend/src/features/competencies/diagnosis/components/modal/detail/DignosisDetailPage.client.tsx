@@ -81,7 +81,6 @@ function pickFirstValue(obj: any, paths: string[]) {
   return undefined;
 }
 
-// 추가: string만 찾아내는 버전
 function pickFirstString(obj: any, paths: string[]): string {
   const v = pickFirstValue(obj, paths);
   if (v === undefined || v === null) return "";
@@ -482,6 +481,24 @@ function mapDetailValue(raw: any): DiagnosisDetailValue {
 
   const deptId = info?.deptId ?? info?.departmentId ?? base?.deptId ?? base?.departmentId;
   const deptName = info?.deptName ?? info?.departmentName ?? base?.deptName ?? base?.departmentName;
+  const semesterId =
+    pickFirstValue(info, ["semesterId", "semester.semesterId", "semester.id"]) ??
+    pickFirstValue(base, ["semesterId", "semester.semesterId", "semester.id"]);
+  const semesterName =
+    pickFirstString(info, [
+      "semesterName",
+      "semester.displayName",
+      "semester.name",
+      "semester.semesterName",
+      "semester.title",
+    ]) ||
+    pickFirstString(base, [
+      "semesterName",
+      "semester.displayName",
+      "semester.name",
+      "semester.semesterName",
+      "semester.title",
+    ]);
 
   const deptValue =
     deptId !== undefined && deptId !== null
@@ -558,6 +575,11 @@ function mapDetailValue(raw: any): DiagnosisDetailValue {
     gradeValue: toGradeValue(
       info?.targetGrade ?? info?.grade ?? info?.gradeLevel ?? base?.targetGrade ?? base?.grade ?? base?.gradeLevel
     ),
+    semesterId:
+      semesterId !== undefined && semesterId !== null && String(semesterId).trim() !== ""
+        ? Number(semesterId)
+        : undefined,
+    semesterName: semesterName ? String(semesterName) : undefined,
     startedAt,
     endedAt,
     status: info?.status ?? base?.status ?? "DRAFT",

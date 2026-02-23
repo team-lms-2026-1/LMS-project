@@ -1,18 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import styles from "./ResultPage.module.css";
-import { useResultList } from "@/features/competencies/result/hooks/useResultList";
-import { recalculateCompetencySummary } from "@/features/competencies/result/api/ResultCompetenciesApi";
+import { useResultList } from "@/features/competencies/diagnosis/hooks/useDignosisList";
+import { recalculateCompetencySummary } from "@/features/competencies/diagnosis/api/DiagnosisApi";
 import type {
   ResultCompetencyDashboard,
   ResultCompetencyRadarItem,
   ResultCompetencyRadarSeries,
   ResultCompetencyStatRow,
-} from "@/features/competencies/result/api/types";
+  ResultCompetencyTrendSeries,
+} from "@/features/competencies/diagnosis/api/types";
 import { Button } from "@/components/button";
-import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
-import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -79,17 +78,19 @@ type NormalizedRadarSeries = {
 export default function ResultPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dignosisId = searchParams.get("dignosisId")?.trim() ?? "";
   const semesterIdParam = searchParams.get("semesterId")?.trim() ?? "";
   const semesterNameParam = searchParams.get("semesterName")?.trim() ?? "";
   const statusParam = searchParams.get("status");
-  const { options: deptOptionsRaw, loading: deptLoading } = useDeptsDropdownOptions();
-  const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
+  const deptIdParam = searchParams.get("deptId")?.trim() ?? "";
+  const deptNameParam =
+    searchParams.get("deptName")?.trim() ??
+    searchParams.get("departmentName")?.trim() ??
+    searchParams.get("dept")?.trim() ??
+    "";
+  const { options: semesterOptions } = useSemestersDropdownOptions();
   const [recalcLoading, setRecalcLoading] = useState(false);
   const [recalcError, setRecalcError] = useState<string | null>(null);
-  const [trendDeptValue, setTrendDeptValue] = useState("");
-  const [radarDeptValue, setRadarDeptValue] = useState("ALL");
-
-
 
   const resolvedSemesterId = useMemo(() => {
     if (semesterIdParam) return semesterIdParam;
@@ -108,42 +109,42 @@ export default function ResultPageClient() {
     return match?.value ?? "";
   }, [semesterIdParam, semesterNameParam, semesterOptions]);
 
-  const [radarSemesterId, setRadarSemesterId] = useState(() => resolvedSemesterId || "");
-
-  useEffect(() => {
-    if (resolvedSemesterId && !radarSemesterId) {
-      setRadarSemesterId(resolvedSemesterId);
-    }
-  }, [resolvedSemesterId, radarSemesterId]);
-
   const isClosed = String(statusParam ?? "").toUpperCase() === "CLOSED";
 
+  const selectedDeptLabel = useMemo(() => {
+    if (deptNameParam) return deptNameParam;
+    return "";
+  }, [deptNameParam]);
 
+  const isAllDept = useMemo(() => {
+    const label = selectedDeptLabel.trim();
+    return !label || label === "전체" || label.toUpperCase() === "ALL";
+  }, [selectedDeptLabel]);
 
   const query = useMemo(() => {
+    if (!dignosisId) return undefined;
     const semesterQuery = semesterIdParam
       ? { semesterId: semesterIdParam }
       : semesterNameParam
         ? { semesterName: semesterNameParam }
         : {};
-    return semesterQuery;
-  }, [semesterIdParam, semesterNameParam]);
+    if (deptIdParam) {
+      return {
+        dignosisId,
+        deptId: deptIdParam,
+        ...(deptNameParam ? { deptName: deptNameParam } : {}),
+        ...semesterQuery,
+      };
+    }
+    if (deptNameParam) return { dignosisId, deptName: deptNameParam, ...semesterQuery };
+    return { dignosisId, ...semesterQuery };
+  }, [dignosisId, deptIdParam, deptNameParam, semesterIdParam, semesterNameParam]);
 
   const { state, actions } = useResultList(query);
-  const radarQuery = useMemo(
-    () => (radarSemesterId ? { semesterId: radarSemesterId } : undefined),
-    [radarSemesterId]
-  );
-  const radarEnabled = Boolean(radarSemesterId) && radarSemesterId !== resolvedSemesterId;
-  const { state: radarState } = useResultList(radarQuery, radarEnabled);
-  const radarLoading = radarEnabled ? radarState.loading : false;
-  const radarError = radarEnabled ? radarState.error : null;
-  const radarSourceData = radarEnabled ? radarState.data : state.data;
 
   const handleRecalculate = async () => {
     if (!isClosed || recalcLoading) return;
     const semesterIdValue = resolvedSemesterId || "";
-
     if (!semesterIdValue) {
       setRecalcError("학기 정보를 찾을 수 없습니다.");
       return;
@@ -154,88 +155,40 @@ export default function ResultPageClient() {
       await recalculateCompetencySummary(semesterIdValue);
       await actions.reload();
     } catch (e: any) {
-      setRecalcError(e?.message ?? "통계 집계에 실패했습니다.");
+      setRecalcError(e?.message ?? "결과 산출에 실패했습니다.");
     } finally {
       setRecalcLoading(false);
     }
   };
 
   const summary = useMemo(() => normalizeSummary(state.data), [state.data]);
-  const baseRadarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);
-  const radarSeries = useMemo(() => normalizeRadarSeries(radarSourceData), [radarSourceData]);
-  const radarDeptOptions = useMemo(() => {
-    const names = new Set<string>();
-    deptOptionsRaw.forEach((opt) => {
-      const label = String(opt.label ?? "").trim();
-      if (label && label !== "전체") names.add(label);
-    });
-    const data = radarSourceData;
-    const rawDepts = [
-      ...(Array.isArray(data?.deptNames) ? data?.deptNames : []),
-      ...(Array.isArray(data?.departments) ? data?.departments : []),
-    ];
-    rawDepts.forEach((d) => {
-      const label = typeof d === "string" ? d.trim() : "";
-      if (label && label !== "전체") names.add(label);
-    });
-    radarSeries.forEach((s) => {
-      const label = String(s.deptName ?? "").trim();
-      if (label && label !== "전체") names.add(label);
-    });
-    const sorted = Array.from(names)
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b));
-    return [{ value: "ALL", label: "전체" }, ...sorted.map((dept) => ({ value: dept, label: dept }))];
-  }, [deptOptionsRaw, radarSourceData, radarSeries]);
-  useEffect(() => {
-    if (radarDeptValue === "ALL") return;
-    const exists = radarDeptOptions.some((opt) => opt.value === radarDeptValue);
-    if (!exists) setRadarDeptValue("ALL");
-  }, [radarDeptOptions, radarDeptValue]);
-  const trendDeptOptions = useMemo(() => {
-    const names = new Set<string>();
-    deptOptionsRaw.forEach((opt) => {
-      const label = String(opt.label ?? "").trim();
-      if (label && label !== "전체") names.add(label);
-    });
-    const data = state.data;
-    const rawDepts = [
-      ...(Array.isArray(data?.deptNames) ? data?.deptNames : []),
-      ...(Array.isArray(data?.departments) ? data?.departments : []),
-    ];
-    rawDepts.forEach((d) => {
-      if (typeof d === "string" && d.trim()) names.add(d.trim());
-    });
-    baseRadarSeries.forEach((s) => {
-      if (s.deptName) names.add(String(s.deptName).trim());
-    });
-    return Array.from(names)
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b))
-      .map((dept) => ({ value: dept, label: dept }));
-  }, [deptOptionsRaw, state.data, baseRadarSeries]);
-  const isTrendDeptSelected = Boolean(trendDeptValue.trim());
+  const radarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);
+
+  const labeledRadarSeries = useMemo(() => {
+    const label = selectedDeptLabel.trim();
+    if (isAllDept) return radarSeries;
+    if (radarSeries.length === 1 && label) {
+      return [{ ...radarSeries[0], deptName: label }];
+    }
+    return radarSeries;
+  }, [radarSeries, selectedDeptLabel, isAllDept]);
+
   const filteredRadarSeries = useMemo(() => {
-    if (radarDeptValue === "ALL") return radarSeries;
-    return radarSeries.filter((s) => s.deptName === radarDeptValue);
-  }, [radarSeries, radarDeptValue]);
+    const label = selectedDeptLabel.trim();
+    if (isAllDept) return labeledRadarSeries;
+    return labeledRadarSeries.filter((s) => s.deptName === label);
+  }, [labeledRadarSeries, selectedDeptLabel, isAllDept]);
+
   const radarData = useMemo(() => buildRadarData(filteredRadarSeries), [filteredRadarSeries]);
-  const isSingleRadarSeries = filteredRadarSeries.length <= 1;
 
-  const trendSeries = useMemo(() => normalizeTrendSeries(state.data), [state.data]);
-  const filteredTrendSeries = useMemo(() => {
-    if (!isTrendDeptSelected) return [];
-    const prefix = `${trendDeptValue} -`;
-    const matched = trendSeries.filter(
-      (s) => s.name === trendDeptValue || s.name.startsWith(prefix)
-    );
-    return matched;
-  }, [trendSeries, isTrendDeptSelected, trendDeptValue]);
-  const trendData = useMemo(
-    () => normalizeTrendData(state.data, filteredTrendSeries),
-    [state.data, filteredTrendSeries]
+  const trendSeries = useMemo(
+    () => state.data?.trendChart?.series ?? [],
+    [state.data?.trendChart?.series]
   );
-
+  const trendData = useMemo(
+    () => normalizeTrend(state.data?.trendChart?.categories ?? [], trendSeries),
+    [state.data?.trendChart?.categories, trendSeries]
+  );
 
   const statsRows = useMemo(() => normalizeStats(state.data), [state.data]);
 
@@ -251,7 +204,7 @@ export default function ResultPageClient() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.topBar}>
-          <h1 className={styles.title}>역량 종합 관리</h1>
+          <h1 className={styles.title}>진단 결과 관리</h1>
           <div className={styles.topActions}>
             {isClosed && (
               <Button
@@ -259,7 +212,7 @@ export default function ResultPageClient() {
                 onClick={handleRecalculate}
                 disabled={recalcLoading || !resolvedSemesterId}
               >
-                결과 재산출
+                결과 산출
               </Button>
             )}
             <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
@@ -270,11 +223,11 @@ export default function ResultPageClient() {
 
         <div className={styles.summaryRow}>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>대상자</div>
+            <div className={styles.summaryLabel}>대상자수</div>
             <div className={styles.summaryValue}>{formatNumber(summary.totalCount)}</div>
           </div>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>산출대상자</div>
+            <div className={styles.summaryLabel}>산출대상자수</div>
             <div className={styles.summaryValue}>{formatNumber(summary.calculatedCount)}</div>
           </div>
           <div className={styles.summaryCard}>
@@ -286,38 +239,10 @@ export default function ResultPageClient() {
         <div className={styles.grid}>
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>레이더 차트</h2>
-              <div className={styles.filterGroup}>
-                <div className={styles.filterWrap}>
-                  <span className={styles.filterLabel}>학기</span>
-                  <Dropdown
-                    value={radarSemesterId}
-                    onChange={setRadarSemesterId}
-                    options={semesterOptions}
-                    placeholder="학기"
-                    loading={semesterLoading}
-                    className={styles.dropdownWrap}
-                  />
-                </div>
-                <div className={styles.filterWrap}>
-                  <span className={styles.filterLabel}>학과</span>
-                  <Dropdown
-                    value={radarDeptValue}
-                    onChange={setRadarDeptValue}
-                    options={radarDeptOptions}
-                    placeholder="전체"
-                    loading={deptLoading}
-                    className={styles.dropdownWrap}
-                  />
-                </div>
-              </div>
+              <h2 className={styles.panelTitle}>역량 차트</h2>
             </div>
             <div className={styles.chartWrap}>
-              {radarLoading ? (
-                <div className={styles.emptyCentered}>불러오는 중...</div>
-              ) : radarError ? (
-                <div className={styles.empty}>{radarError}</div>
-              ) : radarData.length === 0 ? (
+              {radarData.length === 0 ? (
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -326,11 +251,7 @@ export default function ResultPageClient() {
                     <PolarAngleAxis dataKey="name" tick={{ className: styles.radarTick }} />
                     <PolarRadiusAxis tick={false} axisLine={false} />
                     <Tooltip formatter={(v) => formatScore(v)} />
-                    <Legend
-                      verticalAlign="bottom"
-                      height={12}
-                      content={renderRadarLegend}
-                    />
+                    <Legend verticalAlign="bottom" height={12} content={renderRadarLegend} />
                     {filteredRadarSeries.map((series, index) => (
                       <Radar
                         key={series.deptName}
@@ -338,7 +259,7 @@ export default function ResultPageClient() {
                         stroke={RADAR_COLOR_VARS[index % RADAR_COLOR_VARS.length]}
                         fill={RADAR_COLOR_VARS[index % RADAR_COLOR_VARS.length]}
                         className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[index % RADAR_COLOR_CLASSES.length]} ${
-                          isSingleRadarSeries ? styles.radarFillSingle : styles.radarFillAll
+                          isAllDept ? styles.radarFillAll : styles.radarFillSingle
                         }`}
                       />
                     ))}
@@ -350,24 +271,10 @@ export default function ResultPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>추세 차트</h2>
-              <div className={styles.filterWrap}>
-                <span className={styles.filterLabel}>학과</span>
-                <Dropdown
-                  value={trendDeptValue}
-                  onChange={setTrendDeptValue}
-                  options={trendDeptOptions}
-                  placeholder="학과 선택"
-                  loading={deptLoading}
-                  className={styles.dropdownWrap}
-                />
-              </div>
-
+              <h2 className={styles.panelTitle}>역량 추이</h2>
             </div>
             <div className={styles.chartWrap}>
-              {!isTrendDeptSelected ? (
-                <div className={styles.emptyCentered}>학과를 선택해주세요</div>
-              ) : trendData.length === 0 || filteredTrendSeries.length === 0 ? (
+              {trendData.length === 0 || trendSeries.length === 0 ? (
                 <div className={styles.empty}>차트 데이터가 없습니다.</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
@@ -375,9 +282,9 @@ export default function ResultPageClient() {
                     <CartesianGrid className={styles.chartGrid} />
                     <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
                     <YAxis tick={{ className: styles.axisTick }} />
-                    <Tooltip formatter={(value) => formatScore(value)} />
+                    <Tooltip />
                     <Legend verticalAlign="bottom" align="center" content={renderLineLegend} />
-                    {filteredTrendSeries.map((s, i) => (
+                    {trendSeries.map((s, i) => (
                       <Line
                         key={s.name}
                         type="monotone"
@@ -396,7 +303,7 @@ export default function ResultPageClient() {
 
         <section className={styles.tableSection}>
           <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>역량 통계</h2>
+            <h2 className={styles.panelTitle}>역량 통계</h2>
           </div>
           <div className={styles.tableWrap}>
             {statsRows.length === 0 ? (
@@ -406,7 +313,7 @@ export default function ResultPageClient() {
                 <thead>
                   <tr>
                     <th>역량 이름</th>
-                    <th>대상자 / 산출대상자</th>
+                    <th>대상자수/산출대상자수</th>
                     <th>평균</th>
                     <th>중간값</th>
                     <th>표준편차</th>
@@ -551,35 +458,12 @@ function buildRadarData(series: NormalizedRadarSeries[]) {
   return rows;
 }
 
-function normalizeTrendSeries(data: ResultCompetencyDashboard | null) {
-  if (!data) return [];
-  const raw = (data as any).trendChart ?? (data as any).trend ?? (data as any).trendData ?? null;
-  const seriesRaw = raw?.series ?? raw?.lines ?? raw?.data ?? [];
-  if (!Array.isArray(seriesRaw)) return [];
-  return seriesRaw.map((s: any, idx: number) => ({
-    name: pickString(s, ["name", "label"]) || `Series ${idx + 1}`,
-    data: Array.isArray(s?.data) ? s.data.map((v: any) => pickNumber({ value: v }, ["value"]) ?? 0) : [],
-  }));
-}
-
-function normalizeTrendData(data: ResultCompetencyDashboard | null, series: { name: string; data: number[] }[]) {
-  if (!data || series.length === 0) return [];
-  const raw = (data as any).trendChart ?? (data as any).trend ?? (data as any).trendData ?? null;
-  const categories = Array.isArray(raw?.categories)
-    ? raw.categories
-    : Array.isArray(raw?.labels)
-      ? raw.labels
-      : [];
-  const maxLen = Math.max(...series.map((s) => s.data.length), 0);
-  const normalizedCategories =
-    categories.length > 0
-      ? categories
-      : Array.from({ length: maxLen }, (_, i) => `${i + 1}`);
-
-  return normalizedCategories.map((cat: any, idx: number) => {
-    const row: Record<string, any> = { category: String(cat ?? idx + 1) };
+function normalizeTrend(categories: string[], series: ResultCompetencyTrendSeries[]) {
+  if (!categories.length || !series.length) return [];
+  return categories.map((cat, idx) => {
+    const row: Record<string, any> = { category: cat };
     series.forEach((s) => {
-      row[s.name] = s.data[idx] ?? null;
+      row[s.name] = pickNumber({ value: s.data?.[idx] }, ["value"]);
     });
     return row;
   });
@@ -610,6 +494,7 @@ function normalizeStats(data: ResultCompetencyDashboard | null) {
     calculatedAt: pickString(row, ["calculatedAt", "calculatedDate", "updatedAt", "date"]),
   }));
 }
+
 function renderCircleLegend(
   props: any,
   options: {
@@ -625,8 +510,10 @@ function renderCircleLegend(
   const columnCount = Math.max(1, Math.min(maxColumns, payload.length));
   const showDash = options.showDash ?? false;
   const colorClasses = options.colorClasses ?? [];
-  const variantClass = options.variant === "radar" ? styles.legendWrapRadar : styles.legendWrapLine;
-  const columnClass = styles[`legendCols${columnCount}`] ?? styles.legendCols3 ?? "";
+  const variantClass =
+    options.variant === "radar" ? styles.legendWrapRadar : styles.legendWrapLine;
+  const columnClass =
+    styles[`legendCols${columnCount}`] ?? styles.legendCols3 ?? "";
   return (
     <div className={`${styles.legendWrap} ${variantClass}`}>
       <div className={`${styles.legendGrid} ${columnClass}`}>
@@ -640,7 +527,10 @@ function renderCircleLegend(
           const colorClass =
             indexedClass ?? LEGEND_COLOR_CLASS[colorKey] ?? styles.legendColorDefault;
           return (
-            <div key={`${label || "legend"}-${index}`} className={`${styles.legendItem} ${colorClass}`}>
+            <div
+              key={`${label || "legend"}-${index}`}
+              className={`${styles.legendItem} ${colorClass}`}
+            >
               <span className={styles.legendIcon}>
                 {showDash ? <span className={styles.legendDash}>-</span> : null}
                 <span className={styles.legendDot} />
@@ -681,7 +571,6 @@ const LEGEND_COLOR_CLASS: Record<string, string> = {
   "#10b981": styles.legendColorTeal,
   "#facc15": styles.legendColorYellow,
 };
-
 
 function pickString(obj: any, keys: string[]) {
   for (const k of keys) {

@@ -37,7 +37,7 @@ public class NoticeCategoryController {
     @GetMapping({ "/api/v1/student/community/notices/categories",
             "/api/v1/admin/community/notices/categories",
             "/api/v1/professor/community/notices/categories" })
-    @PreAuthorize("hasAuthority('NOTICE_READ')")
+    @PreAuthorize("hasAuthority('NOTICE_READ') or hasAnyRole('STUDENT','PROFESSOR','ADMIN')")
     public ApiResponse<List<Map<String, Object>>> getNoticeCategories(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,

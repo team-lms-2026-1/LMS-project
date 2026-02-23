@@ -87,9 +87,13 @@ function getAlarmBadge(type?: string | null): AlarmBadge | null {
     case "MENTORING_CHAT_MESSAGE":
       return { label: "멘토링 채팅", className: styles.itemBadgeMentoring };
     case "COMMUNITY_COMMENT":
-      return { label: "커뮤니티 댓글", className: styles.itemBadgeCommunity };
+    case "QNA_COMMENT":
+      return { label: "Q&A 댓글", className: styles.itemBadgeCommunity };
     case "STUDY_RENTAL_APPROVED":
+    case "STUDY_RENTAL_REJECTED":
       return { label: "학습공간", className: styles.itemBadgeStudy };
+    case "SURVEY_NEW":
+      return { label: "설문", className: styles.itemBadgeSurvey };
     default:
       return null;
   }

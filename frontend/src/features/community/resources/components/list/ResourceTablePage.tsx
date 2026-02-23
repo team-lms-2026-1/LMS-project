@@ -9,9 +9,11 @@ import { Badge } from "@/components/badge";
 import { useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import DeleteModal from "../modal/DeleteModal.client";
+import { useI18n } from "@/i18n/useI18n";
 
 export function ResourcesTable({ items, loading, onReload }: ResourceTableProps) {
   const router = useRouter();
+  const t = useI18n("community.resources.admin.table");
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -47,7 +49,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       const res = await fetch(`/api/admin/community/resources/${deleteTarget.id}`, { method: "DELETE" });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(text || `삭제 실패 (${res.status})`);
+        throw new Error(text || `${t("errors.deleteFailed")} (${res.status})`);
       }
 
       // ✅ 목록으로 이동 + toast
@@ -57,7 +59,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       router.refresh();
       router.push("/admin/community/resources?toast=deleted");
     } catch (e: any) {
-      toast.error(e?.message ?? "삭제에 실패했습니다.");
+      toast.error(e?.message ?? t("errors.deleteFailed"));
     } finally {
       setDeleteLoading(false);
     }
@@ -65,7 +67,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
 
   const columns: Array<TableColumn<ResourceListItemDto>> = [
     {
-      header: "번호",
+      header: t("headers.id"),
       align: "center",
       render: (r) => (
         <div
@@ -79,7 +81,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       ),
     },
     {
-      header: "분류",
+      header: t("headers.category"),
       align: "center",
       render: (r) => {
         const c = r.category;
@@ -91,7 +93,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
             tabIndex={0}
           >
             {!c ? (
-              "미분류"
+              t("uncategorized")
             ) : (
               <Badge bgColor={c.bgColorHex} textColor={c.textColorHex}>
                 {c.name}
@@ -102,7 +104,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       },
     },
     {
-      header: "제목",
+      header: t("headers.title"),
       align: "center",
       render: (r) => (
         <div
@@ -117,7 +119,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       ),
     },
     {
-      header: "조회수",
+      header: t("headers.views"),
       align: "center",
       render: (r) => (
         <div className={styles.rowClickCell} onClickCapture={() => goDetail(r.resourceId)} role="button" tabIndex={0}>
@@ -126,7 +128,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       ),
     },
     {
-      header: "작성일",
+      header: t("headers.createdAt"),
       align: "center",
       render: (r) => (
         <div className={styles.rowClickCell} onClickCapture={() => goDetail(r.resourceId)} role="button" tabIndex={0}>
@@ -135,7 +137,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
       ),
     },
     {
-      header: "관리",
+      header: t("headers.manage"),
       width: 180,
       align: "center",
       stopRowClick: true, // ✅ 공용 Table이 이걸 지원한다면 함께 동작
@@ -148,7 +150,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
               goEdit(r.resourceId);
             }}
           >
-            수정
+            {t("buttons.edit")}
           </Button>
 
           <Button
@@ -158,7 +160,7 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
               openDelete(r.resourceId, r.title);
             }}
           >
-            삭제
+            {t("buttons.delete")}
           </Button>
         </div>
       ),
@@ -174,13 +176,13 @@ export function ResourcesTable({ items, loading, onReload }: ResourceTableProps)
           loading={loading}
           skeletonRowCount={10}
           rowKey={(r) => r.resourceId}
-          emptyText="자료가 없습니다."
+          emptyText={t("emptyText")}
         />
       </div>
 
       <DeleteModal
         open={deleteOpen}
-        targetLabel="자료"
+        targetLabel={t("targetLabel")}
         targetTitle={deleteTarget?.title}
         loading={deleteLoading}
         onClose={closeDelete}

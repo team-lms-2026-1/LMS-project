@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 import styles from "./QnaDetailPage.module.css";
-import type { QnaListItemDto } from "../../api/types";
-import { fetchQnaDetail, deleteQnaQuestion } from "../../api/qnasApi";
 import { Button } from "@/components/button";
 import { useAuth } from "@/features/auth/AuthProvider";
-import toast from "react-hot-toast";
+import type { QnaListItemDto } from "../../api/types";
+import { deleteQnaQuestion, fetchQnaDetail } from "../../api/qnasApi";
 import DeleteModal from "../modal/DeleteModal.client";
+import { useI18n } from "@/i18n/useI18n";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
@@ -16,7 +17,6 @@ type LoadState =
 
 function normalizeDetail(payload: any): QnaListItemDto {
   const raw = payload?.data ?? payload;
-
   const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
 
   return {
@@ -25,11 +25,8 @@ function normalizeDetail(payload: any): QnaListItemDto {
     title: String(raw?.title ?? ""),
     content: String(raw?.content ?? ""),
     authorName: String(raw?.authorName ?? ""),
-
-    // ✅ 본인 판별용(백엔드가 내려주면 사용)
     authorLoginId: raw?.authorLoginId ?? raw?.author_login_id ?? null,
     authorId: raw?.authorId ?? raw?.authorAccountId ?? null,
-
     viewCount: Number(raw?.viewCount ?? 0),
     createdAt: String(created),
     hasAnswer: Boolean(raw?.hasAnswer ?? false),
@@ -54,9 +51,9 @@ export default function QnaDetailpageClient() {
   const params = useParams<{ questionId?: string }>();
   const questionId = useMemo(() => Number(params?.questionId ?? 0), [params]);
   const sp = useSearchParams();
+  const t = useI18n("community.qna.student.detail");
   const toastOnceRef = useRef<string | null>(null);
 
-  // ✅ AuthProvider 구조에 맞게 me 꺼내기
   const { state: authState } = useAuth();
   const me = authState.me;
 
@@ -70,7 +67,7 @@ export default function QnaDetailpageClient() {
 
   useEffect(() => {
     if (!questionId || Number.isNaN(questionId)) {
-      setState({ loading: false, error: "잘못된 question ID입니다.", data: null });
+      setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
 
@@ -86,7 +83,7 @@ export default function QnaDetailpageClient() {
         if (!alive) return;
         setState({
           loading: false,
-          error: e?.message ?? "질문을 불러오지 못했습니다.",
+          error: e?.message ?? t("errors.loadFailed"),
           data: null,
         });
       }
@@ -95,22 +92,24 @@ export default function QnaDetailpageClient() {
     return () => {
       alive = false;
     };
-  }, [questionId]);
+  }, [questionId, t]);
 
   useEffect(() => {
-    const t = sp.get("toast");
-    if (!t) return;
-    if (toastOnceRef.current === t) return;
-    toastOnceRef.current = t;
+    const toastType = sp.get("toast");
+    if (!toastType) return;
+    if (toastOnceRef.current === toastType) return;
+    toastOnceRef.current = toastType;
 
-    if (t === "updated") toast.success("질문이 수정되었습니다.", { id: "qna-toast-updated" });
+    if (toastType === "updated") {
+      toast.success(t("toasts.updated"), { id: "qna-toast-updated" });
+    }
 
     const next = new URLSearchParams(sp.toString());
     next.delete("toast");
     const qs = next.toString();
     const base = questionId ? `/student/community/qna/questions/${questionId}` : "/student/community/qna/questions";
     router.replace(qs ? `${base}?${qs}` : base);
-  }, [sp, router, questionId]);
+  }, [sp, router, questionId, t]);
 
   const data = state.data;
 
@@ -120,15 +119,10 @@ export default function QnaDetailpageClient() {
     return { backgroundColor: bg, color: fg };
   }, [data?.category?.bgColorHex, data?.category?.textColorHex]);
 
-  // ✅ 본인 글인지 판별 (loginId 우선)
   const isMine = useMemo(() => {
     if (!data || !me) return false;
 
-    const byLogin =
-      !!data.authorLoginId &&
-      !!me.loginId &&
-      String(data.authorLoginId) === String(me.loginId);
-
+    const byLogin = !!data.authorLoginId && !!me.loginId && String(data.authorLoginId) === String(me.loginId);
     const byId =
       typeof data.authorId === "number" &&
       typeof (me as any).accountId === "number" &&
@@ -156,11 +150,11 @@ export default function QnaDetailpageClient() {
       router.push("/student/community/qna/questions?toast=deleted");
       router.refresh();
     } catch (e: any) {
-      toast.error(e?.message ?? "삭제 중 오류가 발생했습니다.");
+      toast.error(e?.message ?? t("errors.deleteFailed"));
     } finally {
       setDeleteLoading(false);
     }
-  }, [data, router]);
+  }, [data, router, t]);
 
   return (
     <div className={styles.page}>
@@ -170,35 +164,34 @@ export default function QnaDetailpageClient() {
             Q&A
           </span>
           <span className={styles.sep}>›</span>
-          <span className={styles.current}>상세페이지</span>
+          <span className={styles.current}>{t("breadcrumbCurrent")}</span>
         </div>
 
-        <h1 className={styles.title}>Q&A</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
-
-        {state.loading && <div className={styles.loadingBox}>불러오는 중...</div>}
+        {state.loading && <div className={styles.loadingBox}>{t("loading")}</div>}
 
         {!state.loading && data && (
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {data.category?.name ?? t("uncategorized")}
               </span>
               <div className={styles.headTitle}>{data.title}</div>
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{t("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{t("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
             </div>
@@ -209,10 +202,9 @@ export default function QnaDetailpageClient() {
 
             <div className={styles.footerRow}>
               <Button type="button" onClick={() => router.push("/student/community/qna/questions")}>
-                목록으로
+                {t("buttons.list")}
               </Button>
 
-              {/* ✅ 본인 글일 때만 삭제 버튼 표시 */}
               {isMine && (
                 <div className={styles.ownerActions}>
                   <Button
@@ -220,10 +212,10 @@ export default function QnaDetailpageClient() {
                     variant="secondary"
                     onClick={() => router.push(`/student/community/qna/questions/${data.questionId}/edit`)}
                   >
-                    수정
+                    {t("buttons.edit")}
                   </Button>
                   <Button type="button" variant="danger" onClick={handleDelete}>
-                    삭제
+                    {t("buttons.delete")}
                   </Button>
                 </div>
               )}
@@ -233,7 +225,7 @@ export default function QnaDetailpageClient() {
 
         <DeleteModal
           open={deleteOpen}
-          targetLabel="질문"
+          targetLabel={t("targetLabel")}
           targetTitle={data?.title}
           loading={deleteLoading}
           onClose={closeDelete}

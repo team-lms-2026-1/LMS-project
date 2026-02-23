@@ -19,6 +19,13 @@ public interface DiagnosisTargetRepository extends JpaRepository<DiagnosisTarget
   // 특정 진단의 총 대상자 수 조회
   long countByRunRunId(Long runId);
 
+  @Query("""
+          SELECT COUNT(DISTINCT dt.student.accountId)
+          FROM DiagnosisTarget dt
+          WHERE dt.run.semester.semesterId = :semesterId
+      """)
+  long countDistinctStudentBySemesterId(@Param("semesterId") Long semesterId);
+
   // 특정 진단의 특정 학생 대상자 조회
   Optional<DiagnosisTarget> findByRunRunIdAndStudentAccountId(Long runId, Long studentAccountId);
 

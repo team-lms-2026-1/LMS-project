@@ -29,4 +29,14 @@ public interface DiagnosisAnswerRepository extends JpaRepository<DiagnosisAnswer
 
     // 특정 제출의 답변 수 조회
     long countBySubmissionSubmissionId(Long submissionId);
+    @Query("""
+                SELECT da
+                FROM DiagnosisAnswer da
+                JOIN FETCH da.question q
+                JOIN FETCH da.submission s
+                WHERE s.run.runId = :runId
+            """)
+    List<DiagnosisAnswer> findByRunRunId(@Param("runId") Long runId);
+
+
 }

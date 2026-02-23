@@ -189,7 +189,7 @@ public class QnaService {
                                 .question(question).author(admin).content(request.getContent()).build();
                 answerRepository.save(answer);
 
-                notifyCommunityComment(question, adminId);
+                notifyQnaComment(question, adminId);
         }
 
         @Transactional
@@ -220,19 +220,22 @@ public class QnaService {
                 // answerRepository.delete(answer); <-- 이 줄은 이제 필요 없습니다! 지우세요.
         }
 
-        private void notifyCommunityComment(QnaQuestion question, Long actorId) {
+        private void notifyQnaComment(QnaQuestion question, Long actorId) {
                 Long recipientId = question.getAuthor().getAccountId();
                 if (recipientId == null || recipientId.equals(actorId)) {
                         return;
                 }
 
-                String title = "Q&A answer";
-                String message = "Your question '" + question.getTitle() + "' has a new answer.";
+                String title = "Q&A 댓글";
+                String questionTitle = question.getTitle();
+                String message = (questionTitle == null || questionTitle.isBlank())
+                                ? "Q&A에 답변이 등록되었습니다."
+                                : "질문 '" + questionTitle + "'에 답변이 등록되었습니다.";
                 String linkUrl = "/community/qna/questions/" + question.getId();
 
                 alarmCommandService.createAlarm(
                                 recipientId,
-                                AlarmType.COMMUNITY_COMMENT,
+                                AlarmType.QNA_COMMENT,
                                 title,
                                 message,
                                 linkUrl);

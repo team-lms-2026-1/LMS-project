@@ -11,13 +11,7 @@ import { SearchBar } from "@/components/searchbar";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { Button } from "@/components/button";
 import { CategoryTablePage, type CategoryTablePageHandle } from "./CategoryTablePage";
-
-const SCOPE_LABEL: Record<CategoryScope, string> = {
-  notices: "공지사항",
-  resources: "자료실",
-  faqs: "FAQ",
-  qna: "Q&A",
-};
+import { useI18n } from "@/i18n/useI18n";
 
 const BACK_PATH: Record<CategoryScope, string> = {
   notices: "/admin/community/notices",
@@ -28,6 +22,7 @@ const BACK_PATH: Record<CategoryScope, string> = {
 
 export default function CategoryPageClient({ scope }: { scope: CategoryScope }) {
   const router = useRouter();
+  const t = useI18n("community.categories.page");
 
   const { state, actions } = useCategoryList(scope);
 
@@ -48,7 +43,8 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
     actions.setKeyword(inputKeyword);
   }, [inputKeyword, setPage, actions]);
 
-  const title = `${SCOPE_LABEL[scope]} 관리`;
+  const scopeLabel = t(`scopes.${scope}`);
+  const title = t("title", { scope: scopeLabel });
 
   const onConfirm = useCallback(() => {
     // 편집 중이면 이동하지 않고 토스트만 표시
@@ -69,21 +65,21 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.homeIcon}>홈</span>
+        <span className={styles.homeIcon}>{t("breadcrumbHome")}</span>
         <span className={styles.sep}>&gt;</span>
         <strong>{title}</strong>
       </div>
 
       <div className={styles.card}>
         <div className={styles.headerRow}>
-          <h1 className={styles.pageTitle}>{SCOPE_LABEL[scope]}</h1>
+          <h1 className={styles.pageTitle}>{scopeLabel}</h1>
 
           <div className={styles.searchWrap}>
             <SearchBar
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="검색어 입력..."
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
@@ -110,7 +106,7 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
 
           <div className={styles.confirmWrap}>
             <Button variant="primary" onClick={onConfirm}>
-              확인
+              {t("confirmButton")}
             </Button>
           </div>
         </div>

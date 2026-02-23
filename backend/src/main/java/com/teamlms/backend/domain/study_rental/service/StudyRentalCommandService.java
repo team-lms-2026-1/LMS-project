@@ -102,6 +102,10 @@ public class StudyRentalCommandService {
         if (previousStatus != RentalStatus.APPROVED && req.getStatus() == RentalStatus.APPROVED) {
             notifyRentalApproved(rental);
         }
+
+        if (previousStatus != RentalStatus.REJECTED && req.getStatus() == RentalStatus.REJECTED) {
+            notifyRentalRejected(rental);
+        }
     }
 
     // 3. 예약 취소 (수정됨: Principal 직접 받음)
@@ -160,22 +164,9 @@ public class StudyRentalCommandService {
         }
 
         String title = "학습공간";
-        String spaceName = rental.getStudyRoom() != null && rental.getStudyRoom().getStudySpace() != null
-                ? rental.getStudyRoom().getStudySpace().getSpaceName()
-                : "학습공간";
-        String roomName = rental.getStudyRoom() != null ? rental.getStudyRoom().getRoomName() : "";
-
-        String period = formatRentalPeriod(rental.getStartAt(), rental.getEndAt());
-        StringBuilder details = new StringBuilder(spaceName);
-        if (roomName != null && !roomName.isBlank()) {
-            details.append(" / ").append(roomName);
-        }
-        if (!period.isBlank()) {
-            details.append(" / ").append(period);
-        }
-
+        String details = buildRentalDetails(rental);
         String message = "학습공간 대여가 승인되었습니다.";
-        if (details.length() > 0) {
+        if (!details.isBlank()) {
             message = message + " (" + details + ")";
         }
 
@@ -187,6 +178,59 @@ public class StudyRentalCommandService {
                 title,
                 message,
                 linkUrl);
+    }
+
+    private void notifyRentalRejected(StudyRoomRental rental) {
+        if (rental == null || rental.getApplicant() == null) {
+            return;
+        }
+
+        Long recipientId = rental.getApplicant().getAccountId();
+        if (recipientId == null) {
+            return;
+        }
+
+        String title = "학습공간";
+        String details = buildRentalDetails(rental);
+        String reason = rental.getRejectionReason();
+        String message = "학습공간 대여가 반려되었습니다.";
+        if (reason != null && !reason.isBlank()) {
+            message = message + " 사유: " + reason;
+        }
+        if (!details.isBlank()) {
+            message = message + " (" + details + ")";
+        }
+
+        String linkUrl = "/study-space/spaces-rentals";
+
+        alarmCommandService.createAlarm(
+                recipientId,
+                AlarmType.STUDY_RENTAL_REJECTED,
+                title,
+                message,
+                linkUrl);
+    }
+
+    private String buildRentalDetails(StudyRoomRental rental) {
+        if (rental == null) {
+            return "";
+        }
+
+        String spaceName = rental.getStudyRoom() != null && rental.getStudyRoom().getStudySpace() != null
+                ? rental.getStudyRoom().getStudySpace().getSpaceName()
+                : "학습공간";
+        String roomName = rental.getStudyRoom() != null ? rental.getStudyRoom().getRoomName() : "";
+        String period = formatRentalPeriod(rental.getStartAt(), rental.getEndAt());
+
+        StringBuilder details = new StringBuilder(spaceName);
+        if (roomName != null && !roomName.isBlank()) {
+            details.append(" / ").append(roomName);
+        }
+        if (!period.isBlank()) {
+            details.append(" / ").append(period);
+        }
+
+        return details.toString();
     }
 
     private String formatRentalPeriod(LocalDateTime startAt, LocalDateTime endAt) {

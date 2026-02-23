@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.teamlms.backend.domain.competency.entitiy.SemesterStudentCompetencySummary;
+import com.teamlms.backend.domain.account.enums.AcademicStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,18 @@ public interface SemesterStudentCompetencySummaryRepository
 
   // 특정 학생의 전체 학기 역량 이력 조회
   @Query("""
+      SELECT s
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  List<SemesterStudentCompetencySummary> findBySemesterSemesterIdAndAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학생의 전체 학기 역량 이력 조회 (학기 내림차순, 역량 정렬순)
+  @Query("""
           SELECT s
           FROM SemesterStudentCompetencySummary s
           WHERE s.student.accountId = :studentAccountId
@@ -56,7 +69,108 @@ public interface SemesterStudentCompetencySummaryRepository
       @Param("competencyId") Long competencyId,
       @Param("deptId") Long deptId);
 
-  // 특정 학기, 특정 역량의 모든 학생 점수 조회
+  // 특정 학기, 특정 학적 상태의 전체 학생 수 조회(중복 제거)
+  @Query("""
+      SELECT COUNT(DISTINCT s.student.accountId)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  long countDistinctStudentsBySemesterAndAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학기, 특정 학적 상태 학생들의 진단 점수 평균
+  @Query("""
+      SELECT AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  Double getSemesterAverageDiagnosisScoreByAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학기, 특정 학적 상태 학생들의 total 점수 평균
+  @Query("""
+      SELECT AVG(s.totalScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      """)
+  Double getSemesterAverageTotalScoreByAcademicStatus(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학기 모든 학과 * 역량별 진단 점수 평균
+  @Query("""
+      SELECT p.deptId, s.competency.competencyId, AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      GROUP BY p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptCompetencyAverages(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학기 모든 학과 * 역량별 total 점수 평균
+  @Query("""
+      SELECT p.deptId, s.competency.competencyId, AVG(s.totalScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId = :semesterId
+        AND p.academicStatus = :status
+      GROUP BY p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptCompetencyTotalScoreAverages(
+      @Param("semesterId") Long semesterId,
+      @Param("status") AcademicStatus status);
+
+  // 여러 학기 학과별 진단 점수 평균 (전체 추이 평균)
+  @Query("""
+      SELECT s.semester.semesterId, p.deptId, AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId IN :semesterIds
+        AND p.academicStatus = :status
+      GROUP BY s.semester.semesterId, p.deptId
+      """)
+  List<Object[]> findDeptSemesterAverages(
+      @Param("semesterIds") List<Long> semesterIds,
+      @Param("status") AcademicStatus status);
+
+  // 여러 학기 학과별 역량(6Cs) 진단 점수 평균 (6Cs 추이 비교)
+  @Query("""
+      SELECT s.semester.semesterId, p.deptId, s.competency.competencyId, AVG(s.diagnosisScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId IN :semesterIds
+        AND p.academicStatus = :status
+      GROUP BY s.semester.semesterId, p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptSemesterCompetencyAverages(
+      @Param("semesterIds") List<Long> semesterIds,
+      @Param("status") AcademicStatus status);
+
+  // 여러 학기 학과별 역량(6Cs) total 점수 평균 (6Cs 추이 비교)
+  @Query("""
+      SELECT s.semester.semesterId, p.deptId, s.competency.competencyId, AVG(s.totalScore)
+      FROM SemesterStudentCompetencySummary s
+      JOIN StudentProfile p ON s.student.accountId = p.accountId
+      WHERE s.semester.semesterId IN :semesterIds
+        AND p.academicStatus = :status
+      GROUP BY s.semester.semesterId, p.deptId, s.competency.competencyId
+      """)
+  List<Object[]> findDeptSemesterCompetencyTotalScoreAverages(
+      @Param("semesterIds") List<Long> semesterIds,
+      @Param("status") AcademicStatus status);
+
+  // 특정 학기, 특정 역량의 모든 학생 점수 조회 (totalScore 내림차순)
   @Query("""
           SELECT s
           FROM SemesterStudentCompetencySummary s

@@ -1,9 +1,8 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { StudentCompetencyDashboard } from "../api/types";
 import { fetchStudentResultDashboard } from "../api/StudentResultApi";
-import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { useAuth } from "@/features/auth/AuthProvider";
 
 export type UseStudentResultState = {
@@ -11,8 +10,6 @@ export type UseStudentResultState = {
   loading: boolean;
   error: string | null;
   semesterId: string;
-  semesterOptions: Array<{ value: string; label: string }>;
-  semesterLoading: boolean;
   authLoading: boolean;
 };
 
@@ -23,7 +20,6 @@ export type UseStudentResultActions = {
 
 export function useStudentResult(): { state: UseStudentResultState; actions: UseStudentResultActions } {
   const { state: authState } = useAuth();
-  const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
   const [semesterId, setSemesterId] = useState("");
   const [data, setData] = useState<StudentCompetencyDashboard | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,7 +28,7 @@ export function useStudentResult(): { state: UseStudentResultState; actions: Use
   const studentId = authState.me?.accountId;
 
   const reload = useCallback(async () => {
-    if (!studentId || !semesterId) return;
+    if (!studentId) return;
     setLoading(true);
     setError(null);
     try {
@@ -47,7 +43,7 @@ export function useStudentResult(): { state: UseStudentResultState; actions: Use
   }, [semesterId, studentId]);
 
   useEffect(() => {
-    if (!studentId || !semesterId) {
+    if (!studentId) {
       setData(null);
       setError(null);
       setLoading(false);
@@ -83,8 +79,6 @@ export function useStudentResult(): { state: UseStudentResultState; actions: Use
       loading: loading || authState.loading,
       error,
       semesterId,
-      semesterOptions,
-      semesterLoading,
       authLoading: authState.loading,
     },
     actions: {

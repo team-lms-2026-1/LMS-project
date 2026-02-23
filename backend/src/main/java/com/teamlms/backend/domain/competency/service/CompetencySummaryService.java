@@ -150,7 +150,10 @@ public class CompetencySummaryService {
         public void recalculateStudentSummary(Long semesterId, Long studentAccountId) {
 
                 List<Competency> competencies = competencyRepository.findAll();
-                DiagnosisRun run = diagnosisRunRepository.findBySemesterSemesterId(semesterId).orElse(null);
+                StudentProfile profile = studentProfileRepository.findById(studentAccountId).orElse(null);
+                Long deptId = profile != null ? profile.getDeptId() : null;
+                Integer grade = profile != null ? profile.getGradeLevel() : null;
+                DiagnosisRun run = resolveDiagnosisRun(semesterId, deptId, grade);
 
                 for (Competency comp : competencies) {
 
@@ -254,13 +257,16 @@ public class CompetencySummaryService {
         public void recalculateAllSummaries(Long semesterId) {
 
                 List<Competency> competencies = competencyRepository.findAll();
-                DiagnosisRun run = diagnosisRunRepository.findBySemesterSemesterId(semesterId).orElse(null);
+                List<DiagnosisRun> runs = diagnosisRunRepository.findAllBySemesterSemesterId(semesterId);
 
                 summaryRepository.deleteBySemesterSemesterId(semesterId);
 
                 List<Long> studentIds;
-                if (run != null) {
-                        studentIds = diagnosisSubmissionRepository.findByRunRunId(run.getRunId()).stream()
+                if (!runs.isEmpty()) {
+                        List<Long> runIds = runs.stream()
+                                        .map(DiagnosisRun::getRunId)
+                                        .collect(Collectors.toList());
+                        studentIds = diagnosisSubmissionRepository.findByRunRunIdIn(runIds).stream()
                                         .map(submission -> submission.getStudent().getAccountId())
                                         .distinct()
                                         .collect(Collectors.toList());
@@ -271,6 +277,10 @@ public class CompetencySummaryService {
                 }
 
                 for (Long studentId : studentIds) {
+                        StudentProfile profile = studentProfileRepository.findById(studentId).orElse(null);
+                        Long deptId = profile != null ? profile.getDeptId() : null;
+                        Integer grade = profile != null ? profile.getGradeLevel() : null;
+                        DiagnosisRun runForStudent = resolveDiagnosisRun(semesterId, deptId, grade);
 
                         for (Competency comp : competencies) {
 
@@ -279,9 +289,9 @@ public class CompetencySummaryService {
                                 BigDecimal diagSkill = BigDecimal.ZERO;
                                 BigDecimal diagAptitude = BigDecimal.ZERO;
 
-                                if (run != null) {
+                                if (runForStudent != null) {
                                         var submission = diagnosisSubmissionRepository
-                                                        .findByRunRunIdAndStudentAccountId(run.getRunId(), studentId);
+                                                        .findByRunRunIdAndStudentAccountId(runForStudent.getRunId(), studentId);
 
                                         if (submission.isPresent()) {
                                                 List<DiagnosisAnswer> answers = diagnosisAnswerRepository
@@ -385,9 +395,9 @@ public class CompetencySummaryService {
                 List<Competency> competencies = competencyRepository.findAll();
                 List<SemesterStudentCompetencySummary> allSummaries = summaryRepository
                                 .findBySemesterSemesterId(semesterId);
-                DiagnosisRun run = diagnosisRunRepository.findBySemesterSemesterId(semesterId).orElse(null);
-                int totalTarget = run != null
-                                ? (int) diagnosisTargetRepository.countByRunRunId(run.getRunId())
+                List<DiagnosisRun> runs = diagnosisRunRepository.findAllBySemesterSemesterId(semesterId);
+                int totalTarget = !runs.isEmpty()
+                                ? (int) diagnosisTargetRepository.countDistinctStudentBySemesterId(semesterId)
                                 : (int) studentProfileRepository.count();
 
                 Map<Long, List<SemesterStudentCompetencySummary>> groupedByComp = allSummaries.stream()
@@ -475,6 +485,54 @@ public class CompetencySummaryService {
 
                         statRepository.save(stat);
                 }
+        }
+
+        private DiagnosisRun resolveDiagnosisRun(Long semesterId, Long deptId, Integer targetGrade) {
+                Integer normalizedGrade = targetGrade != null && targetGrade > 0 ? targetGrade : null;
+
+                if (deptId != null && normalizedGrade != null) {
+                        DiagnosisRun run = diagnosisRunRepository
+                                        .findBySemesterSemesterIdAndDeptIdAndTargetGrade(semesterId, deptId, normalizedGrade)
+                                        .orElse(null);
+                        if (run != null) {
+                                return run;
+                        }
+                }
+
+                if (deptId != null) {
+                        DiagnosisRun run = diagnosisRunRepository
+                                        .findBySemesterSemesterIdAndDeptIdAndTargetGradeIsNull(semesterId, deptId)
+                                        .orElse(null);
+                        if (run != null) {
+                                return run;
+                        }
+                        run = diagnosisRunRepository
+                                        .findBySemesterSemesterIdAndDeptIdAndTargetGrade(semesterId, deptId, 0)
+                                        .orElse(null);
+                        if (run != null) {
+                                return run;
+                        }
+                }
+
+                if (normalizedGrade != null) {
+                        DiagnosisRun run = diagnosisRunRepository
+                                        .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGrade(semesterId, normalizedGrade)
+                                        .orElse(null);
+                        if (run != null) {
+                                return run;
+                        }
+                }
+
+                DiagnosisRun run = diagnosisRunRepository
+                                .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGradeIsNull(semesterId)
+                                .orElse(null);
+                if (run != null) {
+                        return run;
+                }
+
+                return diagnosisRunRepository
+                                .findBySemesterSemesterIdAndDeptIdIsNullAndTargetGrade(semesterId, 0)
+                                .orElse(null);
         }
 
         /**

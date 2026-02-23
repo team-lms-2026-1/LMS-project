@@ -49,6 +49,7 @@ const SECTIONS: NavSection[] = [
       { labelKey: "sections.competency.items.intro", href: "/admin/competencies", exact: true },
       { labelKey: "sections.competency.items.students", href: "/admin/competencies/students" },
       { labelKey: "sections.competency.items.diagnosis", href: "/admin/competencies/dignosis" },
+      { labelKey: "sections.competency.items.results", href: "/admin/competencies/result" },
     ],
   },
   {

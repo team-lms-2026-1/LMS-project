@@ -5,18 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import styles from "./ResourceDetailPage.module.css";
 import type { ResourceListItemDto } from "../../api/types";
 import { fetchResourceDetail } from "../../api/resourcesApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type LoadState =
   | { loading: true; error: string | null; data: null }
   | { loading: false; error: string | null; data: ResourceListItemDto | null };
 
 function normalizeDetail(payload: any): ResourceListItemDto {
-  // 응답 형태가 {data:{...}} / {...} 섞여도 동작하게 방어
   const raw = payload?.data ?? payload;
-
-  // 최소 필드 보정(백엔드가 createdAt/cerateAt 등 오타 섞이는 경우 대비)
-  const created =
-    raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+  const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
 
   return {
     resourceId: Number(raw?.resourceId ?? 0),
@@ -31,7 +28,6 @@ function normalizeDetail(payload: any): ResourceListItemDto {
 }
 
 function formatDateTime(v: string) {
-  // "2026-01-21 08:13" 같이 이미 포맷이면 그대로, ISO면 간단 변환
   if (!v) return "-";
   if (v.includes(" ")) return v;
   const d = new Date(v);
@@ -46,6 +42,7 @@ function formatDateTime(v: string) {
 
 export default function ResourceDetailpageClient() {
   const router = useRouter();
+  const t = useI18n("community.resources.student.detail");
   const params = useParams<{ resourceId?: string }>();
   const resourceId = useMemo(() => Number(params?.resourceId ?? 0), [params]);
 
@@ -57,7 +54,7 @@ export default function ResourceDetailpageClient() {
 
   useEffect(() => {
     if (!resourceId || Number.isNaN(resourceId)) {
-      setState({ loading: false, error: "잘못된 자료실 ID입니다.", data: null });
+      setState({ loading: false, error: t("errors.invalidId"), data: null });
       return;
     }
 
@@ -73,7 +70,7 @@ export default function ResourceDetailpageClient() {
         if (!alive) return;
         setState({
           loading: false,
-          error: e?.message ?? "자료을 불러오지 못했습니다.",
+          error: e?.message ?? t("errors.loadFailed"),
           data: null,
         });
       }
@@ -82,7 +79,7 @@ export default function ResourceDetailpageClient() {
     return () => {
       alive = false;
     };
-  }, [resourceId]);
+  }, [resourceId, t]);
 
   const data = state.data;
 
@@ -97,42 +94,38 @@ export default function ResourceDetailpageClient() {
       <div className={styles.card}>
         <div className={styles.breadcrumb}>
           <span className={styles.crumb} onClick={() => router.push("/student/community/resources")}>
-            자료실
+            {t("title")}
           </span>
-          <span className={styles.sep}>›</span>
-          <span className={styles.current}>상세페이지</span>
+          <span className={styles.sep}>&gt;</span>
+          <span className={styles.current}>{t("breadcrumbCurrent")}</span>
         </div>
 
-        <h1 className={styles.title}>자료실</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
-        {state.loading && (
-          <div className={styles.loadingBox}>
-            불러오는 중...
-          </div>
-        )}
+        {state.loading && <div className={styles.loadingBox}>{t("loading")}</div>}
 
         {!state.loading && data && (
           <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
-                {data.category?.name ?? "미분류"}
+                {data.category?.name ?? t("uncategorized")}
               </span>
               <div className={styles.headTitle}>{data.title}</div>
             </div>
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성자</span>
+                <span className={styles.metaLabel}>{t("labels.author")}</span>
                 <span className={styles.metaValue}>{data.authorName || "-"}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>작성일</span>
+                <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
               </div>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>조회수</span>
+                <span className={styles.metaLabel}>{t("labels.views")}</span>
                 <span className={styles.metaValue}>{data.viewCount}</span>
               </div>
             </div>
@@ -143,22 +136,20 @@ export default function ResourceDetailpageClient() {
 
             <div className={styles.attachBox}>
               <div className={styles.attachRow}>
-                <div className={styles.attachLabel}>첨부</div>
+                <div className={styles.attachLabel}>{t("labels.attachment")}</div>
 
                 <div className={styles.attachList}>
                   {Array.isArray(data.files) && data.files.length > 0 ? (
                     <ul className={styles.attachUl}>
                       {data.files.map((f: any, idx: number) => {
-                        // files 타입을 아직 몰라서 최대한 안전하게 처리
                         const name =
                           typeof f === "string"
                             ? f
-                            : String(f?.fileName ?? f?.name ?? f?.originalName ?? `첨부파일 ${idx + 1}`);
+                            : String(
+                                f?.fileName ?? f?.name ?? f?.originalName ?? t("attachmentFallback", { index: idx + 1 })
+                              );
 
-                        const url =
-                          typeof f === "object"
-                            ? (f?.url ?? f?.downloadUrl ?? f?.path ?? "")
-                            : "";
+                        const url = typeof f === "object" ? f?.url ?? f?.downloadUrl ?? f?.path ?? "" : "";
 
                         return (
                           <li key={idx} className={styles.attachLi}>
@@ -174,7 +165,7 @@ export default function ResourceDetailpageClient() {
                       })}
                     </ul>
                   ) : (
-                    <div className={styles.attachEmpty}>첨부파일 없음</div>
+                    <div className={styles.attachEmpty}>{t("attachmentEmpty")}</div>
                   )}
                 </div>
               </div>
@@ -182,7 +173,7 @@ export default function ResourceDetailpageClient() {
 
             <div className={styles.footerRow}>
               <button className={styles.backBtn} onClick={() => router.push("/student/community/resources")}>
-                목록으로
+                {t("buttons.list")}
               </button>
             </div>
           </div>

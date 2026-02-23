@@ -33,7 +33,7 @@ public class NoticeController {
                  "/api/v1/professor/community/notices",
                  "/api/v1/admin/community/notices" 
     })
-    @PreAuthorize("hasAuthority('NOTICE_READ')")
+    @PreAuthorize("hasAuthority('NOTICE_READ') or hasAnyRole('STUDENT','PROFESSOR','ADMIN')")
     public ApiResponse<List<ExternalNoticeResponse>> getNotices(
             @RequestParam(defaultValue = "1") int page,       // @PageableDefault 대신 사용
             @RequestParam(defaultValue = "20") int size,
@@ -66,7 +66,7 @@ public class NoticeController {
                  "/api/v1/professor/community/notices/{noticeId}",
                  "/api/v1/admin/community/notices/{noticeId}"
     })
-    @PreAuthorize("hasAuthority('NOTICE_READ')")
+    @PreAuthorize("hasAuthority('NOTICE_READ') or hasAnyRole('STUDENT','PROFESSOR','ADMIN')")
     // ★ Map -> ExternalNoticeResponse 로 변경
     public ApiResponse<ExternalNoticeResponse> getNoticeDetail(@PathVariable Long noticeId) {
         // ★ Service가 DTO를 반환하므로 타입을 맞춰줌

@@ -6,7 +6,7 @@ import { Modal } from "@/components/modal/Modal";
 import { ConfirmModal } from "@/components/modal";
 import { Button } from "@/components/button";
 import { StatusPill, type StatusType } from "@/components/status";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import {
   fetchDiagnosisDetail,
   submitDiagnosis,
@@ -36,6 +36,8 @@ type AnswerState = Record<
     shortText?: string;
   }
 >;
+
+const LOCAL_TOASTER_ID = "dignosis-detail-modal";
 
 const STATUS_MAP: Record<string, { label: string; pill: StatusType }> = {
   PENDING: { label: "미응답", pill: "PENDING" },
@@ -77,6 +79,9 @@ function formatDate(value?: string) {
 function formatPeriod(start?: string, end?: string) {
   return `${formatDate(start)} ~ ${formatDate(end)}`;
 }
+
+const showErrorToast = (message: string) =>
+  toast.error(message, { toasterId: LOCAL_TOASTER_ID });
 
 export function DignosisDetailModal({
   open,
@@ -166,7 +171,7 @@ export function DignosisDetailModal({
     if (isSubmitted) return;
     if (!dignosisId) return;
     if (missingCount > 0) {
-      toast.error("모든 문항에 응답해주세요.");
+      showErrorToast("모든 문항에 응답해주세요.");
       return;
     }
     setConfirmOpen(true);
@@ -196,7 +201,7 @@ export function DignosisDetailModal({
       onClose();
     } catch (e: any) {
       console.error("[DignosisDetailModal submit]", e);
-      toast.error(e?.message ?? "응답 제출에 실패했습니다.");
+      showErrorToast(e?.message ?? "응답 제출에 실패했습니다.");
     } finally {
       setSubmitting(false);
     }
@@ -204,6 +209,13 @@ export function DignosisDetailModal({
 
   return (
     <>
+      {open && (
+        <Toaster
+          toasterId={LOCAL_TOASTER_ID}
+          position="top-center"
+          containerStyle={{ zIndex: 20000 }}
+        />
+      )}
       <Modal
         open={open}
         onClose={onClose}
@@ -278,7 +290,7 @@ export function DignosisDetailModal({
                     ) : (
                       <div className={styles.scaleList}>
                         {SCALE_LABELS.map((label, idx) => {
-                          const optionValue = idx + 1;
+                          const optionValue = SCALE_LABELS.length - idx;
                           const checked = answer.scaleValue === optionValue;
                           return (
                             <label

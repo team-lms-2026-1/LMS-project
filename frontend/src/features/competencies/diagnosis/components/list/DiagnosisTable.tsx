@@ -6,6 +6,7 @@ import { StatusPill } from "@/components/status";
 import type { DiagnosisListItemDto, DiagnosisStatus, DiagnosisTableProps } from "../../api/types";
 import styles from "./DiagnosisTable.module.css";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 function formatDate(value?: string) {
   if (!value) return "-";
@@ -39,6 +40,10 @@ function canDelete(status: DiagnosisStatus) {
   return status === "DRAFT";
 }
 
+function isClosedStatus(status: DiagnosisStatus) {
+  return String(status).toUpperCase() === "CLOSED";
+}
+
 export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTableProps) {
   const router = useRouter();
   const buildDetailUrl = (r: DiagnosisListItemDto) => {
@@ -63,7 +68,15 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
     } else if (r.semesterName?.trim()) {
       params.set("semesterName", r.semesterName.trim());
     }
-    return `/admin/competencies/result?${params.toString()}`;
+    const deptIdValue = r.deptId ?? r.departmentId;
+    if (deptIdValue !== undefined && deptIdValue !== null && String(deptIdValue).trim()) {
+      params.set("deptId", String(deptIdValue));
+    }
+    const deptName = r.deptName?.trim();
+    if (deptName && deptName !== "All" && deptName !== "전체") {
+      params.set("deptName", deptName);
+    }
+    return `/admin/competencies/dignosis/result?${params.toString()}`;
   };
   const columns: Array<TableColumn<DiagnosisListItemDto>> = [
     {
@@ -159,6 +172,10 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
       rowKey={(r) => r.diagnosisId}
       emptyText="조회된 진단지가 없습니다."
       onRowClick={(r) => {
+        if (!isClosedStatus(r.status)) {
+          toast.error("진단이 마감되지 않았습니다.");
+          return;
+        }
         router.push(buildResultUrl(r));
       }}
     />

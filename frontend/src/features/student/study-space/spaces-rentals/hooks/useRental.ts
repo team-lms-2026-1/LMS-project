@@ -118,9 +118,15 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
     fetchList();
   }, [fetchList, meLoading]);
 
-  const updateParams = (newParams: Partial<RentalListParams>) => {
-    setParams((prev) => ({ ...prev, ...newParams }));
-  };
+  const updateParams = useCallback((newParams: Partial<RentalListParams>) => {
+    setParams((prev) => {
+      const next = { ...prev, ...newParams };
+      if (next.page === prev.page && next.size === prev.size) {
+        return prev;
+      }
+      return next;
+    });
+  }, []);
 
   const cancelRental = async (rentalId: number) => {
     try {

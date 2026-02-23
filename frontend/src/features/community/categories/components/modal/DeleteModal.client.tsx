@@ -3,6 +3,7 @@
 import React from "react";
 import styles from "./DeleteModal.module.css";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -15,20 +16,23 @@ type Props = {
 
 export default function DeleteModal({
   open,
-  targetLabel = "카테고리",
+  targetLabel,
   targetTitle,
   onConfirm,
   onClose,
   loading = false,
 }: Props) {
+  const t = useI18n("community.categories.deleteModal");
+  const resolvedTargetLabel = targetLabel ?? t("defaultTargetLabel");
+
   return (
     <ConfirmDialog
       open={open}
-      title={`${targetLabel} 삭제`}
+      title={t("title", { targetLabel: resolvedTargetLabel })}
       danger
       loading={loading}
-      confirmText="삭제"
-      cancelText="취소"
+      confirmText={t("confirmText")}
+      cancelText={t("cancelText")}
       onConfirm={onConfirm}
       onCancel={onClose}
       description={
@@ -38,15 +42,15 @@ export default function DeleteModal({
               <>
                 <b className={styles.emph}>&quot;{targetTitle}&quot;</b>
                 <br />
-                {targetLabel}을(를) 삭제할까요?
+                {t("question", { targetLabel: resolvedTargetLabel })}
               </>
             ) : (
-              <>{targetLabel}을(를) 삭제할까요?</>
+              <>{t("question", { targetLabel: resolvedTargetLabel })}</>
             )}
           </p>
 
           <p className={styles.sub}>
-            삭제한 데이터는 복구할 수 없습니다.
+            {t("warning")}
           </p>
         </div>
       }

@@ -24,9 +24,10 @@ export default function DignosisCreatePageClient() {
       setError(null);
       try {
         await createDiagnosis(payload);
+        toast.success("진단지가 등록되었습니다.", { style: { zIndex: 12000 } });
         return true;
       } catch (e: any) {
-        const message = e?.message ?? "진단지 등록에 실패했습니다.";
+        const message = e?.message ?? "진단지 등록이 실패했습니다.";
         setError(message);
         return false;
       } finally {
@@ -38,7 +39,7 @@ export default function DignosisCreatePageClient() {
 
   useEffect(() => {
     if (!error) return;
-    toast.error(error);
+    toast.error(error, { style: { zIndex: 12000 } });
   }, [error]);
 
   return (
