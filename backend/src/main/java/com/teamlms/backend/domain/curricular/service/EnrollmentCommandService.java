@@ -37,6 +37,17 @@ public class EnrollmentCommandService {
         }
 
         // 2) 기존 신청 여부 (유니크키 때문에 "재신청"은 update로 처리)
+        long scheduleConflictCount = enrollmentRepository.countScheduleConflictEnrollment(
+                studentAccountId,
+                offering.getSemesterId(),
+                offering.getDayOfWeek(),
+                offering.getPeriod(),
+                offeringId
+        );
+        if (scheduleConflictCount > 0) {
+            throw new BusinessException(ErrorCode.ENROLLMENT_SCHEDULE_CONFLICT);
+        }
+
         Optional<Enrollment> opt = enrollmentRepository.findByOfferingIdAndStudentAccountId(offeringId, studentAccountId);
 
         if (opt.isPresent()) {

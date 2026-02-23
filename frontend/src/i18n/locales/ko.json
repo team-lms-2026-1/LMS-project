@@ -870,6 +870,7 @@
           "invalidOperationPeriod": "운영 시작일은 종료일보다 늦을 수 없습니다.",
           "invalidRewardPoint": "포인트(기본)는 0 이상이어야 합니다.",
           "invalidRecognizedHours": "인정시간(기본)은 0 이상이어야 합니다.",
+          "invalidHostContactPhone": "담당자 전화번호 형식이 올바르지 않습니다.",
           "invalidHostContactEmail": "담당자 이메일 형식이 올바르지 않습니다."
         }
       }
@@ -922,6 +923,7 @@
           "requiredOperationStartDate": "운영 시작일을 선택하세요.",
           "requiredOperationEndDate": "운영 종료일을 선택하세요.",
           "invalidOperationPeriod": "시작일은 종료일보다 늦을 수 없습니다.",
+          "invalidContactPhone": "담당자 전화번호 형식이 올바르지 않습니다.",
           "invalidContactEmail": "담당자 이메일 형식이 올바르지 않습니다.",
           "onlyDraft": "DRAFT 상태에서만 수정할 수 있습니다.",
           "saveFailed": "수정에 실패했습니다."

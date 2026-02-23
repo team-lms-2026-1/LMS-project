@@ -5,7 +5,6 @@ import { useState } from "react";
 import styles from "./StudentExtraCurricularOfferingDetailPage.module.css";
 import { useExtraCurricularDetail } from "../../hooks/useExtraCurricularOfferingList";
 import { ExtraOfferingDetailTabBar } from "./components/ExtraOfferingDetailTabBar";
-import { ExtraOfferingStatusDropdown } from "./components/ExtraOfferingStatusDropdown";
 import { StudentExtraOfferingDetailSection } from "./StudentExtraOfferingDetailSection";
 import { StudentExtraOfferingCompetenciesSection } from "./StudentExtraOfferingCompetenciesSection";
 import { StudentExtraOfferingSessionSection } from "./StudentExtraOfferingSessionSection";
@@ -14,10 +13,10 @@ export function StudentExtraCurricularOfferingDetailPage() {
   const params = useParams<{ id: string }>();
   const offeringId = Number(params.id);
   const router = useRouter();
-  const [tab, setTab] = useState<"detail" | "students" | "session" | "competencies">("detail");
+  const [tab, setTab] = useState<"detail" | "session" | "competencies">("detail");
 
   // detail 페이지의 섹션을 여기서 불러와버림
-  const { state, actions } = useExtraCurricularDetail(offeringId);
+  const { state } = useExtraCurricularDetail(offeringId);
   const { data, loading, error } = state;
   if (loading) return <div className={styles.page}>불러오는 중...</div>;
   if (error) return <div className={styles.page}>에러가 발생했습니다.</div>;
@@ -45,7 +44,6 @@ export function StudentExtraCurricularOfferingDetailPage() {
       <div className={styles.body}>
         {tab === "detail" && <StudentExtraOfferingDetailSection offeringId={offeringId} data={data} />}
         {tab === "session" && <StudentExtraOfferingSessionSection offeringId={offeringId} />}
-        {/* {tab === "students" && <ExtraOfferingStudentsSection offeringId={offeringId} offeringStatus={data.status} />} */}
         {tab === "competencies" && (
           <StudentExtraOfferingCompetenciesSection offeringId={offeringId} data={data} />
         )}
