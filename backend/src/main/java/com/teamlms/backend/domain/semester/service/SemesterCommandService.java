@@ -4,6 +4,12 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 
+import com.teamlms.backend.domain.competency.repository.DiagnosisRunRepository;
+import com.teamlms.backend.domain.competency.repository.SemesterCompetencyCohortStatRepository;
+import com.teamlms.backend.domain.competency.repository.SemesterStudentCompetencySummaryRepository;
+import com.teamlms.backend.domain.curricular.repository.CurricularOfferingRepository;
+import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingRepository;
+import com.teamlms.backend.domain.mentoring.repository.MentoringRecruitmentRepository;
 import com.teamlms.backend.domain.semester.entity.Semester;
 import com.teamlms.backend.domain.semester.enums.SemesterStatus;
 import com.teamlms.backend.domain.semester.enums.Term;
@@ -20,6 +26,12 @@ import lombok.RequiredArgsConstructor;
 public class SemesterCommandService {
 
     private final SemesterRepository semesterRepository;
+    private final CurricularOfferingRepository curricularOfferingRepository;
+    private final ExtraCurricularOfferingRepository extraCurricularOfferingRepository;
+    private final MentoringRecruitmentRepository mentoringRecruitmentRepository;
+    private final DiagnosisRunRepository diagnosisRunRepository;
+    private final SemesterStudentCompetencySummaryRepository semesterStudentCompetencySummaryRepository;
+    private final SemesterCompetencyCohortStatRepository semesterCompetencyCohortStatRepository;
     
     // 학기 생성
     public void create(int year, Term term, LocalDate startDate, LocalDate endDate) {
@@ -62,6 +74,7 @@ public class SemesterCommandService {
         LocalDate nextStart = (startDate != null) ? startDate : semester.getStartDate();
         LocalDate nextEnd   = (endDate != null) ? endDate : semester.getEndDate();
         validateDateRange(nextStart, nextEnd);
+        validateCloseAllowed(semester, status);
 
         semester.patch(startDate, endDate, status);
     }
@@ -71,6 +84,30 @@ public class SemesterCommandService {
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        }
+    }
+
+    private void validateCloseAllowed(Semester semester, SemesterStatus nextStatus) {
+        if (nextStatus != SemesterStatus.CLOSED || semester.getStatus() == SemesterStatus.CLOSED) {
+            return;
+        }
+
+        Long semesterId = semester.getSemesterId();
+
+        boolean hasCurricularOffering = curricularOfferingRepository.existsBySemesterId(semesterId);
+        boolean hasExtraOffering = extraCurricularOfferingRepository.existsBySemesterId(semesterId);
+        boolean hasMentoringRecruitment = mentoringRecruitmentRepository.existsBySemesterId(semesterId);
+        boolean hasDiagnosisRun = diagnosisRunRepository.existsBySemesterSemesterId(semesterId);
+        boolean hasCompetencySummary = semesterStudentCompetencySummaryRepository.existsBySemesterSemesterId(semesterId);
+        boolean hasCompetencyStat = semesterCompetencyCohortStatRepository.existsBySemesterSemesterId(semesterId);
+
+        if (hasCurricularOffering
+                || hasExtraOffering
+                || hasMentoringRecruitment
+                || hasDiagnosisRun
+                || hasCompetencySummary
+                || hasCompetencyStat) {
+            throw new BusinessException(ErrorCode.SEMESTER_DEACTIVATE_NOT_ALLOWED);
         }
     }
 }

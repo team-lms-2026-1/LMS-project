@@ -67,6 +67,7 @@ public enum ErrorCode {
     // =========================
     SEMESTER_ALREADY_EXISTS(HttpStatus.CONFLICT, "SEMESTER_ALREADY_EXISTS", "해당 연도와 학기의 학기가 이미 존재합니다.", "semester.alreadyExists"),
     SEMESTER_NOT_FOUND(HttpStatus.NOT_FOUND, "SEMESTER_NOT_FOUND", "학기를 찾을 수 없습니다.", "semester.notFound"),
+    SEMESTER_DEACTIVATE_NOT_ALLOWED(HttpStatus.CONFLICT, "SEMESTER_DEACTIVATE_NOT_ALLOWED", "연관 데이터가 존재하여 학기를 비활성화할 수 없습니다.", "semester.deactivate.notAllowed"),
 
     // =========================
     // Domain: Curricular
