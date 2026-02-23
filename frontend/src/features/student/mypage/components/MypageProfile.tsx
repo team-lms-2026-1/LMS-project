@@ -7,6 +7,7 @@ interface Props {
     data: StudentMypageResponse;
 }
 
+
 export default function MypageProfile({ data }: Props) {
 
     const getStatusText = (status: string) => {

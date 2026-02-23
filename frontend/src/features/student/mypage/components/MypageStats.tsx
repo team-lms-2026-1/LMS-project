@@ -14,6 +14,7 @@ export default function MypageStats({ data }: Props) {
         { label: '비교과 이수 시간', value: data.totalExtraHours, unit: '시간' },
     ];
 
+
     return (
         <div className={`${styles.statsGrid} ${styles.section}`}>
             {stats.map((stat, index) => (

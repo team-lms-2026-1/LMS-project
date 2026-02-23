@@ -72,6 +72,7 @@ export default function CompetencyPageClient() {
           </p>
         </section>
 
+
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>진단에서의 계산 식</h2>
           <p className={styles.paragraph}>
