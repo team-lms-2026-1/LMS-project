@@ -5,8 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.teamlms.backend.domain.curricular.api.dto.CurricularPatchRequest;
 import com.teamlms.backend.domain.curricular.entity.Curricular;
+import com.teamlms.backend.domain.curricular.repository.CurricularOfferingRepository;
 import com.teamlms.backend.domain.curricular.repository.CurricularRepository;
-import com.teamlms.backend.domain.dept.entity.Dept;
 import com.teamlms.backend.domain.dept.repository.DeptRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class CurricularCommandService {
     
     private final CurricularRepository curricularRepository;
+    private final CurricularOfferingRepository curricularOfferingRepository;
     private final DeptRepository deptRepository;
 
     public void create(String curricularCode, String curricularName, Long deptId, Integer credits, String description) {
@@ -63,6 +64,11 @@ public class CurricularCommandService {
         }
 
         // 수정
+        if (Boolean.TRUE.equals(c.getIsActive()) && Boolean.FALSE.equals(req.isActive())
+                && curricularOfferingRepository.existsByCurricularId(curricularId)) {
+            throw new BusinessException(ErrorCode.CURRICULAR_DEACTIVATE_NOT_ALLOWED);
+        }
+
         c.patch(
             req.curricularName(),
             req.deptId(),
