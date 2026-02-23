@@ -64,7 +64,7 @@ export default function ProfessorDashboard() {
             .finally(() => setTimetableLoading(false));
     }, []);
 
-    const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const periods = [1, 2, 3, 4, 5, 6];
     const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"] as const;
     const daysLabel: { [key: string]: string } = {
         MONDAY: "월",
