@@ -1,0 +1,60 @@
+{
+  "mbti": {
+    "loading": "Loading...",
+    "home": {
+      "title": "MBTI AI Recommendation",
+      "description": "Starting the test will overwrite previously saved results.",
+      "start": {
+        "kicker": "Start New",
+        "title": "Start Test",
+        "description": "Run a new MBTI test, choose interest keywords, and generate recommendations.",
+        "button": "Start Test"
+      },
+      "result": {
+        "kicker": "Quick View",
+        "title": "View Result",
+        "description": "Check your latest saved MBTI/job recommendation result immediately.",
+        "hasResult": "A saved result is available.",
+        "noResult": "No saved result is available.",
+        "button": "View Result"
+      }
+    },
+    "test": {
+      "title": "MBTI Test",
+      "progress": "{answeredCount} of {totalCount} answered",
+      "submitButton": "Go to Keyword Selection"
+    },
+    "keywords": {
+      "title": "Select Interest Keywords",
+      "description": "Select at least {minCount} keywords.",
+      "submitButton": "View Recommendation Result"
+    },
+    "result": {
+      "title": "MBTI-Based Recommendation Result",
+      "intro": "AI recommendations based on your score profile and selected keywords.",
+      "noScoreData": "No saved MBTI score data.",
+      "jobsTitle": "Top 5 AI Recommended Jobs",
+      "emptyMessage": "No saved job recommendations. Please run the test first.",
+      "fallbackReasonWithKeywords": "{jobName} is recommended based on your {mbtiType} profile and interests like {keywords}.",
+      "fallbackReasonWithoutKeywords": "{jobName} is recommended based on your {mbtiType} profile and work preferences."
+    },
+    "messages": {
+      "initLoadFailed": "Failed to load MBTI information.",
+      "loadQuestionsFailed": "Failed to load MBTI questions.",
+      "noSavedResult": "No saved result. Please complete the test first.",
+      "answerAllQuestions": "Please answer all questions.",
+      "generateResultFailed": "Failed to generate MBTI result.",
+      "testCompleted": "MBTI test completed.",
+      "submitFailed": "An error occurred while submitting MBTI answers.",
+      "selectMinKeywords": "Select at least {minCount} interest keywords.",
+      "recommendationCreated": "Recommendation result has been created.",
+      "createRecommendationFailed": "An error occurred while generating recommendation results."
+    }
+  },
+  "testPage": {
+    "title": "AI Test",
+    "placeholder": "Enter your question",
+    "askButton": "Ask",
+    "askFailed": "Failed to process your question."
+  }
+}

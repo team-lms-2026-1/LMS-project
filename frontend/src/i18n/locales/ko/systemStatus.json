@@ -1,0 +1,79 @@
+{
+  "accountLogs": {
+    "common": {
+      "accountType": {
+        "ADMIN": "관리자",
+        "PROFESSOR": "교수",
+        "STUDENT": "학생",
+        "STAFF": "직원"
+      },
+      "loginStatus": {
+        "LOGGED_IN": "로그인중",
+        "LOGGED_OUT": "비로그인"
+      }
+    },
+    "list": {
+      "title": "계정 로그 관리",
+      "searchPlaceholder": "아이디 및 이름으로 검색",
+      "kpi": {
+        "totalAccounts": "총 계정 수",
+        "onlineAccounts": "현 로그인중"
+      },
+      "table": {
+        "loginId": "로그인 ID",
+        "accountType": "계정 유형",
+        "name": "이름",
+        "lastAccessAt": "최근접속 일시",
+        "loginState": "로그인 유무"
+      },
+      "emptyText": "검색 결과가 없습니다.",
+      "messages": {
+        "loadFailed": "로그 목록을 불러오지 못했습니다."
+      }
+    },
+    "detail": {
+      "loading": "불러오는 중...",
+      "notFound": "존재하지 않는 계정입니다. (ID: {accountId})",
+      "title": "계정 로그 관리 상세",
+      "summary": {
+        "accountType": "계정 유형:",
+        "name": "이름:",
+        "loginId": "ID:",
+        "departmentName": "소속학과:"
+      },
+      "searchPlaceholder": "검색어 입력",
+      "table": {
+        "logId": "번호",
+        "accessedAt": "일시",
+        "accessUrl": "접속URL",
+        "ip": "아이피",
+        "os": "접속환경",
+        "emptyText": "로그가 없습니다."
+      },
+      "buttons": {
+        "backToList": "목록으로",
+        "excelDownload": "Excel 다운로드"
+      },
+      "messages": {
+        "loadFailed": "상세 로그를 불러오지 못했습니다.",
+        "downloadFailed": "다운로드 실패"
+      }
+    },
+    "privacyModal": {
+      "title": "개인정보 이용 안내",
+      "desc": {
+        "line1": "본 엑셀 파일에는 학생의 개인정보가 포함되어 있습니다.",
+        "line2": "해당 정보는 학사 행정 및 내부 업무 목적으로만 사용 가능하며, 목적 외 사용, 제3자 제공, 무단 저장 및 외부 유출을 금지합니다.",
+        "line3": "관련 법령에 따라 개인정보 접근 및 다운로드 이력은 관리자 로그로 기록·관리되며, 위반 시 법적 책임이 발생할 수 있습니다.",
+        "line4": "위 내용을 충분히 숙지하였으며, 개인정보 이용에 동의합니다."
+      },
+      "agreeLabel": "위 개인정보 이용에 동의합니다.",
+      "reasonTitle": "다운로드 사유",
+      "reasonPlaceholder": "다운로드 사유를 입력하세요.",
+      "buttons": {
+        "cancel": "취소",
+        "download": "다운로드"
+      }
+    }
+  }
+}

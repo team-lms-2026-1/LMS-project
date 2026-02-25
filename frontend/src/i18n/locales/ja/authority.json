@@ -1,0 +1,68 @@
+{
+  "semesters": {
+    "page": {
+      "title": "学期管理",
+      "registerButton": "学期登録"
+    },
+    "table": {
+      "year": "年度",
+      "term": "学期",
+      "period": "期間",
+      "status": "状態",
+      "manage": "管理",
+      "editButton": "修正",
+      "emptyText": "学期がありません。"
+    },
+    "createModal": {
+      "title": "学期登録",
+      "buttons": {
+        "create": "登録",
+        "cancel": "キャンセル"
+      },
+      "fields": {
+        "year": "年度",
+        "term": "学期",
+        "startDate": "開始日",
+        "endDate": "終了日"
+      },
+      "placeholders": {
+        "startDate": "開始日を選択",
+        "endDate": "終了日を選択"
+      },
+      "validation": {
+        "requiredYear": "年度を入力してください。",
+        "requiredStartDate": "開始日を選択してください。",
+        "requiredEndDate": "終了日を選択してください。",
+        "invalidPeriod": "開始日は終了日より後にできません。"
+      },
+      "messages": {
+        "submitFailed": "登録に失敗しました。"
+      }
+    },
+    "editModal": {
+      "title": "学期修正",
+      "buttons": {
+        "save": "保存",
+        "close": "閉じる"
+      },
+      "fields": {
+        "year": "年度",
+        "term": "学期",
+        "status": "状態",
+        "startDate": "開始日",
+        "endDate": "終了日"
+      },
+      "placeholders": {
+        "startDate": "開始日を選択",
+        "endDate": "終了日を選択"
+      },
+      "messages": {
+        "submitFailed": "学期の修正に失敗しました。"
+      }
+    },
+    "errors": {
+      "listLoadFailed": "学期一覧の照会に失敗しました。",
+      "detailLoadFailed": "照会に失敗しました。"
+    }
+  }
+}

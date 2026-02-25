@@ -8,9 +8,11 @@ import { SearchBar } from "@/components/searchbar";
 import { PaginationSimple } from "@/components/pagination";
 import RejectedModal from "../modal/RejectedModal";
 import ApproveModal from "../modal/ApproveModal";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function RentalsPageClient() {
     const { data, meta, loading, updateParams, approveRental, rejectRental } = useRentalsList();
+    const t = useI18n("studySpace.admin.rentals.list");
     const [keyword, setKeyword] = useState("");
 
     // Modal State
@@ -63,9 +65,9 @@ export default function RentalsPageClient() {
                     <div className={styles.breadcrumb}>
                         <span className={styles.homeIcon}>🏠</span>
                         <span>{">"}</span>
-                        <span>학습공간 대여 관리</span>
+                        <span>{t("breadcrumb.current")}</span>
                     </div>
-                    <h1 className={styles.title}>학습공간 대여</h1>
+                    <h1 className={styles.title}>{t("title")}</h1>
                 </div>
 
                 {/* Search */}
@@ -74,7 +76,7 @@ export default function RentalsPageClient() {
                         value={keyword}
                         onChange={setKeyword}
                         onSearch={onSearch}
-                        placeholder="검색어 입력..."
+                        placeholder={t("searchPlaceholder")}
                     />
                 </div>
             </div>

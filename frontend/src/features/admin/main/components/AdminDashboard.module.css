@@ -55,3 +55,15 @@
     display: flex;
     justify-content: center;
 }
+
+.noticeTitleCell {
+    overflow: hidden;
+}
+
+.noticeTitleText {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

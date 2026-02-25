@@ -1,0 +1,371 @@
+{
+  "common": {
+    "manageHeader": "管理",
+    "detailButton": "詳細",
+    "editButton": "修正",
+    "registerButton": "登録",
+    "saveButton": "保存",
+    "cancelButton": "キャンセル",
+    "closeButton": "閉じる"
+  },
+  "status": {
+    "offering": {
+      "DRAFT": "作成中",
+      "OPEN": "開設",
+      "ENROLLMENT_CLOSED": "履修申請締切",
+      "IN_PROGRESS": "運営中",
+      "COMPLETED": "運営終了",
+      "CANCELED": "閉講"
+    },
+    "active": {
+      "ACTIVE": "有効",
+      "INACTIVE": "無効"
+    },
+    "enrollment": {
+      "ENROLLED": "履修",
+      "CANCELED": "履修取消"
+    },
+    "completion": {
+      "IN_PROGRESS": "履修中",
+      "PASSED": "履修完了",
+      "FAILED": "未履修"
+    }
+  },
+  "dayOfWeek": {
+    "MONDAY": {
+      "short": "月",
+      "long": "月曜日"
+    },
+    "TUESDAY": {
+      "short": "火",
+      "long": "火曜日"
+    },
+    "WEDNESDAY": {
+      "short": "水",
+      "long": "水曜日"
+    },
+    "THURSDAY": {
+      "short": "木",
+      "long": "木曜日"
+    },
+    "FRIDAY": {
+      "short": "金",
+      "long": "金曜日"
+    },
+    "SATURDAY": {
+      "short": "土",
+      "long": "土曜日"
+    },
+    "SUNDAY": {
+      "short": "日",
+      "long": "日曜日"
+    }
+  },
+  "studentOfferings": {
+    "title": "正規課程履修申請",
+    "searchPlaceholder": "科目名/コード検索",
+    "table": {
+      "offeringCode": "開設コード",
+      "curricularName": "科目名",
+      "professorName": "担当教授",
+      "semesterName": "学期",
+      "credit": "単位",
+      "competency1": "コンピテンシー1",
+      "competency2": "コンピテンシー2",
+      "capacity": "定員",
+      "enrolledCount": "申請人数",
+      "emptyText": "授業運営情報がありません。"
+    }
+  },
+  "studentEnrollments": {
+    "title": "受講申請状況",
+    "table": {
+      "offeringCode": "開設コード",
+      "curricularName": "科目名",
+      "professorName": "担当教授",
+      "semesterName": "学期",
+      "credit": "単位",
+      "competency1": "コンピテンシー1",
+      "competency2": "コンピテンシー2",
+      "capacity": "定員",
+      "enrolledCount": "登録人数",
+      "cancelButton": "申請取消",
+      "emptyText": "申請中の科目がありません。"
+    },
+    "dialog": {
+      "title": "申請取消",
+      "description": "下記科目の申請を取り消しますか？",
+      "confirmText": "申請取消"
+    },
+    "messages": {
+      "cancelSuccess": "申請を取り消しました。",
+      "cancelFailed": "申請取消に失敗しました。"
+    }
+  },
+  "studentCurrentEnrollments": {
+    "title": "履修中科目状況",
+    "table": {
+      "emptyText": "履修中の科目がありません。"
+    }
+  },
+  "professorOfferings": {
+    "title": "担当授業一覧",
+    "searchPlaceholder": "科目名/コード検索",
+    "table": {
+      "offeringCode": "開設コード",
+      "curricularName": "科目名",
+      "capacity": "定員",
+      "professorName": "担当教授",
+      "semesterName": "学期",
+      "location": "場所",
+      "credit": "単位",
+      "status": "状態",
+      "emptyText": "授業運営情報がありません。"
+    }
+  },
+  "adminCurriculars": {
+    "title": "正規課程管理",
+    "searchPlaceholder": "科目名/コード検索",
+    "registerButton": "科目登録",
+    "table": {
+      "curricularCode": "科目コード",
+      "curricularName": "科目名",
+      "deptName": "主管学科",
+      "credits": "単位",
+      "status": "使用可否",
+      "emptyText": "科目情報がありません。"
+    }
+  },
+  "adminOfferings": {
+    "title": "授業運営管理",
+    "searchPlaceholder": "授業運営名/コード検索",
+    "registerButton": "運営登録",
+    "table": {
+      "offeringCode": "開設コード",
+      "curricularName": "科目名",
+      "capacity": "定員",
+      "professorName": "担当教授",
+      "semesterName": "学期",
+      "location": "場所",
+      "credit": "単位",
+      "status": "状態",
+      "emptyText": "授業運営情報がありません。"
+    }
+  },
+  "adminGrades": {
+    "title": "成績管理",
+    "searchPlaceholder": "学籍番号/氏名検索",
+    "table": {
+      "studentNo": "学籍番号",
+      "deptName": "所属学科",
+      "gradeLevel": "学年",
+      "name": "氏名",
+      "gpa": "GPA",
+      "emptyText": "成績情報がありません。"
+    },
+    "detail": {
+      "page": {
+        "invalidAccess": "不正なアクセスです。",
+        "loading": "読み込み中...",
+        "loadError": "エラーが発生しました。",
+        "empty": "データがありません。",
+        "title": "成績詳細",
+        "backButton": "一覧"
+      },
+      "info": {
+        "gradeLevel": "{value}年生",
+        "metrics": {
+          "maxGpa": "最高GPA",
+          "overallGpa": "平均GPA",
+          "totalEarnedCredits": "総取得単位"
+        },
+        "creditUnit": "単位"
+      },
+      "trend": {
+        "title": "学期別成績推移",
+        "empty": "チャートデータがありません。",
+        "tooltip": {
+          "gpa": "GPA: {value}",
+          "earnedCredits": "取得単位: {value}単位"
+        }
+      },
+      "list": {
+        "title": "科目成績一覧",
+        "searchPlaceholder": "科目コード検索",
+        "loadError": "照会失敗"
+      },
+      "table": {
+        "curricularCode": "科目コード",
+        "curricularName": "科目名",
+        "credits": "単位",
+        "grade": "評語",
+        "emptyText": "成績情報がありません。"
+      }
+    }
+  },
+  "adminOfferingDetail": {
+    "page": {
+      "loading": "読み込み中...",
+      "loadError": "エラーが発生しました。",
+      "empty": "データがありません。",
+      "title": "授業運営管理",
+      "backButton": "一覧"
+    },
+    "tabs": {
+      "detail": "詳細",
+      "students": "学生",
+      "competencies": "コンピテンシー"
+    },
+    "detail": {
+      "sections": {
+        "course": "科目",
+        "operation": "運営",
+        "professor": "担当教授",
+        "remark": "備考"
+      },
+      "fields": {
+        "curricularName": "科目名",
+        "deptName": "主管学科",
+        "credits": "単位",
+        "offeringCode": "運営コード",
+        "enrolledCount": "登録人数",
+        "capacity": "定員",
+        "semester": "学期",
+        "dayOfWeek": "曜日",
+        "period": "時限",
+        "periodValue": "{period}時限",
+        "location": "場所",
+        "professor": "担当教授",
+        "professorName": "担当教授名",
+        "phone": "電話番号",
+        "email": "メール",
+        "description": "説明"
+      },
+      "messages": {
+        "onlyDraft": "DRAFT状態でのみ修正できます。",
+        "requiredDayOfWeek": "曜日を選択してください。",
+        "saveFailed": "修正に失敗しました。",
+        "selectProfessorHint": "教授選択後に反映"
+      }
+    },
+    "students": {
+      "headers": {
+        "studentName": "学生名",
+        "studentNo": "学籍番号",
+        "gradeLevel": "学年",
+        "deptName": "所属学科",
+        "rawScore": "点数",
+        "grade": "等級",
+        "enrollmentStatus": "履修状態",
+        "completionStatus": "履修完了状態",
+        "scoreAction": "点数登録"
+      },
+      "buttons": {
+        "input": "入力",
+        "saving": "保存中..."
+      },
+      "messages": {
+        "scoreRange": "点数は0〜100の数値で入力してください",
+        "savingToast": "保存中...",
+        "savedToast": "点数が保存されました。",
+        "saveFailed": "保存に失敗しました。しばらくしてから再試行してください。",
+        "canEditOnlyInProgress": "履修中(IN_PROGRESS)状態でのみ点数修正が可能です。"
+      },
+      "emptyText": "履修学生がいません。"
+    },
+    "competencies": {
+      "labels": {
+        "professor": "担当教授",
+        "mainCompetencies": "主要コンピテンシー"
+      },
+      "titles": {
+        "mapping": "コンピテンシーマッピング",
+        "radar": "コンピテンシーマッピング レーダーチャート"
+      },
+      "messages": {
+        "loading": "読み込み中...",
+        "loadError": "照会失敗",
+        "saved": "コンピテンシーマッピングが保存されました。",
+        "duplicateWeight": "すでに他のコンピテンシーで使用中の点数です。",
+        "saveFailed": "保存失敗"
+      },
+      "buttons": {
+        "saving": "保存中..."
+      }
+    },
+    "radar": {
+      "empty": "コンピテンシー点数を登録してください。",
+      "tooltip": "{value}点"
+    },
+    "status": {
+      "title": "状態変更",
+      "confirmYes": "はい",
+      "confirmNo": "いいえ",
+      "messages": {
+        "confirmText": "状態を変更しますか？（状態は元に戻せません）",
+        "updateFailed": "状態変更に失敗しました。"
+      }
+    }
+  },
+  "modal": {
+    "curricularCreate": {
+      "title": "科目登録",
+      "curricularCodeLabel": "科目コード",
+      "curricularNameLabel": "科目名",
+      "deptLabel": "主管学科",
+      "creditsLabel": "単位",
+      "descriptionLabel": "説明",
+      "curricularCodePlaceholder": "例) CS101",
+      "curricularNamePlaceholder": "例) データ構造",
+      "creditsPlaceholder": "例) 3",
+      "descriptionPlaceholder": "科目説明を入力してください。",
+      "submitFailed": "登録に失敗しました。",
+      "validation": {
+        "requiredCurricularCode": "科目コードを入力してください。",
+        "requiredCurricularName": "科目名を入力してください。",
+        "requiredDept": "主管学科を選択してください。",
+        "requiredCredits": "単位を入力してください。",
+        "requiredDescription": "科目説明を入力してください。"
+      }
+    },
+    "curricularEdit": {
+      "title": "科目修正",
+      "activeAriaLabel": "有効状態",
+      "curricularCodeLabel": "科目コード",
+      "curricularNameLabel": "科目名",
+      "deptLabel": "主管学科",
+      "creditsLabel": "単位",
+      "descriptionLabel": "説明",
+      "submitFailed": "科目の修正に失敗しました。"
+    },
+    "offeringCreate": {
+      "title": "授業運営登録",
+      "offeringCodeLabel": "授業運営コード",
+      "semesterLabel": "学期",
+      "deptLabel": "主管学科",
+      "curricularLabel": "科目",
+      "dayOfWeekLabel": "曜日",
+      "periodLabel": "時限",
+      "capacityLabel": "定員",
+      "locationLabel": "場所",
+      "professorLabel": "担当教授",
+      "professorEmailLabel": "教授メール",
+      "professorPhoneLabel": "教授電話番号",
+      "offeringCodePlaceholder": "例) CS101-1",
+      "capacityPlaceholder": "例) 30",
+      "locationPlaceholder": "例) 本館302号",
+      "submitFailed": "登録に失敗しました。",
+      "validation": {
+        "requiredOfferingCode": "授業運営コードを入力してください。",
+        "requiredSemester": "学期を選択してください。",
+        "requiredDept": "主管学科を選択してください。",
+        "requiredCurricular": "科目を選択してください。",
+        "requiredDayOfWeek": "曜日を選択してください。",
+        "requiredPeriod": "時限を選択してください。",
+        "requiredCapacity": "定員を入力してください。",
+        "requiredLocation": "場所を入力してください。",
+        "requiredProfessor": "担当教授を選択してください。"
+      }
+    }
+  }
+}

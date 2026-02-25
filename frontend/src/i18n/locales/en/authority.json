@@ -1,0 +1,68 @@
+{
+  "semesters": {
+    "page": {
+      "title": "Semester Management",
+      "registerButton": "Register Semester"
+    },
+    "table": {
+      "year": "Year",
+      "term": "Semester",
+      "period": "Period",
+      "status": "Status",
+      "manage": "Manage",
+      "editButton": "Edit",
+      "emptyText": "No semesters."
+    },
+    "createModal": {
+      "title": "Register Semester",
+      "buttons": {
+        "create": "Register",
+        "cancel": "Cancel"
+      },
+      "fields": {
+        "year": "Year",
+        "term": "Semester",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "placeholders": {
+        "startDate": "Select start date",
+        "endDate": "Select end date"
+      },
+      "validation": {
+        "requiredYear": "Please enter a year.",
+        "requiredStartDate": "Please select a start date.",
+        "requiredEndDate": "Please select an end date.",
+        "invalidPeriod": "Start date cannot be later than end date."
+      },
+      "messages": {
+        "submitFailed": "Registration failed."
+      }
+    },
+    "editModal": {
+      "title": "Edit Semester",
+      "buttons": {
+        "save": "Save",
+        "close": "Close"
+      },
+      "fields": {
+        "year": "Year",
+        "term": "Semester",
+        "status": "Status",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "placeholders": {
+        "startDate": "Select start date",
+        "endDate": "Select end date"
+      },
+      "messages": {
+        "submitFailed": "Failed to update semester."
+      }
+    },
+    "errors": {
+      "listLoadFailed": "Failed to load semester list.",
+      "detailLoadFailed": "Failed to load."
+    }
+  }
+}

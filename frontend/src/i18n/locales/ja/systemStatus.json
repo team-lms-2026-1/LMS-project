@@ -1,0 +1,79 @@
+{
+  "accountLogs": {
+    "common": {
+      "accountType": {
+        "ADMIN": "管理者",
+        "PROFESSOR": "教授",
+        "STUDENT": "学生",
+        "STAFF": "職員"
+      },
+      "loginStatus": {
+        "LOGGED_IN": "ログイン中",
+        "LOGGED_OUT": "未ログイン"
+      }
+    },
+    "list": {
+      "title": "アカウントログ管理",
+      "searchPlaceholder": "IDまたは氏名で検索",
+      "kpi": {
+        "totalAccounts": "総アカウント数",
+        "onlineAccounts": "現在ログイン中"
+      },
+      "table": {
+        "loginId": "ログインID",
+        "accountType": "アカウント種別",
+        "name": "氏名",
+        "lastAccessAt": "最終アクセス日時",
+        "loginState": "ログイン状態"
+      },
+      "emptyText": "検索結果がありません。",
+      "messages": {
+        "loadFailed": "ログ一覧を読み込めませんでした。"
+      }
+    },
+    "detail": {
+      "loading": "読み込み中...",
+      "notFound": "存在しないアカウントです。(ID: {accountId})",
+      "title": "アカウントログ管理詳細",
+      "summary": {
+        "accountType": "アカウント種別:",
+        "name": "氏名:",
+        "loginId": "ID:",
+        "departmentName": "所属学科:"
+      },
+      "searchPlaceholder": "検索語を入力",
+      "table": {
+        "logId": "番号",
+        "accessedAt": "日時",
+        "accessUrl": "接続URL",
+        "ip": "IP",
+        "os": "接続環境",
+        "emptyText": "ログがありません。"
+      },
+      "buttons": {
+        "backToList": "一覧へ",
+        "excelDownload": "Excelダウンロード"
+      },
+      "messages": {
+        "loadFailed": "詳細ログを読み込めませんでした。",
+        "downloadFailed": "ダウンロードに失敗しました。"
+      }
+    },
+    "privacyModal": {
+      "title": "個人情報利用案内",
+      "desc": {
+        "line1": "本Excelファイルには学生の個人情報が含まれています。",
+        "line2": "当該情報は学事行政および内部業務目的にのみ使用でき、目的外利用、第三者提供、無断保存および外部流出を禁じます。",
+        "line3": "関連法令に基づき、個人情報へのアクセスおよびダウンロード履歴は管理者ログとして記録・管理され、違反時には法的責任が生じる場合があります。",
+        "line4": "上記内容を十分に理解し、個人情報の利用に同意します。"
+      },
+      "agreeLabel": "上記の個人情報利用に同意します。",
+      "reasonTitle": "ダウンロード理由",
+      "reasonPlaceholder": "ダウンロード理由を入力してください。",
+      "buttons": {
+        "cancel": "キャンセル",
+        "download": "ダウンロード"
+      }
+    }
+  }
+}

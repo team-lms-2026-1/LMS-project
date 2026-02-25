@@ -9,9 +9,9 @@ import type {
   AdminRoomDto,
   CreateAdminRoomRequestDto,
   UpdateAdminRoomRequestDto,
-  SpaceRoomDto,
 } from "../../api/types";
 import { roomsApi } from "../../api/spacesApi";
+import { useI18n } from "@/i18n/useI18n";
 
 type RoomRowState = {
   roomId?: number;
@@ -115,6 +115,7 @@ function toUpdatePayload(r: RoomRowState): UpdateAdminRoomRequestDto {
 }
 
 export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
+  const t = useI18n("studySpace.admin.spaces.roomModal");
   const [rows, setRows] = useState<RoomRowState[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -138,7 +139,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
         console.error("[RoomsModal list]", e);
         if (!alive) return;
         setRows([]);
-        alert(e?.message || "스터디룸 목록을 불러오지 못했습니다.");
+        alert(e?.message || t("errors.listLoadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -148,7 +149,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
     return () => {
       alive = false;
     };
-  }, [open, spaceId]);
+  }, [open, spaceId, t]);
 
   /** ESC 닫기 */
   useEffect(() => {
@@ -196,16 +197,16 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
   };
 
   const validateRow = (r: RoomRowState): string | null => {
-    if (!r.name.trim()) return "스터디실 이름을 입력하세요.";
-    if (!Number.isFinite(r.minPeople) || r.minPeople < 1) return "최소 인원은 1 이상이어야 합니다.";
-    if (!Number.isFinite(r.maxPeople) || r.maxPeople < 1) return "최대 인원은 1 이상이어야 합니다.";
-    if (r.minPeople > r.maxPeople) return "최소 인원은 최대 인원보다 클 수 없습니다.";
+    if (!r.name.trim()) return t("errors.nameRequired");
+    if (!Number.isFinite(r.minPeople) || r.minPeople < 1) return t("errors.minPeopleInvalid");
+    if (!Number.isFinite(r.maxPeople) || r.maxPeople < 1) return t("errors.maxPeopleInvalid");
+    if (r.minPeople > r.maxPeople) return t("errors.minGreaterThanMax");
 
-    if (!isValidYmd(r.startDate) || !isValidYmd(r.endDate)) return "운영기간 날짜 형식이 올바르지 않습니다.";
-    if (compareStr(r.startDate, r.endDate) > 0) return "운영기간 시작일은 종료일보다 늦을 수 없습니다.";
+    if (!isValidYmd(r.startDate) || !isValidYmd(r.endDate)) return t("errors.invalidPeriodDate");
+    if (compareStr(r.startDate, r.endDate) > 0) return t("errors.periodOrderInvalid");
 
-    if (!isValidHm(r.startTime) || !isValidHm(r.endTime)) return "운영시간 형식이 올바르지 않습니다.";
-    if (compareStr(r.startTime, r.endTime) >= 0) return "운영시간 시작은 종료보다 빨라야 합니다.";
+    if (!isValidHm(r.startTime) || !isValidHm(r.endTime)) return t("errors.invalidTimeFormat");
+    if (compareStr(r.startTime, r.endTime) >= 0) return t("errors.timeOrderInvalid");
 
     return null;
   };
@@ -261,10 +262,10 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
           return newData;
         })
       );
-      toast.success(isCreate ? "스터디룸이 등록되었습니다." : "스터디룸이 수정되었습니다.");
+      toast.success(isCreate ? t("toasts.created") : t("toasts.updated"));
     } catch (e: any) {
       console.error("[RoomsModal saveRow]", e);
-      toast.error(e?.message || "저장 중 오류가 발생했습니다.");
+      toast.error(e?.message || t("errors.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -274,7 +275,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
   const removeRow = async (idx: number) => {
     const r = rows[idx];
     if (!r) return;
-    if (!confirm("이 스터디실을 삭제할까요?")) return;
+    if (!confirm(t("confirmDelete"))) return;
 
     try {
       setSaving(true);
@@ -284,10 +285,10 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
       }
 
       setRows((prev) => prev.filter((_, i) => i !== idx));
-      toast.success("스터디룸이 삭제되었습니다.");
+      toast.success(t("toasts.deleted"));
     } catch (e: any) {
       console.error("[RoomsModal removeRow]", e);
-      toast.error(e?.message || "삭제 중 오류가 발생했습니다.");
+      toast.error(e?.message || t("errors.deleteFailed"));
     } finally {
       setSaving(false);
     }
@@ -296,7 +297,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
   const onClickDone = () => {
     const editing = rows.find((r) => r.isEditing);
     if (editing) {
-      toast.error("편집 중인 항목이 있습니다. 저장 또는 취소 후 완료하세요.");
+      toast.error(t("errors.editingExists"));
       return;
     }
     onClose();
@@ -315,31 +316,31 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className={styles.topBar}>
-          <div className={styles.subtitle}>학습 공간 대여 관리</div>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="close">
+          <div className={styles.subtitle}>{t("subtitle")}</div>
+          <button className={styles.closeBtn} onClick={onClose} aria-label={t("closeAriaLabel")}>
             ×
           </button>
         </div>
 
         <div className={styles.header}>
-          <div className={styles.title}>예약하기</div>
-          <div className={styles.spaceHint}>spaceId: {spaceId}</div>
+          <div className={styles.title}>{t("title")}</div>
+          <div className={styles.spaceHint}>{t("spaceHint", { spaceId })}</div>
         </div>
 
         <div className={styles.gridHeader}>
-          <div className={styles.colName}>스터디룸</div>
-          <div className={styles.colPeople}>수용 인원</div>
-          <div className={styles.colPeriod}>운영기간</div>
-          <div className={styles.colTime}>운영시간</div>
+          <div className={styles.colName}>{t("columns.room")}</div>
+          <div className={styles.colPeople}>{t("columns.people")}</div>
+          <div className={styles.colPeriod}>{t("columns.period")}</div>
+          <div className={styles.colTime}>{t("columns.time")}</div>
           <div className={styles.colActions}></div>
         </div>
 
         <div className={styles.body}>
           <div className={styles.rowsCol}>
             {loading ? (
-              <div className={styles.empty}>불러오는 중...</div>
+              <div className={styles.empty}>{t("loading")}</div>
             ) : rows.length === 0 ? (
-              <div className={styles.empty}>등록된 스터디룸이 없습니다.</div>
+              <div className={styles.empty}>{t("empty")}</div>
             ) : (
               rows.map((r, idx) => (
                 <div key={`${r.roomId ?? "new"}-${idx}`} className={styles.row}>
@@ -350,7 +351,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
                         className={styles.nameInput}
                         value={r.name}
                         onChange={(e) => setField(idx, "name", e.target.value)}
-                        placeholder="스터디룸 이름"
+                        placeholder={t("namePlaceholder")}
                       />
                     ) : (
                       <div className={styles.nameText}>{r.name}</div>
@@ -435,19 +436,19 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
                     {r.isEditing ? (
                       <div className={styles.actionStack}>
                         <Button variant="primary" onClick={() => saveRow(idx)} disabled={saving}>
-                          저장
+                          {t("buttons.save")}
                         </Button>
                         <Button variant="secondary" onClick={() => cancelEdit(idx)} disabled={saving}>
-                          취소
+                          {t("buttons.cancel")}
                         </Button>
                       </div>
                     ) : (
                       <div className={styles.actionStack}>
                         <Button variant="primary" onClick={() => enterEdit(idx)} disabled={saving}>
-                          수정
+                          {t("buttons.edit")}
                         </Button>
                         <Button className={styles.dangerBtn} variant="danger" onClick={() => removeRow(idx)} disabled={saving}>
-                          삭제
+                          {t("buttons.delete")}
                         </Button>
                       </div>
                     )}
@@ -460,14 +461,14 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
               <button type="button" className={styles.addBtn} onClick={addRoom} aria-label="add room">
                 +
               </button>
-              <div className={styles.addLabel}>추가하기</div>
+              <div className={styles.addLabel}>{t("addLabel")}</div>
             </div>
           </div>
         </div>
 
         <div className={styles.bottomBar}>
           <Button variant="primary" onClick={onClickDone} disabled={saving}>
-            {saving ? "처리 중..." : "완료"}
+            {saving ? t("buttons.processing") : t("buttons.done")}
           </Button>
         </div>
       </div>

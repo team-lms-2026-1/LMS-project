@@ -1,0 +1,364 @@
+{
+  "status": {
+    "offering": {
+      "DRAFT": "Draft",
+      "OPEN": "Enrollment Open",
+      "ENROLLMENT_CLOSED": "Enrollment Closed",
+      "IN_PROGRESS": "In Progress",
+      "COMPLETED": "Completed (Finalized)",
+      "CANCELED": "Canceled"
+    },
+    "apply": {
+      "APPLIED": "Applied",
+      "CANCELED": "Canceled"
+    },
+    "session": {
+      "OPEN": "Open",
+      "CLOSED": "Closed",
+      "CANCELED": "Canceled"
+    },
+    "attended": {
+      "ATTENDED": "Attended",
+      "ABSENT": "Absent"
+    },
+    "active": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    }
+  },
+  "common": {
+    "manageHeader": "Manage",
+    "detailButton": "Detail",
+    "editButton": "Edit",
+    "registerButton": "Register",
+    "saveButton": "Save",
+    "cancelButton": "Cancel",
+    "closeButton": "Close"
+  },
+  "studentOfferings": {
+    "title": "Program Enrollment",
+    "searchPlaceholder": "Search by offering name/code",
+    "table": {
+      "offeringCode": "Offering Code",
+      "offeringName": "Program Name",
+      "hostContactName": "Contact Name",
+      "rewardPoint": "Points",
+      "recognizedHours": "Recognized Hours",
+      "emptyText": "No program offerings."
+    }
+  },
+  "studentEnrollments": {
+    "title": "Enrollment Status",
+    "table": {
+      "offeringCode": "Offering Code",
+      "offeringName": "Program Name",
+      "hostContactName": "Contact Name",
+      "semesterName": "Semester",
+      "rewardPoint": "Points",
+      "recognizedHours": "Recognized Hours",
+      "status": "Status",
+      "cancelButton": "Cancel Enrollment",
+      "emptyText": "No enrolled programs."
+    },
+    "dialog": {
+      "title": "Cancel Enrollment",
+      "description": "Do you want to cancel enrollment for this program?",
+      "confirmText": "Cancel Enrollment"
+    },
+    "messages": {
+      "cancelSuccess": "Enrollment has been canceled.",
+      "cancelFailed": "Failed to cancel enrollment."
+    }
+  },
+  "studentCurrentEnrollments": {
+    "title": "Current Programs",
+    "table": {
+      "emptyText": "No current programs."
+    }
+  },
+  "adminPrograms": {
+    "title": "Extra-Curricular Program Management",
+    "searchPlaceholder": "Search by code/program name",
+    "registerButton": "Register Program",
+    "table": {
+      "programCode": "Program Code",
+      "programName": "Program Name",
+      "hostOrgName": "Host Organization",
+      "status": "Status",
+      "emptyText": "No extra-curricular programs."
+    }
+  },
+  "adminOfferings": {
+    "title": "Extra-Curricular Offering Management",
+    "searchPlaceholder": "Search by offering name/code",
+    "registerButton": "Register Offering",
+    "table": {
+      "offeringCode": "Offering Code",
+      "offeringName": "Offering Name",
+      "hostContactName": "Contact Name",
+      "rewardPoint": "Points",
+      "recognizedHours": "Recognized Hours",
+      "status": "Status",
+      "emptyText": "No extra-curricular offerings."
+    }
+  },
+  "adminGrades": {
+    "title": "Program Grade Management",
+    "searchPlaceholder": "Search by student ID/name",
+    "table": {
+      "studentNo": "Student ID",
+      "deptName": "Department",
+      "gradeLevel": "Year",
+      "name": "Name",
+      "totalEarnedPoints": "Total Earned Points",
+      "totalEarnedHours": "Total Earned Hours",
+      "emptyText": "No program grade records."
+    },
+    "detail": {
+      "page": {
+        "invalidAccess": "Invalid access.",
+        "loading": "Loading...",
+        "loadError": "An error occurred.",
+        "empty": "No data available.",
+        "title": "Program Grade Detail",
+        "backButton": "Back to list"
+      },
+      "info": {
+        "gradeLevel": "Year {value}",
+        "metrics": {
+          "totalEarnedPoints": "Total Earned Points",
+          "totalEarnedHours": "Total Earned Hours"
+        },
+        "pointUnit": "points",
+        "hourUnit": "hours"
+      },
+      "trend": {
+        "title": "Semester Points/Hours Trend",
+        "empty": "No chart data.",
+        "tooltip": {
+          "earnedPoints": "Earned Points: {value} points",
+          "earnedHours": "Earned Hours: {value} hours"
+        }
+      },
+      "list": {
+        "title": "Program Completion List",
+        "searchPlaceholder": "Search by program name/code",
+        "loadError": "Failed to load."
+      },
+      "table": {
+        "semester": "Semester",
+        "extraOfferingCode": "Program Code",
+        "extraOfferingName": "Program Name",
+        "points": "Points",
+        "recognizedHours": "Recognized Hours",
+        "completionStatus": "Completion",
+        "emptyText": "No program grade records."
+      }
+    }
+  },
+  "modal": {
+    "programCreate": {
+      "title": "Register Program",
+      "fields": {
+        "programCode": "Program Code",
+        "programName": "Program Name",
+        "hostOrgName": "Host Organization",
+        "description": "Description"
+      },
+      "placeholders": {
+        "programCode": "e.g. EX001",
+        "programName": "e.g. Startup Special Lecture",
+        "hostOrgName": "e.g. Industry-Academic Cooperation Foundation",
+        "description": "Enter a program description."
+      },
+      "submitFailed": "Registration failed.",
+      "validation": {
+        "requiredProgramCode": "Please enter a program code.",
+        "requiredProgramName": "Please enter a program name.",
+        "requiredHostOrgName": "Please enter a host organization name.",
+        "requiredDescription": "Please enter a description."
+      }
+    },
+    "programEdit": {
+      "title": "Edit Program",
+      "activeAriaLabel": "Active status",
+      "fields": {
+        "programCode": "Program Code",
+        "programName": "Program Name",
+        "hostOrgName": "Host Organization",
+        "description": "Description"
+      },
+      "submitFailed": "Failed to update program."
+    },
+    "offeringCreate": {
+      "title": "Register Offering",
+      "fields": {
+        "extraCurricular": "Program",
+        "offeringCode": "Offering Code",
+        "offeringName": "Offering Name",
+        "semester": "Semester",
+        "rewardPointDefault": "Default Points",
+        "recognizedHoursDefault": "Default Recognized Hours",
+        "operationStartDate": "Operation Start Date",
+        "operationEndDate": "Operation End Date",
+        "hostContactName": "Contact Name",
+        "hostContactPhone": "Contact Phone",
+        "hostContactEmail": "Contact Email"
+      },
+      "placeholders": {
+        "offeringCode": "e.g. EXTRA-2026-001",
+        "offeringName": "e.g. Freshman Competency Camp - Round 1",
+        "rewardPointDefault": "e.g. 10",
+        "recognizedHoursDefault": "e.g. 2",
+        "operationStartDate": "Select start date",
+        "operationEndDate": "Select end date",
+        "hostContactName": "e.g. Hong Gil-dong",
+        "hostContactPhone": "e.g. 010-1234-5678",
+        "hostContactEmail": "e.g. manager@school.ac.kr"
+      },
+      "submitFailed": "Registration failed.",
+      "validation": {
+        "requiredExtraCurricular": "Please select a program.",
+        "requiredOfferingCode": "Please enter an offering code.",
+        "requiredOfferingName": "Please enter an offering name.",
+        "requiredSemester": "Please select a semester.",
+        "requiredOperationStartDate": "Please select an operation start date.",
+        "requiredOperationEndDate": "Please select an operation end date.",
+        "invalidOperationPeriod": "Start date cannot be later than end date.",
+        "invalidRewardPoint": "Default points must be 0 or greater.",
+        "invalidRecognizedHours": "Default recognized hours must be 0 or greater.",
+        "invalidHostContactPhone": "Contact phone format is invalid.",
+        "invalidHostContactEmail": "Contact email format is invalid."
+      }
+    }
+  },
+  "adminOfferingDetail": {
+    "page": {
+      "loading": "Loading...",
+      "loadError": "An error occurred.",
+      "empty": "No data available.",
+      "title": "Extra-Curricular Offering Management",
+      "backButton": "Back to list"
+    },
+    "tabs": {
+      "detail": "Detail",
+      "session": "Sessions",
+      "students": "Students",
+      "competencies": "Competencies"
+    },
+    "detail": {
+      "sections": {
+        "program": "Program",
+        "operation": "Operation",
+        "contact": "Contact",
+        "remark": "Remarks"
+      },
+      "fields": {
+        "programCode": "Program Code",
+        "programName": "Program Name",
+        "hostOrgName": "Host Organization",
+        "offeringCode": "Offering Code",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "enrolledCount": "Enrolled",
+        "semester": "Semester",
+        "operationStartDate": "Operation Start Date",
+        "operationEndDate": "Operation End Date",
+        "operationStartDatePlaceholder": "Select start date",
+        "operationEndDatePlaceholder": "Select end date",
+        "contactName": "Contact Name",
+        "contactPhone": "Contact Phone",
+        "contactEmail": "Contact Email",
+        "description": "Description"
+      },
+      "messages": {
+        "requiredOfferingCode": "Please enter an offering code.",
+        "requiredOfferingName": "Please enter an offering name.",
+        "requiredSemester": "Please select a semester.",
+        "invalidRewardPoint": "Default points must be 0 or greater.",
+        "invalidRecognizedHours": "Default recognized hours must be 0 or greater.",
+        "requiredOperationStartDate": "Please select an operation start date.",
+        "requiredOperationEndDate": "Please select an operation end date.",
+        "invalidOperationPeriod": "Start date cannot be later than end date.",
+        "invalidContactPhone": "Contact phone format is invalid.",
+        "invalidContactEmail": "Contact email format is invalid.",
+        "onlyDraft": "Editable only in Draft status.",
+        "saveFailed": "Failed to update."
+      }
+    },
+    "students": {
+      "headers": {
+        "studentName": "Student Name",
+        "studentNo": "Student ID",
+        "gradeLevel": "Year",
+        "deptName": "Department",
+        "applyStatus": "Application Status",
+        "completionStatus": "Completion Status",
+        "attendanceAction": "Attendance"
+      },
+      "innerHeaders": {
+        "sessionName": "Session Name",
+        "sessionStatus": "Session Status",
+        "attendance": "Attendance"
+      },
+      "buttons": {
+        "view": "View",
+        "close": "Close"
+      },
+      "messages": {
+        "noSessions": "No sessions."
+      },
+      "emptyText": "No applicants."
+    },
+    "sessions": {
+      "createButton": "Create Session",
+      "headers": {
+        "sessionName": "Session Name",
+        "rewardPoint": "Session Points",
+        "recognizedHours": "Session Hours",
+        "startAt": "Start Period",
+        "endAt": "End Period",
+        "status": "Status",
+        "manage": "Manage"
+      },
+      "buttons": {
+        "detail": "Detail",
+        "close": "Close"
+      },
+      "emptyText": "No sessions."
+    },
+    "competencies": {
+      "labels": {
+        "hostOrgName": "Host Organization",
+        "mainCompetencies": "Primary Competencies"
+      },
+      "titles": {
+        "mapping": "Competency Mapping",
+        "radar": "Competency Mapping Radar Chart"
+      },
+      "messages": {
+        "loading": "Loading...",
+        "loadError": "Failed to load.",
+        "saved": "Competency mapping has been saved.",
+        "duplicateWeight": "This score is already used by another competency.",
+        "saveFailed": "Save failed"
+      },
+      "buttons": {
+        "saving": "Saving..."
+      }
+    },
+    "radar": {
+      "empty": "Please register competency scores.",
+      "tooltip": "{value} points"
+    },
+    "status": {
+      "title": "Change Status",
+      "confirmYes": "Yes",
+      "confirmNo": "No",
+      "messages": {
+        "confirmText": "Do you want to change the status? (This action cannot be undone.)",
+        "updateFailed": "Failed to change status."
+      }
+    }
+  }
+}

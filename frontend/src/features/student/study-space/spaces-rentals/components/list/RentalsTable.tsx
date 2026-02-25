@@ -3,6 +3,7 @@
 import styles from "./RentalsTable.module.css";
 import { Button } from "@/components/button";
 import type { RentalDto, RentalStatus, PageMeta } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: RentalDto[];
@@ -13,16 +14,16 @@ type Props = {
   onShowRejectReason: (r: RentalDto) => void;
 };
 
-function statusLabel(s: RentalStatus) {
+function statusLabel(s: RentalStatus, t: ReturnType<typeof useI18n>) {
   switch (s) {
     case "REQUESTED":
-      return "요청됨";
+      return t("statuses.requested");
     case "APPROVED":
-      return "허가";
+      return t("statuses.approved");
     case "REJECTED":
-      return "반려";
+      return t("statuses.rejected");
     case "CANCELLED":
-      return "취소됨";
+      return t("statuses.cancelled");
     default:
       return s;
   }
@@ -56,23 +57,25 @@ export default function RentalsTable({
   onCancel,
   onShowRejectReason,
 }: Props) {
+  const t = useI18n("studySpace.student.rentals.table");
+
   return (
     <div className={styles.wrap}>
       <div className={styles.table}>
         <div className={styles.head}>
-          <div className={styles.colId}>번호</div>
-          <div className={styles.colSpace}>학습공간</div>
-          <div className={styles.colRoom}>스터디룸</div>
-          <div className={styles.colDate}>날짜</div>
-          <div className={styles.colTime}>시간</div>
-          <div className={styles.colStatus}>상태</div>
-          <div className={styles.colActions}>처리</div>
+          <div className={styles.colId}>{t("headers.id")}</div>
+          <div className={styles.colSpace}>{t("headers.space")}</div>
+          <div className={styles.colRoom}>{t("headers.room")}</div>
+          <div className={styles.colDate}>{t("headers.date")}</div>
+          <div className={styles.colTime}>{t("headers.time")}</div>
+          <div className={styles.colStatus}>{t("headers.status")}</div>
+          <div className={styles.colActions}>{t("headers.actions")}</div>
         </div>
 
         {loading ? (
-          <div className={styles.empty}>불러오는 중...</div>
+          <div className={styles.empty}>{t("loading")}</div>
         ) : items.length === 0 ? (
-          <div className={styles.empty}>예약 내역이 없습니다.</div>
+          <div className={styles.empty}>{t("empty")}</div>
         ) : (
           items.map((r, idx) => {
             const no = calcRowNo(meta, idx, items.length);
@@ -92,21 +95,21 @@ export default function RentalsTable({
 
                 <div className={styles.colStatus}>
                   <span className={styles.badge} data-status={r.status}>
-                    {statusLabel(r.status)}
+                    {statusLabel(r.status, t)}
                   </span>
                 </div>
 
                 <div className={styles.colActions}>
                   {r.status === "REQUESTED" && (
                     <Button variant="secondary" onClick={() => onCancel(r.rentalId)}>
-                      취소하기
+                      {t("buttons.cancel")}
                     </Button>
                   )}
 
                   {r.status === "REJECTED" && (
                     <>
                       <Button variant="danger" onClick={() => onShowRejectReason(r)}>
-                        반려됨
+                        {t("buttons.rejected")}
                       </Button>
                     </>
                   )}
@@ -114,17 +117,17 @@ export default function RentalsTable({
                   {r.status === "APPROVED" && (
                     <>
                       <Button variant="primary" disabled>
-                        허가
+                        {t("buttons.approved")}
                       </Button>
                       <Button variant="secondary" onClick={() => onCancel(r.rentalId)}>
-                        취소하기
+                        {t("buttons.cancel")}
                       </Button>
                     </>
                   )}
 
                   {r.status === "CANCELLED" && (
                     <Button variant="secondary" disabled>
-                      취소됨
+                      {t("buttons.cancelled")}
                     </Button>
                   )}
                 </div>

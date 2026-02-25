@@ -3,6 +3,7 @@
 import React from "react";
 import styles from "./SpacesDeleteModal.module.css";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -19,14 +20,16 @@ export default function SpacesDeleteModal({
   onClose,
   loading = false,
 }: Props) {
+  const t = useI18n("studySpace.admin.spaces.deleteModal");
+
   return (
     <ConfirmDialog
       open={open}
-      title="학습공간 삭제"
+      title={t("title")}
       danger
       loading={loading}
-      confirmText="삭제"
-      cancelText="취소"
+      confirmText={t("confirmText")}
+      cancelText={t("cancelText")}
       onConfirm={onConfirm}
       onCancel={onClose}
       description={
@@ -36,14 +39,14 @@ export default function SpacesDeleteModal({
               <>
                 <b className={styles.emph}>&quot;{targetTitle}&quot;</b>
                 <br />
-                학습공간을 삭제하시겠습니까?
+                {t("questionWithTitle")}
               </>
             ) : (
-              <>학습공간을 삭제하시겠습니까?</>
+              <>{t("questionWithoutTitle")}</>
             )}
           </p>
-          <p className={styles.sub}>해당 학습공간에 포함된 스터디룸도 삭제됩니다.</p>
-          <p className={styles.sub}>삭제한 데이터는 복구할 수 없습니다.</p>
+          <p className={styles.sub}>{t("warnings.includedRooms")}</p>
+          <p className={styles.sub}>{t("warnings.cannotRestore")}</p>
         </div>
       }
     />

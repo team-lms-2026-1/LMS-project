@@ -1,0 +1,371 @@
+{
+  "common": {
+    "manageHeader": "Manage",
+    "detailButton": "Details",
+    "editButton": "Edit",
+    "registerButton": "Register",
+    "saveButton": "Save",
+    "cancelButton": "Cancel",
+    "closeButton": "Close"
+  },
+  "status": {
+    "offering": {
+      "DRAFT": "Draft",
+      "OPEN": "Open",
+      "ENROLLMENT_CLOSED": "Enrollment Closed",
+      "IN_PROGRESS": "In Progress",
+      "COMPLETED": "Completed",
+      "CANCELED": "Canceled"
+    },
+    "active": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "enrollment": {
+      "ENROLLED": "Enrolled",
+      "CANCELED": "Canceled"
+    },
+    "completion": {
+      "IN_PROGRESS": "In Progress",
+      "PASSED": "Passed",
+      "FAILED": "Failed"
+    }
+  },
+  "dayOfWeek": {
+    "MONDAY": {
+      "short": "Mon",
+      "long": "Monday"
+    },
+    "TUESDAY": {
+      "short": "Tue",
+      "long": "Tuesday"
+    },
+    "WEDNESDAY": {
+      "short": "Wed",
+      "long": "Wednesday"
+    },
+    "THURSDAY": {
+      "short": "Thu",
+      "long": "Thursday"
+    },
+    "FRIDAY": {
+      "short": "Fri",
+      "long": "Friday"
+    },
+    "SATURDAY": {
+      "short": "Sat",
+      "long": "Saturday"
+    },
+    "SUNDAY": {
+      "short": "Sun",
+      "long": "Sunday"
+    }
+  },
+  "studentOfferings": {
+    "title": "Course Enrollment",
+    "searchPlaceholder": "Search by course name/code",
+    "table": {
+      "offeringCode": "Offering Code",
+      "curricularName": "Course Name",
+      "professorName": "Professor",
+      "semesterName": "Semester",
+      "credit": "Credits",
+      "competency1": "Competency 1",
+      "competency2": "Competency 2",
+      "capacity": "Capacity",
+      "enrolledCount": "Enrolled",
+      "emptyText": "No course offerings."
+    }
+  },
+  "studentEnrollments": {
+    "title": "Enrollment Status",
+    "table": {
+      "offeringCode": "Offering Code",
+      "curricularName": "Course Name",
+      "professorName": "Professor",
+      "semesterName": "Semester",
+      "credit": "Credits",
+      "competency1": "Competency 1",
+      "competency2": "Competency 2",
+      "capacity": "Capacity",
+      "enrolledCount": "Enrolled",
+      "cancelButton": "Cancel Enrollment",
+      "emptyText": "No enrolled courses."
+    },
+    "dialog": {
+      "title": "Cancel Enrollment",
+      "description": "Do you want to cancel enrollment for this course?",
+      "confirmText": "Cancel Enrollment"
+    },
+    "messages": {
+      "cancelSuccess": "Enrollment has been canceled.",
+      "cancelFailed": "Failed to cancel enrollment."
+    }
+  },
+  "studentCurrentEnrollments": {
+    "title": "Current Courses",
+    "table": {
+      "emptyText": "No current courses."
+    }
+  },
+  "professorOfferings": {
+    "title": "My Courses",
+    "searchPlaceholder": "Search by course name/code",
+    "table": {
+      "offeringCode": "Offering Code",
+      "curricularName": "Course Name",
+      "capacity": "Capacity",
+      "professorName": "Professor",
+      "semesterName": "Semester",
+      "location": "Location",
+      "credit": "Credits",
+      "status": "Status",
+      "emptyText": "No course offerings."
+    }
+  },
+  "adminCurriculars": {
+    "title": "Curricular Management",
+    "searchPlaceholder": "Search by course name/code",
+    "registerButton": "Register Curricular",
+    "table": {
+      "curricularCode": "Course Code",
+      "curricularName": "Course Name",
+      "deptName": "Department",
+      "credits": "Credits",
+      "status": "Status",
+      "emptyText": "No curricular courses."
+    }
+  },
+  "adminOfferings": {
+    "title": "Course Offering Management",
+    "searchPlaceholder": "Search by offering name/code",
+    "registerButton": "Register Offering",
+    "table": {
+      "offeringCode": "Offering Code",
+      "curricularName": "Course Name",
+      "capacity": "Capacity",
+      "professorName": "Professor",
+      "semesterName": "Semester",
+      "location": "Location",
+      "credit": "Credits",
+      "status": "Status",
+      "emptyText": "No course offerings."
+    }
+  },
+  "adminGrades": {
+    "title": "Course Grade Management",
+    "searchPlaceholder": "Search by student ID/name",
+    "table": {
+      "studentNo": "Student ID",
+      "deptName": "Department",
+      "gradeLevel": "Year",
+      "name": "Name",
+      "gpa": "GPA",
+      "emptyText": "No course grade records."
+    },
+    "detail": {
+      "page": {
+        "invalidAccess": "Invalid access.",
+        "loading": "Loading...",
+        "loadError": "An error occurred.",
+        "empty": "No data available.",
+        "title": "Course Grade Detail",
+        "backButton": "Back to list"
+      },
+      "info": {
+        "gradeLevel": "Year {value}",
+        "metrics": {
+          "maxGpa": "Highest GPA",
+          "overallGpa": "Average GPA",
+          "totalEarnedCredits": "Total Earned Credits"
+        },
+        "creditUnit": "credits"
+      },
+      "trend": {
+        "title": "Semester Grade Trend",
+        "empty": "No chart data.",
+        "tooltip": {
+          "gpa": "GPA: {value}",
+          "earnedCredits": "Earned Credits: {value} credits"
+        }
+      },
+      "list": {
+        "title": "Course Grade List",
+        "searchPlaceholder": "Search course code",
+        "loadError": "Failed to load."
+      },
+      "table": {
+        "curricularCode": "Course Code",
+        "curricularName": "Course Name",
+        "credits": "Credits",
+        "grade": "Grade",
+        "emptyText": "No grade records."
+      }
+    }
+  },
+  "adminOfferingDetail": {
+    "page": {
+      "loading": "Loading...",
+      "loadError": "An error occurred.",
+      "empty": "No data available.",
+      "title": "Course Offering Management",
+      "backButton": "Back to list"
+    },
+    "tabs": {
+      "detail": "Detail",
+      "students": "Students",
+      "competencies": "Competencies"
+    },
+    "detail": {
+      "sections": {
+        "course": "Course",
+        "operation": "Operation",
+        "professor": "Professor",
+        "remark": "Remarks"
+      },
+      "fields": {
+        "curricularName": "Course Name",
+        "deptName": "Department",
+        "credits": "Credits",
+        "offeringCode": "Offering Code",
+        "enrolledCount": "Enrolled",
+        "capacity": "Capacity",
+        "semester": "Semester",
+        "dayOfWeek": "Day",
+        "period": "Period",
+        "periodValue": "Period {period}",
+        "location": "Location",
+        "professor": "Professor",
+        "professorName": "Professor Name",
+        "phone": "Phone",
+        "email": "Email",
+        "description": "Description"
+      },
+      "messages": {
+        "onlyDraft": "Editable only in Draft status.",
+        "requiredDayOfWeek": "Please select a day.",
+        "saveFailed": "Failed to update.",
+        "selectProfessorHint": "Reflected after selecting a professor"
+      }
+    },
+    "students": {
+      "headers": {
+        "studentName": "Student Name",
+        "studentNo": "Student ID",
+        "gradeLevel": "Year",
+        "deptName": "Department",
+        "rawScore": "Score",
+        "grade": "Grade",
+        "enrollmentStatus": "Enrollment Status",
+        "completionStatus": "Completion Status",
+        "scoreAction": "Score Entry"
+      },
+      "buttons": {
+        "input": "Input",
+        "saving": "Saving..."
+      },
+      "messages": {
+        "scoreRange": "Score must be a number between 0 and 100.",
+        "savingToast": "Saving...",
+        "savedToast": "Score has been saved.",
+        "saveFailed": "Failed to save. Please try again.",
+        "canEditOnlyInProgress": "Score editing is available only when offering is IN_PROGRESS."
+      },
+      "emptyText": "No students found."
+    },
+    "competencies": {
+      "labels": {
+        "professor": "Professor",
+        "mainCompetencies": "Primary Competencies"
+      },
+      "titles": {
+        "mapping": "Competency Mapping",
+        "radar": "Competency Mapping Radar Chart"
+      },
+      "messages": {
+        "loading": "Loading...",
+        "loadError": "Failed to load.",
+        "saved": "Competency mapping has been saved.",
+        "duplicateWeight": "This score is already used by another competency.",
+        "saveFailed": "Save failed"
+      },
+      "buttons": {
+        "saving": "Saving..."
+      }
+    },
+    "radar": {
+      "empty": "Please register competency scores.",
+      "tooltip": "{value} points"
+    },
+    "status": {
+      "title": "Change Status",
+      "confirmYes": "Yes",
+      "confirmNo": "No",
+      "messages": {
+        "confirmText": "Do you want to change the status? (This action cannot be undone.)",
+        "updateFailed": "Failed to change status."
+      }
+    }
+  },
+  "modal": {
+    "curricularCreate": {
+      "title": "Register Curricular",
+      "curricularCodeLabel": "Course Code",
+      "curricularNameLabel": "Course Name",
+      "deptLabel": "Department",
+      "creditsLabel": "Credits",
+      "descriptionLabel": "Description",
+      "curricularCodePlaceholder": "e.g. CS101",
+      "curricularNamePlaceholder": "e.g. Data Structures",
+      "creditsPlaceholder": "e.g. 3",
+      "descriptionPlaceholder": "Enter course description.",
+      "submitFailed": "Registration failed.",
+      "validation": {
+        "requiredCurricularCode": "Please enter a course code.",
+        "requiredCurricularName": "Please enter a course name.",
+        "requiredDept": "Please select a department.",
+        "requiredCredits": "Please enter credits.",
+        "requiredDescription": "Please enter a description."
+      }
+    },
+    "curricularEdit": {
+      "title": "Edit Curricular",
+      "activeAriaLabel": "Active status",
+      "curricularCodeLabel": "Course Code",
+      "curricularNameLabel": "Course Name",
+      "deptLabel": "Department",
+      "creditsLabel": "Credits",
+      "descriptionLabel": "Description",
+      "submitFailed": "Failed to update curricular."
+    },
+    "offeringCreate": {
+      "title": "Register Course Offering",
+      "offeringCodeLabel": "Offering Code",
+      "semesterLabel": "Semester",
+      "deptLabel": "Department",
+      "curricularLabel": "Course",
+      "dayOfWeekLabel": "Day",
+      "periodLabel": "Period",
+      "capacityLabel": "Capacity",
+      "locationLabel": "Location",
+      "professorLabel": "Professor",
+      "professorEmailLabel": "Professor Email",
+      "professorPhoneLabel": "Professor Phone",
+      "offeringCodePlaceholder": "e.g. CS101-1",
+      "capacityPlaceholder": "e.g. 30",
+      "locationPlaceholder": "e.g. Main Building 302",
+      "submitFailed": "Registration failed.",
+      "validation": {
+        "requiredOfferingCode": "Please enter an offering code.",
+        "requiredSemester": "Please select a semester.",
+        "requiredDept": "Please select a department.",
+        "requiredCurricular": "Please select a course.",
+        "requiredDayOfWeek": "Please select a day.",
+        "requiredPeriod": "Please select a period.",
+        "requiredCapacity": "Please enter capacity.",
+        "requiredLocation": "Please enter a location.",
+        "requiredProfessor": "Please select a professor."
+      }
+    }
+  }
+}

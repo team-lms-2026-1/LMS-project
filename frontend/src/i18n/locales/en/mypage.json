@@ -1,0 +1,150 @@
+{
+  "student": {
+    "metadata": {
+      "title": "Student Main",
+      "description": "Student my page"
+    },
+    "page": {
+      "title": "My Page",
+      "loading": "Loading..."
+    },
+    "hook": {
+      "errors": {
+        "emptyData": "Unable to load data.",
+        "loadFailed": "Failed to load information."
+      }
+    },
+    "profile": {
+      "profileImageAlt": "Profile image",
+      "gradeText": "Year {grade}",
+      "statuses": {
+        "enrolled": "Enrolled",
+        "leave": "On leave",
+        "graduated": "Graduated",
+        "unknown": "Unknown"
+      }
+    },
+    "stats": {
+      "labels": {
+        "totalCredits": "Completed Credits",
+        "averageScore": "Average GPA",
+        "totalExtraPoints": "Extra-curricular Points",
+        "totalExtraHours": "Extra-curricular Hours"
+      },
+      "units": {
+        "credits": "cr",
+        "score": "",
+        "points": "P",
+        "hours": "h"
+      }
+    },
+    "timetable": {
+      "title": "Current Semester Timetable",
+      "headers": {
+        "period": "Period"
+      },
+      "days": {
+        "monday": "Mon",
+        "tuesday": "Tue",
+        "wednesday": "Wed",
+        "thursday": "Thu",
+        "friday": "Fri",
+        "saturday": "Sat",
+        "sunday": "Sun"
+      }
+    }
+  },
+  "admin": {
+    "metadata": {
+      "title": "Admin Main",
+      "description": "Admin dashboard"
+    },
+    "dashboard": {
+      "accountType": {
+        "admin": "Admin",
+        "professor": "Professor",
+        "student": "Student",
+        "staff": "Staff"
+      },
+      "sections": {
+        "onlineAccounts": {
+          "title": "Currently Online Accounts",
+          "button": "Go to Account Logs"
+        },
+        "notices": {
+          "title": "Recent Notices",
+          "button": "Manage All Notices"
+        }
+      },
+      "tables": {
+        "account": {
+          "headers": {
+            "loginId": "Login ID",
+            "name": "Name",
+            "accountType": "Account Type",
+            "lastActivityAt": "Last Activity",
+            "status": "Status"
+          },
+          "statusActive": "Active",
+          "empty": "No accounts are currently online."
+        },
+        "notice": {
+          "headers": {
+            "id": "ID",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "empty": "No notices available."
+        }
+      }
+    }
+  },
+  "professor": {
+    "metadata": {
+      "title": "Professor Main",
+      "description": "Professor dashboard"
+    },
+    "dashboard": {
+      "sections": {
+        "timetable": {
+          "title": "My Class Timetable This Semester",
+          "button": "My Course List"
+        },
+        "notices": {
+          "title": "Recent Notices",
+          "button": "All Notices"
+        }
+      },
+      "tables": {
+        "timetable": {
+          "headers": {
+            "period": "Period"
+          }
+        },
+        "notice": {
+          "headers": {
+            "id": "ID",
+            "category": "Category",
+            "title": "Title",
+            "views": "Views",
+            "createdAt": "Created At"
+          },
+          "uncategorized": "Uncategorized",
+          "empty": "No notices available."
+        }
+      },
+      "days": {
+        "monday": "Mon",
+        "tuesday": "Tue",
+        "wednesday": "Wed",
+        "thursday": "Thu",
+        "friday": "Fri",
+        "saturday": "Sat",
+        "sunday": "Sun"
+      }
+    }
+  }
+}

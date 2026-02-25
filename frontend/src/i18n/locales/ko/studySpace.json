@@ -1,0 +1,334 @@
+{
+  "admin": {
+    "spaces": {
+      "list": {
+        "breadcrumb": {
+          "home": "홈",
+          "current": "학습공간 대여 관리"
+        },
+        "title": "학습공간 대여 관리",
+        "toasts": {
+          "created": "학습공간이 등록되었습니다.",
+          "updated": "학습공간이 수정되었습니다.",
+          "deleted": "학습공간이 삭제되었습니다."
+        },
+        "errors": {
+          "loadFailed": "목록 조회 중 오류가 발생했습니다."
+        },
+        "buttons": {
+          "create": "등록"
+        }
+      },
+      "table": {
+        "loading": "로딩 중...",
+        "empty": "표시할 학습공간이 없습니다.",
+        "peopleRange": "{min}–{max}명",
+        "peopleUpTo": "1–{max}명",
+        "status": {
+          "rentable": "대여가능",
+          "notRentable": "대여불가"
+        }
+      },
+      "detail": {
+        "breadcrumb": {
+          "root": "학습공간 관리",
+          "current": "학습공간 상세페이지"
+        },
+        "loading": "로딩 중...",
+        "toasts": {
+          "created": "학습공간이 등록되었습니다.",
+          "updated": "학습공간이 수정되었습니다."
+        },
+        "errors": {
+          "loadFailed": "상세 조회 중 오류가 발생했습니다.",
+          "deleteFailed": "삭제 중 오류가 발생했습니다."
+        },
+        "buttons": {
+          "list": "목록으로",
+          "manageRooms": "그룹 스터디실 관리",
+          "edit": "수정",
+          "delete": "삭제"
+        }
+      },
+      "deleteModal": {
+        "title": "학습공간 삭제",
+        "confirmText": "삭제",
+        "cancelText": "취소",
+        "questionWithTitle": "학습공간을 삭제하시겠습니까?",
+        "questionWithoutTitle": "학습공간을 삭제하시겠습니까?",
+        "warnings": {
+          "includedRooms": "해당 학습공간에 포함된 스터디룸도 삭제됩니다.",
+          "cannotRestore": "삭제한 데이터는 복구할 수 없습니다."
+        }
+      },
+      "roomModal": {
+        "subtitle": "학습 공간 대여 관리",
+        "title": "예약하기",
+        "closeAriaLabel": "닫기",
+        "spaceHint": "spaceId: {spaceId}",
+        "columns": {
+          "room": "스터디룸",
+          "people": "수용 인원",
+          "period": "운영기간",
+          "time": "운영시간"
+        },
+        "loading": "불러오는 중...",
+        "empty": "등록된 스터디룸이 없습니다.",
+        "namePlaceholder": "스터디룸 이름",
+        "confirmDelete": "이 스터디실을 삭제할까요?",
+        "addLabel": "추가하기",
+        "buttons": {
+          "save": "저장",
+          "cancel": "취소",
+          "edit": "수정",
+          "delete": "삭제",
+          "processing": "처리 중...",
+          "done": "완료"
+        },
+        "toasts": {
+          "created": "스터디룸이 등록되었습니다.",
+          "updated": "스터디룸이 수정되었습니다.",
+          "deleted": "스터디룸이 삭제되었습니다."
+        },
+        "errors": {
+          "listLoadFailed": "스터디룸 목록을 불러오지 못했습니다.",
+          "nameRequired": "스터디실 이름을 입력하세요.",
+          "minPeopleInvalid": "최소 인원은 1 이상이어야 합니다.",
+          "maxPeopleInvalid": "최대 인원은 1 이상이어야 합니다.",
+          "minGreaterThanMax": "최소 인원은 최대 인원보다 클 수 없습니다.",
+          "invalidPeriodDate": "운영기간 날짜 형식이 올바르지 않습니다.",
+          "periodOrderInvalid": "운영기간 시작일은 종료일보다 늦을 수 없습니다.",
+          "invalidTimeFormat": "운영시간 형식이 올바르지 않습니다.",
+          "timeOrderInvalid": "운영시간 시작은 종료보다 빨라야 합니다.",
+          "saveFailed": "저장 중 오류가 발생했습니다.",
+          "deleteFailed": "삭제 중 오류가 발생했습니다.",
+          "editingExists": "편집 중인 항목이 있습니다. 저장 또는 취소 후 완료하세요."
+        }
+      }
+    },
+    "rentals": {
+      "list": {
+        "breadcrumb": {
+          "current": "학습공간 대여 관리"
+        },
+        "title": "학습공간 대여",
+        "searchPlaceholder": "검색어 입력..."
+      },
+      "table": {
+        "loading": "로딩 중...",
+        "empty": "신청 내역이 없습니다.",
+        "headers": {
+          "id": "번호",
+          "space": "장소",
+          "room": "이름",
+          "applicant": "신청자",
+          "date": "예약 날짜",
+          "time": "예약 시간",
+          "requestedAt": "요청 일시"
+        },
+        "userFallback": "사용자#{id}",
+        "statuses": {
+          "canceled": "취소됨"
+        },
+        "buttons": {
+          "approve": "허가",
+          "reject": "반려"
+        }
+      },
+      "hook": {
+        "toasts": {
+          "approved": "승인되었습니다.",
+          "rejected": "반려되었습니다."
+        },
+        "errors": {
+          "list": "목록을 불러오지 못했습니다.",
+          "listWithStatus": "목록을 불러오지 못했습니다. (HTTP {status})",
+          "process": "처리 중 오류가 발생했습니다.",
+          "processWithStatus": "처리 중 오류가 발생했습니다. (HTTP {status})"
+        }
+      },
+      "approveModal": {
+        "title": "승인 확인",
+        "closeAriaLabel": "닫기",
+        "description": "해당 신청을 승인하시겠습니까?",
+        "buttons": {
+          "cancel": "취소",
+          "confirm": "승인",
+          "processing": "처리 중..."
+        }
+      },
+      "rejectModal": {
+        "title": "반려 사유 입력",
+        "closeAriaLabel": "닫기",
+        "label": "사유를 입력하세요",
+        "placeholder": "예: 신청하신 시간에 예약이 꽉 찼습니다.",
+        "buttons": {
+          "cancel": "취소",
+          "confirm": "반려"
+        },
+        "errors": {
+          "reasonRequired": "반려 사유를 입력해주세요."
+        }
+      }
+    }
+  },
+  "student": {
+    "spaces": {
+      "list": {
+        "breadcrumb": {
+          "home": "홈",
+          "current": "학습공간 대여 관리"
+        },
+        "title": "학습공간 대여 관리",
+        "errors": {
+          "loadFailed": "목록 조회 중 오류가 발생했습니다.",
+          "noRentableRooms": "예약 가능한 스터디룸이 없습니다."
+        }
+      },
+      "table": {
+        "loading": "로딩 중...",
+        "empty": "표시할 학습공간이 없습니다.",
+        "peopleRange": "{min}–{max}명",
+        "peopleUpTo": "1–{max}명",
+        "status": {
+          "rentable": "대여가능",
+          "notRentable": "대여불가"
+        }
+      },
+      "detail": {
+        "breadcrumb": {
+          "root": "학습공간",
+          "current": "학습공간 상세페이지"
+        },
+        "loading": "로딩 중...",
+        "errors": {
+          "loadFailed": "상세 조회 중 오류가 발생했습니다."
+        },
+        "buttons": {
+          "list": "목록으로",
+          "reserveRooms": "그룹 스터디실 예약하기"
+        }
+      },
+      "reserveModal": {
+        "subtitle": "예약하기",
+        "title": "예약하기",
+        "closeAriaLabel": "닫기",
+        "spaceHint": "spaceId: {spaceId}",
+        "columns": {
+          "room": "스터디룸",
+          "people": "수용 인원",
+          "date": "날짜",
+          "time": "시간"
+        },
+        "loading": "불러오는 중...",
+        "empty": "예약 가능한 스터디룸이 없습니다.",
+        "peopleRange": "{min} - {max}",
+        "startPlaceholder": "시작 시간",
+        "endPlaceholder": "종료 시간",
+        "startFirst": "시작 먼저 선택",
+        "buttons": {
+          "submit": "신청",
+          "submitting": "신청 중..."
+        },
+        "toasts": {
+          "applied": "신청되었습니다."
+        },
+        "errors": {
+          "listLoadFailed": "스터디룸 목록을 불러오지 못했습니다.",
+          "selectDate": "예약 날짜를 선택하세요.",
+          "selectTime": "시작/종료 시간을 선택하세요.",
+          "endAfterStart": "종료 시간은 시작 시간보다 늦어야 합니다.",
+          "beforeOperationStart": "운영 시작일 이전에는 예약할 수 없습니다.",
+          "afterOperationEnd": "운영 종료일 이후에는 예약할 수 없습니다.",
+          "outOfAvailableTime": "운영시간 범위 내에서만 예약할 수 있습니다.",
+          "submitFailed": "예약 신청 중 오류가 발생했습니다."
+        }
+      },
+      "reserveConfirmModal": {
+        "title": "예약 신청",
+        "buttons": {
+          "cancel": "취소",
+          "submit": "신청"
+        },
+        "questionWithRoom": "예약을 신청할까요?",
+        "questionWithoutRoom": "예약을 신청할까요?",
+        "labels": {
+          "date": "날짜",
+          "time": "시간"
+        },
+        "description": "신청 후에는 승인 결과를 기다려주세요."
+      }
+    },
+    "rentals": {
+      "list": {
+        "title": "내 예약 목록",
+        "titleWithProfile": "내 예약 목록 ({name})",
+        "loading": {
+          "me": "내 정보 확인 중..."
+        },
+        "buttons": {
+          "retry": "다시 시도"
+        },
+        "errors": {
+          "noPermission": "예약 조회 권한이 없습니다. (RENTAL_READ)"
+        },
+        "rejectModal": {
+          "title": "반려 사유",
+          "closeAriaLabel": "닫기",
+          "noReason": "반려 사유가 없습니다.",
+          "buttons": {
+            "confirm": "확인"
+          }
+        },
+        "cancelModal": {
+          "title": "예약 취소",
+          "closeAriaLabel": "닫기",
+          "question": "예약을 취소할까요?",
+          "warning": "취소 후에는 복구할 수 없습니다.",
+          "buttons": {
+            "close": "닫기",
+            "confirm": "취소하기"
+          }
+        }
+      },
+      "table": {
+        "headers": {
+          "id": "번호",
+          "space": "학습공간",
+          "room": "스터디룸",
+          "date": "날짜",
+          "time": "시간",
+          "status": "상태",
+          "actions": "처리"
+        },
+        "loading": "불러오는 중...",
+        "empty": "예약 내역이 없습니다.",
+        "statuses": {
+          "requested": "요청됨",
+          "approved": "허가",
+          "rejected": "반려",
+          "cancelled": "취소됨"
+        },
+        "buttons": {
+          "cancel": "취소하기",
+          "rejected": "반려됨",
+          "approved": "허가",
+          "cancelled": "취소됨"
+        }
+      },
+      "hook": {
+        "toasts": {
+          "cancelled": "예약이 취소되었습니다."
+        },
+        "errors": {
+          "me": "내 정보를 불러오지 못했습니다.",
+          "meWithStatus": "내 정보를 불러오지 못했습니다. (HTTP {status})",
+          "list": "목록을 불러오지 못했습니다.",
+          "listWithStatus": "목록을 불러오지 못했습니다. (HTTP {status})",
+          "cancel": "취소 중 오류가 발생했습니다.",
+          "cancelWithStatus": "취소 중 오류가 발생했습니다. (HTTP {status})"
+        }
+      }
+    }
+  }
+}

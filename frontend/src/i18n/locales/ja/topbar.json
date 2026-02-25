@@ -1,0 +1,12 @@
+{
+  "todayTitle": "今日の日付",
+  "sessionTitle": "自動ログアウトまでの残り時間",
+  "sessionPrefix": "セッション",
+  "sessionEmpty": "セッション --:--",
+  "profileTitle": "プロフィール",
+  "fallback": {
+    "student": "学生",
+    "admin": "管理者",
+    "professor": "教授"
+  }
+}

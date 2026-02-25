@@ -1,0 +1,150 @@
+{
+  "student": {
+    "metadata": {
+      "title": "学生メイン",
+      "description": "学生マイページ"
+    },
+    "page": {
+      "title": "マイページ",
+      "loading": "読み込み中..."
+    },
+    "hook": {
+      "errors": {
+        "emptyData": "データを読み込めませんでした。",
+        "loadFailed": "照会に失敗しました。"
+      }
+    },
+    "profile": {
+      "profileImageAlt": "プロフィール画像",
+      "gradeText": "{grade}年次",
+      "statuses": {
+        "enrolled": "在学",
+        "leave": "休学",
+        "graduated": "卒業",
+        "unknown": "未確認"
+      }
+    },
+    "stats": {
+      "labels": {
+        "totalCredits": "修得単位",
+        "averageScore": "平均成績",
+        "totalExtraPoints": "比較科ポイント",
+        "totalExtraHours": "比較科履修時間"
+      },
+      "units": {
+        "credits": "単位",
+        "score": "点",
+        "points": "P",
+        "hours": "時間"
+      }
+    },
+    "timetable": {
+      "title": "今学期の時間割",
+      "headers": {
+        "period": "時限"
+      },
+      "days": {
+        "monday": "月",
+        "tuesday": "火",
+        "wednesday": "水",
+        "thursday": "木",
+        "friday": "金",
+        "saturday": "土",
+        "sunday": "日"
+      }
+    }
+  },
+  "admin": {
+    "metadata": {
+      "title": "管理者メイン",
+      "description": "管理者ダッシュボード"
+    },
+    "dashboard": {
+      "accountType": {
+        "admin": "管理者",
+        "professor": "教授",
+        "student": "学生",
+        "staff": "教職員"
+      },
+      "sections": {
+        "onlineAccounts": {
+          "title": "現在接続中のアカウント",
+          "button": "アカウントログ管理へ移動"
+        },
+        "notices": {
+          "title": "最近のお知らせ",
+          "button": "お知らせ全体管理"
+        }
+      },
+      "tables": {
+        "account": {
+          "headers": {
+            "loginId": "ログインID",
+            "name": "名前",
+            "accountType": "アカウント種別",
+            "lastActivityAt": "最終接続日時",
+            "status": "状態"
+          },
+          "statusActive": "稼働中",
+          "empty": "現在接続中のアカウントはありません。"
+        },
+        "notice": {
+          "headers": {
+            "id": "ID",
+            "category": "カテゴリ",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "empty": "登録されたお知らせはありません。"
+        }
+      }
+    }
+  },
+  "professor": {
+    "metadata": {
+      "title": "教授メイン",
+      "description": "教授ダッシュボード"
+    },
+    "dashboard": {
+      "sections": {
+        "timetable": {
+          "title": "今学期の担当授業時間割",
+          "button": "担当授業一覧"
+        },
+        "notices": {
+          "title": "最近のお知らせ",
+          "button": "お知らせ一覧"
+        }
+      },
+      "tables": {
+        "timetable": {
+          "headers": {
+            "period": "時限"
+          }
+        },
+        "notice": {
+          "headers": {
+            "id": "ID",
+            "category": "カテゴリ",
+            "title": "タイトル",
+            "views": "閲覧数",
+            "createdAt": "作成日"
+          },
+          "uncategorized": "未分類",
+          "empty": "登録されたお知らせはありません。"
+        }
+      },
+      "days": {
+        "monday": "月",
+        "tuesday": "火",
+        "wednesday": "水",
+        "thursday": "木",
+        "friday": "金",
+        "saturday": "土",
+        "sunday": "日"
+      }
+    }
+  }
+}
