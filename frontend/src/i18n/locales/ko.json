@@ -195,6 +195,66 @@
       }
     }
   },
+  "aiAdvisor": {
+    "mbti": {
+      "loading": "로딩 중...",
+      "home": {
+        "title": "MBTI AI 추천",
+        "description": "검사를 시작하면 기존 결과가 있어도 새 결과로 덮어씁니다.",
+        "start": {
+          "kicker": "새로 시작",
+          "title": "검사 시작",
+          "description": "MBTI 검사를 새로 진행하고 관심 키워드를 선택해 추천을 생성합니다.",
+          "button": "검사 시작"
+        },
+        "result": {
+          "kicker": "바로 확인",
+          "title": "결과 보기",
+          "description": "저장된 최신 MBTI/직업 추천 결과를 바로 확인합니다.",
+          "hasResult": "저장된 결과가 있습니다.",
+          "noResult": "저장된 결과가 없습니다.",
+          "button": "결과 보기"
+        }
+      },
+      "test": {
+        "title": "MBTI 검사",
+        "progress": "총 {totalCount}문항 중 {answeredCount}문항 응답 완료",
+        "submitButton": "관심 키워드 선택으로 이동"
+      },
+      "keywords": {
+        "title": "관심 키워드 선택",
+        "description": "최소 {minCount}개 이상 선택해 주세요.",
+        "submitButton": "추천 결과 보기"
+      },
+      "result": {
+        "title": "MBTI 기반 추천 결과",
+        "intro": "성향 점수와 관심 키워드를 반영한 AI 추천입니다.",
+        "noScoreData": "저장된 MBTI 점수 정보가 없습니다.",
+        "jobsTitle": "AI 추천 직업 5개",
+        "emptyMessage": "저장된 직업 추천 결과가 없습니다. 검사를 먼저 진행해 주세요.",
+        "fallbackReasonWithKeywords": "{jobName}은(는) {mbtiType} 성향과 {keywords} 같은 관심사를 바탕으로 추천된 직업입니다.",
+        "fallbackReasonWithoutKeywords": "{jobName}은(는) {mbtiType} 성향과 업무 선호를 바탕으로 추천된 직업입니다."
+      },
+      "messages": {
+        "initLoadFailed": "MBTI 정보를 불러오지 못했습니다.",
+        "loadQuestionsFailed": "MBTI 문항을 불러오지 못했습니다.",
+        "noSavedResult": "저장된 결과가 없습니다. 검사를 먼저 진행해 주세요.",
+        "answerAllQuestions": "모든 문항에 응답해 주세요.",
+        "generateResultFailed": "MBTI 결과 생성에 실패했습니다.",
+        "testCompleted": "MBTI 검사가 완료되었습니다.",
+        "submitFailed": "MBTI 제출 중 오류가 발생했습니다.",
+        "selectMinKeywords": "관심 키워드를 최소 {minCount}개 선택해 주세요.",
+        "recommendationCreated": "추천 결과가 생성되었습니다.",
+        "createRecommendationFailed": "추천 결과 생성 중 오류가 발생했습니다."
+      }
+    },
+    "testPage": {
+      "title": "AI 테스트",
+      "placeholder": "질문을 입력하세요",
+      "askButton": "질문하기",
+      "askFailed": "질문 처리에 실패했습니다."
+    }
+  },
   "authority": {
     "semesters": {
       "page": {
@@ -419,6 +479,37 @@
         "capacity": "인원수",
         "enrolledCount": "신청인원",
         "emptyText": "교과운영이 없습니다."
+      }
+    },
+    "studentEnrollments": {
+      "title": "\uc218\uac15 \uc2e0\uccad \ud604\ud669",
+      "table": {
+        "offeringCode": "\uac1c\uc124\ucf54\ub4dc",
+        "curricularName": "\uad50\uacfc\ubaa9\uba85",
+        "professorName": "\ub2f4\ub2f9\uad50\uc218",
+        "semesterName": "\ud559\uae30",
+        "credit": "\ud559\uc810",
+        "competency1": "\uc5ed\ub7c91",
+        "competency2": "\uc5ed\ub7c92",
+        "capacity": "\uc815\uc6d0",
+        "enrolledCount": "\ub4f1\ub85d\uc778\uc6d0",
+        "cancelButton": "\uc2e0\uccad\ucde8\uc18c",
+        "emptyText": "\uc2e0\uccad\uc911\uc778 \uad50\uacfc\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4."
+      },
+      "dialog": {
+        "title": "\uc2e0\uccad \ucde8\uc18c",
+        "description": "\uc544\ub798 \uad50\uacfc\ubaa9 \uc2e0\uccad\uc744 \ucde8\uc18c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?",
+        "confirmText": "\uc2e0\uccad\ucde8\uc18c"
+      },
+      "messages": {
+        "cancelSuccess": "\uc2e0\uccad\uc774 \ucde8\uc18c\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+        "cancelFailed": "\uc2e0\uccad \ucde8\uc18c\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4."
+      }
+    },
+    "studentCurrentEnrollments": {
+      "title": "\uc218\uac15\uc911 \uad50\uacfc\ud604\ud669",
+      "table": {
+        "emptyText": "\uc218\uac15\uc911\uc778 \uad50\uacfc\ubaa9\uc774 \uc5c6\uc2b5\ub2c8\ub2e4."
       }
     },
     "professorOfferings": {
@@ -718,6 +809,47 @@
       "saveButton": "저장",
       "cancelButton": "취소",
       "closeButton": "닫기"
+    },
+    "studentOfferings": {
+      "title": "\ube44\uad50\uacfc \uc2e0\uccad",
+      "searchPlaceholder": "\ube44\uad50\uacfc\uc6b4\uc601\uba85/\ucf54\ub4dc \uac80\uc0c9",
+      "table": {
+        "offeringCode": "\uac1c\uc124\ucf54\ub4dc",
+        "offeringName": "\ube44\uad50\uacfc\uba85",
+        "hostContactName": "\ub2f4\ub2f9\uc790",
+        "rewardPoint": "\uc0c1\uc810",
+        "recognizedHours": "\uc778\uc815\uc2dc\uac04",
+        "emptyText": "\ube44\uad50\uacfc\uc6b4\uc601\uc774 \uc5c6\uc2b5\ub2c8\ub2e4."
+      }
+    },
+    "studentEnrollments": {
+      "title": "\ube44\uad50\uacfc \uc2e0\uccad \ud604\ud669",
+      "table": {
+        "offeringCode": "\ube44\uad50\uacfc\ucf54\ub4dc",
+        "offeringName": "\ube44\uad50\uacfc\uba85",
+        "hostContactName": "\ub2f4\ub2f9\uc790",
+        "semesterName": "\ud559\uae30",
+        "rewardPoint": "\uc0c1\uc810",
+        "recognizedHours": "\uc778\uc815\uc2dc\uac04",
+        "status": "\uc0c1\ud0dc",
+        "cancelButton": "\uc2e0\uccad\ucde8\uc18c",
+        "emptyText": "\uc2e0\uccad\uc911\uc778 \ube44\uad50\uacfc\uac00 \uc5c6\uc2b5\ub2c8\ub2e4."
+      },
+      "dialog": {
+        "title": "\uc2e0\uccad \ucde8\uc18c",
+        "description": "\uc544\ub798 \ube44\uad50\uacfc \uc2e0\uccad\uc744 \ucde8\uc18c\ud558\uc2dc\uaca0\uc2b5\ub2c8\uae4c?",
+        "confirmText": "\uc2e0\uccad\ucde8\uc18c"
+      },
+      "messages": {
+        "cancelSuccess": "\uc2e0\uccad\uc774 \ucde8\uc18c\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+        "cancelFailed": "\uc2e0\uccad \ucde8\uc18c\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4."
+      }
+    },
+    "studentCurrentEnrollments": {
+      "title": "\uc774\uc218\uc911 \ube44\uad50\uacfc",
+      "table": {
+        "emptyText": "\uc774\uc218\uc911\uc778 \ube44\uad50\uacfc\uac00 \uc5c6\uc2b5\ub2c8\ub2e4."
+      }
     },
     "adminPrograms": {
       "title": "비교과 관리",
@@ -1167,7 +1299,7 @@
             "maxSize": "최대 용량: 50MB"
           },
           "errors": {
-            "leaveGuard": "등록 작성 중입니다.",
+            "leaveGuard": "등록 페이지 작성 중입니다.",
             "titleRequired": "제목을 입력하세요.",
             "contentRequired": "내용을 입력하세요.",
             "periodRequired": "게시기간을 정해 주세요.",
@@ -1417,6 +1549,7 @@
             "maxSize": "최대 용량: 50MB"
           },
           "errors": {
+            "leaveGuard": "자료 등록 중입니다.",
             "titleRequired": "제목을 입력하세요.",
             "contentRequired": "내용을 입력하세요.",
             "submitFailed": "등록에 실패했습니다."
@@ -1456,6 +1589,7 @@
             "attachmentFallback": "첨부파일 {index}"
           },
           "errors": {
+            "leaveGuard": "자료를 수정 중입니다.",
             "invalidId": "잘못된 자료실 ID입니다.",
             "loadFailed": "자료를 불러오지 못했습니다.",
             "missingFileId": "fileId가 없어 삭제할 수 없습니다.",
@@ -1643,6 +1777,7 @@
             "creating": "등록 중..."
           },
           "errors": {
+            "leaveGuard": "FAQ 등록 중입니다.",
             "titleRequired": "제목을 입력하세요.",
             "contentRequired": "내용을 입력하세요.",
             "submitFailed": "등록에 실패했습니다."
@@ -1674,6 +1809,7 @@
             "uncategorized": "미분류"
           },
           "errors": {
+            "leaveGuard": "FAQ를 수정 중입니다.",
             "invalidId": "잘못된 FAQ ID입니다.",
             "loadFailed": "FAQ를 불러오지 못했습니다.",
             "titleRequired": "제목을 입력하세요.",
@@ -1832,6 +1968,8 @@
             "question": "Q&A"
           },
           "errors": {
+            "answerLeaveGuardEdit": "답변 수정 중입니다.",
+            "answerLeaveGuardCreate": "답변 작성 중입니다.",
             "invalidId": "Invalid question ID.",
             "loadFailed": "Failed to load question.",
             "deleteFailed": "Delete failed.",

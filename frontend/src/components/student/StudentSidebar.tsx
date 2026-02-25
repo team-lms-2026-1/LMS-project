@@ -8,6 +8,8 @@ import styles from "./student-shell.module.css";
 
 type NavItem = { labelKey: string; href: string };
 type NavSection = { key: string; titleKey: string; items: NavItem[] };
+const MBTI_ROUTE = "/student/mbti";
+const MBTI_MENU_RESET_EVENT = "student:mbti-menu-reset";
 
 const SECTIONS: NavSection[] = [
   {
@@ -73,7 +75,7 @@ const SECTIONS: NavSection[] = [
   {
     key: "aiAdvisor",
     titleKey: "sections.aiAdvisor.title",
-    items: [{ labelKey: "sections.aiAdvisor.items.mbti", href: "/student/mbti" }],
+    items: [{ labelKey: "sections.aiAdvisor.items.mbti", href: MBTI_ROUTE }],
   },
 ];
 
@@ -136,6 +138,11 @@ export default function StudentSidebar() {
                         key={item.href + item.labelKey}
                         href={item.href}
                         className={active ? styles.itemActive : styles.item}
+                        onClick={() => {
+                          if (item.href === MBTI_ROUTE) {
+                            window.dispatchEvent(new Event(MBTI_MENU_RESET_EVENT));
+                          }
+                        }}
                       >
                         {t(item.labelKey)}
                       </Link>

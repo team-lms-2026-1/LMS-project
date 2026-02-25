@@ -79,15 +79,20 @@ public class MbtiController {
     @PreAuthorize("hasAuthority('MBTI_MANAGE')")
     public ApiResponse<MbtiJobRecommendationResponse> createRecommendation(
             @AuthenticationPrincipal AuthUser authUser,
-            @RequestBody MbtiJobRecommendationRequest request) {
-        return ApiResponse
-                .ok(recommendationService.generateRecommendation(authUser.getAccountId(), request.keywordIds()));
+            @RequestBody MbtiJobRecommendationRequest request,
+            @RequestParam(value = "locale", required = false) String locale
+    ) {
+        String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
+        return ApiResponse.ok(recommendationService.generateRecommendation(authUser.getAccountId(), request.keywordIds(), currentLocale));
     }
 
     @GetMapping("/recommendations/latest")
     @PreAuthorize("hasAuthority('MBTI_READ')")
     public ApiResponse<MbtiJobRecommendationResponse> getLatestRecommendation(
-            @AuthenticationPrincipal AuthUser authUser) {
-        return ApiResponse.ok(recommendationService.getLatestRecommendation(authUser.getAccountId()));
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(value = "locale", required = false) String locale
+    ) {
+        String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
+        return ApiResponse.ok(recommendationService.getLatestRecommendation(authUser.getAccountId(), currentLocale));
     }
 }

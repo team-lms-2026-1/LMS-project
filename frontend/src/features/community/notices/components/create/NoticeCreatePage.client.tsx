@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 import styles from "./NoticeCreatePage.module.css";
 import type { Category, CreateNoticeRequestDto } from "../../api/types";
-import { createNotice, fetchNoticeCategories } from "../../api/NoticesApi";
+import { createNotice, fetchNoticeCategories } from "../../api/noticesApi";
 import { Button } from "@/components/button";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
@@ -70,6 +70,22 @@ export default function NoticeCreatePageClient() {
   const toastLeave = useCallback(() => {
     toast.error(i18n("errors.leaveGuard"));
   }, [i18n]);
+
+  const guardNavigate = useCallback(
+    (path: string) => {
+      if (allowLeaveRef.current) {
+        router.push(path);
+        return;
+      }
+      if (saving) return;
+      if (isDirty) {
+        toastLeave();
+        return;
+      }
+      router.push(path);
+    },
+    [router, isDirty, saving, toastLeave]
+  );
 
   useEffect(() => {
     let alive = true;
@@ -256,7 +272,7 @@ export default function NoticeCreatePageClient() {
   };
 
   const onCancel = () => {
-    if (isDirty && !saving) toastLeave();
+    allowLeaveRef.current = true;
     router.push(LIST_PATH);
   };
 
@@ -271,7 +287,7 @@ export default function NoticeCreatePageClient() {
       <div className={styles.card}>
         <div className={styles.headerRow}>
           <h1 className={styles.pageTitle}>{i18n("title")}</h1>
-          <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
+          <Button variant="secondary" onClick={() => guardNavigate(LIST_PATH)} disabled={saving}>
             {i18n("buttons.list")}
           </Button>
         </div>

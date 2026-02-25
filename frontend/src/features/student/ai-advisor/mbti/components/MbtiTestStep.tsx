@@ -1,6 +1,7 @@
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./MbtiClient.module.css";
-import { MbtiQuestion } from "../api/types";
+import type { MbtiQuestion } from "../api/types";
 
 type MbtiTestStepProps = {
   questions: MbtiQuestion[];
@@ -21,12 +22,17 @@ export function MbtiTestStep({
   onSelectAnswer,
   onSubmit,
 }: MbtiTestStepProps) {
+  const t = useI18n("aiAdvisor.mbti.test");
+
   return (
     <div className={styles.container}>
       <div className={styles.heroCard}>
-        <h1 className={styles.pageTitle}>MBTI 검사</h1>
+        <h1 className={styles.pageTitle}>{t("title")}</h1>
         <p className={styles.description}>
-          총 {questions.length}문항 중 {answeredCount}문항 응답 완료
+          {t("progress", {
+            totalCount: questions.length,
+            answeredCount,
+          })}
         </p>
       </div>
 
@@ -55,10 +61,9 @@ export function MbtiTestStep({
 
       <div className={styles.actionArea}>
         <Button className={styles.submitBtn} onClick={onSubmit} loading={submitting} disabled={!allAnswered}>
-          관심 키워드 선택으로 이동
+          {t("submitButton")}
         </Button>
       </div>
     </div>
   );
 }
-

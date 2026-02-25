@@ -14,7 +14,7 @@ import type {
   ExistingFile,
   LoadState,
 } from "../../api/types";
-import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/NoticesApi";
+import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/noticesApi";
 import { Button } from "@/components/button";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
@@ -154,6 +154,22 @@ export default function NoticeEditPageClient() {
   const toastLeave = useCallback(() => {
     toast.error(i18n("errors.leaveGuard"));
   }, [i18n]);
+
+  const guardNavigate = useCallback(
+    (path: string) => {
+      if (allowLeaveRef.current) {
+        router.push(path);
+        return;
+      }
+      if (saving) return;
+      if (isDirty) {
+        toastLeave();
+        return;
+      }
+      router.push(path);
+    },
+    [router, isDirty, saving, toastLeave]
+  );
 
   useEffect(() => {
     if (allowLeaveRef.current) return;
@@ -296,7 +312,7 @@ export default function NoticeEditPageClient() {
   }, [title, content, saving, load.loading, isPeriodValid]);
 
   const onCancel = () => {
-    if (isDirty && !saving) toastLeave();
+    allowLeaveRef.current = true;
     router.push(DETAIL_PATH);
   };
 
@@ -399,14 +415,14 @@ export default function NoticeEditPageClient() {
       <div className={styles.card}>
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
-            <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
+            <span className={styles.crumb} onClick={() => guardNavigate(LIST_PATH)}>
               {i18n("title")}
             </span>
             <span className={styles.sep}>›</span>
             <span className={styles.current}>{i18n("breadcrumbCurrent")}</span>
           </div>
 
-          <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
+          <Button variant="secondary" onClick={() => guardNavigate(LIST_PATH)} disabled={saving}>
             {i18n("buttons.list")}
           </Button>
         </div>

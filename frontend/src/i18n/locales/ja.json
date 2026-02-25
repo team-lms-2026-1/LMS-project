@@ -194,6 +194,66 @@
       }
     }
   },
+  "aiAdvisor": {
+    "mbti": {
+      "loading": "読み込み中...",
+      "home": {
+        "title": "MBTI AI 推薦",
+        "description": "テストを開始すると既存結果があっても新しい結果で上書きされます。",
+        "start": {
+          "kicker": "新しく開始",
+          "title": "テスト開始",
+          "description": "MBTIテストを新しく実施し、関心キーワードを選択して推薦を生成します。",
+          "button": "テスト開始"
+        },
+        "result": {
+          "kicker": "すぐ確認",
+          "title": "結果を見る",
+          "description": "保存された最新のMBTI/職業推薦結果をすぐ確認できます。",
+          "hasResult": "保存された結果があります。",
+          "noResult": "保存された結果がありません。",
+          "button": "結果を見る"
+        }
+      },
+      "test": {
+        "title": "MBTIテスト",
+        "progress": "全{totalCount}問のうち{answeredCount}問回答済み",
+        "submitButton": "関心キーワード選択へ移動"
+      },
+      "keywords": {
+        "title": "関心キーワード選択",
+        "description": "最低{minCount}個以上選択してください。",
+        "submitButton": "推薦結果を見る"
+      },
+      "result": {
+        "title": "MBTIベース推薦結果",
+        "intro": "性向スコアと関心キーワードを反映したAI推薦です。",
+        "noScoreData": "保存されたMBTIスコア情報がありません。",
+        "jobsTitle": "AI推薦職業5件",
+        "emptyMessage": "保存された職業推薦結果がありません。先にテストを実施してください。",
+        "fallbackReasonWithKeywords": "{jobName}は{mbtiType}性向と{keywords}のような関心をもとに推薦された職業です。",
+        "fallbackReasonWithoutKeywords": "{jobName}は{mbtiType}性向と業務選好をもとに推薦された職業です。"
+      },
+      "messages": {
+        "initLoadFailed": "MBTI情報を読み込めませんでした。",
+        "loadQuestionsFailed": "MBTI設問を読み込めませんでした。",
+        "noSavedResult": "保存された結果がありません。先にテストを実施してください。",
+        "answerAllQuestions": "すべての設問に回答してください。",
+        "generateResultFailed": "MBTI結果の生成に失敗しました。",
+        "testCompleted": "MBTIテストが完了しました。",
+        "submitFailed": "MBTI提出中にエラーが発生しました。",
+        "selectMinKeywords": "関心キーワードを最低{minCount}個選択してください。",
+        "recommendationCreated": "推薦結果が生成されました。",
+        "createRecommendationFailed": "推薦結果生成中にエラーが発生しました。"
+      }
+    },
+    "testPage": {
+      "title": "AIテスト",
+      "placeholder": "質問を入力してください",
+      "askButton": "質問する",
+      "askFailed": "質問の処理に失敗しました。"
+    }
+  },
   "authority": {
     "semesters": {
       "page": {
@@ -418,6 +478,37 @@
         "capacity": "定員",
         "enrolledCount": "申請人数",
         "emptyText": "授業運営情報がありません。"
+      }
+    },
+    "studentEnrollments": {
+      "title": "\u53d7\u8b1b\u7533\u8acb\u72b6\u6cc1",
+      "table": {
+        "offeringCode": "\u958b\u8a2d\u30b3\u30fc\u30c9",
+        "curricularName": "\u79d1\u76ee\u540d",
+        "professorName": "\u62c5\u5f53\u6559\u6388",
+        "semesterName": "\u5b66\u671f",
+        "credit": "\u5358\u4f4d",
+        "competency1": "\u30b3\u30f3\u30d4\u30c6\u30f3\u30b7\u30fc1",
+        "competency2": "\u30b3\u30f3\u30d4\u30c6\u30f3\u30b7\u30fc2",
+        "capacity": "\u5b9a\u54e1",
+        "enrolledCount": "\u767b\u9332\u4eba\u6570",
+        "cancelButton": "\u7533\u8acb\u53d6\u6d88",
+        "emptyText": "\u7533\u8acb\u4e2d\u306e\u79d1\u76ee\u304c\u3042\u308a\u307e\u305b\u3093\u3002"
+      },
+      "dialog": {
+        "title": "\u7533\u8acb\u53d6\u6d88",
+        "description": "\u4e0b\u8a18\u79d1\u76ee\u306e\u7533\u8acb\u3092\u53d6\u308a\u6d88\u3057\u307e\u3059\u304b\uff1f",
+        "confirmText": "\u7533\u8acb\u53d6\u6d88"
+      },
+      "messages": {
+        "cancelSuccess": "\u7533\u8acb\u3092\u53d6\u308a\u6d88\u3057\u307e\u3057\u305f\u3002",
+        "cancelFailed": "\u7533\u8acb\u53d6\u6d88\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002"
+      }
+    },
+    "studentCurrentEnrollments": {
+      "title": "\u5c65\u4fee\u4e2d\u79d1\u76ee\u72b6\u6cc1",
+      "table": {
+        "emptyText": "\u5c65\u4fee\u4e2d\u306e\u79d1\u76ee\u304c\u3042\u308a\u307e\u305b\u3093\u3002"
       }
     },
     "professorOfferings": {
@@ -717,6 +808,47 @@
       "saveButton": "保存",
       "cancelButton": "取消",
       "closeButton": "閉じる"
+    },
+    "studentOfferings": {
+      "title": "\u8ab2\u5916\u7533\u8acb",
+      "searchPlaceholder": "\u8ab2\u5916\u904b\u55b6\u540d/\u30b3\u30fc\u30c9\u691c\u7d22",
+      "table": {
+        "offeringCode": "\u958b\u8a2d\u30b3\u30fc\u30c9",
+        "offeringName": "\u8ab2\u5916\u540d",
+        "hostContactName": "\u62c5\u5f53\u8005",
+        "rewardPoint": "\u30dd\u30a4\u30f3\u30c8",
+        "recognizedHours": "\u8a8d\u5b9a\u6642\u9593",
+        "emptyText": "\u8ab2\u5916\u904b\u55b6\u304c\u3042\u308a\u307e\u305b\u3093\u3002"
+      }
+    },
+    "studentEnrollments": {
+      "title": "\u8ab2\u5916\u30d7\u30ed\u30b0\u30e9\u30e0\u7533\u8acb\u72b6\u6cc1",
+      "table": {
+        "offeringCode": "\u8ab2\u5916\u30b3\u30fc\u30c9",
+        "offeringName": "\u8ab2\u5916\u540d",
+        "hostContactName": "\u62c5\u5f53\u8005",
+        "semesterName": "\u5b66\u671f",
+        "rewardPoint": "\u30dd\u30a4\u30f3\u30c8",
+        "recognizedHours": "\u8a8d\u5b9a\u6642\u9593",
+        "status": "\u72b6\u614b",
+        "cancelButton": "\u7533\u8acb\u53d6\u6d88",
+        "emptyText": "\u7533\u8acb\u4e2d\u306e\u8ab2\u5916\u304c\u3042\u308a\u307e\u305b\u3093\u3002"
+      },
+      "dialog": {
+        "title": "\u7533\u8acb\u53d6\u6d88",
+        "description": "\u4e0b\u8a18\u8ab2\u5916\u306e\u7533\u8acb\u3092\u53d6\u308a\u6d88\u3057\u307e\u3059\u304b\uff1f",
+        "confirmText": "\u7533\u8acb\u53d6\u6d88"
+      },
+      "messages": {
+        "cancelSuccess": "\u7533\u8acb\u3092\u53d6\u308a\u6d88\u3057\u307e\u3057\u305f\u3002",
+        "cancelFailed": "\u7533\u8acb\u53d6\u6d88\u306b\u5931\u6557\u3057\u307e\u3057\u305f\u3002"
+      }
+    },
+    "studentCurrentEnrollments": {
+      "title": "\u5c65\u4fee\u4e2d\u8ab2\u5916",
+      "table": {
+        "emptyText": "\u5c65\u4fee\u4e2d\u306e\u8ab2\u5916\u304c\u3042\u308a\u307e\u305b\u3093\u3002"
+      }
     },
     "adminPrograms": {
       "title": "課外管理",
@@ -1166,7 +1298,7 @@
             "maxSize": "最大容量: 50MB"
           },
           "errors": {
-            "leaveGuard": "登録内容を編集中です。",
+            "leaveGuard": "お知らせを登録中です。",
             "titleRequired": "タイトルを入力してください。",
             "contentRequired": "内容を入力してください。",
             "periodRequired": "掲示期間を設定してください。",
@@ -1416,6 +1548,7 @@
             "maxSize": "最大容量: 50MB"
           },
           "errors": {
+            "leaveGuard": "?????????",
             "titleRequired": "タイトルを入力してください。",
             "contentRequired": "内容を入力してください。",
             "submitFailed": "登録に失敗しました。"
@@ -1455,6 +1588,7 @@
             "attachmentFallback": "添付ファイル {index}"
           },
           "errors": {
+            "leaveGuard": "?????????",
             "invalidId": "無効な資料IDです。",
             "loadFailed": "資料を読み込めませんでした。",
             "missingFileId": "このファイルはfileIdがないため削除できません。",
@@ -1642,6 +1776,7 @@
             "creating": "登録中..."
           },
           "errors": {
+            "leaveGuard": "FAQ???????",
             "titleRequired": "タイトルを入力してください。",
             "contentRequired": "内容を入力してください。",
             "submitFailed": "登録に失敗しました。"
@@ -1673,6 +1808,7 @@
             "uncategorized": "未分類"
           },
           "errors": {
+            "leaveGuard": "FAQ???????",
             "invalidId": "無効なFAQ IDです。",
             "loadFailed": "FAQを読み込めませんでした。",
             "titleRequired": "タイトルを入力してください。",
@@ -1831,6 +1967,8 @@
             "question": "Q&A"
           },
           "errors": {
+            "answerLeaveGuardEdit": "回答を修正中です。",
+            "answerLeaveGuardCreate": "回答を作成中です。",
             "invalidId": "Invalid question ID.",
             "loadFailed": "Failed to load question.",
             "deleteFailed": "Delete failed.",
