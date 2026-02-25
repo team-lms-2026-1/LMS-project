@@ -1,6 +1,6 @@
-import en from "@/i18n/locales/en.json";
-import ja from "@/i18n/locales/ja.json";
-import ko from "@/i18n/locales/ko.json";
+import en from "@/i18n/locales/en";
+import ja from "@/i18n/locales/ja";
+import ko from "@/i18n/locales/ko";
 import { DEFAULT_LOCALE, type Locale } from "./locale";
 
 const MESSAGES = {

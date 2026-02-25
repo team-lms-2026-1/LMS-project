@@ -1,18 +1,10 @@
 "use client";
 
-<<<<<<< HEAD
-=======
-import { Table, type TableColumn } from "@/components/table";
-import styles from "./FaqTable.module.css";
->>>>>>> 44044ac8de2f65c1a91074d8e7de799d07057468
 import { useRouter } from "next/navigation";
 import { Table, type TableColumn } from "@/components/table";
 import { FaqListItemDto } from "../api/types";
-<<<<<<< HEAD
 import styles from "./FaqTable.module.css";
-=======
 import { useI18n } from "@/i18n/useI18n";
->>>>>>> 44044ac8de2f65c1a91074d8e7de799d07057468
 
 type Props = {
   items: FaqListItemDto[];
