@@ -7,6 +7,7 @@ import { roomsApi } from "../../api/spacesApi";
 import type { RoomDto } from "../../api/types";
 import toast from "react-hot-toast";
 import ReserveConfirmModal from "./ReserveConfirmModal.client";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -84,6 +85,7 @@ function buildTimePoints(room: RoomDto, stepMin = 120): TimePoint[] {
 }
 
 export default function SpacesModal({ open, onClose, spaceId }: Props) {
+  const t = useI18n("studySpace.student.spaces.reserveModal");
   const [rooms, setRooms] = useState<RoomDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [submittingRoomId, setSubmittingRoomId] = useState<number | null>(null);
@@ -117,13 +119,13 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
         setRooms(list);
 
         // ✅ 기본값 초기화
-        const t = todayYmd();
+        const today = todayYmd();
         const baseDate: Record<number, string> = {};
         const baseStart: Record<number, string> = {};
         const baseEnd: Record<number, string> = {};
 
         for (const r of list) {
-          baseDate[r.roomId] = isValidYmd(t) ? t : "";
+          baseDate[r.roomId] = isValidYmd(today) ? today : "";
           baseStart[r.roomId] = "";
           baseEnd[r.roomId] = "";
         }
@@ -135,7 +137,7 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
         console.error("[ReserveModal list]", e);
         if (!alive) return;
         setRooms([]);
-        alert(e?.message || "스터디룸 목록을 불러오지 못했습니다.");
+        alert(e?.message || t("errors.listLoadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -145,7 +147,7 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
     return () => {
       alive = false;
     };
-  }, [open, spaceId]);
+  }, [open, spaceId, t]);
 
   /** ESC 닫기 */
   useEffect(() => {
@@ -187,21 +189,21 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
     const startTime = selectedStartTime[roomId] ?? "";
     const endTime = selectedEndTime[roomId] ?? "";
 
-    if (!isValidYmd(rentalDate)) return alert("예약 날짜를 선택하세요.");
-    if (!isValidHm(startTime) || !isValidHm(endTime)) return alert("시작/종료 시간을 선택하세요.");
-    if (compareStr(startTime, endTime) >= 0) return alert("종료 시간은 시작 시간보다 늦어야 합니다.");
+    if (!isValidYmd(rentalDate)) return alert(t("errors.selectDate"));
+    if (!isValidHm(startTime) || !isValidHm(endTime)) return alert(t("errors.selectTime"));
+    if (compareStr(startTime, endTime) >= 0) return alert(t("errors.endAfterStart"));
 
     // ✅ 운영기간 체크
     if (room.operationStartDate && compareStr(rentalDate, room.operationStartDate) < 0) {
-      return alert("운영 시작일 이전에는 예약할 수 없습니다.");
+      return alert(t("errors.beforeOperationStart"));
     }
     if (room.operationEndDate && compareStr(rentalDate, room.operationEndDate) > 0) {
-      return alert("운영 종료일 이후에는 예약할 수 없습니다.");
+      return alert(t("errors.afterOperationEnd"));
     }
 
     // ✅ 운영시간 체크
     if (compareStr(startTime, room.availableStartTime) < 0 || compareStr(endTime, room.availableEndTime) > 0) {
-      return alert("운영시간 범위 내에서만 예약할 수 있습니다.");
+      return alert(t("errors.outOfAvailableTime"));
     }
 
     setConfirmTarget({ room, rentalDate, startTime, endTime });
@@ -228,13 +230,13 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
         endTime,
       });
 
-      toast.success("신청되었습니다.");
+      toast.success(t("toasts.applied"));
       setConfirmOpen(false);
       setConfirmTarget(null);
       onClose();
     } catch (e: any) {
       console.error("[ReserveModal create]", e);
-      alert(e?.message || "예약 신청 중 오류가 발생했습니다.");
+      alert(e?.message || t("errors.submitFailed"));
     } finally {
       setSubmittingRoomId(null);
     }
@@ -264,31 +266,31 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className={styles.topBar}>
-          <div className={styles.subtitle}>예약하기</div>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="close">
+          <div className={styles.subtitle}>{t("subtitle")}</div>
+          <button className={styles.closeBtn} onClick={onClose} aria-label={t("closeAriaLabel")}>
             ×
           </button>
         </div>
 
         <div className={styles.header}>
-          <div className={styles.title}>예약하기</div>
-          <div className={styles.spaceHint}>spaceId: {spaceId}</div>
+          <div className={styles.title}>{t("title")}</div>
+          <div className={styles.spaceHint}>{t("spaceHint", { spaceId })}</div>
         </div>
 
         <div className={styles.gridHeader}>
-          <div className={styles.colName}>스터디룸</div>
-          <div className={styles.colPeople}>수용 인원</div>
-          <div className={styles.colPeriod}>날짜</div>
-          <div className={styles.colTime}>시간</div>
+          <div className={styles.colName}>{t("columns.room")}</div>
+          <div className={styles.colPeople}>{t("columns.people")}</div>
+          <div className={styles.colPeriod}>{t("columns.date")}</div>
+          <div className={styles.colTime}>{t("columns.time")}</div>
           <div className={styles.colActions}></div>
         </div>
 
         <div className={styles.body}>
           <div className={styles.rowsCol}>
             {loading ? (
-              <div className={styles.empty}>불러오는 중...</div>
+              <div className={styles.empty}>{t("loading")}</div>
             ) : rooms.length === 0 ? (
-              <div className={styles.empty}>예약 가능한 스터디룸이 없습니다.</div>
+              <div className={styles.empty}>{t("empty")}</div>
             ) : (
               rowsView.map(({ room, points, date, start, end }) => {
                 const startOptions = points.slice(0, Math.max(0, points.length - 1)); // 마지막은 종료전용
@@ -305,7 +307,7 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
                     <div className={styles.cellPeople}>
                       <div className={styles.peopleWrap}>
                         <span className={styles.nameText}>
-                          {room.minPeople} - {room.maxPeople}
+                          {t("peopleRange", { min: room.minPeople, max: room.maxPeople })}
                         </span>
                       </div>
                     </div>
@@ -330,7 +332,7 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
                           value={start}
                           onChange={(e) => onPickStart(room.roomId, e.target.value)}
                         >
-                          <option value="">시작 시간</option>
+                          <option value="">{t("startPlaceholder")}</option>
                           {startOptions.map((p) => (
                             <option key={p.value} value={p.value}>
                               {p.label}
@@ -346,7 +348,7 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
                           disabled={!start}
                           onChange={(e) => onPickEnd(room.roomId, e.target.value)}
                         >
-                          <option value="">{start ? "종료 시간" : "시작 먼저 선택"}</option>
+                          <option value="">{start ? t("endPlaceholder") : t("startFirst")}</option>
                           {endOptions.map((p) => (
                             <option key={p.value} value={p.value}>
                               {p.label}
@@ -363,7 +365,7 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
                         onClick={() => onClickReserve(room)}
                         disabled={!canReserve(room.roomId) || submittingRoomId === room.roomId}
                       >
-                        {submittingRoomId === room.roomId ? "신청 중..." : "신청"}
+                        {submittingRoomId === room.roomId ? t("buttons.submitting") : t("buttons.submit")}
                       </Button>
                     </div>
                   </div>

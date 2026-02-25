@@ -10,11 +10,13 @@ import { SpacesTable } from "./SpacesTable";
 import styles from "./SpacesPage.module.css";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function SpacesPageClient() {
   const router = useRouter();
   const sp = useSearchParams();
   const toastOnceRef = useRef<string | null>(null);
+  const t = useI18n("studySpace.admin.spaces.list");
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
@@ -24,22 +26,22 @@ export default function SpacesPageClient() {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    const t = sp.get("toast");
-    if (!t) return;
+    const toastType = sp.get("toast");
+    if (!toastType) return;
 
-    if (toastOnceRef.current === t) return;
-    toastOnceRef.current = t;
+    if (toastOnceRef.current === toastType) return;
+    toastOnceRef.current = toastType;
 
-    if (t === "created") toast.success("학습공간이 등록되었습니다.", { id: "spaces-toast-created" });
-    else if (t === "updated") toast.success("학습공간이 수정되었습니다.", { id: "spaces-toast-updated" });
-    else if (t === "deleted") toast.success("학습공간이 삭제되었습니다.", { id: "spaces-toast-deleted" });
+    if (toastType === "created") toast.success(t("toasts.created"), { id: "spaces-toast-created" });
+    else if (toastType === "updated") toast.success(t("toasts.updated"), { id: "spaces-toast-updated" });
+    else if (toastType === "deleted") toast.success(t("toasts.deleted"), { id: "spaces-toast-deleted" });
 
     const next = new URLSearchParams(sp.toString());
     next.delete("toast");
 
     const qs = next.toString();
     router.replace(qs ? `/admin/study-space/spaces?${qs}` : "/admin/study-space/spaces");
-  }, [sp, router]);
+  }, [sp, router, t]);
 
   useEffect(() => {
     let alive = true;
@@ -55,7 +57,7 @@ export default function SpacesPageClient() {
         setMeta(res.meta ?? null);
       } catch (e: any) {
         if (!alive) return;
-        setError(e?.message || "목록 조회 중 오류가 발생했습니다.");
+        setError(e?.message || t("errors.loadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -64,7 +66,7 @@ export default function SpacesPageClient() {
     return () => {
       alive = false;
     };
-  }, [page, size]);
+  }, [page, size, t]);
 
   const onCardClick = (spaceId: number) => {
     router.push(`/admin/study-space/spaces/${spaceId}`);
@@ -80,8 +82,10 @@ export default function SpacesPageClient() {
     <div className={styles.page}>
       <div className={styles.headerRow}>
         <div>
-          <div className={styles.breadcrumb}>홈 &gt; 학습공간 대여 관리</div>
-          <h1 className={styles.title}>학습공간 대여 관리</h1>
+          <div className={styles.breadcrumb}>
+            {t("breadcrumb.home")} &gt; {t("breadcrumb.current")}
+          </div>
+          <h1 className={styles.title}>{t("title")}</h1>
         </div>
       </div>
 
@@ -96,7 +100,7 @@ export default function SpacesPageClient() {
 
         <div className={styles.createWrap}>
           <Button className={styles.createBtn} variant="primary" onClick={onClickCreate}>
-            등록
+            {t("buttons.create")}
           </Button>
         </div>
       </div>

@@ -1,0 +1,12 @@
+{
+  "todayTitle": "Today's date",
+  "sessionTitle": "Time remaining before auto logout",
+  "sessionPrefix": "Session",
+  "sessionEmpty": "Session --:--",
+  "profileTitle": "Profile",
+  "fallback": {
+    "student": "Student",
+    "admin": "Admin",
+    "professor": "Professor"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "mbti": {
+    "loading": "読み込み中...",
+    "home": {
+      "title": "MBTI AI 推薦",
+      "description": "テストを開始すると既存結果があっても新しい結果で上書きされます。",
+      "start": {
+        "kicker": "新しく開始",
+        "title": "テスト開始",
+        "description": "MBTIテストを新しく実施し、関心キーワードを選択して推薦を生成します。",
+        "button": "テスト開始"
+      },
+      "result": {
+        "kicker": "すぐ確認",
+        "title": "結果を見る",
+        "description": "保存された最新のMBTI/職業推薦結果をすぐ確認できます。",
+        "hasResult": "保存された結果があります。",
+        "noResult": "保存された結果がありません。",
+        "button": "結果を見る"
+      }
+    },
+    "test": {
+      "title": "MBTIテスト",
+      "progress": "全{totalCount}問のうち{answeredCount}問回答済み",
+      "submitButton": "関心キーワード選択へ移動"
+    },
+    "keywords": {
+      "title": "関心キーワード選択",
+      "description": "最低{minCount}個以上選択してください。",
+      "submitButton": "推薦結果を見る"
+    },
+    "result": {
+      "title": "MBTIベース推薦結果",
+      "intro": "性向スコアと関心キーワードを反映したAI推薦です。",
+      "noScoreData": "保存されたMBTIスコア情報がありません。",
+      "jobsTitle": "AI推薦職業5件",
+      "emptyMessage": "保存された職業推薦結果がありません。先にテストを実施してください。",
+      "fallbackReasonWithKeywords": "{jobName}は{mbtiType}性向と{keywords}のような関心をもとに推薦された職業です。",
+      "fallbackReasonWithoutKeywords": "{jobName}は{mbtiType}性向と業務選好をもとに推薦された職業です。"
+    },
+    "messages": {
+      "initLoadFailed": "MBTI情報を読み込めませんでした。",
+      "loadQuestionsFailed": "MBTI設問を読み込めませんでした。",
+      "noSavedResult": "保存された結果がありません。先にテストを実施してください。",
+      "answerAllQuestions": "すべての設問に回答してください。",
+      "generateResultFailed": "MBTI結果の生成に失敗しました。",
+      "testCompleted": "MBTIテストが完了しました。",
+      "submitFailed": "MBTI提出中にエラーが発生しました。",
+      "selectMinKeywords": "関心キーワードを最低{minCount}個選択してください。",
+      "recommendationCreated": "推薦結果が生成されました。",
+      "createRecommendationFailed": "推薦結果生成中にエラーが発生しました。"
+    }
+  },
+  "testPage": {
+    "title": "AIテスト",
+    "placeholder": "質問を入力してください",
+    "askButton": "質問する",
+    "askFailed": "質問の処理に失敗しました。"
+  }
+}
