@@ -158,7 +158,7 @@
             "intro": "6Cs 란?",
             "students": "학생역량활동조회",
             "diagnosis": "역량진단지 관리",
-            "results" : "통합역량결과 관리"
+            "results": "통합역량결과 관리"
           }
         },
         "course": {
@@ -182,7 +182,8 @@
           "items": {
             "recruitments": "모집 공고 등록",
             "applications": "신청 승인",
-            "matching": "멘토-멘티 매칭"
+            "matching": "멘토-멘티 매칭",
+            "chat": "채팅 내역 확인"
           }
         },
         "space": {

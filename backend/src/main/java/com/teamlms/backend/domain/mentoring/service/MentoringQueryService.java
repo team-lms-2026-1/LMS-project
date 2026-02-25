@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.function.Function;
 import com.teamlms.backend.domain.mentoring.enums.MentoringRecruitmentStatus;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +97,10 @@ public class MentoringQueryService {
     }
 
     public List<MentoringChatMessageResponse> getChatHistory(Long matchingId) {
+        if (!matchingRepository.existsById(matchingId)) {
+            throw new BusinessException(ErrorCode.MENTORING_MATCHING_NOT_FOUND);
+        }
+
         List<MentoringQuestion> questions = questionRepository.findAllByMatchingId(matchingId);
         if (questions.isEmpty())
             return Collections.emptyList();
@@ -211,7 +217,7 @@ public class MentoringQueryService {
 
     public MentoringRecruitmentResponse getRecruitment(Long id) {
         MentoringRecruitment recruitment = recruitmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Mentoring recruitment not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
         
         String semesterName = semesterRepository.findById(recruitment.getSemesterId())
                 .map(com.teamlms.backend.domain.semester.entity.Semester::getDisplayName)
@@ -304,6 +310,54 @@ public class MentoringQueryService {
                 builder.name("Unknown");
             }
             return builder.build();
+        }).toList();
+    }
+
+    public List<MentoringMatchingAdminResponse> getAdminMatchings(Long recruitmentId) {
+        MentoringRecruitment recruitment = recruitmentRepository.findById(recruitmentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
+
+        List<MentoringMatching> matchings = matchingRepository.findAllByRecruitmentId(recruitmentId);
+        if (matchings.isEmpty()) return Collections.emptyList();
+
+        List<Long> allAppIds = new ArrayList<>();
+        matchings.forEach(m -> {
+            allAppIds.add(m.getMentorApplicationId());
+            allAppIds.add(m.getMenteeApplicationId());
+        });
+
+        Map<Long, MentoringApplication> appMap = applicationRepository.findAllById(allAppIds).stream()
+                .collect(Collectors.toMap(MentoringApplication::getApplicationId, Function.identity()));
+
+        List<Long> accountIds = appMap.values().stream().map(MentoringApplication::getAccountId).toList();
+        
+        Map<Long, Account> accountMap = accountRepository.findAllById(accountIds).stream()
+                .collect(Collectors.toMap(Account::getAccountId, Function.identity(), (a, b) -> a));
+
+        Map<Long, String> nameMap = new HashMap<>();
+        studentProfileRepository.findAllById(accountIds).forEach(s -> nameMap.put(s.getAccountId(), s.getName()));
+        professorProfileRepository.findAllById(accountIds).forEach(p -> nameMap.put(p.getAccountId(), p.getName()));
+
+        return matchings.stream().map(m -> {
+            MentoringApplication mentorApp = appMap.get(m.getMentorApplicationId());
+            MentoringApplication menteeApp = appMap.get(m.getMenteeApplicationId());
+            
+            String mentorName = mentorApp != null ? nameMap.getOrDefault(mentorApp.getAccountId(),
+                accountMap.containsKey(mentorApp.getAccountId()) ? accountMap.get(mentorApp.getAccountId()).getLoginId() : "Unknown") : "Unknown";
+            String menteeName = menteeApp != null ? nameMap.getOrDefault(menteeApp.getAccountId(),
+                accountMap.containsKey(menteeApp.getAccountId()) ? accountMap.get(menteeApp.getAccountId()).getLoginId() : "Unknown") : "Unknown";
+
+            return MentoringMatchingAdminResponse.builder()
+                    .matchingId(m.getMatchingId())
+                    .recruitmentId(m.getRecruitmentId())
+                    .recruitmentTitle(recruitment.getTitle())
+                    .mentorAccountId(mentorApp != null ? mentorApp.getAccountId() : null)
+                    .mentorName(mentorName)
+                    .menteeAccountId(menteeApp != null ? menteeApp.getAccountId() : null)
+                    .menteeName(menteeName)
+                    .status(m.getStatus().name())
+                    .matchedAt(m.getMatchedAt())
+                    .build();
         }).toList();
     }
 }

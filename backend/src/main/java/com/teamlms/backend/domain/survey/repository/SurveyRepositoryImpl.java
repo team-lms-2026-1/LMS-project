@@ -2,7 +2,6 @@ package com.teamlms.backend.domain.survey.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -37,19 +35,13 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
             Pageable pageable
     ) {
         QSurvey s = QSurvey.survey;
-        LocalDateTime now = LocalDateTime.now();
 
         List<SurveyListResponse> content = queryFactory
                 .select(Projections.constructor(SurveyListResponse.class,
                         s.surveyId,
                         s.type,
                         s.title,
-                        new CaseBuilder()
-                                .when(s.startAt.after(now))   // 아직 시작 안 함 → DRAFT
-                                .then(SurveyStatus.DRAFT)
-                                .when(s.endAt.before(now))    // 종료됨 → CLOSED
-                                .then(SurveyStatus.CLOSED)
-                                .otherwise(s.status),          // 진행 중 → DB 값 사용
+                        s.status,          // DB 상태 그대로 사용 (스케줄러가 관리)
                         s.startAt,
                         s.endAt,
                         s.viewCount,
@@ -83,19 +75,13 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
     public List<SurveyListResponse> findAvailableSurveysForUser(Long userId, String keyword, SurveyType type) {
         QSurvey s = QSurvey.survey;
         QSurveyTarget t = QSurveyTarget.surveyTarget;
-        LocalDateTime now = LocalDateTime.now();
 
         return queryFactory
                 .select(Projections.constructor(SurveyListResponse.class,
                         s.surveyId,
                         s.type,
                         s.title,
-                        new CaseBuilder()
-                                .when(s.startAt.after(now))   // 아직 시작 안 함 → DRAFT
-                                .then(SurveyStatus.DRAFT)
-                                .when(s.endAt.before(now))    // 종료됨 → CLOSED
-                                .then(SurveyStatus.CLOSED)
-                                .otherwise(s.status),          // 진행 중 → DB 값 사용
+                        s.status,          // DB 상태 그대로 사용 (스케줄러가 관리)
                         s.startAt,
                         s.endAt,
                         s.viewCount,
@@ -106,9 +92,7 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                 .join(t).on(t.surveyId.eq(s.surveyId))
                 .where(
                         t.targetAccountId.eq(userId),
-                        s.status.eq(SurveyStatus.OPEN),   // OPEN 상태인 설문만
-                        s.startAt.loe(now),               // 시작일 <= 현재
-                        s.endAt.goe(now),                 // 종료일 >= 현재
+                        s.status.eq(SurveyStatus.OPEN),   // DB OPEN 상태인 설문만 (스케줄러가 최신 상태 보장)
                         titleLike(keyword),
                         typeEq(type)
                 )
