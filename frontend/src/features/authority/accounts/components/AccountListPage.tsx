@@ -13,6 +13,7 @@ import type { AccountRowDto } from "../api/dto";
 
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { Button } from "@/components/button/Button"; // ✅
+import { useI18n } from "@/i18n/useI18n";
 
 type RoleFilter = "ALL" | AccountType;
 
@@ -90,6 +91,7 @@ function mapRow(dto: AccountRowDto): AccountRowView {
 
 
 export default function AccountListPage() {
+  const t = useI18n("authority.accounts.list.page");
   const SIZE = 10;
 
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("ALL");
@@ -199,7 +201,7 @@ export default function AccountListPage() {
         setRows((res.items ?? []).map(mapRow));
       } catch (e: any) {
         if (!alive || seq !== seqRef.current) return;
-        setErrorMsg(e?.message ?? "목록 조회 실패");
+        setErrorMsg(e?.message ?? t("messages.listLoadFailed"));
         setRows([]);
         setTotalPages(1);
       } finally {
@@ -240,7 +242,7 @@ export default function AccountListPage() {
           r.account.accountId === accountId ? { ...r, account: { ...r.account, status: current } } : r
         )
       );
-      alert(e?.message ?? "상태 변경 실패");
+      alert(e?.message ?? t("messages.statusUpdateFailed"));
     } finally {
       setPendingIds((prev) => {
         const n = new Set(prev);
@@ -252,10 +254,10 @@ export default function AccountListPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.breadcrumb}>권한 관리 - 계정 관리</div>
+      <div className={styles.breadcrumb}>{t("breadcrumb")}</div>
 
       <div className={styles.headerRow}>
-        <h1 className={styles.title}>계정 목록</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
       </div>
 
       <div className={styles.card}>
@@ -282,7 +284,7 @@ export default function AccountListPage() {
         {errorMsg && <div style={{ padding: 12, color: "#b91c1c" }}>{errorMsg}</div>}
 
         {loading ? (
-          <div style={{ padding: 12 }}>로딩중...</div>
+          <div style={{ padding: 12 }}>{t("loading")}</div>
         ) : (
           <AccountTable
             rows={displayRows}
@@ -311,7 +313,7 @@ export default function AccountListPage() {
               className={styles.customActionBtn}
               onClick={() => setCreateOpen(true)}
             >
-              계정 생성
+              {t("createButton")}
             </Button>
           </div>
         </div>

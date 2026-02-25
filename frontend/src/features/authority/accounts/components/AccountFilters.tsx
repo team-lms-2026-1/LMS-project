@@ -2,6 +2,7 @@
 
 import styles from "../styles/AccountListPage.module.css";
 import { AccountType } from "../types";
+import { useI18n } from "@/i18n/useI18n";
 
 type RoleFilter = "ALL" | AccountType;
 
@@ -27,6 +28,9 @@ export default function AccountFilters({
   onChangeDept,
   onApply,
 }: Props) {
+  const tRole = useI18n("authority.accounts.common.roles");
+  const t = useI18n("authority.accounts.list.filters");
+
   return (
     <div className={styles.filterRow}>
       <div className={styles.roleGroup}>
@@ -35,28 +39,28 @@ export default function AccountFilters({
           className={role === "ALL" ? styles.roleBtnActive : styles.roleBtn}
           onClick={() => onChangeRole("ALL")}
         >
-          전체
+          {tRole("ALL")}
         </button>
         <button
           type="button"
           className={role === "STUDENT" ? styles.roleBtnActive : styles.roleBtn}
           onClick={() => onChangeRole("STUDENT")}
         >
-          학생
+          {tRole("STUDENT")}
         </button>
         <button
           type="button"
           className={role === "PROFESSOR" ? styles.roleBtnActive : styles.roleBtn}
           onClick={() => onChangeRole("PROFESSOR")}
         >
-          교수
+          {tRole("PROFESSOR")}
         </button>
         <button
           type="button"
           className={role === "ADMIN" ? styles.roleBtnActive : styles.roleBtn}
           onClick={() => onChangeRole("ADMIN")}
         >
-          관리자
+          {tRole("ADMIN")}
         </button>
       </div>
 
@@ -75,7 +79,7 @@ export default function AccountFilters({
           value={keyword}
           onChange={onChangeKeyword}
           onSearch={onApply}
-          placeholder="ID/이름/이메일 검색"
+          placeholder={t("searchPlaceholder")}
           className={styles.customSearchBar}
         />
       </div>

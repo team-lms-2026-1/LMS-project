@@ -1,10 +1,14 @@
-﻿import { useCallback, useEffect, useState } from "react";
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
 import { fetchDepartmentsList } from "../api/departmentsApi";
 import { DepartmentListItem, PageMeta } from "../api/types";
 import { useListQuery } from "@/components/pagination";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 export function useDepartmentList() {
+    const t = useI18n("authority.departments.errors");
     const { page, size, keyword: queryKeyword, setPage, setKeyword: setQueryKeyword } = useListQuery({
         defaultSize: 10,
         keywordKey: "keyword", // URL query param name
@@ -37,12 +41,12 @@ export function useDepartmentList() {
             });
         } catch (e: any) {
             console.error(e);
-            toast.error(e.message || "목록 로드 실패");
+            toast.error(e.message || t("listLoadFailed"));
             setItems([]);
         } finally {
             setLoading(false);
         }
-    }, [page, size, queryKeyword]);
+    }, [page, queryKeyword, size, t]);
 
     useEffect(() => {
         load();
@@ -60,5 +64,3 @@ export function useDepartmentList() {
         reload,
     };
 }
-
-

@@ -64,5 +64,471 @@
       "listLoadFailed": "学期一覧の照会に失敗しました。",
       "detailLoadFailed": "照会に失敗しました。"
     }
+  },
+  "departments": {
+    "list": {
+      "breadcrumb": "権限管理 - 学科管理",
+      "title": "学科一覧",
+      "searchPlaceholder": "学科コード / 学科名を入力",
+      "table": {
+        "headers": {
+          "deptCode": "学科コード",
+          "deptName": "学科名",
+          "headProfessor": "学科長",
+          "studentCount": "在学生数",
+          "professorCount": "教員数",
+          "isActive": "使用可否",
+          "manage": "管理"
+        },
+        "headProfessorFallback": "-",
+        "studentCountValue": "{count}名",
+        "professorCountValue": "{count}名",
+        "actions": {
+          "edit": "修正"
+        },
+        "emptyText": "登録された学科がありません。"
+      },
+      "buttons": {
+        "create": "学科登録"
+      },
+      "toasts": {
+        "statusUpdated": "状態が変更されました。",
+        "statusUpdateFailed": "状態変更に失敗しました。"
+      }
+    },
+    "detail": {
+      "page": {
+        "backToList": "一覧へ →",
+        "tabs": {
+          "professors": "所属教員",
+          "students": "所属学生",
+          "majors": "専攻管理"
+        }
+      },
+      "info": {
+        "loadFailed": "情報を読み込めません。",
+        "titleSuffix": "管理",
+        "departmentCodeLabel": "学科コード",
+        "chairProfessorLabel": "学科長",
+        "unassigned": "未指定",
+        "autoDescription": "{departmentName}は創造的で実務的な人材育成を目指す学科です。現在、在学生{enrolledCount}名、休学生{leaveCount}名、卒業生{graduatedCount}名が所属しており、計{professorCount}名の専任教員が指導しています。"
+      },
+      "studentsTab": {
+        "searchPlaceholder": "氏名 / 学籍番号で検索",
+        "stats": {
+          "enrolled": "在学生: {count}名",
+          "leaveOfAbsence": "休学生: {count}名",
+          "graduated": "卒業生: {count}名"
+        },
+        "table": {
+          "headers": {
+            "studentNo": "学籍番号",
+            "name": "氏名",
+            "gradeLevel": "学年",
+            "academicStatus": "在籍状態",
+            "majorName": "専攻",
+            "email": "メール"
+          },
+          "gradeValue": "{grade}年",
+          "majorFallback": "-",
+          "emptyText": "所属学生がいません。"
+        },
+        "academicStatus": {
+          "ENROLLED": "在学中",
+          "LEAVE": "休学中",
+          "GRADUATED": "卒業",
+          "DROPPED": "除籍"
+        }
+      },
+      "professorsTab": {
+        "searchPlaceholder": "氏名 / 教員番号で検索",
+        "stats": {
+          "professorCount": "教員数: {count}名"
+        },
+        "table": {
+          "headers": {
+            "professorNo": "教員番号",
+            "name": "氏名",
+            "email": "メール",
+            "phone": "電話番号",
+            "manage": "管理"
+          },
+          "headProfessorBadge": "学科長",
+          "assignHeadProfessor": "学科長に指定",
+          "emptyText": "所属教員がいません。"
+        },
+        "confirm": {
+          "title": "学科長指定",
+          "message": "'{name}'教授を学科長に指定しますか？"
+        },
+        "toasts": {
+          "assignSuccess": "学科長が指定されました。",
+          "assignFailed": "学科長の指定に失敗しました。"
+        }
+      },
+      "majorsTab": {
+        "searchPlaceholder": "専攻コード / 専攻名で検索",
+        "table": {
+          "headers": {
+            "majorCode": "専攻コード",
+            "majorName": "専攻名",
+            "enrolledStudentCount": "在学生数",
+            "status": "状態",
+            "manage": "管理"
+          },
+          "enrolledStudentCountValue": "{count}名",
+          "status": {
+            "active": "有効",
+            "inactive": "無効"
+          },
+          "actions": {
+            "edit": "修正",
+            "delete": "削除"
+          },
+          "emptyText": "登録された専攻がありません。"
+        },
+        "buttons": {
+          "create": "専攻追加"
+        },
+        "confirm": {
+          "title": "専攻削除",
+          "message": "この専攻を削除しますか？削除した専攻は復元できません。"
+        },
+        "toasts": {
+          "deleteSuccess": "専攻が削除されました。",
+          "deleteFailed": "専攻の削除に失敗しました。"
+        }
+      }
+    },
+    "modals": {
+      "departmentCreate": {
+        "title": "学科登録",
+        "buttons": {
+          "cancel": "キャンセル",
+          "create": "学科作成",
+          "creating": "作成中..."
+        },
+        "fields": {
+          "deptCode": {
+            "label": "学科コード",
+            "resetHint": "(再設定不可)",
+            "placeholder": "例: CSEEE (英大文字5文字)",
+            "helper": "英大文字{max}文字のみ入力してください ({current}/{max})"
+          },
+          "deptName": {
+            "label": "学科名",
+            "placeholder": "学科名を入力"
+          },
+          "description": {
+            "label": "説明",
+            "placeholder": "学科の説明を入力"
+          }
+        },
+        "validation": {
+          "requiredDeptCode": "学科コードを入力してください。",
+          "invalidDeptCodeFormat": "学科コードは英大文字5文字で入力してください。",
+          "requiredDeptName": "学科名を入力してください。",
+          "requiredDescription": "学科説明を入力してください。"
+        },
+        "toasts": {
+          "createSuccess": "学科が作成されました。",
+          "createFailed": "学科の作成に失敗しました。"
+        }
+      },
+      "departmentUpdate": {
+        "title": "学科修正",
+        "loading": "情報を読み込み中...",
+        "buttons": {
+          "cancel": "キャンセル",
+          "save": "保存",
+          "saving": "保存中..."
+        },
+        "fields": {
+          "deptCode": {
+            "label": "学科コード"
+          },
+          "deptName": {
+            "label": "学科名",
+            "placeholder": "学科名を入力"
+          },
+          "description": {
+            "label": "説明",
+            "placeholder": "学科の説明を入力"
+          }
+        },
+        "validation": {
+          "requiredDeptName": "学科名は必須です。"
+        },
+        "toasts": {
+          "loadFailed": "学科情報を読み込めませんでした。",
+          "updateSuccess": "学科情報が更新されました。",
+          "updateFailed": "学科修正に失敗しました。"
+        }
+      },
+      "majorCreate": {
+        "title": "専攻追加",
+        "buttons": {
+          "cancel": "キャンセル",
+          "create": "専攻作成",
+          "creating": "作成中..."
+        },
+        "fields": {
+          "majorName": {
+            "label": "専攻名",
+            "placeholder": "専攻名を入力"
+          },
+          "majorCode": {
+            "label": "専攻コード",
+            "placeholder": "専攻コードを入力"
+          },
+          "isActive": {
+            "label": "使用可否",
+            "active": "有効",
+            "inactive": "無効"
+          },
+          "description": {
+            "label": "説明",
+            "placeholder": "専攻の説明を入力"
+          }
+        },
+        "validation": {
+          "requiredFields": "必須項目を入力してください。"
+        },
+        "toasts": {
+          "createSuccess": "専攻が追加されました。",
+          "createFailed": "専攻の追加に失敗しました。"
+        }
+      },
+      "majorUpdate": {
+        "title": "専攻修正",
+        "loading": "情報を読み込み中...",
+        "buttons": {
+          "cancel": "キャンセル",
+          "save": "保存",
+          "saving": "保存中..."
+        },
+        "fields": {
+          "majorCode": {
+            "label": "専攻コード"
+          },
+          "majorName": {
+            "label": "専攻名",
+            "placeholder": "専攻名を入力"
+          },
+          "isActive": {
+            "label": "使用可否",
+            "active": "有効",
+            "inactive": "無効",
+            "studentConstraint": "在学生{count}名がいるため無効化できません。"
+          },
+          "description": {
+            "label": "説明",
+            "placeholder": "専攻の説明を入力"
+          }
+        },
+        "validation": {
+          "requiredMajorName": "専攻名を入力してください。",
+          "cannotDeactivateWithStudents": "在学生が{count}名いる専攻は無効化できません。"
+        },
+        "toasts": {
+          "loadFailed": "専攻情報の照会に失敗しました。",
+          "updateSuccess": "専攻情報が更新されました。",
+          "updateFailed": "専攻修正に失敗しました。"
+        }
+      }
+    },
+    "errors": {
+      "listLoadFailed": "一覧の読み込みに失敗しました。",
+      "detailLoadFailed": "学科詳細の照会に失敗しました。"
+    }
+  },
+  "accounts": {
+    "common": {
+      "roles": {
+        "ALL": "全体",
+        "STUDENT": "学生",
+        "PROFESSOR": "教授",
+        "ADMIN": "管理者"
+      },
+      "status": {
+        "ACTIVE": "有効",
+        "INACTIVE": "無効"
+      },
+      "academicStatus": {
+        "ENROLLED": "在学中",
+        "LEAVE": "休学",
+        "DROPPED": "退学",
+        "GRADUATED": "卒業"
+      }
+    },
+    "list": {
+      "page": {
+        "breadcrumb": "権限管理 - アカウント管理",
+        "title": "アカウント一覧",
+        "loading": "読み込み中...",
+        "createButton": "アカウント作成",
+        "messages": {
+          "listLoadFailed": "一覧の照会に失敗しました。",
+          "statusUpdateFailed": "状態変更に失敗しました。"
+        }
+      },
+      "filters": {
+        "searchPlaceholder": "ID/名前/メール検索"
+      },
+      "table": {
+        "headers": {
+          "loginId": "ログインID",
+          "accountType": "アカウント種別",
+          "name": "名前",
+          "email": "メール",
+          "createdAt": "作成日",
+          "status": "有効/無効",
+          "manage": "修正"
+        },
+        "emptyText": "データがありません。",
+        "fallback": "-",
+        "editButton": "修正"
+      }
+    },
+    "modals": {
+      "create": {
+        "title": "アカウント作成",
+        "fields": {
+          "status": "状態",
+          "loginId": "ログインID",
+          "password": "パスワード",
+          "name": "名前",
+          "email": "メール",
+          "phone": "連絡先",
+          "gradeLevel": "学年",
+          "academicStatus": "在籍状態",
+          "memo": "メモ",
+          "profileImage": "プロフィール画像",
+          "department": "所属学科",
+          "primaryMajor": "主専攻",
+          "minorMajor": "副専攻",
+          "doubleMajor": "複数専攻"
+        },
+        "placeholders": {
+          "loginIdDigits": "数字8桁を入力",
+          "password": "英大/小文字+数字を含む6文字以上",
+          "name": "名前を入力",
+          "email": "example@email.com",
+          "phone": "010-0000-0000",
+          "memo": "管理者メモを入力"
+        },
+        "hints": {
+          "loginId": "例: {example} (先頭文字は自動適用)"
+        },
+        "validation": {
+          "loginIdDigits": "IDは数字8桁である必要があります。",
+          "password": "パスワード条件を満たしてください。",
+          "email": "@ を含めてください。",
+          "phone": "000-0000-0000 形式で入力してください。"
+        },
+        "select": {
+          "loading": "読み込み中...",
+          "select": "選択",
+          "choose": "選択してください..."
+        },
+        "toggles": {
+          "useMinor": "副専攻(MINOR)を使用",
+          "useDouble": "複数専攻(DOUBLE)を使用"
+        },
+        "notices": {
+          "professor": {
+            "title": "案内",
+            "text": "教授アカウントは所属学科と基本情報(名前/メール/連絡先)のみ入力します。"
+          },
+          "admin": {
+            "title": "案内",
+            "text": "管理者アカウントは学科/専攻情報を使用しません。"
+          }
+        },
+        "buttons": {
+          "changeImage": "変更",
+          "selectImage": "画像を選択",
+          "deleteImage": "削除",
+          "cancel": "キャンセル",
+          "create": "アカウント作成",
+          "creating": "作成中..."
+        },
+        "messages": {
+          "imageUploadFailed": "アカウントは作成されましたが、プロフィール画像のアップロードに失敗しました。"
+        },
+        "alts": {
+          "profileImage": "プロフィールプレビュー"
+        }
+      },
+      "edit": {
+        "title": "アカウント修正",
+        "header": {
+          "type": "種別"
+        },
+        "loading": "読み込み中...",
+        "fields": {
+          "loginId": "ID",
+          "currentPassword": "現在のパスワード",
+          "newPassword": "新しいパスワード(任意)",
+          "name": "名前",
+          "email": "メール",
+          "phone": "連絡先",
+          "status": "状態",
+          "gradeLevel": "学年",
+          "academicStatus": "在籍状態",
+          "department": "所属学科",
+          "primaryMajor": "主専攻",
+          "minorMajor": "副専攻",
+          "doubleMajor": "複数専攻",
+          "memo": "メモ",
+          "profileImage": "プロフィール画像"
+        },
+        "hints": {
+          "currentPasswordMasked": "現在のパスワードはセキュリティ上表示・照会できないためマスク処理されます。"
+        },
+        "placeholders": {
+          "newPassword": "変更時に入力",
+          "memo": "管理者メモ"
+        },
+        "validation": {
+          "password": "英大/小文字/数字を含む6文字以上",
+          "email": "@ を含めてください。",
+          "phone": "000-0000-0000 または数字11桁"
+        },
+        "select": {
+          "select": "選択"
+        },
+        "toggles": {
+          "useMinor": "副専攻(MINOR)を使用",
+          "useDouble": "複数専攻(DOUBLE)を使用"
+        },
+        "notices": {
+          "professor": {
+            "title": "案内",
+            "text": "教授アカウントは所属学科と基本情報のみ修正できます。"
+          }
+        },
+        "buttons": {
+          "changeImage": "変更",
+          "deleteImage": "削除",
+          "cancel": "キャンセル",
+          "save": "保存",
+          "saving": "保存中..."
+        },
+        "toasts": {
+          "imageUpdated": "プロフィール画像が変更されました。",
+          "imageUpdateFailed": "画像の修正中にエラーが発生しました。",
+          "imageDeleted": "プロフィール画像が削除されました。",
+          "imageDeleteFailed": "画像削除に失敗しました。"
+        },
+        "messages": {
+          "detailLoadFailed": "詳細の照会に失敗しました。",
+          "saveFailed": "保存に失敗しました。"
+        },
+        "alts": {
+          "profileImage": "プロフィールプレビュー"
+        }
+      }
+    }
   }
 }
