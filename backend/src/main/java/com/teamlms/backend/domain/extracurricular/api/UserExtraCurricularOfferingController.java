@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferingBasicDetailResponse;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferingUserListItem;
@@ -49,7 +50,7 @@ public class UserExtraCurricularOfferingController {
             "/api/v1/professor/extra-curricular/offerings/{extraOfferingId}" })
     @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<ExtraCurricularOfferingBasicDetailResponse> getBasicDetail(
-            @org.springframework.security.core.annotation.AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long extraOfferingId) {
         return ApiResponse.ok(
                 extraCurricularOfferingQueryService.getBasicDetailForStudent(authUser, extraOfferingId));
@@ -62,7 +63,7 @@ public class UserExtraCurricularOfferingController {
     })
     @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<ExtraOfferingCompetencyMappingItem>> getCompetencyMapping(
-            @org.springframework.security.core.annotation.AuthenticationPrincipal AuthUser authUser,
+            @AuthenticationPrincipal AuthUser authUser,
             @PathVariable Long extraOfferingId) {
         return ApiResponse.ok(
                 extraCurricularOfferingQueryService.getMappingForStudent(authUser, extraOfferingId));
