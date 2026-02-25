@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/i18n/useI18n";
 import { StudentGradeDetailHeaderDto } from "@/features/curricular-offering/api/types";
 import styles from "./GradeTrendChartMeSection.module.css";
 import { GradeTrendComposedMeChart } from "./GradeTrendComposedMeChart";
@@ -7,9 +8,11 @@ import { GradeTrendComposedMeChart } from "./GradeTrendComposedMeChart";
 type Props = { data: StudentGradeDetailHeaderDto };
 
 export function GradeTrendChartMeSection({ data }: Props) {
+  const t = useI18n("curricular.adminGrades.detail.trend");
+
   return (
     <div className={styles.section}>
-      <Header title="학기별 성적 추이" />
+      <Header title={t("title")} />
       <div className={styles.body}>
         <GradeTrendComposedMeChart items={data.trend ?? []} />
       </div>

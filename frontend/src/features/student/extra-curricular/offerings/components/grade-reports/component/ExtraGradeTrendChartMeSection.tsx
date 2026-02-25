@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { useI18n } from "@/i18n/useI18n";
 import type { StudentExtraGradeDetailHeaderDto } from "../../../api/types";
 import styles from "./ExtraGradeTrendChartMeSection.module.css";
 import { ExtraGradeTrendComposedMeChart } from "./ExtraGradeTrendComposedMeChart";
@@ -7,9 +8,11 @@ import { ExtraGradeTrendComposedMeChart } from "./ExtraGradeTrendComposedMeChart
 type Props = { data: StudentExtraGradeDetailHeaderDto };
 
 export function ExtraGradeTrendChartMeSection({ data }: Props) {
+  const t = useI18n("extraCurricular.adminGrades.detail.trend");
+
   return (
     <div className={styles.section}>
-      <Header title="학기별 이수 포인트/시간" />
+      <Header title={t("title")} />
       <div className={styles.body}>
         <ExtraGradeTrendComposedMeChart items={data.trend ?? []} />
       </div>

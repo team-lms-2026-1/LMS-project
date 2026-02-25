@@ -59,4 +59,28 @@ public class JobCatalog {
             .findFirst()
             .orElse(this.jobName);
     }
+
+    public String getMajorNameByLocale(String locale) {
+        return i18nContents.stream()
+            .filter(i18n -> i18n.getLocale().equals(locale))
+            .map(JobCatalogI18n::getMajorName)
+            .findFirst()
+            .orElse(this.majorName);
+    }
+
+    public String getMiddleNameByLocale(String locale) {
+        return i18nContents.stream()
+            .filter(i18n -> i18n.getLocale().equals(locale))
+            .map(JobCatalogI18n::getMiddleName)
+            .findFirst()
+            .orElse(this.middleName);
+    }
+
+    public String getMinorNameByLocale(String locale) {
+        return i18nContents.stream()
+            .filter(i18n -> i18n.getLocale().equals(locale))
+            .map(JobCatalogI18n::getMinorName)
+            .findFirst()
+            .orElse(this.minorName);
+    }
 }

@@ -3,11 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-
-import styles from "./StudentExtraCurricularEnrollmentPageClient.module.css";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
-
+import { useI18n } from "@/i18n/useI18n";
+import styles from "./StudentExtraCurricularEnrollmentPageClient.module.css";
 import type { ExtraCurricularEnrollmentListItemDto } from "../../api/types";
 import { useStudentExtraCurricularEnrollmentsList } from "../../hooks/useExtraCurricularOfferingList";
 import { StudentExtraCurricularEnrollmentsTable } from "./StudentExtraEnrollmentsTable";
@@ -16,6 +15,8 @@ import { cancelExtraCurricularOffering } from "../../api/extraCurricularApi";
 export default function StudentExtraCurricularEnrollmentPageClient() {
   const router = useRouter();
   const { state, actions } = useStudentExtraCurricularEnrollmentsList();
+  const t = useI18n("extraCurricular.studentEnrollments");
+  const tCommon = useI18n("extraCurricular.common");
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
@@ -49,18 +50,18 @@ export default function StudentExtraCurricularEnrollmentPageClient() {
       setCancelLoading(true);
       await cancelExtraCurricularOffering(target.extraOfferingId);
 
-      toast.success("신청이 취소되었습니다.");
+      toast.success(t("messages.cancelSuccess"));
       await actions.reload();
 
       setConfirmOpen(false);
       setTarget(null);
     } catch (e: any) {
       console.error("[cancelExtraCurricularOffering]", e);
-      toast.error(e?.error?.message ?? e?.message ?? "신청 취소에 실패했습니다.");
+      toast.error(e?.error?.message ?? e?.message ?? t("messages.cancelFailed"));
     } finally {
       setCancelLoading(false);
     }
-  }, [target, actions]);
+  }, [target, actions, t]);
 
   const handleRowClick = useCallback(
     (row: ExtraCurricularEnrollmentListItemDto) => {
@@ -72,7 +73,7 @@ export default function StudentExtraCurricularEnrollmentPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>비교과 신청현황</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
@@ -95,18 +96,18 @@ export default function StudentExtraCurricularEnrollmentPageClient() {
 
         <ConfirmDialog
           open={confirmOpen}
-          title="신청 취소"
+          title={t("dialog.title")}
           description={
             target ? (
               <>
-                아래 비교과 신청을 취소하시겠습니까?
+                {t("dialog.description")}
                 <br />
                 <b>{target.extraOfferingName}</b> ({target.extraOfferingCode})
               </>
             ) : null
           }
-          confirmText="신청취소"
-          cancelText="닫기"
+          confirmText={t("dialog.confirmText")}
+          cancelText={tCommon("cancelButton")}
           danger
           loading={cancelLoading}
           onCancel={closeConfirm}

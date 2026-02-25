@@ -1,27 +1,36 @@
-"use client"
+"use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 import { aiAskApi } from "../api/aiApi";
-import { AiaskResponse } from "../api/types";
 
-export default function AiTestPage () {
-    const [input, setInput] = useState("");
-    const [answer, setAnswer] = useState("");
+export default function AiTestPage() {
+  const t = useI18n("aiAdvisor.testPage");
+  const [input, setInput] = useState("");
+  const [answer, setAnswer] = useState("");
 
-    const handleAsk = async () => {
-        const res = await aiAskApi({question: input});
-        setAnswer(res.data.answer);
+  const handleAsk = async () => {
+    try {
+      const res = await aiAskApi({ question: input });
+      setAnswer(res.data.answer);
+    } catch (e) {
+      console.error("[AiTestPage:handleAsk]", e);
+      toast.error(t("askFailed"));
     }
+  };
 
-    return(
-        <div>
-            <h2>AI 테스트</h2>
-            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} />
-
-            <button onClick={handleAsk}>질문</button>
-
-            <p>{answer}</p>
-
-        </div>
-    )
+  return (
+    <div>
+      <h2>{t("title")}</h2>
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder={t("placeholder")}
+      />
+      <button onClick={handleAsk}>{t("askButton")}</button>
+      <p>{answer}</p>
+    </div>
+  );
 }

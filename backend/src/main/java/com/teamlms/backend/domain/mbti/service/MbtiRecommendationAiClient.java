@@ -2,6 +2,7 @@ package com.teamlms.backend.domain.mbti.service;
 
 import com.teamlms.backend.domain.mbti.entity.InterestKeywordMaster;
 import com.teamlms.backend.domain.mbti.entity.MbtiResult;
+import com.teamlms.backend.global.i18n.LocaleUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -53,12 +54,15 @@ public class MbtiRecommendationAiClient {
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords,
             List<MbtiRecommendationCandidate> candidates,
-            String errorHint
+            String errorHint,
+            String locale
     ) {
         ChatClient.Builder chatClientBuilder = chatClientBuilderProvider.getIfAvailable();
         if (chatClientBuilder == null) {
             throw new IllegalStateException("ChatClient.Builder bean not found");
         }
+        String normalizedLocale = LocaleUtil.normalize(locale);
+        String languageName = toLanguageName(normalizedLocale);
 
         OpenAiChatOptions options = OpenAiChatOptions.builder()
                 .temperature(0.3)
@@ -73,16 +77,16 @@ public class MbtiRecommendationAiClient {
                 - Select exactly 5 recommendations.
                 - Use unique jobCode values.
                 - Use only jobCode values from the candidate list.
-                - reason must be one natural Korean paragraph.
+                - reason must be one natural paragraph in %s.
                 - reason must not contain list markers, markdown, or line breaks.
                 - reason should be specific and evidence-based for each student profile.
                 - reason must include:
                   1) MBTI strength fit
                   2) selected interest keyword fit
                   3) practical growth path in the role
-                """;
+                """.formatted(languageName);
 
-        String userPrompt = buildUserPrompt(mbtiResult, selectedKeywords, candidates, errorHint);
+        String userPrompt = buildUserPrompt(mbtiResult, selectedKeywords, candidates, errorHint, languageName);
         String content = chatClientBuilder.build().prompt()
                 .system(systemPrompt)
                 .user(userPrompt)
@@ -100,7 +104,8 @@ public class MbtiRecommendationAiClient {
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords,
             List<MbtiRecommendationCandidate> candidates,
-            String errorHint
+            String errorHint,
+            String languageName
     ) {
         String keywords = selectedKeywords.stream().map(InterestKeywordMaster::getKeyword)
                 .collect(java.util.stream.Collectors.joining(", "));
@@ -135,7 +140,8 @@ public class MbtiRecommendationAiClient {
                 - Exactly 5 jobs
                 - reason must be one paragraph per job
                 - each reason should be around 2~4 sentences
-                - each reason must be natural Korean with concrete details
+                - each reason must be natural %s with concrete details
+                - do not mix other languages
                 - do not use line breaks or bullet lists
                 - avoid repetitive generic wording
                 """.formatted(
@@ -146,11 +152,20 @@ public class MbtiRecommendationAiClient {
                 mbtiResult.getJScore(), mbtiResult.getPScore(),
                 keywords,
                 candidateLines,
-                retryHint
+                retryHint,
+                languageName
         );
     }
 
     private String nullSafe(String value) {
         return value == null ? "" : value;
+    }
+
+    private String toLanguageName(String locale) {
+        return switch (locale) {
+            case "en" -> "English";
+            case "ja" -> "Japanese";
+            default -> "Korean";
+        };
     }
 }

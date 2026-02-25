@@ -1,40 +1,38 @@
 "use client";
 
+import { useI18n } from "@/i18n/useI18n";
 import { StudentGradeDetailHeaderDto } from "@/features/curricular-offering/api/types";
 import styles from "./GradeInfoMeSection.module.css";
 
 type Props = { data: StudentGradeDetailHeaderDto };
 
 export function GradeInfoMeSection({ data }: Props) {
+  const t = useI18n("curricular.adminGrades.detail.info");
+
   return (
     <div className={styles.section}>
-      {/* Header */}
       <div className={styles.sectionHeader}>
         <div className={styles.headerRow}>
-          {/* 왼쪽: 이름/학번 */}
           <div className={styles.sectionTitle}>
-            {data.studentName}{" "}
-            <span className={styles.studentNo}>({data.studentNo})</span>
+            {data.studentName} <span className={styles.studentNo}>({data.studentNo})</span>
           </div>
 
-          {/* 오른쪽 끝: 학과/학년 */}
           <div className={styles.headerMeta}>
             <span className={styles.metaItem}>{data.deptName}</span>
-            <span className={styles.dot}>•</span>
-            <span className={styles.metaItem}>{data.gradeLevel}학년</span>
+            <span className={styles.dot}>/</span>
+            <span className={styles.metaItem}>{t("gradeLevel", { value: data.gradeLevel })}</span>
           </div>
         </div>
       </div>
 
-      {/* Body */}
       <div className={styles.body}>
         <div className={styles.metrics}>
-          <Metric label="최고 학점" value={data.maxSemesterGpa} format="gpa" />
-          <Metric label="평균 학점" value={data.overallGpa} format="gpa" />
+          <Metric label={t("metrics.maxGpa")} value={data.maxSemesterGpa} format="gpa" />
+          <Metric label={t("metrics.overallGpa")} value={data.overallGpa} format="gpa" />
           <Metric
-            label="총 이수 학점"
+            label={t("metrics.totalEarnedCredits")}
             value={data.totalEarnedCredits}
-            suffix="학점"
+            suffix={t("creditUnit")}
             format="int"
           />
         </div>
@@ -54,8 +52,7 @@ function Metric({
   suffix?: string;
   format: "gpa" | "int";
 }) {
-  const displayValue =
-    format === "gpa" ? formatGpa(value) : formatInt(value);
+  const displayValue = format === "gpa" ? formatGpa(value) : formatInt(value);
 
   return (
     <div className={styles.metric}>
@@ -70,12 +67,10 @@ function Metric({
 
 function formatGpa(v: number) {
   if (Number.isNaN(v)) return "0.00";
-  // ✅ 소수점 2자리 고정 (원하면 1자리로 바꿔도 됨)
   return v.toFixed(2);
 }
 
 function formatInt(v: number) {
   if (Number.isNaN(v)) return "0";
-  // 정수 표기 (혹시 number로 들어와도 안전)
   return String(Math.trunc(v));
 }

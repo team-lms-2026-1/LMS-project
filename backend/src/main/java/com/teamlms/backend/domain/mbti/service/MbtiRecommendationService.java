@@ -8,10 +8,12 @@ import com.teamlms.backend.domain.mbti.entity.JobCatalog;
 import com.teamlms.backend.domain.mbti.entity.MbtiJobRecommendation;
 import com.teamlms.backend.domain.mbti.entity.MbtiJobRecommendationItem;
 import com.teamlms.backend.domain.mbti.entity.MbtiResult;
+import com.teamlms.backend.domain.mbti.repository.JobCatalogRepository;
 import com.teamlms.backend.domain.mbti.repository.MbtiJobRecommendationRepository;
 import com.teamlms.backend.domain.mbti.repository.MbtiResultRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
+import com.teamlms.backend.global.i18n.LocaleUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -36,13 +38,14 @@ public class MbtiRecommendationService {
 
     private static final int MAX_REASON_TEXT_LENGTH = 420;
     private static final int AI_MAX_RETRY = 3;
-    private static final String PROMPT_VERSION = "mbti-job-v3";
+    private static final String PROMPT_VERSION = "mbti-job-v4";
 
     private final MbtiResultRepository mbtiResultRepository;
     private final MbtiJobRecommendationRepository recommendationRepository;
     private final MbtiRecommendationKeywordService keywordService;
     private final MbtiRecommendationCandidateSelector candidateSelector;
     private final MbtiRecommendationAiClient aiClient;
+    private final JobCatalogRepository jobCatalogRepository;
     private final ObjectMapper objectMapper;
 
     public List<InterestKeywordMaster> getActiveInterestKeywords() {
@@ -50,13 +53,19 @@ public class MbtiRecommendationService {
     }
 
     @Transactional
-    public MbtiJobRecommendationResponse generateRecommendation(Long accountId, List<Long> keywordIds) {
+    public MbtiJobRecommendationResponse generateRecommendation(Long accountId, List<Long> keywordIds, String locale) {
+        String normalizedLocale = LocaleUtil.normalize(locale);
         MbtiResult mbtiResult = mbtiResultRepository.findTopByAccountIdOrderByCreatedAtDesc(accountId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MBTI_RESULT_NOT_FOUND));
 
         List<InterestKeywordMaster> selectedKeywords = keywordService.getValidatedKeywords(keywordIds);
         List<MbtiRecommendationCandidate> candidates = candidateSelector.selectCandidates(selectedKeywords);
-        List<ResolvedRecommendation> resolved = generateByAiWithFallback(mbtiResult, selectedKeywords, candidates);
+        List<ResolvedRecommendation> resolved = generateByAiWithFallback(
+                mbtiResult,
+                selectedKeywords,
+                candidates,
+                normalizedLocale
+        );
 
         List<Long> selectedKeywordIds = selectedKeywords.stream().map(InterestKeywordMaster::getId).toList();
         List<String> candidateJobCodes = candidates.stream().map(c -> c.job().getJobCode()).toList();
@@ -85,12 +94,13 @@ public class MbtiRecommendationService {
             );
         }
 
-        return toResponse(saved, selectedKeywords);
+        return toResponse(saved, selectedKeywords, normalizedLocale);
     }
 
-    public MbtiJobRecommendationResponse getLatestRecommendation(Long accountId) {
+    public MbtiJobRecommendationResponse getLatestRecommendation(Long accountId, String locale) {
+        String normalizedLocale = LocaleUtil.normalize(locale);
         return recommendationRepository.findByAccountId(accountId)
-                .map(saved -> toResponse(saved, keywordService.getKeywordsByIds(saved.getSelectedKeywordIds())))
+                .map(saved -> toResponse(saved, keywordService.getKeywordsByIds(saved.getSelectedKeywordIds()), normalizedLocale))
                 .orElse(null);
     }
 
@@ -157,11 +167,12 @@ public class MbtiRecommendationService {
     private List<ResolvedRecommendation> generateByAiWithFallback(
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords,
-            List<MbtiRecommendationCandidate> candidates
+            List<MbtiRecommendationCandidate> candidates,
+            String locale
     ) {
         if (!aiClient.isAvailable()) {
             log.warn("ChatClient.Builder bean not found. Using template fallback recommendations.");
-            return fallbackRecommendations(mbtiResult, selectedKeywords, candidates);
+            return fallbackRecommendations(mbtiResult, selectedKeywords, candidates, locale);
         }
 
         Map<String, MbtiRecommendationCandidate> candidateMap = candidates.stream()
@@ -170,21 +181,22 @@ public class MbtiRecommendationService {
         String errorHint = null;
         for (int attempt = 1; attempt <= AI_MAX_RETRY; attempt++) {
             try {
-                String raw = aiClient.requestRecommendationJson(mbtiResult, selectedKeywords, candidates, errorHint);
-                return parseAndResolve(raw, candidateMap, mbtiResult, selectedKeywords);
+                String raw = aiClient.requestRecommendationJson(mbtiResult, selectedKeywords, candidates, errorHint, locale);
+                return parseAndResolve(raw, candidateMap, mbtiResult, selectedKeywords, locale);
             } catch (Exception e) {
                 errorHint = e.getMessage();
                 log.warn("MBTI recommendation AI attempt {} failed: {}", attempt, e.getMessage());
             }
         }
-        return fallbackRecommendations(mbtiResult, selectedKeywords, candidates);
+        return fallbackRecommendations(mbtiResult, selectedKeywords, candidates, locale);
     }
 
     private List<ResolvedRecommendation> parseAndResolve(
             String raw,
             Map<String, MbtiRecommendationCandidate> candidateMap,
             MbtiResult mbtiResult,
-            List<InterestKeywordMaster> selectedKeywords
+            List<InterestKeywordMaster> selectedKeywords,
+            String locale
     ) throws Exception {
         JsonNode root = objectMapper.readTree(raw);
         JsonNode recommendationsNode = root.get("recommendations");
@@ -215,7 +227,7 @@ public class MbtiRecommendationService {
             }
             resolved.add(new ResolvedRecommendation(
                     candidate.job(),
-                    normalizeReason(candidate, reason, mbtiResult.getMbtiType(), selectedKeywords)
+                    normalizeReason(candidate, reason, mbtiResult.getMbtiType(), selectedKeywords, locale)
             ));
         }
 
@@ -225,7 +237,8 @@ public class MbtiRecommendationService {
     private List<ResolvedRecommendation> fallbackRecommendations(
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords,
-            List<MbtiRecommendationCandidate> candidates
+            List<MbtiRecommendationCandidate> candidates,
+            String locale
     ) {
         if (candidates.size() < 5) {
             throw new BusinessException(ErrorCode.MBTI_JOB_CATALOG_EMPTY);
@@ -236,13 +249,18 @@ public class MbtiRecommendationService {
             MbtiRecommendationCandidate candidate = candidates.get(i);
             fallback.add(new ResolvedRecommendation(
                     candidate.job(),
-                    buildTemplateReason(candidate, mbtiResult.getMbtiType(), selectedKeywords)
+                    buildTemplateReason(candidate, mbtiResult.getMbtiType(), selectedKeywords, locale)
             ));
         }
         return fallback;
     }
 
-    private MbtiJobRecommendationResponse toResponse(MbtiJobRecommendation recommendation, List<InterestKeywordMaster> selectedKeywords) {
+    private MbtiJobRecommendationResponse toResponse(
+            MbtiJobRecommendation recommendation,
+            List<InterestKeywordMaster> selectedKeywords,
+            String locale
+    ) {
+        String normalizedLocale = LocaleUtil.normalize(locale);
         List<Long> selectedKeywordIds = recommendation.getSelectedKeywordIds() == null
                 ? List.of()
                 : recommendation.getSelectedKeywordIds();
@@ -252,17 +270,40 @@ public class MbtiRecommendationService {
         List<MbtiJobRecommendationResponse.SelectedKeyword> keywords = selectedKeywordIds.stream()
                 .map(keywordMap::get)
                 .filter(Objects::nonNull)
-                .map(k -> new MbtiJobRecommendationResponse.SelectedKeyword(k.getId(), k.getKeyword(), k.getCategory()))
+                .map(k -> new MbtiJobRecommendationResponse.SelectedKeyword(
+                        k.getId(),
+                        k.getKeywordByLocale(normalizedLocale),
+                        k.getCategoryByLocale(normalizedLocale)
+                ))
                 .toList();
 
+        List<Long> jobCatalogIds = recommendation.getItems().stream()
+                .map(MbtiJobRecommendationItem::getJobCatalogId)
+                .distinct()
+                .toList();
+        Map<Long, JobCatalog> jobCatalogMap = jobCatalogRepository.findAllById(jobCatalogIds).stream()
+                .collect(java.util.stream.Collectors.toMap(JobCatalog::getId, v -> v, (a, b) -> a, HashMap::new));
+
         List<MbtiJobRecommendationResponse.RecommendedJob> jobs = recommendation.getItems().stream()
-                .map(item -> new MbtiJobRecommendationResponse.RecommendedJob(
-                        item.getRankNo(),
-                        item.getJobCatalogId(),
-                        item.getJobCode(),
-                        item.getJobName(),
-                        item.getReasonText()
-                ))
+                .map(item -> {
+                    JobCatalog jobCatalog = jobCatalogMap.get(item.getJobCatalogId());
+                    String localizedJobName = resolveLocalizedJobName(item, jobCatalog, normalizedLocale);
+                    String localizedReason = resolveLocalizedReason(
+                            item,
+                            jobCatalog,
+                            localizedJobName,
+                            recommendation.getMbtiType(),
+                            selectedKeywords,
+                            normalizedLocale
+                    );
+                    return new MbtiJobRecommendationResponse.RecommendedJob(
+                            item.getRankNo(),
+                            item.getJobCatalogId(),
+                            item.getJobCode(),
+                            localizedJobName,
+                            localizedReason
+                    );
+                })
                 .toList();
 
         return new MbtiJobRecommendationResponse(
@@ -275,15 +316,64 @@ public class MbtiRecommendationService {
         );
     }
 
+    private String resolveLocalizedJobName(
+            MbtiJobRecommendationItem item,
+            JobCatalog jobCatalog,
+            String locale
+    ) {
+        if (jobCatalog == null) {
+            return item.getJobName();
+        }
+        return jobCatalog.getJobNameByLocale(locale);
+    }
+
+    private String resolveLocalizedReason(
+            MbtiJobRecommendationItem item,
+            JobCatalog jobCatalog,
+            String localizedJobName,
+            String mbtiType,
+            List<InterestKeywordMaster> selectedKeywords,
+            String locale
+    ) {
+        String normalizedReason = cleanReasonText(item.getReasonText());
+        if ("ko".equals(locale)) {
+            return normalizedReason;
+        }
+        if (isReasonAlignedWithLocale(normalizedReason, locale)) {
+            return normalizedReason;
+        }
+
+        String keyword = selectedKeywords.isEmpty()
+                ? defaultInterestLabel(locale)
+                : selectedKeywords.get(0).getKeywordByLocale(locale);
+        String track = resolveLocalizedTrack(jobCatalog, locale);
+        return limitReasonText(cleanReasonText(
+                buildTemplateReasonText(localizedJobName, mbtiType, keyword, track, locale)
+        ));
+    }
+
+    private boolean isReasonAlignedWithLocale(String reason, String locale) {
+        String normalizedLocale = LocaleUtil.normalize(locale);
+        if ("en".equals(normalizedLocale)) {
+            return containsLatin(reason) && !containsHangul(reason);
+        }
+        if ("ja".equals(normalizedLocale)) {
+            return containsJapanese(reason) && !containsHangul(reason);
+        }
+        return containsHangul(reason);
+    }
+
     private String normalizeReason(
             MbtiRecommendationCandidate candidate,
             String rawReason,
             String mbtiType,
-            List<InterestKeywordMaster> selectedKeywords
+            List<InterestKeywordMaster> selectedKeywords,
+            String locale
     ) {
-        String template = buildTemplateReason(candidate, mbtiType, selectedKeywords);
+        String normalizedLocale = LocaleUtil.normalize(locale);
+        String template = buildTemplateReason(candidate, mbtiType, selectedKeywords, normalizedLocale);
         String normalized = limitReasonText(cleanReasonText(rawReason));
-        if (isWeakReason(normalized)) {
+        if (isWeakReason(normalized, normalizedLocale)) {
             return template;
         }
         return normalized;
@@ -292,30 +382,42 @@ public class MbtiRecommendationService {
     private String buildTemplateReason(
             MbtiRecommendationCandidate candidate,
             String mbtiType,
-            List<InterestKeywordMaster> selectedKeywords
+            List<InterestKeywordMaster> selectedKeywords,
+            String locale
     ) {
-        String keyword = !candidate.matchedKeywords().isEmpty()
-                ? candidate.matchedKeywords().get(0)
-                : (selectedKeywords.isEmpty() ? "관심 분야" : selectedKeywords.get(0).getKeyword());
+        String normalizedLocale = LocaleUtil.normalize(locale);
+        String localizedJobName = candidate.job().getJobNameByLocale(normalizedLocale);
+        String localizedKeyword = resolveLocalizedKeyword(candidate, selectedKeywords, normalizedLocale);
+        String localizedTrack = resolveLocalizedTrack(candidate.job(), normalizedLocale);
+        return limitReasonText(cleanReasonText(
+                buildTemplateReasonText(localizedJobName, mbtiType, localizedKeyword, localizedTrack, normalizedLocale)
+        ));
+    }
 
-        String track = firstNonBlank(
-                candidate.job().getMinorName(),
-                candidate.job().getMiddleName(),
-                candidate.job().getMajorName(),
-                "관련 분야"
-        );
-
-        String paragraph = """
-                MBTI %s 성향은 %s 직무에서 요구되는 문제 해결과 협업 방식에 잘 맞습니다. \
-                특히 %s 관심 키워드와 연결되는 업무 맥락이 분명해서 학습 동기와 몰입을 유지하기 좋습니다. \
-                %s 역량을 프로젝트와 실습으로 쌓아가면 현장 적응 속도를 높이고 장기 진로 확장에도 유리합니다.
-                """.formatted(
-                mbtiType,
-                candidate.job().getJobName(),
-                keyword,
-                track
-        );
-        return limitReasonText(cleanReasonText(paragraph));
+    private String buildTemplateReasonText(
+            String jobName,
+            String mbtiType,
+            String keyword,
+            String track,
+            String locale
+    ) {
+        return switch (LocaleUtil.normalize(locale)) {
+            case "en" -> """
+                    Your MBTI %s profile aligns well with the problem-solving and collaboration style required in %s roles. \
+                    The role connects naturally with your interest in %s, which helps sustain motivation and learning focus. \
+                    Building %s capability through projects and hands-on practice can accelerate on-the-job adaptation and long-term career growth.
+                    """.formatted(mbtiType, jobName, keyword, track);
+            case "ja" -> """
+                    MBTI %sの傾向は、%s職務で求められる問題解決と協働スタイルに適しています。 \
+                    とくに%sへの関心と業務の接点が明確で、学習意欲と集中を維持しやすいです。 \
+                    %sの力をプロジェクトと実践で積み上げることで、現場適応を早め、長期的なキャリア拡張にも有利です。
+                    """.formatted(mbtiType, jobName, keyword, track);
+            default -> """
+                    MBTI %s 성향은 %s 직무에서 요구되는 문제 해결과 협업 방식에 잘 맞습니다. \
+                    특히 %s 관심 키워드와 연결되는 업무 맥락이 분명해서 학습 동기와 몰입을 유지하기 좋습니다. \
+                    %s 역량을 프로젝트와 실습으로 쌓아가면 현장 적응 속도를 높이고 장기 진로 확장에도 유리합니다.
+                    """.formatted(mbtiType, jobName, keyword, track);
+        };
     }
 
     private String cleanReasonText(String text) {
@@ -330,15 +432,21 @@ public class MbtiRecommendationService {
                 .trim();
     }
 
-    private boolean isWeakReason(String line) {
+    private boolean isWeakReason(String line, String locale) {
         if (line == null || line.isBlank()) {
-            return true;
-        }
-        if (!containsHangul(line)) {
             return true;
         }
         String compact = line.replace(" ", "");
         if (compact.length() < 45) {
+            return true;
+        }
+        if ("ko".equals(locale) && !containsHangul(line)) {
+            return true;
+        }
+        if ("en".equals(locale) && (!containsLatin(line) || containsHangul(line))) {
+            return true;
+        }
+        if ("ja".equals(locale) && (!containsJapanese(line) || containsHangul(line))) {
             return true;
         }
         return compact.equals("추천합니다") || compact.equals("적합합니다");
@@ -346,6 +454,62 @@ public class MbtiRecommendationService {
 
     private boolean containsHangul(String text) {
         return text != null && text.matches(".*[가-힣].*");
+    }
+
+    private boolean containsLatin(String text) {
+        return text != null && text.matches(".*[A-Za-z].*");
+    }
+
+    private boolean containsJapanese(String text) {
+        return text != null && text.matches(".*[\\u3040-\\u30FF\\u4E00-\\u9FFF].*");
+    }
+
+    private String resolveLocalizedKeyword(
+            MbtiRecommendationCandidate candidate,
+            List<InterestKeywordMaster> selectedKeywords,
+            String locale
+    ) {
+        if (!candidate.matchedKeywords().isEmpty()) {
+            String matchedKeyword = candidate.matchedKeywords().get(0);
+            for (InterestKeywordMaster keyword : selectedKeywords) {
+                if (matchedKeyword.equals(keyword.getKeyword())) {
+                    return keyword.getKeywordByLocale(locale);
+                }
+            }
+            return matchedKeyword;
+        }
+        if (!selectedKeywords.isEmpty()) {
+            return selectedKeywords.get(0).getKeywordByLocale(locale);
+        }
+        return defaultInterestLabel(locale);
+    }
+
+    private String resolveLocalizedTrack(JobCatalog jobCatalog, String locale) {
+        if (jobCatalog == null) {
+            return defaultRelatedFieldLabel(locale);
+        }
+        return firstNonBlank(
+                jobCatalog.getMinorNameByLocale(locale),
+                jobCatalog.getMiddleNameByLocale(locale),
+                jobCatalog.getMajorNameByLocale(locale),
+                defaultRelatedFieldLabel(locale)
+        );
+    }
+
+    private String defaultInterestLabel(String locale) {
+        return switch (LocaleUtil.normalize(locale)) {
+            case "en" -> "interest area";
+            case "ja" -> "関心分野";
+            default -> "관심 분야";
+        };
+    }
+
+    private String defaultRelatedFieldLabel(String locale) {
+        return switch (LocaleUtil.normalize(locale)) {
+            case "en" -> "related field";
+            case "ja" -> "関連分野";
+            default -> "관련 분야";
+        };
     }
 
     private String firstNonBlank(String a, String b, String c, String fallback) {
