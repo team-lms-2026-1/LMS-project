@@ -162,11 +162,22 @@ public class MentoringQueryService {
 
     public Page<MentoringRecruitmentResponse> getRecruitments(Pageable pageable, Long currentAccountId, String keyword, MentoringRecruitmentStatus status) {
         Page<MentoringRecruitment> recruitments;
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
         if (status != null) {
-            if (keyword != null && !keyword.isBlank()) {
-                recruitments = recruitmentRepository.findByStatusAndTitleContainingIgnoreCase(status, keyword, pageable);
+            if (status == MentoringRecruitmentStatus.OPEN) {
+                // OPEN 조회 시 날짜 조건 추가 → 현재 모집 기간 내 공고만 반환
+                if (keyword != null && !keyword.isBlank()) {
+                    recruitments = recruitmentRepository.findByStatusAndWithinDateRangeAndTitleContaining(status, now, keyword, pageable);
+                } else {
+                    recruitments = recruitmentRepository.findByStatusAndWithinDateRange(status, now, pageable);
+                }
             } else {
-                recruitments = recruitmentRepository.findByStatus(status, pageable);
+                if (keyword != null && !keyword.isBlank()) {
+                    recruitments = recruitmentRepository.findByStatusAndTitleContainingIgnoreCase(status, keyword, pageable);
+                } else {
+                    recruitments = recruitmentRepository.findByStatus(status, pageable);
+                }
             }
         } else {
             if (keyword != null && !keyword.isBlank()) {

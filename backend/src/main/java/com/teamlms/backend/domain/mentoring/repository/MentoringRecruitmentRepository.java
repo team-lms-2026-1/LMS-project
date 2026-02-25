@@ -5,7 +5,6 @@ import com.teamlms.backend.domain.mentoring.enums.MentoringRecruitmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -20,21 +19,23 @@ public interface MentoringRecruitmentRepository extends JpaRepository<MentoringR
     boolean existsBySemesterId(Long semesterId);
 
     /**
-     * 스케줄러용: DRAFT → OPEN
-     * 모집 시작일이 됐고 아직 종료 전인 공고를 OPEN으로 일괄 변경
+     * OPEN 상태이면서 현재 모집 기간 내 공고 조회 (날짜 기반 동적 필터)
+     * 스케줄러 없이 조회 시점에 날짜로 계산
      */
-    @Modifying
-    @Query("UPDATE MentoringRecruitment r SET r.status = 'OPEN' " +
-           "WHERE r.status = 'DRAFT' AND r.recruitStartAt <= :now AND r.recruitEndAt >= :now")
-    int bulkOpenByDate(@Param("now") LocalDateTime now);
+    @Query("SELECT r FROM MentoringRecruitment r " +
+           "WHERE r.status = :status AND r.recruitStartAt <= :now AND r.recruitEndAt >= :now")
+    Page<MentoringRecruitment> findByStatusAndWithinDateRange(
+            @Param("status") MentoringRecruitmentStatus status,
+            @Param("now") LocalDateTime now,
+            Pageable pageable);
 
-    /**
-     * 스케줄러용: OPEN → CLOSED
-     * 모집 종료일이 지난 OPEN 공고를 CLOSED로 일괄 변경
-     */
-    @Modifying
-    @Query("UPDATE MentoringRecruitment r SET r.status = 'CLOSED' " +
-           "WHERE r.status = 'OPEN' AND r.recruitEndAt < :now")
-    int bulkCloseByDate(@Param("now") LocalDateTime now);
+    @Query("SELECT r FROM MentoringRecruitment r " +
+           "WHERE r.status = :status AND r.recruitStartAt <= :now AND r.recruitEndAt >= :now " +
+           "AND LOWER(r.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<MentoringRecruitment> findByStatusAndWithinDateRangeAndTitleContaining(
+            @Param("status") MentoringRecruitmentStatus status,
+            @Param("now") LocalDateTime now,
+            @Param("keyword") String keyword,
+            Pageable pageable);
 }
 
