@@ -62,11 +62,48 @@ public class NoticeService {
         return notices.map(notice -> convertToExternalResponse(notice, nameMap.get(notice.getAuthor().getAccountId())));
     }
 
+    // 1-1. 학생용 목록 조회 (게기기간 내 공지사항만)
+    public Page<ExternalNoticeResponse> getStudentNoticeList(Pageable pageable, Long categoryId, String keyword) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfDay = startOfDay(now);
+        LocalDateTime endOfDay = endOfDay(now);
+
+        Page<Notice> notices = noticeRepository.findVisibleNotices(
+                categoryId,
+                keyword,
+                startOfDay,
+                endOfDay,
+                pageable);
+
+        List<Long> authorIds = notices.getContent().stream()
+                .map(n -> n.getAuthor().getAccountId())
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, String> nameMap = communityAccountRepository.findRealNamesMap(authorIds);
+
+        return notices.map(notice -> convertToExternalResponse(notice, nameMap.get(notice.getAuthor().getAccountId())));
+    }
+
     // 2. 상세 조회
     @Transactional
     public ExternalNoticeResponse getNoticeDetail(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
+
+        notice.increaseViewCount();
+        String authorName = communityAccountRepository.findRealName(notice.getAuthor().getAccountId());
+        return convertToExternalResponse(notice, authorName);
+    }
+
+    // 2-1. 학생용 상세 조회 (게기기간 밖이면 404)
+    @Transactional
+    public ExternalNoticeResponse getStudentNoticeDetail(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
+
+        if (!isNoticeVisibleForStudent(notice, LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.NOTICE_NOT_FOUND);
+        }
 
         notice.increaseViewCount();
         String authorName = communityAccountRepository.findRealName(notice.getAuthor().getAccountId());
@@ -252,6 +289,27 @@ public class NoticeService {
                         : null)
                 .files(filesDto)
                 .build();
+    }
+
+    private boolean isNoticeVisibleForStudent(Notice notice, LocalDateTime now) {
+        LocalDateTime start = startOfDay(now);
+        LocalDateTime end = endOfDay(now);
+
+        if (notice.getDisplayStartAt() != null && notice.getDisplayStartAt().isAfter(end)) {
+            return false;
+        }
+        if (notice.getDisplayEndAt() != null && notice.getDisplayEndAt().isBefore(start)) {
+            return false;
+        }
+        return true;
+    }
+
+    private LocalDateTime startOfDay(LocalDateTime now) {
+        return now.toLocalDate().atStartOfDay();
+    }
+
+    private LocalDateTime endOfDay(LocalDateTime now) {
+        return now.toLocalDate().atTime(23, 59, 59);
     }
 
     private LocalDateTime parseDateTime(String dateTimeStr) {

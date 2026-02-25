@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
-import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
+import { Table, type TableColumn } from "@/components/table";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./StudentExtraCurrentEnrollmentsTable.module.css";
-
 import type { ExtraCurricularEnrollmentListItemDto } from "../../api/types";
 
 type Props = {
@@ -12,20 +12,20 @@ type Props = {
   onRowClick?: (row: ExtraCurricularEnrollmentListItemDto) => void;
 };
 
-export function StudentExtraCurrentEnrollmentsTable({
-  items,
-  loading,
-  onRowClick,
-}: Props) {
+export function StudentExtraCurrentEnrollmentsTable({ items, loading, onRowClick }: Props) {
+  const tEnrollments = useI18n("extraCurricular.studentEnrollments");
+  const tCurrent = useI18n("extraCurricular.studentCurrentEnrollments");
+  const tCommon = useI18n("extraCurricular.common");
+
   const columns: Array<TableColumn<ExtraCurricularEnrollmentListItemDto>> = [
-    { header: "비교과코드", align: "center", render: (r) => r.extraOfferingCode },
-    { header: "비교과명", align: "center", render: (r) => r.extraOfferingName },
-    { header: "담당자", align: "center", render: (r) => r.hostContactName },
-    { header: "학기", align: "center", render: (r) => r.semesterName },
-    { header: "상점", align: "center", render: (r) => r.rewardPointDefault },
-    { header: "인정시간", align: "center", render: (r) => r.recognizedHoursDefault },
+    { header: tEnrollments("table.offeringCode"), align: "center", render: (r) => r.extraOfferingCode },
+    { header: tEnrollments("table.offeringName"), align: "center", render: (r) => r.extraOfferingName },
+    { header: tEnrollments("table.hostContactName"), align: "center", render: (r) => r.hostContactName },
+    { header: tEnrollments("table.semesterName"), align: "center", render: (r) => r.semesterName },
+    { header: tEnrollments("table.rewardPoint"), align: "center", render: (r) => r.rewardPointDefault },
+    { header: tEnrollments("table.recognizedHours"), align: "center", render: (r) => r.recognizedHoursDefault },
     {
-      header: "관리",
+      header: tCommon("manageHeader"),
       width: 140,
       align: "center",
       stopRowClick: true,
@@ -38,7 +38,7 @@ export function StudentExtraCurrentEnrollmentsTable({
               onRowClick?.(r);
             }}
           >
-            상세
+            {tCommon("detailButton")}
           </Button>
         </div>
       ),
@@ -52,7 +52,7 @@ export function StudentExtraCurrentEnrollmentsTable({
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.extraOfferingId}
-      emptyText="이수중인 비교과가 없습니다."
+      emptyText={tCurrent("table.emptyText")}
       onRowClick={onRowClick ? (row) => onRowClick(row) : undefined}
     />
   );

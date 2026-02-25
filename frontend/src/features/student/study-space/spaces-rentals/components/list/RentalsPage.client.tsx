@@ -30,6 +30,7 @@ export default function RentalsPageClient() {
     meLoading,
     meError,
     hasRentalRead,
+    profileName,
 
     data,
     meta,
@@ -58,9 +59,10 @@ export default function RentalsPageClient() {
   }, [page, size, updateParams]);
 
   const title = useMemo(() => {
-    const id = me?.loginId ? `(${me.loginId})` : "";
-    return `내 예약 목록 ${id}`;
-  }, [me?.loginId]);
+    const label = profileName || me?.loginId || "";
+    const suffix = label ? `(${label})` : "";
+    return `내 예약 목록 ${suffix}`;
+  }, [me?.loginId, profileName]);
 
   const openRejectModal = async (r: RentalDto) => {
     const reason = await fetchRejectionReason(r);
@@ -121,11 +123,6 @@ export default function RentalsPageClient() {
           <h1 className={styles.title}>{title}</h1>
         </div>
 
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={refresh}>
-            새로고침
-          </Button>
-        </div>
       </div>
 
       {error && <div className={styles.errorBox}>{error}</div>}

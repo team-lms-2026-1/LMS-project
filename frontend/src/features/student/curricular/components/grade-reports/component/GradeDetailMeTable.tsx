@@ -1,8 +1,9 @@
 "use client";
 
 import { Table, type TableColumn } from "@/components/table";
-import styles from "./GradeDetailMeTable.module.css"
+import { useI18n } from "@/i18n/useI18n";
 import { StudentGradeDetailListDto } from "@/features/curricular-offering/api/types";
+import styles from "./GradeDetailMeTable.module.css";
 
 type Props = {
   items: StudentGradeDetailListDto[];
@@ -10,11 +11,13 @@ type Props = {
 };
 
 export function GradeDetailMeTable({ items, loading }: Props) {
+  const t = useI18n("curricular.adminGrades.detail.table");
+
   const columns: Array<TableColumn<StudentGradeDetailListDto>> = [
-    { header: "교과코드", align: "center", render: (r) => r.curricularCode },
-    { header: "교과이름", align: "center", render: (r) => r.curricularName },
-    { header: "학점", align: "center", render: (r) => r.credits },
-    { header: "등급", align: "center", render: (r) => r.grade },
+    { header: t("curricularCode"), align: "center", render: (row) => row.curricularCode },
+    { header: t("curricularName"), align: "center", render: (row) => row.curricularName },
+    { header: t("credits"), align: "center", render: (row) => row.credits },
+    { header: t("grade"), align: "center", render: (row) => row.grade },
   ];
 
   return (
@@ -23,8 +26,8 @@ export function GradeDetailMeTable({ items, loading }: Props) {
       items={items}
       loading={loading}
       skeletonRowCount={10}
-      rowKey={(r) => r.enrollmentId}
-      emptyText="성적 정보가 없습니다."
+      rowKey={(row) => row.enrollmentId}
+      emptyText={t("emptyText")}
     />
   );
 }

@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-import styles from "./StudentExtraCurricularCurrentEnrollmentPage.module.css";
 import { PaginationSimple, useListQuery } from "@/components/pagination";
-
+import { useI18n } from "@/i18n/useI18n";
+import styles from "./StudentExtraCurricularCurrentEnrollmentPage.module.css";
 import type { ExtraCurricularEnrollmentListItemDto } from "../../api/types";
 import { StudentExtraCurrentEnrollmentsTable } from "./StudentExtraCurrentEnrollmentsTable";
 import { useStudentExtraCurricularCurrentEnrollmentsList } from "../../hooks/useExtraCurricularOfferingList";
@@ -13,6 +12,7 @@ import { useStudentExtraCurricularCurrentEnrollmentsList } from "../../hooks/use
 export default function StudentExtraCurricularCurrentEnrollmentPageClient() {
   const router = useRouter();
   const { state, actions } = useStudentExtraCurricularCurrentEnrollmentsList();
+  const t = useI18n("extraCurricular.studentCurrentEnrollments");
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
@@ -34,7 +34,7 @@ export default function StudentExtraCurricularCurrentEnrollmentPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>이수중 비교과</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 

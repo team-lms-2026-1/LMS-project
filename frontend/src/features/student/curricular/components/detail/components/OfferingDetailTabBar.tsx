@@ -1,10 +1,14 @@
 "use client";
+
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./OfferingDetailTabBar.module.css";
 
-type Tab = "detail" | "students" | "competencies";
+type Tab = "detail" | "competencies";
 type Props = { value: Tab; onChange: (v: Tab) => void };
 
 export function OfferingDetailTabBar({ value, onChange }: Props) {
+  const t = useI18n("curricular.adminOfferingDetail.tabs");
+
   return (
     <div className={styles.tabs}>
       <button
@@ -12,14 +16,14 @@ export function OfferingDetailTabBar({ value, onChange }: Props) {
         type="button"
         onClick={() => onChange("detail")}
       >
-        상세
+        {t("detail")}
       </button>
       <button
         className={`${styles.tab} ${value === "competencies" ? styles.active : ""}`}
         type="button"
         onClick={() => onChange("competencies")}
       >
-        역량
+        {t("competencies")}
       </button>
     </div>
   );

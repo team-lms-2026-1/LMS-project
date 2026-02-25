@@ -92,8 +92,8 @@ export async function createNotice(body: CreateNoticeRequestDto, files?: File[])
 export async function updateNotice(noticeId: number, body: UpdateNoticeRequestDto, files?: File[]) {
   const deleteIds = body.deleteFileIds ?? [];
 
-  const displayStartAt = body.displayStartAt ?? "";
-  const displayEndAt = body.displayEndAt ?? "";
+  const displayStartAt = body.displayStartAt || null;
+  const displayEndAt = body.displayEndAt || null;
 
   // ✅ 백엔드가 기대하는 엔벨로프: { data, meta }
   const dataPayload = {
@@ -104,12 +104,12 @@ export async function updateNotice(noticeId: number, body: UpdateNoticeRequestDt
     displayEndAt,
     deleteFileIds: deleteIds,
   };
+  const requestPayload = { data: dataPayload, meta: null, ...dataPayload };
 
-  const envelope = { data: dataPayload, meta: null };
 
   // ✅ 파일 유무와 관계없이 항상 multipart로 통일
   const fd = new FormData();
-  fd.append("request", new Blob([JSON.stringify(envelope)], { type: "application/json" }));
+  fd.append("request", new Blob([JSON.stringify(requestPayload)], { type: "application/json" }));
 
   // ✅ files는 있을 때만 append (없어도 정상)
   (files ?? []).forEach((f) => fd.append("files", f));

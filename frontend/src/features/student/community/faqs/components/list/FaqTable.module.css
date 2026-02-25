@@ -36,7 +36,18 @@
   font: inherit;
   color: #111827;
   text-decoration: none;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .titleLink:hover {
   text-decoration: underline;
+}
+
+.rowTall td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  height: 60px;
 }

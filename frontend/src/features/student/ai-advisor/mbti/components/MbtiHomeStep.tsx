@@ -1,4 +1,5 @@
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./MbtiClient.module.css";
 
 type MbtiHomeStepProps = {
@@ -9,13 +10,13 @@ type MbtiHomeStepProps = {
 };
 
 export function MbtiHomeStep({ hasResult, loading, onStartTest, onShowResult }: MbtiHomeStepProps) {
+  const t = useI18n("aiAdvisor.mbti.home");
+
   return (
     <div className={styles.container}>
       <section className={styles.heroCard}>
-        <h1 className={styles.pageTitle}>MBTI AI 추천</h1>
-        <p className={styles.description}>
-          검사하기를 누르면 기존 결과가 있어도 새 결과로 덮어씁니다.
-        </p>
+        <h1 className={styles.pageTitle}>{t("title")}</h1>
+        <p className={styles.description}>{t("description")}</p>
       </section>
 
       <section className={styles.homeGrid}>
@@ -25,13 +26,13 @@ export function MbtiHomeStep({ hasResult, loading, onStartTest, onShowResult }: 
               <SearchIcon />
             </div>
             <div>
-              <div className={styles.optionKicker}>새로 시작</div>
-              <h2 className={styles.optionTitle}>검사하기</h2>
+              <div className={styles.optionKicker}>{t("start.kicker")}</div>
+              <h2 className={styles.optionTitle}>{t("start.title")}</h2>
             </div>
           </div>
-          <p className={styles.optionDesc}>MBTI 검사를 새로 진행하고 관심 키워드를 선택해 추천을 생성합니다.</p>
+          <p className={styles.optionDesc}>{t("start.description")}</p>
           <Button className={`${styles.submitBtn} ${styles.homeActionBtn}`} onClick={onStartTest} loading={loading}>
-            검사 시작
+            {t("start.button")}
           </Button>
         </article>
 
@@ -41,14 +42,16 @@ export function MbtiHomeStep({ hasResult, loading, onStartTest, onShowResult }: 
               <ListIcon />
             </div>
             <div>
-              <div className={styles.optionKicker}>바로 확인</div>
-              <h2 className={styles.optionTitle}>결과보기</h2>
+              <div className={styles.optionKicker}>{t("result.kicker")}</div>
+              <h2 className={styles.optionTitle}>{t("result.title")}</h2>
             </div>
           </div>
-          <p className={styles.optionDesc}>저장된 최신 MBTI/직업 추천 결과를 바로 확인합니다.</p>
-          <div className={styles.optionMeta}>{hasResult ? "저장된 결과가 있습니다." : "저장된 결과가 없습니다."}</div>
+          <p className={styles.optionDesc}>{t("result.description")}</p>
+          <div className={styles.optionMeta}>
+            {hasResult ? t("result.hasResult") : t("result.noResult")}
+          </div>
           <Button className={`${styles.submitBtn} ${styles.homeActionBtn}`} variant="secondary" onClick={onShowResult}>
-            결과 보기
+            {t("result.button")}
           </Button>
         </article>
       </section>

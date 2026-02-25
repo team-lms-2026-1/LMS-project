@@ -9,11 +9,16 @@ type Ctx = { params: { noticeId: string } };
 export async function GET(req: Request, ctx: Ctx) {
   const noticeId = ctx.params.noticeId;
 
-  return proxyToBackend(req, `/api/v1/admin/community/notices/${encodeURIComponent(noticeId)}`, {
+  const res = await proxyToBackend(req, `/api/v1/admin/community/notices/${encodeURIComponent(noticeId)}`, {
     method: "GET",
-    cache: "force-cache",
-    next: { revalidate: 600, tags: [TAG] },
+    cache: "no-store",
   });
+
+  if (res.ok) {
+    revalidateTag(TAG);
+    revalidateTag(STUDENT_TAG);
+  }
+  return res;
 }
 
 export async function PATCH(req: Request, ctx: Ctx) {

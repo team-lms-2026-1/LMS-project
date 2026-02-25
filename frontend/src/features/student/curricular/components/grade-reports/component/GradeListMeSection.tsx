@@ -1,42 +1,33 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import styles from "./GradeListMeSection.module.css";
-
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
-
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
-
+import { useI18n } from "@/i18n/useI18n";
 import { useCurricularGradeMeList } from "../../../hooks/useCurricularGradeReports";
 import { GradeDetailMeTable } from "./GradeDetailMeTable";
-
+import styles from "./GradeListMeSection.module.css";
 
 export function GradeListMeSection() {
+  const t = useI18n("curricular.adminGrades.detail.list");
   const { state, actions } = useCurricularGradeMeList();
 
-  // URL query (semesterId)
   const { get } = useFilterQuery(["semesterId"]);
   const semesterId = get("semesterId");
 
-  // pagination (page/size)
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
-
-  // search input (keyword)
   const [inputKeyword, setInputKeyword] = useState("");
 
-  // sync page
   useEffect(() => {
     actions.goPage(page);
   }, [page, actions]);
 
-  // sync size
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size, actions]);
 
-  // sync semesterId (URL -> hook)
   useEffect(() => {
     actions.setSemesterId(semesterId ? Number(semesterId) : null);
   }, [semesterId, actions]);
@@ -49,11 +40,10 @@ export function GradeListMeSection() {
 
   return (
     <div className={styles.section}>
-      <Header title="과목 성적 리스트" />
+      <Header title={t("title")} />
 
       <div className={styles.body}>
         <div className={styles.searchRow}>
-          {/* 학기 필터 */}
           <SemesterFilterDropdown />
 
           <div className={styles.searchBarWrap}>
@@ -61,12 +51,12 @@ export function GradeListMeSection() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="교과목 코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
 
-        {state.error && <div className={styles.errorMessage}>{state.error}</div>}
+        {state.error && <div className={styles.errorMessage}>{t("loadError")}</div>}
 
         <GradeDetailMeTable items={state.items} loading={state.loading} />
 
@@ -90,4 +80,3 @@ function Header({ title }: { title: string }) {
     </div>
   );
 }
-

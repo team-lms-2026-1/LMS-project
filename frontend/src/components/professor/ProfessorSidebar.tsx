@@ -21,19 +21,9 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    key: "competency",
-    titleKey: "sections.competency.title",
-    items: [{ labelKey: "sections.competency.items.dashboard", href: "/professor/competencies" }],
-  },
-  {
     key: "course",
     titleKey: "sections.course.title",
-    items: [
-      { labelKey: "sections.course.items.offerings", href: "/professor/curricular/offerings" },
-      { labelKey: "sections.course.items.syllabus", href: "/professor/syllabus" },
-      { labelKey: "sections.course.items.grades", href: "/professor/grades" },
-      { labelKey: "sections.course.items.attendance", href: "/professor/attendance" },
-    ],
+    items: [{ labelKey: "sections.course.items.offerings", href: "/professor/curricular/offerings" }],
   },
   {
     key: "mentoring",

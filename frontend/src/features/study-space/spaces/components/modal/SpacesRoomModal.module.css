@@ -16,7 +16,7 @@
   --col-people: 240px;
   --col-period: 320px;
   --col-time: 300px;
-  --col-actions: 120px;
+  --col-actions: 160px;
   --col-gap: 24px;
 
   width: fit-content;                 /* ✅ 내용에 맞춰 늘어남 */
@@ -247,9 +247,14 @@
 
 .actionStack {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-end;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+}
+
+.actionStack > button {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .dangerTextBtn {

@@ -73,7 +73,7 @@ export default function CompetencyPageClient() {
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>학습에서의 계산 식</h2>
+          <h2 className={styles.sectionTitle}>진단에서의 계산 식</h2>
           <p className={styles.paragraph}>
             (진단지 5지선다 점수 * 6cs 각각의 점수) + (진단지 서술형 점수 + 6cs 각각의 점수) = 6cs 진단지의 점수
           </p>
@@ -86,9 +86,9 @@ export default function CompetencyPageClient() {
           <p className={styles.paragraph}>
             (진단지 점수 + 비교과 활동 점수 + 교과 활동 점수) = 6cs 총점
           </p>
-          <p className={styles.paragraph}>
+          <div className={styles.sectionTitle}>
             총점을 기준으로 중간값, 평균값 등을 계산하여 6cs 각각의 점수를 산출한다.
-          </p>
+          </div>
         </section>
       </div>
 

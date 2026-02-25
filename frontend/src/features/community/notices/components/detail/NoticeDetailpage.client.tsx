@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -68,6 +68,7 @@ export default function NoticeDetailpageClient() {
 
   const noticeIdParam = params?.noticeId;
   const noticeId = useMemo(() => Number(noticeIdParam ?? 0), [noticeIdParam]);
+  const inFlightRef = useRef<{ id: number; promise: Promise<NoticeListItemDto> } | null>(null);
 
   const [state, setState] = useState<LoadState<NoticeListItemDto>>({
     loading: true,
@@ -85,8 +86,21 @@ export default function NoticeDetailpageClient() {
     (async () => {
       try {
         setState({ loading: true, error: null, data: null });
-        const res = await fetchNoticeDetail(noticeId);
-        const data = normalizeDetail(res);
+        const promise = (() => {
+          const inFlight = inFlightRef.current;
+          if (inFlight && inFlight.id === noticeId) return inFlight.promise;
+
+          const nextPromise = fetchNoticeDetail(noticeId).then(normalizeDetail);
+          inFlightRef.current = { id: noticeId, promise: nextPromise };
+          nextPromise.finally(() => {
+            if (inFlightRef.current?.id === noticeId && inFlightRef.current?.promise === nextPromise) {
+              inFlightRef.current = null;
+            }
+          });
+          return nextPromise;
+        })();
+
+        const data = await promise;
         if (!alive) return;
         setState({ loading: false, error: null, data });
       } catch (e: any) {

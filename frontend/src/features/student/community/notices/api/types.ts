@@ -37,6 +37,8 @@ export type NoticeListItemDto={
     createdAt : string;
     status : string;
     files : []
+    displayStartAt?: string | null;
+    displayEndAt?: string | null;
 }
 
 /** Response */

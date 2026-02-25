@@ -194,6 +194,66 @@
       }
     }
   },
+  "aiAdvisor": {
+    "mbti": {
+      "loading": "Loading...",
+      "home": {
+        "title": "MBTI AI Recommendation",
+        "description": "Starting the test will overwrite previously saved results.",
+        "start": {
+          "kicker": "Start New",
+          "title": "Start Test",
+          "description": "Run a new MBTI test, choose interest keywords, and generate recommendations.",
+          "button": "Start Test"
+        },
+        "result": {
+          "kicker": "Quick View",
+          "title": "View Result",
+          "description": "Check your latest saved MBTI/job recommendation result immediately.",
+          "hasResult": "A saved result is available.",
+          "noResult": "No saved result is available.",
+          "button": "View Result"
+        }
+      },
+      "test": {
+        "title": "MBTI Test",
+        "progress": "{answeredCount} of {totalCount} answered",
+        "submitButton": "Go to Keyword Selection"
+      },
+      "keywords": {
+        "title": "Select Interest Keywords",
+        "description": "Select at least {minCount} keywords.",
+        "submitButton": "View Recommendation Result"
+      },
+      "result": {
+        "title": "MBTI-Based Recommendation Result",
+        "intro": "AI recommendations based on your score profile and selected keywords.",
+        "noScoreData": "No saved MBTI score data.",
+        "jobsTitle": "Top 5 AI Recommended Jobs",
+        "emptyMessage": "No saved job recommendations. Please run the test first.",
+        "fallbackReasonWithKeywords": "{jobName} is recommended based on your {mbtiType} profile and interests like {keywords}.",
+        "fallbackReasonWithoutKeywords": "{jobName} is recommended based on your {mbtiType} profile and work preferences."
+      },
+      "messages": {
+        "initLoadFailed": "Failed to load MBTI information.",
+        "loadQuestionsFailed": "Failed to load MBTI questions.",
+        "noSavedResult": "No saved result. Please complete the test first.",
+        "answerAllQuestions": "Please answer all questions.",
+        "generateResultFailed": "Failed to generate MBTI result.",
+        "testCompleted": "MBTI test completed.",
+        "submitFailed": "An error occurred while submitting MBTI answers.",
+        "selectMinKeywords": "Select at least {minCount} interest keywords.",
+        "recommendationCreated": "Recommendation result has been created.",
+        "createRecommendationFailed": "An error occurred while generating recommendation results."
+      }
+    },
+    "testPage": {
+      "title": "AI Test",
+      "placeholder": "Enter your question",
+      "askButton": "Ask",
+      "askFailed": "Failed to process your question."
+    }
+  },
   "authority": {
     "semesters": {
       "page": {
@@ -418,6 +478,37 @@
         "capacity": "Capacity",
         "enrolledCount": "Enrolled",
         "emptyText": "No course offerings."
+      }
+    },
+    "studentEnrollments": {
+      "title": "Enrollment Status",
+      "table": {
+        "offeringCode": "Offering Code",
+        "curricularName": "Course Name",
+        "professorName": "Professor",
+        "semesterName": "Semester",
+        "credit": "Credits",
+        "competency1": "Competency 1",
+        "competency2": "Competency 2",
+        "capacity": "Capacity",
+        "enrolledCount": "Enrolled",
+        "cancelButton": "Cancel Enrollment",
+        "emptyText": "No enrolled courses."
+      },
+      "dialog": {
+        "title": "Cancel Enrollment",
+        "description": "Do you want to cancel enrollment for this course?",
+        "confirmText": "Cancel Enrollment"
+      },
+      "messages": {
+        "cancelSuccess": "Enrollment has been canceled.",
+        "cancelFailed": "Failed to cancel enrollment."
+      }
+    },
+    "studentCurrentEnrollments": {
+      "title": "Current Courses",
+      "table": {
+        "emptyText": "No current courses."
       }
     },
     "professorOfferings": {
@@ -717,6 +808,47 @@
       "saveButton": "Save",
       "cancelButton": "Cancel",
       "closeButton": "Close"
+    },
+    "studentOfferings": {
+      "title": "Program Enrollment",
+      "searchPlaceholder": "Search by offering name/code",
+      "table": {
+        "offeringCode": "Offering Code",
+        "offeringName": "Program Name",
+        "hostContactName": "Contact Name",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "emptyText": "No program offerings."
+      }
+    },
+    "studentEnrollments": {
+      "title": "Enrollment Status",
+      "table": {
+        "offeringCode": "Offering Code",
+        "offeringName": "Program Name",
+        "hostContactName": "Contact Name",
+        "semesterName": "Semester",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "status": "Status",
+        "cancelButton": "Cancel Enrollment",
+        "emptyText": "No enrolled programs."
+      },
+      "dialog": {
+        "title": "Cancel Enrollment",
+        "description": "Do you want to cancel enrollment for this program?",
+        "confirmText": "Cancel Enrollment"
+      },
+      "messages": {
+        "cancelSuccess": "Enrollment has been canceled.",
+        "cancelFailed": "Failed to cancel enrollment."
+      }
+    },
+    "studentCurrentEnrollments": {
+      "title": "Current Programs",
+      "table": {
+        "emptyText": "No current programs."
+      }
     },
     "adminPrograms": {
       "title": "Extra-Curricular Program Management",
@@ -1166,7 +1298,7 @@
             "maxSize": "Max size: 50MB"
           },
           "errors": {
-            "leaveGuard": "You are editing a notice.",
+            "leaveGuard": "You are creating a notice.",
             "titleRequired": "Please enter a title.",
             "contentRequired": "Please enter content.",
             "periodRequired": "Please select a display period.",
@@ -1183,6 +1315,7 @@
             "views": "Views",
             "category": "Category",
             "period": "Display Period",
+            "content": "Content",
             "attachment": "Attachments"
           },
           "placeholders": {
@@ -1415,6 +1548,7 @@
             "maxSize": "Max size: 50MB"
           },
           "errors": {
+            "leaveGuard": "You are creating a resource.",
             "titleRequired": "Please enter a title.",
             "contentRequired": "Please enter content.",
             "submitFailed": "Failed to create resource."
@@ -1454,6 +1588,7 @@
             "attachmentFallback": "Attachment {index}"
           },
           "errors": {
+            "leaveGuard": "You are editing a resource.",
             "invalidId": "Invalid resource ID.",
             "loadFailed": "Failed to load resource.",
             "missingFileId": "This file cannot be deleted because it has no fileId.",
@@ -1641,6 +1776,7 @@
             "creating": "Creating..."
           },
           "errors": {
+            "leaveGuard": "You are creating an FAQ.",
             "titleRequired": "Please enter a title.",
             "contentRequired": "Please enter content.",
             "submitFailed": "Failed to create FAQ."
@@ -1672,6 +1808,7 @@
             "uncategorized": "Uncategorized"
           },
           "errors": {
+            "leaveGuard": "You are editing an FAQ.",
             "invalidId": "Invalid FAQ ID.",
             "loadFailed": "Failed to load FAQ.",
             "titleRequired": "Please enter a title.",
@@ -1830,6 +1967,8 @@
             "question": "Q&A"
           },
           "errors": {
+            "answerLeaveGuardEdit": "You are editing an answer.",
+            "answerLeaveGuardCreate": "You are writing an answer.",
             "invalidId": "Invalid question ID.",
             "loadFailed": "Failed to load question.",
             "deleteFailed": "Delete failed.",
@@ -1890,6 +2029,10 @@
             "list": "Back to List",
             "edit": "Edit",
             "delete": "Delete"
+          },
+          "texts": {
+            "answerTitle": "Answer",
+            "answerEmpty": "No answer yet."
           },
           "errors": {
             "invalidId": "Invalid question ID.",
