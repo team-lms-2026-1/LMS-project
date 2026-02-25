@@ -61,8 +61,9 @@ export default function DepartmentMajorsTab({ deptId }: Props) {
         {
             header: "관리",
             width: "15%",
+            align: "center",
             render: (row) => (
-                <div className="flex gap-2">
+                <div className={styles.actionButtons}>
                     <Button
                         variant="secondary"
                         className="px-2 py-1 text-xs"
@@ -124,6 +125,7 @@ export default function DepartmentMajorsTab({ deptId }: Props) {
                     deptId={deptId}
                     majorId={editMajor.majorId}
                     enrolledStudentCount={editMajor.enrolledStudentCount}
+                    isActive={editMajor.isActive}
                     open={editMajor !== null}
                     onClose={() => setEditMajor(null)}
                     onSuccess={() => { setEditMajor(null); reload(); }}

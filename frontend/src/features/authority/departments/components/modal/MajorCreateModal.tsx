@@ -50,7 +50,7 @@ export function MajorCreateModal({ deptId, open, onClose, onSuccess }: Props) {
             onClose={onClose}
             title="전공 추가"
             footer={
-                <div className="flex justify-end gap-2">
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
                     <Button
                         variant="secondary"
                         onClick={onClose}

@@ -72,7 +72,7 @@ const emptyForm: FormState = {
 
 function isValidPassword(v: string) {
   if (!v.trim()) return true;
-  return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(v);
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(v);
 }
 
 function isValidEmail(v: string) {
@@ -570,7 +570,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
                 placeholder="변경 시 입력"
               />
               {!isValidPassword(form.newPassword) && (
-                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>영문/숫자/특수문자 포함 6자 이상</div>
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>영문 대/소문자/숫자 포함 6자 이상</div>
               )}
             </div>
 

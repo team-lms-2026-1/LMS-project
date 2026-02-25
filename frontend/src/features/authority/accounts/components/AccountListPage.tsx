@@ -256,17 +256,6 @@ export default function AccountListPage() {
 
       <div className={styles.headerRow}>
         <h1 className={styles.title}>계정 목록</h1>
-
-        <div className={styles.actions}>
-          {/* ✅ 공용 Button 교체 */}
-          <Button
-            variant="primary"
-            className={styles.customActionBtn}
-            onClick={() => setCreateOpen(true)}
-          >
-            계정 생성
-          </Button>
-        </div>
       </div>
 
       <div className={styles.card}>
@@ -316,7 +305,15 @@ export default function AccountListPage() {
               disabled={loading}
             />
           </div>
-          <div className={styles.footerRight} />
+          <div className={styles.footerRight}>
+            <Button
+              variant="primary"
+              className={styles.customActionBtn}
+              onClick={() => setCreateOpen(true)}
+            >
+              계정 생성
+            </Button>
+          </div>
         </div>
       </div>
 

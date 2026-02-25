@@ -18,7 +18,7 @@ function isEightDigits(v: string) {
 }
 
 function isValidPassword(v: string) {
-  return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(v);
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(v);
 }
 
 function isValidEmail(v: string) {
@@ -397,7 +397,7 @@ export default function AccountCreateModal({
                 type="password"
                 value={form.password}
                 onChange={onChange("password")}
-                placeholder="영문+숫자+특수문자 포함, 6자리 이상"
+                placeholder="영문 대/소문자+숫자 포함, 6자리 이상"
               />
               {pwError && (
                 <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
