@@ -18,6 +18,20 @@
   margin-bottom: 10px;
 }
 
+.breadcrumbRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.breadcrumbActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .crumb {
   cursor: pointer;
 }
@@ -85,6 +99,11 @@
   font-size: 14px;
   font-weight: 800;
   color: #111827;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .metaRow {
@@ -118,11 +137,20 @@
   min-height: 220px;
 }
 
+.actionsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 12px 0;
+}
+
 .contentText {
   white-space: pre-wrap;
   line-height: 1.7;
   font-size: 13px;
   color: #111827;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .attachBox {
@@ -251,6 +279,8 @@
   line-height: 1.65;
   font-size: 13px;
   color: #111827;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .answerEmpty {

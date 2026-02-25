@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import styles from "./QnaDetailPage.module.css";
 import DeleteModal from "../modal/DeleteModal.client";
 import type { LoadState, QnaDetailDto } from "../../api/types";
+import { Button } from "@/components/button";
 import {
   createQnaAnswer,
   deleteQnaAnswer,
@@ -14,6 +15,9 @@ import {
   updateQnaAnswer,
 } from "../../api/QnasApi";
 import { useI18n } from "@/i18n/useI18n";
+
+const ANSWER_MAX = 1000;
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
 
 function pickCreatedAt(raw: any) {
   return raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
@@ -112,8 +116,9 @@ export default function QnaDetailPageClient() {
       setState({ loading: false, error: null, data });
 
       const init = data.answer?.content ?? "";
-      setAnswerText(init);
-      setAnswerInit(init);
+      const clamped = clampText(init, ANSWER_MAX);
+      setAnswerText(clamped);
+      setAnswerInit(clamped);
       setEditingAnswer(false);
     } catch (e: any) {
       setState({ loading: false, error: e?.message ?? t("errors.loadFailed"), data: null });
@@ -198,12 +203,20 @@ export default function QnaDetailPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.breadcrumb}>
-          <span className={styles.crumb} onClick={goList}>
-            Q&amp;A
-          </span>
+        <div className={styles.breadcrumbRow}>
+          <div className={styles.breadcrumb}>
+            <span className={styles.crumb} onClick={goList}>
+              Q&amp;A
+            </span>
           <span className={styles.sep}>›</span>
-          <span className={styles.current}>{t("breadcrumbCurrent")}</span>
+            <span className={styles.current}>{t("breadcrumbCurrent")}</span>
+          </div>
+
+          <div className={styles.breadcrumbActions}>
+            <Button variant="secondary" onClick={goList}>
+              {t("buttons.list")}
+            </Button>
+          </div>
         </div>
 
         <h1 className={styles.title}>{t("title")}</h1>
@@ -239,11 +252,12 @@ export default function QnaDetailPageClient() {
                 <div className={styles.contentText}>{data.content}</div>
               </div>
 
-              <div className={styles.actionsRow}>
-                <button type="button" className={styles.deleteBtn} onClick={onDeleteQuestion} disabled={deleting}>
-                  {t("buttons.deleteQuestion")}
-                </button>
-              </div>
+            </div>
+
+            <div className={styles.actionsRow}>
+              <Button variant="danger" onClick={onDeleteQuestion} disabled={deleting}>
+                {t("buttons.deleteQuestion")}
+              </Button>
             </div>
 
             <div className={styles.answerPanel}>
@@ -252,12 +266,12 @@ export default function QnaDetailPageClient() {
 
                 {hasAnswer && !editingAnswer && (
                   <div className={styles.answerHeaderActions}>
-                    <button type="button" className={styles.answerEditBtn} onClick={onClickEdit} disabled={savingAnswer || deleting}>
+                    <Button variant="primary" onClick={onClickEdit} disabled={savingAnswer || deleting}>
                       {t("buttons.answerEdit")}
-                    </button>
-                    <button type="button" className={styles.answerDeleteBtn} onClick={onDeleteAnswer} disabled={savingAnswer || deleting}>
+                    </Button>
+                    <Button variant="danger" onClick={onDeleteAnswer} disabled={savingAnswer || deleting}>
                       {t("buttons.answerDelete")}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -268,16 +282,17 @@ export default function QnaDetailPageClient() {
                     className={styles.answerTextarea}
                     placeholder={t("texts.answerPlaceholder")}
                     value={answerText}
-                    onChange={(e) => setAnswerText(e.target.value)}
+                    onChange={(e) => setAnswerText(clampText(e.target.value, ANSWER_MAX))}
                     disabled={savingAnswer}
+                    maxLength={ANSWER_MAX}
                   />
                   <div className={styles.answerActions}>
-                    <button type="button" className={styles.answerSubmitBtn} onClick={onSubmitAnswer} disabled={savingAnswer || deleting}>
+                    <Button onClick={onSubmitAnswer} disabled={savingAnswer || deleting}>
                       {hasAnswer ? t("buttons.answerSave") : t("buttons.answerSubmit")}
-                    </button>
-                    <button type="button" className={styles.answerCancelBtn} onClick={onCancelEdit} disabled={savingAnswer}>
+                    </Button>
+                    <Button variant="secondary" onClick={onCancelEdit} disabled={savingAnswer}>
                       {t("buttons.answerCancel")}
-                    </button>
+                    </Button>
                   </div>
                 </>
               ) : (
@@ -286,11 +301,6 @@ export default function QnaDetailPageClient() {
                 </div>
               )}
 
-              <div className={styles.answerFooter}>
-                <button className={styles.backBtn} onClick={goList}>
-                  {t("buttons.list")}
-                </button>
-              </div>
             </div>
           </>
         )}
