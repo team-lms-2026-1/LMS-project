@@ -47,7 +47,7 @@ git checkout -b feature/your-task-name
 ```bash
 git status
 git diff
-```
+```cd
 
 ---
 

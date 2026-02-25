@@ -2,7 +2,7 @@
 import styles from "./OfferingDetailTabBar.module.css";
 import { useI18n } from "@/i18n/useI18n";
 
-type Tab = "detail" | "students" | "competencies";
+type Tab = "detail" | "competencies";
 type Props = { value: Tab; onChange: (v: Tab) => void };
 
 export function OfferingDetailTabBar({ value, onChange }: Props) {
@@ -16,13 +16,6 @@ export function OfferingDetailTabBar({ value, onChange }: Props) {
         onClick={() => onChange("detail")}
       >
         {t("detail")}
-      </button>
-      <button
-        className={`${styles.tab} ${value === "students" ? styles.active : ""}`}
-        type="button"
-        onClick={() => onChange("students")}
-      >
-        {t("students")}
       </button>
       <button
         className={`${styles.tab} ${value === "competencies" ? styles.active : ""}`}

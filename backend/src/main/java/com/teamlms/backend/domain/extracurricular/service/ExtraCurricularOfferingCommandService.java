@@ -261,10 +261,10 @@ public class ExtraCurricularOfferingCommandService {
             return;
         }
 
-        String safeName = (offeringName == null || offeringName.isBlank()) ? "비교과" : offeringName;
-        String title = "비교과 이수";
-        String resultLabel = passed ? "이수" : "미이수";
-        String message = "비교과 '" + safeName + "' 이수 결과가 확정되었습니다. (결과: " + resultLabel + ")";
+        String safeName = (offeringName == null || offeringName.isBlank()) ? "\uBE44\uAD50\uACFC" : offeringName;
+        String title = "\uBE44\uAD50\uACFC \uC774\uC218";
+        String resultLabel = passed ? "\uC774\uC218" : "\uBBF8\uC774\uC218";
+        String message = "\uBE44\uAD50\uACFC '" + safeName + "' \uC774\uC218 \uACB0\uACFC\uAC00 \uD655\uC815\uB418\uC5C8\uC2B5\uB2C8\uB2E4. (\uACB0\uACFC: " + resultLabel + ")";
         String linkUrl = "/extra-curricular/grade-reports";
 
         alarmCommandService.createAlarm(

@@ -6,7 +6,6 @@ import styles from "./CurricularOfferingDetailPage.module.css";
 
 import { OfferingDetailTabBar } from "./components/OfferingDetailTabBar";
 import { OfferingDetailSection } from "./OfferingDetailSection";
-import { OfferingStudentsSection } from "./OfferingStudentsSection";
 import { OfferingCompetenciesSection } from "./OfferingCompetenciesSection";
 import { useCurricularDetail } from "../../hooks/useCurricularOfferingList";
 import { OfferingStatusDropdown } from "./components/OfferingStatusDropdown";
@@ -16,7 +15,7 @@ export function CurricularOfferingDetailPageClient() {
   const params = useParams<{ id: string }>();
   const offeringId = Number(params.id);
   const router = useRouter();
-  const [tab, setTab] = useState<"detail" | "students" | "competencies">("detail");
+  const [tab, setTab] = useState<"detail" | "competencies">("detail");
   const t = useI18n("curricular.adminOfferingDetail.page");
 
   // detail 페이지의 섹션을 여기서 불러와버림
@@ -47,7 +46,6 @@ export function CurricularOfferingDetailPageClient() {
       {/* 본문 */}
       <div className={styles.body}>
         {tab === "detail" && <OfferingDetailSection offeringId={offeringId} data={data} onReload={() => actions.reload?.()}/>}
-        {tab === "students" && <OfferingStudentsSection offeringId={offeringId} offeringStatus={data.status} />}
         {tab === "competencies" && <OfferingCompetenciesSection offeringId={offeringId} data={data} />}
       </div>
     </div>

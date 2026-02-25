@@ -94,7 +94,7 @@ public class MentoringCommandService {
         MentoringRecruitment recruitment = recruitmentRepository.findById(recruitmentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
 
-        // 1. 留ㅼ묶 諛??섏쐞 ?곗씠??Q&A) ??젣
+        // 1. Remove matchings and Q&A data
         java.util.List<MentoringMatching> matchings = matchingRepository.findAllByRecruitmentId(recruitmentId);
         if (!matchings.isEmpty()) {
             java.util.List<Long> matchingIds = matchings.stream().map(MentoringMatching::getMatchingId).toList();
@@ -108,17 +108,17 @@ public class MentoringCommandService {
             matchingRepository.deleteAll(matchings);
         }
 
-        // 2. ?좎껌 ?댁뿭 ??젣
+        // 2. Remove applications
         applicationRepository.deleteAllByRecruitmentId(recruitmentId);
 
-        // 3. 紐⑥쭛 怨듦퀬 ??젣
+        // 3. Remove recruitment
         recruitmentRepository.delete(recruitment);
     }
 
     private final com.teamlms.backend.domain.account.repository.AccountRepository accountRepository;
 
     public void applyMentoring(Long accountId, MentoringApplicationRequest request) {
-        // [寃利? 怨꾩젙 ??낃낵 ?좎껌 ??븷???쇱튂 ?щ? ?뺤씤
+        // Validate account role matches application role
         com.teamlms.backend.domain.account.entity.Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
 
@@ -131,7 +131,7 @@ public class MentoringCommandService {
             throw new BusinessException(ErrorCode.MENTORING_INVALID_ROLE_APPLICATION);
         }
 
-        // [寃利? 紐⑥쭛 湲곌컙 ?뺤씤
+        // Validate recruitment period
         MentoringRecruitment recruitment = recruitmentRepository.findById(request.getRecruitmentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
 
@@ -140,7 +140,7 @@ public class MentoringCommandService {
             throw new BusinessException(ErrorCode.MENTORING_NOT_OPEN);
         }
 
-        // [寃利? 以묐났 ?좎껌 ?щ? ?뺤씤
+        // Validate duplicate application
         if (applicationRepository.existsByRecruitmentIdAndAccountIdAndRole(
                 request.getRecruitmentId(), accountId, request.getRole())) {
             throw new BusinessException(ErrorCode.MENTORING_APPLICATION_ALREADY_EXISTS);
@@ -224,7 +224,7 @@ public class MentoringCommandService {
     }
 
     public void createQuestion(Long writerId, MentoringQuestionRequest request) {
-        // [寃利? 吏덈Ц? 李몄뿬??硫섑넗 ?먮뒗 硫섑떚)留??깅줉 媛??
+        // Only participants (mentor/mentee) can create questions
         MentoringMatching matching = matchingRepository.findById(request.getMatchingId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_MATCHING_NOT_FOUND));
 
@@ -249,7 +249,7 @@ public class MentoringCommandService {
     }
 
     public void createAnswer(Long writerId, MentoringAnswerRequest request) {
-        // [寃利? ?듬?? 硫섑넗留??깅줉 媛??
+        // Only mentors can create answers
         MentoringQuestion question = questionRepository.findById(request.getQuestionId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_QUESTION_NOT_FOUND));
 
