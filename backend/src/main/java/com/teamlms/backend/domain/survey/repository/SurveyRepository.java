@@ -6,3 +6,4 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface SurveyRepository extends JpaRepository<Survey, Long>, JpaSpecificationExecutor<Survey>, SurveyRepositoryCustom {
 }
+

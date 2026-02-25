@@ -2,41 +2,35 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import styles from "./adminMentoring.module.css";
-import { fetchAdminRecruitments, fetchAdminApplications, fetchAdminMatchings, matchMentoring } from "../../api/mentoringApi";
+import { fetchAdminRecruitments, fetchAdminApplications, fetchAdminMatchings } from "../../api/mentoringApi";
 import { MentoringRecruitment, MentoringApplication } from "../../api/types";
+import { AdminMentoringChatModal } from "./AdminMentoringChatModal";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
 import { StatusPill } from "@/components/status/StatusPill";
 import { TableColumn } from "@/components/table/types";
 import { SearchBar } from "@/components/searchbar/SearchBar";
 import { Button } from "@/components/button/Button";
-import { Modal } from "@/components/modal/Modal";
 import toast from "react-hot-toast";
-import { ConfirmModal } from "@/components/modal/ConfirmModal";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { Dropdown } from "@/features/dropdowns/_shared";
 
 const PAGE_SIZE = 10;
 
-export default function AdminMentoringMatchingPage() {
+export default function AdminMentoringChatPage() {
     const [page, setPage] = useState(1);
     const [recruitments, setRecruitments] = useState<MentoringRecruitment[]>([]);
     const [totalElements, setTotalElements] = useState(0);
     const [loading, setLoading] = useState(true);
     const [keywordInput, setKeywordInput] = useState("");
     const [selectedRecruitment, setSelectedRecruitment] = useState<MentoringRecruitment | null>(null);
-    const [applications, setApplications] = useState<MentoringApplication[]>([]);
-    const [loadingApplications, setLoadingApplications] = useState(false);
 
-    // Matching State
-    const [selectedMentor, setSelectedMentor] = useState<number | null>(null);
-    const [selectedMentees, setSelectedMentees] = useState<number[]>([]);
-    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [matching, setMatching] = useState(false);
+    // Chat Modal State
     const [matchingsList, setMatchingsList] = useState<any[]>([]);
+    const [chatModalOpen, setChatModalOpen] = useState(false);
+    const [selectedChat, setSelectedChat] = useState<any>(null);
 
     const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
-
     const [statusFilter, setStatusFilter] = useState("ALL");
 
     const fetchRecruitList = useCallback(async () => {
@@ -58,22 +52,13 @@ export default function AdminMentoringMatchingPage() {
         }
     }, [page, keywordInput, statusFilter]);
 
-    const fetchAppList = useCallback(async (recruitmentId: number) => {
-        setLoadingApplications(true);
+    const fetchMatchList = useCallback(async (recruitmentId: number) => {
         try {
-            const [appRes, matchRes] = await Promise.all([
-                fetchAdminApplications(recruitmentId),
-                fetchAdminMatchings(recruitmentId).catch(() => ({ data: [] }))
-            ]);
-            setApplications(appRes.data || []);
+            const matchRes = await fetchAdminMatchings(recruitmentId);
             setMatchingsList(matchRes.data || []);
-            setSelectedMentor(null);
-            setSelectedMentees([]);
         } catch (e: any) {
             console.error(e);
             toast.error("데이터 조회 실패: " + (e.message || ""));
-        } finally {
-            setLoadingApplications(false);
         }
     }, []);
 
@@ -83,38 +68,9 @@ export default function AdminMentoringMatchingPage() {
 
     useEffect(() => {
         if (selectedRecruitment) {
-            fetchAppList(selectedRecruitment.recruitmentId);
+            fetchMatchList(selectedRecruitment.recruitmentId);
         }
-    }, [selectedRecruitment, fetchAppList]);
-
-    const handleMatch = () => {
-        if (!selectedRecruitment || !selectedMentor || selectedMentees.length === 0) {
-            toast.error("멘토와 최소 1명 이상의 멘티를 선택해주세요.");
-            return;
-        }
-        setIsConfirmOpen(true);
-    };
-
-    const confirmMatch = async () => {
-        setIsConfirmOpen(false);
-        try {
-            setMatching(true);
-            await matchMentoring({
-                recruitmentId: selectedRecruitment!.recruitmentId,
-                mentorApplicationId: selectedMentor!,
-                menteeApplicationIds: selectedMentees
-            });
-            toast.success("매칭이 완료되었습니다.");
-            if (selectedRecruitment) {
-                fetchAppList(selectedRecruitment.recruitmentId);
-            }
-        } catch (e: any) {
-            console.error(e);
-            toast.error("매칭 실패: " + (e.message || "서버 오류가 발생했습니다."));
-        } finally {
-            setMatching(false);
-        }
-    };
+    }, [selectedRecruitment, fetchMatchList]);
 
     const totalPages = Math.max(1, Math.ceil(totalElements / PAGE_SIZE));
 
@@ -158,11 +114,6 @@ export default function AdminMentoringMatchingPage() {
         [semesterOptions]
     );
 
-
-    const allMentors = applications.filter(app => app.role === "MENTOR" && (app.status === "APPROVED" || app.status === "MATCHED"));
-    const availableMentees = applications.filter(app => app.role === "MENTEE" && app.status === "APPROVED");
-    const matchedMentees = applications.filter(app => app.role === "MENTEE" && app.status === "MATCHED");
-
     const STATUS_OPTIONS = [
         { value: "ALL", label: "전체 상태" },
         { value: "DRAFT", label: "작성중 (DRAFT)" },
@@ -173,7 +124,7 @@ export default function AdminMentoringMatchingPage() {
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <h1 className={styles.title}>멘토링 매칭 관리</h1>
+                <h1 className={styles.title}>멘토링 채팅 내역 확인</h1>
 
                 <div className={styles.searchRow}>
                     <div className={styles.searchGroup}>
@@ -228,83 +179,7 @@ export default function AdminMentoringMatchingPage() {
             {selectedRecruitment && (
                 <div className={styles.section} style={{ marginTop: "40px" }}>
                     <div className={styles.card}>
-                        <h2 className={styles.sectionTitle}>매칭 세부 설정: {selectedRecruitment.title}</h2>
-                        <div className={styles.appCountInfo}>
-                            승인된 멘토: {allMentors.length}명 / 대기중 멘티: {availableMentees.length}명 / 매칭완료 멘티: {matchedMentees.length}명
-                        </div>
-
-                        <div className={styles.matchingContainer}>
-                            {/* Mentor Column */}
-                            <div className={styles.matchingColumn}>
-                                <h3 className={styles.colTitle}>멘토 선택 ({allMentors.length})</h3>
-                                <div className={styles.cardList}>
-                                    {allMentors.length === 0 && <div className={styles.emptyMsg}>승인된 멘토가 없습니다.</div>}
-                                    {allMentors.map(mentor => (
-                                        <div
-                                            key={mentor.applicationId}
-                                            className={`${styles.userCard} ${selectedMentor === mentor.applicationId ? styles.selected : ""}`}
-                                            onClick={() => setSelectedMentor(mentor.applicationId)}
-                                        >
-                                            <div className={styles.cardHeader}>
-                                                <span className={styles.cardName}>{mentor.name || mentor.loginId}</span>
-                                                {mentor.status === "MATCHED" && <span className={styles.matchedBadge}>매칭됨</span>}
-                                            </div>
-                                            <div className={styles.cardInfo}>
-                                                <span>학과: {mentor.deptName || "-"}</span>
-                                            </div>
-                                            <div className={styles.cardInfo}>
-                                                <span>신청일: {new Date(mentor.appliedAt).toLocaleDateString()}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Arrow */}
-                            <div className={styles.matchingArrow}>
-                                <div className={styles.arrowIcon}>➜</div>
-                            </div>
-
-                            {/* Mentee Column */}
-                            <div className={styles.matchingColumn}>
-                                <h3 className={styles.colTitle}>멘티 선택 ({availableMentees.length})</h3>
-                                <div className={styles.cardList}>
-                                    {availableMentees.length === 0 && <div className={styles.emptyMsg}>매칭 대기중인 멘티가 없습니다.</div>}
-                                    {availableMentees.map(mentee => (
-                                        <div
-                                            key={mentee.applicationId}
-                                            className={`${styles.userCard} ${selectedMentees.includes(mentee.applicationId) ? styles.selected : ""}`}
-                                            onClick={() => {
-                                                setSelectedMentees(prev =>
-                                                    prev.includes(mentee.applicationId)
-                                                        ? prev.filter(id => id !== mentee.applicationId)
-                                                        : [...prev, mentee.applicationId]
-                                                );
-                                            }}
-                                        >
-                                            <div className={styles.cardHeader}>
-                                                <span className={styles.cardName}>{mentee.name || mentee.loginId}</span>
-                                            </div>
-                                            <div className={styles.cardInfo}>
-                                                <span>학과: {mentee.deptName || "-"}</span>
-                                            </div>
-                                            <div className={styles.cardInfo}>
-                                                <span>신청일: {new Date(mentee.appliedAt).toLocaleDateString()}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.matchActionRow}>
-                            <Button
-                                onClick={handleMatch}
-                                disabled={!selectedMentor || selectedMentees.length === 0}
-                            >
-                                매칭 확정
-                            </Button>
-                        </div>
+                        <h2 className={styles.sectionTitle}>채팅 내역: {selectedRecruitment.title}</h2>
 
                         {/* Matched List */}
                         <div className={styles.matchedListSection}>
@@ -320,6 +195,17 @@ export default function AdminMentoringMatchingPage() {
                                         <div className={styles.cardInfo}>
                                             <span>매칭일: {new Date(m.matchedAt).toLocaleDateString()}</span>
                                         </div>
+                                        <div style={{ marginTop: "12px", textAlign: "right" }}>
+                                            <Button
+                                                variant="secondary"
+                                                onClick={() => {
+                                                    setSelectedChat(m);
+                                                    setChatModalOpen(true);
+                                                }}
+                                            >
+                                                채팅 보기
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -328,12 +214,13 @@ export default function AdminMentoringMatchingPage() {
                 </div>
             )}
 
-            <ConfirmModal
-                open={isConfirmOpen}
-                message="선택한 멘토와 멘티를 매칭하시겠습니까?"
-                onConfirm={confirmMatch}
-                onCancel={() => setIsConfirmOpen(false)}
-                loading={matching}
+            <AdminMentoringChatModal
+                open={chatModalOpen}
+                onClose={() => setChatModalOpen(false)}
+                matchingId={selectedChat?.matchingId || null}
+                mentorName={selectedChat?.mentorName || ""}
+                menteeName={selectedChat?.menteeName || ""}
+                recruitmentTitle={selectedChat?.recruitmentTitle || ""}
             />
         </div>
     );
