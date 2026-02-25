@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,60 +27,62 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserCurricularOfferingController {
 
-    private final CurricularOfferingQueryService curricularOfferingQueryService;
+        private final CurricularOfferingQueryService curricularOfferingQueryService;
 
-    @GetMapping(value = {"/api/v1/student/curriculars", "/api/v1/professor/curriculars"})
-    public ApiResponse<List<CurricularOfferingUserListItem>> list(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword,
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
-        int safePage = Math.max(page, 1);
-        int safeSize = Math.min(Math.max(size, 1), 100);
+        @GetMapping(value = { "/api/v1/student/curriculars", "/api/v1/professor/curriculars" })
+        @PreAuthorize("hasAuthority('CURRICULAR_READ')")
+        public ApiResponse<List<CurricularOfferingUserListItem>> list(
+                        @RequestParam(defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "20") int size,
+                        @RequestParam(required = false) String keyword,
+                        @AuthenticationPrincipal AuthUser authUser) {
+                int safePage = Math.max(page, 1);
+                int safeSize = Math.min(Math.max(size, 1), 100);
 
-        Pageable pageable = PageRequest.of(
-                safePage - 1,
-                safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+                Pageable pageable = PageRequest.of(
+                                safePage - 1,
+                                safeSize,
+                                Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Long professorAccountId = isProfessor(authUser) ? authUser.getAccountId() : null;
+                Long professorAccountId = isProfessor(authUser) ? authUser.getAccountId() : null;
 
-        Page<CurricularOfferingUserListItem> result =
-                curricularOfferingQueryService.listForUser(keyword, professorAccountId, pageable);
+                Page<CurricularOfferingUserListItem> result = curricularOfferingQueryService.listForUser(keyword,
+                                professorAccountId, pageable);
 
-        return ApiResponse.of(result.getContent(), PageMeta.from(result));
-    }
+                return ApiResponse.of(result.getContent(), PageMeta.from(result));
+        }
 
-    @GetMapping(value = {"/api/v1/student/curriculars/{offeringId}", "/api/v1/professor/curriculars/{offeringId}"})
-    public ApiResponse<CurricularOfferingDetailResponse> detail(
-            @PathVariable Long offeringId,
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
-        CurricularOfferingDetailResponse detail = isProfessor(authUser)
-                ? curricularOfferingQueryService.getDetailForProfessor(authUser.getAccountId(), offeringId)
-                : curricularOfferingQueryService.getDetail(offeringId);
+        @GetMapping(value = { "/api/v1/student/curriculars/{offeringId}",
+                        "/api/v1/professor/curriculars/{offeringId}" })
+        @PreAuthorize("hasAuthority('CURRICULAR_READ')")
+        public ApiResponse<CurricularOfferingDetailResponse> detail(
+                        @PathVariable Long offeringId,
+                        @AuthenticationPrincipal AuthUser authUser) {
+                CurricularOfferingDetailResponse detail = isProfessor(authUser)
+                                ? curricularOfferingQueryService.getDetailForProfessor(authUser.getAccountId(),
+                                                offeringId)
+                                : curricularOfferingQueryService.getDetail(offeringId);
 
-        return ApiResponse.ok(detail);
-    }
+                return ApiResponse.ok(detail);
+        }
 
-    @GetMapping(value = {
-            "/api/v1/student/curriculars/{offeringId}/competency-mapping",
-            "/api/v1/professor/curriculars/{offeringId}/competency-mapping"
-    })
-    public ApiResponse<List<OfferingCompetencyMappingItem>> getMapping(
-            @PathVariable Long offeringId,
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
-        List<OfferingCompetencyMappingItem> mapping = isProfessor(authUser)
-                ? curricularOfferingQueryService.getMappingForProfessor(authUser.getAccountId(), offeringId)
-                : curricularOfferingQueryService.getMapping(offeringId);
+        @GetMapping(value = {
+                        "/api/v1/student/curriculars/{offeringId}/competency-mapping",
+                        "/api/v1/professor/curriculars/{offeringId}/competency-mapping"
+        })
+        @PreAuthorize("hasAuthority('CURRICULAR_READ')")
+        public ApiResponse<List<OfferingCompetencyMappingItem>> getMapping(
+                        @PathVariable Long offeringId,
+                        @AuthenticationPrincipal AuthUser authUser) {
+                List<OfferingCompetencyMappingItem> mapping = isProfessor(authUser)
+                                ? curricularOfferingQueryService.getMappingForProfessor(authUser.getAccountId(),
+                                                offeringId)
+                                : curricularOfferingQueryService.getMapping(offeringId);
 
-        return ApiResponse.ok(mapping);
-    }
+                return ApiResponse.ok(mapping);
+        }
 
-    private boolean isProfessor(AuthUser authUser) {
-        return authUser != null && "PROFESSOR".equals(authUser.getAccountType());
-    }
+        private boolean isProfessor(AuthUser authUser) {
+                return authUser != null && "PROFESSOR".equals(authUser.getAccountType());
+        }
 }

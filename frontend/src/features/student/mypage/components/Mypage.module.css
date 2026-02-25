@@ -1,9 +1,10 @@
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
     font-family: 'Pretendard', sans-serif;
 }
+
 
 .pageTitle {
     font-size: 2rem;
@@ -46,6 +47,23 @@
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #eee;
+}
+
+.profilePlaceholder {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #eee;
+}
+
+.profilePlaceholder svg {
+    width: 3.2rem;
+    height: 3.2rem;
 }
 
 .profileInfo {
@@ -123,6 +141,13 @@
     padding: 2px !important;
     height: 100px !important;
     vertical-align: top !important;
+    min-width: 140px;
+}
+
+.timetableWrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .courseItem {
