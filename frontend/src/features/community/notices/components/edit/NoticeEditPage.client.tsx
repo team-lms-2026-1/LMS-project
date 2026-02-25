@@ -14,7 +14,7 @@ import type {
   ExistingFile,
   LoadState,
 } from "../../api/types";
-import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/NoticesApi";
+import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/noticesApi";
 import { Button } from "@/components/button";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
