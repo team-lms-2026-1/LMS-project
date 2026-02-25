@@ -74,7 +74,7 @@ export function DepartmentUpdateModal({ deptId, open, onClose, onSuccess }: Prop
             onClose={onClose}
             title="학과 수정"
             footer={
-                <div className="flex justify-end gap-2">
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
                     <Button
                         variant="secondary"
                         onClick={onClose}
