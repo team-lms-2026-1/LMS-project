@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,55 +31,53 @@ public class AdminExtraGradeReportController {
 
     // 0) ??? ?? ??
     @GetMapping
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<ExtraCurricularGradeListItem>> list(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) Long deptId,
-        @RequestParam(required = false) String keyword
-    ) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) Long deptId,
+            @RequestParam(required = false) String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
         Pageable pageable = PageRequest.of(
-            safePage - 1,
-            safeSize,
-            Sort.by(Sort.Direction.ASC, "studentNo")
-        );
+                safePage - 1,
+                safeSize,
+                Sort.by(Sort.Direction.ASC, "studentNo"));
 
-        Page<ExtraCurricularGradeListItem> result =
-            studentExtraGradeReportQueryService.listStudentGradeSummary(deptId, keyword, pageable);
+        Page<ExtraCurricularGradeListItem> result = studentExtraGradeReportQueryService.listStudentGradeSummary(deptId,
+                keyword, pageable);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
     // 1) ?? ?? + ??
     @GetMapping("/{studentAccountId}")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<StudentExtraGradeDetailHeaderResponse> detail(
-        @PathVariable Long studentAccountId
-    ) {
+            @PathVariable Long studentAccountId) {
         return ApiResponse.ok(studentExtraGradeReportQueryService.getDetailHeader(studentAccountId));
     }
 
     // 2) ??? ?? ???
     @GetMapping("/{studentAccountId}/list")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<StudentExtraCompletionListItem>> listDetail(
-        @PathVariable Long studentAccountId,
-        @RequestParam(required = false) Long semesterId,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) String keyword
-    ) {
+            @PathVariable Long studentAccountId,
+            @RequestParam(required = false) Long semesterId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
         Pageable pageable = PageRequest.of(
-            safePage - 1,
-            safeSize,
-            Sort.by(Sort.Direction.DESC, "semesterId")
-        );
+                safePage - 1,
+                safeSize,
+                Sort.by(Sort.Direction.DESC, "semesterId"));
 
-        Page<StudentExtraCompletionListItem> result =
-            studentExtraGradeReportQueryService.listCompletions(studentAccountId, semesterId, pageable, keyword);
+        Page<StudentExtraCompletionListItem> result = studentExtraGradeReportQueryService
+                .listCompletions(studentAccountId, semesterId, pageable, keyword);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }

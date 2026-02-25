@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -43,88 +44,85 @@ public class AdminCurricularOfferingController {
 
     private final CurricularOfferingCommandService curricularOfferingCommandService;
     private final CurricularOfferingQueryService curricularOfferingQueryService;
-    
+
     // 생성
     @PostMapping
+    @PreAuthorize("hasAuthority('CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> create(
-        @Valid @RequestBody CurricularOfferingCreateRequest req
-    ) {
+            @Valid @RequestBody CurricularOfferingCreateRequest req) {
         curricularOfferingCommandService.create(
-            req.offeringCode(),
-            req.curricularId(),
-            req.semesterId(),
-            req.dayOfWeek(),
-            req.period(),
-            req.capacity(),
-            req.location(),
-            req.professorAccountId()
-        );
+                req.offeringCode(),
+                req.curricularId(),
+                req.semesterId(),
+                req.dayOfWeek(),
+                req.period(),
+                req.capacity(),
+                req.location(),
+                req.professorAccountId());
 
         return ApiResponse.ok(new SuccessResponse());
     }
 
     // 목록
     @GetMapping
+    @PreAuthorize("hasAuthority('CURRICULAR_READ')")
     public ApiResponse<List<CurricularOfferingListItem>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Long semesterId,
-            @RequestParam(required = false) String keyword
-    ) {
+            @RequestParam(required = false) String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+                Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<CurricularOfferingListItem> result =
-                curricularOfferingQueryService.listForAdmin(semesterId, keyword, pageable);
+        Page<CurricularOfferingListItem> result = curricularOfferingQueryService.listForAdmin(semesterId, keyword,
+                pageable);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
-    
+
     // 상세 ( 기본 )
     @GetMapping("/{offeringId}")
+    @PreAuthorize("hasAuthority('CURRICULAR_READ')")
     public ApiResponse<CurricularOfferingDetailResponse> detail(
-        @PathVariable Long offeringId
-    ) {
+            @PathVariable Long offeringId) {
         return ApiResponse.ok(
-        curricularOfferingQueryService.getDetail(offeringId)
-        );
+                curricularOfferingQueryService.getDetail(offeringId));
     }
 
     // 상태변경
     @PatchMapping("/{offeringId}/status")
+    @PreAuthorize("hasAuthority('CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> changeStatus(
             @PathVariable Long offeringId,
             @Valid @RequestBody CurricularOfferingStatusChangeRequest req,
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
+            @AuthenticationPrincipal AuthUser authUser) {
         curricularOfferingCommandService.changeStatus(offeringId, req.status(), authUser.getAccountId());
-         return ApiResponse.ok(new SuccessResponse());
+        return ApiResponse.ok(new SuccessResponse());
     }
 
     // 기본수정
     @PatchMapping("/{offeringId}/basic")
+    @PreAuthorize("hasAuthority('CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> patchBasic(
             @PathVariable Long offeringId,
-            @Valid @RequestBody CurricularOfferingUpdateRequest req
-    ) {
+            @Valid @RequestBody CurricularOfferingUpdateRequest req) {
         curricularOfferingCommandService.patchBasic(offeringId, req);
         return ApiResponse.ok(new SuccessResponse());
     }
 
     // 상세 ( 학생 )
     @GetMapping("/{offeringId}/students")
+    @PreAuthorize("hasAuthority('CURRICULAR_READ')")
     public ApiResponse<List<OfferingStudentListItem>> list(
             @PathVariable Long offeringId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword
-    ) {
+            @RequestParam(required = false) String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
@@ -134,40 +132,40 @@ public class AdminCurricularOfferingController {
                 Sort.by(Sort.Direction.DESC, "appliedAt") // 신청 최신순 추천
         );
 
-        Page<OfferingStudentListItem> result =
-                curricularOfferingQueryService.listStudents(offeringId, keyword, pageable);
+        Page<OfferingStudentListItem> result = curricularOfferingQueryService.listStudents(offeringId, keyword,
+                pageable);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
+
     // 상세 ( 학생 성적 입력 )
     @PatchMapping("/{offeringId}/students/{enrollmentId}/score")
+    @PreAuthorize("hasAuthority('CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> patchScore(
-        @PathVariable Long offeringId,
-        @PathVariable Long enrollmentId,
-        @Valid @RequestBody OfferingScorePatchRequest req
-    ) {
+            @PathVariable Long offeringId,
+            @PathVariable Long enrollmentId,
+            @Valid @RequestBody OfferingScorePatchRequest req) {
         curricularOfferingCommandService.patchScore(
-            offeringId,
-            enrollmentId,
-            req.rawScore()
-        );
+                offeringId,
+                enrollmentId,
+                req.rawScore());
         return ApiResponse.ok(new SuccessResponse());
     }
 
     // 상세 ( 역량 맵핑 )
     @GetMapping("/{offeringId}/competency-mapping")
+    @PreAuthorize("hasAuthority('CURRICULAR_READ')")
     public ApiResponse<List<OfferingCompetencyMappingItem>> getMapping(
-            @PathVariable Long offeringId
-    ) {
+            @PathVariable Long offeringId) {
         return ApiResponse.ok(curricularOfferingQueryService.getMapping(offeringId));
     }
 
     // 상세 ( 역량 맵핑 )
     @PatchMapping("/{offeringId}/competency-mapping")
+    @PreAuthorize("hasAuthority('CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> patchMapping(
             @PathVariable Long offeringId,
-            @Valid @RequestBody OfferingCompetencyMappingBulkUpdateRequest req
-    ) {
+            @Valid @RequestBody OfferingCompetencyMappingBulkUpdateRequest req) {
         curricularOfferingCommandService.patchMapping(offeringId, req);
         return ApiResponse.ok(new SuccessResponse());
     }
