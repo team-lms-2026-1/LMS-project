@@ -20,6 +20,14 @@ export type Category = {
     textColorHex: string;
 };
 
+export type QnaAnswerDto = {
+    answerId: number;
+    content: string;
+    authorName: string;
+    createdAt: string;
+    updatedAt?: string;
+};
+
 export type QnaListItemDto = {
     questionId: number;
     category: Category | null;
@@ -43,7 +51,8 @@ export type QnaDetailDto = {
     authorLoginId?: string | null;
     viewCount: number;
     createdAt: string;
-    hasAnswer: boolean;
+    answer?: QnaAnswerDto | null;
+    hasAnswer?: boolean;
 };
 
 // 교수는 작성/수정/삭제 불가하므로 관련 DTO 불필요

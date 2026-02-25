@@ -84,3 +84,15 @@
     font-size: 0.75rem;
     color: #5d9bc9;
 }
+
+.noticeTitleCell {
+    overflow: hidden;
+}
+
+.noticeTitleText {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

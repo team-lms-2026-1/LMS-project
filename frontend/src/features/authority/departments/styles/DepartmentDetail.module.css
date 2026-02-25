@@ -220,3 +220,11 @@
     background-color: #e0e7ff;
     color: #3730a3;
 }
+
+.actionButtons {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}

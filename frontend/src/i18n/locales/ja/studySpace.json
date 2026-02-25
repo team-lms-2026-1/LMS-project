@@ -1,0 +1,334 @@
+{
+  "admin": {
+    "spaces": {
+      "list": {
+        "breadcrumb": {
+          "home": "ホーム",
+          "current": "学習スペース貸与管理"
+        },
+        "title": "学習スペース貸与管理",
+        "toasts": {
+          "created": "学習スペースが登録されました。",
+          "updated": "学習スペースが修正されました。",
+          "deleted": "学習スペースが削除されました。"
+        },
+        "errors": {
+          "loadFailed": "一覧の取得中にエラーが発生しました。"
+        },
+        "buttons": {
+          "create": "登録"
+        }
+      },
+      "table": {
+        "loading": "読み込み中...",
+        "empty": "表示する学習スペースがありません。",
+        "peopleRange": "{min}～{max}人",
+        "peopleUpTo": "1～{max}人",
+        "status": {
+          "rentable": "貸与可能",
+          "notRentable": "貸与不可"
+        }
+      },
+      "detail": {
+        "breadcrumb": {
+          "root": "学習スペース管理",
+          "current": "学習スペース詳細ページ"
+        },
+        "loading": "読み込み中...",
+        "toasts": {
+          "created": "学習スペースが登録されました。",
+          "updated": "学習スペースが修正されました。"
+        },
+        "errors": {
+          "loadFailed": "詳細の取得中にエラーが発生しました。",
+          "deleteFailed": "削除中にエラーが発生しました。"
+        },
+        "buttons": {
+          "list": "一覧へ",
+          "manageRooms": "グループスタディルーム管理",
+          "edit": "修正",
+          "delete": "削除"
+        }
+      },
+      "deleteModal": {
+        "title": "学習スペース削除",
+        "confirmText": "削除",
+        "cancelText": "キャンセル",
+        "questionWithTitle": "学習スペースを削除しますか？",
+        "questionWithoutTitle": "学習スペースを削除しますか？",
+        "warnings": {
+          "includedRooms": "この学習スペースに含まれるスタディルームも削除されます。",
+          "cannotRestore": "削除したデータは復元できません。"
+        }
+      },
+      "roomModal": {
+        "subtitle": "学習スペース貸与管理",
+        "title": "予約",
+        "closeAriaLabel": "閉じる",
+        "spaceHint": "spaceId: {spaceId}",
+        "columns": {
+          "room": "スタディルーム",
+          "people": "収容人数",
+          "period": "運営期間",
+          "time": "運営時間"
+        },
+        "loading": "読み込み中...",
+        "empty": "登録されたスタディルームがありません。",
+        "namePlaceholder": "スタディルーム名",
+        "confirmDelete": "このスタディルームを削除しますか？",
+        "addLabel": "追加",
+        "buttons": {
+          "save": "保存",
+          "cancel": "キャンセル",
+          "edit": "修正",
+          "delete": "削除",
+          "processing": "処理中...",
+          "done": "完了"
+        },
+        "toasts": {
+          "created": "スタディルームが登録されました。",
+          "updated": "スタディルームが修正されました。",
+          "deleted": "スタディルームが削除されました。"
+        },
+        "errors": {
+          "listLoadFailed": "スタディルーム一覧を読み込めませんでした。",
+          "nameRequired": "スタディルーム名を入力してください。",
+          "minPeopleInvalid": "最小人数は1以上である必要があります。",
+          "maxPeopleInvalid": "最大人数は1以上である必要があります。",
+          "minGreaterThanMax": "最小人数は最大人数を超えることはできません。",
+          "invalidPeriodDate": "運営期間の日付形式が正しくありません。",
+          "periodOrderInvalid": "運営開始日は終了日より後にできません。",
+          "invalidTimeFormat": "運営時間の形式が正しくありません。",
+          "timeOrderInvalid": "開始時間は終了時間より前である必要があります。",
+          "saveFailed": "保存中にエラーが発生しました。",
+          "deleteFailed": "削除中にエラーが発生しました。",
+          "editingExists": "編集中の項目があります。保存またはキャンセル後に完了してください。"
+        }
+      }
+    },
+    "rentals": {
+      "list": {
+        "breadcrumb": {
+          "current": "学習スペース貸与管理"
+        },
+        "title": "学習スペース貸与",
+        "searchPlaceholder": "検索語を入力..."
+      },
+      "table": {
+        "loading": "読み込み中...",
+        "empty": "申請履歴がありません。",
+        "headers": {
+          "id": "番号",
+          "space": "場所",
+          "room": "ルーム名",
+          "applicant": "申請者",
+          "date": "予約日",
+          "time": "予約時間",
+          "requestedAt": "申請日時"
+        },
+        "userFallback": "ユーザー#{id}",
+        "statuses": {
+          "canceled": "取消済み"
+        },
+        "buttons": {
+          "approve": "承認",
+          "reject": "却下"
+        }
+      },
+      "hook": {
+        "toasts": {
+          "approved": "承認されました。",
+          "rejected": "却下されました。"
+        },
+        "errors": {
+          "list": "一覧を読み込めませんでした。",
+          "listWithStatus": "一覧を読み込めませんでした。 (HTTP {status})",
+          "process": "処理中にエラーが発生しました。",
+          "processWithStatus": "処理中にエラーが発生しました。 (HTTP {status})"
+        }
+      },
+      "approveModal": {
+        "title": "承認確認",
+        "closeAriaLabel": "閉じる",
+        "description": "この申請を承認しますか？",
+        "buttons": {
+          "cancel": "キャンセル",
+          "confirm": "承認",
+          "processing": "処理中..."
+        }
+      },
+      "rejectModal": {
+        "title": "却下理由を入力",
+        "closeAriaLabel": "閉じる",
+        "label": "理由を入力してください",
+        "placeholder": "例: 申請された時間帯は満席です。",
+        "buttons": {
+          "cancel": "キャンセル",
+          "confirm": "却下"
+        },
+        "errors": {
+          "reasonRequired": "却下理由を入力してください。"
+        }
+      }
+    }
+  },
+  "student": {
+    "spaces": {
+      "list": {
+        "breadcrumb": {
+          "home": "ホーム",
+          "current": "学習スペース貸与管理"
+        },
+        "title": "学習スペース貸与管理",
+        "errors": {
+          "loadFailed": "一覧の取得中にエラーが発生しました。",
+          "noRentableRooms": "予約可能なスタディルームがありません。"
+        }
+      },
+      "table": {
+        "loading": "読み込み中...",
+        "empty": "表示する学習スペースがありません。",
+        "peopleRange": "{min}～{max}人",
+        "peopleUpTo": "1～{max}人",
+        "status": {
+          "rentable": "貸与可能",
+          "notRentable": "貸与不可"
+        }
+      },
+      "detail": {
+        "breadcrumb": {
+          "root": "学習スペース",
+          "current": "学習スペース詳細ページ"
+        },
+        "loading": "読み込み中...",
+        "errors": {
+          "loadFailed": "詳細の取得中にエラーが発生しました。"
+        },
+        "buttons": {
+          "list": "一覧へ",
+          "reserveRooms": "グループスタディルーム予約"
+        }
+      },
+      "reserveModal": {
+        "subtitle": "予約",
+        "title": "予約",
+        "closeAriaLabel": "閉じる",
+        "spaceHint": "spaceId: {spaceId}",
+        "columns": {
+          "room": "スタディルーム",
+          "people": "収容人数",
+          "date": "日付",
+          "time": "時間"
+        },
+        "loading": "読み込み中...",
+        "empty": "予約可能なスタディルームがありません。",
+        "peopleRange": "{min} - {max}",
+        "startPlaceholder": "開始時間",
+        "endPlaceholder": "終了時間",
+        "startFirst": "先に開始時間を選択",
+        "buttons": {
+          "submit": "申請",
+          "submitting": "申請中..."
+        },
+        "toasts": {
+          "applied": "申請されました。"
+        },
+        "errors": {
+          "listLoadFailed": "スタディルーム一覧を読み込めませんでした。",
+          "selectDate": "予約日を選択してください。",
+          "selectTime": "開始/終了時間を選択してください。",
+          "endAfterStart": "終了時間は開始時間より後である必要があります。",
+          "beforeOperationStart": "運営開始日以前は予約できません。",
+          "afterOperationEnd": "運営終了日以降は予約できません。",
+          "outOfAvailableTime": "運営時間の範囲内でのみ予約できます。",
+          "submitFailed": "予約申請中にエラーが発生しました。"
+        }
+      },
+      "reserveConfirmModal": {
+        "title": "予約申請",
+        "buttons": {
+          "cancel": "キャンセル",
+          "submit": "申請"
+        },
+        "questionWithRoom": "予約を申請しますか？",
+        "questionWithoutRoom": "予約を申請しますか？",
+        "labels": {
+          "date": "日付",
+          "time": "時間"
+        },
+        "description": "申請後は承認結果をお待ちください。"
+      }
+    },
+    "rentals": {
+      "list": {
+        "title": "自分の予約一覧",
+        "titleWithProfile": "自分の予約一覧 ({name})",
+        "loading": {
+          "me": "ユーザー情報を確認中..."
+        },
+        "buttons": {
+          "retry": "再試行"
+        },
+        "errors": {
+          "noPermission": "予約照会権限がありません。 (RENTAL_READ)"
+        },
+        "rejectModal": {
+          "title": "却下理由",
+          "closeAriaLabel": "閉じる",
+          "noReason": "却下理由はありません。",
+          "buttons": {
+            "confirm": "確認"
+          }
+        },
+        "cancelModal": {
+          "title": "予約取消",
+          "closeAriaLabel": "閉じる",
+          "question": "予約を取り消しますか？",
+          "warning": "取り消し後は復元できません。",
+          "buttons": {
+            "close": "閉じる",
+            "confirm": "取り消す"
+          }
+        }
+      },
+      "table": {
+        "headers": {
+          "id": "番号",
+          "space": "学習スペース",
+          "room": "スタディルーム",
+          "date": "日付",
+          "time": "時間",
+          "status": "状態",
+          "actions": "処理"
+        },
+        "loading": "読み込み中...",
+        "empty": "予約履歴がありません。",
+        "statuses": {
+          "requested": "申請済み",
+          "approved": "承認",
+          "rejected": "却下",
+          "cancelled": "取消済み"
+        },
+        "buttons": {
+          "cancel": "取り消し",
+          "rejected": "却下済み",
+          "approved": "承認",
+          "cancelled": "取消済み"
+        }
+      },
+      "hook": {
+        "toasts": {
+          "cancelled": "予約が取り消されました。"
+        },
+        "errors": {
+          "me": "ユーザー情報を読み込めませんでした。",
+          "meWithStatus": "ユーザー情報を読み込めませんでした。 (HTTP {status})",
+          "list": "一覧を読み込めませんでした。",
+          "listWithStatus": "一覧を読み込めませんでした。 (HTTP {status})",
+          "cancel": "取り消し中にエラーが発生しました。",
+          "cancelWithStatus": "取り消し中にエラーが発生しました。 (HTTP {status})"
+        }
+      }
+    }
+  }
+}

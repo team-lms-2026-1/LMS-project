@@ -1,0 +1,150 @@
+{
+  "student": {
+    "metadata": {
+      "title": "학생 메인",
+      "description": "학생 마이페이지"
+    },
+    "page": {
+      "title": "마이페이지",
+      "loading": "불러오는 중..."
+    },
+    "hook": {
+      "errors": {
+        "emptyData": "데이터를 불러올 수 없습니다.",
+        "loadFailed": "조회에 실패했습니다."
+      }
+    },
+    "profile": {
+      "profileImageAlt": "프로필 이미지",
+      "gradeText": "{grade}학년",
+      "statuses": {
+        "enrolled": "재학",
+        "leave": "휴학",
+        "graduated": "졸업",
+        "unknown": "미확인"
+      }
+    },
+    "stats": {
+      "labels": {
+        "totalCredits": "이수 학점",
+        "averageScore": "평균 평점",
+        "totalExtraPoints": "비교과 포인트",
+        "totalExtraHours": "비교과 이수 시간"
+      },
+      "units": {
+        "credits": "학점",
+        "score": "점",
+        "points": "P",
+        "hours": "시간"
+      }
+    },
+    "timetable": {
+      "title": "이번 학기 시간표",
+      "headers": {
+        "period": "교시"
+      },
+      "days": {
+        "monday": "월",
+        "tuesday": "화",
+        "wednesday": "수",
+        "thursday": "목",
+        "friday": "금",
+        "saturday": "토",
+        "sunday": "일"
+      }
+    }
+  },
+  "admin": {
+    "metadata": {
+      "title": "관리자 메인",
+      "description": "관리자 대시보드"
+    },
+    "dashboard": {
+      "accountType": {
+        "admin": "관리자",
+        "professor": "교수",
+        "student": "학생",
+        "staff": "교직원"
+      },
+      "sections": {
+        "onlineAccounts": {
+          "title": "현재 접속 중인 계정 현황",
+          "button": "계정 로그 관리로 이동"
+        },
+        "notices": {
+          "title": "최근 공지사항",
+          "button": "전체 공지사항 관리"
+        }
+      },
+      "tables": {
+        "account": {
+          "headers": {
+            "loginId": "로그인 ID",
+            "name": "이름",
+            "accountType": "계정 유형",
+            "lastActivityAt": "최근 접속 일시",
+            "status": "상태"
+          },
+          "statusActive": "활성",
+          "empty": "현재 접속 중인 계정이 없습니다."
+        },
+        "notice": {
+          "headers": {
+            "id": "ID",
+            "category": "카테고리",
+            "title": "제목",
+            "views": "조회수",
+            "createdAt": "작성일"
+          },
+          "uncategorized": "미분류",
+          "empty": "등록된 공지사항이 없습니다."
+        }
+      }
+    }
+  },
+  "professor": {
+    "metadata": {
+      "title": "교수 메인",
+      "description": "교수 대시보드"
+    },
+    "dashboard": {
+      "sections": {
+        "timetable": {
+          "title": "이번 학기 내 강의 시간표",
+          "button": "내 강의 목록"
+        },
+        "notices": {
+          "title": "최근 공지사항",
+          "button": "전체 공지사항"
+        }
+      },
+      "tables": {
+        "timetable": {
+          "headers": {
+            "period": "교시"
+          }
+        },
+        "notice": {
+          "headers": {
+            "id": "ID",
+            "category": "카테고리",
+            "title": "제목",
+            "views": "조회수",
+            "createdAt": "작성일"
+          },
+          "uncategorized": "미분류",
+          "empty": "등록된 공지사항이 없습니다."
+        }
+      },
+      "days": {
+        "monday": "월",
+        "tuesday": "화",
+        "wednesday": "수",
+        "thursday": "목",
+        "friday": "금",
+        "saturday": "토",
+        "sunday": "일"
+      }
+    }
+  }
+}

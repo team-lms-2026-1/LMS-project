@@ -340,17 +340,6 @@ export default function QnaDetailPageClient() {
             <div className={styles.answerPanel}>
               <div className={styles.answerHeader}>
                 <div className={styles.answerTitle}>{t("texts.answerTitle")}</div>
-
-                {hasAnswer && !editingAnswer && (
-                  <div className={styles.answerHeaderActions}>
-                    <Button variant="primary" onClick={onClickEdit} disabled={savingAnswer || deleting}>
-                      {t("buttons.answerEdit")}
-                    </Button>
-                    <Button variant="danger" onClick={onDeleteAnswer} disabled={savingAnswer || deleting}>
-                      {t("buttons.answerDelete")}
-                    </Button>
-                  </div>
-                )}
               </div>
 
               {!hasAnswer || editingAnswer ? (
@@ -375,6 +364,17 @@ export default function QnaDetailPageClient() {
               ) : (
                 <div className={styles.answerViewBox}>
                   <div className={styles.answerViewText}>{answer?.content}</div>
+                </div>
+              )}
+
+              {hasAnswer && !editingAnswer && (
+                <div className={styles.answerBottomActions}>
+                  <Button variant="primary" onClick={onClickEdit} disabled={savingAnswer || deleting}>
+                    {t("buttons.answerEdit")}
+                  </Button>
+                  <Button variant="danger" onClick={onDeleteAnswer} disabled={savingAnswer || deleting}>
+                    {t("buttons.answerDelete")}
+                  </Button>
                 </div>
               )}
 

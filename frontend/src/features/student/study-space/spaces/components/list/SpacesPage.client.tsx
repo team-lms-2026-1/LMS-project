@@ -10,9 +10,11 @@ import type { PageMeta, SpaceListItemDto } from "../../api/types";
 import { SpacesTable } from "./SpacesTable";
 import styles from "./SpacesPage.module.css";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function SpacesPageClient() {
   const router = useRouter();
+  const t = useI18n("studySpace.student.spaces.list");
 
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
@@ -32,12 +34,12 @@ export default function SpacesPageClient() {
         setRows(res.data ?? []);
         setMeta(res.meta ?? null);
       } catch (e: any) {
-        setError(e?.message || "목록 조회 중 오류가 발생했습니다.");
+        setError(e?.message || t("errors.loadFailed"));
       } finally {
         if (!opts?.silent) setLoading(false);
       }
     },
-    [page, size]
+    [page, size, t]
   );
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function SpacesPageClient() {
   const onCardClick = (spaceId: number) => {
     const target = rows.find((item) => item.spaceId === spaceId);
     if (target && target.isRentable === false) {
-      toast.error("예약 가능한 스터디룸이 없습니다.");
+      toast.error(t("errors.noRentableRooms"));
       return;
     }
     router.push(`/student/study-space/spaces/${spaceId}`);
@@ -75,8 +77,10 @@ export default function SpacesPageClient() {
     <div className={styles.page}>
       <div className={styles.headerRow}>
         <div>
-          <div className={styles.breadcrumb}>홈 &gt; 학습공간 대여 관리</div>
-          <h1 className={styles.title}>학습공간 대여 관리</h1>
+          <div className={styles.breadcrumb}>
+            {t("breadcrumb.home")} &gt; {t("breadcrumb.current")}
+          </div>
+          <h1 className={styles.title}>{t("title")}</h1>
         </div>
       </div>
 

@@ -1,0 +1,183 @@
+{
+  "common": {
+    "sidebarTitle": "詳細メニュー",
+    "logoAlt": {
+      "student": "学生メインへ移動",
+      "admin": "管理者メインへ移動",
+      "professor": "教授メインへ移動"
+    }
+  },
+  "student": {
+    "sections": {
+      "community": {
+        "title": "コミュニティ",
+        "items": {
+          "notices": "お知らせ",
+          "resources": "資料室",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "course": {
+        "title": "正規課程",
+        "items": {
+          "offerings": "履修申請",
+          "enrollments": "履修申請状況",
+          "currentEnrollments": "履修中の科目",
+          "gradeReports": "成績"
+        }
+      },
+      "extra": {
+        "title": "課外プログラム",
+        "items": {
+          "offerings": "課外プログラム申請",
+          "enrollments": "課外プログラム申請状況",
+          "currentEnrollments": "履修中の課外プログラム",
+          "gradeReports": "課外成績"
+        }
+      },
+      "mentoring": {
+        "title": "メンタリング",
+        "items": {
+          "apply": "メンティー申請",
+          "chat": "メンタリングチャット"
+        }
+      },
+      "competency": {
+        "title": "コンピテンシー診断",
+        "items": {
+          "introduce": "6Csとは?",
+          "diagnosis": "診断一覧",
+          "result": "結果照会"
+        }
+      },
+      "survey": {
+        "title": "アンケート",
+        "items": {
+          "list": "アンケート一覧"
+        }
+      },
+      "space": {
+        "title": "学習スペース貸与",
+        "items": {
+          "spaces": "学習スペース貸与・申請",
+          "rentals": "申請履歴確認"
+        }
+      },
+      "aiAdvisor": {
+        "title": "AIアドバイザー",
+        "items": {
+          "mbti": "職業マッチング(MBTI)"
+        }
+      }
+    }
+  },
+  "professor": {
+    "sections": {
+      "community": {
+        "title": "コミュニティ",
+        "items": {
+          "notices": "お知らせ",
+          "resources": "資料室",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "competency": {
+        "title": "コンピテンシー管理",
+        "items": {
+          "dashboard": "コンピテンシー照会"
+        }
+      },
+      "course": {
+        "title": "授業管理",
+        "items": {
+          "offerings": "担当講義一覧",
+          "syllabus": "講義計画書",
+          "grades": "成績入力",
+          "attendance": "出席管理"
+        }
+      },
+      "mentoring": {
+        "title": "メンタリング",
+        "items": {
+          "apply": "メンター申請",
+          "chat": "メンタリングチャット"
+        }
+      }
+    }
+  },
+  "admin": {
+    "sections": {
+      "community": {
+        "title": "コミュニティ",
+        "items": {
+          "notices": "お知らせ",
+          "resources": "資料室",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "authority": {
+        "title": "権限管理",
+        "items": {
+          "departments": "学科管理",
+          "accounts": "アカウント管理",
+          "semesters": "学期管理"
+        }
+      },
+      "systemStatus": {
+        "title": "システム現況管理",
+        "items": {
+          "accountLogs": "アカウントログ管理"
+        }
+      },
+      "survey": {
+        "title": "アンケート統合管理",
+        "items": {
+          "surveys": "アンケート一覧",
+          "statistics": "アンケート統計"
+        }
+      },
+      "competency": {
+        "title": "コンピテンシー統合管理",
+        "items": {
+          "intro": "6Csとは?",
+          "students": "学生コンピテンシー活動照会",
+          "diagnosis": "コンピテンシー診断管理"
+        }
+      },
+      "course": {
+        "title": "正規課程管理",
+        "items": {
+          "curriculars": "正規課程管理",
+          "offerings": "授業運営管理",
+          "grades": "成績管理"
+        }
+      },
+      "extra": {
+        "title": "課外管理",
+        "items": {
+          "programs": "課外管理",
+          "offerings": "課外運営管理",
+          "grades": "課外成績管理"
+        }
+      },
+      "mentoring": {
+        "title": "メンタリング",
+        "items": {
+          "recruitments": "募集公告登録",
+          "applications": "申請承認",
+          "matching": "メンター・メンティーマッチング"
+        }
+      },
+      "space": {
+        "title": "学習スペース貸与",
+        "items": {
+          "spaces": "学習スペース一覧",
+          "rentals": "学習スペース申請一覧"
+        }
+      }
+    }
+  }
+}

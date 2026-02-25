@@ -3,6 +3,8 @@ package com.teamlms.backend.domain.account.api.dto;
 import com.teamlms.backend.domain.account.enums.*;
 import com.teamlms.backend.domain.dept.enums.MajorType;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +19,13 @@ public class AdminAccountUpdateRequest {
     // - null이면 "수정 안함"
     // =========================
     private AccountStatus status; // ACTIVE/INACTIVE
+
+    @Size(min = 6)
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)\\S{6,}$",
+            message = "{validation.account.password.pattern}"
+    )
+    private String password;
 
     private String name;
     private String email;

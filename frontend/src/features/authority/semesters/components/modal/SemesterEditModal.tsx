@@ -7,6 +7,7 @@ import styles from "./SemetserEditModal.module.css";
 import { DatePickerInput } from "../ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
 import { useLocale } from "@/hooks/useLocale";
+import toast from "react-hot-toast";
 
 import { useSemesterDetail } from "../../hooks/useSemesterList";
 import { SemesterStatus, SemesterTerm } from "../../api/types";
@@ -20,6 +21,13 @@ type Props = {
   onClose: () => void;
   onUpdated: () => void | Promise<void>;
 };
+
+function formatYmd(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
 
 export function SemesterEditModal({ open, semesterId, onClose, onUpdated }: Props) {
   const t = useI18n("authority.semesters.editModal");
@@ -40,6 +48,16 @@ export function SemesterEditModal({ open, semesterId, onClose, onUpdated }: Prop
 
   const handlesubmit = async () => {
     if(!semesterId) return;
+
+    const originalStatus = data?.status as SemesterStatus | undefined;
+    const isActiveToClosed = originalStatus === "ACTIVE" && status === "CLOSED";
+    if (isActiveToClosed && startDate && endDate) {
+      const today = formatYmd(new Date());
+      if (startDate <= today && today <= endDate) {
+        toast.error("학기가 진행 중입니다.");
+        return;
+      }
+    }
 
     setSaving(true);
     setSubmitError(null);

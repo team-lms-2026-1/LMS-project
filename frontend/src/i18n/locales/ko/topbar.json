@@ -1,0 +1,12 @@
+{
+  "todayTitle": "오늘 날짜",
+  "sessionTitle": "자동 로그아웃까지 남은 시간",
+  "sessionPrefix": "세션",
+  "sessionEmpty": "세션 --:--",
+  "profileTitle": "프로필",
+  "fallback": {
+    "student": "학생",
+    "admin": "관리자",
+    "professor": "교수"
+  }
+}

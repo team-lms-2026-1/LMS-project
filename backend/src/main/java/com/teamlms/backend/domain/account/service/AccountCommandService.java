@@ -213,6 +213,10 @@ public class AccountCommandService {
             account.changeStatus(req.getStatus(), actorAccountId, LocalDateTime.now()); // 너희 도메인 메서드에 맞게
         }
 
+        if (req.getPassword() != null && !req.getPassword().isBlank()) {
+            account.updatePassword(passwordEncoder.encode(req.getPassword()), LocalDateTime.now());
+        }
+
         // 2) 타입별 profile 업데이트
         switch (account.getAccountType()) {
             case STUDENT -> updateStudentProfile(accountId, req, actorAccountId);

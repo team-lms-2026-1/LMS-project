@@ -1,0 +1,364 @@
+{
+  "status": {
+    "offering": {
+      "DRAFT": "작성중",
+      "OPEN": "등록열림",
+      "ENROLLMENT_CLOSED": "등록마감",
+      "IN_PROGRESS": "진행중",
+      "COMPLETED": "완료(성적확정)",
+      "CANCELED": "취소"
+    },
+    "apply": {
+      "APPLIED": "신청",
+      "CANCELED": "취소"
+    },
+    "session": {
+      "OPEN": "진행중",
+      "CLOSED": "종료",
+      "CANCELED": "취소"
+    },
+    "attended": {
+      "ATTENDED": "출석",
+      "ABSENT": "미출석"
+    },
+    "active": {
+      "ACTIVE": "활성",
+      "INACTIVE": "비활성"
+    }
+  },
+  "common": {
+    "manageHeader": "관리",
+    "detailButton": "상세",
+    "editButton": "수정",
+    "registerButton": "등록",
+    "saveButton": "저장",
+    "cancelButton": "취소",
+    "closeButton": "닫기"
+  },
+  "studentOfferings": {
+    "title": "비교과 신청",
+    "searchPlaceholder": "비교과운영명/코드 검색",
+    "table": {
+      "offeringCode": "개설코드",
+      "offeringName": "비교과명",
+      "hostContactName": "담당자",
+      "rewardPoint": "상점",
+      "recognizedHours": "인정시간",
+      "emptyText": "비교과운영이 없습니다."
+    }
+  },
+  "studentEnrollments": {
+    "title": "비교과 신청 현황",
+    "table": {
+      "offeringCode": "비교과코드",
+      "offeringName": "비교과명",
+      "hostContactName": "담당자",
+      "semesterName": "학기",
+      "rewardPoint": "상점",
+      "recognizedHours": "인정시간",
+      "status": "상태",
+      "cancelButton": "신청취소",
+      "emptyText": "신청중인 비교과가 없습니다."
+    },
+    "dialog": {
+      "title": "신청 취소",
+      "description": "아래 비교과 신청을 취소하시겠습니까?",
+      "confirmText": "신청취소"
+    },
+    "messages": {
+      "cancelSuccess": "신청이 취소되었습니다.",
+      "cancelFailed": "신청 취소에 실패했습니다."
+    }
+  },
+  "studentCurrentEnrollments": {
+    "title": "이수중 비교과",
+    "table": {
+      "emptyText": "이수중인 비교과가 없습니다."
+    }
+  },
+  "adminPrograms": {
+    "title": "비교과 관리",
+    "searchPlaceholder": "코드/비교과명 검색",
+    "registerButton": "비교과 등록",
+    "table": {
+      "programCode": "비교과코드",
+      "programName": "비교과명",
+      "hostOrgName": "주관기관",
+      "status": "사용여부",
+      "emptyText": "비교과가 없습니다."
+    }
+  },
+  "adminOfferings": {
+    "title": "비교과운영 관리",
+    "searchPlaceholder": "비교과운영명/코드 검색",
+    "registerButton": "운영등록",
+    "table": {
+      "offeringCode": "개설코드",
+      "offeringName": "비교과운영명",
+      "hostContactName": "담당자명",
+      "rewardPoint": "포인트",
+      "recognizedHours": "인정시간",
+      "status": "상태",
+      "emptyText": "비교과운영이 없습니다."
+    }
+  },
+  "adminGrades": {
+    "title": "비교과 성적 관리",
+    "searchPlaceholder": "학번/이름 검색",
+    "table": {
+      "studentNo": "학번",
+      "deptName": "소속학과",
+      "gradeLevel": "학년",
+      "name": "이름",
+      "totalEarnedPoints": "총 이수 포인트",
+      "totalEarnedHours": "총 이수 시간",
+      "emptyText": "비교과 성적 정보가 없습니다."
+    },
+    "detail": {
+      "page": {
+        "invalidAccess": "잘못된 접근입니다.",
+        "loading": "불러오는 중...",
+        "loadError": "오류가 발생했습니다.",
+        "empty": "데이터가 없습니다.",
+        "title": "비교과 성적 상세",
+        "backButton": "목록으로"
+      },
+      "info": {
+        "gradeLevel": "{value}학년",
+        "metrics": {
+          "totalEarnedPoints": "총이수 포인트",
+          "totalEarnedHours": "총이수 시간"
+        },
+        "pointUnit": "점",
+        "hourUnit": "시간"
+      },
+      "trend": {
+        "title": "학기별 이수 포인트/시간",
+        "empty": "차트 데이터가 없습니다.",
+        "tooltip": {
+          "earnedPoints": "이수 포인트: {value}점",
+          "earnedHours": "이수 시간: {value}시간"
+        }
+      },
+      "list": {
+        "title": "비교과 수료 리스트",
+        "searchPlaceholder": "비교과명/코드 검색",
+        "loadError": "조회 실패"
+      },
+      "table": {
+        "semester": "학기",
+        "extraOfferingCode": "비교과코드",
+        "extraOfferingName": "비교과명",
+        "points": "포인트",
+        "recognizedHours": "인정시간",
+        "completionStatus": "수료여부",
+        "emptyText": "비교과 성적 정보가 없습니다."
+      }
+    }
+  },
+  "modal": {
+    "programCreate": {
+      "title": "비교과 등록",
+      "fields": {
+        "programCode": "비교과 코드",
+        "programName": "비교과명",
+        "hostOrgName": "주관기관명",
+        "description": "설명"
+      },
+      "placeholders": {
+        "programCode": "예) EX001",
+        "programName": "예) 창업 특강",
+        "hostOrgName": "예) 산학협력단",
+        "description": "비교과 프로그램 설명을 입력하세요."
+      },
+      "submitFailed": "등록에 실패했습니다.",
+      "validation": {
+        "requiredProgramCode": "비교과코드를 입력하세요.",
+        "requiredProgramName": "비교과이름을 입력하세요.",
+        "requiredHostOrgName": "주관기관명을 입력하세요.",
+        "requiredDescription": "비교과 설명을 입력하세요."
+      }
+    },
+    "programEdit": {
+      "title": "비교과 수정",
+      "activeAriaLabel": "활성 여부",
+      "fields": {
+        "programCode": "비교과 코드",
+        "programName": "비교과명",
+        "hostOrgName": "주관기관명",
+        "description": "설명"
+      },
+      "submitFailed": "비교과 수정에 실패했습니다."
+    },
+    "offeringCreate": {
+      "title": "비교과운영 등록",
+      "fields": {
+        "extraCurricular": "비교과 프로그램",
+        "offeringCode": "비교과운영코드",
+        "offeringName": "비교과운영명",
+        "semester": "학기",
+        "rewardPointDefault": "포인트(기본)",
+        "recognizedHoursDefault": "인정시간(기본)",
+        "operationStartDate": "운영 시작일",
+        "operationEndDate": "운영 종료일",
+        "hostContactName": "담당자명",
+        "hostContactPhone": "담당자 전화",
+        "hostContactEmail": "담당자 이메일"
+      },
+      "placeholders": {
+        "offeringCode": "예) EXTRA-2026-001",
+        "offeringName": "예) 신입생 역량 캠프 1차",
+        "rewardPointDefault": "예) 10",
+        "recognizedHoursDefault": "예) 2",
+        "operationStartDate": "시작일 선택",
+        "operationEndDate": "종료일 선택",
+        "hostContactName": "예) 홍길동",
+        "hostContactPhone": "예) 010-1234-5678",
+        "hostContactEmail": "예) 담당자@school.ac.kr"
+      },
+      "submitFailed": "등록에 실패했습니다.",
+      "validation": {
+        "requiredExtraCurricular": "비교과 프로그램을 선택하세요.",
+        "requiredOfferingCode": "비교과운영코드를 입력하세요.",
+        "requiredOfferingName": "비교과운영명을 입력하세요.",
+        "requiredSemester": "학기를 선택하세요.",
+        "requiredOperationStartDate": "운영 시작일을 선택하세요.",
+        "requiredOperationEndDate": "운영 종료일을 선택하세요.",
+        "invalidOperationPeriod": "운영 시작일은 종료일보다 늦을 수 없습니다.",
+        "invalidRewardPoint": "포인트(기본)는 0 이상이어야 합니다.",
+        "invalidRecognizedHours": "인정시간(기본)은 0 이상이어야 합니다.",
+        "invalidHostContactPhone": "담당자 전화번호 형식이 올바르지 않습니다.",
+        "invalidHostContactEmail": "담당자 이메일 형식이 올바르지 않습니다."
+      }
+    }
+  },
+  "adminOfferingDetail": {
+    "page": {
+      "loading": "불러오는 중...",
+      "loadError": "에러가 발생했습니다.",
+      "empty": "데이터가 없습니다.",
+      "title": "비교과운영 운영관리",
+      "backButton": "목록"
+    },
+    "tabs": {
+      "detail": "상세",
+      "session": "회차",
+      "students": "학생",
+      "competencies": "역량"
+    },
+    "detail": {
+      "sections": {
+        "program": "비교과",
+        "operation": "운영",
+        "contact": "담당자",
+        "remark": "비고"
+      },
+      "fields": {
+        "programCode": "비교과코드",
+        "programName": "비교과명",
+        "hostOrgName": "주관기관",
+        "offeringCode": "운영코드",
+        "rewardPoint": "포인트",
+        "recognizedHours": "인정시간",
+        "enrolledCount": "등록인원",
+        "semester": "학기",
+        "operationStartDate": "운영 시작일",
+        "operationEndDate": "운영 종료일",
+        "operationStartDatePlaceholder": "시작일 선택",
+        "operationEndDatePlaceholder": "종료일 선택",
+        "contactName": "담당자명",
+        "contactPhone": "담당자 전화",
+        "contactEmail": "담당자 이메일",
+        "description": "설명"
+      },
+      "messages": {
+        "requiredOfferingCode": "운영코드를 입력하세요.",
+        "requiredOfferingName": "운영명을 입력하세요.",
+        "requiredSemester": "학기를 선택하세요.",
+        "invalidRewardPoint": "포인트(기본)는 0 이상이어야 합니다.",
+        "invalidRecognizedHours": "인정시간(기본)은 0 이상이어야 합니다.",
+        "requiredOperationStartDate": "운영 시작일을 선택하세요.",
+        "requiredOperationEndDate": "운영 종료일을 선택하세요.",
+        "invalidOperationPeriod": "시작일은 종료일보다 늦을 수 없습니다.",
+        "invalidContactPhone": "담당자 전화번호 형식이 올바르지 않습니다.",
+        "invalidContactEmail": "담당자 이메일 형식이 올바르지 않습니다.",
+        "onlyDraft": "DRAFT 상태에서만 수정할 수 있습니다.",
+        "saveFailed": "수정에 실패했습니다."
+      }
+    },
+    "students": {
+      "headers": {
+        "studentName": "학생명",
+        "studentNo": "학번",
+        "gradeLevel": "학년",
+        "deptName": "소속학과",
+        "applyStatus": "신청상태",
+        "completionStatus": "이수상태",
+        "attendanceAction": "출석조회"
+      },
+      "innerHeaders": {
+        "sessionName": "회차명",
+        "sessionStatus": "회차상태",
+        "attendance": "출석"
+      },
+      "buttons": {
+        "view": "조회",
+        "close": "닫기"
+      },
+      "messages": {
+        "noSessions": "회차가 없습니다."
+      },
+      "emptyText": "신청 학생이 없습니다."
+    },
+    "sessions": {
+      "createButton": "회차 생성",
+      "headers": {
+        "sessionName": "회차명",
+        "rewardPoint": "회차포인트",
+        "recognizedHours": "회차인정시간",
+        "startAt": "시작기간",
+        "endAt": "마감기간",
+        "status": "상태",
+        "manage": "관리"
+      },
+      "buttons": {
+        "detail": "상세",
+        "close": "닫기"
+      },
+      "emptyText": "회차가 없습니다."
+    },
+    "competencies": {
+      "labels": {
+        "hostOrgName": "주관기관",
+        "mainCompetencies": "주역량"
+      },
+      "titles": {
+        "mapping": "역량 맵핑",
+        "radar": "역량맵핑 레이더차트"
+      },
+      "messages": {
+        "loading": "불러오는 중...",
+        "loadError": "조회 실패",
+        "saved": "역량 맵핑이 저장되었습니다.",
+        "duplicateWeight": "이미 다른 역량이 사용 중인 점수입니다.",
+        "saveFailed": "저장 실패"
+      },
+      "buttons": {
+        "saving": "저장중..."
+      }
+    },
+    "radar": {
+      "empty": "역량 점수를 등록해주세요.",
+      "tooltip": "{value}점"
+    },
+    "status": {
+      "title": "상태 변경",
+      "confirmYes": "예",
+      "confirmNo": "아니오",
+      "messages": {
+        "confirmText": "상태를 변경하시겠습니까? (상태는 되돌릴 수 없습니다.)",
+        "updateFailed": "상태변경에 실패했습니다."
+      }
+    }
+  }
+}
