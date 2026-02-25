@@ -142,6 +142,7 @@ public class AdminCurricularOfferingController {
     // 상세 ( 학생 성적 입력 )
     @PatchMapping("/{offeringId}/students/{enrollmentId}/score")
     public ApiResponse<SuccessResponse> patchScore(
+        @AuthenticationPrincipal AuthUser user,
         @PathVariable Long offeringId,
         @PathVariable Long enrollmentId,
         @Valid @RequestBody OfferingScorePatchRequest req
@@ -149,7 +150,8 @@ public class AdminCurricularOfferingController {
         curricularOfferingCommandService.patchScore(
             offeringId,
             enrollmentId,
-            req.rawScore()
+            req.rawScore(),
+            user == null ? null : user.getAccountId()
         );
         return ApiResponse.ok(new SuccessResponse());
     }

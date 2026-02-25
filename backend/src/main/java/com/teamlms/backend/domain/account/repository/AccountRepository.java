@@ -31,4 +31,18 @@ public interface AccountRepository extends JpaRepository<Account, Long>, Account
     @Query("SELECT a FROM Account a WHERE a.accountId IN (SELECT sp.accountId FROM StudentProfile sp WHERE sp.deptId IN :deptIds AND sp.gradeLevel IN :gradeLevels)")
     List<Account> findAllByDeptIdInAndGradeLevelIn(@Param("deptIds") List<Long> deptIds,
             @Param("gradeLevels") List<Integer> gradeLevels);
+
+    // 권한 코드로 계정 조회 (관리자/담당자 알림 수신용)
+    @Query("""
+        select distinct a
+        from AuthAccountRole ar
+        join ar.account a
+        join ar.role r
+        join AuthRolePermission rp on rp.role = r
+        join rp.permission p
+        where p.code in :permissionCodes
+          and r.isActive = true
+          and p.isActive = true
+    """)
+    List<Account> findAllByPermissionCodes(@Param("permissionCodes") List<String> permissionCodes);
 }

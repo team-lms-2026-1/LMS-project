@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.extracurricular.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
@@ -11,12 +12,16 @@ import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSession
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOffering;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSession;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSessionVideo;
+import com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus;
 import com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus;
 import com.teamlms.backend.domain.extracurricular.enums.ExtraSessionStatus;
+import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularApplicationRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionCompletionRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionVideoRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 
@@ -30,6 +35,8 @@ public class AdminExtraCurricularSessionCommandService {
     private final ExtraCurricularSessionRepository sessionRepository;
     private final ExtraCurricularSessionVideoRepository videoRepository;
     private final ExtraCurricularSessionCompletionRepository completionRepository;
+    private final ExtraCurricularApplicationRepository applicationRepository;
+    private final AlarmCommandService alarmCommandService;
 
     @Transactional
     public void create(Long offeringId, ExtraCurricularSessionCreateRequest req) {
@@ -94,6 +101,8 @@ public class AdminExtraCurricularSessionCommandService {
             .videoUrl(null)
             .build();
         videoRepository.save(video);
+
+        notifySessionCreated(offering, session);
     }
 
     @Transactional
@@ -160,6 +169,7 @@ public class AdminExtraCurricularSessionCommandService {
 
         if (videoChanged) {
             completionRepository.deleteAllBySessionId(sessionId);
+            notifySessionVideoUploaded(offering, session);
         }
     }
 
@@ -190,6 +200,81 @@ public class AdminExtraCurricularSessionCommandService {
 
         if (targetStatus == ExtraSessionStatus.CANCELED) {
             completionRepository.deleteAllBySessionId(sessionId);
+        }
+    }
+
+    private void notifySessionCreated(ExtraCurricularOffering offering, ExtraCurricularSession session) {
+        if (offering == null || session == null) {
+            return;
+        }
+
+        List<Long> studentAccountIds = applicationRepository.findStudentAccountIdsByOfferingAndApplyStatus(
+                offering.getExtraOfferingId(),
+                ExtraApplicationApplyStatus.APPLIED
+        );
+        if (studentAccountIds.isEmpty()) {
+            return;
+        }
+
+        String offeringName = (offering.getExtraOfferingName() == null || offering.getExtraOfferingName().isBlank())
+                ? "\uBE44\uAD50\uACFC" : offering.getExtraOfferingName();
+        String sessionName = (session.getSessionName() == null || session.getSessionName().isBlank())
+                ? "\uD68C\uCC28" : session.getSessionName();
+
+        String title = "\uBE44\uAD50\uACFC \uD68C\uCC28";
+        String message = "\uBE44\uAD50\uACFC '" + offeringName + "' " + sessionName
+                + " \uD68C\uCC28\uAC00 \uB4F1\uB85D\uB418\uC5C8\uC2B5\uB2C8\uB2E4.";
+        String linkUrl = "/extra-curricular/offerings/" + offering.getExtraOfferingId();
+
+        for (Long studentAccountId : studentAccountIds) {
+            if (studentAccountId == null) {
+                continue;
+            }
+
+            alarmCommandService.createAlarm(
+                    studentAccountId,
+                    AlarmType.EXTRA_SESSION_CREATED,
+                    title,
+                    message,
+                    linkUrl
+            );
+        }
+    }
+
+    private void notifySessionVideoUploaded(ExtraCurricularOffering offering, ExtraCurricularSession session) {
+        if (offering == null || session == null) {
+            return;
+        }
+
+        List<Long> studentAccountIds = applicationRepository.findStudentAccountIdsByOfferingAndApplyStatus(
+                offering.getExtraOfferingId(),
+                ExtraApplicationApplyStatus.APPLIED
+        );
+        if (studentAccountIds.isEmpty()) {
+            return;
+        }
+
+        String offeringName = (offering.getExtraOfferingName() == null || offering.getExtraOfferingName().isBlank())
+                ? "비교과" : offering.getExtraOfferingName();
+        String sessionName = (session.getSessionName() == null || session.getSessionName().isBlank())
+                ? "회차" : session.getSessionName();
+
+        String title = "비교과 영상";
+        String message = "비교과 '" + offeringName + "' " + sessionName + " 영상이 업로드되었습니다.";
+        String linkUrl = "/extra-curricular/offerings/" + offering.getExtraOfferingId();
+
+        for (Long studentAccountId : studentAccountIds) {
+            if (studentAccountId == null) {
+                continue;
+            }
+
+            alarmCommandService.createAlarm(
+                    studentAccountId,
+                    AlarmType.EXTRA_SESSION_VIDEO_UPLOADED,
+                    title,
+                    message,
+                    linkUrl
+            );
         }
     }
 }

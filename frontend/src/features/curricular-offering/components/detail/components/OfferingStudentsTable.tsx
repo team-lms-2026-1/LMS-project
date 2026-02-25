@@ -29,7 +29,7 @@ export function OfferingStudentsTable({ offeringId, offeringStatus, items, loadi
   const [editRawScore, setEditRawScore] = useState<string>(""); // input 값
   const [savingId, setSavingId] = useState<number | null>(null); // 저장중인 row 
 
-  const canEditScore = offeringStatus === "IN_PROGRESS"
+  const canEditScore = offeringStatus === "IN_PROGRESS" || offeringStatus === "COMPLETED"
 
   const startEdit = (r: CurricularOfferingStudentListItemDto) => {
     setEditId(r.enrollmentId);

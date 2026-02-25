@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.community.service;
 
 import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.community.api.dto.*;
 import com.teamlms.backend.domain.community.dto.InternalQnaSearchRequest;
@@ -129,7 +130,9 @@ public class QnaService {
                                 .category(category).author(author)
                                 .title(request.getTitle()).content(request.getContent())
                                 .build();
-                return questionRepository.save(question).getId();
+                QnaQuestion saved = questionRepository.save(question);
+                notifyQnaQuestionCreated(saved, authorId);
+                return saved.getId();
         }
 
         @Transactional
@@ -239,6 +242,41 @@ public class QnaService {
                                 title,
                                 message,
                                 linkUrl);
+        }
+
+        private void notifyQnaQuestionCreated(QnaQuestion question, Long actorId) {
+                if (question == null) {
+                        return;
+                }
+
+                List<Account> admins = accountRepository.findAllByPermissionCodes(List.of("QNA_MANAGE"));
+                if (admins.isEmpty()) {
+                        admins = accountRepository.findAllByAccountType(AccountType.ADMIN);
+                }
+                if (admins.isEmpty()) {
+                        return;
+                }
+
+                String title = "Q&A 질문";
+                String questionTitle = question.getTitle();
+                String message = (questionTitle == null || questionTitle.isBlank())
+                                ? "Q&A에 새로운 질문이 등록되었습니다."
+                                : "질문 '" + questionTitle + "'이 등록되었습니다.";
+                String linkUrl = "/community/qna/questions/" + question.getId();
+
+                for (Account admin : admins) {
+                        Long recipientId = admin.getAccountId();
+                        if (recipientId == null || recipientId.equals(actorId)) {
+                                continue;
+                        }
+
+                        alarmCommandService.createAlarm(
+                                        recipientId,
+                                        AlarmType.QNA_NEW_QUESTION,
+                                        title,
+                                        message,
+                                        linkUrl);
+                }
         }
 
         private ExternalCategoryResponse toCategoryDto(QnaCategory c) {

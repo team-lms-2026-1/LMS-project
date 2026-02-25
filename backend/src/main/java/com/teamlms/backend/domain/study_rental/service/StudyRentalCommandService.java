@@ -2,6 +2,7 @@ package com.teamlms.backend.domain.study_rental.service;
 
 import com.teamlms.backend.global.security.principal.AuthUser;
 import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.study_rental.api.dto.RentalApplyRequest;
 import com.teamlms.backend.domain.study_rental.api.dto.RentalProcessRequest;
@@ -21,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -72,6 +74,7 @@ public class StudyRentalCommandService {
                 .build();
 
         rentalRepository.save(rental);
+        notifyRentalRequested(rental);
     }
 
     public void processRental(Object principal, Long rentalId, RentalProcessRequest req) {
@@ -209,6 +212,44 @@ public class StudyRentalCommandService {
                 title,
                 message,
                 linkUrl);
+    }
+
+    private void notifyRentalRequested(StudyRoomRental rental) {
+        if (rental == null) {
+            return;
+        }
+
+        List<Account> admins = accountRepository.findAllByPermissionCodes(List.of("RENTAL_MANAGE"));
+        if (admins.isEmpty()) {
+            admins = accountRepository.findAllByAccountType(AccountType.ADMIN);
+        }
+        if (admins.isEmpty()) {
+            return;
+        }
+
+        Long applicantId = rental.getApplicant() != null ? rental.getApplicant().getAccountId() : null;
+        String title = "학습공간";
+        String details = buildRentalDetails(rental);
+        String message = "학습공간 대여 신청이 접수되었습니다.";
+        if (!details.isBlank()) {
+            message = message + " (" + details + ")";
+        }
+
+        String linkUrl = "/study-space/spaces-rentals";
+
+        for (Account admin : admins) {
+            Long recipientId = admin.getAccountId();
+            if (recipientId == null || recipientId.equals(applicantId)) {
+                continue;
+            }
+
+            alarmCommandService.createAlarm(
+                    recipientId,
+                    AlarmType.STUDY_RENTAL_REQUESTED,
+                    title,
+                    message,
+                    linkUrl);
+        }
     }
 
     private String buildRentalDetails(StudyRoomRental rental) {

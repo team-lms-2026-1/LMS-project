@@ -198,6 +198,18 @@
   border-color: #fed7aa;
 }
 
+.itemBadgeCurricular {
+  color: #0c4a6e;
+  background: #e0f2fe;
+  border-color: #bae6fd;
+}
+
+.itemBadgeExtra {
+  color: #9f1239;
+  background: #ffe4e6;
+  border-color: #fecdd3;
+}
+
 .itemBadgeStudy {
   color: #0f766e;
   background: #ccfbf1;

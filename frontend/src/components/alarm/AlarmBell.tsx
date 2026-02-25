@@ -89,6 +89,20 @@ function getAlarmBadge(type?: string | null): AlarmBadge | null {
     case "COMMUNITY_COMMENT":
     case "QNA_COMMENT":
       return { label: "Q&A 댓글", className: styles.itemBadgeCommunity };
+    case "QNA_NEW_QUESTION":
+      return { label: "Q&A 질문", className: styles.itemBadgeCommunity };
+    case "CURRICULAR_SCORE_ASSIGNED":
+      return { label: "교과 점수", className: styles.itemBadgeCurricular };
+    case "CURRICULAR_GRADE_CONFIRMED":
+      return { label: "교과 성적", className: styles.itemBadgeCurricular };
+    case "EXTRA_SESSION_CREATED":
+      return { label: "비교과 회차", className: styles.itemBadgeExtra };
+    case "EXTRA_SESSION_VIDEO_UPLOADED":
+      return { label: "비교과 영상", className: styles.itemBadgeExtra };
+    case "EXTRA_OFFERING_COMPLETED":
+      return { label: "비교과 이수", className: styles.itemBadgeExtra };
+    case "STUDY_RENTAL_REQUESTED":
+      return { label: "학습공간 신청", className: styles.itemBadgeStudy };
     case "STUDY_RENTAL_APPROVED":
     case "STUDY_RENTAL_REJECTED":
       return { label: "학습공간", className: styles.itemBadgeStudy };

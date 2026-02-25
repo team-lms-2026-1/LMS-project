@@ -82,6 +82,19 @@ public class Enrollment extends BaseEntity {
         this.gradeConfirmedBy = actorAccountId;
         this.gradeConfirmedAt = confirmedAt;
     }
+
+    public void updateConfirmedGrade(
+            String grade,
+            CompletionStatus completionStatus,
+            Long actorAccountId,
+            LocalDateTime confirmedAt
+    ) {
+        this.grade = grade;
+        this.completionStatus = completionStatus;
+        this.isGradeConfirmed = true;
+        this.gradeConfirmedBy = actorAccountId;
+        this.gradeConfirmedAt = confirmedAt;
+    }
     
     // 수강취소
     public void cancel() {
