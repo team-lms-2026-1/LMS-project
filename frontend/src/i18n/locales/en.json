@@ -1166,7 +1166,7 @@
             "maxSize": "Max size: 50MB"
           },
           "errors": {
-            "leaveGuard": "You are editing a notice.",
+            "leaveGuard": "You are creating a notice.",
             "titleRequired": "Please enter a title.",
             "contentRequired": "Please enter content.",
             "periodRequired": "Please select a display period.",
@@ -1416,6 +1416,7 @@
             "maxSize": "Max size: 50MB"
           },
           "errors": {
+            "leaveGuard": "You are creating a resource.",
             "titleRequired": "Please enter a title.",
             "contentRequired": "Please enter content.",
             "submitFailed": "Failed to create resource."
@@ -1455,6 +1456,7 @@
             "attachmentFallback": "Attachment {index}"
           },
           "errors": {
+            "leaveGuard": "You are editing a resource.",
             "invalidId": "Invalid resource ID.",
             "loadFailed": "Failed to load resource.",
             "missingFileId": "This file cannot be deleted because it has no fileId.",
@@ -1642,6 +1644,7 @@
             "creating": "Creating..."
           },
           "errors": {
+            "leaveGuard": "You are creating an FAQ.",
             "titleRequired": "Please enter a title.",
             "contentRequired": "Please enter content.",
             "submitFailed": "Failed to create FAQ."
@@ -1673,6 +1676,7 @@
             "uncategorized": "Uncategorized"
           },
           "errors": {
+            "leaveGuard": "You are editing an FAQ.",
             "invalidId": "Invalid FAQ ID.",
             "loadFailed": "Failed to load FAQ.",
             "titleRequired": "Please enter a title.",
@@ -1831,6 +1835,8 @@
             "question": "Q&A"
           },
           "errors": {
+            "answerLeaveGuardEdit": "You are editing an answer.",
+            "answerLeaveGuardCreate": "You are writing an answer.",
             "invalidId": "Invalid question ID.",
             "loadFailed": "Failed to load question.",
             "deleteFailed": "Delete failed.",

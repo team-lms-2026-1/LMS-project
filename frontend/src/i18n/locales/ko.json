@@ -1167,7 +1167,7 @@
             "maxSize": "최대 용량: 50MB"
           },
           "errors": {
-            "leaveGuard": "등록 작성 중입니다.",
+            "leaveGuard": "등록 페이지 작성 중입니다.",
             "titleRequired": "제목을 입력하세요.",
             "contentRequired": "내용을 입력하세요.",
             "periodRequired": "게시기간을 정해 주세요.",
@@ -1417,6 +1417,7 @@
             "maxSize": "최대 용량: 50MB"
           },
           "errors": {
+            "leaveGuard": "자료 등록 중입니다.",
             "titleRequired": "제목을 입력하세요.",
             "contentRequired": "내용을 입력하세요.",
             "submitFailed": "등록에 실패했습니다."
@@ -1456,6 +1457,7 @@
             "attachmentFallback": "첨부파일 {index}"
           },
           "errors": {
+            "leaveGuard": "자료를 수정 중입니다.",
             "invalidId": "잘못된 자료실 ID입니다.",
             "loadFailed": "자료를 불러오지 못했습니다.",
             "missingFileId": "fileId가 없어 삭제할 수 없습니다.",
@@ -1643,6 +1645,7 @@
             "creating": "등록 중..."
           },
           "errors": {
+            "leaveGuard": "FAQ 등록 중입니다.",
             "titleRequired": "제목을 입력하세요.",
             "contentRequired": "내용을 입력하세요.",
             "submitFailed": "등록에 실패했습니다."
@@ -1674,6 +1677,7 @@
             "uncategorized": "미분류"
           },
           "errors": {
+            "leaveGuard": "FAQ를 수정 중입니다.",
             "invalidId": "잘못된 FAQ ID입니다.",
             "loadFailed": "FAQ를 불러오지 못했습니다.",
             "titleRequired": "제목을 입력하세요.",
@@ -1832,6 +1836,8 @@
             "question": "Q&A"
           },
           "errors": {
+            "answerLeaveGuardEdit": "답변 수정 중입니다.",
+            "answerLeaveGuardCreate": "답변 작성 중입니다.",
             "invalidId": "Invalid question ID.",
             "loadFailed": "Failed to load question.",
             "deleteFailed": "Delete failed.",

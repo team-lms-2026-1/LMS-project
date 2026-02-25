@@ -83,10 +83,6 @@ export default function QnaDetailPageClient() {
   const [deleteTarget, setDeleteTarget] = useState<{ kind: "question" | "answer" } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const goList = useCallback(() => {
-    router.push("/admin/community/qna");
-  }, [router]);
-
   const loadDetail = useCallback(async (options?: { force?: boolean }) => {
     if (!questionId || Number.isNaN(questionId)) {
       setState({ loading: false, error: t("errors.invalidId"), data: null });
@@ -139,11 +135,92 @@ export default function QnaDetailPageClient() {
   }, [data?.category?.bgColorHex, data?.category?.textColorHex]);
 
   const hasAnswer = Boolean(answer?.answerId) || Boolean(answer?.content?.trim());
+  const isAnswerEditing = hasAnswer && editingAnswer;
+  const isAnswerCreating = !hasAnswer && answerText.trim().length > 0;
+  const isAnswerDirty = isAnswerEditing || isAnswerCreating;
+
+  const leaveToastMessage = useMemo(() => {
+    return isAnswerEditing ? t("errors.answerLeaveGuardEdit") : t("errors.answerLeaveGuardCreate");
+  }, [isAnswerEditing, t]);
+
+  const toastLeave = useCallback(() => {
+    toast.error(leaveToastMessage);
+  }, [leaveToastMessage]);
+
+  const goList = useCallback(() => {
+    if (savingAnswer) return;
+    if (isAnswerDirty) {
+      toastLeave();
+      return;
+    }
+    router.push("/admin/community/qna");
+  }, [isAnswerDirty, router, savingAnswer, toastLeave]);
 
   const onDeleteQuestion = useCallback(() => {
     if (!questionId) return;
     setDeleteTarget({ kind: "question" });
   }, [questionId]);
+
+  useEffect(() => {
+    if (!isAnswerDirty || savingAnswer) return;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isAnswerDirty, savingAnswer]);
+
+  const pushedRef = useRef(false);
+  useEffect(() => {
+    if (!isAnswerDirty || savingAnswer) {
+      pushedRef.current = false;
+      return;
+    }
+
+    if (!pushedRef.current) {
+      history.pushState(null, "", location.href);
+      pushedRef.current = true;
+    }
+
+    const onPopState = () => {
+      if (savingAnswer) return;
+      history.pushState(null, "", location.href);
+      toastLeave();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isAnswerDirty, savingAnswer, toastLeave]);
+
+  useEffect(() => {
+    const onClickCapture = (e: MouseEvent) => {
+      if (!isAnswerDirty || savingAnswer) return;
+
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a) return;
+
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== "_self") return;
+
+      const hrefAttr = a.getAttribute("href") ?? "";
+      if (hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) return;
+      if (a.hasAttribute("download")) return;
+
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      toastLeave();
+    };
+
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, [isAnswerDirty, savingAnswer, toastLeave]);
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget || !questionId) return;

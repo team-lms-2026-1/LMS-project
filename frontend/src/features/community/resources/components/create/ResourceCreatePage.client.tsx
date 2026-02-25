@@ -1,12 +1,13 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./ResourceCreatePage.module.css";
 import type { Category, CreateResourceRequestDto } from "../../api/types";
 import { createResource, fetchResourceCategories } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
+import toast from "react-hot-toast";
 import { useI18n } from "@/i18n/useI18n";
 
 const LIST_PATH = "/admin/community/resources";
@@ -51,6 +52,15 @@ export default function ResourceCreatePageClient() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>("");
+  const allowLeaveRef = useRef(false);
+
+  const isDirty = useMemo(() => {
+    return title.trim().length > 0 || content.trim().length > 0 || files.length > 0 || !!categoryId;
+  }, [title, content, files.length, categoryId]);
+
+  const toastLeave = useCallback(() => {
+    toast.error(i18n("errors.leaveGuard"));
+  }, [i18n]);
 
   useEffect(() => {
     let alive = true;
@@ -80,6 +90,87 @@ export default function ResourceCreatePageClient() {
   const canSubmit = useMemo(() => {
     return title.trim().length > 0 && content.trim().length > 0 && !saving;
   }, [title, content, saving]);
+
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+    if (!isDirty || saving) return;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty, saving]);
+
+  const pushedRef = useRef(false);
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+
+    if (!isDirty || saving) {
+      pushedRef.current = false;
+      return;
+    }
+
+    if (!pushedRef.current) {
+      history.pushState(null, "", location.href);
+      pushedRef.current = true;
+    }
+
+    const onPopState = () => {
+      if (allowLeaveRef.current) return;
+      history.pushState(null, "", location.href);
+      toastLeave();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isDirty, saving, toastLeave]);
+
+  useEffect(() => {
+    const onClickCapture = (e: MouseEvent) => {
+      if (allowLeaveRef.current) return;
+      if (!isDirty || saving) return;
+
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a) return;
+
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== "_self") return;
+
+      const hrefAttr = a.getAttribute("href") ?? "";
+      if (hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) return;
+      if (a.hasAttribute("download")) return;
+
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      toastLeave();
+    };
+
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, [isDirty, saving, toastLeave]);
+
+  const guardNavigate = useCallback(
+    (path: string) => {
+      if (allowLeaveRef.current) {
+        router.push(path);
+        return;
+      }
+      if (saving) return;
+      if (isDirty) {
+        toastLeave();
+        return;
+      }
+      router.push(path);
+    },
+    [router, isDirty, saving, toastLeave]
+  );
 
   const addFiles = (incoming: File[]) => {
     if (!incoming.length) return;
@@ -154,6 +245,7 @@ export default function ResourceCreatePageClient() {
         await createResource(body);
       }
 
+      allowLeaveRef.current = true;
       router.push(`${LIST_PATH}?toast=created`);
     } catch (e: any) {
       setError(e?.message ?? i18n("errors.submitFailed"));
@@ -162,7 +254,10 @@ export default function ResourceCreatePageClient() {
     }
   };
 
-  const onCancel = () => router.push(LIST_PATH);
+  const onCancel = () => {
+    allowLeaveRef.current = true;
+    router.push(LIST_PATH);
+  };
 
   return (
     <div className={styles.page}>
@@ -175,7 +270,7 @@ export default function ResourceCreatePageClient() {
       <div className={styles.card}>
         <div className={styles.headerRow}>
           <h1 className={styles.pageTitle}>{i18n("title")}</h1>
-          <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
+          <Button variant="secondary" onClick={() => guardNavigate(LIST_PATH)} disabled={saving}>
             {i18n("buttons.list")}
           </Button>
         </div>
