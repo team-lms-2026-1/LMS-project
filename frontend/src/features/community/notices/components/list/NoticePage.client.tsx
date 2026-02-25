@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
-import { fetchNoticeCategories } from "../../api/NoticesApi";
+import { fetchNoticeCategories } from "../../api/noticesApi";
 import type { Category } from "../../api/types";
 import { useI18n } from "@/i18n/useI18n";
 
