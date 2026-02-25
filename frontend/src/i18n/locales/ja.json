@@ -1298,7 +1298,7 @@
             "maxSize": "最大容量: 50MB"
           },
           "errors": {
-            "leaveGuard": "登録内容を編集中です。",
+            "leaveGuard": "お知らせを登録中です。",
             "titleRequired": "タイトルを入力してください。",
             "contentRequired": "内容を入力してください。",
             "periodRequired": "掲示期間を設定してください。",
@@ -1548,6 +1548,7 @@
             "maxSize": "最大容量: 50MB"
           },
           "errors": {
+            "leaveGuard": "?????????",
             "titleRequired": "タイトルを入力してください。",
             "contentRequired": "内容を入力してください。",
             "submitFailed": "登録に失敗しました。"
@@ -1587,6 +1588,7 @@
             "attachmentFallback": "添付ファイル {index}"
           },
           "errors": {
+            "leaveGuard": "?????????",
             "invalidId": "無効な資料IDです。",
             "loadFailed": "資料を読み込めませんでした。",
             "missingFileId": "このファイルはfileIdがないため削除できません。",
@@ -1774,6 +1776,7 @@
             "creating": "登録中..."
           },
           "errors": {
+            "leaveGuard": "FAQ???????",
             "titleRequired": "タイトルを入力してください。",
             "contentRequired": "内容を入力してください。",
             "submitFailed": "登録に失敗しました。"
@@ -1805,6 +1808,7 @@
             "uncategorized": "未分類"
           },
           "errors": {
+            "leaveGuard": "FAQ???????",
             "invalidId": "無効なFAQ IDです。",
             "loadFailed": "FAQを読み込めませんでした。",
             "titleRequired": "タイトルを入力してください。",
@@ -1963,6 +1967,8 @@
             "question": "Q&A"
           },
           "errors": {
+            "answerLeaveGuardEdit": "回答を修正中です。",
+            "answerLeaveGuardCreate": "回答を作成中です。",
             "invalidId": "Invalid question ID.",
             "loadFailed": "Failed to load question.",
             "deleteFailed": "Delete failed.",

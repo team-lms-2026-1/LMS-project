@@ -116,10 +116,6 @@ export default function FaqDetailpageClient() {
 
             <div className={styles.metaRow}>
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>{t("labels.author")}</span>
-                <span className={styles.metaValue}>{data.authorName || "-"}</span>
-              </div>
-              <div className={styles.metaItem}>
                 <span className={styles.metaLabel}>{t("labels.createdAt")}</span>
                 <span className={styles.metaValue}>{formatDateTime(data.createdAt)}</span>
               </div>

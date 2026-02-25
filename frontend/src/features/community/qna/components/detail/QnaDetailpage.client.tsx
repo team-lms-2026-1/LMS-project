@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import styles from "./QnaDetailPage.module.css";
 import DeleteModal from "../modal/DeleteModal.client";
 import type { LoadState, QnaDetailDto } from "../../api/types";
+import { Button } from "@/components/button";
 import {
   createQnaAnswer,
   deleteQnaAnswer,
@@ -14,6 +15,9 @@ import {
   updateQnaAnswer,
 } from "../../api/QnasApi";
 import { useI18n } from "@/i18n/useI18n";
+
+const ANSWER_MAX = 1000;
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
 
 function pickCreatedAt(raw: any) {
   return raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
@@ -79,10 +83,6 @@ export default function QnaDetailPageClient() {
   const [deleteTarget, setDeleteTarget] = useState<{ kind: "question" | "answer" } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const goList = useCallback(() => {
-    router.push("/admin/community/qna");
-  }, [router]);
-
   const loadDetail = useCallback(async (options?: { force?: boolean }) => {
     if (!questionId || Number.isNaN(questionId)) {
       setState({ loading: false, error: t("errors.invalidId"), data: null });
@@ -112,8 +112,9 @@ export default function QnaDetailPageClient() {
       setState({ loading: false, error: null, data });
 
       const init = data.answer?.content ?? "";
-      setAnswerText(init);
-      setAnswerInit(init);
+      const clamped = clampText(init, ANSWER_MAX);
+      setAnswerText(clamped);
+      setAnswerInit(clamped);
       setEditingAnswer(false);
     } catch (e: any) {
       setState({ loading: false, error: e?.message ?? t("errors.loadFailed"), data: null });
@@ -134,11 +135,92 @@ export default function QnaDetailPageClient() {
   }, [data?.category?.bgColorHex, data?.category?.textColorHex]);
 
   const hasAnswer = Boolean(answer?.answerId) || Boolean(answer?.content?.trim());
+  const isAnswerEditing = hasAnswer && editingAnswer;
+  const isAnswerCreating = !hasAnswer && answerText.trim().length > 0;
+  const isAnswerDirty = isAnswerEditing || isAnswerCreating;
+
+  const leaveToastMessage = useMemo(() => {
+    return isAnswerEditing ? t("errors.answerLeaveGuardEdit") : t("errors.answerLeaveGuardCreate");
+  }, [isAnswerEditing, t]);
+
+  const toastLeave = useCallback(() => {
+    toast.error(leaveToastMessage);
+  }, [leaveToastMessage]);
+
+  const goList = useCallback(() => {
+    if (savingAnswer) return;
+    if (isAnswerDirty) {
+      toastLeave();
+      return;
+    }
+    router.push("/admin/community/qna");
+  }, [isAnswerDirty, router, savingAnswer, toastLeave]);
 
   const onDeleteQuestion = useCallback(() => {
     if (!questionId) return;
     setDeleteTarget({ kind: "question" });
   }, [questionId]);
+
+  useEffect(() => {
+    if (!isAnswerDirty || savingAnswer) return;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isAnswerDirty, savingAnswer]);
+
+  const pushedRef = useRef(false);
+  useEffect(() => {
+    if (!isAnswerDirty || savingAnswer) {
+      pushedRef.current = false;
+      return;
+    }
+
+    if (!pushedRef.current) {
+      history.pushState(null, "", location.href);
+      pushedRef.current = true;
+    }
+
+    const onPopState = () => {
+      if (savingAnswer) return;
+      history.pushState(null, "", location.href);
+      toastLeave();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isAnswerDirty, savingAnswer, toastLeave]);
+
+  useEffect(() => {
+    const onClickCapture = (e: MouseEvent) => {
+      if (!isAnswerDirty || savingAnswer) return;
+
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a) return;
+
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== "_self") return;
+
+      const hrefAttr = a.getAttribute("href") ?? "";
+      if (hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) return;
+      if (a.hasAttribute("download")) return;
+
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      toastLeave();
+    };
+
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, [isAnswerDirty, savingAnswer, toastLeave]);
 
   const confirmDelete = useCallback(async () => {
     if (!deleteTarget || !questionId) return;
@@ -198,12 +280,20 @@ export default function QnaDetailPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.breadcrumb}>
-          <span className={styles.crumb} onClick={goList}>
-            Q&amp;A
-          </span>
+        <div className={styles.breadcrumbRow}>
+          <div className={styles.breadcrumb}>
+            <span className={styles.crumb} onClick={goList}>
+              Q&amp;A
+            </span>
           <span className={styles.sep}>›</span>
-          <span className={styles.current}>{t("breadcrumbCurrent")}</span>
+            <span className={styles.current}>{t("breadcrumbCurrent")}</span>
+          </div>
+
+          <div className={styles.breadcrumbActions}>
+            <Button variant="secondary" onClick={goList}>
+              {t("buttons.list")}
+            </Button>
+          </div>
         </div>
 
         <h1 className={styles.title}>{t("title")}</h1>
@@ -239,11 +329,12 @@ export default function QnaDetailPageClient() {
                 <div className={styles.contentText}>{data.content}</div>
               </div>
 
-              <div className={styles.actionsRow}>
-                <button type="button" className={styles.deleteBtn} onClick={onDeleteQuestion} disabled={deleting}>
-                  {t("buttons.deleteQuestion")}
-                </button>
-              </div>
+            </div>
+
+            <div className={styles.actionsRow}>
+              <Button variant="danger" onClick={onDeleteQuestion} disabled={deleting}>
+                {t("buttons.deleteQuestion")}
+              </Button>
             </div>
 
             <div className={styles.answerPanel}>
@@ -252,12 +343,12 @@ export default function QnaDetailPageClient() {
 
                 {hasAnswer && !editingAnswer && (
                   <div className={styles.answerHeaderActions}>
-                    <button type="button" className={styles.answerEditBtn} onClick={onClickEdit} disabled={savingAnswer || deleting}>
+                    <Button variant="primary" onClick={onClickEdit} disabled={savingAnswer || deleting}>
                       {t("buttons.answerEdit")}
-                    </button>
-                    <button type="button" className={styles.answerDeleteBtn} onClick={onDeleteAnswer} disabled={savingAnswer || deleting}>
+                    </Button>
+                    <Button variant="danger" onClick={onDeleteAnswer} disabled={savingAnswer || deleting}>
                       {t("buttons.answerDelete")}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -268,16 +359,17 @@ export default function QnaDetailPageClient() {
                     className={styles.answerTextarea}
                     placeholder={t("texts.answerPlaceholder")}
                     value={answerText}
-                    onChange={(e) => setAnswerText(e.target.value)}
+                    onChange={(e) => setAnswerText(clampText(e.target.value, ANSWER_MAX))}
                     disabled={savingAnswer}
+                    maxLength={ANSWER_MAX}
                   />
                   <div className={styles.answerActions}>
-                    <button type="button" className={styles.answerSubmitBtn} onClick={onSubmitAnswer} disabled={savingAnswer || deleting}>
+                    <Button onClick={onSubmitAnswer} disabled={savingAnswer || deleting}>
                       {hasAnswer ? t("buttons.answerSave") : t("buttons.answerSubmit")}
-                    </button>
-                    <button type="button" className={styles.answerCancelBtn} onClick={onCancelEdit} disabled={savingAnswer}>
+                    </Button>
+                    <Button variant="secondary" onClick={onCancelEdit} disabled={savingAnswer}>
                       {t("buttons.answerCancel")}
-                    </button>
+                    </Button>
                   </div>
                 </>
               ) : (
@@ -286,11 +378,6 @@ export default function QnaDetailPageClient() {
                 </div>
               )}
 
-              <div className={styles.answerFooter}>
-                <button className={styles.backBtn} onClick={goList}>
-                  {t("buttons.list")}
-                </button>
-              </div>
             </div>
           </>
         )}

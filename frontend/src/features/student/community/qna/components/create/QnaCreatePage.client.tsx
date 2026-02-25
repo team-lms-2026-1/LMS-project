@@ -8,6 +8,10 @@ import { createQnaQuestion, fetchQnaCategories } from "../../api/qnasApi";
 import { useI18n } from "@/i18n/useI18n";
 
 const LIST_PATH = "/student/community/qna/questions";
+const TITLE_MAX = 190;
+const CONTENT_MAX = 2000;
+
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
 
 export default function QnaCreatePageClient() {
   const router = useRouter();
@@ -122,10 +126,10 @@ export default function QnaCreatePageClient() {
             <input
               className={styles.input}
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
               placeholder={t("placeholders.title")}
               disabled={saving}
-              maxLength={190}
+              maxLength={TITLE_MAX}
             />
           </div>
 
@@ -134,10 +138,11 @@ export default function QnaCreatePageClient() {
             <textarea
               className={styles.textarea}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
               placeholder={t("placeholders.content")}
               disabled={saving}
               rows={12}
+              maxLength={CONTENT_MAX}
             />
           </div>
 

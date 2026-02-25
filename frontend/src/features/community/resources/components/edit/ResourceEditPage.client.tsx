@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./ResourceEditPage.module.css";
 import type { Category, ResourceListItemDto, ResourceFileDto, ExistingFile, LoadState, } from "../../api/types";
 import { fetchResourceCategories, fetchResourceDetail, updateResource } from "../../api/resourcesApi";
 import { Button } from "@/components/button";
+import toast from "react-hot-toast";
 import { useI18n } from "@/i18n/useI18n";
 
 function normalizeDetail(payload: any): ResourceListItemDto {
@@ -103,6 +104,28 @@ export default function ResourceEditPageClient() {
 
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string>("");
+  const allowLeaveRef = useRef(false);
+
+  const isDirty = useMemo(() => {
+    if (!load.data) return false;
+    const base = load.data;
+
+    const baseTitle = String(base.title ?? "");
+    const baseContent = String(base.content ?? "");
+    const baseCat = base.category?.categoryId ? String(base.category.categoryId) : "";
+
+    return (
+      title !== baseTitle ||
+      content !== baseContent ||
+      categoryId !== baseCat ||
+      deletedFileIds.length > 0 ||
+      newFiles.length > 0
+    );
+  }, [load.data, title, content, categoryId, deletedFileIds.length, newFiles.length]);
+
+  const toastLeave = useCallback(() => {
+    toast.error(i18n("errors.leaveGuard"));
+  }, [i18n]);
 
   // 상세 로드
   useEffect(() => {
@@ -174,7 +197,91 @@ export default function ResourceEditPageClient() {
     return title.trim().length > 0 && content.trim().length > 0 && !saving && !load.loading;
   }, [title, content, saving, load.loading]);
 
-  const onCancel = () => router.push(DETAIL_PATH);
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+    if (!isDirty || saving) return;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty, saving]);
+
+  const pushedRef = useRef(false);
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+
+    if (!isDirty || saving) {
+      pushedRef.current = false;
+      return;
+    }
+
+    if (!pushedRef.current) {
+      history.pushState(null, "", location.href);
+      pushedRef.current = true;
+    }
+
+    const onPopState = () => {
+      if (allowLeaveRef.current) return;
+      history.pushState(null, "", location.href);
+      toastLeave();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isDirty, saving, toastLeave]);
+
+  useEffect(() => {
+    const onClickCapture = (e: MouseEvent) => {
+      if (allowLeaveRef.current) return;
+      if (!isDirty || saving) return;
+
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a) return;
+
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== "_self") return;
+
+      const hrefAttr = a.getAttribute("href") ?? "";
+      if (hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) return;
+      if (a.hasAttribute("download")) return;
+
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      toastLeave();
+    };
+
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, [isDirty, saving, toastLeave]);
+
+  const guardNavigate = useCallback(
+    (path: string) => {
+      if (allowLeaveRef.current) {
+        router.push(path);
+        return;
+      }
+      if (saving) return;
+      if (isDirty) {
+        toastLeave();
+        return;
+      }
+      router.push(path);
+    },
+    [router, isDirty, saving, toastLeave]
+  );
+
+  const onCancel = () => {
+    allowLeaveRef.current = true;
+    router.push(DETAIL_PATH);
+  };
 
   // ===== ✅ 새 파일 추가/삭제 =====
   const addFiles = (incoming: File[]) => {
@@ -237,6 +344,7 @@ export default function ResourceEditPageClient() {
       const nextId =
         (res as any)?.data?.resourceId != null ? Number((res as any).data.resourceId) : resourceId;
 
+      allowLeaveRef.current = true;
       router.push(`/admin/community/resources/${nextId}?toast=updated`);
     } catch (e: any) {
       setFormError(e?.message ?? i18n("errors.saveFailed"));
@@ -258,14 +366,14 @@ export default function ResourceEditPageClient() {
       <div className={styles.card}>
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
-            <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
+            <span className={styles.crumb} onClick={() => guardNavigate(LIST_PATH)}>
               {i18n("title")}
             </span>
             <span className={styles.sep}>›</span>
             <span className={styles.current}>{i18n("breadcrumbCurrent")}</span>
           </div>
 
-          <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
+          <Button variant="secondary" onClick={() => guardNavigate(LIST_PATH)} disabled={saving}>
             {i18n("buttons.list")}
           </Button>
         </div>

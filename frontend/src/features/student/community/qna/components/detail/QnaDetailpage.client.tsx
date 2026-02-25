@@ -201,12 +201,20 @@ export default function QnaDetailpageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.breadcrumb}>
-          <span className={styles.crumb} onClick={() => router.push("/student/community/qna/questions")}>
-            Q&A
-          </span>
-          <span className={styles.sep}>&gt;</span>
-          <span className={styles.current}>{t("breadcrumbCurrent")}</span>
+        <div className={styles.breadcrumbRow}>
+          <div className={styles.breadcrumb}>
+            <span className={styles.crumb} onClick={() => router.push("/student/community/qna/questions")}>
+              Q&A
+            </span>
+            <span className={styles.sep}>&gt;</span>
+            <span className={styles.current}>{t("breadcrumbCurrent")}</span>
+          </div>
+
+          <div className={styles.breadcrumbActions}>
+            <Button variant="secondary" onClick={() => router.push("/student/community/qna/questions")}>
+              {t("buttons.list")}
+            </Button>
+          </div>
         </div>
 
         <h1 className={styles.title}>{t("title")}</h1>
@@ -242,28 +250,22 @@ export default function QnaDetailpageClient() {
               <div className={styles.contentBox}>
                 <div className={styles.contentText}>{data.content}</div>
               </div>
-
-              <div className={styles.footerRow}>
-                <Button type="button" onClick={() => router.push("/student/community/qna/questions")}>
-                  {t("buttons.list")}
-                </Button>
-
-                {isMine && (
-                  <div className={styles.ownerActions}>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() => router.push(`/student/community/qna/questions/${data.questionId}/edit`)}
-                    >
-                      {t("buttons.edit")}
-                    </Button>
-                    <Button type="button" variant="danger" onClick={handleDelete}>
-                      {t("buttons.delete")}
-                    </Button>
-                  </div>
-                )}
-              </div>
             </div>
+
+            {isMine && (
+              <div className={styles.actionsRow}>
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => router.push(`/student/community/qna/questions/${data.questionId}/edit`)}
+                >
+                  {t("buttons.edit")}
+                </Button>
+                <Button type="button" variant="danger" onClick={handleDelete}>
+                  {t("buttons.delete")}
+                </Button>
+              </div>
+            )}
 
             <div className={styles.answerPanel}>
               <div className={styles.answerHeader}>

@@ -36,6 +36,11 @@
   font: inherit;
   color: #111827;
   text-decoration: none;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .clickableRow {

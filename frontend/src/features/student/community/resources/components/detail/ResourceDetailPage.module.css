@@ -85,6 +85,11 @@
   font-size: 14px;
   font-weight: 800;
   color: #111827;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .metaRow {
@@ -123,6 +128,8 @@
   line-height: 1.7;
   font-size: 13px;
   color: #111827;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .attachBox {
