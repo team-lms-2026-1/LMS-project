@@ -19,6 +19,20 @@ repositories {
   mavenCentral()
 }
 
+def querydslGenerated = layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main").get().asFile
+
+sourceSets {
+  main {
+    java {
+      srcDir querydslGenerated
+    }
+  }
+}
+
+tasks.withType(JavaCompile).configureEach {
+  options.generatedSourceOutputDirectory = querydslGenerated
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor

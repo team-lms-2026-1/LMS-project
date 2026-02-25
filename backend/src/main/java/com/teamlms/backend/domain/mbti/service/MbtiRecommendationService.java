@@ -8,28 +8,21 @@ import com.teamlms.backend.domain.mbti.entity.JobCatalog;
 import com.teamlms.backend.domain.mbti.entity.MbtiJobRecommendation;
 import com.teamlms.backend.domain.mbti.entity.MbtiJobRecommendationItem;
 import com.teamlms.backend.domain.mbti.entity.MbtiResult;
-import com.teamlms.backend.domain.mbti.repository.InterestKeywordMasterRepository;
-import com.teamlms.backend.domain.mbti.repository.JobCatalogRepository;
 import com.teamlms.backend.domain.mbti.repository.MbtiJobRecommendationRepository;
 import com.teamlms.backend.domain.mbti.repository.MbtiResultRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,44 +34,19 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class MbtiRecommendationService {
 
-    private static final int CANDIDATE_SIZE = 40;
     private static final int MAX_REASON_TEXT_LENGTH = 420;
     private static final int AI_MAX_RETRY = 3;
     private static final String PROMPT_VERSION = "mbti-job-v3";
-    private static final String MODEL_NAME = "gpt-4o-mini";
-    private static final String OUTPUT_SCHEMA = """
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["recommendations"],
-              "properties": {
-                "recommendations": {
-                  "type": "array",
-                  "minItems": 5,
-                  "maxItems": 5,
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["jobCode", "reason"],
-                    "properties": {
-                      "jobCode": { "type": "string" },
-                      "reason": { "type": "string", "minLength": 60, "maxLength": 420 }
-                    }
-                  }
-                }
-              }
-            }
-            """;
 
     private final MbtiResultRepository mbtiResultRepository;
-    private final InterestKeywordMasterRepository keywordRepository;
-    private final JobCatalogRepository jobCatalogRepository;
     private final MbtiJobRecommendationRepository recommendationRepository;
-    private final ObjectProvider<ChatClient.Builder> chatClientBuilderProvider;
+    private final MbtiRecommendationKeywordService keywordService;
+    private final MbtiRecommendationCandidateSelector candidateSelector;
+    private final MbtiRecommendationAiClient aiClient;
     private final ObjectMapper objectMapper;
 
     public List<InterestKeywordMaster> getActiveInterestKeywords() {
-        return keywordRepository.findByActiveTrueOrderBySortOrderAsc();
+        return keywordService.getActiveInterestKeywords();
     }
 
     @Transactional
@@ -86,8 +54,8 @@ public class MbtiRecommendationService {
         MbtiResult mbtiResult = mbtiResultRepository.findTopByAccountIdOrderByCreatedAtDesc(accountId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MBTI_RESULT_NOT_FOUND));
 
-        List<InterestKeywordMaster> selectedKeywords = getValidatedKeywords(keywordIds);
-        List<JobCandidate> candidates = selectCandidates(selectedKeywords);
+        List<InterestKeywordMaster> selectedKeywords = keywordService.getValidatedKeywords(keywordIds);
+        List<MbtiRecommendationCandidate> candidates = candidateSelector.selectCandidates(selectedKeywords);
         List<ResolvedRecommendation> resolved = generateByAiWithFallback(mbtiResult, selectedKeywords, candidates);
 
         List<Long> selectedKeywordIds = selectedKeywords.stream().map(InterestKeywordMaster::getId).toList();
@@ -122,7 +90,7 @@ public class MbtiRecommendationService {
 
     public MbtiJobRecommendationResponse getLatestRecommendation(Long accountId) {
         return recommendationRepository.findByAccountId(accountId)
-                .map(saved -> toResponse(saved, getKeywordsByIds(saved.getSelectedKeywordIds())))
+                .map(saved -> toResponse(saved, keywordService.getKeywordsByIds(saved.getSelectedKeywordIds())))
                 .orElse(null);
     }
 
@@ -142,7 +110,7 @@ public class MbtiRecommendationService {
                     mbtiResult,
                     selectedKeywordIds,
                     candidateJobCodes,
-                    MODEL_NAME,
+                    aiClient.getModelName(),
                     PROMPT_VERSION,
                     generatedAt
             );
@@ -152,7 +120,7 @@ public class MbtiRecommendationService {
                 mbtiResult,
                 selectedKeywordIds,
                 candidateJobCodes,
-                MODEL_NAME,
+                aiClient.getModelName(),
                 PROMPT_VERSION,
                 generatedAt
         );
@@ -186,122 +154,23 @@ public class MbtiRecommendationService {
         return recommendation;
     }
 
-    private List<InterestKeywordMaster> getValidatedKeywords(List<Long> keywordIds) {
-        if (keywordIds == null || keywordIds.size() < 2) {
-            throw new BusinessException(ErrorCode.MBTI_KEYWORD_MIN_REQUIRED);
-        }
-        LinkedHashSet<Long> dedup = keywordIds.stream().filter(Objects::nonNull)
-                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
-        if (dedup.size() < 2) {
-            throw new BusinessException(ErrorCode.MBTI_KEYWORD_MIN_REQUIRED);
-        }
-        List<InterestKeywordMaster> found = keywordRepository.findByIdInAndActiveTrue(dedup);
-        if (found.size() != dedup.size()) {
-            throw new BusinessException(ErrorCode.MBTI_KEYWORD_INVALID);
-        }
-
-        Map<Long, InterestKeywordMaster> map = found.stream()
-                .collect(java.util.stream.Collectors.toMap(InterestKeywordMaster::getId, v -> v));
-        List<InterestKeywordMaster> ordered = new ArrayList<>();
-        for (Long id : dedup) {
-            InterestKeywordMaster keyword = map.get(id);
-            if (keyword == null) {
-                throw new BusinessException(ErrorCode.MBTI_KEYWORD_INVALID);
-            }
-            ordered.add(keyword);
-        }
-        return ordered;
-    }
-
-    private List<InterestKeywordMaster> getKeywordsByIds(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return List.of();
-        }
-        List<InterestKeywordMaster> found = keywordRepository.findByIdInAndActiveTrue(ids);
-        Map<Long, InterestKeywordMaster> map = found.stream()
-                .collect(java.util.stream.Collectors.toMap(InterestKeywordMaster::getId, v -> v));
-        List<InterestKeywordMaster> ordered = new ArrayList<>();
-        for (Long id : ids) {
-            InterestKeywordMaster keyword = map.get(id);
-            if (keyword != null) {
-                ordered.add(keyword);
-            }
-        }
-        return ordered;
-    }
-
-    private List<JobCandidate> selectCandidates(List<InterestKeywordMaster> selectedKeywords) {
-        String latestVersion = jobCatalogRepository.findLatestVersion();
-        List<JobCatalog> jobs = latestVersion == null
-                ? jobCatalogRepository.findAll()
-                : jobCatalogRepository.findByVersionOrderByIdAsc(latestVersion);
-
-        if (jobs.size() < 5) {
-            throw new BusinessException(ErrorCode.MBTI_JOB_CATALOG_EMPTY);
-        }
-
-        List<JobCandidate> scored = new ArrayList<>();
-        for (JobCatalog job : jobs) {
-            int score = 0;
-            Set<String> matched = new LinkedHashSet<>();
-            String searchText = lower(job.getSearchText());
-            String jobName = lower(job.getJobName());
-            String major = lower(job.getMajorName());
-            String middle = lower(job.getMiddleName());
-            String minor = lower(job.getMinorName());
-
-            for (InterestKeywordMaster keyword : selectedKeywords) {
-                String kw = lower(keyword.getKeyword());
-                if (kw.isBlank()) {
-                    continue;
-                }
-                boolean hit = false;
-                if (searchText.contains(kw)) {
-                    score += 4;
-                    hit = true;
-                }
-                if (jobName.contains(kw)) {
-                    score += 5;
-                    hit = true;
-                }
-                if (major.contains(kw) || middle.contains(kw) || minor.contains(kw)) {
-                    score += 2;
-                    hit = true;
-                }
-                if (hit) {
-                    matched.add(keyword.getKeyword());
-                }
-            }
-
-            scored.add(new JobCandidate(job, score, new ArrayList<>(matched)));
-        }
-
-        scored.sort(Comparator
-                .comparingInt(JobCandidate::score).reversed()
-                .thenComparing((JobCandidate c) -> c.matchedKeywords().size(), Comparator.reverseOrder())
-                .thenComparing(c -> c.job().getId()));
-
-        return scored.subList(0, Math.min(CANDIDATE_SIZE, scored.size()));
-    }
-
     private List<ResolvedRecommendation> generateByAiWithFallback(
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords,
-            List<JobCandidate> candidates
+            List<MbtiRecommendationCandidate> candidates
     ) {
-        ChatClient.Builder chatClientBuilder = chatClientBuilderProvider.getIfAvailable();
-        if (chatClientBuilder == null) {
+        if (!aiClient.isAvailable()) {
             log.warn("ChatClient.Builder bean not found. Using template fallback recommendations.");
             return fallbackRecommendations(mbtiResult, selectedKeywords, candidates);
         }
 
-        Map<String, JobCandidate> candidateMap = candidates.stream()
+        Map<String, MbtiRecommendationCandidate> candidateMap = candidates.stream()
                 .collect(java.util.stream.Collectors.toMap(c -> c.job().getJobCode(), c -> c, (a, b) -> a, LinkedHashMap::new));
 
         String errorHint = null;
         for (int attempt = 1; attempt <= AI_MAX_RETRY; attempt++) {
             try {
-                String raw = requestAiContent(chatClientBuilder, mbtiResult, selectedKeywords, candidates, errorHint);
+                String raw = aiClient.requestRecommendationJson(mbtiResult, selectedKeywords, candidates, errorHint);
                 return parseAndResolve(raw, candidateMap, mbtiResult, selectedKeywords);
             } catch (Exception e) {
                 errorHint = e.getMessage();
@@ -311,106 +180,9 @@ public class MbtiRecommendationService {
         return fallbackRecommendations(mbtiResult, selectedKeywords, candidates);
     }
 
-    private String requestAiContent(
-            ChatClient.Builder chatClientBuilder,
-            MbtiResult mbtiResult,
-            List<InterestKeywordMaster> selectedKeywords,
-            List<JobCandidate> candidates,
-            String errorHint
-    ) {
-        OpenAiChatOptions options = OpenAiChatOptions.builder()
-                .temperature(0.3)
-                .maxTokens(1100)
-                .outputSchema(OUTPUT_SCHEMA)
-                .build();
-
-        String systemPrompt = """
-                You are a career recommendation engine for university students in Korea.
-                Return JSON only and strictly follow the provided schema.
-                Hard constraints:
-                - Select exactly 5 recommendations.
-                - Use unique jobCode values.
-                - Use only jobCode values from the candidate list.
-                - reason must be one natural Korean paragraph.
-                - reason must not contain list markers, markdown, or line breaks.
-                - reason should be specific and evidence-based for each student profile.
-                - reason must include:
-                  1) MBTI strength fit
-                  2) selected interest keyword fit
-                  3) practical growth path in the role
-                """;
-
-        String userPrompt = buildUserPrompt(mbtiResult, selectedKeywords, candidates, errorHint);
-        String content = chatClientBuilder.build().prompt()
-                .system(systemPrompt)
-                .user(userPrompt)
-                .options(options)
-                .call()
-                .content();
-
-        if (content == null || content.isBlank()) {
-            throw new IllegalStateException("Empty AI response");
-        }
-        return content;
-    }
-
-    private String buildUserPrompt(
-            MbtiResult mbtiResult,
-            List<InterestKeywordMaster> selectedKeywords,
-            List<JobCandidate> candidates,
-            String errorHint
-    ) {
-        String keywords = selectedKeywords.stream().map(InterestKeywordMaster::getKeyword)
-                .collect(java.util.stream.Collectors.joining(", "));
-
-        String candidateLines = candidates.stream()
-                .map(c -> String.format(
-                        "- jobCode=%s | jobName=%s | major=%s | middle=%s | minor=%s | matchedKeywords=%s | score=%d",
-                        nullSafe(c.job().getJobCode()),
-                        nullSafe(c.job().getJobName()),
-                        nullSafe(c.job().getMajorName()),
-                        nullSafe(c.job().getMiddleName()),
-                        nullSafe(c.job().getMinorName()),
-                        c.matchedKeywords().isEmpty() ? "none" : String.join("/", c.matchedKeywords()),
-                        c.score()
-                ))
-                .collect(java.util.stream.Collectors.joining("\n"));
-
-        String retryHint = (errorHint == null || errorHint.isBlank())
-                ? ""
-                : "\nPrevious output issue: " + errorHint + "\nFix the issue and regenerate valid JSON.\n";
-
-        return """
-                Student profile:
-                - MBTI type: %s
-                - MBTI scores: E=%d, I=%d, S=%d, N=%d, T=%d, F=%d, J=%d, P=%d
-                - Selected interest keywords: %s
-
-                Candidate jobs (choose only from this list):
-                %s
-                %s
-                Output requirements:
-                - Exactly 5 jobs
-                - reason must be one paragraph per job
-                - each reason should be around 2~4 sentences
-                - each reason must be natural Korean with concrete details
-                - do not use line breaks or bullet lists
-                - avoid repetitive generic wording
-                """.formatted(
-                mbtiResult.getMbtiType(),
-                mbtiResult.getEScore(), mbtiResult.getIScore(),
-                mbtiResult.getSScore(), mbtiResult.getNScore(),
-                mbtiResult.getTScore(), mbtiResult.getFScore(),
-                mbtiResult.getJScore(), mbtiResult.getPScore(),
-                keywords,
-                candidateLines,
-                retryHint
-        );
-    }
-
     private List<ResolvedRecommendation> parseAndResolve(
             String raw,
-            Map<String, JobCandidate> candidateMap,
+            Map<String, MbtiRecommendationCandidate> candidateMap,
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords
     ) throws Exception {
@@ -432,7 +204,7 @@ public class MbtiRecommendationService {
                 throw new IllegalStateException("duplicate jobCode");
             }
 
-            JobCandidate candidate = candidateMap.get(jobCode);
+            MbtiRecommendationCandidate candidate = candidateMap.get(jobCode);
             if (candidate == null) {
                 throw new IllegalStateException("jobCode is outside candidates");
             }
@@ -453,7 +225,7 @@ public class MbtiRecommendationService {
     private List<ResolvedRecommendation> fallbackRecommendations(
             MbtiResult mbtiResult,
             List<InterestKeywordMaster> selectedKeywords,
-            List<JobCandidate> candidates
+            List<MbtiRecommendationCandidate> candidates
     ) {
         if (candidates.size() < 5) {
             throw new BusinessException(ErrorCode.MBTI_JOB_CATALOG_EMPTY);
@@ -461,7 +233,7 @@ public class MbtiRecommendationService {
 
         List<ResolvedRecommendation> fallback = new ArrayList<>(5);
         for (int i = 0; i < 5; i++) {
-            JobCandidate candidate = candidates.get(i);
+            MbtiRecommendationCandidate candidate = candidates.get(i);
             fallback.add(new ResolvedRecommendation(
                     candidate.job(),
                     buildTemplateReason(candidate, mbtiResult.getMbtiType(), selectedKeywords)
@@ -504,7 +276,7 @@ public class MbtiRecommendationService {
     }
 
     private String normalizeReason(
-            JobCandidate candidate,
+            MbtiRecommendationCandidate candidate,
             String rawReason,
             String mbtiType,
             List<InterestKeywordMaster> selectedKeywords
@@ -518,7 +290,7 @@ public class MbtiRecommendationService {
     }
 
     private String buildTemplateReason(
-            JobCandidate candidate,
+            MbtiRecommendationCandidate candidate,
             String mbtiType,
             List<InterestKeywordMaster> selectedKeywords
     ) {
@@ -589,14 +361,6 @@ public class MbtiRecommendationService {
         return fallback;
     }
 
-    private String lower(String value) {
-        return value == null ? "" : value.toLowerCase();
-    }
-
-    private String nullSafe(String value) {
-        return value == null ? "" : value;
-    }
-
     private int charLength(String value) {
         return value.codePointCount(0, value.length());
     }
@@ -614,9 +378,6 @@ public class MbtiRecommendationService {
             count++;
         }
         return trimmed.substring(0, cut);
-    }
-
-    private record JobCandidate(JobCatalog job, int score, List<String> matchedKeywords) {
     }
 
     private record ResolvedRecommendation(JobCatalog job, String reason) {
