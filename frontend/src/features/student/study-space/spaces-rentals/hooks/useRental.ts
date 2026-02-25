@@ -11,6 +11,12 @@ import type {
 } from "../api/types";
 import toast from "react-hot-toast";
 
+type AccountMeResponse = {
+  data?: {
+    name?: string | null;
+  } | null;
+};
+
 function normalizeMe(res: any): AuthMeDto | null {
   const d = res?.data ?? res;
   if (!d || typeof d.accountId !== "number") return null;
@@ -21,6 +27,26 @@ function normalizeMe(res: any): AuthMeDto | null {
     accountType: String(d.accountType ?? ""),
     permissionCodes: Array.isArray(d.permissionCodes) ? d.permissionCodes : [],
   };
+}
+
+async function fetchProfileName(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/accounts/me", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+
+    const json = (await res.json()) as AccountMeResponse;
+    const name = json?.data?.name;
+    if (typeof name !== "string") return null;
+
+    const trimmed = name.trim();
+    return trimmed.length ? trimmed : null;
+  } catch {
+    return null;
+  }
 }
 
 /** raw 응답을 화면용 평탄 구조로 변환 */
@@ -54,6 +80,7 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
   const [me, setMe] = useState<AuthMeDto | null>(null);
   const [meLoading, setMeLoading] = useState(false);
   const [meError, setMeError] = useState("");
+  const [profileName, setProfileName] = useState("");
 
   const [data, setData] = useState<RentalDto[]>([]);
   const [meta, setMeta] = useState<PageMeta | null>(null);
@@ -114,13 +141,29 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
   }, [fetchMe]);
 
   useEffect(() => {
+    let active = true;
+    fetchProfileName().then((name) => {
+      if (!active || !name) return;
+      setProfileName(name);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (meLoading) return;
     fetchList();
   }, [fetchList, meLoading]);
 
-  const updateParams = (newParams: Partial<RentalListParams>) => {
-    setParams((prev) => ({ ...prev, ...newParams }));
-  };
+  const updateParams = useCallback((newParams: Partial<RentalListParams>) => {
+    setParams((prev) => {
+      const next = { ...prev, ...newParams };
+      const keys = Object.keys(next) as Array<keyof RentalListParams>;
+      const changed = keys.some((key) => prev[key] !== next[key]);
+      return changed ? next : prev;
+    });
+  }, []);
 
   const cancelRental = async (rentalId: number) => {
     try {
@@ -155,6 +198,7 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
     meLoading,
     meError,
     hasRentalRead,
+    profileName,
 
     data,
     meta,
