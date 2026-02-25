@@ -1,25 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import styles from "./ExtraGradeListMeSection.module.css";
-
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
-
 import { SemesterFilterDropdown } from "@/features/dropdowns/semesters/SemesterFilterDropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
-
+import { useI18n } from "@/i18n/useI18n";
 import { useStudentExtraGradeMeList } from "../../../hooks/useExtraCurricularGradeReports";
 import { ExtraCompletionTable } from "./ExtraCompletionTable";
+import styles from "./ExtraGradeListMeSection.module.css";
 
 export function ExtraGradeListMeSection() {
+  const t = useI18n("extraCurricular.adminGrades.detail.list");
   const { state, actions } = useStudentExtraGradeMeList();
 
   const { get } = useFilterQuery(["semesterId"]);
   const semesterId = get("semesterId");
-
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
-
   const [inputKeyword, setInputKeyword] = useState("");
 
   useEffect(() => {
@@ -42,7 +39,7 @@ export function ExtraGradeListMeSection() {
 
   return (
     <div className={styles.section}>
-      <Header title="비교과 수료 리스트" />
+      <Header title={t("title")} />
 
       <div className={styles.body}>
         <div className={styles.searchRow}>
@@ -53,12 +50,12 @@ export function ExtraGradeListMeSection() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="비교과명/코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
 
-        {state.error && <div className={styles.errorMessage}>{state.error}</div>}
+        {state.error && <div className={styles.errorMessage}>{t("loadError")}</div>}
 
         <ExtraCompletionTable items={state.items} loading={state.loading} />
 
@@ -82,4 +79,3 @@ function Header({ title }: { title: string }) {
     </div>
   );
 }
-

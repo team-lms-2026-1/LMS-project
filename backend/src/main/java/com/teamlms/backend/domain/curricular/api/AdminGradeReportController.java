@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,63 +28,60 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/admin/curricular/grade-reports")
 public class AdminGradeReportController {
 
-    private final StudentGradeReportQueryService studentGradeReportQueryService;
+        private final StudentGradeReportQueryService studentGradeReportQueryService;
 
-    // 교과성적 목록
-    @GetMapping
-    public ApiResponse<List<CurricularGradeListItem>> getCurricularGradeList(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) Long deptId,
-        @RequestParam(required = false) String keyword
-    ){
-        int safePage = Math.max(page, 1);
-        int safeSize = Math.min(Math.max(size, 1), 100);
+        // 교과성적 목록
+        @GetMapping
+        @PreAuthorize("hasAuthority('CURRICULAR_READ')")
+        public ApiResponse<List<CurricularGradeListItem>> getCurricularGradeList(
+                        @RequestParam(defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "20") int size,
+                        @RequestParam(required = false) Long deptId,
+                        @RequestParam(required = false) String keyword) {
+                int safePage = Math.max(page, 1);
+                int safeSize = Math.min(Math.max(size, 1), 100);
 
-        Pageable pageable = PageRequest.of(
-                safePage - 1,
-                safeSize,
-                Sort.by(Sort.Direction.ASC, "curricularCode")
-        );
+                Pageable pageable = PageRequest.of(
+                                safePage - 1,
+                                safeSize,
+                                Sort.by(Sort.Direction.ASC, "curricularCode"));
 
-        Page<CurricularGradeListItem> result =
-                studentGradeReportQueryService.curricularGradeList(deptId, keyword, pageable);
-        
-        return ApiResponse.of(
-                result.getContent(),
-                PageMeta.from(result)
-        );
-    }
-    
-    // 상세 상단 + 추이
-    @GetMapping("/{studentAccountId}")
-    public ApiResponse<StudentGradeDetailHeaderResponse> detail(
-            @PathVariable Long studentAccountId
-    ) {
-        return ApiResponse.ok(studentGradeReportQueryService.getDetailHeader(studentAccountId));
-    }
+                Page<CurricularGradeListItem> result = studentGradeReportQueryService.curricularGradeList(deptId,
+                                keyword, pageable);
 
-    // 과목 성적 리스트 (학기 필터 + 페이지)
-    @GetMapping("/{studentAccountId}/list")
-    public ApiResponse<List<StudentCourseGradeListItem>> curricular(
-            @PathVariable Long studentAccountId,
-            @RequestParam(required = false) Long semesterId,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword
-    ) {
-        int safePage = Math.max(page, 1);
-        int safeSize = Math.min(Math.max(size, 1), 100);
+                return ApiResponse.of(
+                                result.getContent(),
+                                PageMeta.from(result));
+        }
 
-        Pageable pageable = PageRequest.of(
-                safePage - 1,
-                safeSize,
-                Sort.by(Sort.Direction.DESC, "semesterId")
-        );
+        // 상세 상단 + 추이
+        @GetMapping("/{studentAccountId}")
+        @PreAuthorize("hasAuthority('CURRICULAR_READ')")
+        public ApiResponse<StudentGradeDetailHeaderResponse> detail(
+                        @PathVariable Long studentAccountId) {
+                return ApiResponse.ok(studentGradeReportQueryService.getDetailHeader(studentAccountId));
+        }
 
-        Page<StudentCourseGradeListItem> result =
-                studentGradeReportQueryService.listCurricular(studentAccountId, semesterId, pageable, keyword);
+        // 과목 성적 리스트 (학기 필터 + 페이지)
+        @GetMapping("/{studentAccountId}/list")
+        @PreAuthorize("hasAuthority('CURRICULAR_READ')")
+        public ApiResponse<List<StudentCourseGradeListItem>> curricular(
+                        @PathVariable Long studentAccountId,
+                        @RequestParam(required = false) Long semesterId,
+                        @RequestParam(defaultValue = "1") int page,
+                        @RequestParam(defaultValue = "20") int size,
+                        @RequestParam(required = false) String keyword) {
+                int safePage = Math.max(page, 1);
+                int safeSize = Math.min(Math.max(size, 1), 100);
 
-        return ApiResponse.of(result.getContent(), PageMeta.from(result));
-    }
+                Pageable pageable = PageRequest.of(
+                                safePage - 1,
+                                safeSize,
+                                Sort.by(Sort.Direction.DESC, "semesterId"));
+
+                Page<StudentCourseGradeListItem> result = studentGradeReportQueryService
+                                .listCurricular(studentAccountId, semesterId, pageable, keyword);
+
+                return ApiResponse.of(result.getContent(), PageMeta.from(result));
+        }
 }

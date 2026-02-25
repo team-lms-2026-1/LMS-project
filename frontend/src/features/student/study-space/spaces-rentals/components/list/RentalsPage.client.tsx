@@ -6,6 +6,7 @@ import RentalsTable from "./RentalsTable";
 import { Button } from "@/components/button";
 import { useRental } from "../../hooks/useRental";
 import type { RentalDto } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 // 공용 pagination (SpacesPageClient와 동일하게 사용)
 import { PaginationSimple, useListQuery } from "@/components/pagination";
@@ -22,6 +23,7 @@ type CancelModalState = {
 };
 
 export default function RentalsPageClient() {
+  const t = useI18n("studySpace.student.rentals.list");
   // URL query와 연동되는 공용 pagination
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
 
@@ -30,6 +32,7 @@ export default function RentalsPageClient() {
     meLoading,
     meError,
     hasRentalRead,
+    profileName,
 
     data,
     meta,
@@ -58,16 +61,16 @@ export default function RentalsPageClient() {
   }, [page, size, updateParams]);
 
   const title = useMemo(() => {
-    const id = me?.loginId ? `(${me.loginId})` : "";
-    return `내 예약 목록 ${id}`;
-  }, [me?.loginId]);
+    const label = profileName || me?.loginId || "";
+    return label ? t("titleWithProfile", { name: label }) : t("title");
+  }, [me?.loginId, profileName, t]);
 
   const openRejectModal = async (r: RentalDto) => {
     const reason = await fetchRejectionReason(r);
     setRejectModal({
       open: true,
       rentalId: r.rentalId,
-      reason: reason || "반려 사유가 없습니다.",
+      reason: reason || t("rejectModal.noReason"),
     });
   };
 
@@ -90,7 +93,7 @@ export default function RentalsPageClient() {
   };
 
   if (meLoading) {
-    return <div className={styles.page}>내 정보 확인 중...</div>;
+    return <div className={styles.page}>{t("loading.me")}</div>;
   }
 
   if (meError) {
@@ -98,7 +101,7 @@ export default function RentalsPageClient() {
       <div className={styles.page}>
         <div className={styles.errorBox}>{meError}</div>
         <Button variant="secondary" onClick={refresh}>
-          다시 시도
+          {t("buttons.retry")}
         </Button>
       </div>
     );
@@ -107,7 +110,7 @@ export default function RentalsPageClient() {
   if (!hasRentalRead) {
     return (
       <div className={styles.page}>
-        <div className={styles.errorBox}>예약 조회 권한이 없습니다. (RENTAL_READ)</div>
+        <div className={styles.errorBox}>{t("errors.noPermission")}</div>
       </div>
     );
   }
@@ -121,11 +124,6 @@ export default function RentalsPageClient() {
           <h1 className={styles.title}>{title}</h1>
         </div>
 
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={refresh}>
-            새로고침
-          </Button>
-        </div>
       </div>
 
       {error && <div className={styles.errorBox}>{error}</div>}
@@ -149,9 +147,9 @@ export default function RentalsPageClient() {
         <div className={styles.modalOverlay} onMouseDown={closeRejectModal}>
           <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <div className={styles.modalTop}>
-              <div className={styles.modalTitle}>반려 사유</div>
-              <button className={styles.closeBtn} onClick={closeRejectModal} aria-label="close">
-                횞
+              <div className={styles.modalTitle}>{t("rejectModal.title")}</div>
+              <button className={styles.closeBtn} onClick={closeRejectModal} aria-label={t("rejectModal.closeAriaLabel")}>
+                ×
               </button>
             </div>
 
@@ -161,7 +159,7 @@ export default function RentalsPageClient() {
 
             <div className={styles.modalBottom}>
               <Button variant="primary" onClick={closeRejectModal}>
-                확인
+                {t("rejectModal.buttons.confirm")}
               </Button>
             </div>
           </div>
@@ -172,25 +170,25 @@ export default function RentalsPageClient() {
         <div className={styles.modalOverlay} onMouseDown={closeCancelModal}>
           <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <div className={styles.modalTop}>
-              <div className={styles.modalTitle}>예약 취소</div>
-              <button className={styles.closeBtn} onClick={closeCancelModal} aria-label="close">
-                횞
+              <div className={styles.modalTitle}>{t("cancelModal.title")}</div>
+              <button className={styles.closeBtn} onClick={closeCancelModal} aria-label={t("cancelModal.closeAriaLabel")}>
+                ×
               </button>
             </div>
 
             <div className={styles.modalBody}>
               <div className={styles.confirmBox}>
-                <p className={styles.confirmMain}>예약을 취소할까요?</p>
-                <p className={styles.confirmSub}>취소 후에는 복구할 수 없습니다.</p>
+                <p className={styles.confirmMain}>{t("cancelModal.question")}</p>
+                <p className={styles.confirmSub}>{t("cancelModal.warning")}</p>
               </div>
             </div>
 
             <div className={styles.modalBottom}>
               <Button variant="secondary" onClick={closeCancelModal}>
-                닫기
+                {t("cancelModal.buttons.close")}
               </Button>
               <Button variant="danger" onClick={confirmCancel}>
-                취소하기
+                {t("cancelModal.buttons.confirm")}
               </Button>
             </div>
           </div>

@@ -14,9 +14,11 @@ import com.teamlms.backend.domain.mbti.service.MbtiI18nService;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.i18n.LocaleUtil;
 import com.teamlms.backend.global.security.principal.AuthUser;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -35,6 +37,7 @@ public class MbtiController {
      * Accept-Language 헤더 또는 ?locale=en 쿼리 파라미터로 언어 지정
      */
     @GetMapping("/questions")
+    @PreAuthorize("hasAuthority('MBTI_READ')")
     public ApiResponse<List<MbtiQuestionResponse>> getQuestions(
             @RequestParam(value = "locale", required = false) String locale) {
         String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
@@ -43,6 +46,7 @@ public class MbtiController {
     }
 
     @PostMapping("/submit")
+    @PreAuthorize("hasAuthority('MBTI_MANAGE')")
     public ApiResponse<MbtiResultResponse> submitMbti(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody MbtiSubmitRequest request) {
@@ -51,6 +55,7 @@ public class MbtiController {
     }
 
     @GetMapping("/result")
+    @PreAuthorize("hasAuthority('MBTI_READ')")
     public ApiResponse<MbtiResultResponse> getLatestResult(@AuthenticationPrincipal AuthUser authUser) {
         return ApiResponse.ok(queryService.getLatestResult(authUser.getAccountId()));
     }
@@ -60,6 +65,7 @@ public class MbtiController {
      * Accept-Language 헤더 또는 ?locale=en 쿼리 파라미터로 언어 지정
      */
     @GetMapping("/interest-keywords")
+    @PreAuthorize("hasAuthority('MBTI_READ')")
     public ApiResponse<List<InterestKeywordResponse>> getInterestKeywords(
             @RequestParam(value = "locale", required = false) String locale) {
         String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
@@ -70,18 +76,23 @@ public class MbtiController {
     }
 
     @PostMapping("/recommendations")
+    @PreAuthorize("hasAuthority('MBTI_MANAGE')")
     public ApiResponse<MbtiJobRecommendationResponse> createRecommendation(
             @AuthenticationPrincipal AuthUser authUser,
-            @RequestBody MbtiJobRecommendationRequest request
+            @RequestBody MbtiJobRecommendationRequest request,
+            @RequestParam(value = "locale", required = false) String locale
     ) {
-        return ApiResponse.ok(recommendationService.generateRecommendation(authUser.getAccountId(), request.keywordIds()));
+        String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
+        return ApiResponse.ok(recommendationService.generateRecommendation(authUser.getAccountId(), request.keywordIds(), currentLocale));
     }
 
     @GetMapping("/recommendations/latest")
+    @PreAuthorize("hasAuthority('MBTI_READ')")
     public ApiResponse<MbtiJobRecommendationResponse> getLatestRecommendation(
-            @AuthenticationPrincipal AuthUser authUser
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(value = "locale", required = false) String locale
     ) {
-        return ApiResponse.ok(recommendationService.getLatestRecommendation(authUser.getAccountId()));
+        String currentLocale = locale != null ? locale : LocaleUtil.getCurrentLocale();
+        return ApiResponse.ok(recommendationService.getLatestRecommendation(authUser.getAccountId(), currentLocale));
     }
 }
-

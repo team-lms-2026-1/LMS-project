@@ -1,9 +1,11 @@
 package com.teamlms.backend.domain.extracurricular.api;
+
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,53 +39,49 @@ public class StudentExtraCurricularSessionController {
 
     // 세션 목록 (학생)
     @GetMapping("/{extraOfferingId}/sessions")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<StudentExtraCurricularSessionListItem>> getSessionList(
-        @AuthenticationPrincipal AuthUser authUser,
-        @PathVariable Long extraOfferingId,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) String keyword
-    ) {
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long extraOfferingId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
         Pageable pageable = PageRequest.of(safePage - 1, safeSize);
 
-        Page<StudentExtraCurricularSessionListItem> result =
-            queryService.list(
+        Page<StudentExtraCurricularSessionListItem> result = queryService.list(
                 authUser.getAccountId(), // 너희 AuthUser getter에 맞춰 수정
                 extraOfferingId,
                 keyword,
-                pageable
-            );
+                pageable);
 
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
-    
+
     @GetMapping("/{extraOfferingId}/sessions/{sessionId}")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<ExtraCurricularSessionDetailResponse> getDetail(
-        @AuthenticationPrincipal AuthUser authUser,
-        @PathVariable Long extraOfferingId,
-        @PathVariable Long sessionId
-    ) {
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long extraOfferingId,
+            @PathVariable Long sessionId) {
         return ApiResponse.ok(
-            queryService.getDetail(authUser.getAccountId(), extraOfferingId, sessionId)
-        );
+                queryService.getDetail(authUser.getAccountId(), extraOfferingId, sessionId));
     }
 
     @PostMapping("/{extraOfferingId}/sessions/{sessionId}/attendance")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_CLASS')")
     public ApiResponse<SuccessResponse> markAttendance(
-        @AuthenticationPrincipal AuthUser authUser,
-        @PathVariable Long extraOfferingId,
-        @PathVariable Long sessionId,
-        @Valid @RequestBody StudentExtraSessionAttendanceRequest req
-    ) {
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable Long extraOfferingId,
+            @PathVariable Long sessionId,
+            @Valid @RequestBody StudentExtraSessionAttendanceRequest req) {
         commandService.markAttended(
-            authUser.getAccountId(), // 너희 AuthUser getter에 맞춰 수정
-            extraOfferingId,
-            sessionId,
-            req
-        );
+                authUser.getAccountId(), // 너희 AuthUser getter에 맞춰 수정
+                extraOfferingId,
+                sessionId,
+                req);
         return ApiResponse.ok(new SuccessResponse());
     }
 }

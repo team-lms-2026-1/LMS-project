@@ -1,25 +1,23 @@
-﻿"use client"
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
-import styles from "./StudentExtraCurricularOfferingPage.module.css"
 import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
+import { useI18n } from "@/i18n/useI18n";
 import { useRouter } from "next/navigation";
 import { useExtraCurricularOfferingList } from "../../hooks/useExtraCurricularOfferingList";
 import { StudentExtraCurricularOfferingsTable } from "./StudentExtraCurricularOfferingTable";
+import styles from "./StudentExtraCurricularOfferingPage.module.css";
 
 export default function StudentExtraCurricularOfferingPageClient() {
   const router = useRouter();
   const { state, actions } = useExtraCurricularOfferingList();
+  const t = useI18n("extraCurricular.studentOfferings");
 
-  // pagination + search
-
-  const { get } = useFilterQuery(["semesterId"])
-  const semesterId = get("semesterId")
-
+  const { get } = useFilterQuery(["semesterId"]);
+  const semesterId = get("semesterId");
   const { page, size, setPage } = useListQuery({ defaultPage: 1, defaultSize: 10 });
-
   const [inputKeyword, setInputKeyword] = useState("");
 
   useEffect(() => {
@@ -37,13 +35,13 @@ export default function StudentExtraCurricularOfferingPageClient() {
   const handleSearch = useCallback(() => {
     setPage(1);
     actions.goPage(1);
-    actions.setKeyword(inputKeyword)
+    actions.setKeyword(inputKeyword);
   }, [inputKeyword, setPage, actions]);
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>비교과 신청</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>
@@ -51,16 +49,16 @@ export default function StudentExtraCurricularOfferingPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="비교과운영명/코드 검색"
+              placeholder={t("searchPlaceholder")}
             />
           </div>
         </div>
+
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
         <StudentExtraCurricularOfferingsTable
           items={state.items}
           loading={state.loading}
-        //   onEditClick={(id) => setEditId(id)}
           onRowClick={(row) => router.push(`/student/extra-curricular/offerings/${row.extraOfferingId}`)}
         />
 
@@ -72,17 +70,7 @@ export default function StudentExtraCurricularOfferingPageClient() {
             disabled={state.loading}
           />
         </div>
-        {/* <CurricularEditModal
-          open={Boolean(editId)}
-          curricularId = {editId ?? undefined}
-          onClose={() => setEditId(null)}
-          onUpdated={ async () => {
-            await actions.reload();
-            setEditId(null)
-          }}
-        /> */}
       </div>
-
     </div>
-  )
+  );
 }

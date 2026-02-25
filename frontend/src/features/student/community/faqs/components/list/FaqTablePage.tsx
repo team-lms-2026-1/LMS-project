@@ -63,6 +63,7 @@ export function FaqTable({ items, loading, onEditClick: _onEditClick }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.faqId}
       emptyText={t("emptyText")}
+      rowClassName={styles.rowTall}
       onRowClick={(r) => goDetail(r.faqId)}
     />
   );

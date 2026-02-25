@@ -1,39 +1,39 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useI18n } from "@/i18n/useI18n";
 import { fetchStudentMypage } from "../api/mypageApi";
-import { StudentMypageResponse } from "../api/types";
+import type { StudentMypageResponse } from "../api/types";
 
-// 상세 기본
 export function useStudentMypage(enabled: boolean = true, initialData: StudentMypageResponse | null = null) {
-    const [data, setData] = useState<StudentMypageResponse | null>(initialData);
+  const t = useI18n("mypage.student.hook");
+  const [data, setData] = useState<StudentMypageResponse | null>(initialData);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+  const load = async () => {
+    setLoading(true);
+    setError(null);
 
-    const load = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await fetchStudentMypage();
-            if (res && res.data) {
-                setData(res.data);
-            } else {
-                setError("데이터를 불러올 수 없습니다.");
-            }
-        } catch (e) {
-            console.error("[useStudentMypage]", e);
-            setError("조회 실패");
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      const res = await fetchStudentMypage();
+      if (res?.data) {
+        setData(res.data);
+      } else {
+        setError(t("errors.emptyData"));
+      }
+    } catch (e) {
+      console.error("[useStudentMypage]", e);
+      setError(t("errors.loadFailed"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        if (enabled) {
-            load();
-        }
-    }, [enabled]);
+  useEffect(() => {
+    if (!enabled) return;
+    load();
+  }, [enabled]);
 
-    return { data, loading, error, load };
+  return { data, loading, error, load };
 }

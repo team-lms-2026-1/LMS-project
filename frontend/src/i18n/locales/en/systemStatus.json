@@ -1,0 +1,79 @@
+{
+  "accountLogs": {
+    "common": {
+      "accountType": {
+        "ADMIN": "Admin",
+        "PROFESSOR": "Professor",
+        "STUDENT": "Student",
+        "STAFF": "Staff"
+      },
+      "loginStatus": {
+        "LOGGED_IN": "Logged In",
+        "LOGGED_OUT": "Logged Out"
+      }
+    },
+    "list": {
+      "title": "Account Logs",
+      "searchPlaceholder": "Search by login ID or name",
+      "kpi": {
+        "totalAccounts": "Total Accounts",
+        "onlineAccounts": "Currently Logged In"
+      },
+      "table": {
+        "loginId": "Login ID",
+        "accountType": "Account Type",
+        "name": "Name",
+        "lastAccessAt": "Last Access",
+        "loginState": "Login Status"
+      },
+      "emptyText": "No results found.",
+      "messages": {
+        "loadFailed": "Failed to load log list."
+      }
+    },
+    "detail": {
+      "loading": "Loading...",
+      "notFound": "Account does not exist. (ID: {accountId})",
+      "title": "Account Log Detail",
+      "summary": {
+        "accountType": "Account Type:",
+        "name": "Name:",
+        "loginId": "ID:",
+        "departmentName": "Department:"
+      },
+      "searchPlaceholder": "Enter search keyword",
+      "table": {
+        "logId": "No.",
+        "accessedAt": "Date/Time",
+        "accessUrl": "Access URL",
+        "ip": "IP",
+        "os": "Environment",
+        "emptyText": "No logs."
+      },
+      "buttons": {
+        "backToList": "Back to list",
+        "excelDownload": "Download Excel"
+      },
+      "messages": {
+        "loadFailed": "Failed to load detailed logs.",
+        "downloadFailed": "Download failed."
+      }
+    },
+    "privacyModal": {
+      "title": "Personal Data Usage Notice",
+      "desc": {
+        "line1": "This Excel file contains students' personal data.",
+        "line2": "This information may be used only for academic administration and internal operations. Any use beyond purpose, third-party sharing, unauthorized storage, or external leakage is prohibited.",
+        "line3": "In accordance with relevant laws, access and download history for personal data is recorded and managed as administrator logs. Violations may result in legal liability.",
+        "line4": "I have fully understood the above and agree to the use of personal data."
+      },
+      "agreeLabel": "I agree to the above use of personal data.",
+      "reasonTitle": "Download Reason",
+      "reasonPlaceholder": "Enter the reason for download.",
+      "buttons": {
+        "cancel": "Cancel",
+        "download": "Download"
+      }
+    }
+  }
+}

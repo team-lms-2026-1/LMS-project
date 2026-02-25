@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./RejectedModal.module.css";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function ApproveModal({ open, onClose, onConfirm, loading = false }: Props) {
+  const t = useI18n("studySpace.admin.rentals.approveModal");
   if (!open) return null;
 
   const handleClose = () => {
@@ -31,22 +33,22 @@ export default function ApproveModal({ open, onClose, onConfirm, loading = false
         aria-modal="true"
       >
         <div className={styles.header}>
-          <h2 className={styles.title}>승인 확인</h2>
-          <button className={styles.closeBtn} onClick={handleClose} aria-label="close">
+          <h2 className={styles.title}>{t("title")}</h2>
+          <button className={styles.closeBtn} onClick={handleClose} aria-label={t("closeAriaLabel")}>
             &times;
           </button>
         </div>
 
         <div className={styles.body}>
-          <div className={styles.label}>해당 신청을 승인하시겠습니까?</div>
+          <div className={styles.label}>{t("description")}</div>
         </div>
 
         <div className={styles.footer}>
           <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
+            {t("buttons.cancel")}
           </Button>
           <Button variant="primary" onClick={handleConfirm} disabled={loading}>
-            {loading ? "처리 중.." : "승인"}
+            {loading ? t("buttons.processing") : t("buttons.confirm")}
           </Button>
         </div>
       </div>

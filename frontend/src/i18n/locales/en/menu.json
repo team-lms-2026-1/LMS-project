@@ -1,0 +1,183 @@
+{
+  "common": {
+    "sidebarTitle": "Detailed Menu",
+    "logoAlt": {
+      "student": "Go to student main page",
+      "admin": "Go to admin main page",
+      "professor": "Go to professor main page"
+    }
+  },
+  "student": {
+    "sections": {
+      "community": {
+        "title": "Community",
+        "items": {
+          "notices": "Notices",
+          "resources": "Resources",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "course": {
+        "title": "Curricular",
+        "items": {
+          "offerings": "Course Enrollment",
+          "enrollments": "Enrollment Status",
+          "currentEnrollments": "Current Courses",
+          "gradeReports": "Course Grades"
+        }
+      },
+      "extra": {
+        "title": "Extra-curricular",
+        "items": {
+          "offerings": "Program Enrollment",
+          "enrollments": "Enrollment Status",
+          "currentEnrollments": "Current Programs",
+          "gradeReports": "Program Grades"
+        }
+      },
+      "mentoring": {
+        "title": "Mentoring",
+        "items": {
+          "apply": "Mentee Application",
+          "chat": "Mentoring Chat"
+        }
+      },
+      "competency": {
+        "title": "Competency Diagnosis",
+        "items": {
+          "introduce": "What is 6Cs?",
+          "diagnosis": "Diagnosis List",
+          "result": "Result"
+        }
+      },
+      "survey": {
+        "title": "Survey",
+        "items": {
+          "list": "Survey List"
+        }
+      },
+      "space": {
+        "title": "Study Space Rental",
+        "items": {
+          "spaces": "Browse and Apply Spaces",
+          "rentals": "Application History"
+        }
+      },
+      "aiAdvisor": {
+        "title": "AI Advisor",
+        "items": {
+          "mbti": "Career Matching (MBTI)"
+        }
+      }
+    }
+  },
+  "professor": {
+    "sections": {
+      "community": {
+        "title": "Community",
+        "items": {
+          "notices": "Notices",
+          "resources": "Resources",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "competency": {
+        "title": "Competency",
+        "items": {
+          "dashboard": "Competency Dashboard"
+        }
+      },
+      "course": {
+        "title": "Course Management",
+        "items": {
+          "offerings": "My Courses",
+          "syllabus": "Syllabus",
+          "grades": "Grade Entry",
+          "attendance": "Attendance"
+        }
+      },
+      "mentoring": {
+        "title": "Mentoring",
+        "items": {
+          "apply": "Mentor Request",
+          "chat": "Mentoring Chat"
+        }
+      }
+    }
+  },
+  "admin": {
+    "sections": {
+      "community": {
+        "title": "Community",
+        "items": {
+          "notices": "Notices",
+          "resources": "Resources",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "authority": {
+        "title": "Authority Management",
+        "items": {
+          "departments": "Department Management",
+          "accounts": "Account Management",
+          "semesters": "Semester Management"
+        }
+      },
+      "systemStatus": {
+        "title": "System Status",
+        "items": {
+          "accountLogs": "Account Logs"
+        }
+      },
+      "survey": {
+        "title": "Survey Management",
+        "items": {
+          "surveys": "Survey List",
+          "statistics": "Survey Statistics"
+        }
+      },
+      "competency": {
+        "title": "Competency Management",
+        "items": {
+          "intro": "What is 6Cs?",
+          "students": "Student Competency Activity",
+          "diagnosis": "Competency Diagnosis Management"
+        }
+      },
+      "course": {
+        "title": "Curricular Management",
+        "items": {
+          "curriculars": "Curricular Management",
+          "offerings": "Course Offering Management",
+          "grades": "Course Grade Management"
+        }
+      },
+      "extra": {
+        "title": "Extra-curricular Management",
+        "items": {
+          "programs": "Program Management",
+          "offerings": "Program Offering Management",
+          "grades": "Program Grade Management"
+        }
+      },
+      "mentoring": {
+        "title": "Mentoring",
+        "items": {
+          "recruitments": "Recruitment Posting",
+          "applications": "Application Approval",
+          "matching": "Mentor-Mentee Matching"
+        }
+      },
+      "space": {
+        "title": "Study Space Rental",
+        "items": {
+          "spaces": "Study Space List",
+          "rentals": "Study Space Application List"
+        }
+      }
+    }
+  }
+}

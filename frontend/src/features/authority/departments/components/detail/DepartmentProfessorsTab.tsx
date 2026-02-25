@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDepartmentProfessors } from "../../hooks/useDepartmentDetail";
 import { Table } from "@/components/table/Table";
@@ -9,6 +10,7 @@ import { TableColumn } from "@/components/table/types";
 import { DepartmentProfessorListItem, DepartmentDetailSummary } from "../../api/types";
 import styles from "../../styles/DepartmentDetail.module.css";
 import { Button } from "@/components/button/Button";
+import { ConfirmModal } from "@/components/modal";
 import { updateHeadProfessor } from "../../api/departmentsApi";
 import toast from "react-hot-toast";
 
@@ -22,16 +24,22 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
     const router = useRouter();
     const { items, meta, page, keyword, loading, setPage, setKeyword, reload } = useDepartmentProfessors(deptId);
 
-    const handleAssignHeadProfessor = async (prof: DepartmentProfessorListItem) => {
-        if (!confirm(`'${prof.name}' 교수를 학과장으로 지정하시겠습니까?`)) return;
+    const [confirmTarget, setConfirmTarget] = useState<DepartmentProfessorListItem | null>(null);
+    const [assigning, setAssigning] = useState(false);
 
+    const handleAssignConfirm = async () => {
+        if (!confirmTarget) return;
         try {
-            await updateHeadProfessor(deptId, prof.accountId);
+            setAssigning(true);
+            await updateHeadProfessor(deptId, confirmTarget.accountId);
             toast.success("학과장이 지정되었습니다.");
-            if (reloadSummary) reloadSummary(); // 상단 정보 갱신
-            reload(); // 목록 갱신 (필요하다면)
+            if (reloadSummary) reloadSummary();
+            reload();
         } catch (e: any) {
             toast.error(e.message || "학과장 지정 실패");
+        } finally {
+            setAssigning(false);
+            setConfirmTarget(null);
         }
     };
 
@@ -57,7 +65,7 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
                     <div onClick={(e) => e.stopPropagation()}>
                         <Button
                             variant="secondary"
-                            onClick={() => handleAssignHeadProfessor(row)}
+                            onClick={() => setConfirmTarget(row)}
                             className="px-2 py-1 text-xs h-8"
                         >
                             학과장 지정
@@ -96,6 +104,15 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
                     <div className={styles.footerRight} />
                 </div>
             </div>
+
+            <ConfirmModal
+                open={confirmTarget !== null}
+                title="학과장 지정"
+                message={confirmTarget ? `'${confirmTarget.name}' 교수를 학과장으로 지정하시겠습니까?` : ""}
+                onConfirm={handleAssignConfirm}
+                onCancel={() => setConfirmTarget(null)}
+                type="primary"
+            />
         </div>
     );
 }

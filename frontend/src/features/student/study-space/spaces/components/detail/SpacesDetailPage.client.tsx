@@ -8,6 +8,7 @@ import { spacesApi } from "../../api/spacesApi";
 import type { SpaceDetailDto } from "../../api/types";
 import { Button } from "@/components/button";
 import SpacesModal from "../modal/SpacesModal.client";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   spaceId: number;
@@ -15,6 +16,7 @@ type Props = {
 
 export default function SpacesDetailPageClient({ spaceId }: Props) {
   const router = useRouter();
+  const t = useI18n("studySpace.student.spaces.detail");
 
   const [data, setData] = useState<SpaceDetailDto | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,7 +38,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
         setData(res.data);
       } catch (e: any) {
         if (!alive) return;
-        setError(e?.message || "상세 조회 중 오류가 발생했습니다.");
+        setError(e?.message || t("errors.loadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -45,7 +47,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
     return () => {
       alive = false;
     };
-  }, [spaceId]);
+  }, [spaceId, t]);
 
   const mainImageUrl = useMemo(() => {
     const imgs = data?.images ?? [];
@@ -71,18 +73,18 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
       <div className={styles.headerRow}>
         <div className={styles.leftGroup}>
           <button type="button" className={styles.backTextBtn} onClick={onGoList}>
-            학습공간
+            {t("breadcrumb.root")}
           </button>
-          <div className={styles.breadcrumb}>&gt; 학습공간 상세페이지</div>
+          <div className={styles.breadcrumb}>&gt; {t("breadcrumb.current")}</div>
         </div>
 
         <Button variant="secondary" onClick={onGoList}>
-          목록으로
+          {t("buttons.list")}
         </Button>
       </div>
 
       <div className={styles.card}>
-        {loading && <div className={styles.infoBox}>로딩 중...</div>}
+        {loading && <div className={styles.infoBox}>{t("loading")}</div>}
         {error && <div className={styles.errorBox}>{error}</div>}
 
         {data && (
@@ -114,7 +116,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
 
               <div className={styles.manageRow}>
                 <Button variant="secondary" onClick={onClickReserve}>
-                  그룹 스터디실 예약하기
+                  {t("buttons.reserveRooms")}
                 </Button>
               </div>
 

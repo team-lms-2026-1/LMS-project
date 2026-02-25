@@ -10,6 +10,7 @@ import { Button } from "@/components/button";
 import SpacesRoomModal from "../modal/SpacesRoomModal.client";
 import SpacesDeleteModal from "../modal/SpacesDeleteModal.client";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   spaceId: number;
@@ -19,6 +20,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
   const router = useRouter();
   const sp = useSearchParams();
   const toastOnceRef = useRef<string | null>(null);
+  const t = useI18n("studySpace.admin.spaces.detail");
 
   const [data, setData] = useState<SpaceDetailDto | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,19 +31,19 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const t = sp.get("toast");
-    if (!t) return;
-    if (toastOnceRef.current === t) return;
-    toastOnceRef.current = t;
+    const toastType = sp.get("toast");
+    if (!toastType) return;
+    if (toastOnceRef.current === toastType) return;
+    toastOnceRef.current = toastType;
 
-    if (t === "created") toast.success("학습공간이 등록되었습니다.", { id: "space-toast-created" });
-    else if (t === "updated") toast.success("학습공간이 수정되었습니다.", { id: "space-toast-updated" });
+    if (toastType === "created") toast.success(t("toasts.created"), { id: "space-toast-created" });
+    else if (toastType === "updated") toast.success(t("toasts.updated"), { id: "space-toast-updated" });
 
     const next = new URLSearchParams(sp.toString());
     next.delete("toast");
     const qs = next.toString();
     router.replace(qs ? `/admin/study-space/spaces/${spaceId}?${qs}` : `/admin/study-space/spaces/${spaceId}`);
-  }, [sp, router, spaceId]);
+  }, [sp, router, spaceId, t]);
 
   useEffect(() => {
     let alive = true;
@@ -57,7 +59,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
         setData(res.data);
       } catch (e: any) {
         if (!alive) return;
-        setError(e?.message || "상세 조회 중 오류가 발생했습니다.");
+        setError(e?.message || t("errors.loadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -66,7 +68,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
     return () => {
       alive = false;
     };
-  }, [spaceId]);
+  }, [spaceId, t]);
 
   const mainImageUrl = useMemo(() => {
     const imgs = data?.images ?? [];
@@ -104,7 +106,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
       router.push("/admin/study-space/spaces?toast=deleted");
       router.refresh();
     } catch (e: any) {
-      toast.error(e?.message || "삭제 중 오류가 발생했습니다.");
+      toast.error(e?.message || t("errors.deleteFailed"));
     } finally {
       setDeleting(false);
       setDeleteOpen(false);
@@ -116,18 +118,18 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
       <div className={styles.headerRow}>
         <div className={styles.leftGroup}>
           <button type="button" className={styles.backTextBtn} onClick={onGoList}>
-            학습공간 관리
+            {t("breadcrumb.root")}
           </button>
-          <div className={styles.breadcrumb}>&gt; 학습공간 상세페이지</div>
+          <div className={styles.breadcrumb}>&gt; {t("breadcrumb.current")}</div>
         </div>
 
         <Button variant="secondary" onClick={onGoList}>
-          목록으로
+          {t("buttons.list")}
         </Button>
       </div>
 
       <div className={styles.card}>
-        {loading && <div className={styles.infoBox}>로딩 중...</div>}
+        {loading && <div className={styles.infoBox}>{t("loading")}</div>}
         {error && <div className={styles.errorBox}>{error}</div>}
 
         {data && (
@@ -159,7 +161,7 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
 
               <div className={styles.manageRow}>
                 <Button variant="secondary" onClick={onClickManage}>
-                  그룹 스터디실 관리
+                  {t("buttons.manageRooms")}
                 </Button>
               </div>
 
@@ -172,11 +174,11 @@ export default function SpacesDetailPageClient({ spaceId }: Props) {
       {/* 하단 버튼 */}
       <div className={styles.bottomActions}>
         <Button variant="secondary" onClick={onClickEdit}>
-          수정
+          {t("buttons.edit")}
         </Button>
 
         <Button className={styles.dangerBtn} variant="primary" onClick={onClickDelete}>
-          삭제
+          {t("buttons.delete")}
         </Button>
       </div>
 

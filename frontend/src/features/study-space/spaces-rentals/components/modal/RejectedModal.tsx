@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "./RejectedModal.module.css";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     open: boolean;
@@ -10,13 +11,14 @@ type Props = {
 };
 
 export default function RejectedModal({ open, onClose, onConfirm }: Props) {
+    const t = useI18n("studySpace.admin.rentals.rejectModal");
     const [reason, setReason] = useState("");
 
     if (!open) return null;
 
     const handleSubmit = () => {
         if (!reason.trim()) {
-            toast.error("반려 사유를 입력해주세요.");
+            toast.error(t("errors.reasonRequired"));
             return;
         }
         onConfirm(reason);
@@ -38,15 +40,15 @@ export default function RejectedModal({ open, onClose, onConfirm }: Props) {
                 aria-modal="true"
             >
                 <div className={styles.header}>
-                    <h2 className={styles.title}>반려 사유 입력</h2>
-                    <button className={styles.closeBtn} onClick={handleClose}>×</button>
+                    <h2 className={styles.title}>{t("title")}</h2>
+                    <button className={styles.closeBtn} onClick={handleClose} aria-label={t("closeAriaLabel")}>×</button>
                 </div>
 
                 <div className={styles.body}>
-                    <label className={styles.label}>사유를 입력하세요</label>
+                    <label className={styles.label}>{t("label")}</label>
                     <textarea
                         className={styles.textarea}
-                        placeholder="예: 신청하신 시간에 예약이 꽉 찼습니다."
+                        placeholder={t("placeholder")}
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                     />
@@ -54,10 +56,10 @@ export default function RejectedModal({ open, onClose, onConfirm }: Props) {
 
                 <div className={styles.footer}>
                     <Button variant="secondary" onClick={handleClose}>
-                        취소
+                        {t("buttons.cancel")}
                     </Button>
                     <Button variant="danger" onClick={handleSubmit}>
-                        반려
+                        {t("buttons.confirm")}
                     </Button>
                 </div>
             </div>

@@ -114,42 +114,26 @@
   background: #fff;
 }
 
+.periodRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dateInput {
+  min-width: 140px;
+}
+
+.tilde {
+  color: #94a3b8;
+}
+
 .editor {
   border: 1px solid #d1d5db;
   border-radius: 4px;
   overflow: hidden;
   background: #fff;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-bottom: 1px solid #d1d5db;
-  background: #fff;
-  flex-wrap: wrap;
-}
-
-.toolBtn {
-  height: 26px;
-  min-width: 26px;
-  padding: 0 6px;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  color: #111827;
-}
-
-.toolBtn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.toolBtn:hover:not(:disabled) {
-  background: #f3f4f6;
 }
 
 .editorArea {
@@ -181,7 +165,11 @@
   border-radius: 6px;
   background: #fff;
   font-size: 12px;
-  cursor: default;
+  cursor: pointer;
+}
+.tabActive:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .dropzone {
@@ -288,34 +276,3 @@
 .fileRemove { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; }
 .fileRemove:disabled { opacity:.5; cursor:not-allowed; }
 
-.dpWrap :global(.react-datepicker__close-icon) {
-  padding: 0 !important;
-  height: auto !important;
-  width: 16px !important;        
-  min-width: 0 !important;
-  min-height: 0 !important;
-  top: 50% !important;
-  right: 8px !important;
-  transform: translateY(0%) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.periodRow :global(.react-datepicker__close-icon::after) {
-  padding: 0 !important;          
-  box-sizing: border-box !important;
-  width: 14px!important;
-  height: 10px!important;
-  line-height: 12px !important;
-  font-size: 10px !important;     
-  background: #fff !important;    
-  color: #0f172a !important;      
-  border: 1px solid #0f172a !important;
-  border-radius: 9999px !important;
-  box-shadow: none !important;
-}
-
-.dpWrap :global(.react-datepicker__close-icon:hover::after) {
-  background: #f8fafc !important;
-}

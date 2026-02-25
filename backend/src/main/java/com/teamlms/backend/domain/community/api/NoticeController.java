@@ -38,7 +38,8 @@ public class NoticeController {
             @RequestParam(defaultValue = "1") int page,       // @PageableDefault 대신 사용
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @AuthenticationPrincipal AuthUser user
     ) {
         // 1. 페이지 및 사이즈 유효성 검사 (안전장치)
         int safePage = Math.max(page, 1);
@@ -49,10 +50,14 @@ public class NoticeController {
                 safePage - 1,
                 safeSize,
                 Sort.by(Sort.Direction.DESC, "createdAt")
+                        .and(Sort.by(Sort.Direction.DESC, "id"))
         );
 
         // 3. 서비스 호출 (이미 DTO로 반환하도록 설계됨)
-        Page<ExternalNoticeResponse> pageResult = noticeService.getNoticeList(pageable, categoryId, keyword);
+        boolean isStudent = user != null && "STUDENT".equalsIgnoreCase(user.getAccountType());
+        Page<ExternalNoticeResponse> pageResult = isStudent
+                ? noticeService.getStudentNoticeList(pageable, categoryId, keyword)
+                : noticeService.getNoticeList(pageable, categoryId, keyword);
         
         // 4. 공통 규격으로 응답
         return ApiResponse.of(
@@ -68,9 +73,13 @@ public class NoticeController {
     })
     @PreAuthorize("hasAuthority('NOTICE_READ') or hasAnyRole('STUDENT','PROFESSOR','ADMIN')")
     // ★ Map -> ExternalNoticeResponse 로 변경
-    public ApiResponse<ExternalNoticeResponse> getNoticeDetail(@PathVariable Long noticeId) {
+    public ApiResponse<ExternalNoticeResponse> getNoticeDetail(@PathVariable Long noticeId,
+                                                               @AuthenticationPrincipal AuthUser user) {
         // ★ Service가 DTO를 반환하므로 타입을 맞춰줌
-        ExternalNoticeResponse detail = noticeService.getNoticeDetail(noticeId);
+        boolean isStudent = user != null && "STUDENT".equalsIgnoreCase(user.getAccountType());
+        ExternalNoticeResponse detail = isStudent
+                ? noticeService.getStudentNoticeDetail(noticeId)
+                : noticeService.getNoticeDetail(noticeId);
         return ApiResponse.ok(detail);
     }
 

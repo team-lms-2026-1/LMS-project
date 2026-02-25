@@ -1,6 +1,7 @@
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./MbtiClient.module.css";
-import { InterestKeyword } from "../api/types";
+import type { InterestKeyword } from "../api/types";
 
 type MbtiKeywordStepProps = {
   keywords: InterestKeyword[];
@@ -19,11 +20,13 @@ export function MbtiKeywordStep({
   onToggleKeyword,
   onSubmit,
 }: MbtiKeywordStepProps) {
+  const t = useI18n("aiAdvisor.mbti.keywords");
+
   return (
     <div className={styles.container}>
       <div className={styles.heroCard}>
-        <h1 className={styles.pageTitle}>관심 키워드 선택</h1>
-        <p className={styles.description}>최소 {minKeywordCount}개 이상 선택해 주세요.</p>
+        <h1 className={styles.pageTitle}>{t("title")}</h1>
+        <p className={styles.description}>{t("description", { minCount: minKeywordCount })}</p>
       </div>
 
       <div className={styles.keywordGrid}>
@@ -50,10 +53,9 @@ export function MbtiKeywordStep({
           loading={submitting}
           disabled={selectedKeywordIds.length < minKeywordCount}
         >
-          추천 결과 보기
+          {t("submitButton")}
         </Button>
       </div>
     </div>
   );
 }
-

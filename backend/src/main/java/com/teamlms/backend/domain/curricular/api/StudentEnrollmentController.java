@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,31 +34,33 @@ public class StudentEnrollmentController {
     private final EnrollmentCommandService enrollmentCommandService;
     private final EnrollmentQueryService enrollmentQueryService;
 
+    // 수강 신청 버튼
     @PostMapping("/{offeringId}/enroll")
+    @PreAuthorize("hasAuthority('CURRICULAR_CLASS')")
     public ApiResponse<SuccessResponse> enroll(
             @PathVariable Long offeringId,
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
+            @AuthenticationPrincipal AuthUser authUser) {
         enrollmentCommandService.enroll(offeringId, authUser.getAccountId());
         return ApiResponse.ok(new SuccessResponse());
     }
 
+    // 수강 취소 버튼
     @PostMapping("/{offeringId}/cancel")
+    @PreAuthorize("hasAuthority('CURRICULAR_CLASS')")
     public ApiResponse<SuccessResponse> cancel(
             @PathVariable Long offeringId,
-            @AuthenticationPrincipal AuthUser authUser
-    ) {
+            @AuthenticationPrincipal AuthUser authUser) {
         enrollmentCommandService.cancel(offeringId, authUser.getAccountId());
         return ApiResponse.ok(new SuccessResponse());
     }
 
     // 신청현황
     @GetMapping("/enrollList")
+    @PreAuthorize("hasAuthority('CURRICULAR_READ')")
     public ApiResponse<List<EnrollListItem>> listEnrollments(
-        @AuthenticationPrincipal AuthUser authUser,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size
-    ){
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
         Long accountId = authUser.getAccountId();
 
         int safePage = Math.max(page, 1);
@@ -66,22 +69,20 @@ public class StudentEnrollmentController {
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+                Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<EnrollListItem> result = 
-                enrollmentQueryService.listEnrollments(accountId, pageable);
-        
+        Page<EnrollListItem> result = enrollmentQueryService.listEnrollments(accountId, pageable);
+
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
     // 수강중 교과
     @GetMapping("/current-enrollments")
+    @PreAuthorize("hasAuthority('CURRICULAR_READ')")
     public ApiResponse<List<EnrollListItem>> listCurrentEnrollments(
-        @AuthenticationPrincipal AuthUser authUser,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size
-    ){
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
         Long accountId = authUser.getAccountId();
 
         int safePage = Math.max(page, 1);
@@ -90,12 +91,10 @@ public class StudentEnrollmentController {
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+                Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<EnrollListItem> result = 
-                enrollmentQueryService.listCurrentEnrollments(accountId, pageable);
-        
+        Page<EnrollListItem> result = enrollmentQueryService.listCurrentEnrollments(accountId, pageable);
+
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 }

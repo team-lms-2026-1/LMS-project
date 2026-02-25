@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, forwardRef, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import type { ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -16,27 +16,12 @@ import type {
 } from "../../api/types";
 import { fetchNoticeCategories, fetchNoticeDetail, updateNotice } from "../../api/noticesApi";
 import { Button } from "@/components/button";
-import DatePicker from "react-datepicker";
+import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
 
 function toMidnightLocalDateTime(dateOnly: string) {
   if (!dateOnly) return "";
   return `${dateOnly}T00:00:00`;
-}
-
-function formatYmd(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function parseYmdToDate(s?: string | null): Date | null {
-  if (!s) return null;
-  const ymd = String(s).slice(0, 10);
-  const [y, m, d] = ymd.split("-").map((v) => Number(v));
-  if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d);
 }
 
 function normalizeDetail(payload: any): NoticeDetailDto {
@@ -100,9 +85,9 @@ function formatBytes(bytes: number) {
   return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-const DateTextInput = forwardRef<HTMLInputElement, any>(function DateTextInput(props, ref) {
-  return <input ref={ref} {...props} className={styles.date} readOnly />;
-});
+const TITLE_MAX = 100;
+const CONTENT_MAX = 2000;
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
 
 export default function NoticeEditPageClient() {
   const router = useRouter();
@@ -127,8 +112,8 @@ export default function NoticeEditPageClient() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const [displayStartAt, setDisplayStartAt] = useState<Date | null>(null);
-  const [displayEndAt, setDisplayEndAt] = useState<Date | null>(null);
+  const [displayStartAt, setDisplayStartAt] = useState("");
+  const [displayEndAt, setDisplayEndAt] = useState("");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
@@ -151,8 +136,8 @@ export default function NoticeEditPageClient() {
     const baseStart = String(base.displayStartAt ?? "").slice(0, 10);
     const baseEnd = String(base.displayEndAt ?? "").slice(0, 10);
 
-    const curStart = displayStartAt ? formatYmd(displayStartAt) : "";
-    const curEnd = displayEndAt ? formatYmd(displayEndAt) : "";
+    const curStart = displayStartAt || "";
+    const curEnd = displayEndAt || "";
 
     const changed =
       title !== baseTitle ||
@@ -170,16 +155,21 @@ export default function NoticeEditPageClient() {
     toast.error(i18n("errors.leaveGuard"));
   }, [i18n]);
 
-  useEffect(() => {
-    if (!isDirty || saving) return;
-
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-    };
-
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [isDirty, saving]);
+  const guardNavigate = useCallback(
+    (path: string) => {
+      if (allowLeaveRef.current) {
+        router.push(path);
+        return;
+      }
+      if (saving) return;
+      if (isDirty) {
+        toastLeave();
+        return;
+      }
+      router.push(path);
+    },
+    [router, isDirty, saving, toastLeave]
+  );
 
   useEffect(() => {
     if (allowLeaveRef.current) return;
@@ -217,25 +207,6 @@ export default function NoticeEditPageClient() {
   }, [isDirty, saving, toastLeave]);
 
   const pushedRef = useRef(false);
-  useEffect(() => {
-    if (!isDirty || saving) {
-      pushedRef.current = false;
-      return;
-    }
-
-    if (!pushedRef.current) {
-      history.pushState(null, "", location.href);
-      pushedRef.current = true;
-    }
-
-    const onPopState = () => {
-      history.pushState(null, "", location.href);
-      toastLeave();
-    };
-
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, [isDirty, saving, toastLeave]);
 
   useEffect(() => {
     const onClickCapture = (e: MouseEvent) => {
@@ -265,32 +236,6 @@ export default function NoticeEditPageClient() {
     return () => document.removeEventListener("click", onClickCapture, true);
   }, [isDirty, saving, toastLeave]);
 
-  useEffect(() => {
-    const onClickCapture = (e: MouseEvent) => {
-      if (!isDirty || saving) return;
-
-      const target = e.target as HTMLElement | null;
-      const a = target?.closest?.("a[href]") as HTMLAnchorElement | null;
-      if (!a) return;
-
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      if (a.target && a.target !== "_self") return;
-
-      const hrefAttr = a.getAttribute("href") ?? "";
-      if (hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) return;
-      if (a.hasAttribute("download")) return;
-
-      const url = new URL(a.href, window.location.href);
-      if (url.origin !== window.location.origin) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-      toastLeave();
-    };
-
-    document.addEventListener("click", onClickCapture, true);
-    return () => document.removeEventListener("click", onClickCapture, true);
-  }, [isDirty, saving, toastLeave]);
 
   useEffect(() => {
     if (!noticeId || Number.isNaN(noticeId)) {
@@ -308,12 +253,12 @@ export default function NoticeEditPageClient() {
 
         setLoad({ loading: false, error: null, data });
 
-        setTitle(data.title ?? "");
-        setContent(data.content ?? "");
+        setTitle(clampText(data.title ?? "", TITLE_MAX));
+        setContent(clampText(data.content ?? "", CONTENT_MAX));
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
 
-        setDisplayStartAt(parseYmdToDate(data.displayStartAt));
-        setDisplayEndAt(parseYmdToDate(data.displayEndAt));
+        setDisplayStartAt(String(data.displayStartAt ?? "").slice(0, 10));
+        setDisplayEndAt(String(data.displayEndAt ?? "").slice(0, 10));
 
         setExistingFiles(
           normalizeExistingAttachments(data.files ?? [], (index) => i18n("texts.attachmentFallback", { index }))
@@ -367,7 +312,7 @@ export default function NoticeEditPageClient() {
   }, [title, content, saving, load.loading, isPeriodValid]);
 
   const onCancel = () => {
-    if (isDirty && !saving) toastLeave();
+    allowLeaveRef.current = true;
     router.push(DETAIL_PATH);
   };
 
@@ -417,8 +362,8 @@ export default function NoticeEditPageClient() {
     if (!c) return toast.error(i18n("errors.contentRequired"));
     if (!isPeriodValid) return toast.error(i18n("errors.invalidPeriod"));
 
-    const displayStartAtIso = displayStartAt ? toMidnightLocalDateTime(formatYmd(displayStartAt)) : "";
-    const displayEndAtIso = displayEndAt ? toMidnightLocalDateTime(formatYmd(displayEndAt)) : "";
+    const displayStartAtIso = displayStartAt ? toMidnightLocalDateTime(displayStartAt) : "";
+    const displayEndAtIso = displayEndAt ? toMidnightLocalDateTime(displayEndAt) : "";
 
     const body: UpdateNoticeRequestDto = {
       title: t,
@@ -434,7 +379,13 @@ export default function NoticeEditPageClient() {
       await updateNotice(noticeId, body, newFiles);
       allowLeaveRef.current = true;
       toast.success(i18n("toasts.saveSuccess"));
-      router.push(DETAIL_PATH);
+      router.replace(DETAIL_PATH);
+      setTimeout(() => {
+        router.refresh();
+        if (typeof window !== "undefined" && window.location.pathname.includes("/edit")) {
+          window.location.href = DETAIL_PATH;
+        }
+      }, 50);
     } catch (e: any) {
       toast.error(e?.message ?? i18n("errors.saveFailed"));
     } finally {
@@ -464,14 +415,14 @@ export default function NoticeEditPageClient() {
       <div className={styles.card}>
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
-            <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
+            <span className={styles.crumb} onClick={() => guardNavigate(LIST_PATH)}>
               {i18n("title")}
             </span>
             <span className={styles.sep}>›</span>
             <span className={styles.current}>{i18n("breadcrumbCurrent")}</span>
           </div>
 
-          <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
+          <Button variant="secondary" onClick={() => guardNavigate(LIST_PATH)} disabled={saving}>
             {i18n("buttons.list")}
           </Button>
         </div>
@@ -482,7 +433,8 @@ export default function NoticeEditPageClient() {
         {load.loading && <div className={styles.loadingBox}>{i18n("loading")}</div>}
 
         {!load.loading && data && (
-          <div className={styles.detailBox}>
+          <>
+            <div className={styles.detailBox}>
             <div className={styles.headRow}>
               <span className={styles.badge} style={badgeStyle}>
                 {badgeLabel}
@@ -491,10 +443,10 @@ export default function NoticeEditPageClient() {
               <input
                 className={styles.headTitleInput}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
                 disabled={saving}
                 placeholder={i18n("placeholders.title")}
-                maxLength={200}
+                maxLength={TITLE_MAX}
               />
             </div>
 
@@ -532,152 +484,158 @@ export default function NoticeEditPageClient() {
                   ))}
                 </select>
               </div>
+            </div>
 
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>{i18n("labels.period")}</span>
+            <div className={styles.periodRowWrap}>
+              <div className={styles.periodLabel}>{i18n("labels.period")}</div>
+              <div className={styles.periodContent}>
                 <div className={styles.periodRow}>
-                  <DatePicker
-                    selected={displayStartAt}
-                    onChange={(d: Date | null) => {
-                      setDisplayStartAt(d);
-                      if (d && displayEndAt && displayEndAt < d) setDisplayEndAt(d);
+                  <DatePickerInput
+                    value={displayStartAt}
+                    onChange={(value) => {
+                      setDisplayStartAt(value);
+                      if (value && displayEndAt && displayEndAt < value) setDisplayEndAt(value);
                     }}
-                    dateFormat="yyyy-MM-dd"
-                    placeholderText={i18n("placeholders.startDate")}
-                    customInput={<DateTextInput />}
+                    placeholder={i18n("placeholders.startDate")}
                     disabled={saving}
-                    isClearable
-                    wrapperClassName={styles.dpWrap}
-                    popperPlacement="bottom-start"
+                    className={styles.dateInput}
                   />
                   <span className={styles.tilde}>~</span>
-                  <DatePicker
-                    selected={displayEndAt}
-                    onChange={(d: Date | null) => setDisplayEndAt(d)}
-                    dateFormat="yyyy-MM-dd"
-                    placeholderText={i18n("placeholders.endDate")}
-                    customInput={<DateTextInput />}
+                  <DatePickerInput
+                    value={displayEndAt}
+                    onChange={setDisplayEndAt}
+                    placeholder={i18n("placeholders.endDate")}
                     disabled={saving}
-                    minDate={displayStartAt ?? undefined}
-                    isClearable
-                    wrapperClassName={styles.dpWrap}
-                    popperPlacement="bottom-start"
+                    min={displayStartAt || undefined}
+                    className={styles.dateInput}
                   />
                 </div>
               </div>
             </div>
 
-            <div className={styles.contentBox}>
-              <textarea
-                className={styles.contentTextarea}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                disabled={saving}
-                placeholder={i18n("placeholders.content")}
-                rows={12}
-              />
+            <div className={styles.contentRow}>
+              <div className={styles.contentLabel}>{i18n("labels.content")}</div>
+              <div className={styles.contentCell}>
+                <textarea
+                  className={styles.contentTextarea}
+                  value={content}
+                  onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
+                  disabled={saving}
+                  placeholder={i18n("placeholders.content")}
+                  rows={12}
+                  maxLength={CONTENT_MAX}
+                />
+              </div>
             </div>
 
             <div className={styles.attachBox}>
               <div className={styles.attachRow}>
                 <div className={styles.attachLabel}>{i18n("labels.attachment")}</div>
 
-                <div className={styles.attachWrap}>
-                  <div className={styles.attachTabs}>
-                    <button type="button" className={styles.tabActive} disabled={saving}>
-                      {i18n("buttons.myPc")}
-                    </button>
-                  </div>
-
-                  <div className={styles.dropzone}>
-                    <div className={styles.dropText}>
-                      {i18n("help.dropPrefix")}{" "}
+                <div className={styles.attachContent}>
+                  <div className={styles.attachWrap}>
+                    <div className={styles.attachTabs}>
                       <button
                         type="button"
-                        className={styles.uploadLink}
-                        onClick={() => fileInputRef.current?.click()}
+                        className={styles.tabActive}
                         disabled={saving}
+                        onClick={() => fileInputRef.current?.click()}
                       >
-                        {i18n("buttons.upload")}
+                        {i18n("buttons.myPc")}
                       </button>
                     </div>
-                    <div className={styles.maxSize}>{i18n("help.maxSize")}</div>
 
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      className={styles.hiddenFile}
-                      onChange={onFileInputChange}
-                      disabled={saving}
-                    />
-                  </div>
+                    <div className={styles.dropzone}>
+                      <div className={styles.dropText}>
+                        <button
+                          type="button"
+                          className={styles.uploadLink}
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={saving}
+                        >
+                          {i18n("buttons.upload")}
+                        </button>
+                      </div>
+                      <div className={styles.maxSize}>{i18n("help.maxSize")}</div>
 
-                  <div className={styles.fileList}>
-                    {existingFiles.length > 0 ? (
-                      existingFiles.map((f, idx) => {
-                        const deleted = isDeletedExisting(f);
-                        const key = `${f.attachmentId ?? "noid"}_${idx}`;
-                        return (
-                          <div key={key} className={styles.fileItem}>
-                            <div className={styles.fileMeta}>
-                              <span
-                                className={styles.fileName}
-                                style={{
-                                  textDecoration: deleted ? "line-through" : "none",
-                                  opacity: deleted ? 0.6 : 1,
-                                }}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className={styles.hiddenFile}
+                        onChange={onFileInputChange}
+                        disabled={saving}
+                      />
+                    </div>
+
+                    <div className={styles.fileList}>
+                      {existingFiles.length > 0 ? (
+                        existingFiles.map((f, idx) => {
+                          const deleted = isDeletedExisting(f);
+                          const key = `${f.attachmentId ?? "noid"}_${idx}`;
+                          return (
+                            <div key={key} className={styles.fileItem}>
+                              <div className={styles.fileMeta}>
+                                <span
+                                  className={styles.fileName}
+                                  style={{
+                                    textDecoration: deleted ? "line-through" : "none",
+                                    opacity: deleted ? 0.6 : 1,
+                                  }}
+                                >
+                                  {f.fileName}
+                                </span>
+                                {f.url ? (
+                                  <a className={styles.fileLink} href={f.url} target="_blank" rel="noreferrer">
+                                    {i18n("buttons.open")}
+                                  </a>
+                                ) : null}
+                              </div>
+
+                              <button
+                                type="button"
+                                className={styles.fileRemove}
+                                onClick={() => toggleDeleteExisting(f)}
+                                disabled={saving}
                               >
-                                {f.fileName}
-                              </span>
-                              {f.url ? (
-                                <a className={styles.fileLink} href={f.url} target="_blank" rel="noreferrer">
-                                  {i18n("buttons.open")}
-                                </a>
-                              ) : null}
+                                {deleted ? i18n("buttons.deleteFileCancel") : i18n("buttons.deleteFile")}
+                              </button>
                             </div>
+                          );
+                        })
+                      ) : (
+                        <div className={styles.attachEmpty}>{i18n("texts.noExistingFiles")}</div>
+                      )}
+                    </div>
 
-                            <button
-                              type="button"
-                              className={styles.fileRemove}
-                              onClick={() => toggleDeleteExisting(f)}
-                              disabled={saving}
-                            >
-                              {deleted ? i18n("buttons.deleteFileCancel") : i18n("buttons.deleteFile")}
-                            </button>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className={styles.attachEmpty}>{i18n("texts.noExistingFiles")}</div>
+                    {newFiles.length > 0 && (
+                      <div className={styles.fileList}>
+                        {newFiles.map((f) => {
+                          const key = `${f.name}_${f.size}_${f.lastModified}`;
+                          return (
+                            <div key={key} className={styles.fileItem}>
+                              <div className={styles.fileMeta}>
+                                <span className={styles.fileName}>{f.name}</span>
+                                <span className={styles.fileSize}>{formatBytes(f.size)}</span>
+                              </div>
+                              <button
+                                type="button"
+                                className={styles.fileRemove}
+                                onClick={() => removeNewFile(key)}
+                                disabled={saving}
+                              >
+                                {i18n("buttons.deleteFile")}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
-
-                  {newFiles.length > 0 && (
-                    <div className={styles.fileList}>
-                      {newFiles.map((f) => {
-                        const key = `${f.name}_${f.size}_${f.lastModified}`;
-                        return (
-                          <div key={key} className={styles.fileItem}>
-                            <div className={styles.fileMeta}>
-                              <span className={styles.fileName}>{f.name}</span>
-                              <span className={styles.fileSize}>{formatBytes(f.size)}</span>
-                            </div>
-                            <button
-                              type="button"
-                              className={styles.fileRemove}
-                              onClick={() => removeNewFile(key)}
-                              disabled={saving}
-                            >
-                              {i18n("buttons.deleteFile")}
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
                 </div>
               </div>
+            </div>
+
             </div>
 
             <div className={styles.footerRow}>
@@ -688,7 +646,7 @@ export default function NoticeEditPageClient() {
                 {saving ? i18n("buttons.saving") : i18n("buttons.save")}
               </Button>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

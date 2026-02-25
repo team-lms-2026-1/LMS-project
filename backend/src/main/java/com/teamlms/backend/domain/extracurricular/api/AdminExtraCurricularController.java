@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularCreateRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularListItem;
@@ -37,56 +38,52 @@ public class AdminExtraCurricularController {
     private final ExtraCurricularQueryService extraCurricularQueryService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> create(
-        @Valid @RequestBody ExtraCurricularCreateRequest req
-    ) {
+            @Valid @RequestBody ExtraCurricularCreateRequest req) {
         extraCurricularCommandService.create(
-            req.getExtraCurricularCode(),
-            req.getExtraCurricularName(),
-            req.getDescription(),
-            req.getHostOrgName()
-        );
+                req.getExtraCurricularCode(),
+                req.getExtraCurricularName(),
+                req.getDescription(),
+                req.getHostOrgName());
 
         return ApiResponse.ok(new SuccessResponse());
     }
 
     @GetMapping("/{extraCurricularId}")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<ExtraCurricularPatchForm> getEditForm(
-        @PathVariable Long extraCurricularId
-    ) {
+            @PathVariable Long extraCurricularId) {
         return ApiResponse.ok(extraCurricularQueryService.editForm(extraCurricularId));
     }
 
     @PatchMapping("/{extraCurricularId}")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> patch(
-        @PathVariable Long extraCurricularId,
-        @Valid @RequestBody ExtraCurricularPatchRequest req
-    ) {
+            @PathVariable Long extraCurricularId,
+            @Valid @RequestBody ExtraCurricularPatchRequest req) {
         extraCurricularCommandService.patch(extraCurricularId, req);
         return ApiResponse.ok(new SuccessResponse());
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<ExtraCurricularListItem>> getList(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(required = false) String keyword
-    ) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String keyword) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.min(Math.max(size, 1), 100);
 
         Pageable pageable = PageRequest.of(
                 safePage - 1,
                 safeSize,
-                Sort.by(Sort.Direction.ASC, "extraCurricularCode")
-        );
+                Sort.by(Sort.Direction.ASC, "extraCurricularCode"));
 
-        Page<ExtraCurricularListItem> result =
-                extraCurricularQueryService.list(keyword, pageable);
-        
+        Page<ExtraCurricularListItem> result = extraCurricularQueryService.list(keyword, pageable);
+
         return ApiResponse.of(
                 result.getContent(),
-                PageMeta.from(result)
-        );
+                PageMeta.from(result));
     }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import styles from "./FaqEditPage.module.css";
 import type { Category, FaqListItemDto, LoadState, UpdateFaqRequestDto } from "../../api/types";
@@ -25,6 +25,10 @@ function normalizeDetail(payload: any): FaqListItemDto {
   };
 }
 
+const TITLE_MAX = 100;
+const CONTENT_MAX = 2000;
+const clampText = (value: string, max: number) => Array.from(value ?? "").slice(0, max).join("");
+
 export default function FaqEditPageClient() {
   const router = useRouter();
   const t = useI18n("community.faqs.admin.edit");
@@ -45,6 +49,21 @@ export default function FaqEditPageClient() {
 
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string>("");
+  const allowLeaveRef = useRef(false);
+
+  const isDirty = useMemo(() => {
+    if (!load.data) return false;
+    const base = load.data;
+    const baseTitle = String(base.title ?? "");
+    const baseContent = String(base.content ?? "");
+    const baseCat = base.category?.categoryId ? String(base.category.categoryId) : "";
+
+    return title !== baseTitle || content !== baseContent || categoryId !== baseCat;
+  }, [load.data, title, content, categoryId]);
+
+  const toastLeave = useCallback(() => {
+    toast.error(t("errors.leaveGuard"));
+  }, [t]);
 
   useEffect(() => {
     if (!faqId || Number.isNaN(faqId)) {
@@ -61,8 +80,8 @@ export default function FaqEditPageClient() {
         if (!alive) return;
 
         setLoad({ loading: false, error: null, data });
-        setTitle(data.title ?? "");
-        setContent(data.content ?? "");
+        setTitle(clampText(data.title ?? "", TITLE_MAX));
+        setContent(clampText(data.content ?? "", CONTENT_MAX));
         setCategoryId(data.category?.categoryId ? String(data.category.categoryId) : "");
       } catch (e: any) {
         if (!alive) return;
@@ -105,7 +124,89 @@ export default function FaqEditPageClient() {
     return title.trim().length > 0 && content.trim().length > 0 && !saving && !load.loading;
   }, [title, content, saving, load.loading]);
 
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+    if (!isDirty || saving) return;
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isDirty, saving]);
+
+  const pushedRef = useRef(false);
+  useEffect(() => {
+    if (allowLeaveRef.current) return;
+
+    if (!isDirty || saving) {
+      pushedRef.current = false;
+      return;
+    }
+
+    if (!pushedRef.current) {
+      history.pushState(null, "", location.href);
+      pushedRef.current = true;
+    }
+
+    const onPopState = () => {
+      if (allowLeaveRef.current) return;
+      history.pushState(null, "", location.href);
+      toastLeave();
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [isDirty, saving, toastLeave]);
+
+  useEffect(() => {
+    const onClickCapture = (e: MouseEvent) => {
+      if (allowLeaveRef.current) return;
+      if (!isDirty || saving) return;
+
+      const target = e.target as HTMLElement | null;
+      const a = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!a) return;
+
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (a.target && a.target !== "_self") return;
+
+      const hrefAttr = a.getAttribute("href") ?? "";
+      if (hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) return;
+      if (a.hasAttribute("download")) return;
+
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      toastLeave();
+    };
+
+    document.addEventListener("click", onClickCapture, true);
+    return () => document.removeEventListener("click", onClickCapture, true);
+  }, [isDirty, saving, toastLeave]);
+
+  const guardNavigate = useCallback(
+    (path: string) => {
+      if (allowLeaveRef.current) {
+        router.push(path);
+        return;
+      }
+      if (saving) return;
+      if (isDirty) {
+        toastLeave();
+        return;
+      }
+      router.push(path);
+    },
+    [router, isDirty, saving, toastLeave]
+  );
+
   const onCancel = () => {
+    allowLeaveRef.current = true;
     router.push(DETAIL_PATH);
   };
 
@@ -126,6 +227,7 @@ export default function FaqEditPageClient() {
     setSaving(true);
     try {
       await updateFaq(faqId, body);
+      allowLeaveRef.current = true;
       toast.success(t("toasts.saveSuccess"));
       router.push(DETAIL_PATH);
     } catch (e: any) {
@@ -148,14 +250,14 @@ export default function FaqEditPageClient() {
       <div className={styles.card}>
         <div className={styles.breadcrumbRow}>
           <div className={styles.breadcrumb}>
-            <span className={styles.crumb} onClick={() => router.push(LIST_PATH)}>
+            <span className={styles.crumb} onClick={() => guardNavigate(LIST_PATH)}>
               {t("title")}
             </span>
             <span className={styles.sep}>&gt;</span>
             <span className={styles.current}>{t("breadcrumbCurrent")}</span>
           </div>
 
-          <Button variant="secondary" onClick={() => router.push(LIST_PATH)} disabled={saving}>
+          <Button variant="secondary" onClick={() => guardNavigate(LIST_PATH)} disabled={saving}>
             {t("buttons.list")}
           </Button>
         </div>
@@ -177,10 +279,10 @@ export default function FaqEditPageClient() {
               <input
                 className={styles.headTitleInput}
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => setTitle(clampText(e.target.value, TITLE_MAX))}
                 disabled={saving}
                 placeholder={t("placeholders.title")}
-                maxLength={200}
+                maxLength={TITLE_MAX}
               />
             </div>
 
@@ -220,10 +322,11 @@ export default function FaqEditPageClient() {
               <textarea
                 className={styles.contentTextarea}
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={(e) => setContent(clampText(e.target.value, CONTENT_MAX))}
                 disabled={saving}
                 placeholder={t("placeholders.content")}
                 rows={12}
+                maxLength={CONTENT_MAX}
               />
             </div>
 

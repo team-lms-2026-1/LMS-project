@@ -94,11 +94,11 @@ export function DatePickerInput({
   const popStyle =
     open && rect
       ? ({
-          position: "fixed",
-          top: rect.bottom + 8,
-          left: rect.left,
-          zIndex: 2000,
-        } as const)
+        position: "fixed",
+        top: rect.bottom + 8,
+        left: rect.left,
+        zIndex: 2000,
+      } as const)
       : undefined;
 
   return (
@@ -132,6 +132,10 @@ export function DatePickerInput({
             }}
             fromDate={fromDate}
             toDate={toDateMax}
+            disabled={[
+              ...(fromDate ? [{ before: fromDate }] : []),
+              ...(toDateMax ? [{ after: toDateMax }] : []),
+            ]}
           />
         </div>
       ) : null}

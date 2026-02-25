@@ -112,11 +112,6 @@
   background: #fff;
 }
 
-.headTitleInput:focus {
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
-}
-
 /* 메타 줄(등록창 row/grid 톤) */
 .metaRow {
   display: grid;
@@ -135,7 +130,7 @@
 }
 
 .metaLabel {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #111827;
   white-space: nowrap;
@@ -150,6 +145,28 @@
   white-space: nowrap;
 }
 
+.periodRowWrap {
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  border-bottom: 1px solid #d1d5db;
+  background: #fff;
+}
+
+.periodLabel {
+  padding: 10px 12px;
+  border-right: 1px solid #d1d5db;
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.periodContent {
+  padding: 10px 12px;
+}
+
 .categorySelect {
   height: 30px;
   width: 160px;
@@ -161,15 +178,27 @@
   background: #fff;
 }
 
-.categorySelect:focus {
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+/* 내용 */
+.contentRow {
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  border-bottom: 1px solid #d1d5db;
+  background: #fff;
 }
 
-/* 내용 */
-.contentBox {
+.contentLabel {
   padding: 10px 12px;
-  border-bottom: 1px solid #d1d5db;
+  border-right: 1px solid #d1d5db;
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.contentCell {
+  padding: 10px 12px;
 }
 
 .contentTextarea {
@@ -183,39 +212,45 @@
   line-height: 1.55;
   resize: vertical;
   background: #fff;
-}
-
-.contentTextarea:focus {
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* ===== 첨부 (등록창과 거의 동일) ===== */
 .attachBox {
-  padding: 10px 12px;
+  border-top: 1px solid #d1d5db;
+  padding: 0;
 }
 
 .attachRow {
   display: grid;
   grid-template-columns: 86px 1fr;
-  gap: 12px;
-  align-items: flex-start;
+  gap: 0;
+  align-items: stretch;
 }
 
 .attachLabel {
-  padding: 10px 0;
+  padding: 10px 12px;
   font-weight: 700;
   font-size: 13px;
   color: #111827;
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  border-right: 1px solid #d1d5db;
+  background: #fff;
+}
+
+.attachContent {
+  padding: 10px 12px;
 }
 
 .attachWrap {
   border: 1px solid #d1d5db;
   border-radius: 4px;
   background: #fff;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .attachTabs {
@@ -230,7 +265,11 @@
   border-radius: 6px;
   background: #fff;
   font-size: 12px;
-  cursor: default;
+  cursor: pointer;
+}
+.tabActive:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .dropzone {
@@ -345,8 +384,6 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #d1d5db;
 }
 
 /* ===== 반응형 ===== */
@@ -379,6 +416,26 @@
     justify-content: flex-start;
   }
 
+  .contentRow {
+    grid-template-columns: 1fr;
+  }
+
+  .contentLabel {
+    justify-content: flex-start;
+    border-right: none;
+    border-bottom: 1px solid #d1d5db;
+  }
+
+  .periodRowWrap {
+    grid-template-columns: 1fr;
+  }
+
+  .periodLabel {
+    justify-content: flex-start;
+    border-right: none;
+    border-bottom: 1px solid #d1d5db;
+  }
+
   .fileItem {
     flex-direction: column;
     align-items: flex-start;
@@ -399,39 +456,7 @@
   color: #94a3b8;
 }
 
-.date {
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 14px;
+.dateInput {
+  min-width: 140px;
 }
 
-.dpWrap :global(.react-datepicker__close-icon) {
-  padding: 0 !important;
-  height: auto !important;
-  width: 16px !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  top: 50% !important;
-  right: 8px !important;
-  transform: translateY(-50%) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.dpWrap :global(.react-datepicker__close-icon::after) {
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  width: 12px !important;
-  height: 12px !important;
-  line-height: 12px !important;
-  font-size: 10px !important;
-  background: #fff !important;
-  color: #0f172a !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 9999px !important;
-  box-shadow: none !important;
-}

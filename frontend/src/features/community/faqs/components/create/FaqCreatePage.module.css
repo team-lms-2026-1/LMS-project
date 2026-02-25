@@ -121,37 +121,6 @@
   background: #fff;
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-bottom: 1px solid #d1d5db;
-  background: #fff;
-  flex-wrap: wrap;
-}
-
-.toolBtn {
-  height: 26px;
-  min-width: 26px;
-  padding: 0 6px;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  color: #111827;
-}
-
-.toolBtn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.toolBtn:hover:not(:disabled) {
-  background: #f3f4f6;
-}
-
 .editorArea {
   width: 100%;
   min-height: 180px;
