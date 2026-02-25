@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-
-function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL ?? "http://localhost:8080";
-}
+import { resolveBaseUrl } from "@/lib/bff";
 function buildHeaders() {
   let token = cookies().get("access_token")?.value;
   if (token) token = decodeURIComponent(token).replace(/^"|"$/g, "").replace(/^Bearer\s+/i, "").trim();
@@ -16,7 +13,7 @@ function buildHeaders() {
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: Request, ctx: { params: { accountId: string } }) {
-  const upstreamUrl = `${getBaseUrl()}/api/v1/admin/accounts/${ctx.params.accountId}/majors`;
+  const upstreamUrl = `${resolveBaseUrl()}/api/v1/admin/accounts/${ctx.params.accountId}/majors`;
   const res = await fetch(upstreamUrl, { headers: buildHeaders(), cache: "no-store" });
   const data = await res.text();
   return new Response(data, { status: res.status, headers: { "content-type": "application/json" } });

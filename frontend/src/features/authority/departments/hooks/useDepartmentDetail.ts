@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { DepartmentDetailSummary, MajorListItem, DepartmentProfessorListItem, DepartmentStudentListItem, PageMeta } from "../api/types";
 import { fetchDepartmentSummary, fetchDepartmentMajors, fetchDepartmentProfessors, fetchDepartmentStudents } from "../api/departmentsApi";
+import { useI18n } from "@/i18n/useI18n";
 
 export function useDepartmentDetail(deptId: number) {
+    const t = useI18n("authority.departments.errors");
     const [summary, setSummary] = useState<DepartmentDetailSummary | null>(null);
     const [loadingSummary, setLoadingSummary] = useState(true);
     const [errorSummary, setErrorSummary] = useState<string | null>(null);
@@ -18,11 +20,11 @@ export function useDepartmentDetail(deptId: number) {
             setSummary(res.data);
         } catch (err: any) {
             console.error(err);
-            setErrorSummary(err.message || "학과 상세 조회 실패");
+            setErrorSummary(err.message || t("detailLoadFailed"));
         } finally {
             setLoadingSummary(false);
         }
-    }, [deptId]);
+    }, [deptId, t]);
 
     useEffect(() => {
         if (deptId) loadSummary();

@@ -64,5 +64,471 @@
       "listLoadFailed": "Failed to load semester list.",
       "detailLoadFailed": "Failed to load."
     }
+  },
+  "departments": {
+    "list": {
+      "breadcrumb": "Authority Management - Department Management",
+      "title": "Department List",
+      "searchPlaceholder": "Enter department code / name",
+      "table": {
+        "headers": {
+          "deptCode": "Department Code",
+          "deptName": "Department Name",
+          "headProfessor": "Department Chair",
+          "studentCount": "Students",
+          "professorCount": "Professors",
+          "isActive": "Active",
+          "manage": "Manage"
+        },
+        "headProfessorFallback": "-",
+        "studentCountValue": "{count}",
+        "professorCountValue": "{count}",
+        "actions": {
+          "edit": "Edit"
+        },
+        "emptyText": "No departments registered."
+      },
+      "buttons": {
+        "create": "Register Department"
+      },
+      "toasts": {
+        "statusUpdated": "Status has been updated.",
+        "statusUpdateFailed": "Failed to update status."
+      }
+    },
+    "detail": {
+      "page": {
+        "backToList": "Back to list ->",
+        "tabs": {
+          "professors": "Faculty",
+          "students": "Students",
+          "majors": "Major Management"
+        }
+      },
+      "info": {
+        "loadFailed": "Failed to load information.",
+        "titleSuffix": "Management",
+        "departmentCodeLabel": "Department Code",
+        "chairProfessorLabel": "Department Chair",
+        "unassigned": "Unassigned",
+        "autoDescription": "{departmentName} aims to cultivate creative and practical talents. Currently, {enrolledCount} enrolled students, {leaveCount} students on leave, and {graduatedCount} graduates belong to this department, guided by {professorCount} full-time professors."
+      },
+      "studentsTab": {
+        "searchPlaceholder": "Search by name / student number",
+        "stats": {
+          "enrolled": "Enrolled: {count}",
+          "leaveOfAbsence": "On leave: {count}",
+          "graduated": "Graduated: {count}"
+        },
+        "table": {
+          "headers": {
+            "studentNo": "Student No",
+            "name": "Name",
+            "gradeLevel": "Grade",
+            "academicStatus": "Academic Status",
+            "majorName": "Major",
+            "email": "Email"
+          },
+          "gradeValue": "Year {grade}",
+          "majorFallback": "-",
+          "emptyText": "No students in this department."
+        },
+        "academicStatus": {
+          "ENROLLED": "Enrolled",
+          "LEAVE": "On leave",
+          "GRADUATED": "Graduated",
+          "DROPPED": "Dropped out"
+        }
+      },
+      "professorsTab": {
+        "searchPlaceholder": "Search by name / professor number",
+        "stats": {
+          "professorCount": "Professors: {count}"
+        },
+        "table": {
+          "headers": {
+            "professorNo": "Professor No",
+            "name": "Name",
+            "email": "Email",
+            "phone": "Phone",
+            "manage": "Manage"
+          },
+          "headProfessorBadge": "Chair",
+          "assignHeadProfessor": "Assign Chair",
+          "emptyText": "No faculty in this department."
+        },
+        "confirm": {
+          "title": "Assign Department Chair",
+          "message": "Assign professor '{name}' as the department chair?"
+        },
+        "toasts": {
+          "assignSuccess": "Department chair has been assigned.",
+          "assignFailed": "Failed to assign department chair."
+        }
+      },
+      "majorsTab": {
+        "searchPlaceholder": "Search by major code / name",
+        "table": {
+          "headers": {
+            "majorCode": "Major Code",
+            "majorName": "Major Name",
+            "enrolledStudentCount": "Students",
+            "status": "Status",
+            "manage": "Manage"
+          },
+          "enrolledStudentCountValue": "{count}",
+          "status": {
+            "active": "Active",
+            "inactive": "Inactive"
+          },
+          "actions": {
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "emptyText": "No majors registered."
+        },
+        "buttons": {
+          "create": "Add Major"
+        },
+        "confirm": {
+          "title": "Delete Major",
+          "message": "Are you sure you want to delete this major? Deleted majors cannot be restored."
+        },
+        "toasts": {
+          "deleteSuccess": "Major deleted.",
+          "deleteFailed": "Failed to delete major."
+        }
+      }
+    },
+    "modals": {
+      "departmentCreate": {
+        "title": "Register Department",
+        "buttons": {
+          "cancel": "Cancel",
+          "create": "Create Department",
+          "creating": "Creating..."
+        },
+        "fields": {
+          "deptCode": {
+            "label": "Department Code",
+            "resetHint": "(Cannot be changed)",
+            "placeholder": "e.g. CSEEE (5 uppercase letters)",
+            "helper": "Enter exactly {max} uppercase letters ({current}/{max})"
+          },
+          "deptName": {
+            "label": "Department Name",
+            "placeholder": "Enter department name"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Enter department description"
+          }
+        },
+        "validation": {
+          "requiredDeptCode": "Please enter department code.",
+          "invalidDeptCodeFormat": "Department code must be 5 uppercase letters.",
+          "requiredDeptName": "Please enter department name.",
+          "requiredDescription": "Please enter department description."
+        },
+        "toasts": {
+          "createSuccess": "Department created.",
+          "createFailed": "Failed to create department."
+        }
+      },
+      "departmentUpdate": {
+        "title": "Edit Department",
+        "loading": "Loading information...",
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save",
+          "saving": "Saving..."
+        },
+        "fields": {
+          "deptCode": {
+            "label": "Department Code"
+          },
+          "deptName": {
+            "label": "Department Name",
+            "placeholder": "Enter department name"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Enter department description"
+          }
+        },
+        "validation": {
+          "requiredDeptName": "Department name is required."
+        },
+        "toasts": {
+          "loadFailed": "Failed to load department information.",
+          "updateSuccess": "Department information updated.",
+          "updateFailed": "Failed to update department."
+        }
+      },
+      "majorCreate": {
+        "title": "Add Major",
+        "buttons": {
+          "cancel": "Cancel",
+          "create": "Create Major",
+          "creating": "Creating..."
+        },
+        "fields": {
+          "majorName": {
+            "label": "Major Name",
+            "placeholder": "Enter major name"
+          },
+          "majorCode": {
+            "label": "Major Code",
+            "placeholder": "Enter major code"
+          },
+          "isActive": {
+            "label": "Active",
+            "active": "Active",
+            "inactive": "Inactive"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Enter major description"
+          }
+        },
+        "validation": {
+          "requiredFields": "Please fill in required fields."
+        },
+        "toasts": {
+          "createSuccess": "Major added.",
+          "createFailed": "Failed to add major."
+        }
+      },
+      "majorUpdate": {
+        "title": "Edit Major",
+        "loading": "Loading information...",
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save",
+          "saving": "Saving..."
+        },
+        "fields": {
+          "majorCode": {
+            "label": "Major Code"
+          },
+          "majorName": {
+            "label": "Major Name",
+            "placeholder": "Enter major name"
+          },
+          "isActive": {
+            "label": "Active",
+            "active": "Active",
+            "inactive": "Inactive",
+            "studentConstraint": "Cannot deactivate because {count} students are enrolled."
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Enter major description"
+          }
+        },
+        "validation": {
+          "requiredMajorName": "Please enter major name.",
+          "cannotDeactivateWithStudents": "Cannot deactivate a major with {count} enrolled students."
+        },
+        "toasts": {
+          "loadFailed": "Failed to load major information.",
+          "updateSuccess": "Major information updated.",
+          "updateFailed": "Failed to update major."
+        }
+      }
+    },
+    "errors": {
+      "listLoadFailed": "Failed to load list.",
+      "detailLoadFailed": "Failed to load department details."
+    }
+  },
+  "accounts": {
+    "common": {
+      "roles": {
+        "ALL": "All",
+        "STUDENT": "Student",
+        "PROFESSOR": "Professor",
+        "ADMIN": "Admin"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "INACTIVE": "Inactive"
+      },
+      "academicStatus": {
+        "ENROLLED": "Enrolled",
+        "LEAVE": "On leave",
+        "DROPPED": "Dropped out",
+        "GRADUATED": "Graduated"
+      }
+    },
+    "list": {
+      "page": {
+        "breadcrumb": "Authority Management - Account Management",
+        "title": "Account List",
+        "loading": "Loading...",
+        "createButton": "Create Account",
+        "messages": {
+          "listLoadFailed": "Failed to load account list.",
+          "statusUpdateFailed": "Failed to update status."
+        }
+      },
+      "filters": {
+        "searchPlaceholder": "Search by ID/name/email"
+      },
+      "table": {
+        "headers": {
+          "loginId": "Login ID",
+          "accountType": "Account Type",
+          "name": "Name",
+          "email": "Email",
+          "createdAt": "Created At",
+          "status": "Active/Inactive",
+          "manage": "Edit"
+        },
+        "emptyText": "No data available.",
+        "fallback": "-",
+        "editButton": "Edit"
+      }
+    },
+    "modals": {
+      "create": {
+        "title": "Create Account",
+        "fields": {
+          "status": "Status",
+          "loginId": "Login ID",
+          "password": "Password",
+          "name": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "gradeLevel": "Grade",
+          "academicStatus": "Academic Status",
+          "memo": "Memo",
+          "profileImage": "Profile Image",
+          "department": "Department",
+          "primaryMajor": "Primary Major",
+          "minorMajor": "Minor Major",
+          "doubleMajor": "Double Major"
+        },
+        "placeholders": {
+          "loginIdDigits": "Enter 8 digits",
+          "password": "At least 6 chars with upper/lowercase letters and number",
+          "name": "Enter name",
+          "email": "example@email.com",
+          "phone": "010-0000-0000",
+          "memo": "Enter admin memo"
+        },
+        "hints": {
+          "loginId": "Example: {example} (prefix is auto-applied)"
+        },
+        "validation": {
+          "loginIdDigits": "ID must be exactly 8 digits.",
+          "password": "Password must be at least 6 characters and include upper/lowercase letters and a number.",
+          "email": "Email must include @.",
+          "phone": "Use 000-0000-0000 format."
+        },
+        "select": {
+          "loading": "Loading...",
+          "select": "Select",
+          "choose": "Please select..."
+        },
+        "toggles": {
+          "useMinor": "Use minor (MINOR)",
+          "useDouble": "Use double major (DOUBLE)"
+        },
+        "notices": {
+          "professor": {
+            "title": "Notice",
+            "text": "Professor accounts require only department and basic profile fields (name/email/phone)."
+          },
+          "admin": {
+            "title": "Notice",
+            "text": "Admin accounts do not use department/major information."
+          }
+        },
+        "buttons": {
+          "changeImage": "Change",
+          "selectImage": "Select Image",
+          "deleteImage": "Delete",
+          "cancel": "Cancel",
+          "create": "Create Account",
+          "creating": "Creating..."
+        },
+        "messages": {
+          "imageUploadFailed": "Account was created, but profile image upload failed."
+        },
+        "alts": {
+          "profileImage": "Profile preview"
+        }
+      },
+      "edit": {
+        "title": "Edit Account",
+        "header": {
+          "type": "Type"
+        },
+        "loading": "Loading...",
+        "fields": {
+          "loginId": "ID",
+          "currentPassword": "Current Password",
+          "newPassword": "New Password (Optional)",
+          "name": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "status": "Status",
+          "gradeLevel": "Grade",
+          "academicStatus": "Academic Status",
+          "department": "Department",
+          "primaryMajor": "Primary Major",
+          "minorMajor": "Minor Major",
+          "doubleMajor": "Double Major",
+          "memo": "Memo",
+          "profileImage": "Profile Image"
+        },
+        "hints": {
+          "currentPasswordMasked": "Current password cannot be displayed for security reasons and is masked."
+        },
+        "placeholders": {
+          "newPassword": "Enter only if changing",
+          "memo": "Admin memo"
+        },
+        "validation": {
+          "password": "Password must be at least 6 characters and include upper/lowercase letters and a number.",
+          "email": "Email must include @.",
+          "phone": "Use 000-0000-0000 format or 11 digits."
+        },
+        "select": {
+          "select": "Select"
+        },
+        "toggles": {
+          "useMinor": "Use minor (MINOR)",
+          "useDouble": "Use double major (DOUBLE)"
+        },
+        "notices": {
+          "professor": {
+            "title": "Notice",
+            "text": "Professor accounts only allow updates to department and basic profile fields."
+          }
+        },
+        "buttons": {
+          "changeImage": "Change",
+          "deleteImage": "Delete",
+          "cancel": "Cancel",
+          "save": "Save",
+          "saving": "Saving..."
+        },
+        "toasts": {
+          "imageUpdated": "Profile image updated.",
+          "imageUpdateFailed": "Failed to update image.",
+          "imageDeleted": "Profile image deleted.",
+          "imageDeleteFailed": "Failed to delete image."
+        },
+        "messages": {
+          "detailLoadFailed": "Failed to load account details.",
+          "saveFailed": "Failed to save."
+        },
+        "alts": {
+          "profileImage": "Profile preview"
+        }
+      }
+    }
   }
 }

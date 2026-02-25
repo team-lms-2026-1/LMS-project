@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { resolveBaseUrl } from "@/lib/bff";
 
 type ApiResponse<T> = { success?: boolean; message?: string; data?: T };
-
-function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL;
-}
 
 function buildHeaders() {
   let token = cookies().get("access_token")?.value;
@@ -42,13 +39,7 @@ async function passthroughResponse(upstreamRes: Response) {
 }
 
 export async function POST(_req: Request, ctx: { params: { accountId: string } }) {
-  const base = getBaseUrl();
-  if (!base) {
-    return NextResponse.json(
-      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 API_BASE_URL 누락" },
-      { status: 500 }
-    );
-  }
+  const base = resolveBaseUrl();
 
   const accountId = ctx.params.accountId;
   const upstreamUrl = `${base}/api/v1/admin/accounts/${encodeURIComponent(accountId)}/password/reset`;
