@@ -282,6 +282,8 @@
 
 .answerTextarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 120px;
   resize: vertical;
   border: 1px solid #d1d5db;
@@ -355,6 +357,13 @@
   gap: 8px;
 }
 
+.answerBottomActions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 /* 보기 모드 답변 박스 */
 .answerViewBox {
   border: 1px solid #e5e7eb;
@@ -375,6 +384,8 @@
 /* textarea */
 .answerTextarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 120px;
   resize: vertical;
   border: 1px solid #d1d5db;

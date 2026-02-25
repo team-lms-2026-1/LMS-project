@@ -1,0 +1,184 @@
+{
+  "common": {
+    "sidebarTitle": "상세 메뉴",
+    "logoAlt": {
+      "student": "메인 페이지로 이동",
+      "admin": "관리자 메인으로 이동",
+      "professor": "교수 메인으로 이동"
+    }
+  },
+  "student": {
+    "sections": {
+      "community": {
+        "title": "커뮤니티",
+        "items": {
+          "notices": "공지사항",
+          "resources": "자료실",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "course": {
+        "title": "교과",
+        "items": {
+          "offerings": "수강 신청",
+          "enrollments": "수강 신청현황",
+          "currentEnrollments": "수강중 교과",
+          "gradeReports": "교과 성적"
+        }
+      },
+      "extra": {
+        "title": "비교과",
+        "items": {
+          "offerings": "비교과 프로그램 신청",
+          "enrollments": "비교과 프로그램 신청현황",
+          "currentEnrollments": "이수중 비교과",
+          "gradeReports": "비교과 성적"
+        }
+      },
+      "mentoring": {
+        "title": "멘토링",
+        "items": {
+          "apply": "멘티 신청",
+          "chat": "멘토링 채팅"
+        }
+      },
+      "competency": {
+        "title": "역량진단",
+        "items": {
+          "introduce": "6Cs 란?",
+          "diagnosis": "진단목록",
+          "result": "결과 조회"
+        }
+      },
+      "survey": {
+        "title": "설문",
+        "items": {
+          "list": "설문 목록"
+        }
+      },
+      "space": {
+        "title": "학습공간대여",
+        "items": {
+          "spaces": "학습공간대여 및 신청",
+          "rentals": "신청내역확인"
+        }
+      },
+      "aiAdvisor": {
+        "title": "AI 어드바이저",
+        "items": {
+          "mbti": "직업매칭(MBTI)"
+        }
+      }
+    }
+  },
+  "professor": {
+    "sections": {
+      "community": {
+        "title": "커뮤니티",
+        "items": {
+          "notices": "공지사항",
+          "resources": "자료실",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "competency": {
+        "title": "역량 관리",
+        "items": {
+          "dashboard": "역량 조회"
+        }
+      },
+      "course": {
+        "title": "교과 관리",
+        "items": {
+          "offerings": "내 강의 목록",
+          "syllabus": "강의 계획서",
+          "grades": "성적 입력",
+          "attendance": "출석 관리"
+        }
+      },
+      "mentoring": {
+        "title": "멘토링",
+        "items": {
+          "apply": "멘토 요청",
+          "chat": "멘토링 채팅"
+        }
+      }
+    }
+  },
+  "admin": {
+    "sections": {
+      "community": {
+        "title": "커뮤니티",
+        "items": {
+          "notices": "공지사항",
+          "resources": "자료실",
+          "faqs": "FAQ",
+          "qna": "Q&A"
+        }
+      },
+      "authority": {
+        "title": "권한 관리",
+        "items": {
+          "departments": "학과관리",
+          "accounts": "계정관리",
+          "semesters": "학기관리"
+        }
+      },
+      "systemStatus": {
+        "title": "시스템현황 관리",
+        "items": {
+          "accountLogs": "계정로그관리"
+        }
+      },
+      "survey": {
+        "title": "설문 통합 관리",
+        "items": {
+          "surveys": "설문 목록",
+          "statistics": "설문 통계"
+        }
+      },
+      "competency": {
+        "title": "역량 통합 관리",
+        "items": {
+          "intro": "6Cs 란?",
+          "students": "학생역량활동조회",
+          "diagnosis": "역량진단지 관리",
+          "results": "통합역량결과 관리"
+        }
+      },
+      "course": {
+        "title": "교과 관리",
+        "items": {
+          "curriculars": "교과 관리",
+          "offerings": "교과운영 관리",
+          "grades": "교과성적 관리"
+        }
+      },
+      "extra": {
+        "title": "비교과 관리",
+        "items": {
+          "programs": "비교과 관리",
+          "offerings": "비교과운영 관리",
+          "grades": "비교과성적관리"
+        }
+      },
+      "mentoring": {
+        "title": "멘토링",
+        "items": {
+          "recruitments": "모집 공고 등록",
+          "applications": "신청 승인",
+          "matching": "멘토-멘티 매칭"
+        }
+      },
+      "space": {
+        "title": "학습 공간 대여",
+        "items": {
+          "spaces": "학습공간 목록",
+          "rentals": "학습공간 신청 목록"
+        }
+      }
+    }
+  }
+}

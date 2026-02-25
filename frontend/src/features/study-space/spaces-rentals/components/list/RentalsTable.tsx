@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React from "react";
 import styles from "./RentalsPage.module.css";
 import type { RentalDto } from "../../api/types";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   data: RentalDto[];
@@ -11,25 +12,25 @@ type Props = {
 };
 
 export default function RentalsTable({ data, loading, onApprove, onReject }: Props) {
-  if (loading) return <div style={{ padding: 40, textAlign: "center" }}>로딩 중...</div>;
-  if (!data || data.length === 0) return <div style={{ padding: 40, textAlign: "center" }}>신청 내역이 없습니다.</div>;
+  const t = useI18n("studySpace.admin.rentals.table");
+
+  if (loading) return <div style={{ padding: 40, textAlign: "center" }}>{t("loading")}</div>;
+  if (!data || data.length === 0) return <div style={{ padding: 40, textAlign: "center" }}>{t("empty")}</div>;
 
   // ✅ 내림차순 정렬 (원본 data 변형 방지)
-  const sorted = useMemo(() => {
-    return [...data].sort((a, b) => (b.rentalId ?? 0) - (a.rentalId ?? 0));
-  }, [data]);
+  const sorted = [...data].sort((a, b) => (b.rentalId ?? 0) - (a.rentalId ?? 0));
 
   return (
     <table className={styles.table}>
       <thead className={styles.thead}>
         <tr>
-          <th className={styles.th}>번호</th>
-          <th className={styles.th}>장소</th>
-          <th className={styles.th}>이름</th>
-          <th className={styles.th}>신청자</th>
-          <th className={styles.th}>예약 날짜</th>
-          <th className={styles.th}>예약 시간</th>
-          <th className={styles.th}>요청 일시</th>
+          <th className={styles.th}>{t("headers.id")}</th>
+          <th className={styles.th}>{t("headers.space")}</th>
+          <th className={styles.th}>{t("headers.room")}</th>
+          <th className={styles.th}>{t("headers.applicant")}</th>
+          <th className={styles.th}>{t("headers.date")}</th>
+          <th className={styles.th}>{t("headers.time")}</th>
+          <th className={styles.th}>{t("headers.requestedAt")}</th>
           <th className={styles.th}></th>
         </tr>
       </thead>
@@ -41,7 +42,7 @@ export default function RentalsTable({ data, loading, onApprove, onReject }: Pro
             <td className={styles.td}>{item.space.spaceName}</td>
             <td className={styles.td}>{item.room.roomName}</td>
             <td className={styles.td} style={{ fontWeight: "bold" }}>
-              {item.applicant.name || `User#${item.applicant.accountId}`}
+              {item.applicant.name || t("userFallback", { id: item.applicant.accountId })}
             </td>
             <td className={styles.td} style={{ fontWeight: "bold" }}>{item.rentalDate}</td>
             <td className={styles.td} style={{ fontWeight: "bold" }}>
@@ -56,7 +57,7 @@ export default function RentalsTable({ data, loading, onApprove, onReject }: Pro
                     disabled
                     style={{ backgroundColor: "#e5e7eb", color: "#9ca3af", borderColor: "#e5e7eb" }}
                   >
-                    취소됨
+                    {t("statuses.canceled")}
                   </Button>
                 ) : (
                   <>
@@ -65,14 +66,14 @@ export default function RentalsTable({ data, loading, onApprove, onReject }: Pro
                       disabled={item.status === "APPROVED"}
                       onClick={() => onApprove(item.rentalId)}
                     >
-                      허가
+                      {t("buttons.approve")}
                     </Button>
                     <Button
                       variant={item.status === "REJECTED" ? "secondary" : "danger"}
                       disabled={item.status === "REJECTED"}
                       onClick={() => onReject(item.rentalId)}
                     >
-                      반려
+                      {t("buttons.reject")}
                     </Button>
                   </>
                 )}

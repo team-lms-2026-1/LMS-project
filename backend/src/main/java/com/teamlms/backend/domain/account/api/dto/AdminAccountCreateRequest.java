@@ -22,9 +22,9 @@ public class AdminAccountCreateRequest {
 
     @NotBlank
     @Size(min = 6)
-    // 영문+숫자+특수문자 포함(간단버전)
+    // 영문 대/소문자 + 숫자 포함
     @Pattern(
-    regexp = "^(?=.*[A-Za-z])(?=.*\\d)\\S{6,}$",
+    regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)\\S{6,}$",
     message = "{validation.account.password.pattern}"
     )
     private String password;

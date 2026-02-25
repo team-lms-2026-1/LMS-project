@@ -3,6 +3,7 @@
 
 import styles from "./SpacesTable.module.css";
 import type { SpaceListItemDto } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   items: SpaceListItemDto[];
@@ -10,19 +11,25 @@ type Props = {
   onCardClick?: (spaceId: number) => void;
 };
 
-function toPeopleText(minPeople: number, maxPeople: number) {
-  if (minPeople && maxPeople) return `${minPeople}–${maxPeople} people`;
-  if (maxPeople) return `1–${maxPeople} people`;
+function toPeopleText(
+  minPeople: number,
+  maxPeople: number,
+  t: ReturnType<typeof useI18n>
+) {
+  if (minPeople && maxPeople) return t("peopleRange", { min: minPeople, max: maxPeople });
+  if (maxPeople) return t("peopleUpTo", { max: maxPeople });
   return "";
 }
 
 export function SpacesTable({ items, loading = false, onCardClick }: Props) {
+  const t = useI18n("studySpace.student.spaces.table");
+
   if (loading) {
-    return <div className={styles.skeleton}>로딩 중...</div>;
+    return <div className={styles.skeleton}>{t("loading")}</div>;
   }
 
   if (!items?.length) {
-    return <div className={styles.empty}>표시할 학습공간이 없습니다.</div>;
+    return <div className={styles.empty}>{t("empty")}</div>;
   }
 
   return (
@@ -31,7 +38,7 @@ export function SpacesTable({ items, loading = false, onCardClick }: Props) {
         // spaceId가 타입에 없거나 백엔드가 다른 키를 쓰면 여기만 맞춰줘
         const spaceId = (s as any).spaceId ?? idx;
 
-        const peopleText = toPeopleText(s.minPeople, s.maxPeople);
+        const peopleText = toPeopleText(s.minPeople, s.maxPeople, t);
 
         return (
           <button
@@ -61,7 +68,7 @@ export function SpacesTable({ items, loading = false, onCardClick }: Props) {
                 </div>
 
                 <span className={`${styles.badge} ${s.isRentable ? styles.badgeOk : styles.badgeNo}`}>
-                  {s.isRentable ? "대여가능" : "대여불가"}
+                  {s.isRentable ? t("status.rentable") : t("status.notRentable")}
                 </span>
               </div>
             </div>

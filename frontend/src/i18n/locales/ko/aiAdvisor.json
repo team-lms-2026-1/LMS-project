@@ -1,0 +1,60 @@
+{
+  "mbti": {
+    "loading": "로딩 중...",
+    "home": {
+      "title": "MBTI AI 추천",
+      "description": "검사를 시작하면 기존 결과가 있어도 새 결과로 덮어씁니다.",
+      "start": {
+        "kicker": "새로 시작",
+        "title": "검사 시작",
+        "description": "MBTI 검사를 새로 진행하고 관심 키워드를 선택해 추천을 생성합니다.",
+        "button": "검사 시작"
+      },
+      "result": {
+        "kicker": "바로 확인",
+        "title": "결과 보기",
+        "description": "저장된 최신 MBTI/직업 추천 결과를 바로 확인합니다.",
+        "hasResult": "저장된 결과가 있습니다.",
+        "noResult": "저장된 결과가 없습니다.",
+        "button": "결과 보기"
+      }
+    },
+    "test": {
+      "title": "MBTI 검사",
+      "progress": "총 {totalCount}문항 중 {answeredCount}문항 응답 완료",
+      "submitButton": "관심 키워드 선택으로 이동"
+    },
+    "keywords": {
+      "title": "관심 키워드 선택",
+      "description": "최소 {minCount}개 이상 선택해 주세요.",
+      "submitButton": "추천 결과 보기"
+    },
+    "result": {
+      "title": "MBTI 기반 추천 결과",
+      "intro": "성향 점수와 관심 키워드를 반영한 AI 추천입니다.",
+      "noScoreData": "저장된 MBTI 점수 정보가 없습니다.",
+      "jobsTitle": "AI 추천 직업 5개",
+      "emptyMessage": "저장된 직업 추천 결과가 없습니다. 검사를 먼저 진행해 주세요.",
+      "fallbackReasonWithKeywords": "{jobName}은(는) {mbtiType} 성향과 {keywords} 같은 관심사를 바탕으로 추천된 직업입니다.",
+      "fallbackReasonWithoutKeywords": "{jobName}은(는) {mbtiType} 성향과 업무 선호를 바탕으로 추천된 직업입니다."
+    },
+    "messages": {
+      "initLoadFailed": "MBTI 정보를 불러오지 못했습니다.",
+      "loadQuestionsFailed": "MBTI 문항을 불러오지 못했습니다.",
+      "noSavedResult": "저장된 결과가 없습니다. 검사를 먼저 진행해 주세요.",
+      "answerAllQuestions": "모든 문항에 응답해 주세요.",
+      "generateResultFailed": "MBTI 결과 생성에 실패했습니다.",
+      "testCompleted": "MBTI 검사가 완료되었습니다.",
+      "submitFailed": "MBTI 제출 중 오류가 발생했습니다.",
+      "selectMinKeywords": "관심 키워드를 최소 {minCount}개 선택해 주세요.",
+      "recommendationCreated": "추천 결과가 생성되었습니다.",
+      "createRecommendationFailed": "추천 결과 생성 중 오류가 발생했습니다."
+    }
+  },
+  "testPage": {
+    "title": "AI 테스트",
+    "placeholder": "질문을 입력하세요",
+    "askButton": "질문하기",
+    "askFailed": "질문 처리에 실패했습니다."
+  }
+}

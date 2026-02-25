@@ -13,16 +13,17 @@ type Props = {
     deptId: number;
     majorId: number | null;
     enrolledStudentCount?: number;
+    isActive?: boolean;
     open: boolean;
     onClose: () => void;
     onSuccess: () => void;
 };
 
-export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, open, onClose, onSuccess }: Props) {
+export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, isActive, open, onClose, onSuccess }: Props) {
     const [form, setForm] = useState<UpdateMajorRequest>({
         majorName: "",
         description: "",
-        isActive: true,   // 기본값: 활성
+        isActive: isActive ?? true,
     });
     const [originalCode, setOriginalCode] = useState("");
     const [loading, setLoading] = useState(false);
@@ -41,10 +42,11 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, op
             setFetching(true);
             const res = await fetchMajorForUpdate(deptId, majorId!);
             const data = res.data;
+            const nextIsActive = typeof data.isActive === "boolean" ? data.isActive : (isActive ?? true);
             setForm({
                 majorName: data.majorName,
                 description: data.description || "",
-                isActive: true,   // 수정 시 항상 활성이 디폴트
+                isActive: nextIsActive,
             });
             setOriginalCode(data.majorCode);
         } catch (e: any) {
@@ -89,7 +91,7 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, op
             onClose={onClose}
             title="전공 수정"
             footer={
-                <div className="flex justify-end gap-2">
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
                     <Button
                         variant="secondary"
                         onClick={onClose}

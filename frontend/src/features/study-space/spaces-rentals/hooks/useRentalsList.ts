@@ -2,8 +2,10 @@
 import { rentalsApi } from "../api/rentalsApi";
 import type { RentalDto, RentalListParams, PageMeta } from "../api/types";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 export function useRentalsList(initialParams: RentalListParams = { page: 1, size: 10 }) {
+  const t = useI18n("studySpace.admin.rentals.hook");
   const [data, setData] = useState<RentalDto[]>([]);
   const [meta, setMeta] = useState<PageMeta | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,21 +26,17 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
     } catch (e: any) {
       console.error(e);
 
-      // cleaned comment
       setData([]);
       setMeta(null);
 
-      const msg =
-        e?.status
-          ? `목록을 불러오지 못했습니다. (HTTP ${e.status})`
-          : "목록을 불러오지 못했습니다.";
+      const msg = e?.status ? t("errors.listWithStatus", { status: e.status }) : t("errors.list");
       setError(msg);
     } finally {
       if (!opts?.silent) {
         setLoading(false);
       }
     }
-  }, [params]);
+  }, [params, t]);
 
   useEffect(() => {
     fetchList();
@@ -67,22 +65,22 @@ export function useRentalsList(initialParams: RentalListParams = { page: 1, size
   const approveRental = async (id: number) => {
     try {
       await rentalsApi.approve(id);
-      toast.success("승인되었습니다.");
+      toast.success(t("toasts.approved"));
       fetchList();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.status ? `처리 중 오류가 발생했습니다. (HTTP ${e.status})` : "처리 중 오류가 발생했습니다.");
+      toast.error(e?.status ? t("errors.processWithStatus", { status: e.status }) : t("errors.process"));
     }
   };
 
   const rejectRental = async (id: number, reason: string) => {
     try {
       await rentalsApi.reject(id, reason);
-      toast.success("반려되었습니다.");
+      toast.success(t("toasts.rejected"));
       fetchList();
     } catch (e: any) {
       console.error(e);
-      toast.error("처리 중 오류가 발생했습니다.");
+      toast.error(t("errors.process"));
     }
   };
 

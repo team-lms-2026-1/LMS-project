@@ -10,6 +10,7 @@ import type {
   RentalRawDto,
 } from "../api/types";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 type AccountMeResponse = {
   data?: {
@@ -77,6 +78,7 @@ function normalizeRental(raw: RentalRawDto): RentalDto {
 }
 
 export function useRental(initialParams: RentalListParams = { page: 1, size: 10 }) {
+  const t = useI18n("studySpace.student.rentals.hook");
   const [me, setMe] = useState<AuthMeDto | null>(null);
   const [meLoading, setMeLoading] = useState(false);
   const [meError, setMeError] = useState("");
@@ -96,15 +98,15 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
       const res = await rentalsApi.me();
       const parsed = normalizeMe(res);
       setMe(parsed);
-      if (!parsed) setMeError("내 정보를 불러오지 못했습니다.");
+      if (!parsed) setMeError(t("errors.me"));
     } catch (e: any) {
       console.error(e);
       setMe(null);
-      setMeError(e?.status ? `내 정보를 불러오지 못했습니다. (HTTP ${e.status})` : "내 정보를 불러오지 못했습니다.");
+      setMeError(e?.status ? t("errors.meWithStatus", { status: e.status }) : t("errors.me"));
     } finally {
       setMeLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchList = useCallback(async () => {
     setLoading(true);
@@ -130,11 +132,11 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
       console.error(e);
       setData([]);
       setMeta(null);
-      setError(e?.status ? `목록을 불러오지 못했습니다. (HTTP ${e.status})` : "목록을 불러오지 못했습니다.");
+      setError(e?.status ? t("errors.listWithStatus", { status: e.status }) : t("errors.list"));
     } finally {
       setLoading(false);
     }
-  }, [params, me?.accountId]);
+  }, [params, me?.accountId, t]);
 
   useEffect(() => {
     fetchMe();
@@ -168,11 +170,11 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
   const cancelRental = async (rentalId: number) => {
     try {
       await rentalsApi.cancel(rentalId);
-      toast.success("예약이 취소되었습니다.");
+      toast.success(t("toasts.cancelled"));
       fetchList();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.status ? `취소 중 오류가 발생했습니다. (HTTP ${e.status})` : "취소 중 오류가 발생했습니다.");
+      toast.error(e?.status ? t("errors.cancelWithStatus", { status: e.status }) : t("errors.cancel"));
     }
   };
 

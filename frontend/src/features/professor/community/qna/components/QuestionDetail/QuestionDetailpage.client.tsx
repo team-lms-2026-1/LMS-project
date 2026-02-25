@@ -11,9 +11,33 @@ type LoadState =
   | { loading: true; error: string | null; data: null }
   | { loading: false; error: string | null; data: QnaDetailDto | null };
 
+function pickCreatedAt(raw: any) {
+  return raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+}
+
 function normalizeDetail(payload: any): QnaDetailDto {
   const raw = payload?.data ?? payload;
-  const created = raw?.createAt ?? raw?.createdAt ?? raw?.cerateAt ?? raw?.create_at ?? "";
+  const answerRaw = raw?.answer ?? raw?.answerDto ?? raw?.answerInfo ?? raw?.answerContent ?? null;
+
+  const answer =
+    answerRaw && typeof answerRaw === "string"
+      ? {
+          answerId: 0,
+          content: String(answerRaw),
+          authorName: String(raw?.answerAuthorName ?? ""),
+          createdAt: String(raw?.answerCreatedAt ?? ""),
+        }
+      : answerRaw
+        ? {
+            answerId: Number(answerRaw.answerId ?? 0),
+            content: String(answerRaw.content ?? answerRaw.answerContent ?? ""),
+            authorName: String(answerRaw.authorName ?? ""),
+            createdAt: String(pickCreatedAt(answerRaw)),
+            updatedAt: answerRaw?.updatedAt ? String(answerRaw.updatedAt) : undefined,
+          }
+        : null;
+
+  const hasAnswer = typeof raw?.hasAnswer === "boolean" ? raw.hasAnswer : Boolean(answer?.content?.trim());
 
   return {
     questionId: Number(raw?.questionId ?? 0),
@@ -22,8 +46,9 @@ function normalizeDetail(payload: any): QnaDetailDto {
     content: String(raw?.content ?? ""),
     authorName: String(raw?.authorName ?? ""),
     viewCount: Number(raw?.viewCount ?? 0),
-    createdAt: String(created),
-    hasAnswer: Boolean(raw?.hasAnswer),
+    createdAt: String(pickCreatedAt(raw)),
+    answer,
+    hasAnswer,
     authorId: raw?.authorId,
     authorLoginId: raw?.authorLoginId,
   };
@@ -84,6 +109,9 @@ export default function QuestionDetailpageClient() {
   }, [questionId, t]);
 
   const data = state.data;
+  const answer = data?.answer ?? null;
+  const answerContent = answer?.content?.trim() ?? "";
+  const hasAnswerContent = Boolean(answerContent);
 
   const badgeStyle = useMemo(() => {
     const bg = data?.category?.bgColorHex ?? "#EEF2F7";
@@ -133,6 +161,35 @@ export default function QuestionDetailpageClient() {
 
             <div className={styles.contentBox}>
               <div className={styles.contentText}>{data.content}</div>
+            </div>
+
+            <div className={styles.answerPanel}>
+              <div className={styles.answerHeader}>
+                <div className={styles.answerTitle}>{t("texts.answerTitle")}</div>
+                {hasAnswerContent && (
+                  <div className={styles.answerMeta}>
+                    {answer?.authorName && (
+                      <>
+                        <span className={styles.answerMetaLabel}>{t("labels.author")}</span>
+                        <span className={styles.answerMetaValue}>{answer.authorName}</span>
+                      </>
+                    )}
+                    {answer?.createdAt && (
+                      <>
+                        <span className={styles.answerMetaLabel}>{t("labels.createdAt")}</span>
+                        <span className={styles.answerMetaValue}>{formatDateTime(answer.createdAt)}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className={styles.answerViewBox}>
+                {hasAnswerContent ? (
+                  <div className={styles.answerViewText}>{answerContent}</div>
+                ) : (
+                  <div className={styles.answerEmpty}>{t("texts.answerEmpty")}</div>
+                )}
+              </div>
             </div>
 
             <div className={styles.footerRow}>

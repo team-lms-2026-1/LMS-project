@@ -4,6 +4,7 @@ import React from "react";
 import styles from "./ReserveConfirmModal.module.css";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
   open: boolean;
@@ -26,21 +27,22 @@ export default function ReserveConfirmModal({
   onClose,
   loading = false,
 }: Props) {
+  const t = useI18n("studySpace.student.spaces.reserveConfirmModal");
   const hasTime = !!startTime && !!endTime;
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title="예약 신청"
+      title={t("title")}
       size="sm"
       footer={
         <>
           <Button variant="secondary" onClick={onClose} disabled={loading}>
-            취소
+            {t("buttons.cancel")}
           </Button>
           <Button variant="primary" onClick={onConfirm} loading={loading}>
-            신청
+            {t("buttons.submit")}
           </Button>
         </>
       }
@@ -51,23 +53,23 @@ export default function ReserveConfirmModal({
             <>
               <b className={styles.emph}>&quot;{roomName}&quot;</b>
               <br />
-              예약을 신청할까요?
+              {t("questionWithRoom")}
             </>
           ) : (
-            <>예약을 신청할까요?</>
+            <>{t("questionWithoutRoom")}</>
           )}
         </p>
 
         <div className={styles.meta}>
           {rentalDate && (
             <div className={styles.metaRow}>
-              <span className={styles.metaLabel}>날짜</span>
+              <span className={styles.metaLabel}>{t("labels.date")}</span>
               <span className={styles.metaValue}>{rentalDate}</span>
             </div>
           )}
           {hasTime && (
             <div className={styles.metaRow}>
-              <span className={styles.metaLabel}>시간</span>
+              <span className={styles.metaLabel}>{t("labels.time")}</span>
               <span className={styles.metaValue}>
                 {startTime} ~ {endTime}
               </span>
@@ -75,7 +77,7 @@ export default function ReserveConfirmModal({
           )}
         </div>
 
-        <p className={styles.sub}>신청 후에는 승인 결과를 기다려주세요.</p>
+        <p className={styles.sub}>{t("description")}</p>
       </div>
     </Modal>
   );
