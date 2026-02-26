@@ -27,8 +27,10 @@ function PasswordResetForm() {
         e.preventDefault();
         setError(null);
 
-        if (newPassword.length < 8) {
-            setError("비밀번호는 8자 이상이어야 합니다.");
+        // 백엔드 규칙: 소문자+대문자+숫자 포함, 6자 이상, 공백 불가
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)\S{6,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            setError("비밀번호는 6자 이상이며 영문 대문자, 소문자, 숫자를 모두 포함해야 합니다.");
             return;
         }
         if (newPassword !== confirmPassword) {
@@ -46,11 +48,7 @@ function PasswordResetForm() {
 
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
-                const msg = data?.message ?? "비밀번호 재설정에 실패했습니다.";
-                // 토큰 만료/무효 케이스 안내
-                if (res.status === 400 || res.status === 422) {
-                    throw new Error("링크가 만료되었거나 유효하지 않습니다. 비밀번호 재설정을 다시 요청해주세요.");
-                }
+                const msg = data?.error?.message ?? data?.message ?? "비밀번호 재설정에 실패했습니다.";
                 throw new Error(msg);
             }
 
@@ -94,7 +92,8 @@ function PasswordResetForm() {
 
                     <div className={styles.centerTitle}>새 비밀번호 설정</div>
                     <div className={styles.centerDesc}>
-                        사용할 새 비밀번호를 입력해주세요. (8자 이상)
+                        사용할 새 비밀번호를 입력해주세요.<br />
+                        (대문자+소문자+숫자 포함, 6자 이상)
                     </div>
 
                     <form className={styles.centerForm} onSubmit={onSubmit}>
@@ -104,7 +103,7 @@ function PasswordResetForm() {
                             type="password"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="8자 이상 입력"
+                            placeholder="대문자+소문자+숫자 포함, 6자 이상"
                             autoComplete="new-password"
                             required
                             disabled={!token}
