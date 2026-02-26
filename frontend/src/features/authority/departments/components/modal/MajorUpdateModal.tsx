@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import styles from "../../styles/DepartmentModal.module.css";
 import { Button } from "@/components/button/Button";
 import { Modal } from "@/components/modal/Modal";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     deptId: number;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, isActive, open, onClose, onSuccess }: Props) {
+    const t = useI18n("authority.departments.modals.majorUpdate");
     const [form, setForm] = useState<UpdateMajorRequest>({
         majorName: "",
         description: "",
@@ -50,7 +52,7 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
             });
             setOriginalCode(data.majorCode);
         } catch (e: any) {
-            toast.error(e.message || "전공 정보 조회 실패");
+            toast.error(e.message || t("toasts.loadFailed"));
             onClose();
         } finally {
             setFetching(false);
@@ -59,7 +61,7 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
 
     const handleToggleActive = (checked: boolean) => {
         if (!checked && hasStudents) {
-            toast.error(`재학생이 ${enrolledStudentCount}명 있는 전공은 비활성화할 수 없습니다.`);
+            toast.error(t("validation.cannotDeactivateWithStudents", { count: enrolledStudentCount }));
             return;
         }
         setForm({ ...form, isActive: checked });
@@ -69,17 +71,17 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
         e.preventDefault();
         if (!majorId) return;
         if (!form.majorName) {
-            toast.error("전공명을 입력해주세요.");
+            toast.error(t("validation.requiredMajorName"));
             return;
         }
 
         try {
             setLoading(true);
             await updateMajor(deptId, majorId, form);
-            toast.success("전공 정보가 수정되었습니다.");
+            toast.success(t("toasts.updateSuccess"));
             onSuccess();
         } catch (error: any) {
-            toast.error(error.message || "전공 수정 실패");
+            toast.error(error.message || t("toasts.updateFailed"));
         } finally {
             setLoading(false);
         }
@@ -89,7 +91,7 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
         <Modal
             open={open}
             onClose={onClose}
-            title="전공 수정"
+            title={t("title")}
             footer={
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
                     <Button
@@ -97,7 +99,7 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
                         onClick={onClose}
                         disabled={loading}
                     >
-                        취소
+                        {t("buttons.cancel")}
                     </Button>
                     {!fetching &&
                         <Button
@@ -105,7 +107,7 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
                             form="major-update-form"
                             disabled={loading}
                         >
-                            {loading ? "저장 중..." : "저장"}
+                            {loading ? t("buttons.saving") : t("buttons.save")}
                         </Button>
                     }
                 </div>
@@ -113,12 +115,12 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
         >
             {fetching ? (
                 <div style={{ padding: '48px', textAlign: 'center', color: '#6b7280' }}>
-                    정보를 불러오는 중...
+                    {t("loading")}
                 </div>
             ) : (
                 <form id="major-update-form" onSubmit={handleSubmit}>
                     <div className={styles.field}>
-                        <label className={styles.label}>전공코드</label>
+                        <label className={styles.label}>{t("fields.majorCode.label")}</label>
                         <input
                             className={styles.input}
                             value={originalCode}
@@ -129,43 +131,45 @@ export function MajorUpdateModal({ deptId, majorId, enrolledStudentCount = 0, is
 
                     <div className={styles.field}>
                         <label className={styles.label}>
-                            전공이름<span className={styles.required}>*</span>
+                            {t("fields.majorName.label")}<span className={styles.required}>*</span>
                         </label>
                         <input
                             className={styles.input}
                             value={form.majorName}
                             onChange={(e) => setForm({ ...form, majorName: e.target.value })}
-                            placeholder="전공 이름 입력"
+                            placeholder={t("fields.majorName.placeholder")}
                             disabled={loading}
                         />
                     </div>
 
                     <div className={styles.field}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <label className={styles.label} style={{ marginBottom: 0 }}>사용 여부</label>
+                            <label className={styles.label} style={{ marginBottom: 0 }}>
+                                {t("fields.isActive.label")}
+                            </label>
                             <ToggleSwitch
                                 checked={form.isActive}
                                 onChange={handleToggleActive}
-                                disabled={hasStudents && !form.isActive === false}
+                                disabled={hasStudents && form.isActive}
                             />
                             <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                                {form.isActive ? "활성" : "비활성"}
+                                {form.isActive ? t("fields.isActive.active") : t("fields.isActive.inactive")}
                             </span>
                         </div>
                         {hasStudents && (
                             <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px' }}>
-                                재학생 {enrolledStudentCount}명이 있어 비활성화할 수 없습니다.
+                                {t("fields.isActive.studentConstraint", { count: enrolledStudentCount })}
                             </p>
                         )}
                     </div>
 
                     <div className={styles.field}>
-                        <label className={styles.label}>설명</label>
+                        <label className={styles.label}>{t("fields.description.label")}</label>
                         <textarea
                             className={styles.textarea}
                             value={form.description}
                             onChange={(e) => setForm({ ...form, description: e.target.value })}
-                            placeholder="전공에 대한 설명"
+                            placeholder={t("fields.description.placeholder")}
                             disabled={loading}
                         />
                     </div>
