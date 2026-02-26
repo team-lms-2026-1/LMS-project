@@ -17,4 +17,4 @@ EC2에 배포 파이프라인 구축
  docker compose -f infra/docker-compose.local.yml up --build
 
 //PR후 EC2 서버에 잘 올라갔는지 확인 할때
-http://43.201.157.8:3000/
+https://teamlms.duckdns.org
