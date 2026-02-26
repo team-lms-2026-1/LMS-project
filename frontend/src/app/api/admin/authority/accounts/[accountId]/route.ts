@@ -1,5 +1,8 @@
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
 import { resolveBaseUrl } from "@/lib/bff";
+
+const TAG_ACCOUNTS = "admin:authority:accounts";
 
 function buildHeaders() {
   let token = cookies().get("access_token")?.value;
@@ -62,7 +65,9 @@ export async function GET(req: Request, ctx: { params: { accountId: string } }) 
 
 /** 수정: 백엔드가 PATCH를 기대하므로 PATCH로 프록시 */
 export async function PATCH(req: Request, ctx: { params: { accountId: string } }) {
-  return proxyToUpstream("PATCH", req, ctx);
+  const res = await proxyToUpstream("PATCH", req, ctx);
+  if (res.ok) revalidateTag(TAG_ACCOUNTS);
+  return res;
 }
 
 /**
@@ -70,5 +75,7 @@ export async function PATCH(req: Request, ctx: { params: { accountId: string } }
  * (프론트 수정이 끝나면 PUT은 제거해도 됨)
  */
 export async function PUT(req: Request, ctx: { params: { accountId: string } }) {
-  return proxyToUpstream("PATCH", req, ctx);
+  const res = await proxyToUpstream("PATCH", req, ctx);
+  if (res.ok) revalidateTag(TAG_ACCOUNTS);
+  return res;
 }
