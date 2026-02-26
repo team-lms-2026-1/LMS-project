@@ -1,3 +1,22 @@
+.table {
+    width: 100%;
+}
+
+.rowClickCell {
+    width: 100%;
+    display: block;
+    text-align: inherit;
+    cursor: pointer;
+}
+
+.titleText {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -25,4 +44,18 @@
 
 .titleLink:hover {
     text-decoration: underline;
+}
+
+.table :global(tbody tr td) {
+    transition: background-color 0.12s ease;
+}
+
+.table :global(tbody tr:hover td) {
+    background-color: #f9fafb;
+}
+
+.rowTall td {
+    padding-top: 14px;
+    padding-bottom: 14px;
+    height: 60px;
 }

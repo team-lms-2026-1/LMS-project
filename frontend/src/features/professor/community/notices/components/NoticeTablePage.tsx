@@ -15,10 +15,13 @@ type Props = {
 export function NoticesTable({ items, loading, onEditClick }: Props) {
     const router = useRouter();
     const t = useI18n("community.notices.professor.table");
+    const goDetail = (id: number) => {
+        router.push(`/professor/community/notices/${id}`);
+    };
     const columns: Array<TableColumn<NoticeListItemDto>> = [
-        { header: t("headers.id"), align: "left", render: (r) => r.noticeId },
+        { header: t("headers.id"), align: "center", render: (r) => r.noticeId },
         {
-            header: t("headers.category"), align: "left", render: (r) => {
+            header: t("headers.category"), align: "center", render: (r) => {
                 const c = r.category;
                 if (!c) return t("uncategorized");
                 return (
@@ -36,8 +39,10 @@ export function NoticesTable({ items, loading, onEditClick }: Props) {
                 <button
                     type="button"
                     className={styles.titleLink}
-                    // 교수용 경로로 수정
-                    onClick={() => router.push(`/professor/community/notices/${r.noticeId}`)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        goDetail(r.noticeId);
+                    }}
                 >
                     {r.title}
                 </button>
@@ -55,6 +60,8 @@ export function NoticesTable({ items, loading, onEditClick }: Props) {
             skeletonRowCount={10}
             rowKey={(r) => r.noticeId}
             emptyText={t("emptyText")}
+            rowClassName={styles.rowTall}
+            onRowClick={(r) => goDetail(r.noticeId)}
         />
     );
 }

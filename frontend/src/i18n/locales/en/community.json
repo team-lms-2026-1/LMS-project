@@ -237,6 +237,7 @@
       },
       "list": {
         "title": "Notices",
+        "categoryAll": "All",
         "searchPlaceholder": "Search by title"
       },
       "table": {
@@ -278,6 +279,7 @@
       },
       "list": {
         "title": "Notices",
+        "categoryAll": "All",
         "searchPlaceholder": "Search by title"
       },
       "table": {
@@ -478,6 +480,7 @@
       },
       "list": {
         "title": "Resources",
+        "categoryAll": "All",
         "searchPlaceholder": "Search by title"
       },
       "table": {
@@ -519,6 +522,7 @@
       },
       "list": {
         "title": "Resources",
+        "categoryAll": "All",
         "searchPlaceholder": "Search by title"
       },
       "table": {
@@ -696,6 +700,7 @@
       },
       "list": {
         "title": "FAQ",
+        "categoryAll": "All",
         "searchPlaceholder": "Search by title"
       },
       "table": {
@@ -734,6 +739,7 @@
       },
       "list": {
         "title": "FAQ",
+        "categoryAll": "All",
         "searchPlaceholder": "Search by title"
       },
       "table": {
@@ -973,6 +979,7 @@
       },
       "list": {
         "title": "Q&A",
+        "categoryAll": "All",
         "searchPlaceholder": "Search by title"
       },
       "table": {

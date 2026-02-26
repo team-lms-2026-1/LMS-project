@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { FaqListResponse } from "./types";
+import { FaqListResponse, FaqCategoryListResponse } from "./types";
 
 export type FaqListQuery = {
     page?: number;
@@ -13,7 +13,7 @@ export async function fetchFaqList(query: FaqListQuery) {
     if (query.page) sp.set("page", String(query.page));
     if (query.size) sp.set("size", String(query.size));
     if (query.keyword) sp.set("keyword", query.keyword);
-    if (query.categoryId) sp.set("categoryId", String(query.categoryId));
+    if (typeof query.categoryId === "number") sp.set("categoryId", String(query.categoryId));
 
     const qs = sp.toString();
     const url = qs
@@ -21,6 +21,10 @@ export async function fetchFaqList(query: FaqListQuery) {
         : `/api/professor/community/faqs`;
 
     return getJson<FaqListResponse>(url);
+}
+
+export async function fetchFaqCategories() {
+    return getJson<FaqCategoryListResponse>(`/api/professor/community/faqs/categories`);
 }
 
 export async function fetchFaqDetail(faqId: number) {

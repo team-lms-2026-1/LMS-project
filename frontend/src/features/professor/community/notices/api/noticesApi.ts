@@ -1,10 +1,11 @@
 import { getJson } from "@/lib/http";
-import { NoticeListResponse } from "./types";
+import { NoticeListResponse, NoticeCategoryListResponse } from "./types";
 
 export type NoticesListQuery = {
     page?: number;
     size?: number;
     keyword?: string;
+    categoryId?: number;
 };
 
 export async function fetchNoticesList(query: NoticesListQuery) {
@@ -12,6 +13,7 @@ export async function fetchNoticesList(query: NoticesListQuery) {
     if (query.page) sp.set("page", String(query.page));
     if (query.size) sp.set("size", String(query.size));
     if (query.keyword) sp.set("keyword", query.keyword);
+    if (typeof query.categoryId === "number") sp.set("categoryId", String(query.categoryId));
 
     const qs = sp.toString();
     const url = qs
@@ -19,6 +21,10 @@ export async function fetchNoticesList(query: NoticesListQuery) {
         : `/api/professor/community/notices`;
 
     return getJson<NoticeListResponse>(url);
+}
+
+export async function fetchNoticeCategories() {
+    return getJson<NoticeCategoryListResponse>(`/api/professor/community/notices/categories`);
 }
 
 export async function fetchNoticeDetail(noticeId: number) {
