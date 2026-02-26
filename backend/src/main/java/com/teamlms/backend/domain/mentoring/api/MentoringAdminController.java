@@ -76,4 +76,18 @@ public class MentoringAdminController {
             @PathVariable Long id) {
         return ApiResponse.ok(queryService.getApplications(id));
     }
+
+    // [Admin] 멘토링 매칭 목록 조회
+    @GetMapping("/recruitments/{id}/matchings")
+    public ApiResponse<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringMatchingAdminResponse>> getAdminMatchings(
+            @PathVariable Long id) {
+        return ApiResponse.ok(queryService.getAdminMatchings(id));
+    }
+
+    // [Admin] 멘토링 매칭 채팅 내역 조회
+    @GetMapping("/matchings/{id}/chat")
+    public ApiResponse<java.util.List<com.teamlms.backend.domain.mentoring.api.dto.MentoringChatMessageResponse>> getAdminChatHistory(
+            @PathVariable Long id) {
+        return ApiResponse.ok(queryService.getChatHistory(id));
+    }
 }

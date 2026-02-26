@@ -156,27 +156,32 @@ public class MentoringCommandService {
     public void match(Long adminId, MentoringMatchingRequest request) {
         MentoringApplication mentorApp = applicationRepository.findById(request.getMentorApplicationId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
-        MentoringApplication menteeApp = applicationRepository.findById(request.getMenteeApplicationId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
 
-        if (menteeApp.getStatus() == MentoringApplicationStatus.MATCHED) {
-            throw new BusinessException(ErrorCode.MENTORING_ALREADY_MATCHED);
+        java.util.List<MentoringMatching> matchingsToSave = new java.util.ArrayList<>();
+        
+        for (Long menteeId : request.getMenteeApplicationIds()) {
+            MentoringApplication menteeApp = applicationRepository.findById(menteeId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
+
+            if (menteeApp.getStatus() == MentoringApplicationStatus.MATCHED) {
+                throw new BusinessException(ErrorCode.MENTORING_ALREADY_MATCHED);
+            }
+
+            MentoringMatching matching = MentoringMatching.builder()
+                    .recruitmentId(request.getRecruitmentId())
+                    .mentorApplicationId(request.getMentorApplicationId())
+                    .menteeApplicationId(menteeId)
+                    .status(MentoringMatchingStatus.ACTIVE)
+                    .matchedAt(LocalDateTime.now())
+                    .matchedBy(adminId)
+                    .build();
+
+            matchingsToSave.add(matching);
+            menteeApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
         }
 
-        MentoringMatching matching = MentoringMatching.builder()
-                .recruitmentId(request.getRecruitmentId())
-                .mentorApplicationId(request.getMentorApplicationId())
-                .menteeApplicationId(request.getMenteeApplicationId())
-                .status(MentoringMatchingStatus.ACTIVE)
-                .matchedAt(LocalDateTime.now())
-                .matchedBy(adminId)
-                .build();
-
-        matchingRepository.save(matching);
-
-        // Update statuses
+        matchingRepository.saveAll(matchingsToSave);
         mentorApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
-        menteeApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
     }
 
     private final MentoringQuestionRepository questionRepository;

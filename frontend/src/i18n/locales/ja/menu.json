@@ -168,7 +168,8 @@
         "items": {
           "recruitments": "募集公告登録",
           "applications": "申請承認",
-          "matching": "メンター・メンティーマッチング"
+          "matching": "メンター・メンティーマッチング",
+          "chat": "チャット履歴確認"
         }
       },
       "space": {

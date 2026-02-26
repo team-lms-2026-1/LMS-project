@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useDepartmentProfessors } from "../../hooks/useDepartmentDetail";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
@@ -13,6 +12,7 @@ import { Button } from "@/components/button/Button";
 import { ConfirmModal } from "@/components/modal";
 import { updateHeadProfessor } from "../../api/departmentsApi";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     deptId: number;
@@ -21,7 +21,7 @@ type Props = {
 };
 
 export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary }: Props) {
-    const router = useRouter();
+    const t = useI18n("authority.departments.detail.professorsTab");
     const { items, meta, page, keyword, loading, setPage, setKeyword, reload } = useDepartmentProfessors(deptId);
 
     const [confirmTarget, setConfirmTarget] = useState<DepartmentProfessorListItem | null>(null);
@@ -32,11 +32,11 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
         try {
             setAssigning(true);
             await updateHeadProfessor(deptId, confirmTarget.accountId);
-            toast.success("학과장이 지정되었습니다.");
+            toast.success(t("toasts.assignSuccess"));
             if (reloadSummary) reloadSummary();
             reload();
         } catch (e: any) {
-            toast.error(e.message || "학과장 지정 실패");
+            toast.error(e.message || t("toasts.assignFailed"));
         } finally {
             setAssigning(false);
             setConfirmTarget(null);
@@ -44,12 +44,12 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
     };
 
     const columns: TableColumn<DepartmentProfessorListItem>[] = [
-        { header: "교번", field: "professorNo", width: "15%" },
-        { header: "이름", field: "name", width: "20%" },
-        { header: "이메일", field: "email", width: "25%" },
-        { header: "전화번호", field: "phone", width: "20%" },
+        { header: t("table.headers.professorNo"), field: "professorNo", width: "15%" },
+        { header: t("table.headers.name"), field: "name", width: "20%" },
+        { header: t("table.headers.email"), field: "email", width: "25%" },
+        { header: t("table.headers.phone"), field: "phone", width: "20%" },
         {
-            header: "관리",
+            header: t("table.headers.manage"),
             width: "20%",
             align: "center",
             render: (row) => {
@@ -57,7 +57,7 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
                 if (isHead) {
                     return (
                         <span className="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
-                            학과장
+                            {t("table.headProfessorBadge")}
                         </span>
                     );
                 }
@@ -68,7 +68,7 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
                             onClick={() => setConfirmTarget(row)}
                             className="px-2 py-1 text-xs h-8"
                         >
-                            학과장 지정
+                            {t("table.assignHeadProfessor")}
                         </Button>
                     </div>
                 );
@@ -80,10 +80,17 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
         <div className="mt-4">
             <div className={styles.filterRow}>
                 <div className="w-64">
-                    <SearchBar value={keyword} onChange={setKeyword} onSearch={() => setPage(1)} placeholder="이름 / 교번 검색" />
+                    <SearchBar
+                        value={keyword}
+                        onChange={setKeyword}
+                        onSearch={() => setPage(1)}
+                        placeholder={t("searchPlaceholder")}
+                    />
                 </div>
                 <div className={styles.statsContainer}>
-                    <span className={styles.statItemProfessor}>교수명수: {meta.totalElements}명</span>
+                    <span className={styles.statItemProfessor}>
+                        {t("stats.professorCount", { count: meta.totalElements })}
+                    </span>
                 </div>
             </div>
 
@@ -93,7 +100,7 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
                     items={items}
                     rowKey={(row) => row.accountId}
                     loading={loading}
-                    emptyText="소속 교수가 없습니다."
+                    emptyText={t("table.emptyText")}
                 />
 
                 <div className={styles.footerRow}>
@@ -107,10 +114,11 @@ export default function DepartmentProfessorsTab({ deptId, summary, reloadSummary
 
             <ConfirmModal
                 open={confirmTarget !== null}
-                title="학과장 지정"
-                message={confirmTarget ? `'${confirmTarget.name}' 교수를 학과장으로 지정하시겠습니까?` : ""}
+                title={t("confirm.title")}
+                message={confirmTarget ? t("confirm.message", { name: confirmTarget.name }) : ""}
                 onConfirm={handleAssignConfirm}
                 onCancel={() => setConfirmTarget(null)}
+                loading={assigning}
                 type="primary"
             />
         </div>

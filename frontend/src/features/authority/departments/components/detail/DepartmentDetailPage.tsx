@@ -6,9 +6,8 @@ import { useState } from "react";
 import DepartmentProfessorsTab from "./DepartmentProfessorsTab";
 import DepartmentStudentsTab from "./DepartmentStudentsTab";
 import DepartmentMajorsTab from "./DepartmentMajorsTab";
-import { Button } from "@/components/button/Button";
-import Link from "next/link"; // Next.js Link
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     deptId: number;
@@ -21,6 +20,7 @@ import styles from "../../styles/DepartmentDetail.module.css";
 // ...
 
 export default function DepartmentDetailPage({ deptId }: Props) {
+    const t = useI18n("authority.departments.detail.page");
     const router = useRouter();
     const { summary, loadingSummary, reloadSummary } = useDepartmentDetail(deptId);
     const [activeTab, setActiveTab] = useState<TabKey>("PROFESSOR");
@@ -32,7 +32,7 @@ export default function DepartmentDetailPage({ deptId }: Props) {
                     className={styles.backBtn}
                     onClick={() => router.push("/admin/authority/departments")}
                 >
-                    목록으로 →
+                    {t("backToList")}
                 </button>
             </div>
 
@@ -44,19 +44,19 @@ export default function DepartmentDetailPage({ deptId }: Props) {
                     className={`${styles.tabButton} ${activeTab === "PROFESSOR" ? styles.tabButtonActive : ""}`}
                     onClick={() => setActiveTab("PROFESSOR")}
                 >
-                    소속 교수
+                    {t("tabs.professors")}
                 </button>
                 <button
                     className={`${styles.tabButton} ${activeTab === "STUDENT" ? styles.tabButtonActive : ""}`}
                     onClick={() => setActiveTab("STUDENT")}
                 >
-                    소속 학생
+                    {t("tabs.students")}
                 </button>
                 <button
                     className={`${styles.tabButton} ${activeTab === "MAJOR" ? styles.tabButtonActive : ""}`}
                     onClick={() => setActiveTab("MAJOR")}
                 >
-                    전공 관리
+                    {t("tabs.majors")}
                 </button>
             </div>
 

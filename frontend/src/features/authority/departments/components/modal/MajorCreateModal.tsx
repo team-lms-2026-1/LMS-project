@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import styles from "../../styles/DepartmentModal.module.css";
 import { Button } from "@/components/button/Button";
 import { Modal } from "@/components/modal/Modal";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     deptId: number;
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function MajorCreateModal({ deptId, open, onClose, onSuccess }: Props) {
+    const t = useI18n("authority.departments.modals.majorCreate");
     const [form, setForm] = useState<CreateMajorRequest>({
         majorCode: "",
         majorName: "",
@@ -28,17 +30,17 @@ export function MajorCreateModal({ deptId, open, onClose, onSuccess }: Props) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.majorCode || !form.majorName) {
-            toast.error("필수 항목을 입력해주세요.");
+            toast.error(t("validation.requiredFields"));
             return;
         }
 
         try {
             setLoading(true);
             await createMajor(deptId, form);
-            toast.success("전공이 추가되었습니다.");
+            toast.success(t("toasts.createSuccess"));
             onSuccess();
         } catch (error: any) {
-            toast.error(error.message || "전공 추가 실패");
+            toast.error(error.message || t("toasts.createFailed"));
         } finally {
             setLoading(false);
         }
@@ -48,7 +50,7 @@ export function MajorCreateModal({ deptId, open, onClose, onSuccess }: Props) {
         <Modal
             open={open}
             onClose={onClose}
-            title="전공 추가"
+            title={t("title")}
             footer={
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
                     <Button
@@ -56,14 +58,14 @@ export function MajorCreateModal({ deptId, open, onClose, onSuccess }: Props) {
                         onClick={onClose}
                         disabled={loading}
                     >
-                        취소
+                        {t("buttons.cancel")}
                     </Button>
                     <Button
                         type="submit"
                         form="major-create-form"
                         disabled={loading}
                     >
-                        {loading ? "생성 중..." : "전공 생성"}
+                        {loading ? t("buttons.creating") : t("buttons.create")}
                     </Button>
                 </div>
             }
@@ -71,50 +73,52 @@ export function MajorCreateModal({ deptId, open, onClose, onSuccess }: Props) {
             <form id="major-create-form" onSubmit={handleSubmit}>
                 <div className={styles.field}>
                     <label className={styles.label}>
-                        전공이름<span className={styles.required}>*</span>
+                        {t("fields.majorName.label")}<span className={styles.required}>*</span>
                     </label>
                     <input
                         className={styles.input}
                         value={form.majorName}
                         onChange={(e) => setForm({ ...form, majorName: e.target.value })}
-                        placeholder="전공 이름 입력"
+                        placeholder={t("fields.majorName.placeholder")}
                         disabled={loading}
                     />
                 </div>
 
                 <div className={styles.field}>
                     <label className={styles.label}>
-                        전공코드<span className={styles.required}>*</span>
+                        {t("fields.majorCode.label")}<span className={styles.required}>*</span>
                     </label>
                     <input
                         className={styles.input}
                         value={form.majorCode}
                         onChange={(e) => setForm({ ...form, majorCode: e.target.value })}
-                        placeholder="전공 코드 입력"
+                        placeholder={t("fields.majorCode.placeholder")}
                         disabled={loading}
                     />
                 </div>
 
                 <div className={styles.field}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <label className={styles.label} style={{ marginBottom: 0 }}>사용 여부</label>
+                        <label className={styles.label} style={{ marginBottom: 0 }}>
+                            {t("fields.isActive.label")}
+                        </label>
                         <ToggleSwitch
                             checked={form.isActive}
                             onChange={(chk) => setForm({ ...form, isActive: chk })}
                         />
                         <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                            {form.isActive ? "활성" : "비활성"}
+                            {form.isActive ? t("fields.isActive.active") : t("fields.isActive.inactive")}
                         </span>
                     </div>
                 </div>
 
                 <div className={styles.field}>
-                    <label className={styles.label}>설명</label>
+                    <label className={styles.label}>{t("fields.description.label")}</label>
                     <textarea
                         className={styles.textarea}
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        placeholder="전공에 대한 설명"
+                        placeholder={t("fields.description.placeholder")}
                         disabled={loading}
                     />
                 </div>

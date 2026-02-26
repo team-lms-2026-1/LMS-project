@@ -77,6 +77,7 @@ const SECTIONS: NavSection[] = [
       { labelKey: "sections.mentoring.items.recruitments", href: "/admin/mentoring/recruitments" },
       { labelKey: "sections.mentoring.items.applications", href: "/admin/mentoring/applications" },
       { labelKey: "sections.mentoring.items.matching", href: "/admin/mentoring/matching" },
+      { labelKey: "sections.mentoring.items.chat", href: "/admin/mentoring/chat" },
     ],
   },
   {

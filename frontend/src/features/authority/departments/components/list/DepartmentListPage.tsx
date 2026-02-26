@@ -15,8 +15,10 @@ import { toggleDepartmentActive } from "../../api/departmentsApi";
 import toast from "react-hot-toast";
 import styles from "../../styles/DepartmentList.module.css";
 import { ToggleSwitch } from "@/components/toggle/ToggleSwitch";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function DepartmentListPage() {
+    const t = useI18n("authority.departments.list");
     const router = useRouter();
     const {
         items,
@@ -71,14 +73,14 @@ export default function DepartmentListPage() {
         try {
             // 3. API 호출
             await toggleDepartmentActive(dept.deptId, checked);
-            toast.success("상태가 변경되었습니다.");
+            toast.success(t("toasts.statusUpdated"));
             // 성공 시 별도 작업 불필요 (이미 반영됨)
             // 단, 서버 데이터와 일치를 보장하려면 reload()를 할 수도 있지만, 
             // AccountListPage 패턴을 따르면 reload 없이 유지합니다.
         } catch (e: any) {
             // 4. 실패 시 롤백
             setRows(previousRows);
-            toast.error(e.message || "상태 변경 실패");
+            toast.error(e.message || t("toasts.statusUpdateFailed"));
         } finally {
             // 5. Pending 제거
             setPendingIds((prev) => {
@@ -91,13 +93,28 @@ export default function DepartmentListPage() {
 
     // 테이블 컬럼 정의
     const columns: TableColumn<DepartmentListItem>[] = [
-        { header: "학과코드", field: "deptCode", width: "12%" },
-        { header: "학과명", field: "deptName", width: "20%" },
-        { header: "학과장", field: "headProfessorName", width: "15%", render: (row) => row.headProfessorName || "-" },
-        { header: "재학생수", field: "studentCount", width: "10%", render: (row) => `${row.studentCount}명` },
-        { header: "교수 수", field: "professorCount", width: "10%", render: (row) => `${row.professorCount}명` },
+        { header: t("table.headers.deptCode"), field: "deptCode", width: "12%" },
+        { header: t("table.headers.deptName"), field: "deptName", width: "20%" },
         {
-            header: "사용여부",
+            header: t("table.headers.headProfessor"),
+            field: "headProfessorName",
+            width: "15%",
+            render: (row) => row.headProfessorName || t("table.headProfessorFallback"),
+        },
+        {
+            header: t("table.headers.studentCount"),
+            field: "studentCount",
+            width: "10%",
+            render: (row) => t("table.studentCountValue", { count: row.studentCount }),
+        },
+        {
+            header: t("table.headers.professorCount"),
+            field: "professorCount",
+            width: "10%",
+            render: (row) => t("table.professorCountValue", { count: row.professorCount }),
+        },
+        {
+            header: t("table.headers.isActive"),
             field: "isActive",
             width: "10%",
             align: "center",
@@ -112,7 +129,7 @@ export default function DepartmentListPage() {
             ),
         },
         {
-            header: "관리",
+            header: t("table.headers.manage"),
             width: "10%",
             align: "center",
             render: (row) => (
@@ -122,7 +139,7 @@ export default function DepartmentListPage() {
                         onClick={() => setEditDeptId(row.deptId)}
                         className="!h-7 !px-2 !py-0 !text-xs"
                     >
-                        수정
+                        {t("table.actions.edit")}
                     </Button>
                 </div>
             ),
@@ -131,15 +148,15 @@ export default function DepartmentListPage() {
 
     return (
         <div className={styles.page}>
-            <div className={styles.breadcrumb}>권한 관리 - 학과 관리</div>
+            <div className={styles.breadcrumb}>{t("breadcrumb")}</div>
 
             <div className={styles.headerRow}>
-                <h1 className={styles.title}>학과 목록</h1>
+                <h1 className={styles.title}>{t("title")}</h1>
                 <div className="w-64">
                     <SearchBar
                         value={term}
                         onChange={setTerm}
-                        placeholder="학과코드 / 학과명 입력"
+                        placeholder={t("searchPlaceholder")}
                         onSearch={handleSearch}
                     />
                 </div>
@@ -152,7 +169,7 @@ export default function DepartmentListPage() {
                     rowKey={(row) => row.deptId}
                     loading={loading}
                     onRowClick={(row) => router.push(`/admin/authority/departments/${row.deptId}`)}
-                    emptyText="등록된 학과가 없습니다."
+                    emptyText={t("table.emptyText")}
                 />
 
                 <div className={styles.footerRow}>
@@ -165,7 +182,7 @@ export default function DepartmentListPage() {
                         />
                     </div>
                     <div className={styles.footerRight}>
-                        <Button onClick={() => setIsCreateModalOpen(true)}>학과등록</Button>
+                        <Button onClick={() => setIsCreateModalOpen(true)}>{t("buttons.create")}</Button>
                     </div>
                 </div>
             </div>
