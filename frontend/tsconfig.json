@@ -33,9 +33,11 @@
     "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.json",
-    ".next/types/**/*.ts"
-, ".next/types/app/(admin)/admin/page.tsx", ".next/types/app/(admin)/admin/depts/[deptId]/page02.tsx", ".next/types/app/(admin)/admin/depts/page01.tsx"  ],
+    ".next/types/**/*.ts",
+    ".next/types/app/(admin)/admin/page.tsx",
+    ".next/types/app/(admin)/admin/depts/[deptId]/page02.tsx",
+    ".next/types/app/(admin)/admin/depts/page01.tsx"
+  ],
   "exclude": [
     "node_modules"
   ]

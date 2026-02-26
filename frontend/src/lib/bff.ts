@@ -79,7 +79,7 @@ export async function proxyToBackendPublic(req: Request, upstreamPath: string, o
 
   try {
     const incomingAcceptLanguage = req.headers.get("accept-language");
-    
+
     // 요청 본문 읽기 (POST/PATCH는 body 있음)
     let requestBody = options.body;
     if (!requestBody && (options.method === "POST" || options.method === "PATCH")) {
@@ -156,7 +156,6 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
     );
   }
 
-  const method = options.method ?? req.method ?? "GET";
   const forwardQuery = options.forwardQuery ?? true;
   const qs = forwardQuery ? new URL(req.url).search : "";
   const url = `${base.replace(/\/+$/, "")}${upstreamPath}${qs}`;
@@ -166,11 +165,10 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
 
   // ✅ 여기부터 추가
   try {
-    console.log("[BFF] ->", method, url);
     const incomingAcceptLanguage = req.headers.get("accept-language");
 
     const res = await fetch(url, {
-      method,
+      method: options.method ?? "GET",
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${token}`,

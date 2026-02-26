@@ -84,7 +84,8 @@
 }
 
 .tableBorderWrap {
-    border: 0;
+    border: 2px solid #3b82f6;
+    /* Blue border as shown in image */
     border-radius: 6px;
     margin: 0;
     overflow: hidden;
@@ -167,10 +168,11 @@
 }
 
 .paginationFooter {
-  display: flex;
-  justify-content: center; /* ✅ 중앙 */
-  align-items: center;
-  margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    /* ✅ 중앙 */
+    align-items: center;
+    margin-top: 16px;
 }
 
 .pageBtn {

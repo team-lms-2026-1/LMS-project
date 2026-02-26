@@ -161,10 +161,9 @@ export function useRental(initialParams: RentalListParams = { page: 1, size: 10 
   const updateParams = useCallback((newParams: Partial<RentalListParams>) => {
     setParams((prev) => {
       const next = { ...prev, ...newParams };
-      if (next.page === prev.page && next.size === prev.size) {
-        return prev;
-      }
-      return next;
+      const keys = Object.keys(next) as Array<keyof RentalListParams>;
+      const changed = keys.some((key) => prev[key] !== next[key]);
+      return changed ? next : prev;
     });
   }, []);
 

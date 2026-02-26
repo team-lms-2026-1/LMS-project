@@ -6,7 +6,8 @@ const TAG = "student:notices";
 export async function GET(req: Request) {
   return proxyToBackend(req, "/api/v1/student/community/notices", {
     method: "GET",
-    next: { revalidate: 600, tags: [TAG] }
+    cache: "force-cache",
+    next: { revalidate: 600, tags: [TAG] },
   });
 }
 

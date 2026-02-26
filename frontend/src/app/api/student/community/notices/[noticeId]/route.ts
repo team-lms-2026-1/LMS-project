@@ -11,7 +11,7 @@ export async function GET(req: Request, ctx: Ctx) {
 
   const res = await proxyToBackend(req, `/api/v1/student/community/notices/${encodeURIComponent(noticeId)}`, {
     method: "GET",
-    next: { revalidate: 600, tags: [TAG] },
+    cache: "no-store",
   });
 
   if (res.ok) {
