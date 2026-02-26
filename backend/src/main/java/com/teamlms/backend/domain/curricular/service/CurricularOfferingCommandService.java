@@ -272,36 +272,31 @@ public class CurricularOfferingCommandService {
             return;
         }
 
-        String safeName = (curricularName == null || curricularName.isBlank()) ? "\uad50\uacfc" : curricularName;
-        String title = "\uad50\uacfc \uc131\uc801";
-        String message = "\uad50\uacfc '" + safeName + "' \uc131\uc801\uc774 \ud655\uc815\ub418\uc5c8\uc2b5\ub2c8\ub2e4. (\ub4f1\uae09: " + grade + ")";
+        String safeName = curricularName == null ? null : curricularName.trim();
+        boolean hasName = safeName != null && !safeName.isBlank();
+
+        String titleKey = "curricular.alarm.grade.confirmed.title";
+        String messageKey;
+        Object[] messageArgs;
+
+        if (hasName) {
+            messageKey = "curricular.alarm.grade.confirmed.message";
+            messageArgs = new Object[] { safeName, grade };
+        } else {
+            messageKey = "curricular.alarm.grade.confirmed.message.default";
+            messageArgs = new Object[] { grade };
+        }
         String linkUrl = "/curricular/grade-reports";
 
-        alarmCommandService.createAlarm(
+        alarmCommandService.createAlarmI18n(
                 studentAccountId,
                 AlarmType.CURRICULAR_GRADE_CONFIRMED,
-                title,
-                message,
-                linkUrl
-        );
-    }
-
-    private void notifyCurricularScoreAssigned(Long studentAccountId, String curricularName, Integer rawScore) {
-        if (studentAccountId == null || rawScore == null) {
-            return;
-        }
-
-        String safeName = (curricularName == null || curricularName.isBlank()) ? "\uad50\uacfc" : curricularName;
-        String title = "\uad50\uacfc \uc810\uc218";
-        String message = "\uad50\uacfc '" + safeName + "' \uc810\uc218\uac00 \uc785\ub825\ub418\uc5c8\uc2b5\ub2c8\ub2e4. (\uc810\uc218: " + rawScore + ")";
-        String linkUrl = "/curricular/grade-reports";
-
-        alarmCommandService.createAlarm(
-                studentAccountId,
-                AlarmType.CURRICULAR_SCORE_ASSIGNED,
-                title,
-                message,
-                linkUrl
+                titleKey,
+                messageKey,
+                messageArgs,
+                linkUrl,
+                null,
+                null
         );
     }
 
@@ -425,13 +420,7 @@ public class CurricularOfferingCommandService {
             }
         }
 
-        boolean changed = beforeScore == null || !beforeScore.equals(rawScore);
-        if (changed) {
-            String curricularName = curricularRepository.findById(offering.getCurricularId())
-                    .map(Curricular::getCurricularName)
-                    .orElse("\uad50\uacfc");
-            notifyCurricularScoreAssigned(e.getStudentAccountId(), curricularName, rawScore);
-        }
+        // 점수 입력 알림은 보내지 않음 (성적 확정 알림만 유지)
     }
 
 

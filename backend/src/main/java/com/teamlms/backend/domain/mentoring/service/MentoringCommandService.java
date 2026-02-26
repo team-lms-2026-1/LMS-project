@@ -288,52 +288,88 @@ public class MentoringCommandService {
             return;
         }
 
-        String applicantName = applicant != null ? applicant.getLoginId() : "User";
-        String title = "멘토링";
-        String roleLabel = application.getRole() == MentoringRole.MENTOR ? "멘토" : "멘티";
-        String message = String.format("%s님이 '%s' 멘토링에 %s로 신청했습니다.",
-                applicantName, recruitment.getTitle(), roleLabel);
+        String applicantName = applicant != null && applicant.getLoginId() != null
+                ? applicant.getLoginId()
+                : "User";
+        String recruitmentTitle = recruitment != null ? recruitment.getTitle() : null;
+        boolean hasRecruitment = recruitmentTitle != null && !recruitmentTitle.isBlank();
+
+        String titleKey = "mentoring.alarm.title";
+        String messageKey;
+        Object[] messageArgs;
+
+        if (application.getRole() == MentoringRole.MENTOR) {
+            if (hasRecruitment) {
+                messageKey = "mentoring.alarm.application.new.mentor";
+                messageArgs = new Object[] { applicantName, recruitmentTitle };
+            } else {
+                messageKey = "mentoring.alarm.application.new.mentor.no_recruitment";
+                messageArgs = new Object[] { applicantName };
+            }
+        } else {
+            if (hasRecruitment) {
+                messageKey = "mentoring.alarm.application.new.mentee";
+                messageArgs = new Object[] { applicantName, recruitmentTitle };
+            } else {
+                messageKey = "mentoring.alarm.application.new.mentee.no_recruitment";
+                messageArgs = new Object[] { applicantName };
+            }
+        }
         String linkUrl = "/admin/mentoring/recruitments/" + recruitment.getRecruitmentId() + "/applications";
 
         for (Account admin : admins) {
-            alarmCommandService.createAlarm(
+            alarmCommandService.createAlarmI18n(
                     admin.getAccountId(),
                     AlarmType.MENTORING_NEW_APPLICATION,
-                    title,
-                    message,
-                    linkUrl);
+                    titleKey,
+                    messageKey,
+                    messageArgs,
+                    linkUrl,
+                    null,
+                    null);
         }
     }
+
     private void notifyApplicationStatus(MentoringApplication application) {
         Long recipientId = application.getAccountId();
         if (recipientId == null) {
             return;
         }
 
-        String title = "멘토링";
-        String message = switch (application.getStatus()) {
-            case APPROVED -> "멘토링 신청이 승인되었습니다.";
+        String titleKey = "mentoring.alarm.title";
+        String messageKey;
+        Object[] messageArgs = null;
+
+        switch (application.getStatus()) {
+            case APPROVED -> messageKey = "mentoring.alarm.application.approved";
             case REJECTED -> {
                 String reason = application.getRejectReason();
                 if (reason == null || reason.isBlank()) {
-                    yield "멘토링 신청이 반려되었습니다.";
+                    messageKey = "mentoring.alarm.application.rejected";
+                } else {
+                    messageKey = "mentoring.alarm.application.rejected.reason";
+                    messageArgs = new Object[] { reason };
                 }
-                yield "멘토링 신청이 반려되었습니다. 사유: " + reason;
             }
-            case MATCHED -> "멘토링이 매칭되었습니다.";
-            case CANCELED -> "멘토링 신청이 취소되었습니다.";
-            case APPLIED -> "멘토링 신청이 접수되었습니다.";
-        };
+            case MATCHED -> messageKey = "mentoring.alarm.application.matched";
+            case CANCELED -> messageKey = "mentoring.alarm.application.canceled";
+            case APPLIED -> messageKey = "mentoring.alarm.application.applied";
+            default -> messageKey = "mentoring.alarm.application.applied";
+        }
 
         String linkUrl = "/mentoring/recruitments/" + application.getRecruitmentId();
 
-        alarmCommandService.createAlarm(
+        alarmCommandService.createAlarmI18n(
                 recipientId,
                 AlarmType.MENTORING_APPLICATION_STATUS,
-                title,
-                message,
-                linkUrl);
+                titleKey,
+                messageKey,
+                messageArgs,
+                linkUrl,
+                null,
+                null);
     }
+
     private Long resolveChatRecipient(MentoringApplication mentorApp, MentoringApplication menteeApp, Long senderId) {
         if (senderId == null || mentorApp == null || menteeApp == null) {
             return null;
@@ -356,17 +392,21 @@ public class MentoringCommandService {
             return;
         }
 
-        String title = "멘토링";
-        String message = "멘토링 채팅 메시지가 도착했습니다.";
+        String titleKey = "mentoring.alarm.title";
+        String messageKey = "mentoring.alarm.chat.message";
         String linkUrl = "/mentoring/matchings/" + matchingId + "/chat";
 
-        alarmCommandService.createAlarm(
+        alarmCommandService.createAlarmI18n(
                 recipientId,
                 AlarmType.MENTORING_CHAT_MESSAGE,
-                title,
-                message,
-                linkUrl);
+                titleKey,
+                messageKey,
+                null,
+                linkUrl,
+                null,
+                null);
     }
+
     private String normalizeReason(String value) {
         if (value == null) {
             return null;
@@ -375,5 +415,9 @@ public class MentoringCommandService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 }
+
+
+
+
 
 

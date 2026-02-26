@@ -1,6 +1,8 @@
 package com.teamlms.backend.domain.competency.api;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 // import java.util.ArrayList;
 
 import org.springframework.data.domain.Page;
@@ -18,8 +20,20 @@ import com.teamlms.backend.domain.competency.service.DiagnosisCommandService;
 // import com.teamlms.backend.domain.competency.service.DiagnosisCommandService.QuestionUpdateData;
 import com.teamlms.backend.domain.competency.service.DiagnosisQueryService;
 // import com.teamlms.backend.domain.competency.enums.DiagnosisRunStatus;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
+import com.teamlms.backend.domain.competency.entitiy.DiagnosisRun;
+import com.teamlms.backend.domain.competency.entitiy.DiagnosisTarget;
+import com.teamlms.backend.domain.competency.enums.DiagnosisTargetStatus;
+import com.teamlms.backend.domain.competency.repository.DiagnosisRunRepository;
+import com.teamlms.backend.domain.competency.repository.DiagnosisTargetRepository;
+import com.teamlms.backend.domain.dept.entity.Dept;
+import com.teamlms.backend.domain.dept.repository.DeptRepository;
+import com.teamlms.backend.domain.semester.repository.SemesterRepository;
 import com.teamlms.backend.global.api.ApiResponse;
 import com.teamlms.backend.global.api.PageMeta;
+import com.teamlms.backend.global.exception.base.BusinessException;
+import com.teamlms.backend.global.exception.code.ErrorCode;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +45,11 @@ public class AdminDiagnosisController {
 
         private final DiagnosisCommandService diagnosisCommandService;
         private final DiagnosisQueryService diagnosisQueryService;
+        private final DiagnosisRunRepository diagnosisRunRepository;
+        private final DiagnosisTargetRepository diagnosisTargetRepository;
+        private final DeptRepository deptRepository;
+        private final SemesterRepository semesterRepository;
+        private final AlarmCommandService alarmCommandService;
 
         /**
          * 1-1. 진단지 목록 조회
@@ -152,9 +171,89 @@ public class AdminDiagnosisController {
         public ApiResponse<DiagnosisReminderResponse> sendReminders(
                         @PathVariable Long diagnosisId,
                         @Valid @RequestBody DiagnosisReminderRequest req) {
-                // Mocking sender logic
+                DiagnosisRun run = diagnosisRunRepository.findById(diagnosisId)
+                                .orElseThrow(() -> new BusinessException(ErrorCode.DIAGNOSIS_NOT_FOUND, diagnosisId));
+
+                List<DiagnosisTarget> targets;
+                if (Boolean.TRUE.equals(req.getSendToAllPending())) {
+                        targets = diagnosisTargetRepository.findPendingTargetsByRunId(diagnosisId);
+                } else {
+                        List<Long> targetIds = req.getTargetIds();
+                        if (targetIds == null || targetIds.isEmpty()) {
+                                return ApiResponse.ok(DiagnosisReminderResponse.builder()
+                                                .sentCount(0)
+                                                .failedCount(0)
+                                                .build());
+                        }
+                        targets = diagnosisTargetRepository.findAllById(targetIds).stream()
+                                        .filter(target -> target.getStatus() == DiagnosisTargetStatus.PENDING)
+                                        .filter(target -> Objects.equals(target.getRun().getRunId(), diagnosisId))
+                                        .collect(Collectors.toList());
+                }
+
+                if (targets.isEmpty()) {
+                        return ApiResponse.ok(DiagnosisReminderResponse.builder()
+                                        .sentCount(0)
+                                        .failedCount(0)
+                                        .build());
+                }
+
+                String semesterName = semesterRepository.findById(run.getSemester().getSemesterId())
+                                .map(semester -> semester.getDisplayName())
+                                .orElse(null);
+                String runTitle = run.getTitle() != null ? run.getTitle().trim() : "";
+                Integer targetGrade = run.getTargetGrade();
+                if (targetGrade != null && targetGrade <= 0) {
+                        targetGrade = null;
+                }
+
+                String deptName = null;
+                if (run.getDeptId() != null) {
+                        deptName = deptRepository.findById(run.getDeptId())
+                                        .map(Dept::getDeptName)
+                                        .orElse(null);
+                }
+
+                String titleKey = "diagnosis.alarm.reminder.title";
+                String messageKey;
+                Object[] messageArgs;
+
+                if (deptName != null && targetGrade != null) {
+                        messageKey = "diagnosis.alarm.reminder.message.dept.grade";
+                        messageArgs = new Object[] { semesterName, deptName, targetGrade, runTitle };
+                } else if (deptName != null) {
+                        messageKey = "diagnosis.alarm.reminder.message.dept";
+                        messageArgs = new Object[] { semesterName, deptName, runTitle };
+                } else if (targetGrade != null) {
+                        messageKey = "diagnosis.alarm.reminder.message.grade";
+                        messageArgs = new Object[] { semesterName, targetGrade, runTitle };
+                } else {
+                        messageKey = "diagnosis.alarm.reminder.message";
+                        messageArgs = new Object[] { semesterName, runTitle };
+                }
+
+                String linkUrl = "/competencies/dignosis/" + diagnosisId;
+
+                int sentCount = 0;
+                for (DiagnosisTarget target : targets) {
+                        if (target.getStudent() == null || target.getStudent().getAccountId() == null) {
+                                continue;
+                        }
+
+                        alarmCommandService.createAlarmI18n(
+                                        target.getStudent().getAccountId(),
+                                        AlarmType.DIAGNOSIS_REMINDER,
+                                        titleKey,
+                                        messageKey,
+                                        messageArgs,
+                                        linkUrl,
+                                        null,
+                                        null);
+                        sentCount++;
+                }
+
                 return ApiResponse.ok(DiagnosisReminderResponse.builder()
-                                .sentCount(req.getTargetIds().size())
+                                .sentCount(sentCount)
                                 .failedCount(0)
                                 .build());
         }

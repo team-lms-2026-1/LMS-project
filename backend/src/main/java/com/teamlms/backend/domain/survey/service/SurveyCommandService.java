@@ -95,9 +95,10 @@ public class SurveyCommandService {
         }
 
         if (targetRepository.countBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED) > 0) {
-            // 제목이나 기간은 수정할 수 있어도 질문을 삭제/재생성하는 것은 문제될 수 있음.
-            // 여기서는 전체 수정 시 질문 삭제 로직이 있으므로, 응답이 있으면 전체 수정을 막거나 질문 부분만 제한해야 함.
-            // 일단 질문 목록이 바뀌었는지 체크하고 바뀌었으면 막는 것이 좋으나, 간단히 응답 있으면 수정 불가로 처리.
+            // 응답자가 있으면(제출됨) 제목/기간 변경이나 질문 삭제/재생성 등이
+            // 응답 데이터와 불일치 문제를 만들 수 있음.
+            // 현재 구현은 전체 질문을 삭제 후 재생성하는 방식이므로,
+            // 응답이 하나라도 있으면 설문 전체 수정은 막는 정책으로 처리.
             throw new BusinessException(ErrorCode.SURVEY_HAS_RESPONSES);
         }
 
@@ -190,31 +191,36 @@ public class SurveyCommandService {
             return;
         }
 
-        String title = survey.getTitle() != null ? survey.getTitle() : "설문";
+        String title = survey.getTitle();
+        String titleKey = (title == null || title.isBlank()) ? "survey.alarm.title.default" : null;
         String message = buildSurveyMessage(survey.getDescription());
+        String messageKey = message == null ? "survey.alarm.message.default" : null;
         String linkUrl = "/surveys/" + survey.getSurveyId();
 
         targets.stream()
                 .map(Account::getAccountId)
                 .filter(id -> id != null)
                 .distinct()
-                .forEach(recipientId -> alarmCommandService.createAlarm(
+                .forEach(recipientId -> alarmCommandService.createAlarmI18n(
                         recipientId,
                         AlarmType.SURVEY_NEW,
+                        titleKey,
+                        messageKey,
+                        null,
+                        linkUrl,
                         title,
-                        message,
-                        linkUrl));
+                        message));
     }
 
     private String buildSurveyMessage(String description) {
         if (description == null) {
-            return "새 설문이 등록되었습니다.";
+            return null;
         }
 
         String normalized = description.replaceAll("<[^>]*>", " ");
         normalized = normalized.replaceAll("\\s+", " ").trim();
         if (normalized.isEmpty()) {
-            return "새 설문이 등록되었습니다.";
+            return null;
         }
 
         int maxLen = 80;
@@ -265,6 +271,4 @@ public class SurveyCommandService {
             }
         }
     }
-
-
 }

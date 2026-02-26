@@ -8,5 +8,38 @@
     "student": "Student",
     "admin": "Admin",
     "professor": "Professor"
+  },
+  "alarm": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "deleteAll": "Delete all",
+    "deleteOne": "Delete notification",
+    "loading": "Loading...",
+    "empty": "No notifications.",
+    "confirm": {
+      "deleteAll": "Delete all notifications?"
+    },
+    "error": {
+      "load": "Failed to load notifications.",
+      "delete": "Failed to delete notifications."
+    },
+    "badge": {
+      "notice": "Notice",
+      "mentoringNew": "Mentoring application",
+      "mentoringStatus": "Mentoring result",
+      "mentoringAnswer": "Mentoring answer",
+      "mentoringChat": "Mentoring chat",
+      "qnaComment": "Q&A comment",
+      "qnaQuestion": "Q&A question",
+      "curricularScore": "Curricular score",
+      "curricularGrade": "Curricular grade",
+      "diagnosis": "Competency diagnosis",
+      "extraSession": "Extra session",
+      "extraVideo": "Extra video",
+      "extraCompleted": "Extra completion",
+      "studyRentalRequest": "Study space request",
+      "studyRentalStatus": "Study space",
+      "survey": "Survey"
+    }
   }
 }

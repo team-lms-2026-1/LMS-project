@@ -73,6 +73,19 @@ export async function fetchDiagnosisParticipants(
   return getJson<DiagnosisParticipantsResponse>(url);
 }
 
+export type DiagnosisReminderPayload = {
+  targetIds?: number[];
+  sendToAllPending: boolean;
+};
+
+export async function sendDiagnosisReminders(
+  id: string | number,
+  payload: DiagnosisReminderPayload
+) {
+  const encodedId = encodeURIComponent(String(id));
+  return postJson(`/api/admin/competencies/dignosis/${encodedId}/reminders/send`, payload);
+}
+
 export type ResultCompetencyQuery = {
   dignosisId: string;
   deptId?: string;

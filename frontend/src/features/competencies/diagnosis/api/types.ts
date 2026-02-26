@@ -204,7 +204,7 @@ export type DiagnosisNonRespondentModalProps = {
   deptName?: string;
   dignosisId?: string;
   items?: DiagnosisNonRespondentItem[];
-  onSendEmail?: (items: DiagnosisNonRespondentItem[]) => void;
+  onSendEmail?: (items: DiagnosisNonRespondentItem[]) => void | Promise<void>;
 };
 
 export type DiagnosisNonRespondentPageItem = number | "ellipsis";

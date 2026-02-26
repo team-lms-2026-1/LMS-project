@@ -3,6 +3,8 @@ package com.teamlms.backend.domain.alarm.entity;
 import com.teamlms.backend.domain.alarm.enums.AlarmType;
 import com.teamlms.backend.global.audit.BaseEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -32,6 +34,16 @@ public class Alarm extends BaseEntity {
 
     @Column(name = "message", nullable = false, length = 1000)
     private String message;
+
+    @Column(name = "title_key", length = 200)
+    private String titleKey;
+
+    @Column(name = "message_key", length = 200)
+    private String messageKey;
+
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(name = "message_args", columnDefinition = "text")
+    private String messageArgs;
 
     @Column(name = "link_url", length = 500)
     private String linkUrl;

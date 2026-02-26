@@ -35,4 +35,18 @@ public class AlarmResponse {
                 .actorAccountId(alarm.getCreatedBy())
                 .build();
     }
+
+    public static AlarmResponse of(Alarm alarm, String title, String message) {
+        return AlarmResponse.builder()
+                .alarmId(alarm.getAlarmId())
+                .type(alarm.getType())
+                .title(title)
+                .message(message)
+                .linkUrl(alarm.getLinkUrl())
+                .read(alarm.isRead())
+                .readAt(alarm.getReadAt())
+                .createdAt(alarm.getCreatedAt())
+                .actorAccountId(alarm.getCreatedBy())
+                .build();
+    }
 }

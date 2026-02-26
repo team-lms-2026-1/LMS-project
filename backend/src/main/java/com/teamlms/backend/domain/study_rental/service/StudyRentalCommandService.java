@@ -31,7 +31,7 @@ public class StudyRentalCommandService {
 
     private final StudyRoomRentalRepository rentalRepository;
     private final StudyRoomRepository roomRepository;
-    private final AccountRepository accountRepository; // 신청자/처리자 조회용
+    private final AccountRepository accountRepository; // 요청자/처리자 조회용
     private final AlarmCommandService alarmCommandService;
 
     // 1. 예약 신청
@@ -45,7 +45,7 @@ public class StudyRentalCommandService {
         StudyRoom room = roomRepository.findById(req.getRoomId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.STUDY_RENTAL_USER_NOT_FOUND));
 
-        // 날짜+시간 결합
+        // 날짜 + 시간 결합
         LocalDateTime startAt = LocalDateTime.of(req.getRentalDate(), req.getStartTime());
         LocalDateTime endAt = LocalDateTime.of(req.getRentalDate(), req.getEndTime());
 
@@ -59,7 +59,8 @@ public class StudyRentalCommandService {
                 room.getId(),
                 RentalStatus.APPROVED,
                 startAt,
-                endAt).isEmpty();
+                endAt
+        ).isEmpty();
 
         if (isOverlapped) {
             throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_TIME);
@@ -77,8 +78,9 @@ public class StudyRentalCommandService {
         notifyRentalRequested(rental);
     }
 
+    // 2. 예약 승인/반려 처리
     public void processRental(Object principal, Long rentalId, RentalProcessRequest req) {
-        // 1. Principal에서 ID 추출 로직을 내부 메서드로 위임
+        // 1. Principal에서 ID 추출 로직을 메서드로 위임
         Long accountId = extractAccountId(principal);
 
         Account processor = accountRepository.findById(accountId)
@@ -94,12 +96,14 @@ public class StudyRentalCommandService {
                     rental.getStudyRoom().getId(),
                     RentalStatus.APPROVED,
                     rental.getStartAt(),
-                    rental.getEndAt()).isEmpty();
+                    rental.getEndAt()
+            ).isEmpty();
 
             if (isOverlapped) {
                 throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_TIME);
             }
         }
+
         rental.process(req.getStatus(), processor, req.getRejectionReason());
 
         if (previousStatus != RentalStatus.APPROVED && req.getStatus() == RentalStatus.APPROVED) {
@@ -111,9 +115,9 @@ public class StudyRentalCommandService {
         }
     }
 
-    // 3. 예약 취소 (수정됨: Principal 직접 받음)
+    // 3. 예약 취소 (Principal 직접 받음)
     public void cancelRental(Object principal, Long rentalId) {
-        // 1. ID 추출 (Controller 로직 이관)
+        // 1. ID 추출 (Controller 로직 제거)
         Long accountId = extractAccountId(principal);
 
         StudyRoomRental rental = rentalRepository.findById(rentalId)
@@ -125,7 +129,8 @@ public class StudyRentalCommandService {
         }
 
         // 3. 상태 확인
-        if (rental.getStatus() == RentalStatus.REJECTED || rental.getStatus() == RentalStatus.CANCELED) {
+        if (rental.getStatus() == RentalStatus.REJECTED
+                || rental.getStatus() == RentalStatus.CANCELED) {
             throw new BusinessException(ErrorCode.STUDY_RENTAL_NOT_UPDATE);
         }
 
@@ -157,110 +162,127 @@ public class StudyRentalCommandService {
     }
 
     private void notifyRentalApproved(StudyRoomRental rental) {
-        if (rental == null || rental.getApplicant() == null) {
-            return;
-        }
+        if (rental == null || rental.getApplicant() == null) return;
 
         Long recipientId = rental.getApplicant().getAccountId();
-        if (recipientId == null) {
-            return;
-        }
+        if (recipientId == null) return;
 
-        String title = "학습공간";
+        String titleKey = "study.rental.alarm.title";
         String details = buildRentalDetails(rental);
-        String message = "학습공간 대여가 승인되었습니다.";
-        if (!details.isBlank()) {
-            message = message + " (" + details + ")";
-        }
 
-        String linkUrl = "/study-space/spaces-rentals";
+        String messageKey = (details != null && !details.isBlank())
+                ? "study.rental.alarm.approved.with_details"
+                : "study.rental.alarm.approved";
 
-        alarmCommandService.createAlarm(
+        Object[] messageArgs = (details != null && !details.isBlank())
+                ? new Object[]{details}
+                : null;
+
+        alarmCommandService.createAlarmI18n(
                 recipientId,
                 AlarmType.STUDY_RENTAL_APPROVED,
-                title,
-                message,
-                linkUrl);
+                titleKey,
+                messageKey,
+                messageArgs,
+                "/study-space/spaces-rentals",
+                null,
+                null
+        );
     }
 
     private void notifyRentalRejected(StudyRoomRental rental) {
-        if (rental == null || rental.getApplicant() == null) {
-            return;
-        }
+        if (rental == null || rental.getApplicant() == null) return;
 
         Long recipientId = rental.getApplicant().getAccountId();
-        if (recipientId == null) {
-            return;
-        }
+        if (recipientId == null) return;
 
-        String title = "학습공간";
+        String titleKey = "study.rental.alarm.title";
         String details = buildRentalDetails(rental);
         String reason = rental.getRejectionReason();
-        String message = "학습공간 대여가 반려되었습니다.";
-        if (reason != null && !reason.isBlank()) {
-            message = message + " 사유: " + reason;
-        }
-        if (!details.isBlank()) {
-            message = message + " (" + details + ")";
+
+        String messageKey;
+        Object[] messageArgs = null;
+
+        if (reason != null && !reason.isBlank() && details != null && !details.isBlank()) {
+            messageKey = "study.rental.alarm.rejected.with_reason_details";
+            messageArgs = new Object[]{reason, details};
+        } else if (reason != null && !reason.isBlank()) {
+            messageKey = "study.rental.alarm.rejected.with_reason";
+            messageArgs = new Object[]{reason};
+        } else if (details != null && !details.isBlank()) {
+            messageKey = "study.rental.alarm.rejected.with_details";
+            messageArgs = new Object[]{details};
+        } else {
+            messageKey = "study.rental.alarm.rejected";
         }
 
-        String linkUrl = "/study-space/spaces-rentals";
-
-        alarmCommandService.createAlarm(
+        alarmCommandService.createAlarmI18n(
                 recipientId,
                 AlarmType.STUDY_RENTAL_REJECTED,
-                title,
-                message,
-                linkUrl);
+                titleKey,
+                messageKey,
+                messageArgs,
+                "/study-space/spaces-rentals",
+                null,
+                null
+        );
     }
 
     private void notifyRentalRequested(StudyRoomRental rental) {
-        if (rental == null) {
-            return;
-        }
+        if (rental == null) return;
 
         List<Account> admins = accountRepository.findAllByPermissionCodes(List.of("RENTAL_MANAGE"));
         if (admins.isEmpty()) {
             admins = accountRepository.findAllByAccountType(AccountType.ADMIN);
         }
-        if (admins.isEmpty()) {
-            return;
-        }
+        if (admins.isEmpty()) return;
 
-        Long applicantId = rental.getApplicant() != null ? rental.getApplicant().getAccountId() : null;
-        String title = "학습공간";
+        Long applicantId = rental.getApplicant() != null
+                ? rental.getApplicant().getAccountId()
+                : null;
+
+        String titleKey = "study.rental.alarm.title";
         String details = buildRentalDetails(rental);
-        String message = "학습공간 대여 신청이 접수되었습니다.";
-        if (!details.isBlank()) {
-            message = message + " (" + details + ")";
-        }
 
-        String linkUrl = "/study-space/spaces-rentals";
+        String messageKey = (details != null && !details.isBlank())
+                ? "study.rental.alarm.requested.with_details"
+                : "study.rental.alarm.requested";
+
+        Object[] messageArgs = (details != null && !details.isBlank())
+                ? new Object[]{details}
+                : null;
 
         for (Account admin : admins) {
-            Long recipientId = admin.getAccountId();
-            if (recipientId == null || recipientId.equals(applicantId)) {
+            if (admin.getAccountId() == null
+                    || admin.getAccountId().equals(applicantId)) {
                 continue;
             }
 
-            alarmCommandService.createAlarm(
-                    recipientId,
+            alarmCommandService.createAlarmI18n(
+                    admin.getAccountId(),
                     AlarmType.STUDY_RENTAL_REQUESTED,
-                    title,
-                    message,
-                    linkUrl);
+                    titleKey,
+                    messageKey,
+                    messageArgs,
+                    "/study-space/spaces-rentals",
+                    null,
+                    null
+            );
         }
     }
 
     private String buildRentalDetails(StudyRoomRental rental) {
-        if (rental == null) {
-            return "";
-        }
+        if (rental == null) return "";
 
-        String spaceName = rental.getStudyRoom() != null && rental.getStudyRoom().getStudySpace() != null
+        String spaceName = rental.getStudyRoom() != null
+                && rental.getStudyRoom().getStudySpace() != null
                 ? rental.getStudyRoom().getStudySpace().getSpaceName()
-                : "학습공간";
-        String roomName = rental.getStudyRoom() != null ? rental.getStudyRoom().getRoomName() : "";
+                : "";
+
+        String roomName = rental.getStudyRoom() != null
+                ? rental.getStudyRoom().getRoomName()
+                : "";
+
         String period = formatRentalPeriod(rental.getStartAt(), rental.getEndAt());
 
         StringBuilder details = new StringBuilder(spaceName);
@@ -275,9 +297,7 @@ public class StudyRentalCommandService {
     }
 
     private String formatRentalPeriod(LocalDateTime startAt, LocalDateTime endAt) {
-        if (startAt == null || endAt == null) {
-            return "";
-        }
+        if (startAt == null || endAt == null) return "";
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");

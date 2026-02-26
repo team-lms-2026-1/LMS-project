@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { getJson } from "@/lib/http";
 import { useAuth } from "@/features/auth/AuthProvider";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./AlarmBell.module.css";
 
 type ApiResponse<T> = {
@@ -73,49 +74,53 @@ type AlarmBadge = {
   className?: string;
 };
 
-function getAlarmBadge(type?: string | null): AlarmBadge | null {
+type Translator = ReturnType<typeof useI18n>;
+
+function getAlarmBadge(t: Translator, type?: string | null): AlarmBadge | null {
   if (!type) return null;
   switch (type) {
     case "NOTICE_NEW":
-      return { label: "공지사항", className: styles.itemBadgeNotice };
+      return { label: t("alarm.badge.notice"), className: styles.itemBadgeNotice };
     case "MENTORING_NEW_APPLICATION":
-      return { label: "멘토링 신청", className: styles.itemBadgeMentoring };
+      return { label: t("alarm.badge.mentoringNew"), className: styles.itemBadgeMentoring };
     case "MENTORING_APPLICATION_STATUS":
-      return { label: "멘토링 결과", className: styles.itemBadgeMentoring };
+      return { label: t("alarm.badge.mentoringStatus"), className: styles.itemBadgeMentoring };
     case "MENTORING_QUESTION_ANSWERED":
-      return { label: "멘토링 답변", className: styles.itemBadgeMentoring };
+      return { label: t("alarm.badge.mentoringAnswer"), className: styles.itemBadgeMentoring };
     case "MENTORING_CHAT_MESSAGE":
-      return { label: "멘토링 채팅", className: styles.itemBadgeMentoring };
+      return { label: t("alarm.badge.mentoringChat"), className: styles.itemBadgeMentoring };
     case "COMMUNITY_COMMENT":
     case "QNA_COMMENT":
-      return { label: "Q&A 댓글", className: styles.itemBadgeCommunity };
+      return { label: t("alarm.badge.qnaComment"), className: styles.itemBadgeCommunity };
     case "QNA_NEW_QUESTION":
-      return { label: "Q&A 질문", className: styles.itemBadgeCommunity };
+      return { label: t("alarm.badge.qnaQuestion"), className: styles.itemBadgeCommunity };
     case "CURRICULAR_SCORE_ASSIGNED":
-      return { label: "교과 점수", className: styles.itemBadgeCurricular };
+      return { label: t("alarm.badge.curricularScore"), className: styles.itemBadgeCurricular };
     case "CURRICULAR_GRADE_CONFIRMED":
-      return { label: "교과 성적", className: styles.itemBadgeCurricular };
+      return { label: t("alarm.badge.curricularGrade"), className: styles.itemBadgeCurricular };
+    case "DIAGNOSIS_REMINDER":
+      return { label: t("alarm.badge.diagnosis"), className: styles.itemBadgeSurvey };
     case "EXTRA_SESSION_CREATED":
-      return { label: "비교과 회차", className: styles.itemBadgeExtra };
+      return { label: t("alarm.badge.extraSession"), className: styles.itemBadgeExtra };
     case "EXTRA_SESSION_VIDEO_UPLOADED":
-      return { label: "비교과 영상", className: styles.itemBadgeExtra };
+      return { label: t("alarm.badge.extraVideo"), className: styles.itemBadgeExtra };
     case "EXTRA_OFFERING_COMPLETED":
-      return { label: "비교과 이수", className: styles.itemBadgeExtra };
+      return { label: t("alarm.badge.extraCompleted"), className: styles.itemBadgeExtra };
     case "STUDY_RENTAL_REQUESTED":
-      return { label: "학습공간 신청", className: styles.itemBadgeStudy };
+      return { label: t("alarm.badge.studyRentalRequest"), className: styles.itemBadgeStudy };
     case "STUDY_RENTAL_APPROVED":
     case "STUDY_RENTAL_REJECTED":
-      return { label: "학습공간", className: styles.itemBadgeStudy };
+      return { label: t("alarm.badge.studyRentalStatus"), className: styles.itemBadgeStudy };
     case "SURVEY_NEW":
-      return { label: "설문", className: styles.itemBadgeSurvey };
+      return { label: t("alarm.badge.survey"), className: styles.itemBadgeSurvey };
     default:
       return null;
   }
 }
 
-function normalizeTitle(item: AlarmItem) {
+function normalizeTitle(item: AlarmItem, fallbackTitle: string) {
   const raw = item.title?.trim() ?? "";
-  if (!raw) return "알림";
+  if (!raw) return fallbackTitle;
   if (item.type === "NOTICE_NEW") {
     const cleaned = raw.replace(/^\s*\[(notice|공지사항)\]\s*/i, "").trim();
     return cleaned || raw;
@@ -127,6 +132,7 @@ export default function AlarmBell() {
   const { state } = useAuth();
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
+  const t = useI18n("topbar");
 
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<AlarmItem[]>([]);
@@ -138,6 +144,7 @@ export default function AlarmBell() {
   const [error, setError] = useState<string | null>(null);
 
   const accountType = state.me?.accountType;
+  const alarmTitle = t("alarm.title");
 
   const loadUnreadCount = async () => {
     try {
@@ -157,7 +164,7 @@ export default function AlarmBell() {
       setItems(Array.isArray(res?.data) ? res.data : []);
     } catch (e: any) {
       console.error("[AlarmBell] list failed", e);
-      setError(e?.message || "알림을 불러오지 못했습니다.");
+      setError(e?.message || t("alarm.error.load"));
     } finally {
       setLoadingList(false);
     }
@@ -250,7 +257,7 @@ export default function AlarmBell() {
   const handleDeleteAll = async () => {
     if (deletingAll || items.length === 0) return;
 
-    if (!window.confirm("알림을 모두 삭제할까요?")) return;
+    if (!window.confirm(t("alarm.confirm.deleteAll"))) return;
 
     setError(null);
     setDeletingAll(true);
@@ -261,7 +268,7 @@ export default function AlarmBell() {
       void loadList();
     } catch (e: any) {
       console.error("[AlarmBell] delete-all failed", e);
-      setError(e?.message || "알림 삭제에 실패했습니다.");
+      setError(e?.message || t("alarm.error.delete"));
     } finally {
       setDeletingAll(false);
     }
@@ -284,7 +291,7 @@ export default function AlarmBell() {
       void loadList();
     } catch (e: any) {
       console.error("[AlarmBell] delete failed", e);
-      setError(e?.message || "알림 삭제에 실패했습니다.");
+      setError(e?.message || t("alarm.error.delete"));
     } finally {
       setDeletingId(null);
     }
@@ -300,7 +307,7 @@ export default function AlarmBell() {
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        title="알림"
+        title={alarmTitle}
       >
         <svg viewBox="0 0 24 24" className={styles.bellIcon} aria-hidden="true">
           <path
@@ -312,9 +319,9 @@ export default function AlarmBell() {
       </button>
 
       {open && (
-        <div className={styles.panel} role="dialog" aria-label="알림">
+        <div className={styles.panel} role="dialog" aria-label={alarmTitle}>
           <div className={styles.panelHeader}>
-            <div className={styles.panelTitle}>알림</div>
+            <div className={styles.panelTitle}>{alarmTitle}</div>
             <div className={styles.panelActions}>
               <button
                 type="button"
@@ -322,7 +329,7 @@ export default function AlarmBell() {
                 onClick={handleReadAll}
                 disabled={markingAll || unreadCount === 0}
               >
-                전체 읽음 처리
+                {t("alarm.markAllRead")}
               </button>
               <button
                 type="button"
@@ -330,7 +337,7 @@ export default function AlarmBell() {
                 onClick={handleDeleteAll}
                 disabled={deletingAll || items.length === 0}
               >
-                전체 삭제
+                {t("alarm.deleteAll")}
               </button>
             </div>
           </div>
@@ -338,13 +345,13 @@ export default function AlarmBell() {
           {error && <div className={styles.panelError}>{error}</div>}
 
           {loadingList ? (
-            <div className={styles.panelEmpty}>불러오는 중...</div>
+            <div className={styles.panelEmpty}>{t("alarm.loading")}</div>
           ) : items.length === 0 ? (
-            <div className={styles.panelEmpty}>알림이 없습니다.</div>
+            <div className={styles.panelEmpty}>{t("alarm.empty")}</div>
           ) : (
             <div className={styles.panelList}>
               {items.map((item) => {
-                const badge = getAlarmBadge(item.type);
+                const badge = getAlarmBadge(t, item.type);
                 const badgeClassName = badge?.className
                   ? `${styles.itemBadge} ${badge.className}`
                   : styles.itemBadge;
@@ -360,7 +367,7 @@ export default function AlarmBell() {
                     >
                       <div className={styles.itemHeader}>
                         {badge && <span className={badgeClassName}>{badge.label}</span>}
-                        <div className={styles.itemTitle}>{normalizeTitle(item)}</div>
+                        <div className={styles.itemTitle}>{normalizeTitle(item, alarmTitle)}</div>
                       </div>
                       {item.message && <div className={styles.itemMessage}>{item.message}</div>}
                       <div className={styles.itemMeta}>{formatDateTime(item.createdAt)}</div>
@@ -370,8 +377,8 @@ export default function AlarmBell() {
                       className={styles.itemDelete}
                       onClick={(event) => handleDelete(event, item)}
                       disabled={deletingId === item.alarmId}
-                      aria-label="알림 삭제"
-                      title="알림 삭제"
+                      aria-label={t("alarm.deleteOne")}
+                      title={t("alarm.deleteOne")}
                     >
                       <svg viewBox="0 0 24 24" className={styles.itemDeleteIcon} aria-hidden="true">
                         <path

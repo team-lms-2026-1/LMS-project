@@ -80,6 +80,7 @@ export function DignosisNonRespondentModal({
 }: DiagnosisNonRespondentModalProps) {
   const [remoteItems, setRemoteItems] = useState<DiagnosisNonRespondentItem[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const safeItems = remoteItems ?? items ?? [];
   const [page, setPage] = useState(1);
 
@@ -130,12 +131,16 @@ export function DignosisNonRespondentModal({
   }, [page, totalPages]);
 
   const deptLabel = deptName?.trim() ? deptName : "전체";
-  const handleSendEmail = () => {
+  const handleSendEmail = async () => {
     if (!onSendEmail) {
-      window.alert("이메일 전송 기능은 준비 중입니다.");
       return;
     }
-    onSendEmail(safeItems);
+    setSending(true);
+    try {
+      await onSendEmail(safeItems);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -152,9 +157,9 @@ export function DignosisNonRespondentModal({
           <Button
             variant="primary"
             onClick={handleSendEmail}
-            disabled={safeItems.length === 0}
+            disabled={safeItems.length === 0 || sending}
           >
-            이메일 전송
+            알림 전송
           </Button>
         </div>
       }

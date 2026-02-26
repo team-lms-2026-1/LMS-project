@@ -27,7 +27,6 @@ import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSess
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -261,19 +260,44 @@ public class ExtraCurricularOfferingCommandService {
             return;
         }
 
-        String safeName = (offeringName == null || offeringName.isBlank()) ? "\uBE44\uAD50\uACFC" : offeringName;
-        String title = "\uBE44\uAD50\uACFC \uC774\uC218";
-        String resultLabel = passed ? "\uC774\uC218" : "\uBBF8\uC774\uC218";
-        String message = "\uBE44\uAD50\uACFC '" + safeName + "' \uC774\uC218 \uACB0\uACFC\uAC00 \uD655\uC815\uB418\uC5C8\uC2B5\uB2C8\uB2E4. (\uACB0\uACFC: " + resultLabel + ")";
+        String safeName = normalizeName(offeringName);
+        boolean hasName = safeName != null && !safeName.isBlank();
+
+        String titleKey = "extra.curricular.alarm.completed.title";
+        String messageKey;
+        Object[] messageArgs = null;
+
+        if (passed) {
+            if (hasName) {
+                messageKey = "extra.curricular.alarm.completed.passed";
+                messageArgs = new Object[] { safeName };
+            } else {
+                messageKey = "extra.curricular.alarm.completed.passed.default";
+            }
+        } else {
+            if (hasName) {
+                messageKey = "extra.curricular.alarm.completed.failed";
+                messageArgs = new Object[] { safeName };
+            } else {
+                messageKey = "extra.curricular.alarm.completed.failed.default";
+            }
+        }
         String linkUrl = "/extra-curricular/grade-reports";
 
-        alarmCommandService.createAlarm(
+        alarmCommandService.createAlarmI18n(
                 studentAccountId,
                 AlarmType.EXTRA_OFFERING_COMPLETED,
-                title,
-                message,
-                linkUrl
+                titleKey,
+                messageKey,
+                messageArgs,
+                linkUrl,
+                null,
+                null
         );
+    }
+
+    private String normalizeName(String value) {
+        return value == null ? null : value.trim();
     }
     
     // =====================

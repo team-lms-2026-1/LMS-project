@@ -1,12 +1,14 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
 import styles from "./DignosisDetailModal.module.css";
 import { DignosisNonRespondentModal } from "./DignosisNonRespondentModal.client";
 import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
+import { sendDiagnosisReminders } from "@/features/competencies/diagnosis/api/DiagnosisApi";
 import type {
   DiagnosisScaleOption,
   DiagnosisQuestion,
@@ -14,6 +16,7 @@ import type {
   DiagnosisResponseItem,
   DiagnosisDetailModalProps,
   DiagnosisDetailLegendItem,
+  DiagnosisNonRespondentItem,
 } from "@/features/competencies/diagnosis/api/types";
 import {
   CartesianGrid,
@@ -162,6 +165,7 @@ export function DignosisDetailModal({
   const [activeTab, setActiveTab] = useState<"QUESTION" | "ANSWER">("QUESTION");
   const [questions, setQuestions] = useState<DiagnosisQuestion[]>([createDefaultQuestion()]);
   const [nonRespondentOpen, setNonRespondentOpen] = useState(false);
+  const [sendingReminders, setSendingReminders] = useState(false);
   const { options: deptOptionsRaw } = useDeptsDropdownOptions();
   const { options: semesterOptionsRaw } = useSemestersDropdownOptions();
   const deptOptions = useMemo(
@@ -328,6 +332,32 @@ export function DignosisDetailModal({
 
   const handleClose = () => {
     onClose();
+  };
+
+  const handleSendReminders = async (items: DiagnosisNonRespondentItem[]) => {
+    if (!dignosisId) {
+      toast.error("진단 ID를 확인할 수 없습니다.");
+      return;
+    }
+    if (sendingReminders) return;
+
+    setSendingReminders(true);
+    try {
+      const res: any = await sendDiagnosisReminders(dignosisId, {
+        targetIds: [],
+        sendToAllPending: true,
+      });
+      const sentCount = Number(res?.data?.sentCount ?? res?.sentCount ?? 0);
+      if (Number.isFinite(sentCount) && sentCount > 0) {
+        toast.success(`알림을 전송했습니다. (${sentCount}명)`);
+      } else {
+        toast.error("알림 대상이 없습니다.");
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "알림 전송에 실패했습니다.");
+    } finally {
+      setSendingReminders(false);
+    }
   };
 
   return (
@@ -574,6 +604,7 @@ export function DignosisDetailModal({
         deptName={deptLabel}
         items={nonRespondents}
         dignosisId={dignosisId}
+        onSendEmail={handleSendReminders}
       />
     </>
   );

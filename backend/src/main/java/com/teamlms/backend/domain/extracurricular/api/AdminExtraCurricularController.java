@@ -38,7 +38,7 @@ public class AdminExtraCurricularController {
     private final ExtraCurricularQueryService extraCurricularQueryService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> create(
             @Valid @RequestBody ExtraCurricularCreateRequest req) {
         extraCurricularCommandService.create(
@@ -51,14 +51,14 @@ public class AdminExtraCurricularController {
     }
 
     @GetMapping("/{extraCurricularId}")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<ExtraCurricularPatchForm> getEditForm(
             @PathVariable Long extraCurricularId) {
         return ApiResponse.ok(extraCurricularQueryService.editForm(extraCurricularId));
     }
 
     @PatchMapping("/{extraCurricularId}")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> patch(
             @PathVariable Long extraCurricularId,
             @Valid @RequestBody ExtraCurricularPatchRequest req) {
@@ -67,7 +67,7 @@ public class AdminExtraCurricularController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<ExtraCurricularListItem>> getList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,

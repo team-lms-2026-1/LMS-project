@@ -31,7 +31,7 @@ public class AdminExtraGradeReportController {
 
     // 0) ??? ?? ??
     @GetMapping
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<ExtraCurricularGradeListItem>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -53,7 +53,7 @@ public class AdminExtraGradeReportController {
 
     // 1) ?? ?? + ??
     @GetMapping("/{studentAccountId}")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<StudentExtraGradeDetailHeaderResponse> detail(
             @PathVariable Long studentAccountId) {
         return ApiResponse.ok(studentExtraGradeReportQueryService.getDetailHeader(studentAccountId));
@@ -61,7 +61,7 @@ public class AdminExtraGradeReportController {
 
     // 2) ??? ?? ???
     @GetMapping("/{studentAccountId}/list")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
     public ApiResponse<List<StudentExtraCompletionListItem>> listDetail(
             @PathVariable Long studentAccountId,
             @RequestParam(required = false) Long semesterId,
