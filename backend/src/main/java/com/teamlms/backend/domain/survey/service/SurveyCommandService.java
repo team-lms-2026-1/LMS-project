@@ -3,6 +3,8 @@ package com.teamlms.backend.domain.survey.service;
 import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.domain.survey.api.dto.SurveyCreateRequest;
 import com.teamlms.backend.domain.survey.api.dto.SurveyQuestionDto;
 import com.teamlms.backend.domain.survey.api.dto.SurveyTargetFilterDto;
@@ -33,6 +35,7 @@ public class SurveyCommandService {
     private final SurveyQuestionRepository questionRepository;
     private final SurveyTargetRepository targetRepository;
     private final AccountRepository accountRepository;
+    private final AlarmCommandService alarmCommandService;
 
     // 1. 설문 생성
     public void createAndPublishSurvey(Long accountId, SurveyCreateRequest request) {
@@ -71,7 +74,11 @@ public class SurveyCommandService {
 
         questionRepository.saveAll(questions);
         if (request.targetFilter() != null) {
-            createTargetSnapshot(savedSurvey, request.targetFilter());
+            List<Account> targets = resolveTargets(request.targetFilter());
+            if (!targets.isEmpty()) {
+                createTargetSnapshot(savedSurvey, targets);
+                notifySurveyCreated(savedSurvey, targets);
+            }
         }
 
     }
@@ -88,9 +95,10 @@ public class SurveyCommandService {
         }
 
         if (targetRepository.countBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED) > 0) {
-            // 제목이나 기간은 수정할 수 있어도 질문을 삭제/재생성하는 것은 문제될 수 있음.
-            // 여기서는 전체 수정 시 질문 삭제 로직이 있으므로, 응답이 있으면 전체 수정을 막거나 질문 부분만 제한해야 함.
-            // 일단 질문 목록이 바뀌었는지 체크하고 바뀌었으면 막는 것이 좋으나, 간단히 응답 있으면 수정 불가로 처리.
+            // 응답자가 있으면(제출됨) 제목/기간 변경이나 질문 삭제/재생성 등이
+            // 응답 데이터와 불일치 문제를 만들 수 있음.
+            // 현재 구현은 전체 질문을 삭제 후 재생성하는 방식이므로,
+            // 응답이 하나라도 있으면 설문 전체 수정은 막는 정책으로 처리.
             throw new BusinessException(ErrorCode.SURVEY_HAS_RESPONSES);
         }
 
@@ -136,28 +144,35 @@ public class SurveyCommandService {
         surveyRepository.delete(survey);
     }
 
-    private void createTargetSnapshot(Survey survey, SurveyTargetFilterDto filter) {
-        List<Account> targets;
+    private List<Account> resolveTargets(SurveyTargetFilterDto filter) {
+        if (filter == null) {
+            return Collections.emptyList();
+        }
+
         SurveyTargetGenType genType = filter.genType() != null ? filter.genType() : SurveyTargetGenType.ALL;
 
         if (genType == SurveyTargetGenType.ALL) {
-            targets = accountRepository.findAllByAccountType(AccountType.STUDENT);
+            return accountRepository.findAllByAccountType(AccountType.STUDENT);
         } else if (genType == SurveyTargetGenType.DEPT) {
-            targets = selectByDepts(filter.deptIds());
+            return selectByDepts(filter.deptIds());
         } else if (genType == SurveyTargetGenType.GRADE) {
-            targets = selectByGrades(filter.gradeLevels());
+            return selectByGrades(filter.gradeLevels());
         } else if (genType == SurveyTargetGenType.DEPT_GRADE) {
-            targets = selectByDeptAndGrades(filter.deptIds(), filter.gradeLevels());
-        } else {
-            // USER (직접 개별 선택)
-            if (filter.userIds() != null && !filter.userIds().isEmpty()) {
-                targets = accountRepository.findAllById(filter.userIds());
-            } else {
-                targets = Collections.emptyList();
-            }
+            return selectByDeptAndGrades(filter.deptIds(), filter.gradeLevels());
         }
 
-        if (targets.isEmpty()) return;
+        // USER (직접 개별 선택)
+        if (filter.userIds() != null && !filter.userIds().isEmpty()) {
+            return accountRepository.findAllById(filter.userIds());
+        }
+
+        return Collections.emptyList();
+    }
+
+    private void createTargetSnapshot(Survey survey, List<Account> targets) {
+        if (survey == null || targets == null || targets.isEmpty()) {
+            return;
+        }
 
         List<SurveyTarget> surveyTargets = targets.stream()
                 .map(account -> SurveyTarget.builder()
@@ -169,6 +184,51 @@ public class SurveyCommandService {
                 .collect(Collectors.toList());
 
         targetRepository.saveAll(surveyTargets);
+    }
+
+    private void notifySurveyCreated(Survey survey, List<Account> targets) {
+        if (survey == null || targets == null || targets.isEmpty()) {
+            return;
+        }
+
+        String title = survey.getTitle();
+        String titleKey = (title == null || title.isBlank()) ? "survey.alarm.title.default" : null;
+        String message = buildSurveyMessage(survey.getDescription());
+        String messageKey = message == null ? "survey.alarm.message.default" : null;
+        String linkUrl = "/surveys/" + survey.getSurveyId();
+
+        targets.stream()
+                .map(Account::getAccountId)
+                .filter(id -> id != null)
+                .distinct()
+                .forEach(recipientId -> alarmCommandService.createAlarmI18n(
+                        recipientId,
+                        AlarmType.SURVEY_NEW,
+                        titleKey,
+                        messageKey,
+                        null,
+                        linkUrl,
+                        title,
+                        message));
+    }
+
+    private String buildSurveyMessage(String description) {
+        if (description == null) {
+            return null;
+        }
+
+        String normalized = description.replaceAll("<[^>]*>", " ");
+        normalized = normalized.replaceAll("\\s+", " ").trim();
+        if (normalized.isEmpty()) {
+            return null;
+        }
+
+        int maxLen = 80;
+        if (normalized.length() <= maxLen) {
+            return normalized;
+        }
+
+        return normalized.substring(0, maxLen) + "...";
     }
 
     private List<Account> selectByDepts(List<Long> deptIds) {
@@ -211,6 +271,4 @@ public class SurveyCommandService {
             }
         }
     }
-
-
 }

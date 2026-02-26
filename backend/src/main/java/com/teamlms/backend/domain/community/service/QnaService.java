@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.community.service;
 
 import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.community.api.dto.*;
 import com.teamlms.backend.domain.community.dto.InternalQnaSearchRequest;
@@ -11,8 +12,10 @@ import com.teamlms.backend.domain.community.repository.CommunityAccountRepositor
 import com.teamlms.backend.domain.community.repository.QnaAnswerRepository;
 import com.teamlms.backend.domain.community.repository.QnaCategoryRepository;
 import com.teamlms.backend.domain.community.repository.QnaQuestionRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 
-// 에러코드 임포트
+// 에러코드 import
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 
@@ -37,8 +40,9 @@ public class QnaService {
         private final QnaCategoryRepository categoryRepository;
         private final AccountRepository accountRepository;
         private final CommunityAccountRepository communityAccountRepository;
+        private final AlarmCommandService alarmCommandService;
 
-        // --- 질문 (Question) ---
+        // --- 질문(Question) ---
 
         public Page<ExternalQnaResponse> getQuestionList(Pageable pageable, Long categoryId, String keyword) {
                 InternalQnaSearchRequest condition = InternalQnaSearchRequest.builder()
@@ -126,7 +130,9 @@ public class QnaService {
                                 .category(category).author(author)
                                 .title(request.getTitle()).content(request.getContent())
                                 .build();
-                return questionRepository.save(question).getId();
+                QnaQuestion saved = questionRepository.save(question);
+                notifyQnaQuestionCreated(saved, authorId);
+                return saved.getId();
         }
 
         @Transactional
@@ -156,11 +162,11 @@ public class QnaService {
                 Account requestUser = accountRepository.findById(userId)
                                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_AUTHOR_NOT_FOUND));
 
-                // 3. 권한 체크 (관리자이거나, 작성자 본인이거나)
-                // [수정 포인트] Account 엔티티의 필드명은 'accountType' 입니다.
+                // 3. 권한 체크 (관리자거나 작성자 본인이거나)
+                // Account 엔티티의 필드명이 accountType인 것을 전제로 함
                 boolean isAdmin = requestUser.getAccountType().name().equals("ADMIN");
 
-                // Account 엔티티의 ID 필드명은 'accountId' 이므로 getAccountId() 사용 (이건 맞음)
+                // Account 엔티티의 ID 필드명이 accountId여서 getAccountId() 사용
                 boolean isWriter = question.getAuthor().getAccountId().equals(userId);
 
                 if (!isAdmin && !isWriter) {
@@ -170,7 +176,7 @@ public class QnaService {
                 questionRepository.delete(question);
         }
 
-        // --- 답변 (Answer) ---
+        // --- 답변(Answer) ---
 
         @Transactional
         public void createAnswer(Long questionId, ExternalAnswerRequest request, Long adminId) {
@@ -185,6 +191,8 @@ public class QnaService {
                 QnaAnswer answer = QnaAnswer.builder()
                                 .question(question).author(admin).content(request.getContent()).build();
                 answerRepository.save(answer);
+
+                notifyQnaComment(question, adminId);
         }
 
         @Transactional
@@ -205,14 +213,76 @@ public class QnaService {
 
                 // 2. 답변이 있는지 확인
                 if (question.getAnswer() == null) {
-                        // 답변이 없으면 에러를 던지거나, 그냥 조용히 리턴(선택사항)
+                        // 답변이 없으면 에러를 내거나, 그냥 조용히 리턴(선택사항)
                         throw new IllegalArgumentException("삭제할 답변이 없습니다.");
                 }
 
-                // 3. 연결 끊기 (orphanRemoval = true 덕분에 여기서 자동으로 DELETE 쿼리 발생)
+                // 3. 연관 끊기 (orphanRemoval = true 설정 시 자동으로 DELETE 쿼리 발생)
                 question.removeAnswer();
 
-                // answerRepository.delete(answer); <-- 이 줄은 이제 필요 없습니다! 지우세요.
+                // answerRepository.delete(answer); <-- 여기서는 제거 필요 없음(설정에 따라)
+        }
+
+        private void notifyQnaComment(QnaQuestion question, Long actorId) {
+                Long recipientId = question.getAuthor().getAccountId();
+                if (recipientId == null || recipientId.equals(actorId)) {
+                        return;
+                }
+
+                String titleKey = "qna.alarm.answer.title";
+                String questionTitle = question.getTitle();
+                boolean hasTitle = questionTitle != null && !questionTitle.isBlank();
+                String messageKey = hasTitle ? "qna.alarm.answer.message" : "qna.alarm.answer.message.no_title";
+                Object[] messageArgs = hasTitle ? new Object[] { questionTitle } : null;
+                String linkUrl = "/community/qna/questions/" + question.getId();
+
+                alarmCommandService.createAlarmI18n(
+                                recipientId,
+                                AlarmType.QNA_COMMENT,
+                                titleKey,
+                                messageKey,
+                                messageArgs,
+                                linkUrl,
+                                null,
+                                null);
+        }
+
+        private void notifyQnaQuestionCreated(QnaQuestion question, Long actorId) {
+                if (question == null) {
+                        return;
+                }
+
+                List<Account> admins = accountRepository.findAllByPermissionCodes(List.of("QNA_MANAGE"));
+                if (admins.isEmpty()) {
+                        admins = accountRepository.findAllByAccountType(AccountType.ADMIN);
+                }
+                if (admins.isEmpty()) {
+                        return;
+                }
+
+                String titleKey = "qna.alarm.question.title";
+                String questionTitle = question.getTitle();
+                boolean hasTitle = questionTitle != null && !questionTitle.isBlank();
+                String messageKey = hasTitle ? "qna.alarm.question.message" : "qna.alarm.question.message.no_title";
+                Object[] messageArgs = hasTitle ? new Object[] { questionTitle } : null;
+                String linkUrl = "/community/qna/questions/" + question.getId();
+
+                for (Account admin : admins) {
+                        Long recipientId = admin.getAccountId();
+                        if (recipientId == null || recipientId.equals(actorId)) {
+                                continue;
+                        }
+
+                        alarmCommandService.createAlarmI18n(
+                                        recipientId,
+                                        AlarmType.QNA_NEW_QUESTION,
+                                        titleKey,
+                                        messageKey,
+                                        messageArgs,
+                                        linkUrl,
+                                        null,
+                                        null);
+                }
         }
 
         private ExternalCategoryResponse toCategoryDto(QnaCategory c) {

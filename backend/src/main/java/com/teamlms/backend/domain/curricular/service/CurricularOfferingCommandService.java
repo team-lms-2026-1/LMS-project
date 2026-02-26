@@ -10,10 +10,13 @@ import com.teamlms.backend.domain.account.entity.Account;
 import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.account.repository.ProfessorProfileRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.domain.competency.repository.CompetencyRepository;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUpdateRequest;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingBulkUpdateRequest;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingPatchRequest;
+import com.teamlms.backend.domain.curricular.entity.Curricular;
 import com.teamlms.backend.domain.curricular.entity.CurricularOffering;
 import com.teamlms.backend.domain.curricular.entity.CurricularOfferingCompetencyMap;
 import com.teamlms.backend.domain.curricular.entity.CurricularOfferingCompetencyMapId;
@@ -47,9 +50,10 @@ public class CurricularOfferingCommandService {
     private final EnrollmentRepository enrollmentRepository;
     private final CurricularOfferingCompetencyMapRepository competencyMapRepository;
     private final CompetencyRepository competencyRepository;
+    private final AlarmCommandService alarmCommandService;
 
     // =====================
-    // 개설 생성
+    // Create offering
     // =====================
     public void create(
             String offeringCode,
@@ -95,7 +99,7 @@ public class CurricularOfferingCommandService {
     }
 
     // =====================
-    // 기본 수정 (DRAFT만)
+    // Update draft offering
     // =====================
     public void patchBasic(Long offeringId, CurricularOfferingUpdateRequest req) {
 
@@ -106,7 +110,7 @@ public class CurricularOfferingCommandService {
             throw new BusinessException(ErrorCode.OFFERING_NOT_EDITABLE, offeringId, offering.getStatus());
         }
 
-        // offeringCode 수정(중복 방지)
+        // Validate offeringCode uniqueness
         if (req.offeringCode() != null && !req.offeringCode().isBlank()) {
             String nextCode = req.offeringCode().trim();
             if (!nextCode.equals(offering.getOfferingCode())
@@ -115,14 +119,14 @@ public class CurricularOfferingCommandService {
             }
         }
 
-        // semesterId 수정(존재 검증)
+        // Validate semesterId existence
         if (req.semesterId() != null) {
             if (!semesterRepository.existsById(req.semesterId())) {
                 throw new BusinessException(ErrorCode.SEMESTER_NOT_FOUND, req.semesterId());
             }
         }
 
-        // 교수 변경 시 검증
+        // Validate professor assignment
         if (req.professorAccountId() != null) {
             validateProfessor(req.professorAccountId());
         }
@@ -139,9 +143,9 @@ public class CurricularOfferingCommandService {
     }
 
     // =====================
-    // 상태 변경
-    // - OPEN → ENROLLMENT_CLOSED 자동 전환은 "수강신청 서비스"에서 처리 추천
-    // - 여기서는 "수동 상태 변경" + COMPLETED 시 확정 로직 담당
+    // Status change
+    // - OPEN -> ENROLLMENT_CLOSED is handled by enrollment flow
+    // - This method handles manual transitions and COMPLETED confirmation
     // =====================
     public void changeStatus(
             Long offeringId,
@@ -156,21 +160,21 @@ public class CurricularOfferingCommandService {
 
         validateTransition(current, targetStatus);
 
-        // 🔥 IN_PROGRESS -> COMPLETED 전환 시, 필수 체크 + 성적 확정
+        // IN_PROGRESS -> COMPLETED: validate mappings and confirm grades
         if (current == OfferingStatus.IN_PROGRESS && targetStatus == OfferingStatus.COMPLETED) {
             validateCompetencyMappingCompleted(offeringId);
-            confirmGrades(offeringId, actorAccountId);
+            confirmGrades(offering, actorAccountId);
         }
 
         offering.changeStatus(targetStatus);
     }
 
     // =====================
-    // 상태 전이 검증
+    // Validate transition
     // =====================
     private void validateTransition(OfferingStatus from, OfferingStatus to) {
 
-        // ✅ COMPLETED는 잠금 상태: 어떤 상태로도 변경 불가(취소 포함)
+        // COMPLETED is locked (no further transitions)
         if (from == OfferingStatus.COMPLETED && to != OfferingStatus.COMPLETED) {
             throw new BusinessException(
                 ErrorCode.CURRICULAR_OFFERING_STATUS_LOCKED,
@@ -178,7 +182,7 @@ public class CurricularOfferingCommandService {
             );
         }
 
-        // ✅ 허용 전이
+        // Allowed transitions
         if (from == OfferingStatus.DRAFT && to == OfferingStatus.OPEN) return;
         if (from == OfferingStatus.OPEN && to == OfferingStatus.ENROLLMENT_CLOSED) return;
 
@@ -187,7 +191,7 @@ public class CurricularOfferingCommandService {
 
         if (from == OfferingStatus.IN_PROGRESS && to == OfferingStatus.COMPLETED) return;
 
-        // 언제든 취소는 허용 (단, COMPLETED는 위에서 이미 막힘)
+        // Cancel/rollback allowed only before COMPLETED
         if (to == OfferingStatus.CANCELED) return;
 
         throw new BusinessException(
@@ -197,7 +201,7 @@ public class CurricularOfferingCommandService {
     }
 
     // =====================
-    // COMPLETED 전환 조건: 역량 매핑 6개(1~6) 완성 여부
+    // COMPLETED transition requires 6 competency mappings (1~6)
     // =====================
     private void validateCompetencyMappingCompleted(Long offeringId) {
 
@@ -219,25 +223,28 @@ public class CurricularOfferingCommandService {
     }
 
     // =====================
-    // COMPLETED 전환 조건: 성적 모두 입력 + 성적 확정(grade/완료상태)
+    // COMPLETED transition requires all scores and grade confirmation
     // =====================
-    private void confirmGrades(Long offeringId, Long actorAccountId) {
+    private void confirmGrades(CurricularOffering offering, Long actorAccountId) {
 
-        List<Enrollment> enrollments = enrollmentRepository.findByOfferingId(offeringId);
+        List<Enrollment> enrollments = enrollmentRepository.findByOfferingId(offering.getOfferingId());
+        String curricularName = curricularRepository.findById(offering.getCurricularId())
+                .map(Curricular::getCurricularName)
+                .orElse("\uad50\uacfc");
 
         for (Enrollment e : enrollments) {
 
-            // ✅ 1) 취소자는 성적 확정 대상 아님
+            // 1) Skip non-enrolled students
             if (e.getEnrollmentStatus() != EnrollmentStatus.ENROLLED) {
                 continue;
             }
 
-            // ✅ 2) 재호출 방지 (idempotent)
+            // 2) Idempotent: skip already confirmed
             if (Boolean.TRUE.equals(e.getIsGradeConfirmed())) {
                 continue;
             }
 
-            // ✅ 3) 점수 미입력은 예외
+            // 3) Raw score required
             if (e.getRawScore() == null) {
                 throw new BusinessException(
                         ErrorCode.GRADE_NOT_INPUTTED,
@@ -255,12 +262,46 @@ public class CurricularOfferingCommandService {
                     actorAccountId,
                     LocalDateTime.now()
             );
+
+            notifyCurricularGradeConfirmed(e.getStudentAccountId(), curricularName, grade);
         }
     }
 
+    private void notifyCurricularGradeConfirmed(Long studentAccountId, String curricularName, String grade) {
+        if (studentAccountId == null) {
+            return;
+        }
+
+        String safeName = curricularName == null ? null : curricularName.trim();
+        boolean hasName = safeName != null && !safeName.isBlank();
+
+        String titleKey = "curricular.alarm.grade.confirmed.title";
+        String messageKey;
+        Object[] messageArgs;
+
+        if (hasName) {
+            messageKey = "curricular.alarm.grade.confirmed.message";
+            messageArgs = new Object[] { safeName, grade };
+        } else {
+            messageKey = "curricular.alarm.grade.confirmed.message.default";
+            messageArgs = new Object[] { grade };
+        }
+        String linkUrl = "/curricular/grade-reports";
+
+        alarmCommandService.createAlarmI18n(
+                studentAccountId,
+                AlarmType.CURRICULAR_GRADE_CONFIRMED,
+                titleKey,
+                messageKey,
+                messageArgs,
+                linkUrl,
+                null,
+                null
+        );
+    }
 
     // =====================
-    // 교수 검증 공통
+    // Professor validation
     // =====================
     private void validateProfessor(Long professorAccountId) {
 
@@ -276,7 +317,8 @@ public class CurricularOfferingCommandService {
         }
     }
 
-    // 역량 맵핑
+
+    // Competency mapping
     public void patchMapping(Long offeringId, OfferingCompetencyMappingBulkUpdateRequest req) {
 
         CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
@@ -288,7 +330,7 @@ public class CurricularOfferingCommandService {
 
         var reqs = req.mappings();
 
-        // 요청 weight 중복 방지 (swap 포함해서 최종 중복만 막으면 됨)
+        // Validate unique weights
         long distinctWeight = reqs.stream()
                 .map(OfferingCompetencyMappingPatchRequest::weight)
                 .distinct()
@@ -297,14 +339,14 @@ public class CurricularOfferingCommandService {
             throw new BusinessException(ErrorCode.OFFERING_COMPETENCY_WEIGHT_DUPLICATED, offeringId);
         }
 
-        // competency 존재 검증 (N번 existsById 대신 한 방에)
+        // Validate competency existence (bulk)
         var ids = reqs.stream().map(OfferingCompetencyMappingPatchRequest::competencyId).distinct().toList();
-        long existCount = competencyRepository.countByCompetencyIdIn(ids); // 이런 메서드 하나 추가 추천
+        long existCount = competencyRepository.countByCompetencyIdIn(ids); // Prefer bulk check over N+1
         if (existCount != ids.size()) {
             throw new BusinessException(ErrorCode.COMPETENCY_NOT_FOUND, "some competencyId not found");
         }
 
-        // ✅ 핵심: 기존 맵핑 전부 삭제 후 재생성
+        // Replace existing mappings
         competencyMapRepository.deleteByIdOfferingId(offeringId);
 
         var entities = reqs.stream().map(r -> {
@@ -317,16 +359,17 @@ public class CurricularOfferingCommandService {
         competencyMapRepository.saveAll(entities);
     }
 
-    // 학생성적 입력
-    public void patchScore(Long offeringId, Long enrollmentId, Integer rawScore){
+    // Update student score
+    public void patchScore(Long offeringId, Long enrollmentId, Integer rawScore, Long actorAccountId){
 
-        // ✅ 0) 교과운영(Offering) 상태 확인: IN_PROGRESS일 때만 성적 입력 가능
+        // 0) Offering status must be IN_PROGRESS or COMPLETED
         CurricularOffering offering = curricularOfferingRepository.findById(offeringId)
             .orElseThrow(() -> new BusinessException(
                 ErrorCode.CURRICULAR_OFFERING_NOT_FOUND, offeringId
             ));
 
-        if (offering.getStatus() != OfferingStatus.IN_PROGRESS) {
+        if (offering.getStatus() != OfferingStatus.IN_PROGRESS
+                && offering.getStatus() != OfferingStatus.COMPLETED) {
             throw new BusinessException(ErrorCode.OFFERING_NOT_GRADEABLE_STATUS);
         }
 
@@ -335,28 +378,53 @@ public class CurricularOfferingCommandService {
             ErrorCode.ENROLLMENT_NOT_FOUND, enrollmentId
         ));
 
-        // 1️⃣ 다른 교과의 enrollment 방지
+        // 1) Enrollment must belong to this offering
         if (!e.getOfferingId().equals(offeringId)) {
             throw new BusinessException(ErrorCode.ENROLLMENT_OFFERING_MISMATCH);
         }
 
-        // 2️⃣ 취소자는 점수 입력 불가
+        // 2) Canceled enrollments cannot be scored
         if (e.getEnrollmentStatus() != EnrollmentStatus.ENROLLED) {
             throw new BusinessException(ErrorCode.ENROLLMENT_NOT_GRADEABLE);
         }
 
-        // 3️⃣ 이미 성적 확정되었으면 수정 불가
-        if (Boolean.TRUE.equals(e.getIsGradeConfirmed())) {
+        // 3) If grade confirmed and offering not completed, forbid change
+        if (Boolean.TRUE.equals(e.getIsGradeConfirmed())
+                && offering.getStatus() != OfferingStatus.COMPLETED) {
             throw new BusinessException(ErrorCode.GRADE_ALREADY_CONFIRMED);
         }
 
-        // 4️⃣ 점수 반영
+        // 4) Apply score update
+        Integer beforeScore = e.getRawScore();
         e.updateRawScore(rawScore);
+
+        if (offering.getStatus() == OfferingStatus.COMPLETED) {
+            String grade = GradeCalculator.fromScore(rawScore);
+            CompletionStatus completionStatus =
+                    GradeCalculator.isPassed(grade) ? CompletionStatus.PASSED : CompletionStatus.FAILED;
+
+            if (Boolean.TRUE.equals(e.getIsGradeConfirmed())) {
+                e.updateConfirmedGrade(
+                        grade,
+                        completionStatus,
+                        actorAccountId,
+                        LocalDateTime.now()
+                );
+            } else {
+                e.confirmGrade(
+                        grade,
+                        completionStatus,
+                        actorAccountId,
+                        LocalDateTime.now()
+                );
+            }
+        }
+
+        // 점수 입력 알림은 보내지 않음 (성적 확정 알림만 유지)
     }
 
 
 }
-
 // ===============================
 // GradeCalculator
 // ===============================

@@ -3,6 +3,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { DEFAULT_LOCALE, LOCALE_COOKIE_KEY, isLocale } from "@/i18n/locale";
 
 type ProxyOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -44,6 +45,22 @@ function getClientIp(req: Request): string {
   return "unknown";
 }
 
+function resolveAcceptLanguage(req: Request, optionsHeaders?: Record<string, string>) {
+  const fromOptions =
+    optionsHeaders?.["Accept-Language"] ?? optionsHeaders?.["accept-language"];
+  if (fromOptions) return fromOptions;
+
+  const cookieLocale = cookies().get(LOCALE_COOKIE_KEY)?.value;
+  if (isLocale(cookieLocale)) return cookieLocale;
+
+  const incoming = req.headers.get("accept-language");
+  if (!incoming) return DEFAULT_LOCALE;
+
+  const first = incoming.split(",")[0]?.trim() ?? "";
+  const normalized = first.split("-")[0]?.toLowerCase() ?? "";
+  return isLocale(normalized) ? normalized : DEFAULT_LOCALE;
+}
+
 async function readTextSafe(res: Response) {
   try {
     return await res.text();
@@ -78,8 +95,8 @@ export async function proxyToBackendPublic(req: Request, upstreamPath: string, o
   const userAgent = req.headers.get("user-agent") ?? "";
 
   try {
-    const incomingAcceptLanguage = req.headers.get("accept-language");
-    
+    const acceptLanguage = resolveAcceptLanguage(req, options.headers);
+
     // 요청 본문 읽기 (POST/PATCH는 body 있음)
     let requestBody = options.body;
     if (!requestBody && (options.method === "POST" || options.method === "PATCH")) {
@@ -96,7 +113,7 @@ export async function proxyToBackendPublic(req: Request, upstreamPath: string, o
         "X-Forwarded-For": clientIp,
         "User-Agent": userAgent,
         ...(requestBody ? { "Content-Type": "application/json" } : {}),
-        ...(incomingAcceptLanguage ? { "Accept-Language": incomingAcceptLanguage } : {}),
+        ...(acceptLanguage ? { "Accept-Language": acceptLanguage } : {}),
         ...(options.headers ?? {}),
       },
       body: requestBody ? JSON.stringify(requestBody) : undefined,
@@ -165,7 +182,7 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
 
   // ✅ 여기부터 추가
   try {
-    const incomingAcceptLanguage = req.headers.get("accept-language");
+    const acceptLanguage = resolveAcceptLanguage(req, options.headers);
 
     const res = await fetch(url, {
       method: options.method ?? "GET",
@@ -175,7 +192,7 @@ export async function proxyToBackend(req: Request, upstreamPath: string, options
         "X-Forwarded-For": clientIp,
         "User-Agent": userAgent,
         ...(options.body ? { "Content-Type": "application/json" } : {}),
-        ...(incomingAcceptLanguage ? { "Accept-Language": incomingAcceptLanguage } : {}),
+        ...(acceptLanguage ? { "Accept-Language": acceptLanguage } : {}),
         ...(options.headers ?? {}),
       },
       body: options.body ? JSON.stringify(options.body) : undefined,
@@ -253,6 +270,7 @@ export async function proxyStreamToBackend(req: Request, options: StreamProxyOpt
   headers.delete("content-length");
   headers.delete("cookie");
   headers.delete("accept-encoding");
+  headers.set("Accept-Language", resolveAcceptLanguage(req));
   headers.set("Authorization", `Bearer ${token}`);
   headers.set("X-Forwarded-For", clientIp);
 

@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import AlarmBell from "@/components/alarm/AlarmBell";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { useLocale } from "@/hooks/useLocale";
 import { useI18n } from "@/i18n/useI18n";
@@ -149,6 +150,7 @@ export default function AdminTopbar() {
           </div>
         )}
 
+        <AlarmBell />
         <button className={styles.profileBtn} type="button" title={t("profileTitle")}>
           <span className={styles.profileAvatar} aria-hidden="true" />
           <span className={styles.profileText}>{profileLabel}</span>
@@ -157,3 +159,4 @@ export default function AdminTopbar() {
     </div>
   );
 }
+

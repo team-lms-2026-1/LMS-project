@@ -31,12 +31,6 @@ export function NonRespondentTable({
       align: "center",
       render: (row) => row.name ?? "-",
     },
-    {
-      header: t("headers.email"),
-      align: "center",
-      cellClassName: styles.emailCell,
-      render: (row) => row.email ?? "-",
-    },
   ];
 
   return (

@@ -142,13 +142,17 @@ public class AdminCurricularOfferingController {
     @PatchMapping("/{offeringId}/students/{enrollmentId}/score")
     @PreAuthorize("hasAuthority('CURRICULAR_MANAGE')")
     public ApiResponse<SuccessResponse> patchScore(
-            @PathVariable Long offeringId,
-            @PathVariable Long enrollmentId,
-            @Valid @RequestBody OfferingScorePatchRequest req) {
+        @AuthenticationPrincipal AuthUser user,
+        @PathVariable Long offeringId,
+        @PathVariable Long enrollmentId,
+        @Valid @RequestBody OfferingScorePatchRequest req
+    ) {
         curricularOfferingCommandService.patchScore(
-                offeringId,
-                enrollmentId,
-                req.rawScore());
+            offeringId,
+            enrollmentId,
+            req.rawScore(),
+            user == null ? null : user.getAccountId()
+        );
         return ApiResponse.ok(new SuccessResponse());
     }
 

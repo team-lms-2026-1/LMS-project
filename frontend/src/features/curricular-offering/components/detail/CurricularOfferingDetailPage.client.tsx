@@ -41,12 +41,12 @@ export function CurricularOfferingDetailPageClient() {
         {/* 왼쪽 */}
         <OfferingDetailTabBar value={tab} onChange={setTab} />
         {/* 오른쪽 */}
-        <OfferingStatusDropdown offeringId={offeringId} status={data.status} onChanged = {() => actions.reload?.()} />
+        <OfferingStatusDropdown offeringId={offeringId} status={data.status} onChanged={() => actions.reload?.()} />
       </div>
 
       {/* 본문 */}
       <div className={styles.body}>
-        {tab === "detail" && <OfferingDetailSection offeringId={offeringId} data={data} onReload={() => actions.reload?.()}/>}
+        {tab === "detail" && <OfferingDetailSection offeringId={offeringId} data={data} onReload={() => actions.reload?.()} />}
         {tab === "students" && <OfferingStudentsSection offeringId={offeringId} offeringStatus={data.status} />}
         {tab === "competencies" && <OfferingCompetenciesSection offeringId={offeringId} data={data} />}
       </div>

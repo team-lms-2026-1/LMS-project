@@ -7,10 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.teamlms.backend.domain.competency.repository.CompetencyRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferingCreateRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularOfferingPatchRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingBulkUpdateRequest;
 import com.teamlms.backend.domain.extracurricular.api.dto.ExtraOfferingCompetencyMappingPatchRequest;
+import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularApplication;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOffering;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOfferingCompetencyMap;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOfferingCompetencyMapId;
@@ -24,7 +27,6 @@ import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSess
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionRepository;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -39,6 +41,7 @@ public class ExtraCurricularOfferingCommandService {
 
     private final CompetencyRepository competencyRepository;
     private final ExtraCurricularOfferingCompetencyMapRepository competencyMapRepository;
+    private final AlarmCommandService alarmCommandService;
 
     // =====================
     // 개설 생성
@@ -160,7 +163,7 @@ public class ExtraCurricularOfferingCommandService {
 
             validateCompetencyMappingCompleted(extraOfferingId);
             // ✅ 2) 그 다음에 이수 확정
-            confirmExtraCompletions(extraOfferingId);
+            confirmExtraCompletions(offering);
         }
 
         offering.changeStatus(targetStatus);
@@ -212,20 +215,21 @@ public class ExtraCurricularOfferingCommandService {
     // - apply_status=APPLIED 대상만
     // - CANCELED 제외 모든 세션 출석 완료 => PASSED
     // =====================
-    private void confirmExtraCompletions(Long extraOfferingId) {
+    private void confirmExtraCompletions(ExtraCurricularOffering offering) {
 
-        List<Long> validSessionIds = sessionRepository.findValidSessionIds(extraOfferingId);
+        List<Long> validSessionIds = sessionRepository.findValidSessionIds(offering.getExtraOfferingId());
 
         if (validSessionIds.isEmpty()) {
             throw new BusinessException(ErrorCode.EXTRA_CURRICULAR_OFFERING_NOT_COMPLETABLE, "no valid session");
         }
 
-        List<Long> applicationIds = applicationRepository.findApplicationIdsByOfferingAndApplyStatus(
-                extraOfferingId,
+        List<ExtraCurricularApplication> applications = applicationRepository.findAllByExtraOfferingIdAndApplyStatus(
+                offering.getExtraOfferingId(),
                 ExtraApplicationApplyStatus.APPLIED
         );
 
-        for (Long applicationId : applicationIds) {
+        for (ExtraCurricularApplication application : applications) {
+            Long applicationId = application.getApplicationId();
 
             long attendedCount = completionRepository.countAttendedByApplicationIdAndSessionIds(
                     applicationId, validSessionIds
@@ -246,7 +250,54 @@ public class ExtraCurricularOfferingCommandService {
                         null
                 );
             }
+
+            notifyExtraCompletionResult(application.getStudentAccountId(), offering.getExtraOfferingName(), passed);
         }
+    }
+
+    private void notifyExtraCompletionResult(Long studentAccountId, String offeringName, boolean passed) {
+        if (studentAccountId == null) {
+            return;
+        }
+
+        String safeName = normalizeName(offeringName);
+        boolean hasName = safeName != null && !safeName.isBlank();
+
+        String titleKey = "extra.curricular.alarm.completed.title";
+        String messageKey;
+        Object[] messageArgs = null;
+
+        if (passed) {
+            if (hasName) {
+                messageKey = "extra.curricular.alarm.completed.passed";
+                messageArgs = new Object[] { safeName };
+            } else {
+                messageKey = "extra.curricular.alarm.completed.passed.default";
+            }
+        } else {
+            if (hasName) {
+                messageKey = "extra.curricular.alarm.completed.failed";
+                messageArgs = new Object[] { safeName };
+            } else {
+                messageKey = "extra.curricular.alarm.completed.failed.default";
+            }
+        }
+        String linkUrl = "/extra-curricular/grade-reports";
+
+        alarmCommandService.createAlarmI18n(
+                studentAccountId,
+                AlarmType.EXTRA_OFFERING_COMPLETED,
+                titleKey,
+                messageKey,
+                messageArgs,
+                linkUrl,
+                null,
+                null
+        );
+    }
+
+    private String normalizeName(String value) {
+        return value == null ? null : value.trim();
     }
     
     // =====================

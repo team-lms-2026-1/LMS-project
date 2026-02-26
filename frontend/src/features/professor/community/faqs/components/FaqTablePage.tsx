@@ -7,13 +7,13 @@ import { FaqListItemDto } from "../api/types";
 import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
-  items: FaqListItemDto[];
-  loading: boolean;
+    items: FaqListItemDto[];
+    loading: boolean;
 };
 
 export function FaqTable({ items, loading }: Props) {
-  const router = useRouter();
-  const t = useI18n("community.faqs.professor.table");
+    const router = useRouter();
+    const t = useI18n("community.faqs.professor.table");
 
   const goDetail = (id: number) => {
     router.push(`/professor/community/faqs/${id}`);

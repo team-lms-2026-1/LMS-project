@@ -32,6 +32,17 @@ public interface ExtraCurricularApplicationRepository
             @Param("applyStatus") ExtraApplicationApplyStatus applyStatus
     );
 
+    @Query("""
+        select a.studentAccountId
+        from ExtraCurricularApplication a
+        where a.extraOfferingId = :extraOfferingId
+          and a.applyStatus = :applyStatus
+    """)
+    List<Long> findStudentAccountIdsByOfferingAndApplyStatus(
+            @Param("extraOfferingId") Long extraOfferingId,
+            @Param("applyStatus") ExtraApplicationApplyStatus applyStatus
+    );
+
     /**
      * 이수 결과 확정
      */
@@ -57,6 +68,11 @@ public interface ExtraCurricularApplicationRepository
         Long studentAccountId,
         ExtraApplicationApplyStatus applyStatus
     );    
+
+    List<ExtraCurricularApplication> findAllByExtraOfferingIdAndApplyStatus(
+        Long extraOfferingId,
+        ExtraApplicationApplyStatus applyStatus
+    );
 
     @Query("""
         select a

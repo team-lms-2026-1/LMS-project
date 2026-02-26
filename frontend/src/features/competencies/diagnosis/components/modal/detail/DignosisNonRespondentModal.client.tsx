@@ -82,6 +82,7 @@ export function DignosisNonRespondentModal({
   const t = useI18n("competency.adminDiagnosis.nonRespondentModal");
   const [remoteItems, setRemoteItems] = useState<DiagnosisNonRespondentItem[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const safeItems = remoteItems ?? items ?? [];
   const [page, setPage] = useState(1);
 
@@ -131,13 +132,17 @@ export function DignosisNonRespondentModal({
     setPage(totalPages);
   }, [page, totalPages]);
 
-  const deptLabel = deptName?.trim() ? deptName : t("fallback.all");
-  const handleSendEmail = () => {
+  const deptLabel = deptName?.trim() ? deptName : "전체";
+  const handleSendEmail = async () => {
     if (!onSendEmail) {
-      window.alert(t("alerts.emailNotReady"));
       return;
     }
-    onSendEmail(safeItems);
+    setSending(true);
+    try {
+      await onSendEmail(safeItems);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -154,7 +159,7 @@ export function DignosisNonRespondentModal({
           <Button
             variant="primary"
             onClick={handleSendEmail}
-            disabled={safeItems.length === 0}
+            disabled={safeItems.length === 0 || sending}
           >
             {t("buttons.sendEmail")}
           </Button>
