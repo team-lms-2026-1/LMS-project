@@ -24,6 +24,7 @@ export function useResourceList() {
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
     const [keyword, setKeyword] = useState("");
+    const [categoryId, setCategoryId] = useState<number | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export function useResourceList() {
                 page,
                 size,
                 keyword: keyword || undefined,
+                categoryId: categoryId ?? undefined,
             });
 
             setItems(res.data);
@@ -49,7 +51,7 @@ export function useResourceList() {
         } finally {
             setLoading(false);
         }
-    }, [page, size, keyword, t]);
+    }, [page, size, keyword, categoryId, t]);
 
     useEffect(() => {
         load();
@@ -62,11 +64,16 @@ export function useResourceList() {
             page,
             size,
             keyword,
+            categoryId,
             loading,
             error,
         },
         actions: {
             setKeyword,
+            setCategoryId: (cid: number | null) => {
+                setPage(1);
+                setCategoryId(cid);
+            },
             search: () => setPage(1),
             goPage: (p: number) => setPage(p),
             setSize: (s: number) => {

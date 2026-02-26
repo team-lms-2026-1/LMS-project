@@ -58,3 +58,4 @@ export type QnaDetailDto = {
 // 교수는 작성/수정/삭제 불가하므로 관련 DTO 불필요
 export type QnaListResponse = ApiResponse<QnaListItemDto[], PageMeta>;
 export type QnaDetailResponse = ApiResponse<QnaDetailDto, null>;
+export type QnaCategoryListResponse = ApiResponse<Category[], null>;

@@ -15,18 +15,45 @@ export function ResourceTable({ items, loading }: Props) {
   const router = useRouter();
   const t = useI18n("community.resources.professor.table");
 
+  const goDetail = (id: number) => {
+    router.push(`/professor/community/resources/${id}`);
+  };
+
   const columns: Array<TableColumn<ResourceListItemDto>> = [
-    { header: t("headers.id"), align: "left", render: (r) => r.resourceId },
+    {
+      header: t("headers.id"),
+      align: "center",
+      render: (r) => (
+        <div
+          className={styles.rowClickCell}
+          onClickCapture={() => goDetail(r.resourceId)}
+          role="button"
+          tabIndex={0}
+        >
+          {r.resourceId}
+        </div>
+      ),
+    },
     {
       header: t("headers.category"),
-      align: "left",
+      align: "center",
       render: (r) => {
         const c = r.category;
-        if (!c) return t("uncategorized");
         return (
-          <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
-            {c.name}
-          </span>
+          <div
+            className={styles.rowClickCell}
+            onClickCapture={() => goDetail(r.resourceId)}
+            role="button"
+            tabIndex={0}
+          >
+            {!c ? (
+              t("uncategorized")
+            ) : (
+              <span className={styles.badge} style={{ backgroundColor: c.bgColorHex, color: c.textColorHex }}>
+                {c.name}
+              </span>
+            )}
+          </div>
         );
       },
     },
@@ -34,27 +61,58 @@ export function ResourceTable({ items, loading }: Props) {
       header: t("headers.title"),
       align: "center",
       render: (r) => (
-        <button
-          type="button"
-          className={styles.titleLink}
-          onClick={() => router.push(`/professor/community/resources/${r.resourceId}`)}
+        <div
+          className={styles.rowClickCell}
+          onClickCapture={() => goDetail(r.resourceId)}
+          role="button"
+          tabIndex={0}
+          title={r.title}
         >
-          {r.title}
-        </button>
+          <span className={styles.titleText}>{r.title}</span>
+        </div>
       ),
     },
-    { header: t("headers.views"), align: "center", render: (r) => r.viewCount },
-    { header: t("headers.createdAt"), align: "center", render: (r) => r.createdAt },
+    {
+      header: t("headers.views"),
+      align: "center",
+      render: (r) => (
+        <div
+          className={styles.rowClickCell}
+          onClickCapture={() => goDetail(r.resourceId)}
+          role="button"
+          tabIndex={0}
+        >
+          {r.viewCount}
+        </div>
+      ),
+    },
+    {
+      header: t("headers.createdAt"),
+      align: "center",
+      render: (r) => (
+        <div
+          className={styles.rowClickCell}
+          onClickCapture={() => goDetail(r.resourceId)}
+          role="button"
+          tabIndex={0}
+        >
+          {r.createdAt}
+        </div>
+      ),
+    },
   ];
 
   return (
-    <Table<ResourceListItemDto>
-      columns={columns}
-      items={items}
-      loading={loading}
-      skeletonRowCount={10}
-      rowKey={(r) => r.resourceId}
-      emptyText={t("emptyText")}
-    />
+    <div className={styles.table}>
+      <Table<ResourceListItemDto>
+        columns={columns}
+        items={items}
+        loading={loading}
+        skeletonRowCount={10}
+        rowKey={(r) => r.resourceId}
+        emptyText={t("emptyText")}
+        rowClassName={styles.rowTall}
+      />
+    </div>
   );
 }
