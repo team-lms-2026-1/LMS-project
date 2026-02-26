@@ -19,7 +19,6 @@ export default function LoginPage() {
     if (prefix === "a") return "/admin";
     if (prefix === "s") return "/student/main";
     if (prefix === "p") return "/professor";
-    // 예외: 규칙 밖이면 기본값으로 변경
 
     return "/";
   }
@@ -28,22 +27,19 @@ export default function LoginPage() {
     e.preventDefault();
 
     const trimmedId = id.trim();
+    const validId = /^[asp][0-9]{8}$/i.test(trimmedId);
 
-    // ID 규칙: 문자 1개 + 숫자 8자리 (총 9자리) + 영문 a/s/p
-    const ok = /^[asp][0-9]{8}$/i.test(trimmedId);
-    if (!ok) {
-      alert("아이디 형식이 올바르지 않습니다. (a|s|p + 숫자 8자리, 예: a12345678)");
+    if (!validId) {
+      alert("Invalid ID format. Use a|s|p + 8 digits (e.g., a12345678).");
       return;
     }
 
     setLoading(true);
 
     try {
-      // 로그인은 1번만 호출
       const res = await loginViaBff({ loginId: trimmedId, password: pw });
-
-      // expiresAt이 있으면 자동 로그아웃 스케줄링
       const expiresAt = (res as any)?.expiresAt;
+
       if (expiresAt) {
         scheduleAutoLogout(expiresAt, async () => {
           await logoutViaBff();
@@ -51,10 +47,9 @@ export default function LoginPage() {
         });
       }
 
-      // 아이디 prefix 기반 라우팅
       router.replace(resolveRedirectPath(trimmedId));
     } catch (err) {
-      const message = err instanceof Error ? err.message : "로그인에 실패했습니다.";
+      const message = err instanceof Error ? err.message : "Login failed.";
       alert(message);
     } finally {
       setLoading(false);
@@ -62,56 +57,74 @@ export default function LoginPage() {
   }
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <section className={styles.left}>
-          <div className={styles.brandRow}>
-            <img className={styles.logo} src="/logo.png" alt="학교 로고" />
-            <div>
-              <div className={styles.title}>교직원 · 학생 통합시스템 로그인</div>
-              <div className={styles.sub}>아이디와 비밀번호를 입력하여 로그인하세요.</div>
+    <div className={styles.loginShell}>
+      <div className={styles.loginGlow} aria-hidden="true" />
+      <div className={styles.loginCard}>
+        <section className={styles.loginLeft}>
+          <div className={styles.loginBrandRow}>
+            <img className={styles.loginLogo} src="/logo.png" alt="School logo" />
+            <div className={styles.loginBrandText}>
+              <div className={styles.loginEyebrow}>Integrated System</div>
+              <div className={styles.loginTitle}>Integrated System login</div>
+              <div className={styles.loginSub}>Sign in with your ID and password.</div>
             </div>
           </div>
 
-          <form className={styles.form} onSubmit={onSubmit}>
-            <div>
-              <div className={styles.label}>ID</div>
+          <form className={styles.loginForm} onSubmit={onSubmit}>
+            <div className={styles.loginField}>
+              <div className={styles.loginLabel}>ID</div>
               <input
-                className={styles.input}
+                className={styles.loginInput}
                 value={id}
                 onChange={(e) => setId(e.target.value)}
-                placeholder="아이디"
+                placeholder="s00000000"
                 autoComplete="username"
               />
             </div>
 
-            <div>
+            <div className={styles.loginField}>
+              <div className={styles.loginLabel}>Password</div>
               <input
-                className={styles.input}
+                className={styles.loginInput}
                 value={pw}
                 onChange={(e) => setPw(e.target.value)}
-                placeholder="비밀번호"
+                placeholder="s00000000"
                 type="password"
                 autoComplete="current-password"
               />
-              <div className={styles.rowBetween}>
-                <div className={styles.label}>Password</div>
-                <Link className={styles.link} href="/forgot-password">
-                  forgot password
+              <div className={styles.loginRowBetween}>
+                <div className={styles.loginHint}>ID format: a/s/p + 8 digits</div>
+                <Link className={styles.loginLink} href="/forgot-password">
+                  Forgot password?
                 </Link>
               </div>
             </div>
 
-            <button className={styles.button} type="submit" disabled={loading || !id || !pw}>
-              {loading ? "로그인 중.." : "Login"}
+            <button className={styles.loginButton} type="submit" disabled={loading || !id || !pw}>
+              {loading ? "Signing in..." : "Login"}
             </button>
           </form>
         </section>
 
-        <section className={styles.right}>
-          <img className={styles.heroImg} src="/campus.jpg" alt="캠퍼스" />
-          <div className={styles.heroOverlay} />
-          <div className={styles.heroText}>미래를 여는 대학</div>
+        <section className={styles.loginRight}>
+          <img className={styles.loginHeroImg} src="/campus.jpg" alt="Campus" />
+          <div className={styles.loginHeroOverlay} />
+          <div className={styles.loginHeroTop}>
+            <div className={styles.loginHeroText}>LMS</div>
+            <div className={styles.loginHeroKicker}>Learning Management Suite</div>
+          </div>
+          <div className={styles.loginHeroContent}>
+            <div className={styles.loginHeroStats}>
+              <div className={styles.loginHeroStat}>
+                <span>Access</span>
+                <strong>Unified</strong>
+              </div>
+              <div className={styles.loginHeroStat}>
+                <span>Flow</span>
+                <strong>Simple</strong>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </div>

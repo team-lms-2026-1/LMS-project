@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./DignosisDetailModal.module.css";
+import { useI18n } from "@/i18n/useI18n";
 import { Modal } from "@/components/modal/Modal";
 import { ConfirmModal } from "@/components/modal";
 import { Button } from "@/components/button";
@@ -20,7 +21,13 @@ import type {
   DignosisDetailModalProps,
 } from "../../../api/types";
 
-const SCALE_LABELS = ["매우 그렇다", "그렇다", "보통이다", "그렇지 않다", "매우 그렇지 않다"];
+const SCALE_LABEL_KEYS = [
+  "stronglyAgree",
+  "agree",
+  "neutral",
+  "disagree",
+  "stronglyDisagree",
+] as const;
 
 type QuestionItem = {
   id: number;
@@ -39,14 +46,16 @@ type AnswerState = Record<
 
 const LOCAL_TOASTER_ID = "dignosis-detail-modal";
 
-const STATUS_MAP: Record<string, { label: string; pill: StatusType }> = {
-  PENDING: { label: "미응답", pill: "PENDING" },
-  SUBMITTED: { label: "응답완료", pill: "COMPLETED" },
-};
-
-function getStatusConfig(status?: DiagnosisStatus) {
+function getStatusConfig(
+  status: DiagnosisStatus | undefined,
+  pendingLabel: string,
+  submittedLabel: string
+) {
   if (!status) return { label: "-", pill: "PENDING" as StatusType };
-  return STATUS_MAP[String(status).toUpperCase()] ?? { label: String(status), pill: "PENDING" as StatusType };
+  const normalized = String(status).toUpperCase();
+  if (normalized === "PENDING") return { label: pendingLabel, pill: "PENDING" as StatusType };
+  if (normalized === "SUBMITTED") return { label: submittedLabel, pill: "COMPLETED" as StatusType };
+  return { label: String(status), pill: "PENDING" as StatusType };
 }
 
 function normalizeQuestions(items?: DiagnosisQuestionDetailDto[]): QuestionItem[] {
@@ -89,6 +98,8 @@ export function DignosisDetailModal({
   dignosisId,
   onSubmitted,
 }: DignosisDetailModalProps) {
+  const t = useI18n("competency.studentDiagnosis.detailModal");
+
   const [detail, setDetail] = useState<DiagnosisDetailDto | null>(null);
   const [answers, setAnswers] = useState<AnswerState>({});
   const [loading, setLoading] = useState(false);
@@ -97,17 +108,31 @@ export function DignosisDetailModal({
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const questions = useMemo(() => normalizeQuestions(detail?.questions), [detail]);
-  const title = detail?.basicInfo?.title ?? "역량 진단서";
+  const title = detail?.basicInfo?.title ?? t("fallback.title");
   const startedAt = detail?.basicInfo?.startedAt;
   const endedAt = detail?.basicInfo?.endedAt;
 
-  const statusConfig = getStatusConfig(detail?.basicInfo?.status);
+  const statusConfig = useMemo(
+    () =>
+      getStatusConfig(
+        detail?.basicInfo?.status,
+        t("statusLabel.PENDING"),
+        t("statusLabel.SUBMITTED")
+      ),
+    [detail?.basicInfo?.status, t]
+  );
+
+  const scaleLabels = useMemo(
+    () => SCALE_LABEL_KEYS.map((key) => t(`scaleLabels.${key}`)),
+    [t]
+  );
+
   const isSubmitted = String(detail?.basicInfo?.status ?? "").toUpperCase() === "SUBMITTED";
 
   useEffect(() => {
     if (!open) return;
     if (!dignosisId) {
-      setError("진단서 정보가 없습니다.");
+      setError(t("messages.missingDiagnosisInfo"));
       return;
     }
 
@@ -125,7 +150,7 @@ export function DignosisDetailModal({
       } catch (e: any) {
         if (!alive) return;
         console.error("[DignosisDetailModal]", e);
-        setError(e?.message ?? "진단서 상세를 불러오지 못했습니다.");
+        setError(e?.message ?? t("messages.loadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -134,7 +159,7 @@ export function DignosisDetailModal({
     return () => {
       alive = false;
     };
-  }, [open, dignosisId]);
+  }, [open, dignosisId, t]);
 
   useEffect(() => {
     if (open) return;
@@ -168,10 +193,9 @@ export function DignosisDetailModal({
   }, [answers, questions]);
 
   const handleSubmitClick = () => {
-    if (isSubmitted) return;
-    if (!dignosisId) return;
+    if (isSubmitted || !dignosisId) return;
     if (missingCount > 0) {
-      showErrorToast("모든 문항에 응답해주세요.");
+      showErrorToast(t("messages.answerAllQuestions"));
       return;
     }
     setConfirmOpen(true);
@@ -195,13 +219,13 @@ export function DignosisDetailModal({
 
     try {
       await submitDiagnosis(dignosisId, payload);
-      toast.success("응답이 제출되었습니다.");
+      toast.success(t("messages.submitSuccess"));
       setConfirmOpen(false);
       onSubmitted?.();
       onClose();
     } catch (e: any) {
       console.error("[DignosisDetailModal submit]", e);
-      showErrorToast(e?.message ?? "응답 제출에 실패했습니다.");
+      showErrorToast(e?.message ?? t("messages.submitFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -224,11 +248,11 @@ export function DignosisDetailModal({
         footer={
           <div className={styles.footer}>
             <div className={styles.footerNote}>
-              {isSubmitted ? "이미 응답이 완료된 진단서입니다." : "제출 후에는 수정할 수 없습니다."}
+              {isSubmitted ? t("footer.submittedNote") : t("footer.submitNote")}
             </div>
             <div className={styles.footerActions}>
               <Button variant="secondary" onClick={onClose} disabled={submitting}>
-                닫기
+                {t("buttons.close")}
               </Button>
               {!isSubmitted && (
                 <Button
@@ -237,7 +261,7 @@ export function DignosisDetailModal({
                   loading={submitting}
                   disabled={loading || questions.length === 0}
                 >
-                  제출
+                  {t("buttons.submit")}
                 </Button>
               )}
             </div>
@@ -250,7 +274,7 @@ export function DignosisDetailModal({
               <div className={styles.title}>{title}</div>
               <div className={styles.meta}>
                 <div className={styles.metaItem}>
-                  <span className={styles.metaLabel}>기간</span>
+                  <span className={styles.metaLabel}>{t("meta.period")}</span>
                   <span className={styles.metaValue}>{formatPeriod(startedAt, endedAt)}</span>
                 </div>
               </div>
@@ -263,9 +287,9 @@ export function DignosisDetailModal({
           {error && <div className={styles.error}>{error}</div>}
 
           {loading ? (
-            <div className={styles.loading}>진단서를 불러오는 중입니다...</div>
+            <div className={styles.loading}>{t("loadingText")}</div>
           ) : questions.length === 0 ? (
-            <div className={styles.empty}>등록된 문항이 없습니다.</div>
+            <div className={styles.empty}>{t("emptyText")}</div>
           ) : (
             <div className={styles.questionList}>
               {questions.map((q, index) => {
@@ -275,8 +299,10 @@ export function DignosisDetailModal({
                   <div key={q.id} className={styles.questionCard}>
                     <div className={styles.questionHeader}>
                       <span className={styles.questionIndex}>Q{index + 1}</span>
-                      <div className={styles.questionText}>{q.text || "질문"}</div>
-                      <span className={styles.questionType}>{isShort ? "단답형" : "척도형"}</span>
+                      <div className={styles.questionText}>{q.text || t("fallback.question")}</div>
+                      <span className={styles.questionType}>
+                        {isShort ? t("questionType.short") : t("questionType.scale")}
+                      </span>
                     </div>
 
                     {isShort ? (
@@ -284,13 +310,13 @@ export function DignosisDetailModal({
                         className={styles.shortInput}
                         value={answer.shortText ?? ""}
                         onChange={(e) => handleShortChange(q.id, e.target.value)}
-                        placeholder="응답을 입력하세요."
+                        placeholder={t("placeholders.shortAnswer")}
                         disabled={isSubmitted || submitting}
                       />
                     ) : (
                       <div className={styles.scaleList}>
-                        {SCALE_LABELS.map((label, idx) => {
-                          const optionValue = SCALE_LABELS.length - idx;
+                        {scaleLabels.map((label, idx) => {
+                          const optionValue = scaleLabels.length - idx;
                           const checked = answer.scaleValue === optionValue;
                           return (
                             <label
@@ -321,8 +347,8 @@ export function DignosisDetailModal({
 
       <ConfirmModal
         open={confirmOpen}
-        title="진단서 제출"
-        message="제출 후에는 수정할 수 없습니다. 제출하시겠습니까?"
+        title={t("confirm.title")}
+        message={t("confirm.message")}
         onConfirm={handleConfirmSubmit}
         onCancel={() => setConfirmOpen(false)}
         loading={submitting}

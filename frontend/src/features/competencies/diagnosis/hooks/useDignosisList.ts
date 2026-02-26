@@ -7,7 +7,16 @@ import {
   type ResultCompetencyQuery,
 } from "@/features/competencies/diagnosis/api/DiagnosisApi";
 
-export function useResultList(query?: ResultCompetencyQuery, enabled: boolean = true) {
+type ResultListMessages = {
+  missingDiagnosisId?: string;
+  loadFailed?: string;
+};
+
+export function useResultList(
+  query?: ResultCompetencyQuery,
+  enabled: boolean = true,
+  messages?: ResultListMessages
+) {
   const [data, setData] = useState<ResultCompetencyDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,23 +27,34 @@ export function useResultList(query?: ResultCompetencyQuery, enabled: boolean = 
       try {
         setLoading(true);
         setError(null);
+
         const effectiveQuery = nextQuery ?? query;
         if (!effectiveQuery?.dignosisId) {
           setData(null);
-          setError("진단 ID가 없습니다.");
+          setError(messages?.missingDiagnosisId ?? "Diagnosis ID is missing.");
           return;
         }
+
         const res = await fetchResultCompetencyDashboard(effectiveQuery);
         setData(res.data ?? null);
       } catch (e: any) {
         console.error("[useResultList]", e);
-        setError(e?.message ?? "진단 결과를 불러오지 못했습니다.");
+        setError(e?.message ?? messages?.loadFailed ?? "Failed to load diagnosis results.");
         setData(null);
       } finally {
         setLoading(false);
       }
     },
-    [enabled, query?.dignosisId, query?.deptId, query?.deptName, query?.semesterId, query?.semesterName]
+    [
+      enabled,
+      messages?.loadFailed,
+      messages?.missingDiagnosisId,
+      query?.dignosisId,
+      query?.deptId,
+      query?.deptName,
+      query?.semesterId,
+      query?.semesterName,
+    ]
   );
 
   useEffect(() => {

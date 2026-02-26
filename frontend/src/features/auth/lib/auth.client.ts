@@ -1,4 +1,4 @@
-import type { LoginRequest, LoginSuccess, ApiErrorShape } from "../types";
+import type { LoginRequest, ApiErrorShape } from "../types";
 
 type LoginBffResponse = {
   account: { accountId: number; loginId: string; accountType: string };
@@ -13,7 +13,6 @@ export async function logoutViaBff(): Promise<void> {
     method: "POST",
     credentials: "include",
   });
-  // 로컬 만료정보도 제거
   localStorage.removeItem(EXP_KEY);
 }
 
@@ -36,16 +35,14 @@ export async function loginViaBff(payload: LoginRequest): Promise<LoginBffRespon
   });
 
   if (!res.ok) {
-    let err: ApiErrorShape = { message: "로그인에 실패했습니다." };
+    let err: ApiErrorShape = { message: "Login failed." };
     try {
       err = (await res.json()) as ApiErrorShape;
     } catch {}
-    throw new Error(err.message || "로그인에 실패했습니다.");
+    throw new Error(err.message || "Login failed.");
   }
 
   const data = (await res.json()) as LoginBffResponse;
-
-  // 만료시각 저장(토큰이 아니라 '시각'만 저장)
   localStorage.setItem(EXP_KEY, String(data.expiresAt));
 
   return data;

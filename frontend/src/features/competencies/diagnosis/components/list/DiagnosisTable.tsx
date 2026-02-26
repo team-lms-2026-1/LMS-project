@@ -1,12 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
 import type { DiagnosisListItemDto, DiagnosisStatus, DiagnosisTableProps } from "../../api/types";
 import styles from "./DiagnosisTable.module.css";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 
 function formatDate(value?: string) {
   if (!value) return "-";
@@ -20,12 +21,6 @@ function formatDate(value?: string) {
 
 function formatPeriod(start?: string, end?: string) {
   return `${formatDate(start)}~${formatDate(end)}`;
-}
-
-function formatDeptGrade(deptName?: string, targetGrade?: string) {
-  const dept = !deptName || deptName === "All" ? "전체" : deptName;
-  const grade = targetGrade ?? "-";
-  return `${dept} · ${grade}`;
 }
 
 function formatNumber(id: number) {
@@ -45,7 +40,29 @@ function isClosedStatus(status: DiagnosisStatus) {
 }
 
 export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTableProps) {
+  const t = useI18n("competency.adminDiagnosis.list");
   const router = useRouter();
+
+  const getStatusLabel = (status: DiagnosisStatus) => {
+    const normalized = String(status ?? "").trim().toUpperCase();
+    if (normalized === "DRAFT") return t("table.statusLabel.DRAFT");
+    if (normalized === "OPEN") return t("table.statusLabel.OPEN");
+    if (normalized === "CLOSED") return t("table.statusLabel.CLOSED");
+    if (normalized === "PENDING") return t("table.statusLabel.PENDING");
+    if (normalized === "SUBMITTED") return t("table.statusLabel.SUBMITTED");
+    return status;
+  };
+
+  const formatDeptGrade = (deptName?: string, targetGrade?: string) => {
+    const deptValue = String(deptName ?? "").trim();
+    const gradeValue = String(targetGrade ?? "").trim();
+
+    const dept = !deptValue || deptValue.toUpperCase() === "ALL" ? t("table.target.all") : deptValue;
+    const grade = !gradeValue || gradeValue.toUpperCase() === "ALL" ? t("table.target.all") : gradeValue;
+
+    return `${dept} ${t("table.target.separator")} ${grade}`;
+  };
+
   const buildDetailUrl = (r: DiagnosisListItemDto) => {
     const params = new URLSearchParams();
     if (r.startedAt) {
@@ -59,64 +76,70 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
     const query = params.toString();
     return `/admin/competencies/dignosis/${r.diagnosisId}${query ? `?${query}` : ""}`;
   };
+
   const buildResultUrl = (r: DiagnosisListItemDto) => {
     const params = new URLSearchParams();
     params.set("dignosisId", String(r.diagnosisId));
     params.set("status", r.status);
+
     if (r.semesterId !== undefined && r.semesterId !== null && String(r.semesterId).trim()) {
       params.set("semesterId", String(r.semesterId));
     } else if (r.semesterName?.trim()) {
       params.set("semesterName", r.semesterName.trim());
     }
+
     const deptIdValue = r.deptId ?? r.departmentId;
     if (deptIdValue !== undefined && deptIdValue !== null && String(deptIdValue).trim()) {
       params.set("deptId", String(deptIdValue));
     }
+
     const deptName = r.deptName?.trim();
-    if (deptName && deptName !== "All" && deptName !== "전체") {
+    if (deptName && deptName.toUpperCase() !== "ALL") {
       params.set("deptName", deptName);
     }
+
     return `/admin/competencies/dignosis/result?${params.toString()}`;
   };
+
   const columns: Array<TableColumn<DiagnosisListItemDto>> = [
     {
-      header: "번호",
+      header: t("table.headers.number"),
       align: "center",
       cellClassName: styles.numberCell,
       render: (r) => formatNumber(r.diagnosisId),
     },
     {
-      header: "제목",
+      header: t("table.headers.title"),
       align: "center",
       cellClassName: styles.titleCell,
       render: (r) => r.title,
     },
     {
-      header: "대상 학과·학년",
+      header: t("table.headers.target"),
       align: "center",
       cellClassName: styles.targetCell,
       render: (r) => formatDeptGrade(r.deptName, r.targetGrade),
     },
     {
-      header: "제출기간",
+      header: t("table.headers.period"),
       align: "center",
       cellClassName: styles.periodCell,
       render: (r) => formatPeriod(r.startedAt, r.endedAt),
     },
     {
-      header: "작성일",
+      header: t("table.headers.createdAt"),
       align: "center",
       cellClassName: styles.dateCell,
       render: (r) => formatDate(r.createdAt),
     },
     {
-      header: "상태",
+      header: t("table.headers.status"),
       align: "center",
       cellClassName: styles.statusCell,
-      render: (r) => <StatusPill status={r.status as any} label={r.status} />,
+      render: (r) => <StatusPill status={r.status as any} label={getStatusLabel(r.status)} />,
     },
     {
-      header: "관리",
+      header: t("table.headers.manage"),
       width: 240,
       align: "center",
       stopRowClick: true,
@@ -133,7 +156,7 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
                 router.push(buildDetailUrl(r));
               }}
             >
-              상세
+              {t("table.buttons.detail")}
             </Button>
             {showEdit && (
               <Button
@@ -143,7 +166,7 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
                   onEdit?.(r.diagnosisId);
                 }}
               >
-                수정
+                {t("table.buttons.edit")}
               </Button>
             )}
             {showDelete && (
@@ -154,7 +177,7 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
                   onDelete?.(r.diagnosisId);
                 }}
               >
-                삭제
+                {t("table.buttons.delete")}
               </Button>
             )}
           </div>
@@ -170,10 +193,10 @@ export function DiagnosisTable({ items, loading, onEdit, onDelete }: DiagnosisTa
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.diagnosisId}
-      emptyText="조회된 진단지가 없습니다."
+      emptyText={t("table.emptyText")}
       onRowClick={(r) => {
         if (!isClosedStatus(r.status)) {
-          toast.error("진단이 마감되지 않았습니다.");
+          toast.error(t("messages.notClosed"));
           return;
         }
         router.push(buildResultUrl(r));

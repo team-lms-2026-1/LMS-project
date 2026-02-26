@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/i18n/useI18n";
 import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
 import { StatusPill, type StatusType } from "@/components/status";
@@ -30,44 +31,43 @@ function getDisplayNumber(item: DiagnosisListItemDto, index: number) {
   return index + 1;
 }
 
-const STATUS_MAP: Record<string, { label: string; pill: StatusType }> = {
-  PENDING: { label: "미응답", pill: "PENDING" },
-  SUBMITTED: { label: "응답완료", pill: "COMPLETED" },
-};
-
-function getStatusConfig(status?: DiagnosisStatus) {
-  if (!status) return { label: "-", pill: "PENDING" as StatusType };
-  return STATUS_MAP[status] ?? { label: status, pill: "PENDING" as StatusType };
-}
-
 export function DignosisTable({ items, loading, onRowClick }: DiagnosisTableProps) {
+  const t = useI18n("competency.studentDiagnosis.list.table");
+
+  const getStatusConfig = (status?: DiagnosisStatus): { label: string; pill: StatusType } => {
+    const normalized = String(status ?? "").trim().toUpperCase();
+    if (normalized === "PENDING") return { label: t("statusLabel.PENDING"), pill: "PENDING" };
+    if (normalized === "SUBMITTED") return { label: t("statusLabel.SUBMITTED"), pill: "COMPLETED" };
+    return { label: status ?? "-", pill: "PENDING" };
+  };
+
   const columns: Array<TableColumn<DiagnosisListItemDto>> = [
     {
-      header: "번호",
+      header: t("headers.number"),
       align: "center",
       cellClassName: styles.numberCell,
       render: (r, index) => formatNumber(getDisplayNumber(r, index)),
     },
     {
-      header: "제목",
+      header: t("headers.title"),
       align: "center",
       cellClassName: styles.titleCell,
       render: (r) => r.title,
     },
     {
-      header: "학기",
+      header: t("headers.semester"),
       align: "center",
       cellClassName: styles.targetCell,
       render: (r) => r.semesterName ?? "-",
     },
     {
-      header: "진단기간",
+      header: t("headers.period"),
       align: "center",
       cellClassName: styles.periodCell,
       render: (r) => formatPeriod(r.startedAt, r.endedAt),
     },
     {
-      header: "상태",
+      header: t("headers.status"),
       align: "center",
       cellClassName: styles.statusCell,
       render: (r) => {
@@ -76,7 +76,7 @@ export function DignosisTable({ items, loading, onRowClick }: DiagnosisTableProp
       },
     },
     {
-      header: "관리",
+      header: t("headers.manage"),
       width: 160,
       align: "center",
       stopRowClick: true,
@@ -89,7 +89,7 @@ export function DignosisTable({ items, loading, onRowClick }: DiagnosisTableProp
               onRowClick?.(r);
             }}
           >
-            {r.status === "PENDING" ? "응답" : "상세"}
+            {r.status === "PENDING" ? t("buttons.respond") : t("buttons.detail")}
           </Button>
         </div>
       ),
@@ -103,7 +103,7 @@ export function DignosisTable({ items, loading, onRowClick }: DiagnosisTableProp
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.diagnosisId}
-      emptyText="조회된 진단서가 없습니다."
+      emptyText={t("emptyText")}
       onRowClick={onRowClick ? (row) => onRowClick(row) : undefined}
     />
   );

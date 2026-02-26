@@ -10,6 +10,7 @@ import studySpace from "./studySpace.json";
 import mypage from "./mypage.json";
 import survey from "./survey.json";
 import mentoring from "./mentoring.json";
+import competency from "./competency.json";
 
 const messages = {
   topbar,
@@ -23,7 +24,8 @@ const messages = {
   studySpace,
   mypage,
   survey,
-  mentoring
+  mentoring,
+  competency
 } as const;
 
 export default messages;
