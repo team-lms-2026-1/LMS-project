@@ -1,0 +1,479 @@
+{
+  "intro": {
+    "eyebrow": "コンピテンシー案内",
+    "title": "6CSコンピテンシーとは？",
+    "lead": {
+      "line1": "6CSは、学習者が未来社会で求められる中核コンピテンシーをバランスよく育成するための共通基準です。",
+      "line2": "知識の習得に加えて、実際の課題を解決し、協働し、責任ある行動を取る力を育てます。"
+    },
+    "sections": {
+      "sixCs": "6CSの6つのコンピテンシー",
+      "learningUse": "学習での活用",
+      "formula": "診断での計算式"
+    },
+    "cards": {
+      "creativity": {
+        "title": "創造性 (Creativity)",
+        "description": "新しい視点で問題を捉え、独創的なアイデアを生み出して実行する力です。"
+      },
+      "criticalThinking": {
+        "title": "批判的思考 (Critical Thinking)",
+        "description": "情報の妥当性を検討し、根拠に基づいて判断し、合理的な結論に到達する力です。"
+      },
+      "collaboration": {
+        "title": "協働 (Collaboration)",
+        "description": "共通目標のために役割を調整し、チームで成果を生み出す力です。"
+      },
+      "communication": {
+        "title": "コミュニケーション (Communication)",
+        "description": "考えを明確に伝え、多様な方法で相互理解を促す力です。"
+      },
+      "citizenship": {
+        "title": "市民性 (Citizenship)",
+        "description": "共同体の規範と責任を理解し、倫理的かつ持続可能な選択を実践する姿勢です。"
+      },
+      "character": {
+        "title": "人間性/自己管理 (Character)",
+        "description": "誠実さ・共感・自己主導性を土台に、着実に成長し続ける力です。"
+      }
+    },
+    "learning": {
+      "line1": "6CSは、正課授業・課外活動・プロジェクト経験を一つの言語でつなぎます。これにより、自分の強みと改善点をより明確に把握できます。",
+      "line2": "活動後にどのコンピテンシーが強化されたかを振り返ることで、次の目標と学習計画をより具体的に立てられます。"
+    },
+    "formula": {
+      "line1": "(診断の5段階選択スコア * 各6CS配点) + (診断の記述式スコア + 各6CS配点) = 診断スコア",
+      "line2": "(課外活動ポイント * 課外に割り当てられた6CS配点 * 10) = 課外活動スコア",
+      "line3": "(正課活動ポイント * 正課に割り当てられた6CS配点) = 正課活動スコア",
+      "line4": "(診断スコア + 課外活動スコア + 正課活動スコア) = 6CS総合点",
+      "line5": "総合点を基準に中央値・平均値などを算出し、6CS各項目の点数を計算します。"
+    }
+  },
+  "adminStudents": {
+    "title": "学生コンピテンシー活動照会",
+    "filters": {
+      "all": "全体",
+      "keywordPlaceholder": "検索語"
+    },
+    "table": {
+      "headers": {
+        "studentNumber": "学籍番号",
+        "deptName": "学科",
+        "grade": "学年",
+        "name": "氏名"
+      },
+      "emptyText": "表示する学生がいません。"
+    },
+    "detail": {
+      "loadingText": "読み込み中です...",
+      "emptyData": "表示するデータがありません。",
+      "title": "学生コンピテンシー活動詳細",
+      "buttons": {
+        "backToList": "一覧へ"
+      },
+      "messages": {
+        "invalidStudentId": "有効な学生IDではありません。",
+        "loadFailed": "学生コンピテンシー情報を読み込めませんでした。"
+      },
+      "profile": {
+        "studentNumber": "学籍番号",
+        "deptName": "学科",
+        "grade": "学年"
+      },
+      "summary": {
+        "maxScore": "最高点",
+        "recentAvg": "最近平均",
+        "lastEvaluationAt": "最終評価日"
+      },
+      "panels": {
+        "myCompetency": "私のコンピテンシー",
+        "trend": "推移",
+        "myStats": "私の統計",
+        "comparison": "比較"
+      },
+      "empty": {
+        "chartData": "チャートデータがありません。",
+        "tableData": "テーブルデータがありません。"
+      },
+      "legend": {
+        "myScore": "私の点数",
+        "deptAverage": "学科平均"
+      },
+      "fallback": {
+        "competencyPrefix": "コンピテンシー"
+      },
+      "tables": {
+        "myStats": {
+          "headers": {
+            "competencyName": "コンピテンシー名",
+            "myScore": "私の点数",
+            "average": "平均",
+            "myMaxScore": "私の最高点"
+          }
+        },
+        "comparison": {
+          "headers": {
+            "competencyName": "コンピテンシー名",
+            "myScore": "私の点数",
+            "deptAverage": "学科平均",
+            "deptMaxScore": "学科最高点"
+          }
+        }
+      }
+    }
+  },
+  "adminDiagnosis": {
+    "list": {
+      "title": "診断紙管理",
+      "searchPlaceholder": "検索語",
+      "buttons": {
+        "create": "登録"
+      },
+      "messages": {
+        "listLoadFallback": "診断紙一覧を読み込めませんでした。",
+        "targetNotFound": "削除対象の診断紙が見つかりません。",
+        "deleteSuccess": "診断紙を削除しました。",
+        "deleteFailed": "診断紙の削除に失敗しました。",
+        "notClosed": "診断がまだ締め切られていません。"
+      },
+      "table": {
+        "headers": {
+          "number": "番号",
+          "title": "タイトル",
+          "target": "対象(学科・学年)",
+          "period": "提出期間",
+          "createdAt": "作成日",
+          "status": "状態",
+          "manage": "管理"
+        },
+        "target": {
+          "all": "全体",
+          "separator": "・"
+        },
+        "statusLabel": {
+          "DRAFT": "作成中",
+          "OPEN": "進行中",
+          "CLOSED": "締切",
+          "PENDING": "未回答",
+          "SUBMITTED": "回答完了"
+        },
+        "buttons": {
+          "detail": "詳細",
+          "edit": "修正",
+          "delete": "削除"
+        },
+        "emptyText": "表示する診断紙がありません。"
+      },
+      "deleteModal": {
+        "title": "診断紙削除",
+        "confirmText": "削除",
+        "cancelText": "キャンセル",
+        "question": "診断紙を削除しますか？",
+        "questionWithTitle": "\"{title}\" を削除しますか？",
+        "sub": "削除した診断紙は復元できません。"
+      }
+    },
+    "resultDetail": {
+      "loadingText": "読み込み中です...",
+      "title": "診断結果管理",
+      "buttons": {
+        "recalculate": "結果算出",
+        "backToList": "一覧"
+      },
+      "messages": {
+        "missingDiagnosisId": "診断IDがありません。",
+        "loadFailed": "診断結果を読み込めませんでした。",
+        "semesterNotFound": "学期情報が見つかりません。",
+        "recalculateFailed": "結果算出に失敗しました。"
+      },
+      "summary": {
+        "totalTargets": "対象者",
+        "calculatedTargets": "算出対象者",
+        "average": "平均"
+      },
+      "panels": {
+        "radar": "コンピテンシーチャート",
+        "trend": "コンピテンシー推移",
+        "stats": "コンピテンシー統計"
+      },
+      "empty": {
+        "chartData": "チャートデータがありません。",
+        "statsData": "統計データがありません。"
+      },
+      "table": {
+        "headers": {
+          "competencyName": "コンピテンシー名",
+          "targetAndCalculated": "対象者 / 算出対象者",
+          "average": "平均",
+          "median": "中央値",
+          "stdDev": "標準偏差",
+          "calculatedAt": "算出日時"
+        }
+      },
+      "fallback": {
+        "all": "全体",
+        "deptPrefix": "学科",
+        "competencyPrefix": "コンピテンシー"
+      }
+    },
+    "detailPage": {
+      "messages": {
+        "loadFailed": "診断詳細を読み込めませんでした。"
+      }
+    },
+    "detailModal": {
+      "tabs": {
+        "question": "質問",
+        "answer": "回答"
+      },
+      "buttons": {
+        "edit": "修正",
+        "close": "閉じる",
+        "nonRespondents": "未回答者"
+      },
+      "summary": {
+        "title": "回答",
+        "count": "回答数: {count}"
+      },
+      "chart": {
+        "title": "コンピテンシー分布",
+        "empty": "回答データがありません。"
+      },
+      "legend": {
+        "range": "{label}: 最小 {min} / 最大 {max}",
+        "avg": " / 平均 {avg}"
+      },
+      "form": {
+        "titleMain": "診断設問",
+        "titleSub": "この診断は{count}問で構成されています。",
+        "meta": {
+          "semester": "学期",
+          "dept": "学科",
+          "grade": "学年",
+          "period": "提出期間"
+        }
+      },
+      "placeholders": {
+        "question": "質問",
+        "shortAnswer": "短答回答を入力..."
+      },
+      "fallback": {
+        "all": "全体",
+        "student": "学生",
+        "competency": "コンピテンシー"
+      },
+      "scoreText": "{score}点",
+      "gradeFormat": "{grade}年",
+      "scaleLabels": {
+        "stronglyAgree": "とてもそう思う",
+        "agree": "そう思う",
+        "neutral": "どちらでもない",
+        "disagree": "そう思わない",
+        "stronglyDisagree": "まったくそう思わない"
+      }
+    },
+    "nonRespondentModal": {
+      "title": "未回答者一覧",
+      "subtitle": "{dept} 未回答学生一覧",
+      "buttons": {
+        "cancel": "キャンセル",
+        "sendEmail": "メール送信"
+      },
+      "alerts": {
+        "emailNotReady": "メール送信機能はまだ利用できません。"
+      },
+      "aria": {
+        "prevPage": "前のページ",
+        "nextPage": "次のページ"
+      },
+      "fallback": {
+        "all": "全体"
+      },
+      "table": {
+        "headers": {
+          "no": "NO",
+          "studentNumber": "学籍番号",
+          "name": "氏名",
+          "email": "メール"
+        },
+        "emptyText": "未回答学生はいません。"
+      }
+    }
+  },
+  "studentDiagnosis": {
+    "list": {
+      "title": "コンピテンシー診断紙",
+      "searchPlaceholder": "検索語",
+      "table": {
+        "headers": {
+          "number": "番号",
+          "title": "タイトル",
+          "semester": "学期",
+          "period": "診断期間",
+          "status": "状態",
+          "manage": "管理"
+        },
+        "statusLabel": {
+          "PENDING": "未回答",
+          "SUBMITTED": "回答完了"
+        },
+        "buttons": {
+          "respond": "回答",
+          "detail": "詳細"
+        },
+        "emptyText": "表示する診断紙がありません。"
+      }
+    },
+    "detailModal": {
+      "statusLabel": {
+        "PENDING": "未回答",
+        "SUBMITTED": "回答完了"
+      },
+      "messages": {
+        "missingDiagnosisInfo": "診断情報がありません。",
+        "loadFailed": "診断の詳細を読み込めませんでした。",
+        "answerAllQuestions": "すべての設問に回答してください。",
+        "submitSuccess": "回答を提出しました。",
+        "submitFailed": "回答の提出に失敗しました。"
+      },
+      "footer": {
+        "submittedNote": "この診断はすでに提出済みです。",
+        "submitNote": "提出後は回答を修正できません。"
+      },
+      "buttons": {
+        "close": "閉じる",
+        "submit": "提出"
+      },
+      "meta": {
+        "period": "期間"
+      },
+      "loadingText": "診断を読み込み中です...",
+      "emptyText": "登録された設問がありません。",
+      "questionType": {
+        "short": "短答式",
+        "scale": "尺度式"
+      },
+      "placeholders": {
+        "shortAnswer": "回答を入力してください。"
+      },
+      "fallback": {
+        "title": "コンピテンシー診断紙",
+        "question": "質問"
+      },
+      "confirm": {
+        "title": "診断提出",
+        "message": "提出後は修正できません。提出しますか？"
+      },
+      "scaleLabels": {
+        "stronglyAgree": "とてもそう思う",
+        "agree": "そう思う",
+        "neutral": "どちらでもない",
+        "disagree": "そう思わない",
+        "stronglyDisagree": "まったくそう思わない"
+      }
+    }
+  },
+  "adminResult": {
+    "detail": {
+      "loadingText": "読み込み中です...",
+      "title": "コンピテンシー総合管理",
+      "buttons": {
+        "recalculate": "結果再算出"
+      },
+      "messages": {
+        "loadFailed": "コンピテンシー総合結果を読み込めませんでした。",
+        "semesterNotFound": "学期情報が見つかりません。",
+        "recalculateFailed": "統計の再算出に失敗しました。"
+      },
+      "summary": {
+        "totalTargets": "対象者",
+        "calculatedTargets": "算出対象者",
+        "average": "平均"
+      },
+      "panels": {
+        "radar": "学期・学科別コンピテンシーチャート",
+        "trend": "学科別推移チャート",
+        "stats": "コンピテンシー統計"
+      },
+      "filters": {
+        "semester": "学期",
+        "dept": "学科",
+        "selectDept": "学科を選択"
+      },
+      "empty": {
+        "chartData": "チャートデータがありません。",
+        "statsData": "統計データがありません。",
+        "selectDept": "学科を選択してください。"
+      },
+      "table": {
+        "headers": {
+          "competencyName": "コンピテンシー名",
+          "targetAndCalculated": "対象者 / 算出対象者",
+          "average": "平均",
+          "median": "中央値",
+          "stdDev": "標準偏差",
+          "calculatedAt": "算出日時"
+        }
+      },
+      "fallback": {
+        "all": "全体",
+        "deptPrefix": "学科",
+        "competencyPrefix": "コンピテンシー"
+      }
+    }
+  },
+  "studentResult": {
+    "detail": {
+      "loadingText": "読み込み中です...",
+      "title": "学生コンピテンシー活動照会",
+      "messages": {
+        "loadFailed": "コンピテンシー結果を読み込めませんでした。"
+      },
+      "empty": {
+        "noResult": "結果がありません。",
+        "chartData": "チャートデータがありません。",
+        "statsData": "統計データがありません。"
+      },
+      "profile": {
+        "studentNumber": "学籍番号",
+        "deptName": "学科",
+        "grade": "学年"
+      },
+      "summary": {
+        "maxScore": "最高点",
+        "averageScore": "平均点",
+        "calculatedAt": "算出日時"
+      },
+      "panels": {
+        "radar": "コンピテンシーチャート",
+        "trend": "コンピテンシー推移",
+        "myStats": "私のコンピテンシー統計",
+        "comparison": "私のコンピテンシー比較"
+      },
+      "table": {
+        "myStats": {
+          "headers": {
+            "competencyName": "コンピテンシー名",
+            "myScore": "私の点数",
+            "average": "平均",
+            "myMaxScore": "私の最高点"
+          }
+        },
+        "comparison": {
+          "headers": {
+            "competencyName": "コンピテンシー名",
+            "myScore": "私の点数",
+            "deptAverage": "学科平均",
+            "deptMaxScore": "学科最高点"
+          }
+        }
+      },
+      "legend": {
+        "myScore": "私の点数"
+      },
+      "fallback": {
+        "competencyPrefix": "コンピテンシー"
+      }
+    }
+  }
+}
