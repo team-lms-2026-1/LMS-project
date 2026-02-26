@@ -10,6 +10,7 @@ import com.teamlms.backend.domain.survey.api.dto.SurveyPatchRequest;
 import com.teamlms.backend.domain.survey.entity.*;
 import com.teamlms.backend.domain.survey.enums.*;
 import com.teamlms.backend.domain.survey.repository.*;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,8 @@ class SurveyCommandServiceTest {
     private SurveyTargetRepository targetRepository;
     @Mock
     private AccountRepository accountRepository;
+    @Mock
+    private AlarmCommandService alarmCommandService;
 
     @Test
     @DisplayName("설문 생성 및 배포 성공 (전체 학생 대상)")

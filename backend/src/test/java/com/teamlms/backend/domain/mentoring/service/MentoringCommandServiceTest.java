@@ -37,6 +37,7 @@ import com.teamlms.backend.domain.mentoring.repository.MentoringApplicationRepos
 import com.teamlms.backend.domain.mentoring.repository.MentoringMatchingRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringQuestionRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringRecruitmentRepository;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.global.exception.base.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +63,9 @@ class MentoringCommandServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private AlarmCommandService alarmCommandService;
 
     @Test
     @DisplayName("멘토링 모집 공고 생성")

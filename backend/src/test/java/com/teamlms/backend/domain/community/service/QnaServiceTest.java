@@ -25,6 +25,8 @@ import com.teamlms.backend.domain.community.entity.QnaQuestion;
 import com.teamlms.backend.domain.community.repository.QnaAnswerRepository;
 import com.teamlms.backend.domain.community.repository.QnaCategoryRepository;
 import com.teamlms.backend.domain.community.repository.QnaQuestionRepository;
+import com.teamlms.backend.domain.community.repository.CommunityAccountRepository;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 
 @ExtendWith(MockitoExtension.class)
 class QnaServiceTest {
@@ -43,6 +45,12 @@ class QnaServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private CommunityAccountRepository communityAccountRepository;
+
+    @Mock
+    private AlarmCommandService alarmCommandService;
 
     @Test
     @DisplayName("QnA 생성 성공")
@@ -114,6 +122,10 @@ class QnaServiceTest {
         QnaQuestion question = mock(QnaQuestion.class);
         when(question.getAnswer()).thenReturn(null);
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(question));
+
+        Account questionAuthor = mock(Account.class);
+        when(questionAuthor.getAccountId()).thenReturn(2L);
+        when(question.getAuthor()).thenReturn(questionAuthor);
 
         Account admin = mock(Account.class);
         when(accountRepository.findById(adminId)).thenReturn(Optional.of(admin));
