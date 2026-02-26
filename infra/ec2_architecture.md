@@ -16,6 +16,7 @@ flowchart TD
     end
 
     subgraph EC2 ["🖥️ AWS EC2 (단일 서버)"]
+        NGINX["🔀 Nginx\n리버스 프록시 :80 / :443\nSSL 종료 · teamlms.duckdns.org\nLet's Encrypt 인증서"]
         subgraph NET ["Docker 네트워크 : lms-network"]
             FE["frontend-server (Next.js :3000)"]
             BE["backend-server (Spring Boot :8080)"]
@@ -35,7 +36,8 @@ flowchart TD
     IMG -->|"pull·실행"| FE
     BE_CI -->|"JAR 전송·실행"| BE
 
-    User -->|":3000"| FE
+    User -->|"https :443"| NGINX
+    NGINX -->|"프록시 :3000"| FE
     FE -->|"/api/* 내부망"| BE
     BE --> RDS & S3 & OAI
 ```
@@ -80,14 +82,17 @@ flowchart TD
 
 ```
 EC2 인스턴스
+├── Nginx (호스트 직접 설치 - :80 / :443)
+│   └── SSL 종료 후 → localhost:3000 프록시
 └── lms-network (Docker 내부망)
     ├── frontend-server (Next.js :3000)
     └── backend-server  (Spring Boot :8080)
 ```
 
-| 컨테이너 | 역할 및 환경 통제 |
+| 구성요소 | 역할 및 환경 통제 |
 |---|---|
-| **frontend-server** | **SSR(서버 사이드) 통신**: `API_BASE_URL=http://backend-server:8080` (내부망 직통)<br/>**CSR(클라이언트) 통신**: `NEXT_PUBLIC_API_URL` (EC2 공인 IP 경유) |
+| **Nginx** | **SSL 종료**: Let's Encrypt 인증서로 HTTPS 처리<br/>**리버스 프록시**: `https://teamlms.duckdns.org` → `localhost:3000` 으로 프록시<br/>**자동 갱신**: Certbot 크론탭으로 90일마다 인증서 자동 갱신 |
+| **frontend-server** | **SSR(서버 사이드) 통신**: `API_BASE_URL=http://backend-server:8080` (내부망 직통)<br/>**CSR(클라이언트) 통신**: `NEXT_PUBLIC_API_URL=https://teamlms.duckdns.org` (Nginx 경유) |
 | **backend-server** | **Secrets 연동**: DB 계정, AWS S3 무결성 키, OpenAI API 키 등을 환경변수로 주입받아 구동<br/>**리소스 최적화**: 저사양 EC2를 우려하여 JVM 메모리를 384MB로 고정 (`-Xms384m`) |
 
 ---
@@ -124,8 +129,10 @@ backend/src/main/resources/db/migration/
 
 - **AWS Security Group (SG / 인바운드 보안 규칙)**
   - `포트 22 (SSH)`: GitHub Actions 서버 IP와 지정된 관리자 IP에서만 접근 가능하도록 허용
-  - `포트 3000`: 프론트엔드 웹 서비스 접속용 (오픈)
-  - `포트 8080`: 백엔드 API 서버 (클라이언트 CSR 통신용으로 오픈)
+  - `포트 80 (HTTP)`: Nginx가 수신 → `https://` 로 자동 리다이렉트
+  - `포트 443 (HTTPS)`: Nginx가 수신 → SSL 종료 후 Next.js(3000)로 프록시. **사용자 실제 접속 포트**
+  - `포트 3000`: Next.js 직접 접속용 (Nginx 도입 후 외부 노출 불필요, 추후 닫아도 무방)
+  - `포트 8080`: 백엔드 API 서버 (BFF 패턴으로 Next.js 내부에서 호출, 추후 닫아도 무방)
   - `포트 5432`: RDS 접근은 외부에서 불가능하며, 오직 이 EC2 서버 내부 IP에서만 접속 가능하도록 원천 차단
 
 - **GitHub Secrets**: SSH 키, DB 자격증명, API 키 모두 Secrets에 저장 → 소스코드 내 하드코딩 완전 방지
