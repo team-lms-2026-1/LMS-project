@@ -237,6 +237,7 @@
       },
       "list": {
         "title": "お知らせ",
+        "categoryAll": "すべて",
         "searchPlaceholder": "タイトル検索"
       },
       "table": {
@@ -278,6 +279,7 @@
       },
       "list": {
         "title": "お知らせ",
+        "categoryAll": "すべて",
         "searchPlaceholder": "タイトル検索"
       },
       "table": {
@@ -478,6 +480,7 @@
       },
       "list": {
         "title": "資料室",
+        "categoryAll": "すべて",
         "searchPlaceholder": "タイトル検索"
       },
       "table": {
@@ -519,6 +522,7 @@
       },
       "list": {
         "title": "資料室",
+        "categoryAll": "すべて",
         "searchPlaceholder": "タイトル検索"
       },
       "table": {
@@ -696,6 +700,7 @@
       },
       "list": {
         "title": "FAQ",
+        "categoryAll": "すべて",
         "searchPlaceholder": "タイトル検索"
       },
       "table": {
@@ -734,6 +739,7 @@
       },
       "list": {
         "title": "FAQ",
+        "categoryAll": "すべて",
         "searchPlaceholder": "タイトル検索"
       },
       "table": {
@@ -973,6 +979,7 @@
       },
       "list": {
         "title": "Q&A",
+        "categoryAll": "すべて",
         "searchPlaceholder": "タイトル検索"
       },
       "table": {

@@ -43,3 +43,4 @@ export type FaqDetailDto = {
 
 export type FaqListResponse = ApiResponse<FaqListItemDto[], PageMeta>;
 export type FaqDetailResponse = ApiResponse<FaqDetailDto, null>;
+export type FaqCategoryListResponse = ApiResponse<Category[], null>;

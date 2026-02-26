@@ -46,3 +46,9 @@
 .titleLink:hover {
     text-decoration: underline;
 }
+
+.rowTall td {
+    padding-top: 14px;
+    padding-bottom: 14px;
+    height: 60px;
+}
