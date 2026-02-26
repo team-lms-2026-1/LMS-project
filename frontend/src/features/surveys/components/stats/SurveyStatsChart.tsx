@@ -12,6 +12,7 @@ import { Doughnut } from "react-chartjs-2";
 import { useMemo, useState } from "react";
 import styles from "./SurveyStatsChart.module.css";
 import { SurveyStatsDto } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -34,6 +35,7 @@ interface Props {
 type ViewMode = "DEPT" | "GRADE";
 
 export function SurveyStatsChart({ stats }: Props) {
+    const t = useI18n("survey.admin.stats.chart");
     const [viewMode, setViewMode] = useState<ViewMode>("DEPT");
 
     const data: ChartData<"doughnut"> = useMemo(() => {
@@ -44,7 +46,7 @@ export function SurveyStatsChart({ stats }: Props) {
 
         if (keys.length === 0) {
             return {
-                labels: ["데이터 없음"],
+                labels: [t("noData")],
                 datasets: [
                     {
                         data: [1],
@@ -65,7 +67,7 @@ export function SurveyStatsChart({ stats }: Props) {
                 },
             ],
         };
-    }, [stats, viewMode]);
+    }, [stats, viewMode, t]);
 
     return (
         <div className={styles.chartContainer}>
@@ -74,13 +76,13 @@ export function SurveyStatsChart({ stats }: Props) {
                     className={`${styles.tabBtn} ${viewMode === "DEPT" ? styles.tabBtnActive : ""}`}
                     onClick={() => setViewMode("DEPT")}
                 >
-                    학과별 통계
+                    {t("byDept")}
                 </button>
                 <button
                     className={`${styles.tabBtn} ${viewMode === "GRADE" ? styles.tabBtnActive : ""}`}
                     onClick={() => setViewMode("GRADE")}
                 >
-                    학년별 통계
+                    {t("byGrade")}
                 </button>
             </div>
 
@@ -96,7 +98,7 @@ export function SurveyStatsChart({ stats }: Props) {
                             },
                             title: {
                                 display: true,
-                                text: viewMode === "DEPT" ? "학과별 참여 비율" : "학년별 참여 비율"
+                                text: viewMode === "DEPT" ? t("deptRatio") : t("gradeRatio")
                             }
                         }
                     }}

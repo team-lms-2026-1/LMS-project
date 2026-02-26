@@ -1,0 +1,401 @@
+{
+  "recruitments": {
+    "common": {
+      "statusLabel": {
+        "DRAFT": "作成中",
+        "OPEN": "募集中",
+        "CLOSED": "締切"
+      },
+      "statusOption": {
+        "ALL": "全状態",
+        "DRAFT": "作成中 (DRAFT)",
+        "OPEN": "募集中 (OPEN)",
+        "CLOSED": "締切 (CLOSED)"
+      },
+      "semesterFallback": "{id}学期"
+    },
+    "list": {
+      "title": "メンタリング募集公告管理",
+      "search": {
+        "statusPlaceholder": "状態を選択",
+        "keywordPlaceholder": "募集公告を検索..."
+      },
+      "buttons": {
+        "register": "登録"
+      },
+      "modal": {
+        "titleCreate": "メンタリング募集登録",
+        "titleEdit": "メンタリング募集修正",
+        "buttons": {
+          "cancel": "キャンセル",
+          "saveCreate": "登録",
+          "saveEdit": "修正"
+        },
+        "fields": {
+          "title": "タイトル",
+          "semester": "学期",
+          "description": "説明",
+          "startAt": "開始日",
+          "endAt": "終了日"
+        },
+        "placeholders": {
+          "title": "タイトルを入力してください",
+          "semester": "学期を選択してください",
+          "description": "説明を入力してください",
+          "startAt": "開始日を選択",
+          "endAt": "終了日を選択"
+        }
+      },
+      "confirmDelete": {
+        "message": "本当に削除しますか？申請履歴にも影響する場合があります。"
+      },
+      "messages": {
+        "validationSemester": "学期を選択してください。",
+        "validationPeriod": "募集期間を選択してください。",
+        "deleteSuccess": "削除しました。",
+        "deleteFailedPrefix": "削除失敗: ",
+        "saveFailedPrefix": "保存失敗: ",
+        "createSuccess": "登録しました。",
+        "updateSuccess": "修正しました。",
+        "unknownError": "Unknown error"
+      }
+    },
+    "table": {
+      "headers": {
+        "semester": "学期",
+        "title": "タイトル",
+        "period": "募集期間",
+        "status": "状態",
+        "manage": "管理"
+      },
+      "buttons": {
+        "edit": "修正",
+        "delete": "削除"
+      },
+      "emptyText": "募集公告がありません。"
+    }
+  },
+  "approval": {
+    "title": "メンタリング申請承認",
+    "search": {
+      "statusPlaceholder": "状態を選択",
+      "keywordPlaceholder": "募集公告タイトルを検索"
+    },
+    "recruitments": {
+      "emptyText": "募集公告がありません。"
+    },
+    "applications": {
+      "sectionTitle": "申請者一覧: {title}",
+      "loadingText": "申請者一覧を読み込み中...",
+      "emptyText": "申請者がいません。",
+      "headers": {
+        "name": "名前",
+        "role": "役割",
+        "status": "状態",
+        "appliedAt": "申請日",
+        "actions": "操作"
+      },
+      "roleLabel": {
+        "MENTOR": "メンター",
+        "MENTEE": "メンティー"
+      },
+      "statusLabel": {
+        "APPLIED": "待機",
+        "APPROVED": "承認",
+        "REJECTED": "却下",
+        "MATCHED": "マッチング完了",
+        "CANCELED": "キャンセル"
+      },
+      "actions": {
+        "approve": "承認",
+        "reject": "却下",
+        "noAction": "-"
+      },
+      "detailModal": {
+        "title": "申請情報詳細",
+        "buttons": {
+          "close": "閉じる"
+        },
+        "fields": {
+          "name": "名前",
+          "loginId": "ID",
+          "deptName": "学科",
+          "phone": "連絡先",
+          "studentNo": "学番",
+          "gradeLevel": "学年",
+          "email": "メール",
+          "role": "申請役割",
+          "appliedAt": "申請日",
+          "applyReason": "申請理由"
+        },
+        "reasonEmpty": "内容なし"
+      }
+    },
+    "confirm": {
+      "approveMessage": "この申請を承認しますか？",
+      "rejectTitle": "却下理由入力",
+      "rejectReasonLabel": "却下理由",
+      "rejectReasonPlaceholder": "却下理由を入力してください。",
+      "buttons": {
+        "cancel": "キャンセル",
+        "reject": "却下処理"
+      }
+    },
+    "messages": {
+      "recruitmentsFetchFailedPrefix": "募集公告の取得に失敗しました: ",
+      "applicationsFetchFailedPrefix": "申請者の取得に失敗しました: ",
+      "approveSuccess": "承認しました。",
+      "approveFailedPrefix": "承認失敗: ",
+      "rejectReasonRequired": "却下理由を入力してください。",
+      "rejectSuccess": "却下しました。",
+      "rejectFailedPrefix": "却下失敗: ",
+      "unknownError": "不明なエラー"
+    }
+  },
+  "matching": {
+    "title": "メンタリングマッチング管理",
+    "search": {
+      "statusPlaceholder": "状態を選択",
+      "keywordPlaceholder": "募集公告タイトルを検索"
+    },
+    "recruitments": {
+      "emptyText": "募集公告がありません。"
+    },
+    "sectionTitle": "マッチング詳細設定: {title}",
+    "counts": {
+      "summary": "承認済みメンター: {mentorCount}名 / 待機中メンティー: {availableMenteeCount}名 / マッチング済みメンティー: {matchedMenteeCount}名"
+    },
+    "columns": {
+      "mentorTitle": "メンター選択 ({count})",
+      "menteeTitle": "メンティー選択 ({count})",
+      "matchedListTitle": "マッチング完了一覧 ({count})",
+      "emptyApprovedMentor": "承認済みメンターがいません。",
+      "emptyAvailableMentee": "マッチ待機中のメンティーがいません。",
+      "emptyMatchedList": "まだマッチングされた件がありません。"
+    },
+    "labels": {
+      "department": "学科",
+      "appliedAt": "申請日",
+      "matchedAt": "マッチング日"
+    },
+    "badges": {
+      "matched": "マッチ済み",
+      "matchedComplete": "マッチング完了"
+    },
+    "buttons": {
+      "confirmMatch": "マッチ確定"
+    },
+    "confirm": {
+      "matchMessage": "選択したメンターとメンティーをマッチングしますか？"
+    },
+    "messages": {
+      "recruitmentsFetchFailedPrefix": "募集公告の取得に失敗しました: ",
+      "dataFetchFailedPrefix": "データ取得に失敗しました: ",
+      "selectionRequired": "メンターと1名以上のメンティーを選択してください。",
+      "matchSuccess": "マッチングが完了しました。",
+      "matchFailedPrefix": "マッチング失敗: ",
+      "serverErrorFallback": "サーバーエラーが発生しました。",
+      "unknownError": "不明なエラー"
+    }
+  },
+  "chatHistory": {
+    "title": "メンタリングチャット履歴確認",
+    "search": {
+      "statusPlaceholder": "状態を選択",
+      "keywordPlaceholder": "募集公告タイトルを検索"
+    },
+    "recruitments": {
+      "emptyText": "募集公告がありません。"
+    },
+    "sectionTitle": "チャット履歴: {title}",
+    "columns": {
+      "matchedListTitle": "マッチング完了一覧 ({count})",
+      "emptyMatchedList": "まだマッチングされた件がありません。"
+    },
+    "labels": {
+      "matchedAt": "マッチング日"
+    },
+    "badges": {
+      "matchedComplete": "マッチング完了"
+    },
+    "buttons": {
+      "viewChat": "チャットを見る"
+    },
+    "modal": {
+      "title": "メンタリングチャット履歴照会",
+      "labels": {
+        "mentor": "メンター",
+        "mentee": "メンティー"
+      },
+      "loadingText": "読み込み中...",
+      "emptyText": "チャット履歴がありません。",
+      "buttons": {
+        "close": "閉じる"
+      },
+      "messages": {
+        "fetchFailed": "チャット履歴の読み込みに失敗しました。"
+      }
+    },
+    "messages": {
+      "recruitmentsFetchFailedPrefix": "募集公告の取得に失敗しました: ",
+      "dataFetchFailedPrefix": "データ取得に失敗しました: ",
+      "unknownError": "不明なエラー"
+    }
+  },
+  "chat": {
+    "title": "メンタリングチャット",
+    "sidebar": {
+      "loadingText": "読み込み中...",
+      "emptyText": "まだマッチングされた件がありません。",
+      "partnerRole": {
+        "mentor": "メンター",
+        "mentee": "メンティー"
+      }
+    },
+    "input": {
+      "placeholder": "メッセージを入力してください...",
+      "send": "送信"
+    },
+    "emptyState": {
+      "title": "チャットルームを選択してください",
+      "description": "メンタリングのマッチング完了後に会話を開始できます。"
+    },
+    "messages": {
+      "sendFailedPrefix": "送信に失敗しました: ",
+      "unknownError": "不明なエラー"
+    }
+  },
+  "studentApply": {
+    "title": "メンティー申請",
+    "search": {
+      "placeholder": "タイトルを入力してください"
+    },
+    "table": {
+      "headers": {
+        "semester": "学期",
+        "title": "タイトル",
+        "period": "募集期間",
+        "recruitmentStatus": "募集状態",
+        "myApplication": "申請情報",
+        "createdAt": "作成日"
+      },
+      "recruitmentStatusLabel": {
+        "DRAFT": "作成中",
+        "OPEN": "募集中",
+        "CLOSED": "締切"
+      },
+      "roleLabel": {
+        "MENTOR": "メンター",
+        "MENTEE": "メンティー"
+      },
+      "applicationStatusLabel": {
+        "APPLIED": "申請完了",
+        "APPROVED": "承認済み",
+        "REJECTED": "却下",
+        "MATCHED": "マッチング完了",
+        "CANCELED": "取消"
+      },
+      "notApplied": "未申請",
+      "emptyText": "募集公告がありません。"
+    },
+    "modal": {
+      "title": "メンタリング申請",
+      "buttons": {
+        "cancel": "キャンセル",
+        "apply": "申請"
+      },
+      "fields": {
+        "name": "名前",
+        "recruitmentTitle": "募集名",
+        "deptName": "学科",
+        "gradeLevel": "学年",
+        "studentNo": "学籍番号",
+        "email": "メール",
+        "phone": "連絡先",
+        "reason": "申請理由"
+      },
+      "placeholders": {
+        "name": "名前",
+        "deptName": "学科",
+        "gradeLevel": "学年",
+        "studentNo": "学籍番号",
+        "email": "email@example.com",
+        "phone": "010-0000-0000",
+        "reason": "申請理由を入力してください。"
+      }
+    },
+    "messages": {
+      "dataLoadFailedPrefix": "データの読み込みに失敗しました: ",
+      "alreadyApplied": "すでに申請済みの募集です。",
+      "outOfPeriod": "申請期間ではありません。",
+      "applySuccess": "申請しました。",
+      "applyFailedPrefix": "申請に失敗しました: ",
+      "profileLoadFailed": "プロフィール情報の読み込みに失敗しました。",
+      "unknownError": "不明なエラー"
+    }
+  },
+  "professorApply": {
+    "title": "メンター申請",
+    "search": {
+      "placeholder": "タイトルを入力してください"
+    },
+    "table": {
+      "headers": {
+        "semester": "学期",
+        "title": "タイトル",
+        "period": "募集期間",
+        "recruitmentStatus": "募集状態",
+        "myApplication": "申請情報",
+        "createdAt": "作成日"
+      },
+      "recruitmentStatusLabel": {
+        "DRAFT": "作成中",
+        "OPEN": "募集中",
+        "CLOSED": "締切"
+      },
+      "roleLabel": {
+        "MENTOR": "メンター",
+        "MENTEE": "メンティー"
+      },
+      "applicationStatusLabel": {
+        "APPLIED": "申請完了",
+        "APPROVED": "承認済み",
+        "REJECTED": "却下",
+        "MATCHED": "マッチング完了",
+        "CANCELED": "取消"
+      },
+      "notApplied": "未申請",
+      "emptyText": "募集公告がありません。"
+    },
+    "modal": {
+      "title": "メンター申請",
+      "buttons": {
+        "cancel": "キャンセル",
+        "apply": "メンター申請"
+      },
+      "fields": {
+        "recruitmentTitle": "募集公告タイトル",
+        "description": "説明",
+        "recruitStartAt": "募集開始日",
+        "recruitEndAt": "募集終了日",
+        "appliedRole": "申請役割",
+        "appliedRoleValue": "メンター (Mentor)"
+      },
+      "info": {
+        "first": "教授はメンターとして申請しています。",
+        "second": "申請後は管理者の承認をお待ちください。"
+      }
+    },
+    "confirm": {
+      "message": "メンターとして申請しますか?"
+    },
+    "messages": {
+      "dataLoadFailedPrefix": "データの読み込みに失敗しました: ",
+      "alreadyApplied": "すでに申請済みの募集です。",
+      "outOfPeriod": "申請期間ではありません。",
+      "applySuccess": "メンター申請が完了しました。",
+      "applyFailedPrefix": "メンター申請に失敗しました: ",
+      "unknownError": "不明なエラー"
+    }
+  }
+}

@@ -5,16 +5,16 @@ export type SurveyStatus = "DRAFT" | "OPEN" | "CLOSED";
 export type SurveyType = "SATISFACTION" | "COURSE" | "SERVICE" | "ETC";
 
 export const SurveyStatusLabel: Record<SurveyStatus, string> = {
-  DRAFT: "작성 중",
-  OPEN: "진행 중",
-  CLOSED: "종료됨",
+  DRAFT: "Draft",
+  OPEN: "Open",
+  CLOSED: "Closed",
 };
 
 export const SurveyTypeLabel: Record<SurveyType, string> = {
-  SATISFACTION: "만족도 조사",
-  COURSE: "수강 설문",
-  SERVICE: "서비스 이용 조사",
-  ETC: "기타",
+  SATISFACTION: "Satisfaction Survey",
+  COURSE: "Course Survey",
+  SERVICE: "Service Usage Survey",
+  ETC: "Other",
 };
 
 export interface SurveyListItemDto {
@@ -39,10 +39,10 @@ export type SurveyListResponse = ApiResponse<SurveyListItemDto[], PageMeta>;
 export type SurveyQuestionType = "RATING" | "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "ESSAY";
 
 export const SurveyQuestionTypeLabel: Record<SurveyQuestionType, string> = {
-  RATING: "척도형 (점수)",
-  SINGLE_CHOICE: "객관식 (단일 선택)",
-  MULTIPLE_CHOICE: "객관식 (다중 선택)",
-  ESSAY: "주관식 (서술형)",
+  RATING: "Rating (Score)",
+  SINGLE_CHOICE: "Multiple Choice (Single)",
+  MULTIPLE_CHOICE: "Multiple Choice (Multiple)",
+  ESSAY: "Essay (Text)",
 };
 
 export interface QuestionResponseDto {

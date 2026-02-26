@@ -6,12 +6,14 @@ import { sendQuestion, sendAnswer, fetchChatHistory } from "../api/mentoringApi"
 import { useMentoringChat } from "../hooks/useMentoringChat";
 import { useAuth } from "@/features/auth/AuthProvider";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 interface Props {
     userRole: "student" | "professor";
 }
 
 export default function MentoringChatPage({ userRole }: Props) {
+    const tChat = useI18n("mentoring.chat");
     const { state } = useAuth();
     const myAccountId = state.me?.accountId;
 
@@ -30,7 +32,7 @@ export default function MentoringChatPage({ userRole }: Props) {
 
     const messageEndRef = useRef<HTMLDivElement>(null);
 
-    const activeRoom = useMemo(() => matchings.find(m => m.matchingId === selectedId), [matchings, selectedId]);
+    const activeRoom = useMemo(() => matchings.find((m) => m.matchingId === selectedId), [matchings, selectedId]);
 
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,15 +51,17 @@ export default function MentoringChatPage({ userRole }: Props) {
             try {
                 const res = await fetchChatHistory(userRole, selectedId);
                 const data = res.data;
-                setMessages(prev => {
+                setMessages((prev) => {
                     if (JSON.stringify(prev) !== JSON.stringify(data)) return data;
                     return prev;
                 });
-            } catch (e) { }
+            } catch {
+                // Ignore polling errors and keep previous messages.
+            }
         }, 5000);
 
         return () => clearInterval(timer);
-    }, [selectedId, setMessages]);
+    }, [selectedId, setMessages, userRole]);
 
     const handleSend = async () => {
         if (!inputValue.trim() || !activeRoom || sending) return;
@@ -70,7 +74,7 @@ export default function MentoringChatPage({ userRole }: Props) {
                     content: inputValue
                 });
             } else {
-                const lastQuestion = [...messages].reverse().find(m => m.type === "QUESTION");
+                const lastQuestion = [...messages].reverse().find((m) => m.type === "QUESTION");
 
                 if (lastQuestion) {
                     await sendAnswer(userRole, {
@@ -87,9 +91,10 @@ export default function MentoringChatPage({ userRole }: Props) {
             setInputValue("");
             refreshChat();
             setTimeout(scrollToBottom, 50);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
-            toast.error("전송 실패: " + (e.message || ""));
+            const message = e instanceof Error ? e.message : "";
+            toast.error(tChat("messages.sendFailedPrefix") + (message || tChat("messages.unknownError")));
         } finally {
             setSending(false);
         }
@@ -98,25 +103,26 @@ export default function MentoringChatPage({ userRole }: Props) {
     return (
         <div className={styles.page}>
             <div className={styles.sidebar}>
-                <div className={styles.sidebarTitle}>멘토링 채팅</div>
+                <div className={styles.sidebarTitle}>{tChat("title")}</div>
                 <div className={styles.roomList}>
                     {loadingRooms ? (
-                        <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>로딩 중...</div>
+                        <div style={{ padding: 20, textAlign: "center", color: "#999" }}>{tChat("sidebar.loadingText")}</div>
                     ) : matchings.length === 0 ? (
-                        <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>매칭된 멘토링이 없습니다.</div>
+                        <div style={{ padding: 20, textAlign: "center", color: "#999" }}>{tChat("sidebar.emptyText")}</div>
                     ) : (
-                        matchings.map(room => (
+                        matchings.map((room) => (
                             <div
                                 key={room.matchingId}
                                 className={`${styles.roomItem} ${selectedId === room.matchingId ? styles.active : ""}`}
                                 onClick={() => setSelectedId(room.matchingId)}
                             >
-                                <div className={styles.roomAvatar}>
-                                    {room.partnerName?.charAt(0) ?? "?"}
-                                </div>
+                                <div className={styles.roomAvatar}>{room.partnerName?.charAt(0) ?? "?"}</div>
                                 <div className={styles.roomInfo}>
                                     <span className={styles.partnerName}>
-                                        {room.partnerName} <span style={{ fontWeight: 400, color: '#9aa3b0' }}>({room.role === "MENTOR" ? "멘티" : "멘토"})</span>
+                                        {room.partnerName}{" "}
+                                        <span style={{ fontWeight: 400, color: "#9aa3b0" }}>
+                                            ({room.role === "MENTOR" ? tChat("sidebar.partnerRole.mentee") : tChat("sidebar.partnerRole.mentor")})
+                                        </span>
                                     </span>
                                     <span className={styles.recruitmentTitle}>{room.recruitmentTitle}</span>
                                 </div>
@@ -130,9 +136,7 @@ export default function MentoringChatPage({ userRole }: Props) {
                 {activeRoom ? (
                     <>
                         <div className={styles.chatHeader}>
-                            <div className={styles.chatHeaderAvatar}>
-                                {activeRoom.partnerName?.charAt(0) ?? "?"}
-                            </div>
+                            <div className={styles.chatHeaderAvatar}>{activeRoom.partnerName?.charAt(0) ?? "?"}</div>
                             <div className={styles.chatHeaderInfo}>
                                 <div className={styles.chatPartnerName}>{activeRoom.partnerName}</div>
                                 <div className={styles.chatInfo}>{activeRoom.recruitmentTitle}</div>
@@ -156,11 +160,9 @@ export default function MentoringChatPage({ userRole }: Props) {
                                             {!isMine && <div className={styles.messageSender}>{msg.senderName}</div>}
                                             <div className={styles.messageContentWrapper}>
                                                 <div className={styles.messageTime}>
-                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                                 </div>
-                                                <div className={styles.bubble}>
-                                                    {msg.content}
-                                                </div>
+                                                <div className={styles.bubble}>{msg.content}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -172,7 +174,7 @@ export default function MentoringChatPage({ userRole }: Props) {
                         <div className={styles.inputArea}>
                             <textarea
                                 className={styles.textarea}
-                                placeholder="메시지를 입력하세요..."
+                                placeholder={tChat("input.placeholder")}
                                 value={inputValue}
                                 maxLength={200}
                                 onChange={(e) => setInputValue(e.target.value)}
@@ -184,7 +186,8 @@ export default function MentoringChatPage({ userRole }: Props) {
                                 }}
                             />
                             <div className={styles.inputFooter}>
-                                <span className={styles.charCount}
+                                <span
+                                    className={styles.charCount}
                                     style={{ color: inputValue.length >= 200 ? "#ef4444" : undefined }}
                                 >
                                     {inputValue.length}/200
@@ -194,7 +197,7 @@ export default function MentoringChatPage({ userRole }: Props) {
                                     onClick={handleSend}
                                     disabled={!inputValue.trim() || sending}
                                 >
-                                    전송
+                                    {tChat("input.send")}
                                 </button>
                             </div>
                         </div>
@@ -202,12 +205,11 @@ export default function MentoringChatPage({ userRole }: Props) {
                 ) : (
                     <div className={styles.emptyState}>
                         <div className={styles.emptyIcon}>💬</div>
-                        <h3>대화방을 선택해주세요</h3>
-                        <p>멘토링 매칭 완료 후 대화를 시작할 수 있습니다.</p>
+                        <h3>{tChat("emptyState.title")}</h3>
+                        <p>{tChat("emptyState.description")}</p>
                     </div>
                 )}
             </div>
         </div>
     );
 }
-

@@ -13,8 +13,11 @@ import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function SurveyListPageClient() {
+    const tList = useI18n("survey.admin.list");
+    const tTypes = useI18n("survey.common.types");
     const router = useRouter();
     const { state, actions } = useSurveyList();
     const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -44,11 +47,19 @@ export default function SurveyListPageClient() {
     }, []);
 
     const typeOptions = useMemo(() => {
+        const typeLabel = (typeCode: string) => {
+            if (typeCode === "SATISFACTION") return tTypes("SATISFACTION");
+            if (typeCode === "COURSE") return tTypes("COURSE");
+            if (typeCode === "SERVICE") return tTypes("SERVICE");
+            if (typeCode === "ETC") return tTypes("ETC");
+            return typeCode;
+        };
+
         return types.map(t => ({
             value: t.typeCode,
-            label: t.typeName
+            label: typeLabel(t.typeCode)
         }));
-    }, [types]);
+    }, [types, tTypes]);
 
     useEffect(() => {
         actions.goPage(page);
@@ -72,11 +83,11 @@ export default function SurveyListPageClient() {
         if (deleteId === null) return;
         try {
             await deleteSurvey(deleteId);
-            toast.success("삭제되었습니다.");
+            toast.success(tList("messages.deleteSuccess"));
             await actions.reload();
         } catch (e: any) {
             console.error(e);
-            toast.error(e.message ?? "삭제에 실패했습니다.");
+            toast.error(e.message ?? tList("messages.deleteFailed"));
         } finally {
             setDeleteId(null);
         }
@@ -85,7 +96,7 @@ export default function SurveyListPageClient() {
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <h1 className={styles.title}>설문 통합 관리</h1>
+                <h1 className={styles.title}>{tList("title")}</h1>
 
                 <div className={styles.searchRow}>
                     <div className={styles.searchGroup}>
@@ -97,8 +108,9 @@ export default function SurveyListPageClient() {
                                     setPage(1);
                                     actions.setType(val);
                                 }}
-                                placeholder="전체 유형"
+                                placeholder={tList("placeholders.typeAll")}
                                 loading={typesLoading}
+                                className={styles.dropdownFit}
                             />
                         </div>
                         <div className={styles.searchBarWrap}>
@@ -106,7 +118,8 @@ export default function SurveyListPageClient() {
                                 value={inputKeyword}
                                 onChange={setInputKeyword}
                                 onSearch={handleSearch}
-                                placeholder="설문 제목 검색"
+                                placeholder={tList("placeholders.keyword")}
+                                className={styles.searchBarFit}
                             />
                         </div>
                     </div>
@@ -132,15 +145,15 @@ export default function SurveyListPageClient() {
                         disabled={state.loading}
                     />
                     <Button onClick={() => router.push("/admin/surveys/new")}>
-                        새 설문 등록
+                        {tList("buttons.newSurvey")}
                     </Button>
                 </div>
             </div>
 
             <ConfirmModal
                 open={deleteId !== null}
-                title="설문 삭제"
-                message="정말 이 설문을 삭제하시겠습니까? 관련 응답 데이터가 모두 삭제됩니다."
+                title={tList("confirmDelete.title")}
+                message={tList("confirmDelete.message")}
                 onConfirm={handleDelete}
                 onCancel={() => setDeleteId(null)}
                 type="danger"

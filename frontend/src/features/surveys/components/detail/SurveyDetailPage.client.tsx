@@ -9,12 +9,15 @@ import styles from "./SurveyDetailPage.client.module.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
+import { useI18n } from "@/i18n/useI18n";
 
 interface Props {
     id: string;
 }
 
 export default function SurveyDetailPageClient({ id }: Props) {
+    const tDetail = useI18n("survey.admin.detail");
+    const tTypes = useI18n("survey.common.types");
     const router = useRouter();
     const { state, actions } = useSurveyDetail(id);
     const {
@@ -35,64 +38,72 @@ export default function SurveyDetailPageClient({ id }: Props) {
     };
 
     const typeOptions = useMemo(() => {
+        const typeLabel = (typeCode: string) => {
+            if (typeCode === "SATISFACTION") return tTypes("SATISFACTION");
+            if (typeCode === "COURSE") return tTypes("COURSE");
+            if (typeCode === "SERVICE") return tTypes("SERVICE");
+            if (typeCode === "ETC") return tTypes("ETC");
+            return typeCode;
+        };
+
         return state.surveyTypes.map((t) => ({
             value: t.typeCode,
-            label: t.typeName,
+            label: typeLabel(t.typeCode),
         }));
-    }, [state.surveyTypes]);
+    }, [state.surveyTypes, tTypes]);
 
     return (
         <div className={styles.page}>
             <div className={styles.topBar}>
-                <div className={styles.title}>{isNew ? "새 설문 등록" : "설문 수정"}</div>
+                <div className={styles.title}>{isNew ? tDetail("titleNew") : tDetail("titleEdit")}</div>
                 <Button
                     variant="secondary"
                     onClick={() => router.back()}
                     style={{ height: '36px', fontSize: '14px', padding: '0 12px' }}
                 >
-                    목록으로 →
+                    {tDetail("backToList")}
                 </Button>
             </div>
 
             <div className={styles.body}>
                 <section className={styles.sectionCard}>
-                    <h2 className={styles.sectionTitle}>기본 정보</h2>
+                    <h2 className={styles.sectionTitle}>{tDetail("sections.basicInfo")}</h2>
                     <div className={styles.formGrid}>
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>설문 유형</label>
+                            <label className={styles.label}>{tDetail("fields.surveyType")}</label>
                             <Dropdown
                                 value={state.surveyType}
                                 options={typeOptions}
                                 onChange={(val) => {
                                     if (val !== "") actions.setSurveyType(val);
                                 }}
-                                placeholder="유형 선택"
+                                placeholder={tDetail("placeholders.typeSelect")}
                             />
                         </div>
                         <div className={styles.formGroupFull}>
-                            <label className={styles.label}>설문 제목</label>
+                            <label className={styles.label}>{tDetail("fields.title")}</label>
                             <input
                                 className={styles.input}
                                 value={title}
                                 onChange={(e) => actions.setTitle(e.target.value)}
-                                placeholder="설문 제목을 입력하세요."
+                                placeholder={tDetail("placeholders.title")}
                             />
                         </div>
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>시작 일시</label>
+                            <label className={styles.label}>{tDetail("fields.startAt")}</label>
                             <DatePickerInput
                                 value={dates?.startAt?.split('T')[0] || ""}
                                 onChange={(v) => handleDateChange('start', v)}
-                                placeholder="시작일 선택"
+                                placeholder={tDetail("placeholders.startDate")}
                                 closeSignal={closeSignal}
                             />
                         </div>
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>종료 일시</label>
+                            <label className={styles.label}>{tDetail("fields.endAt")}</label>
                             <DatePickerInput
                                 value={dates?.endAt?.split('T')[0] || ""}
                                 onChange={(v) => handleDateChange('end', v)}
-                                placeholder="종료일 선택"
+                                placeholder={tDetail("placeholders.endDate")}
                                 min={dates?.startAt?.split('T')[0]}
                                 closeSignal={closeSignal}
                             />
@@ -102,7 +113,7 @@ export default function SurveyDetailPageClient({ id }: Props) {
 
                 {isNew && (
                     <section className={styles.sectionCard}>
-                        <h2 className={styles.sectionTitle}>대상 설정</h2>
+                        <h2 className={styles.sectionTitle}>{tDetail("sections.target")}</h2>
                         <TargetSelector
                             targetType={targetType}
                             setTargetType={actions.setTargetType}
@@ -116,8 +127,8 @@ export default function SurveyDetailPageClient({ id }: Props) {
 
                 <section className={styles.sectionCard}>
                     <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>질문 구성</h2>
-                        <Button variant="secondary" onClick={actions.addQuestion}>질문 추가</Button>
+                        <h2 className={styles.sectionTitle}>{tDetail("sections.questions")}</h2>
+                        <Button variant="secondary" onClick={actions.addQuestion}>{tDetail("buttons.addQuestion")}</Button>
                     </div>
 
                     <div className={styles.questionList}>
@@ -143,7 +154,7 @@ export default function SurveyDetailPageClient({ id }: Props) {
                         }}
                         className={styles.submitBtn}
                     >
-                        {isNew ? "설문 등록 완료" : "설문 수정 완료"}
+                        {isNew ? tDetail("buttons.submitNew") : tDetail("buttons.submitEdit")}
                     </Button>
                 </div>
             </div>

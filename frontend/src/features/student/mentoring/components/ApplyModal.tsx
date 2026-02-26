@@ -8,6 +8,7 @@ import { getJson } from "@/lib/http";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 interface Props {
     recruitment: MentoringRecruitment;
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
+    const tApply = useI18n("mentoring.studentApply");
+
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -24,32 +27,34 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
         studentNo: "",
         email: "",
         phone: "",
-        reason: "",
+        reason: ""
     });
 
     useEffect(() => {
-        // Fetch user profile
         getJson<any>("/api/accounts/me")
             .then((res) => {
                 if (res.data) {
                     const p = res.data;
-                    setFormData(prev => ({
+                    setFormData((prev) => ({
                         ...prev,
                         name: p.name || "",
                         deptName: p.deptName || "",
                         gradeLevel: p.gradeLevel ? String(p.gradeLevel) : "",
                         studentNo: p.studentNo || "",
                         email: p.email || "",
-                        phone: p.phone || "",
+                        phone: p.phone || ""
                     }));
                 }
             })
-            .catch(err => console.error("Failed to load profile", err));
-    }, []);
+            .catch((e: unknown) => {
+                console.error(e);
+                toast.error(tApply("messages.profileLoadFailed"));
+            });
+    }, [tApply]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async () => {
@@ -58,19 +63,14 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
             await applyMentoring("student", {
                 recruitmentId: recruitment.recruitmentId,
                 role: "MENTEE",
-                // If the backend expects these profile fields in the application request, include them. 
-                // But typically application just links to account. 
-                // The prompt says "자기 정보가 자동으로 입력되있는 상태였으면 좋겠어". 
-                // It implies these are for display or maybe contact info update?
-                // Assuming currently backend only takes recruitmentId/role based on previous file view.
-                // If backend needs reason, we send reason.
                 reason: formData.reason
             });
-            toast.success("신청되었습니다.");
+            toast.success(tApply("messages.applySuccess"));
             onSuccess();
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
-            toast.error("신청 실패: " + (e.message || "알 수 없는 오류"));
+            const message = e instanceof Error ? e.message : "";
+            toast.error(tApply("messages.applyFailedPrefix") + (message || tApply("messages.unknownError")));
         } finally {
             setSubmitting(false);
         }
@@ -80,15 +80,15 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
         <Modal
             open={true}
             onClose={onClose}
-            title="멘토링 신청"
+            title={tApply("modal.title")}
             size="md"
             footer={
                 <div className={styles.buttonGroup}>
                     <Button variant="secondary" onClick={onClose} disabled={submitting}>
-                        취소
+                        {tApply("modal.buttons.cancel")}
                     </Button>
                     <Button onClick={handleSubmit} loading={submitting}>
-                        신청
+                        {tApply("modal.buttons.apply")}
                     </Button>
                 </div>
             }
@@ -96,53 +96,53 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
             <div className={styles.formGroup}>
                 <div className={styles.row}>
                     <div className={styles.col}>
-                        <label>이름</label>
+                        <label>{tApply("modal.fields.name")}</label>
                         <input
                             className={styles.input}
                             name="name"
                             value={formData.name}
                             readOnly
-                            placeholder="이름"
+                            placeholder={tApply("modal.placeholders.name")}
                         />
                     </div>
                     <div className={styles.col}>
-                        <label>모집명</label>
+                        <label>{tApply("modal.fields.recruitmentTitle")}</label>
                         <input className={styles.input} type="text" value={recruitment.title} readOnly />
                     </div>
                 </div>
             </div>
 
             <div className={styles.formGroup}>
-                <label>학과</label>
+                <label>{tApply("modal.fields.deptName")}</label>
                 <input
                     className={styles.input}
                     name="deptName"
                     value={formData.deptName}
                     readOnly
-                    placeholder="학과"
+                    placeholder={tApply("modal.placeholders.deptName")}
                 />
             </div>
 
             <div className={styles.formGroup}>
                 <div className={styles.row}>
                     <div className={styles.col}>
-                        <label>학년</label>
+                        <label>{tApply("modal.fields.gradeLevel")}</label>
                         <input
                             className={styles.input}
                             name="gradeLevel"
                             value={formData.gradeLevel}
                             readOnly
-                            placeholder="학년"
+                            placeholder={tApply("modal.placeholders.gradeLevel")}
                         />
                     </div>
                     <div className={styles.col}>
-                        <label>학번</label>
+                        <label>{tApply("modal.fields.studentNo")}</label>
                         <input
                             className={styles.input}
                             name="studentNo"
                             value={formData.studentNo}
                             readOnly
-                            placeholder="학번"
+                            placeholder={tApply("modal.placeholders.studentNo")}
                         />
                     </div>
                 </div>
@@ -151,38 +151,38 @@ export function ApplyModal({ recruitment, onClose, onSuccess }: Props) {
             <div className={styles.formGroup}>
                 <div className={styles.row}>
                     <div className={styles.col}>
-                        <label>이메일</label>
+                        <label>{tApply("modal.fields.email")}</label>
                         <input
                             className={styles.input}
                             name="email"
                             type="email"
                             value={formData.email}
                             readOnly
-                            placeholder="email@example.com"
+                            placeholder={tApply("modal.placeholders.email")}
                         />
                     </div>
                     <div className={styles.col}>
-                        <label>연락처</label>
+                        <label>{tApply("modal.fields.phone")}</label>
                         <input
                             className={styles.input}
                             name="phone"
                             type="tel"
                             value={formData.phone}
                             readOnly
-                            placeholder="010-0000-0000"
+                            placeholder={tApply("modal.placeholders.phone")}
                         />
                     </div>
                 </div>
             </div>
 
             <div className={styles.formGroup}>
-                <label>멘토링 신청 사유</label>
+                <label>{tApply("modal.fields.reason")}</label>
                 <textarea
                     className={styles.textarea}
                     name="reason"
                     value={formData.reason}
                     onChange={handleChange}
-                    placeholder="신청 사유를 입력하세요"
+                    placeholder={tApply("modal.placeholders.reason")}
                 />
             </div>
         </Modal>
