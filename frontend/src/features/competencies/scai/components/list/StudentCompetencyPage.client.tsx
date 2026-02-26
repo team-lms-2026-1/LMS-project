@@ -25,20 +25,41 @@ export default function StudentCompetencyPageClient() {
   }, [keywordQs]);
 
   useEffect(() => {
-    actions.goPage(page);
-  }, [page, actions]);
+    if (state.page !== page) actions.goPage(page);
+  }, [page, state.page, actions]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size, actions]);
 
   useEffect(() => {
-    actions.setKeyword(keywordQs ?? "");
-  }, [keywordQs, actions]);
+    const nextKeyword = keywordQs ?? "";
+    if (state.keyword !== nextKeyword) actions.setKeyword(nextKeyword);
+  }, [keywordQs, state.keyword, actions]);
 
   useEffect(() => {
-    actions.setDeptName(deptNameQs ?? "");
-  }, [deptNameQs, actions]);
+    const nextDeptName = deptNameQs ?? "";
+    if (state.deptName !== nextDeptName) actions.setDeptName(nextDeptName);
+  }, [deptNameQs, state.deptName, actions]);
+
+  useEffect(() => {
+    const reloadSilently = () => {
+      actions.reload({ silent: true });
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        reloadSilently();
+      }
+    };
+
+    window.addEventListener("focus", reloadSilently);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", reloadSilently);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [actions]);
 
   const handleSearch = useCallback(() => {
     setKeywordQs(inputKeyword);

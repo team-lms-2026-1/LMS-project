@@ -47,7 +47,7 @@ export type DiagnosisCsKey =
   | "communication"
   | "collaboration"
   | "creativity"
-  | "convergence";
+  | "citizenship";
 
 export type DiagnosisScaleOption = {
   id: string;

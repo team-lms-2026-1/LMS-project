@@ -25,7 +25,7 @@ const CS_META: Array<{ key: DiagnosisCsKey; label: string }> = [
   { key: "creativity", label: "Creativity" },
   { key: "communication", label: "Communication" },
   { key: "collaboration", label: "Collaboration" },
-  { key: "convergence", label: "Convergence" },
+  { key: "citizenship", label: "Citizenship" },
 ];
 
 function toDateOnly(value?: string | number | Date | null) {
@@ -111,7 +111,9 @@ function toCsKey(raw?: string) {
   if (key.includes("creativity") || key === "cre" || key === "c5") return "creativity";
   if (key.includes("communication") || key === "com" || key === "c3") return "communication";
   if (key.includes("collaboration") || key === "col" || key === "c4") return "collaboration";
-  if (key.includes("convergence") || key === "conv" || key === "c6") return "convergence";
+  if (key.includes("convergence") || key.includes("citizenship") || key === "conv" || key === "c6") {
+    return "citizenship";
+  }
   return undefined;
 }
 
@@ -441,7 +443,8 @@ function mapQuestions(raw?: any[]): DiagnosisQuestion[] {
           q?.c5,
           q?.C5
         ),
-        convergence: pickScore(
+        citizenship: pickScore(
+          cs?.citizenship,
           cs?.convergence,
           cs?.conv,
           weights?.C6,
@@ -675,5 +678,4 @@ export default function DignosisDetailPageClient({ dignosisId }: DiagnosisDetail
     </>
   );
 }
-
 

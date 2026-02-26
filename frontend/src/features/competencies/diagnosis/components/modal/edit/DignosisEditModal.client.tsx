@@ -28,7 +28,7 @@ const CS_LABELS: Array<{ key: DiagnosisCsKey; label: string }> = [
   { key: "communication", label: "Communication" },
   { key: "collaboration", label: "Collaboration" },
   { key: "creativity", label: "Creativity" },
-  { key: "convergence", label: "Convergence" },
+  { key: "citizenship", label: "Citizenship" },
 ];
 
 const QUESTION_TYPE_OPTIONS = [
@@ -75,7 +75,7 @@ function createDefaultQuestion(): DiagnosisQuestion {
       communication: 5,
       collaboration: 5,
       creativity: 5,
-      convergence: 5,
+      citizenship: 5,
     },
   };
 }
@@ -96,7 +96,10 @@ function serializeQuestions(questions: DiagnosisQuestion[]) {
         communication: q.csScores?.communication ?? 0,
         collaboration: q.csScores?.collaboration ?? 0,
         creativity: q.csScores?.creativity ?? 0,
-        convergence: q.csScores?.convergence ?? 0,
+        citizenship:
+          q.csScores?.citizenship ??
+          (q.csScores as Record<string, number> | undefined)?.convergence ??
+          0,
       },
     }))
   );
@@ -145,7 +148,7 @@ function buildCreateQuestions(questions: DiagnosisQuestion[]): DiagnosisCreateQu
       c3: q.csScores.communication,
       c4: q.csScores.collaboration,
       c5: q.csScores.creativity,
-      c6: q.csScores.convergence,
+      c6: q.csScores.citizenship,
     };
 
     if (q.type === "SHORT") {
@@ -192,7 +195,10 @@ function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[
       communication: q.csScores?.communication ?? 5,
       collaboration: q.csScores?.collaboration ?? 5,
       creativity: q.csScores?.creativity ?? 5,
-      convergence: q.csScores?.convergence ?? 5,
+      citizenship:
+        q.csScores?.citizenship ??
+        (q.csScores as Record<string, number> | undefined)?.convergence ??
+        5,
     },
   }));
 }
