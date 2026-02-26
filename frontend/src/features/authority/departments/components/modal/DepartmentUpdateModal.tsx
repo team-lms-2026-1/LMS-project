@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { updateDepartment, fetchDepartmentForUpdate } from "../../api/departmentsApi";
-import { UpdateDepartmentRequest, ProfessorDropdownItem } from "../../api/types";
+import { UpdateDepartmentRequest } from "../../api/types";
 import toast from "react-hot-toast";
 import styles from "../../styles/DepartmentModal.module.css";
 import { Button } from "@/components/button/Button";
 import { Modal } from "@/components/modal/Modal";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     deptId: number;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function DepartmentUpdateModal({ deptId, open, onClose, onSuccess }: Props) {
+    const t = useI18n("authority.departments.modals.departmentUpdate");
     const [form, setForm] = useState<UpdateDepartmentRequest>({
         deptName: "",
         description: "",
@@ -42,27 +44,27 @@ export function DepartmentUpdateModal({ deptId, open, onClose, onSuccess }: Prop
                 })
                 .catch((err) => {
                     console.error(err);
-                    toast.error("학과 정보를 불러오지 못했습니다.");
+                    toast.error(t("toasts.loadFailed"));
                     onClose();
                 })
                 .finally(() => setFetching(false));
         }
-    }, [open, deptId]);
+    }, [open, deptId, onClose, t]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!form.deptName) {
-            toast.error("학과 이름은 필수입니다.");
+            toast.error(t("validation.requiredDeptName"));
             return;
         }
 
         try {
             setLoading(true);
             await updateDepartment(deptId, form);
-            toast.success("학과 정보가 수정되었습니다.");
+            toast.success(t("toasts.updateSuccess"));
             onSuccess();
         } catch (error: any) {
-            toast.error(error.message || "학과 수정 실패");
+            toast.error(error.message || t("toasts.updateFailed"));
         } finally {
             setLoading(false);
         }
@@ -72,15 +74,15 @@ export function DepartmentUpdateModal({ deptId, open, onClose, onSuccess }: Prop
         <Modal
             open={open}
             onClose={onClose}
-            title="학과 수정"
+            title={t("title")}
             footer={
-                <div className="flex justify-end gap-2">
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
                     <Button
                         variant="secondary"
                         onClick={onClose}
                         disabled={loading}
                     >
-                        취소
+                        {t("buttons.cancel")}
                     </Button>
                     {!fetching &&
                         <Button
@@ -88,18 +90,18 @@ export function DepartmentUpdateModal({ deptId, open, onClose, onSuccess }: Prop
                             form="department-update-form"
                             disabled={loading}
                         >
-                            {loading ? "저장 중..." : "저장"}
+                            {loading ? t("buttons.saving") : t("buttons.save")}
                         </Button>
                     }
                 </div>
             }
         >
             {fetching ? (
-                <div className="p-8 text-center text-gray-500">정보를 불러오는 중...</div>
+                <div className="p-8 text-center text-gray-500">{t("loading")}</div>
             ) : (
                 <form id="department-update-form" onSubmit={handleSubmit}>
                     <div className={styles.field}>
-                        <label className={styles.label}>학과코드</label>
+                        <label className={styles.label}>{t("fields.deptCode.label")}</label>
                         <input
                             className={`${styles.input} bg-gray-100 text-gray-500`}
                             value={deptCode}
@@ -110,25 +112,25 @@ export function DepartmentUpdateModal({ deptId, open, onClose, onSuccess }: Prop
 
                     <div className={styles.field}>
                         <label className={styles.label}>
-                            학과이름<span className={styles.required}>*</span>
+                            {t("fields.deptName.label")}<span className={styles.required}>*</span>
                         </label>
                         <input
                             className={styles.input}
                             value={form.deptName}
                             onChange={(e) => setForm({ ...form, deptName: e.target.value })}
                             disabled={loading}
-                            placeholder="학과 이름 입력"
+                            placeholder={t("fields.deptName.placeholder")}
                         />
                     </div>
 
                     <div className={styles.field}>
-                        <label className={styles.label}>설명</label>
+                        <label className={styles.label}>{t("fields.description.label")}</label>
                         <textarea
                             className={styles.textarea}
                             value={form.description}
                             onChange={(e) => setForm({ ...form, description: e.target.value })}
                             disabled={loading}
-                            placeholder="학과에 대한 설명"
+                            placeholder={t("fields.description.placeholder")}
                         />
                     </div>
                 </form>

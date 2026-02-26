@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { revalidateTag } from "next/cache";
+import { resolveBaseUrl } from "@/lib/bff";
 
 export const runtime = "nodejs";
 
@@ -8,10 +9,6 @@ const TAG_ACCOUNTS = "admin:authority:accounts";
 const REVALIDATE_SECONDS = 30;
 
 type ApiResponse<T> = { success?: boolean; message?: string; data?: T };
-
-function getBaseUrl() {
-  return process.env.ADMIN_API_BASE_URL ?? process.env.API_BASE_URL;
-}
 
 function getToken() {
   let token = cookies().get("access_token")?.value;
@@ -70,13 +67,7 @@ function pickKeyword(sp: URLSearchParams): string | undefined {
 }
 
 export async function GET(req: Request) {
-  const base = getBaseUrl();
-  if (!base) {
-    return NextResponse.json(
-      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 API_BASE_URL 누락" },
-      { status: 500 }
-    );
-  }
+  const base = resolveBaseUrl();
 
   const inbound = new URL(req.url);
   const sp = inbound.searchParams;
@@ -161,13 +152,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const base = getBaseUrl();
-  if (!base) {
-    return NextResponse.json(
-      { message: "서버 설정 오류: ADMIN_API_BASE_URL 또는 API_BASE_URL 누락" },
-      { status: 500 }
-    );
-  }
+  const base = resolveBaseUrl();
 
   const upstreamUrl = `${base}/api/v1/admin/accounts`;
 

@@ -13,6 +13,7 @@ import {
 import { Bar } from "react-chartjs-2";
 import { QuestionStatsDto } from "../../api/types";
 import styles from "./SurveyQuestionStats.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -21,19 +22,30 @@ interface Props {
 }
 
 export function SurveyQuestionStats({ questions }: Props) {
+    const t = useI18n("survey.admin.stats.questions");
+    const tQuestionTypes = useI18n("survey.common.questionTypes.short");
+
+    const typeLabel = (type: string) => {
+        if (type === "RATING") return tQuestionTypes("RATING");
+        if (type === "SINGLE_CHOICE") return tQuestionTypes("SINGLE_CHOICE");
+        if (type === "MULTIPLE_CHOICE") return tQuestionTypes("MULTIPLE_CHOICE");
+        if (type === "ESSAY") return tQuestionTypes("ESSAY");
+        return type;
+    };
+
     if (!questions || questions.length === 0) {
-        return <div className={styles.noData}>문항 데이터를 찾을 수 없습니다.</div>;
+        return <div className={styles.noData}>{t("noData")}</div>;
     }
 
     return (
         <div className={styles.container}>
-            <h2 className={styles.sectionTitle}>문항별 응답 상세</h2>
+            <h2 className={styles.sectionTitle}>{t("sectionTitle")}</h2>
             <div className={styles.grid}>
                 {questions.map((q) => (
                     <div key={q.questionId} className={styles.questionCard}>
                         <h3 className={styles.questionTitle}>
                             <span className={styles.qNum}>Q.</span> {q.title}
-                            <span className={styles.qType}>{getTypeLabel(q.type)}</span>
+                            <span className={styles.qType}>{typeLabel(q.type)}</span>
                         </h3>
 
                         {q.type === "ESSAY" ? (
@@ -45,12 +57,12 @@ export function SurveyQuestionStats({ questions }: Props) {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className={styles.noEssay}>응답이 없습니다.</div>
+                                    <div className={styles.noEssay}>{t("noEssay")}</div>
                                 )}
                             </div>
                         ) : (
                             <div className={styles.chartWrapper}>
-                                <BarChart data={q.answerCounts} />
+                                <BarChart data={q.answerCounts} label={t("responseCount")} />
                             </div>
                         )}
                     </div>
@@ -70,7 +82,7 @@ const COLORS = [
     '#1e40af', // blue-800
 ];
 
-function BarChart({ data }: { data: Record<string, number> }) {
+function BarChart({ data, label }: { data: Record<string, number>; label: string }) {
     const labels = Object.keys(data).sort((a, b) => {
         if (!isNaN(Number(a)) && !isNaN(Number(b))) {
             return Number(a) - Number(b);
@@ -83,7 +95,7 @@ function BarChart({ data }: { data: Record<string, number> }) {
         labels,
         datasets: [
             {
-                label: "응답 수",
+                label,
                 data: values,
                 backgroundColor: labels.map((_, i) => COLORS[i % COLORS.length]),
                 borderRadius: 6,
@@ -135,14 +147,4 @@ function BarChart({ data }: { data: Record<string, number> }) {
             }}
         />
     );
-}
-
-function getTypeLabel(type: string) {
-    switch (type) {
-        case "RATING": return "척도형";
-        case "SINGLE_CHOICE": return "객관식";
-        case "MULTIPLE_CHOICE": return "다중선택";
-        case "ESSAY": return "주관식";
-        default: return type;
-    }
 }

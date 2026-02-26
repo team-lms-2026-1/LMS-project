@@ -13,7 +13,8 @@ import { Badge } from "@/components/badge";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useRouter } from "next/navigation";
 import { fetchSurveyTypes } from "../../api/surveysApi";
-import { SurveyListItemDto, SurveyTypeLabel, SurveyTypeResponse } from "../../api/types";
+import { SurveyListItemDto, SurveyTypeResponse } from "../../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 const SURVEY_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
     SATISFACTION: { bg: "#eff6ff", text: "#1d4ed8" },
@@ -23,6 +24,10 @@ const SURVEY_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 export default function SurveyResultsPageClient() {
+    const tResults = useI18n("survey.admin.results");
+    const tTable = useI18n("survey.admin.table");
+    const tStatus = useI18n("survey.common.status");
+    const tTypes = useI18n("survey.common.types");
     const router = useRouter();
     const { state, actions } = useSurveyList();
 
@@ -48,10 +53,25 @@ export default function SurveyResultsPageClient() {
         load();
     }, []);
 
-    const typeOptions = useMemo(() =>
-        types.map(t => ({ value: t.typeCode, label: t.typeName })),
-        [types]
-    );
+    const typeOptions = useMemo(() => {
+        const typeLabel = (typeCode: string) => {
+            if (typeCode === "SATISFACTION") return tTypes("SATISFACTION");
+            if (typeCode === "COURSE") return tTypes("COURSE");
+            if (typeCode === "SERVICE") return tTypes("SERVICE");
+            if (typeCode === "ETC") return tTypes("ETC");
+            return typeCode;
+        };
+
+        return types.map(t => ({ value: t.typeCode, label: typeLabel(t.typeCode) }));
+    }, [types, tTypes]);
+
+    const typeLabel = (typeCode: string) => {
+        if (typeCode === "SATISFACTION") return tTypes("SATISFACTION");
+        if (typeCode === "COURSE") return tTypes("COURSE");
+        if (typeCode === "SERVICE") return tTypes("SERVICE");
+        if (typeCode === "ETC") return tTypes("ETC");
+        return typeCode;
+    };
 
     useEffect(() => {
         actions.goPage(page);
@@ -76,14 +96,14 @@ export default function SurveyResultsPageClient() {
 
     const columns: TableColumn<SurveyListItemDto>[] = [
         {
-            header: "번호",
+            header: tTable("headers.no"),
             field: "surveyId",
             width: "60px",
             align: "center",
             render: (_, idx) => String((idx + 1) + (page - 1) * state.size),
         },
         {
-            header: "유형",
+            header: tTable("headers.type"),
             field: "type",
             width: "130px",
             align: "center",
@@ -91,13 +111,13 @@ export default function SurveyResultsPageClient() {
                 const colors = SURVEY_TYPE_COLORS[row.type] || SURVEY_TYPE_COLORS.ETC;
                 return (
                     <Badge bgColor={colors.bg} textColor={colors.text}>
-                        {SurveyTypeLabel[row.type] || row.type}
+                        {typeLabel(row.type)}
                     </Badge>
                 );
             }
         },
         {
-            header: "제목",
+            header: tTable("headers.title"),
             field: "title",
             align: "center",
             render: (row) => (
@@ -105,14 +125,14 @@ export default function SurveyResultsPageClient() {
             )
         },
         {
-            header: "조회수",
+            header: tTable("headers.views"),
             field: "viewCount",
             width: "100px",
             align: "center",
             render: (row) => row.viewCount?.toLocaleString() || "0",
         },
         {
-            header: "기간",
+            header: tTable("headers.period"),
             width: "220px",
             align: "center",
             render: (row) => (
@@ -122,35 +142,35 @@ export default function SurveyResultsPageClient() {
             ),
         },
         {
-            header: "상태",
+            header: tTable("headers.status"),
             field: "status",
             width: "100px",
             align: "center",
             render: (row) => {
-                if (row.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
-                if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+                if (row.status === "DRAFT") return <StatusPill status="DRAFT" label={tStatus("DRAFT")} />;
+                if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label={tStatus("CLOSED")} />;
 
                 const now = new Date();
                 const start = new Date(row.startAt);
                 const end = new Date(row.endAt);
 
                 if (now < start) {
-                    return <StatusPill status="DRAFT" label="DRAFT" />;
+                    return <StatusPill status="DRAFT" label={tStatus("DRAFT")} />;
                 } else if (now >= start && now <= end) {
-                    return <StatusPill status="ACTIVE" label="OPEN" />;
+                    return <StatusPill status="ACTIVE" label={tStatus("OPEN")} />;
                 } else {
-                    return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    return <StatusPill status="INACTIVE" label={tStatus("CLOSED")} />;
                 }
             }
         },
         {
-            header: "결과",
+            header: tResults("table.result"),
             width: "120px",
             align: "center",
             stopRowClick: true,
             render: (row) => (
                 <Button variant="primary" onClick={() => handleStats(row.surveyId)}>
-                    결과 통계
+                    {tResults("table.resultButton")}
                 </Button>
             )
         },
@@ -159,7 +179,7 @@ export default function SurveyResultsPageClient() {
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <h1 className={styles.title}>설문 결과 통계</h1>
+                <h1 className={styles.title}>{tResults("title")}</h1>
 
                 <div className={styles.searchRow}>
                     <div className={styles.searchGroup}>
@@ -168,8 +188,9 @@ export default function SurveyResultsPageClient() {
                                 value={selectedType}
                                 options={typeOptions}
                                 onChange={handleTypeChange}
-                                placeholder="전체 유형"
+                                placeholder={tResults("placeholders.typeAll")}
                                 loading={typesLoading}
+                                className={styles.dropdownFit}
                             />
                         </div>
                         <div className={styles.searchBarWrap}>
@@ -177,7 +198,8 @@ export default function SurveyResultsPageClient() {
                                 value={inputKeyword}
                                 onChange={setInputKeyword}
                                 onSearch={handleSearch}
-                                placeholder="설문 제목 검색"
+                                placeholder={tResults("placeholders.keyword")}
+                                className={styles.searchBarFit}
                             />
                         </div>
                     </div>
@@ -193,6 +215,7 @@ export default function SurveyResultsPageClient() {
                         loading={state.loading}
                         skeletonRowCount={10}
                         onRowClick={(row) => handleStats(row.surveyId)}
+                        emptyText={tTable("empty")}
                     />
                 </div>
 

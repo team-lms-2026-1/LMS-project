@@ -5,6 +5,7 @@ import styles from "../styles/AccountModal.module.css";
 import type { AccountType, MajorType } from "../types";
 import { accountsApi } from "../api/accountsApi";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 export type AccountEditModalProps = {
   open: boolean;
@@ -72,7 +73,7 @@ const emptyForm: FormState = {
 
 function isValidPassword(v: string) {
   if (!v.trim()) return true;
-  return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(v);
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(v);
 }
 
 function isValidEmail(v: string) {
@@ -206,6 +207,10 @@ const numericKeys = new Set<keyof FormState>([
 ]);
 
 export default function AccountEditModal({ open, accountId, onClose, onSaved }: AccountEditModalProps) {
+  const t = useI18n("authority.accounts.modals.edit");
+  const tRoles = useI18n("authority.accounts.common.roles");
+  const tStatus = useI18n("authority.accounts.common.status");
+  const tAcademicStatus = useI18n("authority.accounts.common.academicStatus");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -302,7 +307,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
         const allMajors = await majorsAllFallback();
         setMajorsAll(allMajors);
       } catch (e: any) {
-        setError(e?.message ?? "상세 조회 실패");
+        setError(e?.message ?? t("messages.detailLoadFailed"));
         setForm(emptyForm);
         setMajorsByDept([]);
         setMajorsAll([]);
@@ -313,7 +318,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
     };
 
     load();
-  }, [open, accountId]);
+  }, [open, accountId, t]);
 
   useEffect(() => {
     if (!open) return;
@@ -390,11 +395,11 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
     // 업로드 직후 바로 반영 (계정 저장과는 별개로 이미지 API 호출 권장)
     if (accountId) {
       accountsApi.updateStudentProfileImage(accountId, file).then(() => {
-        toast.success("프로필 이미지가 변경되었습니다.");
+        toast.success(t("toasts.imageUpdated"));
       })
         .catch((err) => {
           console.error("Image PATCH failed", err);
-          toast.error("이미지 수정 중 오류가 발생했습니다.");
+          toast.error(t("toasts.imageUpdateFailed"));
         });
     }
   };
@@ -408,9 +413,9 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
       setImagePreview(null);
       setImageFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      toast.success("프로필 이미지가 삭제되었습니다.");
+      toast.success(t("toasts.imageDeleted"));
     } catch (e) {
-      toast.error("이미지 삭제 실패");
+      toast.error(t("toasts.imageDeleteFailed"));
     } finally {
       setIsImageDeleting(false);
     }
@@ -501,7 +506,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
       await accountsApi.update(accountId, body);
       await onSaved();
     } catch (e: any) {
-      setError(e?.message ?? "저장 실패");
+      setError(e?.message ?? t("messages.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -509,17 +514,17 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
   if (!open) return null;
 
-  const typeLabel = form.accountType === "STUDENT" ? "학생" : form.accountType === "PROFESSOR" ? "교수" : "관리자";
+  const typeLabel = tRoles(form.accountType);
 
   return (
     <div className={styles.backdrop} onMouseDown={onClose}>
       <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <div>
-            <h2 className={styles.title}>계정 수정</h2>
+            <h2 className={styles.title}>{t("title")}</h2>
           </div>
           <div className={styles.headerRight}>
-            <span className={styles.headerLabel}>유형</span>
+            <span className={styles.headerLabel}>{t("header.type")}</span>
             <span className={styles.headerLabel} style={{ color: "#111827" }}>
               {typeLabel}
             </span>
@@ -536,79 +541,79 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
               style={{ cursor: "default", opacity: form.accountType === t ? 1 : 0.55 }}
               aria-disabled="true"
             >
-              {t === "STUDENT" ? "학생" : t === "PROFESSOR" ? "교수" : "관리자"}
+              {tRoles(t)}
             </button>
           ))}
         </div>
 
         {error && <div style={{ marginBottom: 12, color: "#b91c1c", fontSize: 13 }}>{error}</div>}
-        {loading ? <div style={{ padding: 12 }}>불러오는 중...</div> : null}
+        {loading ? <div style={{ padding: 12 }}>{t("loading")}</div> : null}
 
         <div className={styles.grid}>
           {/* 좌측 */}
           <section className={styles.col}>
             <div className={styles.field}>
-              <label className={styles.label}>ID</label>
+              <label className={styles.label}>{t("fields.loginId")}</label>
               <input className={styles.input} value={form.loginId} disabled />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>현재 비밀번호</label>
+              <label className={styles.label}>{t("fields.currentPassword")}</label>
               <div className={styles.inlineRow}>
                 <input className={styles.input} value={"********"} disabled />
               </div>
-              <div className={styles.idHint}>현재 비밀번호는 보안상 표시/조회가 불가하여 마스킹 처리됩니다.</div>
+              <div className={styles.idHint}>{t("hints.currentPasswordMasked")}</div>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>새 비밀번호(선택)</label>
+              <label className={styles.label}>{t("fields.newPassword")}</label>
               <input
                 className={styles.input}
                 value={form.newPassword}
                 type="password"
                 onChange={onChange("newPassword")}
-                placeholder="변경 시 입력"
+                placeholder={t("placeholders.newPassword")}
               />
               {!isValidPassword(form.newPassword) && (
-                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>영문/숫자/특수문자 포함 6자 이상</div>
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>{t("validation.password")}</div>
               )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>이름</label>
+              <label className={styles.label}>{t("fields.name")}</label>
               <input className={styles.input} value={form.name} onChange={onChange("name")} />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>이메일</label>
+              <label className={styles.label}>{t("fields.email")}</label>
               <input className={styles.input} value={form.email} onChange={onChange("email")} />
               {!isValidEmail(form.email) && (
-                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>@ 포함</div>
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>{t("validation.email")}</div>
               )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>연락처</label>
+              <label className={styles.label}>{t("fields.phone")}</label>
               <input className={styles.input} value={form.phone} onChange={onChange("phone")} />
               {!isValidPhone(form.phone) && (
                 <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
-                  000-0000-0000 또는 숫자 11자리
+                  {t("validation.phone")}
                 </div>
               )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>상태</label>
+              <label className={styles.label}>{t("fields.status")}</label>
               <select className={styles.select} value={form.status} onChange={onChange("status")}>
-                <option value="ACTIVE">활성</option>
-                <option value="INACTIVE">비활성</option>
+                <option value="ACTIVE">{tStatus("ACTIVE")}</option>
+                <option value="INACTIVE">{tStatus("INACTIVE")}</option>
               </select>
             </div>
 
             {form.accountType === "STUDENT" && (
               <div className={styles.row2}>
                 <div className={styles.field}>
-                  <label className={styles.label}>학년</label>
+                  <label className={styles.label}>{t("fields.gradeLevel")}</label>
                   <select className={styles.select} value={form.gradeLevel} onChange={onChange("gradeLevel")}>
                     {[1, 2, 3, 4].map((v) => (
                       <option key={v} value={v}>
@@ -619,12 +624,12 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>재학 상태</label>
+                  <label className={styles.label}>{t("fields.academicStatus")}</label>
                   <select className={styles.select} value={form.academicStatus} onChange={onChange("academicStatus")}>
-                    <option value="ENROLLED">재학</option>
-                    <option value="LEAVE">휴학</option>
-                    <option value="DROPPED">퇴학</option>
-                    <option value="GRADUATED">졸업</option>
+                    <option value="ENROLLED">{tAcademicStatus("ENROLLED")}</option>
+                    <option value="LEAVE">{tAcademicStatus("LEAVE")}</option>
+                    <option value="DROPPED">{tAcademicStatus("DROPPED")}</option>
+                    <option value="GRADUATED">{tAcademicStatus("GRADUATED")}</option>
                   </select>
                 </div>
               </div>
@@ -635,9 +640,9 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
           <section className={styles.col}>
             {(form.accountType === "STUDENT" || form.accountType === "PROFESSOR") && (
               <div className={styles.field}>
-                <label className={styles.label}>소속 학과</label>
+                <label className={styles.label}>{t("fields.department")}</label>
                 <select className={styles.select} value={form.deptId} onChange={onDeptChange}>
-                  <option value={0}>선택</option>
+                  <option value={0}>{t("select.select")}</option>
                   {depts.map((d) => (
                     <option key={d.deptId} value={d.deptId}>
                       {d.deptName}
@@ -650,9 +655,9 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
             {form.accountType === "STUDENT" && (
               <>
                 <div className={styles.field}>
-                  <label className={styles.label}>주전공</label>
+                  <label className={styles.label}>{t("fields.primaryMajor")}</label>
                   <select className={styles.select} value={form.primaryMajorId} onChange={onChange("primaryMajorId")}>
-                    <option value={0}>선택</option>
+                    <option value={0}>{t("select.select")}</option>
                     {majorsByDept.map((m) => (
                       <option key={m.majorId} value={m.majorId}>
                         {m.majorName}
@@ -663,17 +668,17 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
                 <div className={styles.checkRow}>
                   <input type="checkbox" checked={form.useMinor} onChange={onChange("useMinor")} />
-                  <span className={styles.checkText}>부전공(MINOR) 사용</span>
+                  <span className={styles.checkText}>{t("toggles.useMinor")}</span>
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>부전공</label>
+                  <label className={styles.label}>{t("fields.minorMajor")}</label>
                   <select
                     className={styles.select}
                     value={form.minorMajorId}
                     onChange={onChange("minorMajorId")}
                     disabled={!form.useMinor}
                   >
-                    <option value={0}>선택</option>
+                    <option value={0}>{t("select.select")}</option>
                     {majorsAll.map((m) => (
                       <option key={m.majorId} value={m.majorId}>
                         {m.majorName}
@@ -684,17 +689,17 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
                 <div className={styles.checkRow}>
                   <input type="checkbox" checked={form.useDouble} onChange={onChange("useDouble")} />
-                  <span className={styles.checkText}>복수전공(DOUBLE) 사용</span>
+                  <span className={styles.checkText}>{t("toggles.useDouble")}</span>
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>복수전공</label>
+                  <label className={styles.label}>{t("fields.doubleMajor")}</label>
                   <select
                     className={styles.select}
                     value={form.doubleMajorId}
                     onChange={onChange("doubleMajorId")}
                     disabled={!form.useDouble}
                   >
-                    <option value={0}>선택</option>
+                    <option value={0}>{t("select.select")}</option>
                     {majorsAll.map((m) => (
                       <option key={m.majorId} value={m.majorId}>
                         {m.majorName}
@@ -707,29 +712,29 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
             {form.accountType === "PROFESSOR" && (
               <div className={styles.noticeBox}>
-                <div className={styles.noticeTitle}>안내</div>
-                <div className={styles.noticeText}>교수 계정은 소속 학과 및 기본 정보만 수정합니다.</div>
+                <div className={styles.noticeTitle}>{t("notices.professor.title")}</div>
+                <div className={styles.noticeText}>{t("notices.professor.text")}</div>
               </div>
             )}
 
             {form.accountType === "ADMIN" && (
               <div className={styles.field}>
-                <label className={styles.label}>메모</label>
+                <label className={styles.label}>{t("fields.memo")}</label>
                 <textarea
                   className={styles.textarea}
                   value={form.memo}
                   onChange={onChange("memo")}
-                  placeholder="관리자 메모"
+                  placeholder={t("placeholders.memo")}
                 />
               </div>
             )}
 
             {form.accountType === "STUDENT" && (
               <div className={styles.imageSection}>
-                <label className={styles.label}>프로필 이미지</label>
+                <label className={styles.label}>{t("fields.profileImage")}</label>
                 <div className={styles.imageWrapper}>
                   {imagePreview ? (
-                    <img src={imagePreview} alt="Profile Preview" className={styles.profileImage} />
+                    <img src={imagePreview} alt={t("alts.profileImage")} className={styles.profileImage} />
                   ) : (
                     <div className={styles.placeholderIcon}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -753,7 +758,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
                     onClick={() => fileInputRef.current?.click()}
                     disabled={loading || saving}
                   >
-                    변경
+                    {t("buttons.changeImage")}
                   </button>
                   {imagePreview && (
                     <button
@@ -762,7 +767,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
                       onClick={onImageDelete}
                       disabled={loading || saving || isImageDeleting}
                     >
-                      삭제
+                      {t("buttons.deleteImage")}
                     </button>
                   )}
                 </div>
@@ -773,10 +778,10 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
         <div className={styles.footer}>
           <button type="button" className={styles.ghostBtn} onClick={onClose} disabled={saving || loading}>
-            취소
+            {t("buttons.cancel")}
           </button>
           <button type="button" className={styles.primaryBtn} onClick={onSubmit} disabled={!canSave}>
-            {saving ? "저장 중..." : "계정 수정"}
+            {saving ? t("buttons.saving") : t("buttons.save")}
           </button>
         </div>
       </div>

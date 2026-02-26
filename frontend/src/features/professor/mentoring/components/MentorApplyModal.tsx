@@ -4,17 +4,11 @@ import { useState } from "react";
 import styles from "./ProfessorMentoring.module.css";
 import { MentoringRecruitment } from "@/features/mentoring/api/types";
 import { applyMentoring } from "@/features/mentoring/api/mentoringApi";
-
-interface MentorApplyModalProps {
-    recruitment: MentoringRecruitment;
-    onClose: () => void;
-    onSuccess: () => void;
-}
-
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "@/components/modal/ConfirmModal";
+import { useI18n } from "@/i18n/useI18n";
 
 interface MentorApplyModalProps {
     recruitment: MentoringRecruitment;
@@ -23,8 +17,9 @@ interface MentorApplyModalProps {
 }
 
 export function MentorApplyModal({ recruitment, onClose, onSuccess }: MentorApplyModalProps) {
-    const [submitting, setSubmitting] = useState(false);
+    const tApply = useI18n("mentoring.professorApply");
 
+    const [submitting, setSubmitting] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
     const handleSubmit = () => {
@@ -39,11 +34,12 @@ export function MentorApplyModal({ recruitment, onClose, onSuccess }: MentorAppl
                 recruitmentId: recruitment.recruitmentId,
                 role: "MENTOR"
             });
-            toast.success("멘토 신청이 완료되었습니다.");
+            toast.success(tApply("messages.applySuccess"));
             onSuccess();
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
-            toast.error("멘토 신청 실패: " + (e.message || ""));
+            const message = e instanceof Error ? e.message : "";
+            toast.error(tApply("messages.applyFailedPrefix") + (message || tApply("messages.unknownError")));
         } finally {
             setSubmitting(false);
         }
@@ -53,61 +49,57 @@ export function MentorApplyModal({ recruitment, onClose, onSuccess }: MentorAppl
         <Modal
             open={true}
             onClose={onClose}
-            title="멘토 신청"
+            title={tApply("modal.title")}
             size="md"
             footer={
                 <div className={styles.buttonGroup}>
                     <Button variant="secondary" onClick={onClose} disabled={submitting}>
-                        취소
+                        {tApply("modal.buttons.cancel")}
                     </Button>
                     <Button onClick={handleSubmit} loading={submitting}>
-                        멘토 신청
+                        {tApply("modal.buttons.apply")}
                     </Button>
                 </div>
             }
         >
             <div className={styles.formGroup}>
-                <label>모집 공고 제목</label>
+                <label>{tApply("modal.fields.recruitmentTitle")}</label>
                 <div className={styles.readOnlyText}>{recruitment.title}</div>
             </div>
 
             <div className={styles.formGroup}>
-                <label>설명</label>
+                <label>{tApply("modal.fields.description")}</label>
                 <div className={styles.readOnlyText}>{recruitment.description}</div>
             </div>
 
             <div className={styles.row}>
                 <div className={styles.col}>
                     <div className={styles.formGroup}>
-                        <label>모집 시작일</label>
-                        <div className={styles.readOnlyText}>
-                            {recruitment.recruitStartAt.split("T")[0]}
-                        </div>
+                        <label>{tApply("modal.fields.recruitStartAt")}</label>
+                        <div className={styles.readOnlyText}>{recruitment.recruitStartAt.split("T")[0]}</div>
                     </div>
                 </div>
                 <div className={styles.col}>
                     <div className={styles.formGroup}>
-                        <label>모집 종료일</label>
-                        <div className={styles.readOnlyText}>
-                            {recruitment.recruitEndAt.split("T")[0]}
-                        </div>
+                        <label>{tApply("modal.fields.recruitEndAt")}</label>
+                        <div className={styles.readOnlyText}>{recruitment.recruitEndAt.split("T")[0]}</div>
                     </div>
                 </div>
             </div>
 
             <div className={styles.formGroup}>
-                <label>신청 역할</label>
-                <div className={styles.readOnlyText}>멘토 (Mentor)</div>
+                <label>{tApply("modal.fields.appliedRole")}</label>
+                <div className={styles.readOnlyText}>{tApply("modal.fields.appliedRoleValue")}</div>
             </div>
 
             <div className={styles.infoBox}>
-                <p>교수님은 멘토로 신청하실 수 있습니다.</p>
-                <p>신청 후 관리자의 승인을 기다려주세요.</p>
+                <p>{tApply("modal.info.first")}</p>
+                <p>{tApply("modal.info.second")}</p>
             </div>
 
             <ConfirmModal
                 open={showConfirm}
-                message="멘토로 신청하시겠습니까?"
+                message={tApply("confirm.message")}
                 onConfirm={confirmSubmit}
                 onCancel={() => setShowConfirm(false)}
                 loading={submitting}

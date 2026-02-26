@@ -10,6 +10,7 @@ import {
     MentoringMatchingRequest,
     MentoringApplicationRequest,
     MentoringMatchingListResponse,
+    MentoringMatchingAdminListResponse,
     ChatHistoryResponse
 } from "./types";
 
@@ -58,6 +59,16 @@ export async function updateApplicationStatus(applicationId: number, data: Mento
 // 매칭 수행
 export async function matchMentoring(data: MentoringMatchingRequest) {
     return postJson<SuccessResponse>(`/api/admin/mentoring/match`, data);
+}
+
+// 멘토링 매칭 목록 조회 (Admin)
+export async function fetchAdminMatchings(recruitmentId: number) {
+    return getJson<MentoringMatchingAdminListResponse>(`/api/admin/mentoring/recruitments/${recruitmentId}/matchings`);
+}
+
+// 멘토링 매칭 채팅 내역 조회 (Admin)
+export async function fetchAdminChatHistory(matchingId: number) {
+    return getJson<ChatHistoryResponse>(`/api/admin/mentoring/matchings/${matchingId}/chat`);
 }
 
 

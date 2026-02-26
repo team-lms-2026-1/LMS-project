@@ -5,6 +5,7 @@ import { StatusPill } from "@/components/status";
 import { MentoringRecruitment } from "../api/types";
 import styles from "./MentoringRecruitmentsTable.module.css";
 import { SelectOption } from "@/features/dropdowns/semesters/types";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     items: MentoringRecruitment[];
@@ -15,16 +16,25 @@ type Props = {
 };
 
 export function MentoringRecruitmentsTable({ items, loading, onEdit, onDelete, semesterOptions }: Props) {
+    const tTable = useI18n("mentoring.recruitments.table");
+    const tCommon = useI18n("mentoring.recruitments.common");
+
     const getSemesterLabel = (id: number) => {
-        return semesterOptions.find(opt => opt.value === String(id))?.label || `${id}학기`;
+        return semesterOptions.find(opt => opt.value === String(id))?.label || tCommon("semesterFallback", { id });
+    };
+
+    const statusLabel = (status: "DRAFT" | "OPEN" | "CLOSED") => {
+        if (status === "DRAFT") return tCommon("statusLabel.DRAFT");
+        if (status === "OPEN") return tCommon("statusLabel.OPEN");
+        return tCommon("statusLabel.CLOSED");
     };
 
     const columns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
-            { header: "학기", field: "semesterId", render: (row) => row.semesterName || getSemesterLabel(row.semesterId) },
-            { header: "제목", field: "title" },
+            { header: tTable("headers.semester"), field: "semesterId", render: (row) => row.semesterName || getSemesterLabel(row.semesterId) },
+            { header: tTable("headers.title"), field: "title" },
             {
-                header: "모집기간",
+                header: tTable("headers.period"),
                 field: "recruitStartAt",
                 render: (row) => {
                     const format = (dt: string) => dt ? dt.replace("T", " ").substring(0, 16) : "-";
@@ -32,28 +42,28 @@ export function MentoringRecruitmentsTable({ items, loading, onEdit, onDelete, s
                 }
             },
             {
-                header: "상태",
+                header: tTable("headers.status"),
                 field: "status",
                 align: "center",
                 render: (row) => {
-                    if (row.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
-                    if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    if (row.status === "DRAFT") return <StatusPill status="DRAFT" label={statusLabel("DRAFT")} />;
+                    if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label={statusLabel("CLOSED")} />;
 
                     const now = new Date();
                     const start = new Date(row.recruitStartAt);
                     const end = new Date(row.recruitEndAt);
 
                     if (now < start) {
-                        return <StatusPill status="DRAFT" label="DRAFT" />;
+                        return <StatusPill status="DRAFT" label={statusLabel("DRAFT")} />;
                     } else if (now >= start && now <= end) {
-                        return <StatusPill status="ACTIVE" label="OPEN" />;
+                        return <StatusPill status="ACTIVE" label={statusLabel("OPEN")} />;
                     } else {
-                        return <StatusPill status="INACTIVE" label="CLOSED" />;
+                        return <StatusPill status="INACTIVE" label={statusLabel("CLOSED")} />;
                     }
                 }
             },
             {
-                header: "관리",
+                header: tTable("headers.manage"),
                 field: "recruitmentId",
                 align: "center",
                 width: "220px",
@@ -64,19 +74,19 @@ export function MentoringRecruitmentsTable({ items, loading, onEdit, onDelete, s
                             variant="secondary"
                             onClick={() => onEdit(row)}
                         >
-                            수정
+                            {tTable("buttons.edit")}
                         </Button>
                         <Button
                             variant="danger"
                             onClick={() => onDelete(row.recruitmentId)}
                         >
-                            삭제
+                            {tTable("buttons.delete")}
                         </Button>
                     </div>
                 )
             }
         ],
-        [onEdit, onDelete, semesterOptions]
+        [onEdit, onDelete, semesterOptions, tCommon, tTable]
     );
 
 
@@ -87,7 +97,7 @@ export function MentoringRecruitmentsTable({ items, loading, onEdit, onDelete, s
             rowKey={(r) => r.recruitmentId}
             loading={loading}
             skeletonRowCount={10}
-            emptyText="모집 공고가 없습니다."
+            emptyText={tTable("emptyText")}
         />
     );
 }

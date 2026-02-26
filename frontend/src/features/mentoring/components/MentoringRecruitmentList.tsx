@@ -19,10 +19,14 @@ import { ConfirmModal } from "@/components/modal/ConfirmModal";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { DatePickerInput } from "@/features/authority/semesters/components/ui/DatePickerInput";
 import { Dropdown } from "@/features/dropdowns/_shared";
+import { useI18n } from "@/i18n/useI18n";
 
 const PAGE_SIZE = 10;
 
 export default function MentoringRecruitmentList() {
+    const tList = useI18n("mentoring.recruitments.list");
+    const tCommon = useI18n("mentoring.recruitments.common");
+
     const {
         items,
         meta,
@@ -105,11 +109,11 @@ export default function MentoringRecruitmentList() {
         try {
             setDeleting(true);
             await deleteRecruitment(id);
-            toast.success("삭제되었습니다.");
+            toast.success(tList("messages.deleteSuccess"));
             refresh();
         } catch (e: any) {
             console.error(e);
-            toast.error("삭제 실패: " + (e.message || "Unknown error"));
+            toast.error(tList("messages.deleteFailedPrefix") + (e.message || tList("messages.unknownError")));
         } finally {
             setDeleting(false);
         }
@@ -117,11 +121,11 @@ export default function MentoringRecruitmentList() {
 
     const handleSave = async () => {
         if (formData.semesterId === 0) {
-            toast.error("학기를 선택해주세요.");
+            toast.error(tList("messages.validationSemester"));
             return;
         }
         if (!formData.recruitStartAt || !formData.recruitEndAt) {
-            toast.error("모집 기간을 선택해주세요.");
+            toast.error(tList("messages.validationPeriod"));
             return;
         }
 
@@ -134,10 +138,10 @@ export default function MentoringRecruitmentList() {
 
             if (editingId) {
                 await updateRecruitment(editingId, payload);
-                toast.success("수정되었습니다.");
+                toast.success(tList("messages.updateSuccess"));
             } else {
                 await createRecruitment(payload);
-                toast.success("등록되었습니다.");
+                toast.success(tList("messages.createSuccess"));
             }
 
             handleCloseModal();
@@ -145,23 +149,23 @@ export default function MentoringRecruitmentList() {
             refresh();
         } catch (e: any) {
             console.error(e);
-            toast.error("저장 실패: " + (e.message || "Unknown error"));
+            toast.error(tList("messages.saveFailedPrefix") + (e.message || tList("messages.unknownError")));
         }
     };
 
     const totalPages = meta?.totalPages || 1;
 
     const STATUS_OPTIONS = [
-        { value: "ALL", label: "전체 상태" },
-        { value: "DRAFT", label: "작성중 (DRAFT)" },
-        { value: "OPEN", label: "모집중 (OPEN)" },
-        { value: "CLOSED", label: "마감 (CLOSED)" },
+        { value: "ALL", label: tCommon("statusOption.ALL") },
+        { value: "DRAFT", label: tCommon("statusOption.DRAFT") },
+        { value: "OPEN", label: tCommon("statusOption.OPEN") },
+        { value: "CLOSED", label: tCommon("statusOption.CLOSED") },
     ];
 
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <h1 className={styles.title}>멘토링 모집 공고 등록</h1>
+                <h1 className={styles.title}>{tList("title")}</h1>
 
                 <div className={styles.searchRow}>
                     <div className={styles.searchGroup}>
@@ -173,9 +177,10 @@ export default function MentoringRecruitmentList() {
                                     setPage(1);
                                 }}
                                 options={STATUS_OPTIONS}
-                                placeholder="상태 선택"
+                                placeholder={tList("search.statusPlaceholder")}
                                 clearable={false}
                                 showPlaceholder={false}
+                                className={styles.dropdownFit}
                             />
                         </div>
                         <div className={styles.searchBarWrap}>
@@ -183,7 +188,8 @@ export default function MentoringRecruitmentList() {
                                 value={searchKeyword}
                                 onChange={setSearchKeyword}
                                 onSearch={() => handleSearch(searchKeyword)}
-                                placeholder="모집 공고 검색..."
+                                placeholder={tList("search.keywordPlaceholder")}
+                                className={styles.searchBarFit}
                             />
                         </div>
                     </div>
@@ -209,7 +215,7 @@ export default function MentoringRecruitmentList() {
                         />
                     </div>
                     <div className={styles.footerRight}>
-                        <Button onClick={handleOpenCreate}>등록</Button>
+                        <Button onClick={handleOpenCreate}>{tList("buttons.register")}</Button>
                     </div>
                 </div>
             </div>
@@ -218,49 +224,49 @@ export default function MentoringRecruitmentList() {
             <Modal
                 open={isModalOpen}
                 onClose={handleCloseModal}
-                title={editingId ? "멘토링 모집 수정" : "멘토링 모집 등록"}
+                title={editingId ? tList("modal.titleEdit") : tList("modal.titleCreate")}
                 footer={
                     <>
-                        <Button variant="secondary" onClick={handleCloseModal}>취소</Button>
-                        <Button onClick={handleSave}>{editingId ? "수정" : "등록"}</Button>
+                        <Button variant="secondary" onClick={handleCloseModal}>{tList("modal.buttons.cancel")}</Button>
+                        <Button onClick={handleSave}>{editingId ? tList("modal.buttons.saveEdit") : tList("modal.buttons.saveCreate")}</Button>
                     </>
                 }
             >
                 <div className={styles.formGroup}>
-                    <label className={styles.label}>제목</label>
+                    <label className={styles.label}>{tList("modal.fields.title")}</label>
                     <input
                         className={styles.input}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        placeholder="제목을 입력해주세요"
+                        placeholder={tList("modal.placeholders.title")}
                     />
                 </div>
                 <div className={styles.formGroup}>
-                    <label className={styles.label}>학기</label>
+                    <label className={styles.label}>{tList("modal.fields.semester")}</label>
                     <select
                         className={styles.input}
                         value={formData.semesterId}
                         onChange={(e) => setFormData({ ...formData, semesterId: Number(e.target.value) })}
                     >
-                        <option value={0} disabled>학기를 선택해주세요</option>
+                        <option value={0} disabled>{tList("modal.placeholders.semester")}</option>
                         {semesterOptions.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
                 </div>
                 <div className={styles.formGroup}>
-                    <label className={styles.label}>설명</label>
+                    <label className={styles.label}>{tList("modal.fields.description")}</label>
                     <textarea
                         className={styles.textarea}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="설명을 입력해주세요"
+                        placeholder={tList("modal.placeholders.description")}
                         rows={4}
                     />
                 </div>
                 <div className={styles.grid2}>
                     <div className={styles.formGroup}>
-                        <label className={styles.label}>시작 일시</label>
+                        <label className={styles.label}>{tList("modal.fields.startAt")}</label>
                         <DatePickerInput
                             value={formData.recruitStartAt}
                             onChange={(v) => {
@@ -269,16 +275,16 @@ export default function MentoringRecruitmentList() {
                                     setFormData(prev => ({ ...prev, recruitEndAt: "" }));
                                 }
                             }}
-                            placeholder="시작일 선택"
+                            placeholder={tList("modal.placeholders.startAt")}
                             closeSignal={closeSignal}
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label className={styles.label}>종료 일시</label>
+                        <label className={styles.label}>{tList("modal.fields.endAt")}</label>
                         <DatePickerInput
                             value={formData.recruitEndAt}
                             onChange={(v) => setFormData({ ...formData, recruitEndAt: v })}
-                            placeholder="종료일 선택"
+                            placeholder={tList("modal.placeholders.endAt")}
                             min={formData.recruitStartAt || undefined}
                             closeSignal={closeSignal}
                         />
@@ -288,7 +294,7 @@ export default function MentoringRecruitmentList() {
 
             <ConfirmModal
                 open={!!deleteTargetId}
-                message="정말 삭제하시겠습니까? 신청 내역도 함께 처리될 수 있습니다."
+                message={tList("confirmDelete.message")}
                 onConfirm={confirmDelete}
                 onCancel={() => setDeleteTargetId(null)}
                 loading={deleting}

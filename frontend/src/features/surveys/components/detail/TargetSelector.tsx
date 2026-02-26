@@ -3,6 +3,7 @@
 import { DeptFilterDropdown } from "@/features/dropdowns/depts/DeptFilterDropdown";
 import { useDeptsDropdownOptions } from "@/features/dropdowns/depts";
 import styles from "./TargetSelector.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 interface Props {
     targetType: "ALL" | "DEPT" | "GRADE" | "DEPT_GRADE";
@@ -23,7 +24,8 @@ export function TargetSelector({
     selectedGrades,
     setSelectedGrades
 }: Props) {
-    const { options: deptOptions, loading: deptLoading } = useDeptsDropdownOptions();
+    const t = useI18n("survey.admin.targetSelector");
+    const { options: deptOptions } = useDeptsDropdownOptions();
 
     const addDept = (id: number) => {
         if (!selectedDeptIds.includes(id)) {
@@ -44,7 +46,7 @@ export function TargetSelector({
     };
 
     const getDeptName = (id: number) => {
-        return deptOptions.find(o => o.value === String(id))?.label || `학과 ${id}`;
+        return deptOptions.find(o => o.value === String(id))?.label || t("deptFallback", { id });
     };
 
     return (
@@ -57,7 +59,7 @@ export function TargetSelector({
                         checked={targetType === "ALL"}
                         onChange={() => setTargetType("ALL")}
                     />
-                    전체 대상
+                    {t("targetType.ALL")}
                 </label>
                 <label className={styles.radioLabel}>
                     <input
@@ -66,7 +68,7 @@ export function TargetSelector({
                         checked={targetType === "DEPT"}
                         onChange={() => setTargetType("DEPT")}
                     />
-                    학과별
+                    {t("targetType.DEPT")}
                 </label>
                 <label className={styles.radioLabel}>
                     <input
@@ -75,7 +77,7 @@ export function TargetSelector({
                         checked={targetType === "GRADE"}
                         onChange={() => setTargetType("GRADE")}
                     />
-                    학년별
+                    {t("targetType.GRADE")}
                 </label>
                 <label className={styles.radioLabel}>
                     <input
@@ -84,14 +86,14 @@ export function TargetSelector({
                         checked={targetType === "DEPT_GRADE"}
                         onChange={() => setTargetType("DEPT_GRADE")}
                     />
-                    직접 지정 (학과+학년)
+                    {t("targetType.DEPT_GRADE")}
                 </label>
             </div>
 
             {(targetType === "DEPT" || targetType === "DEPT_GRADE") && (
                 <div className={styles.selectionArea}>
                     <p className={styles.guideText}>
-                        {targetType === "DEPT_GRADE" ? "1. 대상이 될 학과를 선택하세요." : "대상이 될 학과를 선택하세요."}
+                        {targetType === "DEPT_GRADE" ? t("guides.deptStep1") : t("guides.dept")}
                     </p>
 
                     <div style={{ maxWidth: '300px', marginBottom: '12px' }}>
@@ -115,7 +117,7 @@ export function TargetSelector({
                             </button>
                         ))}
                         {selectedDeptIds.length === 0 && (
-                            <span className="text-sm text-gray-400">선택된 학과가 없습니다.</span>
+                            <span className="text-sm text-gray-400">{t("noDeptSelected")}</span>
                         )}
                     </div>
                 </div>
@@ -124,7 +126,7 @@ export function TargetSelector({
             {(targetType === "GRADE" || targetType === "DEPT_GRADE") && (
                 <div className={styles.selectionArea}>
                     <p className={styles.guideText}>
-                        {targetType === "DEPT_GRADE" ? "2. 대상이 될 학년을 선택하세요." : "대상 학년을 선택하세요."}
+                        {targetType === "DEPT_GRADE" ? t("guides.gradeStep2") : t("guides.grade")}
                     </p>
                     <div className={styles.chipGrid}>
                         {GRADES.map(grade => (
@@ -134,7 +136,7 @@ export function TargetSelector({
                                 className={`${styles.chip} ${selectedGrades.includes(grade) ? styles.chipActive : ''}`}
                                 onClick={() => toggleGrade(grade)}
                             >
-                                {grade}학년
+                                {t("gradeLabel", { grade })}
                             </button>
                         ))}
                     </div>
