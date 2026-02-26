@@ -168,7 +168,8 @@
         "items": {
           "recruitments": "Recruitment Posting",
           "applications": "Application Approval",
-          "matching": "Mentor-Mentee Matching"
+          "matching": "Mentor-Mentee Matching",
+          "chat": "Chat History"
         }
       },
       "space": {

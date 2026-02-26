@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "../styles/AccountModal.module.css";
 import { accountsApi } from "../api/accountsApi";
 import type { AccountType, MajorType } from "../types";
+import { useI18n } from "@/i18n/useI18n";
 
 type RoleTab = "STUDENT" | "PROFESSOR" | "ADMIN";
 
@@ -18,7 +19,7 @@ function isEightDigits(v: string) {
 }
 
 function isValidPassword(v: string) {
-  return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(v);
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(v);
 }
 
 function isValidEmail(v: string) {
@@ -47,6 +48,10 @@ export default function AccountCreateModal({
   onClose: () => void;
   onCreated: () => Promise<void>;
 }) {
+  const t = useI18n("authority.accounts.modals.create");
+  const tRoles = useI18n("authority.accounts.common.roles");
+  const tStatus = useI18n("authority.accounts.common.status");
+  const tAcademicStatus = useI18n("authority.accounts.common.academicStatus");
   const [tab, setTab] = useState<RoleTab>("STUDENT");
 
   // ✅ ID는 숫자 8자리만
@@ -283,7 +288,7 @@ export default function AccountCreateModal({
             }
           } catch (e) {
             console.error("Image upload failed:", e);
-            alert("계정은 생성되었으나 프로필 이미지 업로드에 실패했습니다.");
+            alert(t("messages.imageUploadFailed"));
           }
         }
 
@@ -340,7 +345,7 @@ export default function AccountCreateModal({
       <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <div>
-            <div className={styles.title}>계정 생성</div>
+            <div className={styles.title}>{t("title")}</div>
             <div className={styles.tabRow}>
               {(["STUDENT", "PROFESSOR", "ADMIN"] as RoleTab[]).map((t) => (
                 <button
@@ -349,17 +354,17 @@ export default function AccountCreateModal({
                   className={`${styles.tabBtn} ${tab === t ? styles.tabActive : ""}`}
                   onClick={() => setTab(t)}
                 >
-                  {t === "STUDENT" ? "학생" : t === "PROFESSOR" ? "교수" : "관리자"}
+                  {tRoles(t)}
                 </button>
               ))}
             </div>
           </div>
 
           <div className={styles.headerRight}>
-            <div className={styles.headerLabel}>상태</div>
+            <div className={styles.headerLabel}>{t("fields.status")}</div>
             <select className={styles.select} value={form.status} onChange={onChange("status")}>
-              <option value="ACTIVE">활성</option>
-              <option value="INACTIVE">비활성</option>
+              <option value="ACTIVE">{tStatus("ACTIVE")}</option>
+              <option value="INACTIVE">{tStatus("INACTIVE")}</option>
             </select>
           </div>
         </div>
@@ -368,7 +373,7 @@ export default function AccountCreateModal({
           {/* 좌 */}
           <section className={styles.col}>
             <div className={styles.field}>
-              <label className={styles.label}>로그인 ID</label>
+              <label className={styles.label}>{t("fields.loginId")}</label>
 
               <div className={styles.idRow}>
                 <div className={styles.idPrefix}>{idPrefix}</div>
@@ -377,56 +382,77 @@ export default function AccountCreateModal({
                   value={loginIdDigits}
                   onChange={onChangeLoginDigits}
                   inputMode="numeric"
-                  placeholder="숫자 8자리 입력"
+                  placeholder={t("placeholders.loginIdDigits")}
                 />
               </div>
 
-              <div className={styles.idHint}>예: {idPrefix}12345678 (앞의 문자는 자동 적용)</div>
+              <div className={styles.idHint}>
+                {t("hints.loginId", { example: `${idPrefix}12345678` })}
+              </div>
 
               {idError && (
                 <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
-                  ID는 숫자 8자리여야 합니다.
+                  {t("validation.loginIdDigits")}
                 </div>
               )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>비밀번호</label>
+              <label className={styles.label}>{t("fields.password")}</label>
               <input
                 className={styles.input}
                 type="password"
                 value={form.password}
                 onChange={onChange("password")}
-                placeholder="영문+숫자+특수문자 포함, 6자리 이상"
+                placeholder={t("placeholders.password")}
               />
               {pwError && (
                 <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
-                  비밀번호 조건을 만족해야 합니다.
+                  {t("validation.password")}
                 </div>
               )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>이름</label>
-              <input className={styles.input} value={form.name} onChange={onChange("name")} placeholder="이름 입력" />
+              <label className={styles.label}>{t("fields.name")}</label>
+              <input
+                className={styles.input}
+                value={form.name}
+                onChange={onChange("name")}
+                placeholder={t("placeholders.name")}
+              />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>이메일</label>
-              <input className={styles.input} value={form.email} onChange={onChange("email")} placeholder="example@email.com" />
-              {!emailOk && <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>@ 포함 필수</div>}
+              <label className={styles.label}>{t("fields.email")}</label>
+              <input
+                className={styles.input}
+                value={form.email}
+                onChange={onChange("email")}
+                placeholder={t("placeholders.email")}
+              />
+              {!emailOk && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>{t("validation.email")}</div>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>연락처</label>
-              <input className={styles.input} value={form.phone} onChange={onChangePhone} placeholder="010-0000-0000" />
-              {!phoneOk && <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>000-0000-0000 형식</div>}
+              <label className={styles.label}>{t("fields.phone")}</label>
+              <input
+                className={styles.input}
+                value={form.phone}
+                onChange={onChangePhone}
+                placeholder={t("placeholders.phone")}
+              />
+              {!phoneOk && (
+                <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>{t("validation.phone")}</div>
+              )}
             </div>
 
             {tab === "STUDENT" && (
               <div className={styles.row2}>
                 <div className={styles.field}>
-                  <label className={styles.label}>학년</label>
+                  <label className={styles.label}>{t("fields.gradeLevel")}</label>
                   <select className={styles.select} value={form.gradeLevel} onChange={onChange("gradeLevel")}>
                     {[1, 2, 3, 4].map((v) => (
                       <option key={v} value={v}>
@@ -437,12 +463,12 @@ export default function AccountCreateModal({
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>재학 상태</label>
+                  <label className={styles.label}>{t("fields.academicStatus")}</label>
                   <select className={styles.select} value={form.academicStatus} onChange={onChange("academicStatus")}>
-                    <option value="ENROLLED">재학</option>
-                    <option value="LEAVE">휴학</option>
-                    <option value="DROPPED">퇴학</option>
-                    <option value="GRADUATED">졸업</option>
+                    <option value="ENROLLED">{tAcademicStatus("ENROLLED")}</option>
+                    <option value="LEAVE">{tAcademicStatus("LEAVE")}</option>
+                    <option value="DROPPED">{tAcademicStatus("DROPPED")}</option>
+                    <option value="GRADUATED">{tAcademicStatus("GRADUATED")}</option>
                   </select>
                 </div>
               </div>
@@ -450,12 +476,12 @@ export default function AccountCreateModal({
 
             {tab === "ADMIN" && (
               <div className={styles.field}>
-                <label className={styles.label}>메모</label>
+                <label className={styles.label}>{t("fields.memo")}</label>
                 <textarea
                   className={styles.textarea}
                   value={form.memo}
                   onChange={onChange("memo")}
-                  placeholder="관리자 메모를 입력하세요."
+                  placeholder={t("placeholders.memo")}
                 />
               </div>
             )}
@@ -465,10 +491,10 @@ export default function AccountCreateModal({
           <section className={styles.col}>
             {tab === "STUDENT" && (
               <div className={styles.imageSection}>
-                <label className={styles.label}>프로필 이미지</label>
+                <label className={styles.label}>{t("fields.profileImage")}</label>
                 <div className={styles.imageWrapper}>
                   {imagePreview ? (
-                    <img src={imagePreview} alt="Preview" className={styles.profileImage} />
+                    <img src={imagePreview} alt={t("alts.profileImage")} className={styles.profileImage} />
                   ) : (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -486,12 +512,12 @@ export default function AccountCreateModal({
                 </div>
                 <div className={styles.imageActions}>
                   <label className={styles.uploadBtn}>
-                    {imagePreview ? "변경" : "이미지 선택"}
+                    {imagePreview ? t("buttons.changeImage") : t("buttons.selectImage")}
                     <input type="file" accept="image/*" hidden onChange={onFileChange} disabled={saving} />
                   </label>
                   {imagePreview && (
                     <button type="button" className={styles.deleteBtn} onClick={onRemoveImage} disabled={saving}>
-                      삭제
+                      {t("buttons.deleteImage")}
                     </button>
                   )}
                 </div>
@@ -500,9 +526,9 @@ export default function AccountCreateModal({
 
             {(tab === "STUDENT" || tab === "PROFESSOR") && (
               <div className={styles.field}>
-                <label className={styles.label}>소속 학과</label>
+                <label className={styles.label}>{t("fields.department")}</label>
                 <select className={styles.select} value={form.deptId} onChange={onChange("deptId")}>
-                  <option value={0}>{deptLoading ? "불러오는 중..." : "선택"}</option>
+                  <option value={0}>{deptLoading ? t("select.loading") : t("select.select")}</option>
                   {depts.map((d) => (
                     <option key={d.deptId} value={d.deptId}>
                       {d.deptName}
@@ -515,24 +541,22 @@ export default function AccountCreateModal({
             {/* 교수: 전공 섹션 제거 */}
             {tab === "PROFESSOR" && (
               <div className={styles.noticeBox}>
-                <div className={styles.noticeTitle}>안내</div>
-                <div className={styles.noticeText}>
-                  교수 계정은 소속 학과 및 기본 정보(이름/이메일/연락처)만 입력합니다.
-                </div>
+                <div className={styles.noticeTitle}>{t("notices.professor.title")}</div>
+                <div className={styles.noticeText}>{t("notices.professor.text")}</div>
               </div>
             )}
 
             {tab === "STUDENT" && (
               <>
                 <div className={styles.field}>
-                  <label className={styles.label}>주전공</label>
+                  <label className={styles.label}>{t("fields.primaryMajor")}</label>
                   <select
                     className={styles.select}
                     value={form.primaryMajorId}
                     onChange={onChange("primaryMajorId")}
                     disabled={!form.deptId || majorDeptLoading}
                   >
-                    <option value={0}>{majorDeptLoading ? "불러오는 중..." : "선택"}</option>
+                    <option value={0}>{majorDeptLoading ? t("select.loading") : t("select.select")}</option>
                     {majorsByDept.map((m) => (
                       <option key={m.majorId} value={m.majorId}>
                         {m.majorName}
@@ -543,18 +567,18 @@ export default function AccountCreateModal({
 
                 <div className={styles.checkRow}>
                   <input type="checkbox" checked={form.useMinor} onChange={onChange("useMinor")} />
-                  <span className={styles.checkText}>부전공(MINOR) 사용</span>
+                  <span className={styles.checkText}>{t("toggles.useMinor")}</span>
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>부전공</label>
+                  <label className={styles.label}>{t("fields.minorMajor")}</label>
                   <select
                     className={styles.select}
                     value={form.minorMajorId}
                     onChange={onChange("minorMajorId")}
                     disabled={!form.useMinor || majorAllLoading}
                   >
-                    <option value={0}>{majorAllLoading ? "불러오는 중..." : "선택하세요..."}</option>
+                    <option value={0}>{majorAllLoading ? t("select.loading") : t("select.choose")}</option>
                     {majorsAll.map((m) => (
                       <option key={m.majorId} value={m.majorId}>
                         {m.majorName}
@@ -565,18 +589,18 @@ export default function AccountCreateModal({
 
                 <div className={styles.checkRow}>
                   <input type="checkbox" checked={form.useDouble} onChange={onChange("useDouble")} />
-                  <span className={styles.checkText}>복수전공(DOUBLE) 사용</span>
+                  <span className={styles.checkText}>{t("toggles.useDouble")}</span>
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>복수전공</label>
+                  <label className={styles.label}>{t("fields.doubleMajor")}</label>
                   <select
                     className={styles.select}
                     value={form.doubleMajorId}
                     onChange={onChange("doubleMajorId")}
                     disabled={!form.useDouble || majorAllLoading}
                   >
-                    <option value={0}>{majorAllLoading ? "불러오는 중..." : "선택"}</option>
+                    <option value={0}>{majorAllLoading ? t("select.loading") : t("select.select")}</option>
                     {majorsAll.map((m) => (
                       <option key={m.majorId} value={m.majorId}>
                         {m.majorName}
@@ -589,8 +613,8 @@ export default function AccountCreateModal({
 
             {tab === "ADMIN" && (
               <div className={styles.noticeBox}>
-                <div className={styles.noticeTitle}>안내</div>
-                <div className={styles.noticeText}>관리자 계정은 학과/전공 정보를 사용하지 않습니다.</div>
+                <div className={styles.noticeTitle}>{t("notices.admin.title")}</div>
+                <div className={styles.noticeText}>{t("notices.admin.text")}</div>
               </div>
             )}
           </section>
@@ -598,10 +622,10 @@ export default function AccountCreateModal({
 
         <div className={styles.actions}>
           <button type="button" className={styles.ghostBtn} onClick={onClose} disabled={saving}>
-            취소
+            {t("buttons.cancel")}
           </button>
           <button type="button" className={styles.primaryBtn} onClick={onSubmit} disabled={!canSubmit}>
-            {saving ? "생성 중..." : "계정 생성"}
+            {saving ? t("buttons.creating") : t("buttons.create")}
           </button>
         </div>
       </div>

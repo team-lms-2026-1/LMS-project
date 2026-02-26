@@ -15,5 +15,5 @@ public class MentoringMatchingRequest {
     private Long mentorApplicationId;
 
     @NotNull
-    private Long menteeApplicationId;
+    private java.util.List<Long> menteeApplicationIds;
 }

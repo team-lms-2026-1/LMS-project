@@ -16,7 +16,7 @@ public class PasswordResetConfirmRequest {
     @NotBlank
     @Size(min = 6)
     @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)\\S{6,}$",
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)\\S{6,}$",
             message = "{validation.account.password.pattern}"
     )
     private String newPassword;

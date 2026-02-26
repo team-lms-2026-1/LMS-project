@@ -67,19 +67,8 @@ export default function ProfessorMentoringList() {
                 field: "status",
                 render: (r) => {
                     if (r.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
-                    if (r.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
-
-                    const now = new Date();
-                    const start = new Date(r.recruitStartAt);
-                    const end = new Date(r.recruitEndAt);
-
-                    if (now < start) {
-                        return <StatusPill status="DRAFT" label="DRAFT" />;
-                    } else if (now >= start && now <= end) {
-                        return <StatusPill status="ACTIVE" label="OPEN" />;
-                    } else {
-                        return <StatusPill status="INACTIVE" label="CLOSED" />;
-                    }
+                    if (r.status === "OPEN") return <StatusPill status="ACTIVE" label="OPEN" />;
+                    return <StatusPill status="INACTIVE" label="CLOSED" />;
                 }
             },
             {

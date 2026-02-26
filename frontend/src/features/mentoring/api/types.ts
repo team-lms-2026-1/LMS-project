@@ -66,7 +66,7 @@ export interface MentoringStatusUpdateRequest {
 export interface MentoringMatchingRequest {
     recruitmentId: number;
     mentorApplicationId: number;
-    menteeApplicationId: number;
+    menteeApplicationIds: number[];
 }
 
 export interface MentoringApplicationRequest {
@@ -95,10 +95,23 @@ export interface ChatMessageResponse {
     createdAt: string;
 }
 
+export interface MentoringMatchingAdminResponse {
+    matchingId: number;
+    recruitmentId: number;
+    recruitmentTitle: string;
+    mentorAccountId: number;
+    mentorName: string;
+    menteeAccountId: number;
+    menteeName: string;
+    status: string;
+    matchedAt: string;
+}
+
 /** Response Types */
 export type MentoringRecruitmentListResponse = ApiResponse<MentoringRecruitment[], PageMeta>;
 export type MentoringRecruitmentDetailResponse = ApiResponse<MentoringRecruitment, null>;
 export type MentoringApplicationListResponse = ApiResponse<MentoringApplication[], null>;
 export type MentoringMatchingListResponse = ApiResponse<MentoringMatchingResponse[], null>;
+export type MentoringMatchingAdminListResponse = ApiResponse<MentoringMatchingAdminResponse[], null>;
 export type ChatHistoryResponse = ApiResponse<ChatMessageResponse[], null>;
 export type MentoringCreateResponse = ApiResponse<number, null>;
