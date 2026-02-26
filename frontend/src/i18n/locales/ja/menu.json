@@ -144,7 +144,8 @@
         "items": {
           "intro": "6Csとは?",
           "students": "学生コンピテンシー活動照会",
-          "diagnosis": "コンピテンシー診断管理"
+          "diagnosis": "コンピテンシー診断管理",
+          "results": "コンピテンシー結果管理"
         }
       },
       "course": {

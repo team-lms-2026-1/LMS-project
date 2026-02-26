@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type { StudentCompetencyListItemDto, PageMeta } from "@/features/competencies/scai/api/types";
@@ -44,7 +44,7 @@ export function useSClist() {
       setMeta(res.meta ?? defaultMeta);
     } catch (e: any) {
       console.error("[useSClist]", e);
-      setError(e?.message ?? "학생 역량 활동 목록 조회 실패");
+      setError(e?.message ?? "Failed to load student competency activity list.");
       setItems([]);
       setMeta(defaultMeta);
     } finally {
@@ -85,5 +85,3 @@ export function useSClist() {
     },
   };
 }
-
-

@@ -1,28 +1,31 @@
-﻿"use client";
+"use client";
 
+import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 import { Table, type TableColumn } from "@/components/table";
 import type { StudentCompetencyListItemDto, StudentCompetencyTableProps } from "../../api/types";
 import styles from "./StudetnCompetencytable.module.css";
-import { useRouter } from "next/navigation";
 
 export function StudetnCompetencytable({ items, loading }: StudentCompetencyTableProps) {
+  const t = useI18n("competency.adminStudents.table");
   const router = useRouter();
+
   const columns: Array<TableColumn<StudentCompetencyListItemDto>> = [
     {
-      header: "학번",
+      header: t("headers.studentNumber"),
       align: "center",
       cellClassName: styles.studentNumber,
       render: (r) => r.studentNumber,
     },
     {
-      header: "학과",
+      header: t("headers.deptName"),
       align: "center",
       cellClassName: styles.deptName,
       render: (r) => r.deptName,
     },
-    { header: "학년", align: "center", render: (r) => r.grade },
+    { header: t("headers.grade"), align: "center", render: (r) => r.grade },
     {
-      header: "이름",
+      header: t("headers.name"),
       align: "center",
       cellClassName: styles.name,
       render: (r) => r.name,
@@ -36,7 +39,7 @@ export function StudetnCompetencytable({ items, loading }: StudentCompetencyTabl
       loading={loading}
       skeletonRowCount={10}
       rowKey={(r) => r.accountId}
-      emptyText="조회된 학생이 없습니다."
+      emptyText={t("emptyText")}
       onRowClick={(r) => router.push(`/admin/competencies/students/${r.accountId}`)}
     />
   );

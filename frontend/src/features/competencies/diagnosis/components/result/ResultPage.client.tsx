@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./ResultPage.module.css";
 import { useResultList } from "@/features/competencies/diagnosis/hooks/useDignosisList";
 import { recalculateCompetencySummary } from "@/features/competencies/diagnosis/api/DiagnosisApi";
@@ -75,7 +76,14 @@ type NormalizedRadarSeries = {
   items: { name: string; value: number }[];
 };
 
+type RadarFallbackLabels = {
+  allLabel: string;
+  deptPrefix: string;
+  competencyPrefix: string;
+};
+
 export default function ResultPageClient() {
+  const t = useI18n("competency.adminDiagnosis.resultDetail");
   const router = useRouter();
   const searchParams = useSearchParams();
   const dignosisId = searchParams.get("dignosisId")?.trim() ?? "";
@@ -92,6 +100,10 @@ export default function ResultPageClient() {
   const [recalcLoading, setRecalcLoading] = useState(false);
   const [recalcError, setRecalcError] = useState<string | null>(null);
 
+  const allLabel = t("fallback.all");
+  const deptPrefix = t("fallback.deptPrefix");
+  const competencyPrefix = t("fallback.competencyPrefix");
+
   const resolvedSemesterId = useMemo(() => {
     if (semesterIdParam) return semesterIdParam;
     if (!semesterNameParam) return "";
@@ -99,8 +111,10 @@ export default function ResultPageClient() {
     const normalize = (value: string) =>
       value
         .replace(/\s+/g, "")
-        .replace(/학년도/g, "")
-        .replace(/학기/g, "")
+        .replace(/\uD559\uB144/g, "")
+        .replace(/\uD559\uAE30/g, "")
+        .replace(/year/gi, "")
+        .replace(/semester/gi, "")
         .replace(/-/g, "")
         .toLowerCase();
 
@@ -118,8 +132,15 @@ export default function ResultPageClient() {
 
   const isAllDept = useMemo(() => {
     const label = selectedDeptLabel.trim();
-    return !label || label === "전체" || label.toUpperCase() === "ALL";
-  }, [selectedDeptLabel]);
+    if (!label) return true;
+    const upper = label.toUpperCase();
+    return (
+      label === allLabel ||
+      upper === "ALL" ||
+      label === "\uC804\uCCB4" ||
+      label === "\u5168\u4F53"
+    );
+  }, [selectedDeptLabel, allLabel]);
 
   const query = useMemo(() => {
     if (!dignosisId) return undefined;
@@ -128,6 +149,7 @@ export default function ResultPageClient() {
       : semesterNameParam
         ? { semesterName: semesterNameParam }
         : {};
+
     if (deptIdParam) {
       return {
         dignosisId,
@@ -136,33 +158,48 @@ export default function ResultPageClient() {
         ...semesterQuery,
       };
     }
+
     if (deptNameParam) return { dignosisId, deptName: deptNameParam, ...semesterQuery };
     return { dignosisId, ...semesterQuery };
   }, [dignosisId, deptIdParam, deptNameParam, semesterIdParam, semesterNameParam]);
 
-  const { state, actions } = useResultList(query);
+  const { state, actions } = useResultList(query, true, {
+    missingDiagnosisId: t("messages.missingDiagnosisId"),
+    loadFailed: t("messages.loadFailed"),
+  });
 
   const handleRecalculate = async () => {
     if (!isClosed || recalcLoading) return;
+
     const semesterIdValue = resolvedSemesterId || "";
     if (!semesterIdValue) {
-      setRecalcError("학기 정보를 찾을 수 없습니다.");
+      setRecalcError(t("messages.semesterNotFound"));
       return;
     }
+
     setRecalcLoading(true);
     setRecalcError(null);
+
     try {
       await recalculateCompetencySummary(semesterIdValue);
       await actions.reload();
     } catch (e: any) {
-      setRecalcError(e?.message ?? "결과 산출에 실패했습니다.");
+      setRecalcError(e?.message ?? t("messages.recalculateFailed"));
     } finally {
       setRecalcLoading(false);
     }
   };
 
   const summary = useMemo(() => normalizeSummary(state.data), [state.data]);
-  const radarSeries = useMemo(() => normalizeRadarSeries(state.data), [state.data]);
+  const radarSeries = useMemo(
+    () =>
+      normalizeRadarSeries(state.data, {
+        allLabel,
+        deptPrefix,
+        competencyPrefix,
+      }),
+    [state.data, allLabel, deptPrefix, competencyPrefix]
+  );
 
   const labeledRadarSeries = useMemo(() => {
     const label = selectedDeptLabel.trim();
@@ -185,14 +222,18 @@ export default function ResultPageClient() {
     () => state.data?.trendChart?.series ?? [],
     [state.data?.trendChart?.series]
   );
+
   const trendData = useMemo(
     () => normalizeTrend(state.data?.trendChart?.categories ?? [], trendSeries),
     [state.data?.trendChart?.categories, trendSeries]
   );
+
   const trendYAxis = useMemo(() => {
     if (!trendSeries.length) return undefined;
+
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
+
     trendSeries.forEach((series) => {
       (series.data ?? []).forEach((value) => {
         const n = Number(value);
@@ -201,7 +242,9 @@ export default function ResultPageClient() {
         max = Math.max(max, n);
       });
     });
+
     if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
+
     const range = max - min;
     const padding = range === 0 ? Math.max(Math.abs(max) * 0.1, 1) : range * 0.1;
     const paddedMin = min - padding;
@@ -210,16 +253,21 @@ export default function ResultPageClient() {
     const minTick = Math.floor(paddedMin / step) * step;
     const maxTick = Math.ceil(paddedMax / step) * step;
     const ticks: number[] = [];
+
     for (let v = minTick; v <= maxTick; v += step) {
       ticks.push(v);
     }
+
     return { domain: [minTick, maxTick] as [number, number], ticks };
   }, [trendSeries]);
 
-  const statsRows = useMemo(() => normalizeStats(state.data), [state.data]);
+  const statsRows = useMemo(
+    () => normalizeStats(state.data, competencyPrefix),
+    [state.data, competencyPrefix]
+  );
 
   if (state.loading || recalcLoading) {
-    return <div className={styles.page}>불러오는 중...</div>;
+    return <div className={styles.page}>{t("loadingText")}</div>;
   }
 
   if (state.error || recalcError) {
@@ -230,7 +278,7 @@ export default function ResultPageClient() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.topBar}>
-          <h1 className={styles.title}>진단 결과 관리</h1>
+          <h1 className={styles.title}>{t("title")}</h1>
           <div className={styles.topActions}>
             {isClosed && (
               <Button
@@ -238,26 +286,26 @@ export default function ResultPageClient() {
                 onClick={handleRecalculate}
                 disabled={recalcLoading || !resolvedSemesterId}
               >
-                결과 산출
+                {t("buttons.recalculate")}
               </Button>
             )}
             <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
-              목록
+              {t("buttons.backToList")}
             </Button>
           </div>
         </div>
 
         <div className={styles.summaryRow}>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>대상자수</div>
+            <div className={styles.summaryLabel}>{t("summary.totalTargets")}</div>
             <div className={styles.summaryValue}>{formatNumber(summary.totalCount)}</div>
           </div>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>산출대상자수</div>
+            <div className={styles.summaryLabel}>{t("summary.calculatedTargets")}</div>
             <div className={styles.summaryValue}>{formatNumber(summary.calculatedCount)}</div>
           </div>
           <div className={styles.summaryCard}>
-            <div className={styles.summaryLabel}>평균</div>
+            <div className={styles.summaryLabel}>{t("summary.average")}</div>
             <div className={styles.summaryValue}>{formatScore(summary.averageScore)}</div>
           </div>
         </div>
@@ -265,11 +313,11 @@ export default function ResultPageClient() {
         <div className={styles.grid}>
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>역량 차트</h2>
+              <h2 className={styles.panelTitle}>{t("panels.radar")}</h2>
             </div>
             <div className={styles.chartWrap}>
               {radarData.length === 0 ? (
-                <div className={styles.empty}>차트 데이터가 없습니다.</div>
+                <div className={styles.empty}>{t("empty.chartData")}</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData} outerRadius={RADAR_OUTER_RADIUS} margin={RADAR_CHART_MARGIN}>
@@ -297,11 +345,11 @@ export default function ResultPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>역량 추이</h2>
+              <h2 className={styles.panelTitle}>{t("panels.trend")}</h2>
             </div>
             <div className={styles.chartWrap}>
               {trendData.length === 0 || trendSeries.length === 0 ? (
-                <div className={styles.empty}>차트 데이터가 없습니다.</div>
+                <div className={styles.empty}>{t("empty.chartData")}</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
@@ -335,21 +383,21 @@ export default function ResultPageClient() {
 
         <section className={styles.tableSection}>
           <div className={styles.panelHeader}>
-            <h2 className={styles.panelTitle}>역량 통계</h2>
+            <h2 className={styles.panelTitle}>{t("panels.stats")}</h2>
           </div>
           <div className={styles.tableWrap}>
             {statsRows.length === 0 ? (
-              <div className={styles.empty}>통계 데이터가 없습니다.</div>
+              <div className={styles.empty}>{t("empty.statsData")}</div>
             ) : (
               <table className={styles.statTable}>
                 <thead>
                   <tr>
-                    <th>역량 이름</th>
-                    <th>대상자수/산출대상자수</th>
-                    <th>평균</th>
-                    <th>중간값</th>
-                    <th>표준편차</th>
-                    <th>산출일시</th>
+                    <th>{t("table.headers.competencyName")}</th>
+                    <th>{t("table.headers.targetAndCalculated")}</th>
+                    <th>{t("table.headers.average")}</th>
+                    <th>{t("table.headers.median")}</th>
+                    <th>{t("table.headers.stdDev")}</th>
+                    <th>{t("table.headers.calculatedAt")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -411,8 +459,12 @@ function normalizeSummary(data: ResultCompetencyDashboard | null) {
   };
 }
 
-function normalizeRadarSeries(data: ResultCompetencyDashboard | null): NormalizedRadarSeries[] {
+function normalizeRadarSeries(
+  data: ResultCompetencyDashboard | null,
+  labels: RadarFallbackLabels
+): NormalizedRadarSeries[] {
   if (!data) return [];
+
   const raw =
     (data as any).radarChart ??
     (data as any).radarCharts ??
@@ -425,8 +477,8 @@ function normalizeRadarSeries(data: ResultCompetencyDashboard | null): Normalize
   if (raw.every((item) => isRadarItem(item))) {
     return [
       {
-        deptName: "전체",
-        items: normalizeRadarItems(raw),
+        deptName: labels.allLabel,
+        items: normalizeRadarItems(raw, labels.competencyPrefix),
       },
     ];
   }
@@ -434,7 +486,8 @@ function normalizeRadarSeries(data: ResultCompetencyDashboard | null): Normalize
   return raw
     .map((series: ResultCompetencyRadarSeries, idx: number) => {
       const name =
-        pickString(series, ["deptName", "department", "dept", "name", "label"]) || `학과 ${idx + 1}`;
+        pickString(series, ["deptName", "department", "dept", "name", "label"]) ||
+        `${labels.deptPrefix} ${idx + 1}`;
       const itemsRaw =
         (series as any).items ??
         (series as any).data ??
@@ -445,16 +498,16 @@ function normalizeRadarSeries(data: ResultCompetencyDashboard | null): Normalize
         [];
       return {
         deptName: name,
-        items: normalizeRadarItems(itemsRaw),
+        items: normalizeRadarItems(itemsRaw, labels.competencyPrefix),
       };
     })
     .filter((s) => s.items.length > 0);
 }
 
-function normalizeRadarItems(items: ResultCompetencyRadarItem[] | any) {
+function normalizeRadarItems(items: ResultCompetencyRadarItem[] | any, competencyPrefix: string) {
   if (!Array.isArray(items)) return [];
   return items.map((item, index) => ({
-    name: pickString(item, ["name", "label", "competencyName"]) || `역량 ${index + 1}`,
+    name: pickString(item, ["name", "label", "competencyName"]) || `${competencyPrefix} ${index + 1}`,
     value: pickNumber(item, ["value", "score", "avgScore", "weight", "myScore", "maxScore"]) ?? 0,
   }));
 }
@@ -501,7 +554,7 @@ function normalizeTrend(categories: string[], series: ResultCompetencyTrendSerie
   });
 }
 
-function normalizeStats(data: ResultCompetencyDashboard | null) {
+function normalizeStats(data: ResultCompetencyDashboard | null, competencyPrefix: string) {
   const raw =
     (data as any)?.statsTable ??
     (data as any)?.table ??
@@ -511,7 +564,7 @@ function normalizeStats(data: ResultCompetencyDashboard | null) {
   if (!Array.isArray(raw)) return [];
   return raw.map((row: ResultCompetencyStatRow, idx: number) => ({
     key: `${pickString(row, ["name", "competencyName"]) || "row"}-${idx}`,
-    name: pickString(row, ["name", "competencyName"]) || `역량 ${idx + 1}`,
+    name: pickString(row, ["name", "competencyName"]) || `${competencyPrefix} ${idx + 1}`,
     totalTargets: pickNumber(row, ["targetCount", "totalTargets", "totalCount", "targets", "total"]),
     calculatedTargets: pickNumber(row, [
       "responseCount",

@@ -7,7 +7,15 @@ import {
   type ResultCompetencyQuery,
 } from "@/features/competencies/result/api/ResultCompetenciesApi";
 
-export function useResultList(query?: ResultCompetencyQuery, enabled: boolean = true) {
+type ResultListMessages = {
+  loadFailed?: string;
+};
+
+export function useResultList(
+  query?: ResultCompetencyQuery,
+  enabled: boolean = true,
+  messages?: ResultListMessages
+) {
   const [data, setData] = useState<ResultCompetencyDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,13 +31,21 @@ export function useResultList(query?: ResultCompetencyQuery, enabled: boolean = 
         setData(res.data ?? null);
       } catch (e: any) {
         console.error("[useResultList]", e);
-        setError(e?.message ?? "역량 종합 결과를 불러오지 못했습니다.");
+        setError(e?.message ?? messages?.loadFailed ?? "Failed to load competency summary results.");
         setData(null);
       } finally {
         setLoading(false);
       }
     },
-    [enabled, query?.dignosisId, query?.deptId, query?.deptName, query?.semesterId, query?.semesterName]
+    [
+      enabled,
+      messages?.loadFailed,
+      query?.dignosisId,
+      query?.deptId,
+      query?.deptName,
+      query?.semesterId,
+      query?.semesterName,
+    ]
   );
 
   useEffect(() => {
