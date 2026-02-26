@@ -12,8 +12,10 @@ import {
     SurveyTypeResponse,
     TargetFilterDto as FilterDto
 } from "../api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 export function useSurveyDetail(idStr: string | undefined) {
+    const t = useI18n("survey.hooks.detail");
     const router = useRouter();
     const isNew = idStr === "new";
 
@@ -34,12 +36,12 @@ export function useSurveyDetail(idStr: string | undefined) {
         sortOrder: order,
         minVal: 1,
         maxVal: 5,
-        minLabel: "전혀 그렇지 않다",
-        maxLabel: "매우 그렇다",
+        minLabel: t("defaults.minLabel"),
+        maxLabel: t("defaults.maxLabel"),
         isRequired: true,
         questionType: "RATING",
         options: []
-    }), []);
+    }), [t]);
 
     const load = useCallback(async (id: number) => {
         setLoading(true);
@@ -54,11 +56,11 @@ export function useSurveyDetail(idStr: string | undefined) {
             setDates({ startAt: fmt(data.startAt), endAt: fmt(data.endAt) });
         } catch (e) {
             console.error(e);
-            toast.error("데이터를 불러오는데 실패했습니다.");
+            toast.error(t("messages.loadFailed"));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         if (!isNew && idStr) {
@@ -104,18 +106,18 @@ export function useSurveyDetail(idStr: string | undefined) {
 
     const submit = useCallback(async () => {
         if (!title.trim()) {
-            toast.error("제목을 입력해주세요.");
+            toast.error(t("validation.titleRequired"));
             return;
         }
 
         if (questions.length === 0) {
-            toast.error("질문을 하나 이상 추가해주세요.");
+            toast.error(t("validation.questionRequired"));
             return;
         }
 
         const emptyQuestionIndex = questions.findIndex(q => !q.questionText.trim());
         if (emptyQuestionIndex !== -1) {
-            toast.error(`${emptyQuestionIndex + 1}번 질문의 내용을 입력해주세요.`);
+            toast.error(t("validation.questionTextRequired", { index: emptyQuestionIndex + 1 }));
             return;
         }
 
@@ -123,12 +125,17 @@ export function useSurveyDetail(idStr: string | undefined) {
             const q = questions[i];
             if (q.questionType === "MULTIPLE_CHOICE" || q.questionType === "SINGLE_CHOICE") {
                 if (!q.options || q.options.length === 0) {
-                    toast.error(`${i + 1}번 질문에 옵션을 하나 이상 추가해주세요.`);
+                    toast.error(t("validation.choiceOptionRequired", { index: i + 1 }));
                     return;
                 }
                 const emptyOptionIndex = q.options.findIndex(opt => !opt.trim());
                 if (emptyOptionIndex !== -1) {
-                    toast.error(`${i + 1}번 질문의 ${emptyOptionIndex + 1}번 옵션 내용을 입력해주세요.`);
+                    toast.error(
+                        t("validation.choiceOptionTextRequired", {
+                            index: i + 1,
+                            optionIndex: emptyOptionIndex + 1,
+                        })
+                    );
                     return;
                 }
             }
@@ -136,20 +143,20 @@ export function useSurveyDetail(idStr: string | undefined) {
 
         if (isNew) {
             if (targetType === "DEPT" && selectedDeptIds.length === 0) {
-                toast.error("대상이 될 학과를 하나 이상 선택해주세요.");
+                toast.error(t("validation.targetDeptRequired"));
                 return;
             }
             if (targetType === "GRADE" && selectedGrades.length === 0) {
-                toast.error("대상이 될 학년을 하나 이상 선택해주세요.");
+                toast.error(t("validation.targetGradeRequired"));
                 return;
             }
             if (targetType === "DEPT_GRADE") {
                 if (selectedDeptIds.length === 0) {
-                    toast.error("학과를 선택해주세요.");
+                    toast.error(t("validation.deptRequired"));
                     return;
                 }
                 if (selectedGrades.length === 0) {
-                    toast.error("학년을 선택해주세요.");
+                    toast.error(t("validation.gradeRequired"));
                     return;
                 }
             }
@@ -207,15 +214,15 @@ export function useSurveyDetail(idStr: string | undefined) {
                 await patchSurvey(Number(idStr), payload);
             }
 
-            toast.success("저장되었습니다.");
+            toast.success(t("messages.saveSuccess"));
             router.push("/admin/surveys");
         } catch (e: any) {
             console.error(e);
-            toast.error(e.message ?? "저장에 실패했습니다.");
+            toast.error(e.message ?? t("messages.saveFailed"));
         } finally {
             setLoading(false);
         }
-    }, [isNew, idStr, title, questions, dates, targetType, selectedDeptIds, selectedGrades, router]);
+    }, [isNew, idStr, title, questions, dates, targetType, selectedDeptIds, selectedGrades, router, t]);
 
     return {
         state: {

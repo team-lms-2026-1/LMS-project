@@ -1,0 +1,401 @@
+{
+  "recruitments": {
+    "common": {
+      "statusLabel": {
+        "DRAFT": "Draft",
+        "OPEN": "Open",
+        "CLOSED": "Closed"
+      },
+      "statusOption": {
+        "ALL": "All Statuses",
+        "DRAFT": "Draft (DRAFT)",
+        "OPEN": "Open (OPEN)",
+        "CLOSED": "Closed (CLOSED)"
+      },
+      "semesterFallback": "Semester {id}"
+    },
+    "list": {
+      "title": "Mentoring Recruitment Management",
+      "search": {
+        "statusPlaceholder": "Select status",
+        "keywordPlaceholder": "Search recruitments..."
+      },
+      "buttons": {
+        "register": "Create"
+      },
+      "modal": {
+        "titleCreate": "Create Mentoring Recruitment",
+        "titleEdit": "Edit Mentoring Recruitment",
+        "buttons": {
+          "cancel": "Cancel",
+          "saveCreate": "Create",
+          "saveEdit": "Save"
+        },
+        "fields": {
+          "title": "Title",
+          "semester": "Semester",
+          "description": "Description",
+          "startAt": "Start Date",
+          "endAt": "End Date"
+        },
+        "placeholders": {
+          "title": "Enter title",
+          "semester": "Select semester",
+          "description": "Enter description",
+          "startAt": "Select start date",
+          "endAt": "Select end date"
+        }
+      },
+      "confirmDelete": {
+        "message": "Are you sure you want to delete this? Related applications may also be affected."
+      },
+      "messages": {
+        "validationSemester": "Please select a semester.",
+        "validationPeriod": "Please select a recruitment period.",
+        "deleteSuccess": "Deleted successfully.",
+        "deleteFailedPrefix": "Delete failed: ",
+        "saveFailedPrefix": "Save failed: ",
+        "createSuccess": "Created successfully.",
+        "updateSuccess": "Updated successfully.",
+        "unknownError": "Unknown error"
+      }
+    },
+    "table": {
+      "headers": {
+        "semester": "Semester",
+        "title": "Title",
+        "period": "Recruitment Period",
+        "status": "Status",
+        "manage": "Manage"
+      },
+      "buttons": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "emptyText": "No recruitment announcements."
+    }
+  },
+  "approval": {
+    "title": "Mentoring Application Approval",
+    "search": {
+      "statusPlaceholder": "Select status",
+      "keywordPlaceholder": "Search recruitment title"
+    },
+    "recruitments": {
+      "emptyText": "No recruitment announcements."
+    },
+    "applications": {
+      "sectionTitle": "Application List: {title}",
+      "loadingText": "Loading application list...",
+      "emptyText": "No applications.",
+      "headers": {
+        "name": "Name",
+        "role": "Role",
+        "status": "Status",
+        "appliedAt": "Applied Date",
+        "actions": "Action"
+      },
+      "roleLabel": {
+        "MENTOR": "Mentor",
+        "MENTEE": "Mentee"
+      },
+      "statusLabel": {
+        "APPLIED": "Pending",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "MATCHED": "Matched",
+        "CANCELED": "Canceled"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "noAction": "-"
+      },
+      "detailModal": {
+        "title": "Application Details",
+        "buttons": {
+          "close": "Close"
+        },
+        "fields": {
+          "name": "Name",
+          "loginId": "Login ID",
+          "deptName": "Department",
+          "phone": "Phone",
+          "studentNo": "Student No.",
+          "gradeLevel": "Grade",
+          "email": "Email",
+          "role": "Applied Role",
+          "appliedAt": "Applied At",
+          "applyReason": "Application Reason"
+        },
+        "reasonEmpty": "No content"
+      }
+    },
+    "confirm": {
+      "approveMessage": "Do you want to approve this application?",
+      "rejectTitle": "Enter Rejection Reason",
+      "rejectReasonLabel": "Rejection Reason",
+      "rejectReasonPlaceholder": "Please enter a rejection reason.",
+      "buttons": {
+        "cancel": "Cancel",
+        "reject": "Reject"
+      }
+    },
+    "messages": {
+      "recruitmentsFetchFailedPrefix": "Failed to fetch recruitments: ",
+      "applicationsFetchFailedPrefix": "Failed to fetch applications: ",
+      "approveSuccess": "Approved successfully.",
+      "approveFailedPrefix": "Approval failed: ",
+      "rejectReasonRequired": "Please enter a rejection reason.",
+      "rejectSuccess": "Rejected successfully.",
+      "rejectFailedPrefix": "Rejection failed: ",
+      "unknownError": "Unknown error"
+    }
+  },
+  "matching": {
+    "title": "Mentoring Matching Management",
+    "search": {
+      "statusPlaceholder": "Select status",
+      "keywordPlaceholder": "Search recruitment title"
+    },
+    "recruitments": {
+      "emptyText": "No recruitment announcements."
+    },
+    "sectionTitle": "Matching Detail Settings: {title}",
+    "counts": {
+      "summary": "Approved mentors: {mentorCount} / Waiting mentees: {availableMenteeCount} / Matched mentees: {matchedMenteeCount}"
+    },
+    "columns": {
+      "mentorTitle": "Select Mentor ({count})",
+      "menteeTitle": "Select Mentee ({count})",
+      "matchedListTitle": "Matched List ({count})",
+      "emptyApprovedMentor": "No approved mentors.",
+      "emptyAvailableMentee": "No waiting mentees for matching.",
+      "emptyMatchedList": "No matched records yet."
+    },
+    "labels": {
+      "department": "Department",
+      "appliedAt": "Applied Date",
+      "matchedAt": "Matched Date"
+    },
+    "badges": {
+      "matched": "Matched",
+      "matchedComplete": "Match Complete"
+    },
+    "buttons": {
+      "confirmMatch": "Confirm Matching"
+    },
+    "confirm": {
+      "matchMessage": "Do you want to match the selected mentor and mentees?"
+    },
+    "messages": {
+      "recruitmentsFetchFailedPrefix": "Failed to fetch recruitments: ",
+      "dataFetchFailedPrefix": "Failed to fetch data: ",
+      "selectionRequired": "Please select one mentor and at least one mentee.",
+      "matchSuccess": "Matching completed successfully.",
+      "matchFailedPrefix": "Matching failed: ",
+      "serverErrorFallback": "Server error occurred.",
+      "unknownError": "Unknown error"
+    }
+  },
+  "chatHistory": {
+    "title": "Mentoring Chat History",
+    "search": {
+      "statusPlaceholder": "Select status",
+      "keywordPlaceholder": "Search recruitment title"
+    },
+    "recruitments": {
+      "emptyText": "No recruitment announcements."
+    },
+    "sectionTitle": "Chat History: {title}",
+    "columns": {
+      "matchedListTitle": "Matched List ({count})",
+      "emptyMatchedList": "No matched records yet."
+    },
+    "labels": {
+      "matchedAt": "Matched Date"
+    },
+    "badges": {
+      "matchedComplete": "Match Complete"
+    },
+    "buttons": {
+      "viewChat": "View Chat"
+    },
+    "modal": {
+      "title": "View Mentoring Chat History",
+      "labels": {
+        "mentor": "Mentor",
+        "mentee": "Mentee"
+      },
+      "loadingText": "Loading...",
+      "emptyText": "No chat history.",
+      "buttons": {
+        "close": "Close"
+      },
+      "messages": {
+        "fetchFailed": "Failed to load chat history."
+      }
+    },
+    "messages": {
+      "recruitmentsFetchFailedPrefix": "Failed to fetch recruitments: ",
+      "dataFetchFailedPrefix": "Failed to fetch data: ",
+      "unknownError": "Unknown error"
+    }
+  },
+  "chat": {
+    "title": "Mentoring Chat",
+    "sidebar": {
+      "loadingText": "Loading...",
+      "emptyText": "No matched mentoring sessions.",
+      "partnerRole": {
+        "mentor": "Mentor",
+        "mentee": "Mentee"
+      }
+    },
+    "input": {
+      "placeholder": "Type a message...",
+      "send": "Send"
+    },
+    "emptyState": {
+      "title": "Please select a chat room",
+      "description": "You can start chatting after mentoring matching is complete."
+    },
+    "messages": {
+      "sendFailedPrefix": "Send failed: ",
+      "unknownError": "Unknown error"
+    }
+  },
+  "studentApply": {
+    "title": "Mentee Application",
+    "search": {
+      "placeholder": "Enter title"
+    },
+    "table": {
+      "headers": {
+        "semester": "Semester",
+        "title": "Title",
+        "period": "Recruitment Period",
+        "recruitmentStatus": "Recruitment Status",
+        "myApplication": "My Application",
+        "createdAt": "Created At"
+      },
+      "recruitmentStatusLabel": {
+        "DRAFT": "Draft",
+        "OPEN": "Open",
+        "CLOSED": "Closed"
+      },
+      "roleLabel": {
+        "MENTOR": "Mentor",
+        "MENTEE": "Mentee"
+      },
+      "applicationStatusLabel": {
+        "APPLIED": "Applied",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "MATCHED": "Matched",
+        "CANCELED": "Canceled"
+      },
+      "notApplied": "Not Applied",
+      "emptyText": "No recruitment announcements."
+    },
+    "modal": {
+      "title": "Mentoring Application",
+      "buttons": {
+        "cancel": "Cancel",
+        "apply": "Apply"
+      },
+      "fields": {
+        "name": "Name",
+        "recruitmentTitle": "Recruitment Title",
+        "deptName": "Department",
+        "gradeLevel": "Grade",
+        "studentNo": "Student No.",
+        "email": "Email",
+        "phone": "Phone",
+        "reason": "Reason for Application"
+      },
+      "placeholders": {
+        "name": "Name",
+        "deptName": "Department",
+        "gradeLevel": "Grade",
+        "studentNo": "Student No.",
+        "email": "email@example.com",
+        "phone": "010-0000-0000",
+        "reason": "Enter your reason for applying."
+      }
+    },
+    "messages": {
+      "dataLoadFailedPrefix": "Failed to load data: ",
+      "alreadyApplied": "You have already applied for this recruitment.",
+      "outOfPeriod": "This is not the application period.",
+      "applySuccess": "Applied successfully.",
+      "applyFailedPrefix": "Application failed: ",
+      "profileLoadFailed": "Failed to load profile information.",
+      "unknownError": "Unknown error"
+    }
+  },
+  "professorApply": {
+    "title": "Mentor Application",
+    "search": {
+      "placeholder": "Enter title"
+    },
+    "table": {
+      "headers": {
+        "semester": "Semester",
+        "title": "Title",
+        "period": "Recruitment Period",
+        "recruitmentStatus": "Recruitment Status",
+        "myApplication": "My Application",
+        "createdAt": "Created At"
+      },
+      "recruitmentStatusLabel": {
+        "DRAFT": "Draft",
+        "OPEN": "Open",
+        "CLOSED": "Closed"
+      },
+      "roleLabel": {
+        "MENTOR": "Mentor",
+        "MENTEE": "Mentee"
+      },
+      "applicationStatusLabel": {
+        "APPLIED": "Applied",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "MATCHED": "Matched",
+        "CANCELED": "Canceled"
+      },
+      "notApplied": "Not Applied",
+      "emptyText": "No recruitment announcements."
+    },
+    "modal": {
+      "title": "Mentor Application",
+      "buttons": {
+        "cancel": "Cancel",
+        "apply": "Apply as Mentor"
+      },
+      "fields": {
+        "recruitmentTitle": "Recruitment Title",
+        "description": "Description",
+        "recruitStartAt": "Recruitment Start",
+        "recruitEndAt": "Recruitment End",
+        "appliedRole": "Applied Role",
+        "appliedRoleValue": "Mentor"
+      },
+      "info": {
+        "first": "You are applying as a mentor.",
+        "second": "After applying, please wait for admin approval."
+      }
+    },
+    "confirm": {
+      "message": "Do you want to apply as a mentor?"
+    },
+    "messages": {
+      "dataLoadFailedPrefix": "Failed to load data: ",
+      "alreadyApplied": "You have already applied for this recruitment.",
+      "outOfPeriod": "This is not the application period.",
+      "applySuccess": "Mentor application completed.",
+      "applyFailedPrefix": "Mentor application failed: ",
+      "unknownError": "Unknown error"
+    }
+  }
+}

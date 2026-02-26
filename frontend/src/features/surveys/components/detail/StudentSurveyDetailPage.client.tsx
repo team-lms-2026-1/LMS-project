@@ -10,12 +10,14 @@ import toast from "react-hot-toast";
 import { StudentSurveyQuestionCard } from "./StudentSurveyQuestionCard";
 import { ConfirmModal } from "@/components/modal";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 interface Props {
     id: string;
 }
 
 export default function StudentSurveyDetailPageClient({ id }: Props) {
+    const tDetail = useI18n("survey.student.detail");
     const router = useRouter();
     const [survey, setSurvey] = useState<SurveyDetailDto | null>(null);
     const [loading, setLoading] = useState(true);
@@ -30,14 +32,14 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
             setSurvey(res.data);
         } catch (e: any) {
             console.error(e);
-            toast.error(e.message ?? "설문을 불러올 수 없습니다.");
+            toast.error(e.message ?? tDetail("messages.loadFailed"));
             if (e.body?.code === "SURVEY_NOT_OPEN" || e.body?.code === "SURVEY_ALREADY_SUBMITTED") {
                 router.push("/student/surveys");
             }
         } finally {
             setLoading(false);
         }
-    }, [id, router]);
+    }, [id, router, tDetail]);
 
     useEffect(() => {
         load();
@@ -55,7 +57,7 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
 
         const missing = survey.questions.filter(q => q.isRequired && !responses[q.questionId]);
         if (missing.length > 0) {
-            toast.error("필수 항목에 모두 응답해주세요.");
+            toast.error(tDetail("messages.requiredMissing"));
             return;
         }
 
@@ -65,20 +67,20 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
                 surveyId: survey.surveyId,
                 responses
             });
-            toast.success("제출되었습니다. 감사합니다!");
+            toast.success(tDetail("messages.submitSuccess"));
             router.push("/student/surveys");
         } catch (e: any) {
             console.error(e);
-            toast.error(e.message ?? "제출에 실패했습니다.");
+            toast.error(e.message ?? tDetail("messages.submitFailed"));
         } finally {
             setSubmitting(false);
             setIsConfirmOpen(false);
         }
     };
 
-    if (loading) return <div className={styles.loading}>설문 정보를 불러오는 중...</div>;
+    if (loading) return <div className={styles.loading}>{tDetail("loading")}</div>;
 
-    if (!survey) return <div className={styles.errorContainer}>설문 정보를 찾을 수 없습니다.</div>;
+    if (!survey) return <div className={styles.errorContainer}>{tDetail("errorNotFound")}</div>;
 
     return (
         <div className={styles.page}>
@@ -87,7 +89,10 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
                     <h1 className={styles.title}>{survey.title}</h1>
                     {survey.description && <p className={styles.description}>{survey.description}</p>}
                     <div className={styles.meta}>
-                        기간: {new Date(survey.startAt).toLocaleString()} ~ {new Date(survey.endAt).toLocaleString()}
+                        {tDetail("period", {
+                            start: new Date(survey.startAt).toLocaleString(),
+                            end: new Date(survey.endAt).toLocaleString(),
+                        })}
                     </div>
                 </header>
 
@@ -108,15 +113,15 @@ export default function StudentSurveyDetailPageClient({ id }: Props) {
                         className={styles.submitBtn}
                         onClick={() => setIsConfirmOpen(true)}
                     >
-                        제출하기
+                        {tDetail("submitButton")}
                     </Button>
                 </div>
             </div>
 
             <ConfirmModal
                 open={isConfirmOpen}
-                title="설문 제출"
-                message="제출 후에는 수정할 수 없습니다. 정말 제출하시겠습니까?"
+                title={tDetail("confirm.title")}
+                message={tDetail("confirm.message")}
                 onConfirm={handleSubmit}
                 onCancel={() => setIsConfirmOpen(false)}
                 loading={submitting}

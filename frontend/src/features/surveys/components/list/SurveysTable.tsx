@@ -1,11 +1,12 @@
 "use client";
 
 import { Table, type TableColumn } from "@/components/table";
-import { SurveyListItemDto, SurveyTypeLabel } from "../../api/types";
+import { SurveyListItemDto } from "../../api/types";
 import { StatusPill } from "@/components/status";
 import { Button } from "@/components/button";
 import { Badge } from "@/components/badge";
 import styles from "./SurveysTable.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 const SURVEY_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
     SATISFACTION: { bg: "#eff6ff", text: "#1d4ed8" },
@@ -24,16 +25,28 @@ interface Props {
 }
 
 export function SurveysTable({ items, loading, page, size, onEditClick, onDeleteClick }: Props) {
+    const tTable = useI18n("survey.admin.table");
+    const tTypes = useI18n("survey.common.types");
+    const tStatus = useI18n("survey.common.status");
+
+    const typeLabel = (type: string) => {
+        if (type === "SATISFACTION") return tTypes("SATISFACTION");
+        if (type === "COURSE") return tTypes("COURSE");
+        if (type === "SERVICE") return tTypes("SERVICE");
+        if (type === "ETC") return tTypes("ETC");
+        return type;
+    };
+
     const columns: TableColumn<SurveyListItemDto>[] = [
         {
-            header: "번호",
+            header: tTable("headers.no"),
             field: "surveyId",
             width: "60px",
             align: "center",
             render: (_, idx) => String((idx + 1) + (page - 1) * size),
         },
         {
-            header: "유형",
+            header: tTable("headers.type"),
             field: "type",
             width: "130px",
             align: "center",
@@ -41,32 +54,32 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
                 const colors = SURVEY_TYPE_COLORS[row.type] || SURVEY_TYPE_COLORS.ETC;
                 return (
                     <Badge bgColor={colors.bg} textColor={colors.text}>
-                        {SurveyTypeLabel[row.type] || row.type}
+                        {typeLabel(row.type)}
                     </Badge>
                 );
             }
         },
         {
-            header: "제목",
+            header: tTable("headers.title"),
             field: "title",
             align: "center",
             render: (row) => <span>{row.title}</span>
         },
         {
-            header: "조회수",
+            header: tTable("headers.views"),
             field: "viewCount",
             width: "100px",
             align: "center",
             render: (row) => row.viewCount?.toLocaleString() || "0",
         },
         {
-            header: "작성일",
+            header: tTable("headers.createdAt"),
             width: "120px",
             align: "center",
             render: (row) => row.createdAt ? row.createdAt.split(" ")[0] : "-",
         },
         {
-            header: "기간",
+            header: tTable("headers.period"),
             width: "220px",
             align: "center",
             render: (row) => (
@@ -76,29 +89,29 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
             ),
         },
         {
-            header: "상태",
+            header: tTable("headers.status"),
             field: "status",
             width: "100px",
             align: "center",
             render: (row) => {
-                if (row.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
-                if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+                if (row.status === "DRAFT") return <StatusPill status="DRAFT" label={tStatus("DRAFT")} />;
+                if (row.status === "CLOSED") return <StatusPill status="INACTIVE" label={tStatus("CLOSED")} />;
 
                 const now = new Date();
                 const start = new Date(row.startAt);
                 const end = new Date(row.endAt);
 
                 if (now < start) {
-                    return <StatusPill status="DRAFT" label="DRAFT" />;
+                    return <StatusPill status="DRAFT" label={tStatus("DRAFT")} />;
                 } else if (now >= start && now <= end) {
-                    return <StatusPill status="ACTIVE" label="OPEN" />;
+                    return <StatusPill status="ACTIVE" label={tStatus("OPEN")} />;
                 } else {
-                    return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    return <StatusPill status="INACTIVE" label={tStatus("CLOSED")} />;
                 }
             }
         },
         {
-            header: "관리",
+            header: tTable("headers.manage"),
             width: "180px",
             align: "center",
             render: (row) => (
@@ -107,13 +120,13 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
                         variant="secondary"
                         onClick={() => onEditClick(row.surveyId)}
                     >
-                        수정
+                        {tTable("buttons.edit")}
                     </Button>
                     <Button
                         variant="danger"
                         onClick={() => onDeleteClick(row.surveyId)}
                     >
-                        삭제
+                        {tTable("buttons.delete")}
                     </Button>
                 </div>
             ),
@@ -129,7 +142,7 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
             loading={loading}
             skeletonRowCount={10}
             onRowClick={(row) => onEditClick(row.surveyId)}
-            emptyText="설문이 없습니다."
+            emptyText={tTable("empty")}
         />
     );
 }

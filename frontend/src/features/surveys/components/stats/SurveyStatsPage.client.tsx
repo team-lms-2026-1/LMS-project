@@ -7,14 +7,15 @@ import { StatCard } from "./StatCard";
 import { SurveyStatsChart } from "./SurveyStatsChart";
 import { SurveyQuestionStats } from "./SurveyQuestionStats";
 import styles from "./SurveyStatsPage.client.module.css";
-import { Button } from "@/components/button";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 
 interface Props {
     id: string;
 }
 
 export default function SurveyStatsPageClient({ id }: Props) {
+    const t = useI18n("survey.admin.stats");
     const router = useRouter();
     const [stats, setStats] = useState<SurveyStatsDto | null>(null);
     const [loading, setLoading] = useState(true);
@@ -28,25 +29,25 @@ export default function SurveyStatsPageClient({ id }: Props) {
             setStats(res.data);
         } catch (e: any) {
             console.error(e);
-            setErrorMsg(e.message || "통계 정보를 찾을 수 없습니다.");
+            setErrorMsg(e.message || t("errorNotFound"));
         } finally {
             setLoading(false);
         }
-    }, [id]);
+    }, [id, t]);
 
     useEffect(() => {
         load();
     }, [load]);
 
-    if (loading) return <div className={styles.loading}>통계 정보를 불러오는 중...</div>;
-    if (errorMsg || !stats) return <div className={styles.error}>{errorMsg || "통계 정보를 찾을 수 없습니다."}</div>;
+    if (loading) return <div className={styles.loading}>{t("loading")}</div>;
+    if (errorMsg || !stats) return <div className={styles.error}>{errorMsg || t("errorNotFound")}</div>;
 
     return (
         <div className={styles.page}>
             <div className={styles.topBar}>
-                <div className={styles.title}>{stats.title} 결과 분석</div>
+                <div className={styles.title}>{`${stats.title} ${t("titleSuffix")}`}</div>
                 <button className={styles.backBtn} type="button" onClick={() => router.back()}>
-                    목록으로 →
+                    {t("backToList")}
                 </button>
             </div>
 
@@ -54,11 +55,11 @@ export default function SurveyStatsPageClient({ id }: Props) {
                 <section className={styles.sectionCard}>
                     <div className={styles.metaRow}>
                         <div className={styles.metaItem}>
-                            <span className={styles.metaLabel}>작성일:</span>
+                            <span className={styles.metaLabel}>{t("meta.createdAt")}</span>
                             <span className={styles.metaValue}>{new Date(stats.createdAt).toLocaleDateString()}</span>
                         </div>
                         <div className={styles.metaItem}>
-                            <span className={styles.metaLabel}>진행 기간:</span>
+                            <span className={styles.metaLabel}>{t("meta.period")}</span>
                             <span className={styles.metaValue}>
                                 {new Date(stats.startAt).toLocaleString()} ~ {new Date(stats.endAt).toLocaleString()}
                             </span>
@@ -66,9 +67,9 @@ export default function SurveyStatsPageClient({ id }: Props) {
                     </div>
 
                     <div className={styles.statGrid}>
-                        <StatCard label="총 대상자" value={`${stats.totalTargets}명`} />
-                        <StatCard label="응답 완료" value={`${stats.submittedCount}명`} />
-                        <StatCard label="응답률" value={`${stats.responseRate}%`} highlight />
+                        <StatCard label={t("cards.totalTargets")} value={stats.totalTargets} />
+                        <StatCard label={t("cards.submitted")} value={stats.submittedCount} />
+                        <StatCard label={t("cards.responseRate")} value={`${stats.responseRate}%`} highlight />
                     </div>
 
                     <div className={styles.chartSection}>

@@ -1,8 +1,9 @@
 "use client";
 
-import { QuestionResponseDto, SurveyQuestionType, SurveyQuestionTypeLabel } from "../../api/types";
+import { QuestionResponseDto, SurveyQuestionType } from "../../api/types";
 import styles from "./SurveyQuestionCard.module.css";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     index: number;
@@ -12,8 +13,18 @@ type Props = {
 };
 
 export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Props) {
+    const t = useI18n("survey.admin.questionCard");
+    const tQuestionTypes = useI18n("survey.common.questionTypes.long");
 
     const currentType = question.questionType || "RATING";
+    const questionTypes: SurveyQuestionType[] = ["RATING", "SINGLE_CHOICE", "MULTIPLE_CHOICE", "ESSAY"];
+
+    const questionTypeLabel = (type: SurveyQuestionType) => {
+        if (type === "RATING") return tQuestionTypes("RATING");
+        if (type === "SINGLE_CHOICE") return tQuestionTypes("SINGLE_CHOICE");
+        if (type === "MULTIPLE_CHOICE") return tQuestionTypes("MULTIPLE_CHOICE");
+        return tQuestionTypes("ESSAY");
+    };
 
     const handleAddOption = () => {
         const newOptions = [...(question.options || []), ""];
@@ -39,7 +50,7 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                     className={styles.inputQuestion}
                     value={question.questionText}
                     onChange={(e) => onUpdate({ questionText: e.target.value })}
-                    placeholder="질문을 입력하세요"
+                    placeholder={t("placeholderQuestion")}
                 />
 
                 <select
@@ -47,8 +58,8 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                     value={currentType}
                     onChange={(e) => onUpdate({ questionType: e.target.value as SurveyQuestionType })}
                 >
-                    {Object.entries(SurveyQuestionTypeLabel).map(([key, label]) => (
-                        <option key={key} value={key}>{label}</option>
+                    {questionTypes.map((type) => (
+                        <option key={type} value={type}>{questionTypeLabel(type)}</option>
                     ))}
                 </select>
 
@@ -56,7 +67,7 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                     variant="danger"
                     onClick={onRemove}
                 >
-                    삭제
+                    {t("buttons.delete")}
                 </Button>
             </div>
 
@@ -66,19 +77,19 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                         <div className={styles.labelRow}>
                             <input
                                 className={styles.inputSmall}
-                                placeholder="최소 라벨 (예: 전혀 아님)"
+                                placeholder={t("placeholders.minLabel")}
                                 value={question.minLabel || ""}
                                 onChange={(e) => onUpdate({ minLabel: e.target.value })}
                             />
                             <input
                                 className={styles.inputSmall}
-                                placeholder="최대 라벨 (예: 매우 그럼)"
+                                placeholder={t("placeholders.maxLabel")}
                                 value={question.maxLabel || ""}
                                 onChange={(e) => onUpdate({ maxLabel: e.target.value })}
                             />
                         </div>
                         <div className={styles.scalePreview}>
-                            <span className={styles.scaleLabel}>{question.minLabel || "최소"}</span>
+                            <span className={styles.scaleLabel}>{question.minLabel || t("scale.minFallback")}</span>
                             <div className={styles.scaleGrid}>
                                 {[1, 2, 3, 4, 5].map((val) => (
                                     <div key={val} className={`${styles.scaleBox} ${val === 3 ? styles.scaleBoxActive : ""}`}>
@@ -86,7 +97,7 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                                     </div>
                                 ))}
                             </div>
-                            <span className={styles.scaleLabel}>{question.maxLabel || "최대"}</span>
+                            <span className={styles.scaleLabel}>{question.maxLabel || t("scale.maxFallback")}</span>
                         </div>
                     </div>
                 )}
@@ -103,7 +114,7 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                                     className={styles.optionInput}
                                     value={opt}
                                     onChange={(e) => handleOptionChange(i, e.target.value)}
-                                    placeholder={`옵션 ${i + 1}`}
+                                    placeholder={t("placeholders.option", { index: i + 1 })}
                                 />
                                 <button
                                     type="button"
@@ -119,7 +130,7 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                             onClick={handleAddOption}
                             style={{ width: "fit-content" }}
                         >
-                            + 옵션 추가
+                            {t("buttons.addOption")}
                         </Button>
                     </div>
                 )}
@@ -129,7 +140,7 @@ export function SurveyQuestionCard({ index, question, onUpdate, onRemove }: Prop
                         <textarea
                             className={styles.essayPreview}
                             disabled
-                            placeholder="주관식 답변 입력 영역 (미리보기)"
+                            placeholder={t("placeholders.essayPreview")}
                         />
                     </div>
                 )}
