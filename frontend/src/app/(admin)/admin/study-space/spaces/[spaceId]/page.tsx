@@ -1,4 +1,4 @@
-import SpacesDetailPageClient from "@/features/study-space/spaces/components/detail/SpacesDetailPage.client";
+import SpacesDetailPageClient from "@/features/admin/study-space/spaces/components/detail/SpacesDetailPage.client";
 
 type Props = {
   params: { spaceId: string };

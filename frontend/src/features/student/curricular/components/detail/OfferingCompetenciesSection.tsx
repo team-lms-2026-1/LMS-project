@@ -6,11 +6,11 @@ import { useLocale } from "@/hooks/useLocale";
 import {
   getLocalizedCompetencyDescription,
   getLocalizedCompetencyName,
-} from "@/features/competencies/utils/competencyLocale";
+} from "@/features/admin/competencies/utils/competencyLocale";
 import styles from "./OfferingCompetenciesSection.module.css";
 import { OfferingCompetencyRadarChart } from "./components/OfferingCompetencyRadarChart";
 import { useOfferingCompetencyMapping } from "../../hooks/useCurricularOfferingList";
-import type { CurricularOfferingDetailDto } from "@/features/curricular-offering/api/types";
+import type { CurricularOfferingDetailDto } from "@/features/admin/curricular-offering/api/types";
 
 type Props = {
   offeringId?: number;

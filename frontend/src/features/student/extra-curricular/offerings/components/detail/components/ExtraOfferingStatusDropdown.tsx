@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Dropdown } from "@/features/dropdowns/_shared";
 import { Button } from "@/components/button";
 import { Modal } from "@/components/modal/Modal";
-import { OfferingStatus } from "@/features/curricular-offering/api/types";
-import { updateCurricularOfferingStatus } from "@/features/curricular-offering/api/curricularOfferingsApi";
+import { OfferingStatus } from "@/features/admin/curricular-offering/api/types";
+import { updateCurricularOfferingStatus } from "@/features/admin/curricular-offering/api/curricularOfferingsApi";
 import styles from "./ExtraOfferingStatusDropdown.module.css";
 
 type Props = {

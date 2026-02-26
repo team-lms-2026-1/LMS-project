@@ -7,10 +7,10 @@ import { Button } from "@/components/button";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
 import { StatusPill } from "@/components/status";
 import { Table, type TableColumn } from "@/components/table";
-import type { NoticeListItemDto } from "@/features/community/notices/api/types";
-import { useNoticesList } from "@/features/community/notices/hooks/useNoticeList";
-import { fetchAccountLogs } from "@/features/systemStatus/accountLogs/lib/clientApi";
-import type { AccountLogListItem } from "@/features/systemStatus/accountLogs/types";
+import type { NoticeListItemDto } from "@/features/admin/community/notices/api/types";
+import { useNoticesList } from "@/features/admin/community/notices/hooks/useNoticeList";
+import { fetchAccountLogs } from "@/features/admin/systemStatus/accountLogs/lib/clientApi";
+import type { AccountLogListItem } from "@/features/admin/systemStatus/accountLogs/types";
 import { useI18n } from "@/i18n/useI18n";
 import styles from "./AdminDashboard.module.css";
 

@@ -1,4 +1,4 @@
-import SpacesEditPageClient from "@/features/study-space/spaces/components/edit/SpacesEditPage.client";
+import SpacesEditPageClient from "@/features/admin/study-space/spaces/components/edit/SpacesEditPage.client";
 
 type Props = {
   params: { spaceId: string };

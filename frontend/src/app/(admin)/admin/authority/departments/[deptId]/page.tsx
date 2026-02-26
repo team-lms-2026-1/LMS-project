@@ -1,4 +1,4 @@
-import DepartmentDetailPage from "@/features/authority/departments/components/detail/DepartmentDetailPage";
+import DepartmentDetailPage from "@/features/admin/authority/departments/components/detail/DepartmentDetailPage";
 
 type Props = {
   params: { deptId: string };

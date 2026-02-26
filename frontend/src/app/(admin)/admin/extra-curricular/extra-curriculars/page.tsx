@@ -1,4 +1,4 @@
-import ExtraCurricularMasterPage from "@/features/extra-curricular/extra-curriculars/components/list/ExtraCurricularMasterPage.client";
+import ExtraCurricularMasterPage from "@/features/admin/extra-curricular/extra-curriculars/components/list/ExtraCurricularMasterPage.client";
 
 
 export default function Page() {

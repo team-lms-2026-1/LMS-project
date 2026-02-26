@@ -7,7 +7,7 @@ import { useI18n } from "@/i18n/useI18n";
 import styles from "./OfferingDetailSection.module.css";
 import { enrollCurricularOffering } from "../../api/curricularApi";
 import type { DayOfWeekType } from "../../api/types";
-import type { CurricularOfferingDetailDto } from "@/features/curricular-offering/api/types";
+import type { CurricularOfferingDetailDto } from "@/features/admin/curricular-offering/api/types";
 
 type Props = {
   offeringId?: number;

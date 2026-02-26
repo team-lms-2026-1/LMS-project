@@ -1,4 +1,4 @@
-﻿import { ExtraCurricularGradeDetailPageClient } from "@/features/extra-curricular/offerings/components/grade/detail/ExtraCurricularGradeDetailPage.client";
+﻿import { ExtraCurricularGradeDetailPageClient } from "@/features/admin/extra-curricular/offerings/components/grade/detail/ExtraCurricularGradeDetailPage.client";
 
 export default function Page() {
   return <ExtraCurricularGradeDetailPageClient />;

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { fetchCurricularGradeMeHeader, fetchCurricularGradeMeList } from "../api/curricularApi";
-import { StudentGradeDetailHeaderDto, StudentGradeDetailListDto } from "@/features/curricular-offering/api/types";
+import { StudentGradeDetailHeaderDto, StudentGradeDetailListDto } from "@/features/admin/curricular-offering/api/types";
 import { PageMeta } from "../api/types";
 
 const defaultMeta: PageMeta = {
