@@ -14,7 +14,7 @@ import { Button } from "@/components/button";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   CartesianGrid,
   Legend,
@@ -76,8 +76,12 @@ type NormalizedRadarSeries = {
   items: { name: string; value: number }[];
 };
 
+type TrendSeries = {
+  name: string;
+  data: number[];
+};
+
 export default function ResultPageClient() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const semesterIdParam = searchParams.get("semesterId")?.trim() ?? "";
   const semesterNameParam = searchParams.get("semesterName")?.trim() ?? "";
@@ -235,6 +239,35 @@ export default function ResultPageClient() {
     () => normalizeTrendData(state.data, filteredTrendSeries),
     [state.data, filteredTrendSeries]
   );
+  const trendYAxis = useMemo(() => {
+    if (filteredTrendSeries.length === 0) return undefined;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    filteredTrendSeries.forEach((series) => {
+      series.data.forEach((value) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return;
+        min = Math.min(min, n);
+        max = Math.max(max, n);
+      });
+    });
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
+    const range = max - min;
+    const padding = range === 0 ? Math.max(Math.abs(max) * 0.1, 1) : range * 0.1;
+    const paddedMin = min - padding;
+    const paddedMax = max + padding;
+    const step = 100;
+    const minTick = Math.floor(paddedMin / step) * step;
+    const maxTick = Math.ceil(paddedMax / step) * step;
+    const ticks: number[] = [];
+    for (let v = minTick; v <= maxTick; v += step) {
+      ticks.push(v);
+    }
+    return {
+      domain: [minTick, maxTick] as [number, number],
+      ticks,
+    };
+  }, [filteredTrendSeries]);
 
 
   const statsRows = useMemo(() => normalizeStats(state.data), [state.data]);
@@ -262,9 +295,6 @@ export default function ResultPageClient() {
                 결과 재산출
               </Button>
             )}
-            <Button variant="secondary" onClick={() => router.push("/admin/competencies/dignosis")}>
-              목록
-            </Button>
           </div>
         </div>
 
@@ -286,7 +316,7 @@ export default function ResultPageClient() {
         <div className={styles.grid}>
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>레이더 차트</h2>
+              <h2 className={styles.panelTitle}>학기/학과별 역량 차트</h2>
               <div className={styles.filterGroup}>
                 <div className={styles.filterWrap}>
                   <span className={styles.filterLabel}>학기</span>
@@ -325,7 +355,7 @@ export default function ResultPageClient() {
                     <PolarGrid />
                     <PolarAngleAxis dataKey="name" tick={{ className: styles.radarTick }} />
                     <PolarRadiusAxis tick={false} axisLine={false} />
-                    <Tooltip formatter={(v) => formatScore(v)} />
+                    <Tooltip formatter={(v: number | string | undefined) => formatScore(v)} />
                     <Legend
                       verticalAlign="bottom"
                       height={12}
@@ -349,7 +379,7 @@ export default function ResultPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>추세 차트</h2>
+              <h2 className={styles.panelTitle}>학과별 추이 차트</h2>
               <div className={styles.filterWrap}>
                 <span className={styles.filterLabel}>학과</span>
                 <Dropdown
@@ -373,8 +403,14 @@ export default function ResultPageClient() {
                   <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
                     <CartesianGrid className={styles.chartGrid} />
                     <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
-                    <YAxis tick={{ className: styles.axisTick }} />
-                    <Tooltip formatter={(value) => formatScore(value)} />
+                    <YAxis
+                      tick={{ className: styles.axisTick }}
+                      domain={trendYAxis?.domain ?? ["auto", "auto"]}
+                      ticks={trendYAxis?.ticks}
+                      tickFormatter={(value: number) => String(Math.round(value))}
+                      allowDecimals={false}
+                    />
+                    <Tooltip formatter={(value: number | string | undefined) => formatScore(value)} />
                     <Legend verticalAlign="bottom" align="center" content={renderLineLegend} />
                     {filteredTrendSeries.map((s, i) => (
                       <Line
@@ -550,7 +586,7 @@ function buildRadarData(series: NormalizedRadarSeries[]) {
   return rows;
 }
 
-function normalizeTrendSeries(data: ResultCompetencyDashboard | null) {
+function normalizeTrendSeries(data: ResultCompetencyDashboard | null): TrendSeries[] {
   if (!data) return [];
   const raw = (data as any).trendChart ?? (data as any).trend ?? (data as any).trendData ?? null;
   const seriesRaw = raw?.series ?? raw?.lines ?? raw?.data ?? [];

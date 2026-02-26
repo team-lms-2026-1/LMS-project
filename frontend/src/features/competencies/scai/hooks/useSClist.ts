@@ -26,9 +26,11 @@ export function useSClist() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (opts?: { silent?: boolean }) => {
     try {
-      setLoading(true);
+      if (!opts?.silent) {
+        setLoading(true);
+      }
       setError(null);
 
       const res = await fetchStudentCompetencyList({
@@ -46,7 +48,9 @@ export function useSClist() {
       setItems([]);
       setMeta(defaultMeta);
     } finally {
-      setLoading(false);
+      if (!opts?.silent) {
+        setLoading(false);
+      }
     }
   }, [page, size, keyword, deptName]);
 
@@ -77,7 +81,7 @@ export function useSClist() {
         setPage(1);
         setSize(s);
       },
-      reload: load,
+      reload: (opts?: { silent?: boolean }) => load(opts),
     },
   };
 }

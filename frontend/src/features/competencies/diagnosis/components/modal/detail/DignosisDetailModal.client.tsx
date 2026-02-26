@@ -33,7 +33,7 @@ const CS_META: Array<{ key: DiagnosisCsKey; label: string; color: string }> = [
   { key: "creativity", label: "Creativity", color: "#facc15" },
   { key: "communication", label: "Communication", color: "#22c55e" },
   { key: "collaboration", label: "Collaboration", color: "#2563eb" },
-  { key: "convergence", label: "Convergence", color: "#8b5cf6" },
+  { key: "citizenship", label: "Citizenship", color: "#8b5cf6" },
 ];
 const LEGEND_DOT_CLASS: Record<DiagnosisCsKey, string> = {
   criticalThinking: styles.legendDotCriticalThinking,
@@ -41,7 +41,7 @@ const LEGEND_DOT_CLASS: Record<DiagnosisCsKey, string> = {
   creativity: styles.legendDotCreativity,
   communication: styles.legendDotCommunication,
   collaboration: styles.legendDotCollaboration,
-  convergence: styles.legendDotConvergence,
+  citizenship: styles.legendDotConvergence,
 };
 const CS_INDEX = new Map<DiagnosisCsKey, number>(
   CS_META.map((item, index) => [item.key, index])
@@ -120,7 +120,7 @@ function createDefaultQuestion(): DiagnosisQuestion {
       communication: 5,
       collaboration: 5,
       creativity: 5,
-      convergence: 5,
+      citizenship: 5,
     },
   };
 }
@@ -146,7 +146,10 @@ function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[
       communication: q.csScores?.communication ?? 5,
       collaboration: q.csScores?.collaboration ?? 5,
       creativity: q.csScores?.creativity ?? 5,
-      convergence: q.csScores?.convergence ?? 5,
+      citizenship:
+        q.csScores?.citizenship ??
+        (q.csScores as Record<string, number> | undefined)?.convergence ??
+        5,
     },
   }));
 }
@@ -261,6 +264,41 @@ export function DignosisDetailModal({
       );
     });
     return map;
+  }, [responseItems]);
+
+  const distributionYAxis = useMemo(() => {
+    if (responseItems.length === 0) return undefined;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+
+    responseItems.forEach((item) => {
+      const candidates = [
+        item.min,
+        item.max,
+        item.avg,
+        ...(item.points ?? []).map((p) => p.score),
+      ];
+      candidates.forEach((value) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return;
+        min = Math.min(min, n);
+        max = Math.max(max, n);
+      });
+    });
+
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
+    const range = max - min;
+    const padding = range === 0 ? Math.max(Math.abs(max) * 0.1, 1) : range * 0.1;
+    const paddedMin = min - padding;
+    const paddedMax = max + padding;
+    const step = 100;
+    const minTick = Math.floor(paddedMin / step) * step;
+    const maxTick = Math.ceil(paddedMax / step) * step;
+    const ticks: number[] = [];
+    for (let v = minTick; v <= maxTick; v += step) {
+      ticks.push(v);
+    }
+    return { domain: [minTick, maxTick] as [number, number], ticks };
   }, [responseItems]);
 
   const legendItems = useMemo<DiagnosisDetailLegendItem[]>(() => {
@@ -408,8 +446,9 @@ export function DignosisDetailModal({
                           dataKey="score"
                           type="number"
                           tick={{ fontSize: 12 }}
-                          domain={[0, 3100]}
-                          ticks={[0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100]}
+                          domain={distributionYAxis?.domain ?? ["auto", "auto"]}
+                          ticks={distributionYAxis?.ticks}
+                          tickFormatter={(value: number) => String(Math.round(value))}
                           allowDecimals={false}
                           allowDataOverflow
                         />
@@ -578,7 +617,5 @@ export function DignosisDetailModal({
     </>
   );
 }
-
-
 
 

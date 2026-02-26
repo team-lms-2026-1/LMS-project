@@ -100,6 +100,32 @@ export default function StudentDetailPageClient() {
     () => normalizeTrend(data?.trendChart?.categories ?? [], trendSeries),
     [data?.trendChart?.categories, trendSeries]
   );
+  const trendYAxis = useMemo(() => {
+    if (!trendSeries.length) return undefined;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    trendSeries.forEach((series) => {
+      (series.data ?? []).forEach((value) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return;
+        min = Math.min(min, n);
+        max = Math.max(max, n);
+      });
+    });
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
+    const range = max - min;
+    const padding = range === 0 ? Math.max(Math.abs(max) * 0.1, 1) : range * 0.1;
+    const paddedMin = min - padding;
+    const paddedMax = max + padding;
+    const step = 100;
+    const minTick = Math.floor(paddedMin / step) * step;
+    const maxTick = Math.ceil(paddedMax / step) * step;
+    const ticks: number[] = [];
+    for (let v = minTick; v <= maxTick; v += step) {
+      ticks.push(v);
+    }
+    return { domain: [minTick, maxTick] as [number, number], ticks };
+  }, [trendSeries]);
 
   const myStatsRows = useMemo(
     () => normalizeMyStats(data?.myStatsTable ?? []),
@@ -233,7 +259,7 @@ export default function StudentDetailPageClient() {
                         className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[0]} ${styles.radarFillStrong}`}
                       />
                     )}
-                    <Tooltip formatter={(v) => formatScore(v)} />
+                    <Tooltip formatter={(v: number | string | undefined) => formatScore(v)} />
                   </RadarChart>
                 </ResponsiveContainer>
               )}
@@ -252,8 +278,14 @@ export default function StudentDetailPageClient() {
                   <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
                     <CartesianGrid className={styles.chartGrid} />
                     <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
-                    <YAxis tick={{ className: styles.axisTick }} />
-                    <Tooltip />
+                    <YAxis
+                      tick={{ className: styles.axisTick }}
+                      domain={trendYAxis?.domain ?? ["auto", "auto"]}
+                      ticks={trendYAxis?.ticks}
+                      tickFormatter={(value: number) => String(Math.round(value))}
+                      allowDecimals={false}
+                    />
+                    <Tooltip formatter={(value: number | string | undefined) => formatScore(value)} />
                     <Legend
                       verticalAlign="bottom"
                       align="center"
