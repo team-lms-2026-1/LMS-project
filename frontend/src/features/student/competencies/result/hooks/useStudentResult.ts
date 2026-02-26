@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import type { StudentCompetencyDashboard } from "../api/types";
@@ -18,7 +18,13 @@ export type UseStudentResultActions = {
   reload: () => Promise<void>;
 };
 
-export function useStudentResult(): { state: UseStudentResultState; actions: UseStudentResultActions } {
+type StudentResultMessages = {
+  loadFailed?: string;
+};
+
+export function useStudentResult(
+  messages?: StudentResultMessages
+): { state: UseStudentResultState; actions: UseStudentResultActions } {
   const { state: authState } = useAuth();
   const [semesterId, setSemesterId] = useState("");
   const [data, setData] = useState<StudentCompetencyDashboard | null>(null);
@@ -26,6 +32,8 @@ export function useStudentResult(): { state: UseStudentResultState; actions: Use
   const [error, setError] = useState<string | null>(null);
 
   const studentId = authState.me?.accountId;
+
+  const loadFailedMessage = messages?.loadFailed ?? "Failed to load competency results.";
 
   const reload = useCallback(async () => {
     if (!studentId) return;
@@ -35,12 +43,12 @@ export function useStudentResult(): { state: UseStudentResultState; actions: Use
       const res = await fetchStudentResultDashboard({ studentId, semesterId });
       setData(res.data ?? null);
     } catch (e: any) {
-      setError(e?.message ?? "역량 결과를 불러오지 못했습니다.");
+      setError(e?.message ?? loadFailedMessage);
       setData(null);
     } finally {
       setLoading(false);
     }
-  }, [semesterId, studentId]);
+  }, [loadFailedMessage, semesterId, studentId]);
 
   useEffect(() => {
     if (!studentId) {
@@ -61,7 +69,7 @@ export function useStudentResult(): { state: UseStudentResultState; actions: Use
         setData(res.data ?? null);
       } catch (e: any) {
         if (!alive) return;
-        setError(e?.message ?? "역량 결과를 불러오지 못했습니다.");
+        setError(e?.message ?? loadFailedMessage);
         setData(null);
       } finally {
         if (alive) setLoading(false);
@@ -71,7 +79,7 @@ export function useStudentResult(): { state: UseStudentResultState; actions: Use
     return () => {
       alive = false;
     };
-  }, [studentId, semesterId]);
+  }, [loadFailedMessage, studentId, semesterId]);
 
   return {
     state: {

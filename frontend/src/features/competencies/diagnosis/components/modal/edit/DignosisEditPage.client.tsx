@@ -215,7 +215,8 @@ function mapQuestions(raw?: any[]): DiagnosisQuestion[] {
           q?.c5,
           q?.C5
         ),
-        convergence: pickScore(
+        citizenship: pickScore(
+          cs?.citizenship,
           cs?.convergence,
           cs?.conv,
           weights?.C6,

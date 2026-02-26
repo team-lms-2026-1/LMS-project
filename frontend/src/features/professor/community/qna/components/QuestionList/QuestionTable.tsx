@@ -15,11 +15,15 @@ export function QuestionTable({ items, loading }: Props) {
   const router = useRouter();
   const t = useI18n("community.qna.professor.table");
 
+  const goDetail = (id: number) => {
+    router.push(`/professor/community/qna/${id}`);
+  };
+
   const columns: Array<TableColumn<QnaListItemDto>> = [
-    { header: t("headers.id"), align: "left", render: (r) => r.questionId },
+    { header: t("headers.id"), align: "center", render: (r) => r.questionId },
     {
       header: t("headers.category"),
-      align: "left",
+      align: "center",
       render: (r) => {
         const c = r.category;
         if (!c) return t("uncategorized");
@@ -37,7 +41,10 @@ export function QuestionTable({ items, loading }: Props) {
         <button
           type="button"
           className={styles.titleLink}
-          onClick={() => router.push(`/professor/community/qna/${r.questionId}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            goDetail(r.questionId);
+          }}
         >
           {r.title}
         </button>
@@ -61,6 +68,8 @@ export function QuestionTable({ items, loading }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.questionId}
       emptyText={t("emptyText")}
+      rowClassName={styles.rowTall}
+      onRowClick={(r) => goDetail(r.questionId)}
     />
   );
 }

@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./DignosisPage.module.css";
-import { DignosisTable } from "./DignosisTable";
-import { PaginationSimple, useListQuery } from "@/components/pagination";
-import { SearchBar } from "@/components/searchbar";
-import { useDignosisList } from "../../hooks/useDignosisList";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/i18n/useI18n";
+import styles from "./DignosisPage.module.css";
+import { SearchBar } from "@/components/searchbar";
+import { PaginationSimple, useListQuery } from "@/components/pagination";
+import { useDignosisList } from "../../hooks/useDignosisList";
 import type { DiagnosisListItemDto } from "../../api/types";
+import { DignosisTable } from "./DignosisTable";
 
 export default function DignosisPageClient() {
+  const t = useI18n("competency.studentDiagnosis.list");
   const router = useRouter();
   const { state, actions } = useDignosisList();
   const { page, size, keyword, setPage, setKeyword } = useListQuery({
@@ -21,15 +23,15 @@ export default function DignosisPageClient() {
 
   useEffect(() => {
     actions.goPage(page);
-  }, [page]);
+  }, [actions, page]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
-  }, [size, state.size]);
+  }, [actions, size, state.size]);
 
   useEffect(() => {
     if (state.keyword !== keyword) actions.setKeyword(keyword ?? "");
-  }, [keyword, state.keyword]);
+  }, [actions, keyword, state.keyword]);
 
   useEffect(() => {
     setInputKeyword(keyword ?? "");
@@ -58,7 +60,7 @@ export default function DignosisPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>역량 진단지</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchBarWrap}>
@@ -66,7 +68,7 @@ export default function DignosisPageClient() {
               value={inputKeyword}
               onChange={setInputKeyword}
               onSearch={handleSearch}
-              placeholder="검색어"
+              placeholder={t("searchPlaceholder")}
               onClear={() => setKeyword("")}
             />
           </div>

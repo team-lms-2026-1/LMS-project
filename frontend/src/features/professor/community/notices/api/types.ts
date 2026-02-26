@@ -33,3 +33,4 @@ export type NoticeListItemDto = {
 }
 
 export type NoticeListResponse = ApiResponse<NoticeListItemDto[], PageMeta>;
+export type NoticeCategoryListResponse = ApiResponse<Category[], null>;

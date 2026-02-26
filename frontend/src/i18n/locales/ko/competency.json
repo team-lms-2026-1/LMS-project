@@ -1,0 +1,479 @@
+{
+  "intro": {
+    "eyebrow": "역량 안내",
+    "title": "6CS 역량이란?",
+    "lead": {
+      "line1": "6CS는 학습자가 미래 사회에서 요구되는 핵심 역량을 균형 있게 키우기 위한 공통 기준입니다.",
+      "line2": "지식 습득에 더해 실제 문제를 해결하고 협력하며 책임 있게 행동하는 힘을 길러 줍니다."
+    },
+    "sections": {
+      "sixCs": "6CS의 여섯 가지 역량",
+      "learningUse": "학습에서의 활용",
+      "formula": "진단에서의 계산 식"
+    },
+    "cards": {
+      "creativity": {
+        "title": "창의성 (Creativity)",
+        "description": "새로운 관점으로 문제를 바라보고 독창적인 아이디어를 만들어 실행하는 능력입니다."
+      },
+      "criticalThinking": {
+        "title": "비판적 사고 (Critical Thinking)",
+        "description": "정보의 타당성을 검토하고 근거 기반으로 판단하며 합리적인 결론에 도달하는 능력입니다."
+      },
+      "collaboration": {
+        "title": "협업 (Collaboration)",
+        "description": "공동 목표를 위해 역할을 조정하고 팀과 함께 성과를 만들어 내는 능력입니다."
+      },
+      "communication": {
+        "title": "소통 (Communication)",
+        "description": "생각을 명확하게 전달하고 다양한 방식으로 상호 이해를 이끄는 능력입니다."
+      },
+      "citizenship": {
+        "title": "시민성 (Citizenship)",
+        "description": "공동체의 규범과 책임을 이해하고 윤리적·지속가능한 선택을 실천하는 태도입니다."
+      },
+      "character": {
+        "title": "인성/자기관리 (Character)",
+        "description": "성실함과 공감, 자기주도성을 바탕으로 꾸준히 성장하는 힘입니다."
+      }
+    },
+    "learning": {
+      "line1": "6CS는 교과 수업, 비교과 활동, 프로젝트 경험을 하나의 언어로 연결해 줍니다. 이를 통해 자신의 강점과 보완점을 더 명확히 파악할 수 있습니다.",
+      "line2": "활동을 마친 뒤 어떤 역량이 강화되었는지 성찰하면, 다음 목표와 학습 계획을 더욱 구체적으로 세울 수 있습니다."
+    },
+    "formula": {
+      "line1": "(진단지 5지선다 점수 * 6CS 각각의 점수) + (진단지 서술형 점수 + 6CS 각각의 점수) = 6CS 진단지의 점수",
+      "line2": "(비교과 활동 포인트 * 비교과의 할당된 6CS 점수 * 10) = 비교과 활동의 점수",
+      "line3": "(교과 활동 포인트 * 교과의 할당된 6CS 점수) = 교과 활동의 점수",
+      "line4": "(진단지 점수 + 비교과 활동 점수 + 교과 활동 점수) = 6CS 총점",
+      "line5": "총점을 기준으로 중간값, 평균값 등을 계산하여 6CS 각각의 점수를 산출합니다."
+    }
+  },
+  "adminStudents": {
+    "title": "학생 역량 활동 조회",
+    "filters": {
+      "all": "전체",
+      "keywordPlaceholder": "검색어"
+    },
+    "table": {
+      "headers": {
+        "studentNumber": "학번",
+        "deptName": "학과",
+        "grade": "학년",
+        "name": "이름"
+      },
+      "emptyText": "조회된 학생이 없습니다."
+    },
+    "detail": {
+      "loadingText": "불러오는 중입니다...",
+      "emptyData": "표시할 데이터가 없습니다.",
+      "title": "학생 역량 활동 상세",
+      "buttons": {
+        "backToList": "목록으로"
+      },
+      "messages": {
+        "invalidStudentId": "유효한 학생 ID가 아닙니다.",
+        "loadFailed": "학생 역량 정보를 불러오지 못했습니다."
+      },
+      "profile": {
+        "studentNumber": "학번",
+        "deptName": "학과",
+        "grade": "학년"
+      },
+      "summary": {
+        "maxScore": "최고 점수",
+        "recentAvg": "최근 평균",
+        "lastEvaluationAt": "최근 평가일"
+      },
+      "panels": {
+        "myCompetency": "나의 역량",
+        "trend": "변화 추이",
+        "myStats": "나의 통계",
+        "comparison": "비교"
+      },
+      "empty": {
+        "chartData": "차트 데이터가 없습니다.",
+        "tableData": "표 데이터가 없습니다."
+      },
+      "legend": {
+        "myScore": "내 점수",
+        "deptAverage": "학과 평균"
+      },
+      "fallback": {
+        "competencyPrefix": "역량"
+      },
+      "tables": {
+        "myStats": {
+          "headers": {
+            "competencyName": "역량명",
+            "myScore": "내 점수",
+            "average": "평균",
+            "myMaxScore": "내 최고점"
+          }
+        },
+        "comparison": {
+          "headers": {
+            "competencyName": "역량명",
+            "myScore": "내 점수",
+            "deptAverage": "학과 평균",
+            "deptMaxScore": "학과 최고점"
+          }
+        }
+      }
+    }
+  },
+  "adminDiagnosis": {
+    "list": {
+      "title": "진단지 관리",
+      "searchPlaceholder": "검색어",
+      "buttons": {
+        "create": "등록"
+      },
+      "messages": {
+        "listLoadFallback": "진단지 목록을 불러오지 못했습니다.",
+        "targetNotFound": "삭제할 진단지를 찾을 수 없습니다.",
+        "deleteSuccess": "진단지가 삭제되었습니다.",
+        "deleteFailed": "진단지 삭제에 실패했습니다.",
+        "notClosed": "진단이 마감되지 않았습니다."
+      },
+      "table": {
+        "headers": {
+          "number": "번호",
+          "title": "제목",
+          "target": "대상(학과·학년)",
+          "period": "제출기간",
+          "createdAt": "작성일",
+          "status": "상태",
+          "manage": "관리"
+        },
+        "target": {
+          "all": "전체",
+          "separator": "·"
+        },
+        "statusLabel": {
+          "DRAFT": "작성중",
+          "OPEN": "진행중",
+          "CLOSED": "마감",
+          "PENDING": "미응답",
+          "SUBMITTED": "응답완료"
+        },
+        "buttons": {
+          "detail": "상세",
+          "edit": "수정",
+          "delete": "삭제"
+        },
+        "emptyText": "조회된 진단지가 없습니다."
+      },
+      "deleteModal": {
+        "title": "진단지 삭제",
+        "confirmText": "삭제",
+        "cancelText": "취소",
+        "question": "진단지를 삭제하시겠습니까?",
+        "questionWithTitle": "\"{title}\" 진단지를 삭제하시겠습니까?",
+        "sub": "삭제된 진단지는 복구할 수 없습니다."
+      }
+    },
+    "resultDetail": {
+      "loadingText": "불러오는 중입니다...",
+      "title": "진단 결과 관리",
+      "buttons": {
+        "recalculate": "결과 산출",
+        "backToList": "목록"
+      },
+      "messages": {
+        "missingDiagnosisId": "진단 ID가 없습니다.",
+        "loadFailed": "진단 결과를 불러오지 못했습니다.",
+        "semesterNotFound": "학기 정보를 찾을 수 없습니다.",
+        "recalculateFailed": "결과 산출에 실패했습니다."
+      },
+      "summary": {
+        "totalTargets": "대상자",
+        "calculatedTargets": "산출대상자",
+        "average": "평균"
+      },
+      "panels": {
+        "radar": "역량 차트",
+        "trend": "역량 추이",
+        "stats": "역량 통계"
+      },
+      "empty": {
+        "chartData": "차트 데이터가 없습니다.",
+        "statsData": "통계 데이터가 없습니다."
+      },
+      "table": {
+        "headers": {
+          "competencyName": "역량 이름",
+          "targetAndCalculated": "대상자 / 산출대상자",
+          "average": "평균",
+          "median": "중간값",
+          "stdDev": "표준편차",
+          "calculatedAt": "산출일시"
+        }
+      },
+      "fallback": {
+        "all": "전체",
+        "deptPrefix": "학과",
+        "competencyPrefix": "역량"
+      }
+    },
+    "detailPage": {
+      "messages": {
+        "loadFailed": "진단 상세를 불러오지 못했습니다."
+      }
+    },
+    "detailModal": {
+      "tabs": {
+        "question": "문항",
+        "answer": "응답"
+      },
+      "buttons": {
+        "edit": "수정",
+        "close": "닫기",
+        "nonRespondents": "미응답자 조회"
+      },
+      "summary": {
+        "title": "응답",
+        "count": "응답: {count}건"
+      },
+      "chart": {
+        "title": "역량 분포",
+        "empty": "응답 데이터가 없습니다."
+      },
+      "legend": {
+        "range": "{label}: 최소 {min} / 최대 {max}",
+        "avg": " / 평균 {avg}"
+      },
+      "form": {
+        "titleMain": "진단 문항",
+        "titleSub": "이 진단은 {count}문항으로 구성되어 있습니다.",
+        "meta": {
+          "semester": "학기",
+          "dept": "학과",
+          "grade": "학년",
+          "period": "제출기간"
+        }
+      },
+      "placeholders": {
+        "question": "문항",
+        "shortAnswer": "단답 텍스트.."
+      },
+      "fallback": {
+        "all": "전체",
+        "student": "학생",
+        "competency": "역량"
+      },
+      "scoreText": "{score}점",
+      "gradeFormat": "{grade}학년",
+      "scaleLabels": {
+        "stronglyAgree": "매우 그렇다",
+        "agree": "그렇다",
+        "neutral": "보통이다",
+        "disagree": "그렇지 않다",
+        "stronglyDisagree": "매우 그렇지 않다"
+      }
+    },
+    "nonRespondentModal": {
+      "title": "미응답자 학생 목록",
+      "subtitle": "{dept} 학과 미응답 학생 목록",
+      "buttons": {
+        "cancel": "취소",
+        "sendEmail": "메일 발송"
+      },
+      "alerts": {
+        "emailNotReady": "메일 발송 기능은 아직 준비되지 않았습니다."
+      },
+      "aria": {
+        "prevPage": "이전 페이지",
+        "nextPage": "다음 페이지"
+      },
+      "fallback": {
+        "all": "전체"
+      },
+      "table": {
+        "headers": {
+          "no": "NO",
+          "studentNumber": "학번",
+          "name": "이름",
+          "email": "이메일"
+        },
+        "emptyText": "미응답 학생이 없습니다."
+      }
+    }
+  },
+  "studentDiagnosis": {
+    "list": {
+      "title": "역량 진단지",
+      "searchPlaceholder": "검색어",
+      "table": {
+        "headers": {
+          "number": "번호",
+          "title": "제목",
+          "semester": "학기",
+          "period": "진단기간",
+          "status": "상태",
+          "manage": "관리"
+        },
+        "statusLabel": {
+          "PENDING": "미응답",
+          "SUBMITTED": "응답완료"
+        },
+        "buttons": {
+          "respond": "응답",
+          "detail": "상세"
+        },
+        "emptyText": "조회된 진단지가 없습니다."
+      }
+    },
+    "detailModal": {
+      "statusLabel": {
+        "PENDING": "미응답",
+        "SUBMITTED": "응답완료"
+      },
+      "messages": {
+        "missingDiagnosisInfo": "진단지 정보가 없습니다.",
+        "loadFailed": "진단지 상세를 불러오지 못했습니다.",
+        "answerAllQuestions": "모든 문항에 응답해 주세요.",
+        "submitSuccess": "응답이 제출되었습니다.",
+        "submitFailed": "응답 제출에 실패했습니다."
+      },
+      "footer": {
+        "submittedNote": "이미 응답이 완료된 진단지입니다.",
+        "submitNote": "제출 후에는 수정할 수 없습니다."
+      },
+      "buttons": {
+        "close": "닫기",
+        "submit": "제출"
+      },
+      "meta": {
+        "period": "기간"
+      },
+      "loadingText": "진단지를 불러오는 중입니다...",
+      "emptyText": "등록된 문항이 없습니다.",
+      "questionType": {
+        "short": "단답형",
+        "scale": "척도형"
+      },
+      "placeholders": {
+        "shortAnswer": "응답을 입력하세요."
+      },
+      "fallback": {
+        "title": "역량 진단지",
+        "question": "질문"
+      },
+      "confirm": {
+        "title": "진단지 제출",
+        "message": "제출 후에는 수정할 수 없습니다. 제출하시겠습니까?"
+      },
+      "scaleLabels": {
+        "stronglyAgree": "매우 그렇다",
+        "agree": "그렇다",
+        "neutral": "보통이다",
+        "disagree": "그렇지 않다",
+        "stronglyDisagree": "매우 그렇지 않다"
+      }
+    }
+  },
+  "adminResult": {
+    "detail": {
+      "loadingText": "불러오는 중입니다...",
+      "title": "역량 종합 관리",
+      "buttons": {
+        "recalculate": "결과 재산출"
+      },
+      "messages": {
+        "loadFailed": "역량 종합 결과를 불러오지 못했습니다.",
+        "semesterNotFound": "학기 정보를 찾을 수 없습니다.",
+        "recalculateFailed": "통계 재산출에 실패했습니다."
+      },
+      "summary": {
+        "totalTargets": "대상자",
+        "calculatedTargets": "산출대상자",
+        "average": "평균"
+      },
+      "panels": {
+        "radar": "학기/학과별 역량 차트",
+        "trend": "학과별 추이 차트",
+        "stats": "역량 통계"
+      },
+      "filters": {
+        "semester": "학기",
+        "dept": "학과",
+        "selectDept": "학과 선택"
+      },
+      "empty": {
+        "chartData": "차트 데이터가 없습니다.",
+        "statsData": "통계 데이터가 없습니다.",
+        "selectDept": "학과를 선택해주세요."
+      },
+      "table": {
+        "headers": {
+          "competencyName": "역량 이름",
+          "targetAndCalculated": "대상자 / 산출대상자",
+          "average": "평균",
+          "median": "중간값",
+          "stdDev": "표준편차",
+          "calculatedAt": "산출일시"
+        }
+      },
+      "fallback": {
+        "all": "전체",
+        "deptPrefix": "학과",
+        "competencyPrefix": "역량"
+      }
+    }
+  },
+  "studentResult": {
+    "detail": {
+      "loadingText": "불러오는 중입니다...",
+      "title": "학생 역량 활동 조회",
+      "messages": {
+        "loadFailed": "역량 결과를 불러오지 못했습니다."
+      },
+      "empty": {
+        "noResult": "결과가 없습니다.",
+        "chartData": "차트 데이터가 없습니다.",
+        "statsData": "통계 데이터가 없습니다."
+      },
+      "profile": {
+        "studentNumber": "학번",
+        "deptName": "학과",
+        "grade": "학년"
+      },
+      "summary": {
+        "maxScore": "최고 점수",
+        "averageScore": "평균 점수",
+        "calculatedAt": "산출 일시"
+      },
+      "panels": {
+        "radar": "역량 차트",
+        "trend": "역량 추이",
+        "myStats": "내 역량 통계",
+        "comparison": "내 역량 비교"
+      },
+      "table": {
+        "myStats": {
+          "headers": {
+            "competencyName": "역량 이름",
+            "myScore": "내 점수",
+            "average": "평균",
+            "myMaxScore": "내 최고점수"
+          }
+        },
+        "comparison": {
+          "headers": {
+            "competencyName": "역량 이름",
+            "myScore": "내 점수",
+            "deptAverage": "학과 평균",
+            "deptMaxScore": "학과 최고점수"
+          }
+        }
+      },
+      "legend": {
+        "myScore": "내 점수"
+      },
+      "fallback": {
+        "competencyPrefix": "역량"
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./DignosisDetailModal.module.css";
 import { DignosisNonRespondentModal } from "./DignosisNonRespondentModal.client";
 import { useDeptsDropdownOptions } from "@/features/dropdowns/depts/hooks";
@@ -36,7 +37,7 @@ const CS_META: Array<{ key: DiagnosisCsKey; label: string; color: string }> = [
   { key: "creativity", label: "Creativity", color: "#facc15" },
   { key: "communication", label: "Communication", color: "#22c55e" },
   { key: "collaboration", label: "Collaboration", color: "#2563eb" },
-  { key: "convergence", label: "Convergence", color: "#8b5cf6" },
+  { key: "citizenship", label: "Citizenship", color: "#8b5cf6" },
 ];
 const LEGEND_DOT_CLASS: Record<DiagnosisCsKey, string> = {
   criticalThinking: styles.legendDotCriticalThinking,
@@ -44,14 +45,14 @@ const LEGEND_DOT_CLASS: Record<DiagnosisCsKey, string> = {
   creativity: styles.legendDotCreativity,
   communication: styles.legendDotCommunication,
   collaboration: styles.legendDotCollaboration,
-  convergence: styles.legendDotConvergence,
+  citizenship: styles.legendDotConvergence,
 };
 const CS_INDEX = new Map<DiagnosisCsKey, number>(
   CS_META.map((item, index) => [item.key, index])
 );
 const CS_TICKS = CS_META.map((_, index) => index);
 const RANGE_CAP_WIDTH = 0.18;
-const SCALE_LABELS = ["매우 그렇다", "그렇다", "보통이다", "그렇지 않다", "매우 그렇지 않다"];
+
 function makeId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -93,29 +94,32 @@ function toDisplayText(value?: string, fallback = "-") {
   return text ? text : fallback;
 }
 
-function formatGrade(value?: string) {
-  if (!value) return "전체";
+function formatGrade(
+  value: string | undefined,
+  options: { allLabel: string; gradeLabel: (grade: string) => string }
+) {
+  if (!value) return options.allLabel;
   const text = String(value).trim();
-  if (!text) return "전체";
-  if (text.toUpperCase() === "ALL" || text === "전체") return "전체";
-  if (/^\d+$/.test(text)) return `${text}학년`;
+  if (!text) return options.allLabel;
+  if (text.toUpperCase() === "ALL" || text === options.allLabel) return options.allLabel;
+  if (/^\d+$/.test(text)) return options.gradeLabel(text);
   return text;
 }
 
-function createScaleOptions(): DiagnosisScaleOption[] {
-  return SCALE_LABELS.map((label, index) => ({
+function createScaleOptions(scaleLabels: string[]): DiagnosisScaleOption[] {
+  return scaleLabels.map((label, index) => ({
     id: makeId(),
     label,
     score: SCORE_OPTIONS[SCORE_OPTIONS.length - 1 - index] ?? 1,
   }));
 }
 
-function createDefaultQuestion(): DiagnosisQuestion {
+function createDefaultQuestion(scaleLabels: string[]): DiagnosisQuestion {
   return {
     id: makeId(),
     title: "",
     type: "SCALE",
-    scaleOptions: createScaleOptions(),
+    scaleOptions: createScaleOptions(scaleLabels),
     shortAnswer: "",
     csScores: {
       criticalThinking: 5,
@@ -123,13 +127,16 @@ function createDefaultQuestion(): DiagnosisQuestion {
       communication: 5,
       collaboration: 5,
       creativity: 5,
-      convergence: 5,
+      citizenship: 5,
     },
   };
 }
 
-function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[] {
-  if (!questions || questions.length === 0) return [createDefaultQuestion()];
+function normalizeQuestions(
+  questions: DiagnosisQuestion[] | undefined,
+  scaleLabels: string[]
+): DiagnosisQuestion[] {
+  if (!questions || questions.length === 0) return [createDefaultQuestion(scaleLabels)];
   return questions.map((q) => ({
     id: q.id || makeId(),
     title: q.title ?? "",
@@ -138,10 +145,10 @@ function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[
       q.scaleOptions && q.scaleOptions.length > 0
         ? q.scaleOptions.map((opt, idx) => ({
             id: opt.id || makeId(),
-            label: opt.label ?? SCALE_LABELS[idx] ?? "",
+            label: opt.label ?? scaleLabels[idx] ?? "",
             score: opt.score ?? SCORE_OPTIONS[SCORE_OPTIONS.length - 1 - idx] ?? 1,
           }))
-        : createScaleOptions(),
+        : createScaleOptions(scaleLabels),
     shortAnswer: q.shortAnswer ?? "",
     csScores: {
       criticalThinking: q.csScores?.criticalThinking ?? 5,
@@ -149,7 +156,10 @@ function normalizeQuestions(questions?: DiagnosisQuestion[]): DiagnosisQuestion[
       communication: q.csScores?.communication ?? 5,
       collaboration: q.csScores?.collaboration ?? 5,
       creativity: q.csScores?.creativity ?? 5,
-      convergence: q.csScores?.convergence ?? 5,
+      citizenship:
+        q.csScores?.citizenship ??
+        (q.csScores as Record<string, number> | undefined)?.convergence ??
+        5,
     },
   }));
 }
@@ -162,15 +172,28 @@ export function DignosisDetailModal({
   dignosisId,
   initialTab,
 }: DiagnosisDetailModalProps) {
+  const t = useI18n("competency.adminDiagnosis.detailModal");
+  const scaleLabels = useMemo(
+    () => [
+      t("scaleLabels.stronglyAgree"),
+      t("scaleLabels.agree"),
+      t("scaleLabels.neutral"),
+      t("scaleLabels.disagree"),
+      t("scaleLabels.stronglyDisagree"),
+    ],
+    [t]
+  );
   const [activeTab, setActiveTab] = useState<"QUESTION" | "ANSWER">("QUESTION");
-  const [questions, setQuestions] = useState<DiagnosisQuestion[]>([createDefaultQuestion()]);
+  const [questions, setQuestions] = useState<DiagnosisQuestion[]>([
+    createDefaultQuestion(scaleLabels),
+  ]);
   const [nonRespondentOpen, setNonRespondentOpen] = useState(false);
   const [sendingReminders, setSendingReminders] = useState(false);
   const { options: deptOptionsRaw } = useDeptsDropdownOptions();
   const { options: semesterOptionsRaw } = useSemestersDropdownOptions();
   const deptOptions = useMemo(
-    () => [{ value: "All", label: "전체" }, ...deptOptionsRaw],
-    [deptOptionsRaw]
+    () => [{ value: "All", label: t("fallback.all") }, ...deptOptionsRaw],
+    [deptOptionsRaw, t]
   );
   const startedAt =
     value?.startedAt ??
@@ -204,13 +227,13 @@ export function DignosisDetailModal({
         (value as any)?.department?.name
     );
     if (rawDeptValue === undefined || rawDeptValue === null || String(rawDeptValue).trim() === "") {
-      return fallbackName === "-" ? "전체" : fallbackName;
+      return fallbackName === "-" ? t("fallback.all") : fallbackName;
     }
     const deptValue = String(rawDeptValue);
-    if (deptValue === "All" || deptValue.toUpperCase() === "ALL") return "전체";
+    if (deptValue === "All" || deptValue.toUpperCase() === "ALL") return t("fallback.all");
     const matched = deptOptions.find((opt) => String(opt.value) === deptValue);
     return matched?.label ?? fallbackName;
-  }, [deptOptions, value]);
+  }, [deptOptions, t, value]);
   const semesterLabel = useMemo(() => {
     const rawSemesterId =
       value?.semesterId ??
@@ -232,12 +255,10 @@ export function DignosisDetailModal({
     const matched = semesterOptionsRaw.find((opt) => String(opt.value) === semesterValue);
     return matched?.label ?? fallbackName;
   }, [semesterOptionsRaw, value]);
-  const gradeLabel = formatGrade(
-    value?.gradeValue ??
-      (value as any)?.basicInfo?.targetGrade ??
-      (value as any)?.grade ??
-      (value as any)?.gradeLevel
-  );
+  const gradeLabel = formatGrade(value?.gradeValue ?? (value as any)?.basicInfo?.targetGrade ?? (value as any)?.grade ?? (value as any)?.gradeLevel, {
+    allLabel: t("fallback.all"),
+    gradeLabel: (grade) => t("gradeFormat", { grade }),
+  });
   const statusText =
     value?.status ??
     (value as any)?.basicInfo?.status ??
@@ -265,6 +286,41 @@ export function DignosisDetailModal({
       );
     });
     return map;
+  }, [responseItems]);
+
+  const distributionYAxis = useMemo(() => {
+    if (responseItems.length === 0) return undefined;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+
+    responseItems.forEach((item) => {
+      const candidates = [
+        item.min,
+        item.max,
+        item.avg,
+        ...(item.points ?? []).map((p) => p.score),
+      ];
+      candidates.forEach((value) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return;
+        min = Math.min(min, n);
+        max = Math.max(max, n);
+      });
+    });
+
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
+    const range = max - min;
+    const padding = range === 0 ? Math.max(Math.abs(max) * 0.1, 1) : range * 0.1;
+    const paddedMin = min - padding;
+    const paddedMax = max + padding;
+    const step = 100;
+    const minTick = Math.floor(paddedMin / step) * step;
+    const maxTick = Math.ceil(paddedMax / step) * step;
+    const ticks: number[] = [];
+    for (let v = minTick; v <= maxTick; v += step) {
+      ticks.push(v);
+    }
+    return { domain: [minTick, maxTick] as [number, number], ticks };
   }, [responseItems]);
 
   const legendItems = useMemo<DiagnosisDetailLegendItem[]>(() => {
@@ -296,22 +352,31 @@ export function DignosisDetailModal({
     const rows =
       matched.length > 0
         ? matched
-        : [{ name: point.name ?? "학생", score: Number.isFinite(baseScore) ? baseScore : 0 }];
+        : [
+            {
+              name: point.name ?? t("fallback.student"),
+              score: Number.isFinite(baseScore) ? baseScore : 0,
+            },
+          ];
     const unique = new Map<string, number>();
     rows.forEach((row) => {
-      const name = row.name ?? "학생";
+      const name = row.name ?? t("fallback.student");
       if (!unique.has(name)) unique.set(name, row.score);
     });
     const list = Array.from(unique.entries()).map(([name, score]) => ({ name, score }));
     return (
       <div className={styles.tooltip}>
-        <div className={styles.tooltipTitle}>{point.category ?? "역량"}</div>
-        <div className={styles.tooltipMeta}>{formatScore(baseScore)}점</div>
+        <div className={styles.tooltipTitle}>{point.category ?? t("fallback.competency")}</div>
+        <div className={styles.tooltipMeta}>
+          {t("scoreText", { score: formatScore(baseScore) })}
+        </div>
         <div className={styles.tooltipList}>
           {list.map((row, index) => (
             <div key={`${row.name}-${index}`} className={styles.tooltipRow}>
               <span className={styles.tooltipName}>{row.name}</span>
-              <span className={styles.tooltipScore}>{formatScore(row.score)}점</span>
+              <span className={styles.tooltipScore}>
+                {t("scoreText", { score: formatScore(row.score) })}
+              </span>
             </div>
           ))}
         </div>
@@ -322,8 +387,8 @@ export function DignosisDetailModal({
   useEffect(() => {
     if (!open) return;
     setActiveTab(initialTab ?? "QUESTION");
-    setQuestions(normalizeQuestions(value?.questions));
-  }, [open, value, initialTab]);
+    setQuestions(normalizeQuestions(value?.questions, scaleLabels));
+  }, [initialTab, open, scaleLabels, value]);
 
   useEffect(() => {
     if (open) return;
@@ -372,10 +437,12 @@ export function DignosisDetailModal({
           <>
             {!isClosed && (
               <Button variant="primary" onClick={onEdit} disabled={!onEdit}>
-                수정
+                {t("buttons.edit")}
               </Button>
             )}
-            <Button variant="secondary" onClick={handleClose}>닫기</Button>
+            <Button variant="secondary" onClick={handleClose}>
+              {t("buttons.close")}
+            </Button>
           </>
         }
       >
@@ -386,37 +453,43 @@ export function DignosisDetailModal({
                 type="button"
                 className={`${styles.tabButton} ${activeTab === "QUESTION" ? styles.tabActive : ""}`}
                 onClick={() => setActiveTab("QUESTION")}
-              >질문</button>
+              >
+                {t("tabs.question")}
+              </button>
               <button
                 type="button"
                 className={`${styles.tabButton} ${activeTab === "ANSWER" ? styles.tabActive : ""}`}
                 onClick={() => setActiveTab("ANSWER")}
-              >응답</button>
+              >
+                {t("tabs.answer")}
+              </button>
             </div>
           </div>
 
           {activeTab === "ANSWER" ? (
             <div className={styles.answerWrap}>
               <div className={styles.summaryCard}>
-                <div className={styles.summaryTitle}>응답</div>
-                <div className={styles.summaryCount}>응답: {responseCount}개</div>
+                <div className={styles.summaryTitle}>{t("summary.title")}</div>
+                <div className={styles.summaryCount}>
+                  {t("summary.count", { count: responseCount })}
+                </div>
                 <button
                   type="button"
                   className={styles.summaryButton}
                   onClick={() => setNonRespondentOpen(true)}
                   disabled={!canOpenNonRespondents}
                 >
-                  미실시자 목록
+                  {t("buttons.nonRespondents")}
                 </button>
               </div>
 
               <div className={styles.chartCard}>
                 <div className={styles.chartHeader}>
-                  <h3 className={styles.chartTitle}>역량별 분포</h3>
+                  <h3 className={styles.chartTitle}>{t("chart.title")}</h3>
                 </div>
                 <div className={styles.chartWrap}>
                   {responseItems.length === 0 ? (
-                    <div className={styles.emptyAnswer}>응답 데이터가 없습니다.</div>
+                    <div className={styles.emptyAnswer}>{t("chart.empty")}</div>
                   ) : (
                     <ResponsiveContainer width="100%" height={360}>
                       <ScatterChart margin={{ top: 10, right: 24, left: 0, bottom: 24 }}>
@@ -438,8 +511,9 @@ export function DignosisDetailModal({
                           dataKey="score"
                           type="number"
                           tick={{ fontSize: 12 }}
-                          domain={[0, 3100]}
-                          ticks={[0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100]}
+                          domain={distributionYAxis?.domain ?? ["auto", "auto"]}
+                          ticks={distributionYAxis?.ticks}
+                          tickFormatter={(value: number) => String(Math.round(value))}
                           allowDecimals={false}
                           allowDataOverflow
                         />
@@ -511,8 +585,14 @@ export function DignosisDetailModal({
                         <div key={`legend-${item.key}`} className={styles.legendItem}>
                           <span className={`${styles.legendDot} ${dotClass ?? ""}`} />
                           <span className={styles.legendText}>
-                            {item.label}: 최소 {formatScore(item.min)} / 최대 {formatScore(item.max)}
-                            {Number.isFinite(item.avg) ? ` / 평균 ${formatScore(item.avg)}` : ""}
+                            {t("legend.range", {
+                              label: item.label,
+                              min: formatScore(item.min),
+                              max: formatScore(item.max),
+                            })}
+                            {Number.isFinite(item.avg)
+                              ? t("legend.avg", { avg: formatScore(item.avg) })
+                              : ""}
                           </span>
                         </div>
                       );
@@ -526,25 +606,27 @@ export function DignosisDetailModal({
               <div className={styles.formCard}>
                 <div className={styles.formHeader}>
                   <div className={styles.formTitle}>
-                    <div className={styles.formTitleMain}>진단 문항</div>
-                    <div className={styles.formTitleSub}>진단 문항은 {questions.length}문항으로 구성되어 있습니다.</div>
+                    <div className={styles.formTitleMain}>{t("form.titleMain")}</div>
+                    <div className={styles.formTitleSub}>
+                      {t("form.titleSub", { count: questions.length })}
+                    </div>
                   </div>
 
                 <div className={styles.formMeta}>
                   <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>학기</span>
+                    <span className={styles.metaLabel}>{t("form.meta.semester")}</span>
                     <span className={styles.metaValue}>{semesterLabel}</span>
                   </div>
                   <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>학과</span>
+                    <span className={styles.metaLabel}>{t("form.meta.dept")}</span>
                     <span className={styles.metaValue}>{deptLabel}</span>
                   </div>
                   <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>학년</span>
+                    <span className={styles.metaLabel}>{t("form.meta.grade")}</span>
                     <span className={styles.metaValue}>{gradeLabel}</span>
                   </div>
                   <div className={styles.metaRow}>
-                    <span className={styles.metaLabel}>제출기간</span>
+                    <span className={styles.metaLabel}>{t("form.meta.period")}</span>
                     <span className={styles.metaValue}>
                       {formatPeriod(startedAt, endedAt)}
                       </span>
@@ -562,7 +644,7 @@ export function DignosisDetailModal({
                           className={styles.questionInput}
                           value={q.title}
                           readOnly
-                          placeholder="질문"
+                          placeholder={t("placeholders.question")}
                         />
                       </div>
 
@@ -583,7 +665,7 @@ export function DignosisDetailModal({
                             className={styles.shortInput}
                             value={q.shortAnswer}
                             readOnly
-                            placeholder="단답 텍스트.."
+                            placeholder={t("placeholders.shortAnswer")}
                           />
                         </div>
                       )}
@@ -609,7 +691,5 @@ export function DignosisDetailModal({
     </>
   );
 }
-
-
 
 

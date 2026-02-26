@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 import styles from "./StudentDetailPage.module.css";
 import { fetchStudentCompetencyDashboard } from "../../api/StudentCompetencyApi";
 import type {
@@ -49,12 +50,9 @@ const RADAR_COLOR_VARS = ["var(--series-blue)", "var(--series-orange)"];
 const RADAR_CHART_MARGIN = { top: 8, right: 8, bottom: 24, left: 8 };
 const LINE_CHART_MARGIN = { top: 20, right: 20, left: 0, bottom: 10 };
 const RADAR_OUTER_RADIUS = "78%";
-const RADAR_LEGEND = {
-  myScore: "\uB0B4 \uC810\uC218",
-  deptAverage: "\uD559\uACFC \uD3C9\uADE0",
-};
 
 export default function StudentDetailPageClient() {
+  const t = useI18n("competency.adminStudents.detail");
   const router = useRouter();
   const params = useParams<{ studentId: string }>();
   const studentId = Number(params.studentId);
@@ -65,7 +63,7 @@ export default function StudentDetailPageClient() {
 
   useEffect(() => {
     if (!Number.isFinite(studentId)) {
-      setError("유효하지 않은 학생 ID입니다.");
+      setError(t("messages.invalidStudentId"));
       setLoading(false);
       return;
     }
@@ -80,7 +78,7 @@ export default function StudentDetailPageClient() {
         setData(res.data ?? null);
       } catch (e: any) {
         if (!alive) return;
-        setError(e?.message ?? "학생 상세 정보를 불러오지 못했습니다.");
+        setError(e?.message ?? t("messages.loadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -89,25 +87,62 @@ export default function StudentDetailPageClient() {
     return () => {
       alive = false;
     };
-  }, [studentId]);
+  }, [studentId, t]);
 
   const profile = data?.profile;
   const summary = data?.summary;
+  const competencyPrefix = t("fallback.competencyPrefix");
+  const legendText = useMemo(
+    () => ({
+      myScore: t("legend.myScore"),
+      deptAverage: t("legend.deptAverage"),
+    }),
+    [t]
+  );
 
-  const radarFallbackData = useMemo(() => normalizeRadar(data?.radarChart ?? []), [data?.radarChart]);
+  const radarFallbackData = useMemo(
+    () => normalizeRadar(data?.radarChart ?? [], competencyPrefix),
+    [data?.radarChart, competencyPrefix]
+  );
   const trendSeries = data?.trendChart?.series ?? [];
   const trendData = useMemo(
     () => normalizeTrend(data?.trendChart?.categories ?? [], trendSeries),
     [data?.trendChart?.categories, trendSeries]
   );
+  const trendYAxis = useMemo(() => {
+    if (!trendSeries.length) return undefined;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    trendSeries.forEach((series) => {
+      (series.data ?? []).forEach((value) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return;
+        min = Math.min(min, n);
+        max = Math.max(max, n);
+      });
+    });
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
+    const range = max - min;
+    const padding = range === 0 ? Math.max(Math.abs(max) * 0.1, 1) : range * 0.1;
+    const paddedMin = min - padding;
+    const paddedMax = max + padding;
+    const step = 100;
+    const minTick = Math.floor(paddedMin / step) * step;
+    const maxTick = Math.ceil(paddedMax / step) * step;
+    const ticks: number[] = [];
+    for (let v = minTick; v <= maxTick; v += step) {
+      ticks.push(v);
+    }
+    return { domain: [minTick, maxTick] as [number, number], ticks };
+  }, [trendSeries]);
 
   const myStatsRows = useMemo(
-    () => normalizeMyStats(data?.myStatsTable ?? []),
-    [data?.myStatsTable]
+    () => normalizeMyStats(data?.myStatsTable ?? [], competencyPrefix),
+    [data?.myStatsTable, competencyPrefix]
   );
   const comparisonRows = useMemo(
-    () => normalizeMyStats(data?.comparisonTable ?? data?.myStatsTable ?? []),
-    [data?.comparisonTable, data?.myStatsTable]
+    () => normalizeMyStats(data?.comparisonTable ?? data?.myStatsTable ?? [], competencyPrefix),
+    [data?.comparisonTable, data?.myStatsTable, competencyPrefix]
   );
   const radarComparisonData = useMemo(
     () =>
@@ -131,23 +166,24 @@ export default function StudentDetailPageClient() {
   }, [myStatsRows, summary?.maxScore]);
   const hasRadarComparison = radarComparisonData.length > 0;
   const radarData = hasRadarComparison ? radarComparisonData : radarFallbackData;
+
   if (loading) {
-    return <div className={styles.page}>불러오는 중...</div>;
+    return <div className={styles.page}>{t("loadingText")}</div>;
   }
   if (error) {
     return <div className={styles.page}>{error}</div>;
   }
   if (!data) {
-    return <div className={styles.page}>데이터가 없습니다.</div>;
+    return <div className={styles.page}>{t("emptyData")}</div>;
   }
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.topBar}>
-          <h1 className={styles.title}>학생 역량 활동 조회</h1>
+          <h1 className={styles.title}>{t("title")}</h1>
           <button type="button" className={styles.backBtn} onClick={() => router.back()}>
-            목록
+            {t("buttons.backToList")}
           </button>
         </div>
 
@@ -156,15 +192,15 @@ export default function StudentDetailPageClient() {
             <div className={styles.profileName}>{profile?.name ?? "-"}</div>
             <div className={styles.profileMeta}>
               <div className={styles.profileRow}>
-                <span className={styles.profileLabel}>학번</span>
+                <span className={styles.profileLabel}>{t("profile.studentNumber")}</span>
                 <span className={styles.profileValue}>{profile?.studentNumber ?? "-"}</span>
               </div>
               <div className={styles.profileRow}>
-                <span className={styles.profileLabel}>학과</span>
+                <span className={styles.profileLabel}>{t("profile.deptName")}</span>
                 <span className={styles.profileValue}>{profile?.deptName ?? "-"}</span>
               </div>
               <div className={styles.profileRow}>
-                <span className={styles.profileLabel}>학년</span>
+                <span className={styles.profileLabel}>{t("profile.grade")}</span>
                 <span className={styles.profileValue}>{formatNumber(profile?.grade)}</span>
               </div>
             </div>
@@ -173,15 +209,15 @@ export default function StudentDetailPageClient() {
           <div className={styles.sectionCard}>
             <div className={styles.summaryGrid}>
               <div className={styles.summaryBox}>
-                <div className={styles.summaryLabel}>내 최고 점수</div>
+                <div className={styles.summaryLabel}>{t("summary.maxScore")}</div>
                 <div className={styles.summaryValue}>{formatScore(computedMaxScore)}</div>
               </div>
               <div className={styles.summaryBox}>
-                <div className={styles.summaryLabel}>최근 역량 평균</div>
+                <div className={styles.summaryLabel}>{t("summary.recentAvg")}</div>
                 <div className={styles.summaryValue}>{formatScore(summary?.recentAvg)}</div>
               </div>
               <div className={styles.summaryBox}>
-                <div className={styles.summaryLabel}>최근 평가일시</div>
+                <div className={styles.summaryLabel}>{t("summary.lastEvaluationAt")}</div>
                 <div className={styles.summaryValue}>{formatDateTime(summary?.lastEvaluationDate)}</div>
               </div>
             </div>
@@ -191,11 +227,11 @@ export default function StudentDetailPageClient() {
         <div className={styles.grid}>
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>내 역량</h2>
+              <h2 className={styles.panelTitle}>{t("panels.myCompetency")}</h2>
             </div>
             <div className={styles.chartWrap}>
               {radarData.length === 0 ? (
-                <div className={styles.empty}>차트 데이터가 없습니다.</div>
+                <div className={styles.empty}>{t("empty.chartData")}</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData} outerRadius={RADAR_OUTER_RADIUS} margin={RADAR_CHART_MARGIN}>
@@ -205,14 +241,14 @@ export default function StudentDetailPageClient() {
                     {hasRadarComparison ? (
                       <>
                         <Radar
-                          name={RADAR_LEGEND.myScore}
+                          name={legendText.myScore}
                           dataKey="myScore"
                           stroke={RADAR_COLOR_VARS[0]}
                           fill={RADAR_COLOR_VARS[0]}
                           className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[0]} ${styles.radarFillStrong}`}
                         />
                         <Radar
-                          name={RADAR_LEGEND.deptAverage}
+                          name={legendText.deptAverage}
                           dataKey="avgScore"
                           stroke={RADAR_COLOR_VARS[1]}
                           fill={RADAR_COLOR_VARS[1]}
@@ -226,14 +262,14 @@ export default function StudentDetailPageClient() {
                       </>
                     ) : (
                       <Radar
-                        name={RADAR_LEGEND.myScore}
+                        name={legendText.myScore}
                         dataKey="value"
                         stroke={RADAR_COLOR_VARS[0]}
                         fill={RADAR_COLOR_VARS[0]}
                         className={`${styles.radarSeries} ${RADAR_COLOR_CLASSES[0]} ${styles.radarFillStrong}`}
                       />
                     )}
-                    <Tooltip formatter={(v) => formatScore(v)} />
+                    <Tooltip formatter={(v: number | string | undefined) => formatScore(v)} />
                   </RadarChart>
                 </ResponsiveContainer>
               )}
@@ -242,18 +278,24 @@ export default function StudentDetailPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>역량 추이</h2>
+              <h2 className={styles.panelTitle}>{t("panels.trend")}</h2>
             </div>
             <div className={styles.chartWrap}>
               {trendData.length === 0 || trendSeries.length === 0 ? (
-                <div className={styles.empty}>차트 데이터가 없습니다.</div>
+                <div className={styles.empty}>{t("empty.chartData")}</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData} margin={LINE_CHART_MARGIN}>
                     <CartesianGrid className={styles.chartGrid} />
                     <XAxis dataKey="category" tick={{ className: styles.axisTick }} />
-                    <YAxis tick={{ className: styles.axisTick }} />
-                    <Tooltip />
+                    <YAxis
+                      tick={{ className: styles.axisTick }}
+                      domain={trendYAxis?.domain ?? ["auto", "auto"]}
+                      ticks={trendYAxis?.ticks}
+                      tickFormatter={(value: number) => String(Math.round(value))}
+                      allowDecimals={false}
+                    />
+                    <Tooltip formatter={(value: number | string | undefined) => formatScore(value)} />
                     <Legend
                       verticalAlign="bottom"
                       align="center"
@@ -277,19 +319,19 @@ export default function StudentDetailPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>내 역량 통계</h2>
+              <h2 className={styles.panelTitle}>{t("panels.myStats")}</h2>
             </div>
             <div className={styles.tableWrap}>
               {myStatsRows.length === 0 ? (
-                <div className={styles.empty}>데이터가 없습니다.</div>
+                <div className={styles.empty}>{t("empty.tableData")}</div>
               ) : (
                 <table className={styles.statTable}>
                   <thead>
                     <tr>
-                      <th>역량 이름</th>
-                      <th>내 점수</th>
-                      <th>평균</th>
-                      <th>내 최고점수</th>
+                      <th>{t("tables.myStats.headers.competencyName")}</th>
+                      <th>{t("tables.myStats.headers.myScore")}</th>
+                      <th>{t("tables.myStats.headers.average")}</th>
+                      <th>{t("tables.myStats.headers.myMaxScore")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -309,19 +351,19 @@ export default function StudentDetailPageClient() {
 
           <section className={styles.panel}>
             <div className={styles.panelHeader}>
-              <h2 className={styles.panelTitle}>내 역량 비교</h2>
+              <h2 className={styles.panelTitle}>{t("panels.comparison")}</h2>
             </div>
             <div className={styles.tableWrap}>
               {comparisonRows.length === 0 ? (
-                <div className={styles.empty}>데이터가 없습니다.</div>
+                <div className={styles.empty}>{t("empty.tableData")}</div>
               ) : (
                 <table className={styles.statTable}>
                   <thead>
                     <tr>
-                      <th>역량 이름</th>
-                      <th>내 점수</th>
-                      <th>학과 평균</th>
-                      <th>학과 최고점수</th>
+                      <th>{t("tables.comparison.headers.competencyName")}</th>
+                      <th>{t("tables.comparison.headers.myScore")}</th>
+                      <th>{t("tables.comparison.headers.deptAverage")}</th>
+                      <th>{t("tables.comparison.headers.deptMaxScore")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -344,9 +386,9 @@ export default function StudentDetailPageClient() {
   );
 }
 
-function normalizeRadar(items: StudentCompetencyRadarItem[]) {
+function normalizeRadar(items: StudentCompetencyRadarItem[], prefix: string) {
   return items.map((item, index) => ({
-    name: pickString(item, ["name", "label", "competencyName"]) || `역량 ${index + 1}`,
+    name: pickString(item, ["name", "label", "competencyName"]) || `${prefix} ${index + 1}`,
     value: pickNumber(item, ["value", "score", "myScore", "avgScore", "maxScore", "weight"]) ?? 0,
   }));
 }
@@ -362,10 +404,10 @@ function normalizeTrend(categories: string[], series: StudentCompetencyTrendSeri
   });
 }
 
-function normalizeMyStats(rows: StudentCompetencyStatRow[]) {
+function normalizeMyStats(rows: StudentCompetencyStatRow[], prefix: string) {
   return rows.map((row, idx) => ({
     key: `${pickString(row, ["name", "competencyName"]) || "row"}-${idx}`,
-    name: pickString(row, ["name", "competencyName"]) || `역량 ${idx + 1}`,
+    name: pickString(row, ["name", "competencyName"]) || `${prefix} ${idx + 1}`,
     myScore: pickNumber(row, ["myScore", "score", "value"]),
     myAvgScore: pickNumber(row, ["myAvgScore", "myAverage"]),
     myMaxScore: pickNumber(row, ["myMaxScore", "myMaximum"]),

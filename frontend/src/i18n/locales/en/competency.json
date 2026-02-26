@@ -1,0 +1,479 @@
+{
+  "intro": {
+    "eyebrow": "Competency Guide",
+    "title": "What is 6CS?",
+    "lead": {
+      "line1": "6CS is a common framework for helping learners build balanced core competencies required in future society.",
+      "line2": "Beyond acquiring knowledge, it develops the ability to solve real problems, collaborate, and act responsibly."
+    },
+    "sections": {
+      "sixCs": "The Six Competencies of 6CS",
+      "learningUse": "How It Is Used in Learning",
+      "formula": "Scoring Formula in Diagnosis"
+    },
+    "cards": {
+      "creativity": {
+        "title": "Creativity (Creativity)",
+        "description": "The ability to view problems from new perspectives and generate and execute original ideas."
+      },
+      "criticalThinking": {
+        "title": "Critical Thinking (Critical Thinking)",
+        "description": "The ability to evaluate validity of information, judge based on evidence, and reach rational conclusions."
+      },
+      "collaboration": {
+        "title": "Collaboration (Collaboration)",
+        "description": "The ability to coordinate roles and produce outcomes together for a shared goal."
+      },
+      "communication": {
+        "title": "Communication (Communication)",
+        "description": "The ability to convey thoughts clearly and build mutual understanding through diverse methods."
+      },
+      "citizenship": {
+        "title": "Citizenship (Citizenship)",
+        "description": "An attitude of understanding social norms and responsibilities, and practicing ethical and sustainable choices."
+      },
+      "character": {
+        "title": "Character/Self-Management (Character)",
+        "description": "The strength to keep growing through sincerity, empathy, and self-directedness."
+      }
+    },
+    "learning": {
+      "line1": "6CS connects curricular classes, extracurricular activities, and project experiences with one common language. This helps learners identify strengths and areas for improvement more clearly.",
+      "line2": "By reflecting on which competencies improved after activities, learners can set more concrete next goals and learning plans."
+    },
+    "formula": {
+      "line1": "(Diagnosis Likert score * each 6CS weight) + (Diagnosis short-answer score + each 6CS weight) = Diagnosis score",
+      "line2": "(Extracurricular points * assigned 6CS weight for extracurricular * 10) = Extracurricular score",
+      "line3": "(Curricular points * assigned 6CS weight for curricular) = Curricular score",
+      "line4": "(Diagnosis score + Extracurricular score + Curricular score) = 6CS total score",
+      "line5": "Using total scores, median/average values are calculated to produce each 6CS score."
+    }
+  },
+  "adminStudents": {
+    "title": "Student Competency Activity",
+    "filters": {
+      "all": "All",
+      "keywordPlaceholder": "Search"
+    },
+    "table": {
+      "headers": {
+        "studentNumber": "Student No.",
+        "deptName": "Department",
+        "grade": "Grade",
+        "name": "Name"
+      },
+      "emptyText": "No students found."
+    },
+    "detail": {
+      "loadingText": "Loading...",
+      "emptyData": "No data to display.",
+      "title": "Student Competency Activity Detail",
+      "buttons": {
+        "backToList": "Back to List"
+      },
+      "messages": {
+        "invalidStudentId": "Invalid student ID.",
+        "loadFailed": "Failed to load student competency data."
+      },
+      "profile": {
+        "studentNumber": "Student No.",
+        "deptName": "Department",
+        "grade": "Grade"
+      },
+      "summary": {
+        "maxScore": "Max Score",
+        "recentAvg": "Recent Avg",
+        "lastEvaluationAt": "Last Evaluation"
+      },
+      "panels": {
+        "myCompetency": "My Competency",
+        "trend": "Trend",
+        "myStats": "My Stats",
+        "comparison": "Comparison"
+      },
+      "empty": {
+        "chartData": "No chart data.",
+        "tableData": "No table data."
+      },
+      "legend": {
+        "myScore": "My Score",
+        "deptAverage": "Dept Avg"
+      },
+      "fallback": {
+        "competencyPrefix": "Competency"
+      },
+      "tables": {
+        "myStats": {
+          "headers": {
+            "competencyName": "Competency",
+            "myScore": "My Score",
+            "average": "Average",
+            "myMaxScore": "My Max"
+          }
+        },
+        "comparison": {
+          "headers": {
+            "competencyName": "Competency",
+            "myScore": "My Score",
+            "deptAverage": "Dept Avg",
+            "deptMaxScore": "Dept Max"
+          }
+        }
+      }
+    }
+  },
+  "adminDiagnosis": {
+    "list": {
+      "title": "Diagnosis Management",
+      "searchPlaceholder": "Search",
+      "buttons": {
+        "create": "Create"
+      },
+      "messages": {
+        "listLoadFallback": "Failed to load diagnosis list.",
+        "targetNotFound": "Could not find a diagnosis to delete.",
+        "deleteSuccess": "Diagnosis deleted.",
+        "deleteFailed": "Failed to delete diagnosis.",
+        "notClosed": "This diagnosis is not closed yet."
+      },
+      "table": {
+        "headers": {
+          "number": "No.",
+          "title": "Title",
+          "target": "Target (Dept/Grade)",
+          "period": "Submission Period",
+          "createdAt": "Created At",
+          "status": "Status",
+          "manage": "Manage"
+        },
+        "target": {
+          "all": "All",
+          "separator": "·"
+        },
+        "statusLabel": {
+          "DRAFT": "Draft",
+          "OPEN": "Open",
+          "CLOSED": "Closed",
+          "PENDING": "Pending",
+          "SUBMITTED": "Submitted"
+        },
+        "buttons": {
+          "detail": "Detail",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "emptyText": "No diagnosis found."
+      },
+      "deleteModal": {
+        "title": "Delete Diagnosis",
+        "confirmText": "Delete",
+        "cancelText": "Cancel",
+        "question": "Do you want to delete this diagnosis?",
+        "questionWithTitle": "Do you want to delete \"{title}\"?",
+        "sub": "Deleted diagnoses cannot be restored."
+      }
+    },
+    "resultDetail": {
+      "loadingText": "Loading...",
+      "title": "Diagnosis Result Management",
+      "buttons": {
+        "recalculate": "Recalculate Results",
+        "backToList": "Back to List"
+      },
+      "messages": {
+        "missingDiagnosisId": "Diagnosis ID is missing.",
+        "loadFailed": "Failed to load diagnosis results.",
+        "semesterNotFound": "Could not find semester information.",
+        "recalculateFailed": "Failed to recalculate results."
+      },
+      "summary": {
+        "totalTargets": "Total Targets",
+        "calculatedTargets": "Calculated Targets",
+        "average": "Average"
+      },
+      "panels": {
+        "radar": "Competency Chart",
+        "trend": "Competency Trend",
+        "stats": "Competency Statistics"
+      },
+      "empty": {
+        "chartData": "No chart data.",
+        "statsData": "No statistics data."
+      },
+      "table": {
+        "headers": {
+          "competencyName": "Competency",
+          "targetAndCalculated": "Targets / Calculated",
+          "average": "Average",
+          "median": "Median",
+          "stdDev": "Standard Deviation",
+          "calculatedAt": "Calculated At"
+        }
+      },
+      "fallback": {
+        "all": "All",
+        "deptPrefix": "Department",
+        "competencyPrefix": "Competency"
+      }
+    },
+    "detailPage": {
+      "messages": {
+        "loadFailed": "Failed to load diagnosis details."
+      }
+    },
+    "detailModal": {
+      "tabs": {
+        "question": "Questions",
+        "answer": "Responses"
+      },
+      "buttons": {
+        "edit": "Edit",
+        "close": "Close",
+        "nonRespondents": "Non-Respondents"
+      },
+      "summary": {
+        "title": "Responses",
+        "count": "Responses: {count}"
+      },
+      "chart": {
+        "title": "Competency Distribution",
+        "empty": "No response data."
+      },
+      "legend": {
+        "range": "{label}: Min {min} / Max {max}",
+        "avg": " / Avg {avg}"
+      },
+      "form": {
+        "titleMain": "Diagnosis Questions",
+        "titleSub": "This diagnosis consists of {count} questions.",
+        "meta": {
+          "semester": "Semester",
+          "dept": "Department",
+          "grade": "Grade",
+          "period": "Submission Period"
+        }
+      },
+      "placeholders": {
+        "question": "Question",
+        "shortAnswer": "Short answer text..."
+      },
+      "fallback": {
+        "all": "All",
+        "student": "Student",
+        "competency": "Competency"
+      },
+      "scoreText": "{score} pts",
+      "gradeFormat": "Grade {grade}",
+      "scaleLabels": {
+        "stronglyAgree": "Strongly Agree",
+        "agree": "Agree",
+        "neutral": "Neutral",
+        "disagree": "Disagree",
+        "stronglyDisagree": "Strongly Disagree"
+      }
+    },
+    "nonRespondentModal": {
+      "title": "Non-Respondent Students",
+      "subtitle": "{dept} non-respondent student list",
+      "buttons": {
+        "cancel": "Cancel",
+        "sendEmail": "Send Email"
+      },
+      "alerts": {
+        "emailNotReady": "Email sending is not available yet."
+      },
+      "aria": {
+        "prevPage": "Previous page",
+        "nextPage": "Next page"
+      },
+      "fallback": {
+        "all": "All"
+      },
+      "table": {
+        "headers": {
+          "no": "NO",
+          "studentNumber": "Student No.",
+          "name": "Name",
+          "email": "Email"
+        },
+        "emptyText": "No non-respondent students."
+      }
+    }
+  },
+  "studentDiagnosis": {
+    "list": {
+      "title": "Competency Diagnosis",
+      "searchPlaceholder": "Search",
+      "table": {
+        "headers": {
+          "number": "No.",
+          "title": "Title",
+          "semester": "Semester",
+          "period": "Diagnosis Period",
+          "status": "Status",
+          "manage": "Manage"
+        },
+        "statusLabel": {
+          "PENDING": "Pending",
+          "SUBMITTED": "Submitted"
+        },
+        "buttons": {
+          "respond": "Respond",
+          "detail": "Detail"
+        },
+        "emptyText": "No diagnosis found."
+      }
+    },
+    "detailModal": {
+      "statusLabel": {
+        "PENDING": "Pending",
+        "SUBMITTED": "Submitted"
+      },
+      "messages": {
+        "missingDiagnosisInfo": "Diagnosis information is missing.",
+        "loadFailed": "Failed to load diagnosis details.",
+        "answerAllQuestions": "Please answer all questions.",
+        "submitSuccess": "Your response has been submitted.",
+        "submitFailed": "Failed to submit your response."
+      },
+      "footer": {
+        "submittedNote": "This diagnosis has already been submitted.",
+        "submitNote": "You cannot edit answers after submission."
+      },
+      "buttons": {
+        "close": "Close",
+        "submit": "Submit"
+      },
+      "meta": {
+        "period": "Period"
+      },
+      "loadingText": "Loading diagnosis...",
+      "emptyText": "No questions are registered.",
+      "questionType": {
+        "short": "Short Answer",
+        "scale": "Scale"
+      },
+      "placeholders": {
+        "shortAnswer": "Please enter your answer."
+      },
+      "fallback": {
+        "title": "Competency Diagnosis",
+        "question": "Question"
+      },
+      "confirm": {
+        "title": "Submit Diagnosis",
+        "message": "You cannot edit your answers after submission. Submit now?"
+      },
+      "scaleLabels": {
+        "stronglyAgree": "Strongly Agree",
+        "agree": "Agree",
+        "neutral": "Neutral",
+        "disagree": "Disagree",
+        "stronglyDisagree": "Strongly Disagree"
+      }
+    }
+  },
+  "adminResult": {
+    "detail": {
+      "loadingText": "Loading...",
+      "title": "Competency Summary Management",
+      "buttons": {
+        "recalculate": "Recalculate Results"
+      },
+      "messages": {
+        "loadFailed": "Failed to load competency summary results.",
+        "semesterNotFound": "Could not find semester information.",
+        "recalculateFailed": "Failed to recalculate statistics."
+      },
+      "summary": {
+        "totalTargets": "Total Targets",
+        "calculatedTargets": "Calculated Targets",
+        "average": "Average"
+      },
+      "panels": {
+        "radar": "Competency Chart by Semester/Department",
+        "trend": "Trend Chart by Department",
+        "stats": "Competency Statistics"
+      },
+      "filters": {
+        "semester": "Semester",
+        "dept": "Department",
+        "selectDept": "Select department"
+      },
+      "empty": {
+        "chartData": "No chart data.",
+        "statsData": "No statistics data.",
+        "selectDept": "Please select a department."
+      },
+      "table": {
+        "headers": {
+          "competencyName": "Competency",
+          "targetAndCalculated": "Targets / Calculated",
+          "average": "Average",
+          "median": "Median",
+          "stdDev": "Standard Deviation",
+          "calculatedAt": "Calculated At"
+        }
+      },
+      "fallback": {
+        "all": "All",
+        "deptPrefix": "Department",
+        "competencyPrefix": "Competency"
+      }
+    }
+  },
+  "studentResult": {
+    "detail": {
+      "loadingText": "Loading...",
+      "title": "Student Competency Activity",
+      "messages": {
+        "loadFailed": "Failed to load competency results."
+      },
+      "empty": {
+        "noResult": "No results.",
+        "chartData": "No chart data.",
+        "statsData": "No statistics data."
+      },
+      "profile": {
+        "studentNumber": "Student No.",
+        "deptName": "Department",
+        "grade": "Grade"
+      },
+      "summary": {
+        "maxScore": "Max Score",
+        "averageScore": "Average Score",
+        "calculatedAt": "Calculated At"
+      },
+      "panels": {
+        "radar": "Competency Chart",
+        "trend": "Competency Trend",
+        "myStats": "My Competency Stats",
+        "comparison": "My Competency Comparison"
+      },
+      "table": {
+        "myStats": {
+          "headers": {
+            "competencyName": "Competency",
+            "myScore": "My Score",
+            "average": "Average",
+            "myMaxScore": "My Max Score"
+          }
+        },
+        "comparison": {
+          "headers": {
+            "competencyName": "Competency",
+            "myScore": "My Score",
+            "deptAverage": "Dept Average",
+            "deptMaxScore": "Dept Max Score"
+          }
+        }
+      },
+      "legend": {
+        "myScore": "My Score"
+      },
+      "fallback": {
+        "competencyPrefix": "Competency"
+      }
+    }
+  }
+}

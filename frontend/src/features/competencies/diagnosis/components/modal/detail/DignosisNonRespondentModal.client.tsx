@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
+import { useI18n } from "@/i18n/useI18n";
 import type {
   DiagnosisNonRespondentItem,
   DiagnosisNonRespondentModalProps,
@@ -78,6 +79,7 @@ export function DignosisNonRespondentModal({
   items,
   onSendEmail,
 }: DiagnosisNonRespondentModalProps) {
+  const t = useI18n("competency.adminDiagnosis.nonRespondentModal");
   const [remoteItems, setRemoteItems] = useState<DiagnosisNonRespondentItem[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -148,24 +150,24 @@ export function DignosisNonRespondentModal({
       open={open}
       onClose={onClose}
       size="lg"
-      title="미실시 학생 목록"
+      title={t("title")}
       footer={
         <div className={styles.footerActions}>
           <Button variant="secondary" onClick={onClose}>
-            취소
+            {t("buttons.cancel")}
           </Button>
           <Button
             variant="primary"
             onClick={handleSendEmail}
             disabled={safeItems.length === 0 || sending}
           >
-            알림 전송
+            {t("buttons.sendEmail")}
           </Button>
         </div>
       }
     >
       <div className={styles.root}>
-        <div className={styles.subTitle}>{`${deptLabel} 설문 미실시 인원 목록`}</div>
+        <div className={styles.subTitle}>{t("subtitle", { dept: deptLabel })}</div>
 
         <div className={styles.tableWrap}>
           <NonRespondentTable items={pageItems} startIndex={startIndex} loading={loading} />
@@ -179,7 +181,7 @@ export function DignosisNonRespondentModal({
                 className={`${styles.pageButton} ${currentPage === 1 ? styles.pageButtonDisabled : ""}`}
                 onClick={() => setPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                aria-label="이전 페이지"
+                aria-label={t("aria.prevPage")}
               >
                 {"<"}
               </button>
@@ -205,7 +207,7 @@ export function DignosisNonRespondentModal({
                 className={`${styles.pageButton} ${currentPage === totalPages ? styles.pageButtonDisabled : ""}`}
                 onClick={() => setPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                aria-label="다음 페이지"
+                aria-label={t("aria.nextPage")}
               >
                 {">"}
               </button>

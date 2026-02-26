@@ -32,3 +32,4 @@ export type ResourceListItemDto = {
 }
 
 export type ResourceListResponse = ApiResponse<ResourceListItemDto[], PageMeta>;
+export type ResourceCategoryListResponse = ApiResponse<Category[], null>;

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DiagnosisListItemDto, PageMeta } from "../api/types";
@@ -67,7 +67,7 @@ export function useDignosisList() {
       setItems(nextItems);
     } catch (e: any) {
       console.error("[useDignosisList]", e);
-      setError(e?.message ?? "진단지 목록 조회 실패");
+      setError(e?.message ?? "Failed to load diagnosis list.");
       setItems([]);
     } finally {
       if (!opts?.silent) setLoading(false);

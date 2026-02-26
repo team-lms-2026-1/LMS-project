@@ -8,8 +8,10 @@ import { PaginationSimple, useListQuery } from "@/components/pagination";
 import { SearchBar } from "@/components/searchbar";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import { useFilterQuery } from "@/features/dropdowns/_shared/useFilterQuery";
+import { useI18n } from "@/i18n/useI18n";
 
 export default function StudentCompetencyPageClient() {
+  const t = useI18n("competency.adminStudents");
   const { state, actions } = useSClist();
   const { page, size, keyword: keywordQs, setPage, setKeyword: setKeywordQs } = useListQuery({
     defaultPage: 1,
@@ -25,20 +27,41 @@ export default function StudentCompetencyPageClient() {
   }, [keywordQs]);
 
   useEffect(() => {
-    actions.goPage(page);
-  }, [page, actions]);
+    if (state.page !== page) actions.goPage(page);
+  }, [page, state.page, actions]);
 
   useEffect(() => {
     if (state.size !== size) actions.setSize(size);
   }, [size, state.size, actions]);
 
   useEffect(() => {
-    actions.setKeyword(keywordQs ?? "");
-  }, [keywordQs, actions]);
+    const nextKeyword = keywordQs ?? "";
+    if (state.keyword !== nextKeyword) actions.setKeyword(nextKeyword);
+  }, [keywordQs, state.keyword, actions]);
 
   useEffect(() => {
-    actions.setDeptName(deptNameQs ?? "");
-  }, [deptNameQs, actions]);
+    const nextDeptName = deptNameQs ?? "";
+    if (state.deptName !== nextDeptName) actions.setDeptName(nextDeptName);
+  }, [deptNameQs, state.deptName, actions]);
+
+  useEffect(() => {
+    const reloadSilently = () => {
+      actions.reload({ silent: true });
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        reloadSilently();
+      }
+    };
+
+    window.addEventListener("focus", reloadSilently);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", reloadSilently);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [actions]);
 
   const handleSearch = useCallback(() => {
     setKeywordQs(inputKeyword);
@@ -78,12 +101,12 @@ export default function StudentCompetencyPageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>학생 역량 활동 조회</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
 
         <div className={styles.searchRow}>
           <div className={styles.searchGroup}>
             <div className={styles.dropdownWrap}>
-              <Dropdown value={deptNameQs} options={deptOptions} placeholder="전체" onChange={onChangeDept} />
+              <Dropdown value={deptNameQs} options={deptOptions} placeholder={t("filters.all")} onChange={onChangeDept} />
             </div>
 
             <div className={styles.searchBarWrap}>
@@ -91,7 +114,7 @@ export default function StudentCompetencyPageClient() {
                 value={inputKeyword}
                 onChange={setInputKeyword}
                 onSearch={handleSearch}
-                placeholder="검색어"
+                placeholder={t("filters.keywordPlaceholder")}
                 onClear={() => setKeywordQs("")}
               />
             </div>

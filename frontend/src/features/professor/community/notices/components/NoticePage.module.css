@@ -39,3 +39,20 @@
     gap: 8px;
     margin-bottom: 16px;
 }
+
+.searchGroup {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dropdownWrap {
+    flex: 0 0 200px;
+    margin-right: -100px;
+}
+
+.searchBarWrap {
+    flex: 0 0 360px;
+    min-width: 240px;
+}

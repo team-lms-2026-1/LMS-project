@@ -142,6 +142,20 @@
   stroke-width: var(--chart-line-width);
 }
 
+.chartWrap :global(.recharts-tooltip-wrapper) {
+  z-index: 5;
+}
+
+.chartWrap :global(.recharts-default-tooltip) {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
+.chartWrap :global(.recharts-tooltip-item) {
+  margin: 2px 0;
+}
+
 .radarSeries path,
 .radarSeries polygon {
   stroke: currentColor;
@@ -171,12 +185,12 @@
 }
 
 .legendGrid {
-  display: grid;
-  gap: 2px 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
   justify-content: center;
-  justify-items: start;
   align-items: center;
-  width: fit-content;
+  width: 100%;
   margin: 0 auto;
 }
 
