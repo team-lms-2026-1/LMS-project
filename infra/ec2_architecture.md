@@ -16,11 +16,14 @@ flowchart TD
     end
 
     subgraph EC2 ["🖥️ AWS EC2 (단일 서버)"]
-        subgraph NET ["Docker 네트워크 : lms-network"]
-            FE["frontend-server (Next.js :3000)"]
-            BE["backend-server (Spring Boot :8080)"]
+        NGINX["🔀 Nginx<br/>:80 → HTTPS 리다이렉트<br/>:443 SSL 종료<br/>teamlms.duckdns.org"]
+        subgraph NET ["🐳 lms-network"]
+            FE["Next.js :3000"]
+            BE["Spring Boot :8080"]
         end
     end
+
+
 
     subgraph AWS ["☁️ AWS 서비스"]
         RDS["RDS (PostgreSQL)"]
@@ -35,7 +38,8 @@ flowchart TD
     IMG -->|"pull·실행"| FE
     BE_CI -->|"JAR 전송·실행"| BE
 
-    User -->|":3000"| FE
+    User -->|"https :443"| NGINX
+    NGINX -->|"프록시 :3000"| FE
     FE -->|"/api/* 내부망"| BE
     BE --> RDS & S3 & OAI
 ```
@@ -80,14 +84,17 @@ flowchart TD
 
 ```
 EC2 인스턴스
+├── Nginx (호스트 직접 설치 - :80 / :443)
+│   └── SSL 종료 후 → localhost:3000 프록시
 └── lms-network (Docker 내부망)
     ├── frontend-server (Next.js :3000)
     └── backend-server  (Spring Boot :8080)
 ```
 
-| 컨테이너 | 역할 및 환경 통제 |
+| 구성요소 | 역할 및 환경 통제 |
 |---|---|
-| **frontend-server** | **SSR(서버 사이드) 통신**: `API_BASE_URL=http://backend-server:8080` (내부망 직통)<br/>**CSR(클라이언트) 통신**: `NEXT_PUBLIC_API_URL` (EC2 공인 IP 경유) |
+| **Nginx** | **SSL 종료**: Let's Encrypt 인증서로 HTTPS 처리<br/>**리버스 프록시**: `https://teamlms.duckdns.org` → `localhost:3000` 으로 프록시<br/>**자동 갱신**: Certbot 크론탭으로 90일마다 인증서 자동 갱신 |
+| **frontend-server** | **SSR(서버 사이드) 통신**: `API_BASE_URL=http://backend-server:8080` (내부망 직통)<br/>**CSR(클라이언트) 통신**: `NEXT_PUBLIC_API_URL=https://teamlms.duckdns.org` (Nginx 경유) |
 | **backend-server** | **Secrets 연동**: DB 계정, AWS S3 무결성 키, OpenAI API 키 등을 환경변수로 주입받아 구동<br/>**리소스 최적화**: 저사양 EC2를 우려하여 JVM 메모리를 384MB로 고정 (`-Xms384m`) |
 
 ---
@@ -122,11 +129,22 @@ backend/src/main/resources/db/migration/
 
 ## 5. 보안 및 네트워크 통제 (Security Rules)
 
-- **AWS Security Group (SG / 인바운드 보안 규칙)**
-  - `포트 22 (SSH)`: GitHub Actions 서버 IP와 지정된 관리자 IP에서만 접근 가능하도록 허용
-  - `포트 3000`: 프론트엔드 웹 서비스 접속용 (오픈)
-  - `포트 8080`: 백엔드 API 서버 (클라이언트 CSR 통신용으로 오픈)
-  - `포트 5432`: RDS 접근은 외부에서 불가능하며, 오직 이 EC2 서버 내부 IP에서만 접속 가능하도록 원천 차단
+### EC2 Security Group (`launch-wizard-1`)
+| 포트 | 프로토콜 | 소스 | 용도 |
+|------|----------|------|------|
+| `22` (SSH) | TCP | `0.0.0.0/0` | EC2 서버 관리 (GitHub Actions 배포, 관리자 접속) |
+| `80` (HTTP) | TCP | `0.0.0.0/0` | Nginx 수신 → `https://` 자동 리다이렉트 |
+| `443` (HTTPS) | TCP | `0.0.0.0/0` | **사용자 실제 접속 포트** — Nginx SSL 종료 후 Next.js로 프록시 |
+
+> **포트 3000, 8080은 완전히 닫혀 있습니다.**  
+> Nginx가 모든 외부 트래픽을 443으로 받아 Next.js(3000)로 내부 프록시하며, 백엔드(8080)는 Docker 내부망(`lms-network`)으로만 통신합니다.
+
+### RDS Security Group (`rds-sg`)
+| 포트 | 프로토콜 | 소스 | 용도 |
+|------|----------|------|------|
+| `5432` (PostgreSQL) | TCP | EC2 SG (`sg-04e08777b4ce3d1e8`) | EC2의 Spring Boot → RDS 접속 전용 허용 |
+
+> **외부 인터넷에서 DB 직접 접속 완전 차단.** EC2 서버에서 오는 요청만 허용합니다.
 
 - **GitHub Secrets**: SSH 키, DB 자격증명, API 키 모두 Secrets에 저장 → 소스코드 내 하드코딩 완전 방지
 - **JWT 토큰 인증**: Spring Security 기반, 모든 API는 역할별(`ADMIN`, `PROFESSOR`, `STUDENT`) 권한 검증 진행
@@ -153,7 +171,7 @@ backend/src/main/resources/db/migration/
 본 시스템은 보안 강화와 CORS 브라우저 제약을 원천 차단하기 위해, Next.js의 API Routes를 활용한 **BFF(Backend-For-Frontend) 프록시 패턴**을 전면 도입했습니다. 브라우저가 백엔드로 직접 전화를 걸지 않고 무조건 중간의 프론트엔드 서버(Next.js)를 거칩니다.
 
 ### 🛡️ BFF 도입으로 얻은 핵심 이점
-1. **완벽한 CORS 해결**: 브라우저는 오직 프론트엔드 도메인(`http://...:3000/api/...`)으로만 통신합니다. 브라우저 정책상 동일 출처(Same-Origin)로 인식되어 귀찮은 CORS 에러가 발생하지 않습니다.
+1. **완벽한 CORS 해결**: 브라우저는 오직 프론트엔드 도메인(`https://teamlms.duckdns.org/api/...`)으로만 통신합니다. 브라우저 정책상 동일 출처(Same-Origin)로 인식되어 귀찮은 CORS 에러가 발생하지 않습니다.
 2. **토큰 탈취 원천 차단**: 민감한 JWT Access Token을 로컬 스토리지에 두지 않습니다. 자바스크립트로 접근할 수 없는 **httpOnly 쿠키**에 구워 브라우저에 저장하고, 브라우저가 Next.js에 요청할 때마다 자동으로 실려오는 쿠키를 추출해 백엔드 API 호출 시 백단에서 `Authorization: Bearer <token>` 헤더로 변환해 찔러주는 역할을 `src/lib/bff.ts`가 수행합니다.
 
 ### 🔄 전체 사용자 요청 흐름 시나리오
@@ -161,25 +179,30 @@ backend/src/main/resources/db/migration/
 ```mermaid
 sequenceDiagram
     participant Browser as 🌐 웹 브라우저
-    participant FE as 🖥️ Next.js (BFF 프록시 :3000)
-    participant BE as ⚙️ Spring Boot (Backend :8080)
+    participant NGINX as 🔀 Nginx (SSL :443)
+    participant FE as 🖥️ Next.js BFF (:3000 내부)
+    participant BE as ⚙️ Spring Boot (:8080 내부)
     participant DB as 🗄️ Database (RDS)
 
     Note over Browser, DB: 1️⃣ SSR (서버 사이드 렌더링) 페이지 최초 접속 시
-    Browser->>+FE: 1. 화면 요청 (GET /admin/departments)<br/>[쿠키 포함]
-    FE->>+BE: 2. 토큰 조립 후 데이터 요청<br/>(http://backend-server:8080/api/...)
-    BE->>DB: 3. 데이터 조회
-    DB-->>BE: 4. 결과 반환
-    BE-->>-FE: 5. 날것의 JSON 응답
-    FE-->>-Browser: 6. 데이터가 포함된 완성된 HTML 전달 화면 표시
+    Browser->>+NGINX: 1. 화면 요청 (GET /admin/departments)<br/>https://teamlms.duckdns.org [쿠키 포함]
+    NGINX->>+FE: 2. SSL 종료 후 프록시 (localhost:3000)
+    FE->>+BE: 3. 토큰 조립 후 데이터 요청<br/>(http://backend-server:8080/api/...)
+    BE->>DB: 4. 데이터 조회
+    DB-->>BE: 5. 결과 반환
+    BE-->>-FE: 6. 날것의 JSON 응답
+    FE-->>-NGINX: 7. 데이터가 포함된 완성된 HTML
+    NGINX-->>-Browser: 8. HTTPS 응답 전달 · 화면 표시
 
     Note over Browser, DB: 2️⃣ 화면 렌더링 후, 클라이언트(브라우저)에서 API 요청 시 (CSR)
-    Browser->>+FE: 1. "등록" 버튼 클릭 (POST /api/departments)<br/>[쿠키 포함]
-    FE->>FE: 2. BFF 통과: 쿠키에서 토큰 추출 & 헤더 조립
-    FE->>+BE: 3. 백엔드 Proxy (http://backend-server:8080/api/...)
-    BE->>DB: 4. DB Insert 수행
-    DB-->>BE: 5. 리소스 조작 성공 여부 반환
-    BE-->>-FE: 6. 200 OK & JSON
-    FE-->>-Browser: 7. 클라이언트로 응답 바이패스
-    Browser->>Browser: 8. 프론트엔드 상태(State) 업데이트 및 깔끔하게 화면만 갱신
+    Browser->>+NGINX: 1. "등록" 버튼 클릭 (POST /api/departments)<br/>https://teamlms.duckdns.org [쿠키 포함]
+    NGINX->>+FE: 2. SSL 종료 후 프록시 (localhost:3000)
+    FE->>FE: 3. BFF 통과: 쿠키에서 토큰 추출 & 헤더 조립
+    FE->>+BE: 4. 백엔드 Proxy (http://backend-server:8080/api/...)
+    BE->>DB: 5. DB Insert 수행
+    DB-->>BE: 6. 리소스 조작 성공 여부 반환
+    BE-->>-FE: 7. 200 OK & JSON
+    FE-->>-NGINX: 8. 클라이언트로 응답 바이패스
+    NGINX-->>-Browser: 9. HTTPS 응답 전달
+    Browser->>Browser: 10. 프론트엔드 상태(State) 업데이트 및 화면 갱신
 ```

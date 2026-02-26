@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import styles from "./adminMentoring.module.css";
-import { fetchAdminRecruitments, fetchAdminApplications, fetchAdminMatchings } from "../../api/mentoringApi";
-import { MentoringRecruitment, MentoringApplication } from "../../api/types";
+import { fetchAdminRecruitments, fetchAdminMatchings } from "../../api/mentoringApi";
+import { MentoringRecruitment, MentoringMatchingAdminResponse } from "../../api/types";
 import { AdminMentoringChatModal } from "./AdminMentoringChatModal";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
@@ -14,10 +14,15 @@ import { Button } from "@/components/button/Button";
 import toast from "react-hot-toast";
 import { useSemestersDropdownOptions } from "@/features/dropdowns/semesters/hooks";
 import { Dropdown } from "@/features/dropdowns/_shared";
+import { useI18n } from "@/i18n/useI18n";
 
 const PAGE_SIZE = 10;
 
 export default function AdminMentoringChatPage() {
+    const tCommon = useI18n("mentoring.recruitments.common");
+    const tRecruitTable = useI18n("mentoring.recruitments.table");
+    const tChat = useI18n("mentoring.chatHistory");
+
     const [page, setPage] = useState(1);
     const [recruitments, setRecruitments] = useState<MentoringRecruitment[]>([]);
     const [totalElements, setTotalElements] = useState(0);
@@ -25,13 +30,23 @@ export default function AdminMentoringChatPage() {
     const [keywordInput, setKeywordInput] = useState("");
     const [selectedRecruitment, setSelectedRecruitment] = useState<MentoringRecruitment | null>(null);
 
-    // Chat Modal State
-    const [matchingsList, setMatchingsList] = useState<any[]>([]);
+    const [matchingsList, setMatchingsList] = useState<MentoringMatchingAdminResponse[]>([]);
     const [chatModalOpen, setChatModalOpen] = useState(false);
-    const [selectedChat, setSelectedChat] = useState<any>(null);
+    const [selectedChat, setSelectedChat] = useState<MentoringMatchingAdminResponse | null>(null);
 
     const { options: semesterOptions, loading: semesterLoading } = useSemestersDropdownOptions();
     const [statusFilter, setStatusFilter] = useState("ALL");
+
+    const toMessage = (prefixKey: string, e: unknown) => {
+        const message = e instanceof Error ? e.message : "";
+        return tChat(prefixKey) + (message || tChat("messages.unknownError"));
+    };
+
+    const getRecruitmentStatusLabel = (status: "DRAFT" | "OPEN" | "CLOSED") => {
+        if (status === "DRAFT") return tCommon("statusLabel.DRAFT");
+        if (status === "OPEN") return tCommon("statusLabel.OPEN");
+        return tCommon("statusLabel.CLOSED");
+    };
 
     const fetchRecruitList = useCallback(async () => {
         setLoading(true);
@@ -44,23 +59,23 @@ export default function AdminMentoringChatPage() {
             });
             setRecruitments(res.data || []);
             setTotalElements(res.meta?.totalElements || 0);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
-            toast.error("모집 공고 조회 실패: " + (e.message || ""));
+            toast.error(toMessage("messages.recruitmentsFetchFailedPrefix", e));
         } finally {
             setLoading(false);
         }
-    }, [page, keywordInput, statusFilter]);
+    }, [page, keywordInput, statusFilter, tChat]);
 
     const fetchMatchList = useCallback(async (recruitmentId: number) => {
         try {
             const matchRes = await fetchAdminMatchings(recruitmentId);
-            setMatchingsList(matchRes.data || []);
-        } catch (e: any) {
+            setMatchingsList((matchRes.data || []) as MentoringMatchingAdminResponse[]);
+        } catch (e: unknown) {
             console.error(e);
-            toast.error("데이터 조회 실패: " + (e.message || ""));
+            toast.error(toMessage("messages.dataFetchFailedPrefix", e));
         }
-    }, []);
+    }, [tChat]);
 
     useEffect(() => {
         fetchRecruitList();
@@ -77,13 +92,13 @@ export default function AdminMentoringChatPage() {
     const recruitmentColumns = useMemo<TableColumn<MentoringRecruitment>[]>(
         () => [
             {
-                header: "학기",
+                header: tRecruitTable("headers.semester"),
                 field: "semesterId",
-                render: (r) => semesterOptions.find(opt => opt.value === String(r.semesterId))?.label || `${r.semesterId}학기`
+                render: (r) => semesterOptions.find((opt) => opt.value === String(r.semesterId))?.label || tCommon("semesterFallback", { id: r.semesterId })
             },
-            { header: "제목", field: "title" },
+            { header: tRecruitTable("headers.title"), field: "title" },
             {
-                header: "모집기간",
+                header: tRecruitTable("headers.period"),
                 field: "recruitStartAt",
                 render: (r) => {
                     const format = (dt: string) => dt ? dt.replace("T", " ").substring(0, 16) : "-";
@@ -91,40 +106,40 @@ export default function AdminMentoringChatPage() {
                 }
             },
             {
-                header: "상태",
+                header: tRecruitTable("headers.status"),
                 field: "status",
                 render: (r) => {
-                    if (r.status === "DRAFT") return <StatusPill status="DRAFT" label="DRAFT" />;
-                    if (r.status === "CLOSED") return <StatusPill status="INACTIVE" label="CLOSED" />;
+                    if (r.status === "DRAFT") return <StatusPill status="DRAFT" label={getRecruitmentStatusLabel("DRAFT")} />;
+                    if (r.status === "CLOSED") return <StatusPill status="INACTIVE" label={getRecruitmentStatusLabel("CLOSED")} />;
 
                     const now = new Date();
                     const start = new Date(r.recruitStartAt);
                     const end = new Date(r.recruitEndAt);
 
                     if (now < start) {
-                        return <StatusPill status="DRAFT" label="DRAFT" />;
+                        return <StatusPill status="DRAFT" label={getRecruitmentStatusLabel("DRAFT")} />;
                     } else if (now >= start && now <= end) {
-                        return <StatusPill status="ACTIVE" label="OPEN" />;
+                        return <StatusPill status="ACTIVE" label={getRecruitmentStatusLabel("OPEN")} />;
                     } else {
-                        return <StatusPill status="INACTIVE" label="CLOSED" />;
+                        return <StatusPill status="INACTIVE" label={getRecruitmentStatusLabel("CLOSED")} />;
                     }
                 }
-            },
+            }
         ],
-        [semesterOptions]
+        [semesterOptions, tCommon, tRecruitTable]
     );
 
-    const STATUS_OPTIONS = [
-        { value: "ALL", label: "전체 상태" },
-        { value: "DRAFT", label: "작성중 (DRAFT)" },
-        { value: "OPEN", label: "모집중 (OPEN)" },
-        { value: "CLOSED", label: "마감 (CLOSED)" },
+    const statusOptions = [
+        { value: "ALL", label: tCommon("statusOption.ALL") },
+        { value: "DRAFT", label: tCommon("statusOption.DRAFT") },
+        { value: "OPEN", label: tCommon("statusOption.OPEN") },
+        { value: "CLOSED", label: tCommon("statusOption.CLOSED") }
     ];
 
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <h1 className={styles.title}>멘토링 채팅 내역 확인</h1>
+                <h1 className={styles.title}>{tChat("title")}</h1>
 
                 <div className={styles.searchRow}>
                     <div className={styles.searchGroup}>
@@ -135,10 +150,11 @@ export default function AdminMentoringChatPage() {
                                     setStatusFilter(val);
                                     setPage(1);
                                 }}
-                                options={STATUS_OPTIONS}
-                                placeholder="상태 선택"
+                                options={statusOptions}
+                                placeholder={tChat("search.statusPlaceholder")}
                                 clearable={false}
                                 showPlaceholder={false}
+                                className={styles.dropdownFit}
                             />
                         </div>
                         <div className={styles.searchBarWrap}>
@@ -146,14 +162,14 @@ export default function AdminMentoringChatPage() {
                                 value={keywordInput}
                                 onChange={setKeywordInput}
                                 onSearch={fetchRecruitList}
-                                placeholder="모집 공고 제목 검색"
+                                placeholder={tChat("search.keywordPlaceholder")}
+                                className={styles.searchBarFit}
                             />
                         </div>
                     </div>
                 </div>
 
                 <div className={styles.section}>
-
                     <div className={styles.tableWrap}>
                         <Table
                             columns={recruitmentColumns}
@@ -161,7 +177,7 @@ export default function AdminMentoringChatPage() {
                             rowKey={(r) => r.recruitmentId}
                             loading={loading || semesterLoading}
                             skeletonRowCount={5}
-                            emptyText="모집 공고가 없습니다."
+                            emptyText={tChat("recruitments.emptyText")}
                             onRowClick={(row) => setSelectedRecruitment(row)}
                         />
                     </div>
@@ -179,21 +195,26 @@ export default function AdminMentoringChatPage() {
             {selectedRecruitment && (
                 <div className={styles.section} style={{ marginTop: "40px" }}>
                     <div className={styles.card}>
-                        <h2 className={styles.sectionTitle}>채팅 내역: {selectedRecruitment.title}</h2>
+                        <h2 className={styles.sectionTitle}>
+                            {tChat("sectionTitle", { title: selectedRecruitment.title })}
+                        </h2>
 
-                        {/* Matched List */}
                         <div className={styles.matchedListSection}>
-                            <h3 className={styles.colTitle}>매칭 완료 목록 ({matchingsList.length})</h3>
+                            <h3 className={styles.colTitle}>
+                                {tChat("columns.matchedListTitle", { count: matchingsList.length })}
+                            </h3>
                             <div className={styles.cardListHorizontal}>
-                                {matchingsList.length === 0 && <div className={styles.emptyMsg}>아직 매칭된 건이 없습니다.</div>}
-                                {matchingsList.map(m => (
+                                {matchingsList.length === 0 && (
+                                    <div className={styles.emptyMsg}>{tChat("columns.emptyMatchedList")}</div>
+                                )}
+                                {matchingsList.map((m) => (
                                     <div key={m.matchingId} className={styles.userCardSimple}>
                                         <div className={styles.cardHeader}>
                                             <span className={styles.cardName}>{m.mentorName} &amp; {m.menteeName}</span>
-                                            <span className={styles.matchedBadge}>매칭완료</span>
+                                            <span className={styles.matchedBadge}>{tChat("badges.matchedComplete")}</span>
                                         </div>
                                         <div className={styles.cardInfo}>
-                                            <span>매칭일: {new Date(m.matchedAt).toLocaleDateString()}</span>
+                                            <span>{tChat("labels.matchedAt")}: {new Date(m.matchedAt).toLocaleDateString()}</span>
                                         </div>
                                         <div style={{ marginTop: "12px", textAlign: "right" }}>
                                             <Button
@@ -203,7 +224,7 @@ export default function AdminMentoringChatPage() {
                                                     setChatModalOpen(true);
                                                 }}
                                             >
-                                                채팅 보기
+                                                {tChat("buttons.viewChat")}
                                             </Button>
                                         </div>
                                     </div>
@@ -220,7 +241,7 @@ export default function AdminMentoringChatPage() {
                 matchingId={selectedChat?.matchingId || null}
                 mentorName={selectedChat?.mentorName || ""}
                 menteeName={selectedChat?.menteeName || ""}
-                recruitmentTitle={selectedChat?.recruitmentTitle || ""}
+                recruitmentTitle={selectedChat?.recruitmentTitle || selectedRecruitment?.title || ""}
             />
         </div>
     );

@@ -2,6 +2,7 @@
 
 import { QuestionResponseDto } from "../../api/types";
 import styles from "./StudentSurveyQuestionCard.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
     question: QuestionResponseDto;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function StudentSurveyQuestionCard({ question, response, onResponseChange }: Props) {
+    const t = useI18n("survey.student.questionCard");
     const type = question.questionType || "RATING";
     const q = question;
 
@@ -31,14 +33,14 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
 
             {type === "MULTIPLE_CHOICE" && (
                 <div className={styles.questionTypeLabel}>
-                    (중복 선택 가능)
+                    {t("multiSelectable")}
                 </div>
             )}
 
             {/* RATING */}
             {type === "RATING" && (
                 <div className={styles.options}>
-                    <span className={styles.optionLabel}>{q.minLabel || "비동의"}</span>
+                    <span className={styles.optionLabel}>{q.minLabel || t("rating.minFallback")}</span>
                     <div className={styles.radioGroup}>
                         {[1, 2, 3, 4, 5].filter(v => v >= q.minVal && v <= q.maxVal).map((val) => (
                             <label key={val} className={styles.radioLabel}>
@@ -53,7 +55,7 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
                             </label>
                         ))}
                     </div>
-                    <span className={styles.optionLabel}>{q.maxLabel || "동의"}</span>
+                    <span className={styles.optionLabel}>{q.maxLabel || t("rating.maxFallback")}</span>
                 </div>
             )}
 
@@ -97,7 +99,7 @@ export function StudentSurveyQuestionCard({ question, response, onResponseChange
                         className={styles.textInput}
                         value={response || ""}
                         onChange={(e) => onResponseChange(e.target.value)}
-                        placeholder="답변을 입력해주세요."
+                        placeholder={t("essayPlaceholder")}
                     />
                 </div>
             )}

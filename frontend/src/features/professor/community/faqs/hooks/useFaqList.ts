@@ -24,7 +24,7 @@ export function useFaqList() {
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
     const [keyword, setKeyword] = useState("");
-    const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
+    const [categoryId, setCategoryId] = useState<number | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export function useFaqList() {
                 page,
                 size,
                 keyword: keyword || undefined,
-                categoryId,
+                categoryId: categoryId ?? undefined,
             });
 
             setItems(res.data);
@@ -70,7 +70,7 @@ export function useFaqList() {
         },
         actions: {
             setKeyword,
-            setCategoryId: (id?: number) => {
+            setCategoryId: (id: number | null) => {
                 setPage(1);
                 setCategoryId(id);
             },

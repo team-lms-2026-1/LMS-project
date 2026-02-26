@@ -24,16 +24,31 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    width: min(100%, 760px);
+    min-width: 0;
+    flex-wrap: nowrap;
 }
 
 .dropdownWrap {
-    flex: 0 0 200px;
-    margin-right: -100px;
+    flex: 1 1 240px;
+    min-width: 0;
+    max-width: 320px;
 }
 
 .searchBarWrap {
-    flex: 0 0 360px;
-    min-width: 240px;
+    flex: 1 1 420px;
+    min-width: 0;
+    max-width: 520px;
+}
+
+.dropdownFit {
+    width: 100%;
+    min-width: 0;
+}
+
+.searchBarFit {
+    width: 100% !important;
+    margin-left: 0 !important;
 }
 
 .section {
@@ -444,4 +459,17 @@
     border-radius: 8px;
     background: #f0fdf4;
     min-width: 180px;
+}
+
+@media (max-width: 900px) {
+    .searchGroup {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .dropdownWrap,
+    .searchBarWrap {
+        flex: 1 1 100%;
+        max-width: none;
+    }
 }

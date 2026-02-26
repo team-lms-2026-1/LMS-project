@@ -8,5 +8,38 @@
     "student": "학생",
     "admin": "관리자",
     "professor": "교수"
+  },
+  "alarm": {
+    "title": "알림",
+    "markAllRead": "전체 읽음 처리",
+    "deleteAll": "전체 삭제",
+    "deleteOne": "알림 삭제",
+    "loading": "불러오는 중...",
+    "empty": "알림이 없습니다.",
+    "confirm": {
+      "deleteAll": "알림을 모두 삭제할까요?"
+    },
+    "error": {
+      "load": "알림을 불러오지 못했습니다.",
+      "delete": "알림 삭제에 실패했습니다."
+    },
+    "badge": {
+      "notice": "공지사항",
+      "mentoringNew": "멘토링 신청",
+      "mentoringStatus": "멘토링 결과",
+      "mentoringAnswer": "멘토링 답변",
+      "mentoringChat": "멘토링 채팅",
+      "qnaComment": "Q&A 댓글",
+      "qnaQuestion": "Q&A 질문",
+      "curricularScore": "교과 점수",
+      "curricularGrade": "교과 성적",
+      "diagnosis": "역량 진단",
+      "extraSession": "비교과 회차",
+      "extraVideo": "비교과 영상",
+      "extraCompleted": "비교과 이수",
+      "studyRentalRequest": "학습공간 신청",
+      "studyRentalStatus": "학습공간",
+      "survey": "설문"
+    }
   }
 }

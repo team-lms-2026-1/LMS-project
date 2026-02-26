@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { fetchSurveysList } from "../api/surveysApi";
 import { SurveyListItemDto } from "../api/types";
 import { PageMeta } from "../../curricular/api/types";
+import { useI18n } from "@/i18n/useI18n";
 
 const defaultMeta: PageMeta = {
     page: 1,
@@ -17,6 +18,7 @@ const defaultMeta: PageMeta = {
 };
 
 export function useSurveyList() {
+    const t = useI18n("survey.hooks.list");
     const [items, setItems] = useState<SurveyListItemDto[]>([]);
     const [meta, setMeta] = useState<PageMeta>(defaultMeta);
 
@@ -40,8 +42,8 @@ export function useSurveyList() {
             setError(null);
         } catch (e: any) {
             console.error("[useSurveyList]", e);
-            toast.error(e.message ?? "설문 목록 조회 실패");
-            setError(e.message || "설문 목록 조회 실패");
+            toast.error(e.message ?? t("loadFailed"));
+            setError(e.message || t("loadFailed"));
             setItems([]);
             setMeta(defaultMeta);
         } finally {

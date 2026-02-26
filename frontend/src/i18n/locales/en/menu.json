@@ -144,7 +144,8 @@
         "items": {
           "intro": "What is 6Cs?",
           "students": "Student Competency Activity",
-          "diagnosis": "Competency Diagnosis Management"
+          "diagnosis": "Competency Diagnosis Management",
+          "results": "Competency Result Management"
         }
       },
       "course": {

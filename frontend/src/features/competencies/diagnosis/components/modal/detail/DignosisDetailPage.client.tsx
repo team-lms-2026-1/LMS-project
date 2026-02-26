@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useI18n } from "@/i18n/useI18n";
 import DignosisPageClient from "@/features/competencies/diagnosis/components/list/DignosisPage.client";
 import { DignosisDetailModal } from "./DignosisDetailModal.client";
 import { fetchDiagnosisDetail, fetchDiagnosisDistribution } from "@/features/competencies/diagnosis/api/DiagnosisApi";
@@ -18,14 +19,20 @@ import type {
 } from "@/features/competencies/diagnosis/api/types";
 
 const SCORE_OPTIONS = [1, 2, 3, 4, 5];
-const SCALE_LABELS = ["매우 그렇다", "그렇다", "보통이다", "그렇지 않다", "매우 그렇지 않다"];
+const SCALE_LABELS = [
+  "Strongly Agree",
+  "Agree",
+  "Neutral",
+  "Disagree",
+  "Strongly Disagree",
+];
 const CS_META: Array<{ key: DiagnosisCsKey; label: string }> = [
   { key: "criticalThinking", label: "Critical Thinking" },
   { key: "character", label: "Character" },
   { key: "creativity", label: "Creativity" },
   { key: "communication", label: "Communication" },
   { key: "collaboration", label: "Collaboration" },
-  { key: "convergence", label: "Convergence" },
+  { key: "citizenship", label: "Citizenship" },
 ];
 
 function toDateOnly(value?: string | number | Date | null) {
@@ -111,7 +118,9 @@ function toCsKey(raw?: string) {
   if (key.includes("creativity") || key === "cre" || key === "c5") return "creativity";
   if (key.includes("communication") || key === "com" || key === "c3") return "communication";
   if (key.includes("collaboration") || key === "col" || key === "c4") return "collaboration";
-  if (key.includes("convergence") || key === "conv" || key === "c6") return "convergence";
+  if (key.includes("convergence") || key.includes("citizenship") || key === "conv" || key === "c6") {
+    return "citizenship";
+  }
   return undefined;
 }
 
@@ -122,7 +131,7 @@ function normalizeResponseItem(key: DiagnosisCsKey, raw: any): DiagnosisResponse
   const points = Array.isArray(pointsRaw)
     ? pointsRaw
         .map((p: any, idx: number) => ({
-          name: String(p?.name ?? p?.studentName ?? p?.id ?? `학생${idx + 1}`),
+          name: String(p?.name ?? p?.studentName ?? p?.id ?? `Student ${idx + 1}`),
           score: Number(p?.score ?? p?.value ?? p?.point ?? p?.avgScore ?? 0),
         }))
         .filter((p) => Number.isFinite(p.score))
@@ -220,7 +229,7 @@ function normalizeDistributionStats(raw: any): DiagnosisResponseStats | undefine
     if (!key) return;
     const score = Number(item?.score ?? item?.value ?? item?.point ?? item?.avgScore);
     if (!Number.isFinite(score)) return;
-    const name = String(item?.studentName ?? item?.name ?? item?.studentHash ?? `학생${idx + 1}`);
+    const name = String(item?.studentName ?? item?.name ?? item?.studentHash ?? `Student ${idx + 1}`);
 
     uniqueNames.add(name);
     const points = grouped.get(key) ?? [];
@@ -441,7 +450,8 @@ function mapQuestions(raw?: any[]): DiagnosisQuestion[] {
           q?.c5,
           q?.C5
         ),
-        convergence: pickScore(
+        citizenship: pickScore(
+          cs?.citizenship,
           cs?.convergence,
           cs?.conv,
           weights?.C6,
@@ -588,6 +598,7 @@ function mapDetailValue(raw: any): DiagnosisDetailValue {
 }
 
 export default function DignosisDetailPageClient({ dignosisId }: DiagnosisDetailPageProps) {
+  const t = useI18n("competency.adminDiagnosis.detailPage");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [value, setValue] = useState<DiagnosisDetailValue | undefined>(undefined);
@@ -639,14 +650,14 @@ export default function DignosisDetailPageClient({ dignosisId }: DiagnosisDetail
         });
       } catch (e: any) {
         if (!alive) return;
-        setError(e?.message ?? "진단지 상세를 불러오지 못했습니다.");
+        setError(e?.message ?? t("messages.loadFailed"));
       }
     })();
 
     return () => {
       alive = false;
     };
-  }, [dignosisId, fallbackEndedAt, fallbackStartedAt]);
+  }, [dignosisId, fallbackEndedAt, fallbackStartedAt, t]);
 
   const handleClose = useCallback(() => {
     router.push("/admin/competencies/dignosis");
@@ -675,5 +686,4 @@ export default function DignosisDetailPageClient({ dignosisId }: DiagnosisDetail
     </>
   );
 }
-
 

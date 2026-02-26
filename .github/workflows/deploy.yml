@@ -74,6 +74,17 @@ jobs:
               -e AWS_ACCESS_KEY_ID=${{ secrets.MY_AWS_ACCESS_KEY }} \
               -e AWS_SECRET_ACCESS_KEY=${{ secrets.MY_AWS_SECRET_KEY }} \
               -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e SMTP_HOST=smtp.gmail.com \
+              -e SMTP_PORT=587 \
+              -e SMTP_USER=${{ secrets.SMTP_USER }} \
+              -e SMTP_PASS=${{ secrets.SMTP_PASS }} \
+              -e SMTP_AUTH=true \
+              -e SMTP_STARTTLS=true \
+              -e SMTP_STARTTLS_REQUIRED=true \
+              -e PASSWORD_RESET_LINK_TEMPLATE="https://teamlms.duckdns.org/password-reset?token=%s" \
+              -e PASSWORD_RESET_MAIL_SUBJECT="[LMS] 비밀번호 재설정" \
+              -e PASSWORD_RESET_MAIL_FROM=${{ secrets.SMTP_USER }} \
+              -e PASSWORD_RESET_TOKEN_TTL_SECONDS=1800 \
               eclipse-temurin:17-jdk-jammy \
               java -Xms384m -Xmx384m -jar /app.jar
             

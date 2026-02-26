@@ -21,10 +21,16 @@ import com.teamlms.backend.domain.mentoring.repository.MentoringMatchingReposito
 import com.teamlms.backend.domain.mentoring.repository.MentoringRecruitmentRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringQuestionRepository;
 import com.teamlms.backend.domain.mentoring.repository.MentoringAnswerRepository;
+import com.teamlms.backend.domain.mentoring.enums.MentoringRole;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
+import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class MentoringCommandService {
 
     private final MentoringRecruitmentRepository recruitmentRepository;
     private final MentoringApplicationRepository applicationRepository;
+    private final AlarmCommandService alarmCommandService;
 
     public Long createRecruitment(MentoringRecruitmentCreateRequest request) {
         LocalDateTime now = LocalDateTime.now();
@@ -87,7 +94,7 @@ public class MentoringCommandService {
         MentoringRecruitment recruitment = recruitmentRepository.findById(recruitmentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
 
-        // 1. 매칭 및 하위 데이터(Q&A) 삭제
+        // 1. Remove matchings and Q&A data
         java.util.List<MentoringMatching> matchings = matchingRepository.findAllByRecruitmentId(recruitmentId);
         if (!matchings.isEmpty()) {
             java.util.List<Long> matchingIds = matchings.stream().map(MentoringMatching::getMatchingId).toList();
@@ -101,17 +108,17 @@ public class MentoringCommandService {
             matchingRepository.deleteAll(matchings);
         }
 
-        // 2. 신청 내역 삭제
+        // 2. Remove applications
         applicationRepository.deleteAllByRecruitmentId(recruitmentId);
 
-        // 3. 모집 공고 삭제
+        // 3. Remove recruitment
         recruitmentRepository.delete(recruitment);
     }
 
     private final com.teamlms.backend.domain.account.repository.AccountRepository accountRepository;
 
     public void applyMentoring(Long accountId, MentoringApplicationRequest request) {
-        // [검증] 계정 타입과 신청 역할의 일치 여부 확인
+        // Validate account role matches application role
         com.teamlms.backend.domain.account.entity.Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
 
@@ -124,7 +131,7 @@ public class MentoringCommandService {
             throw new BusinessException(ErrorCode.MENTORING_INVALID_ROLE_APPLICATION);
         }
 
-        // [검증] 모집 기간 확인
+        // Validate recruitment period
         MentoringRecruitment recruitment = recruitmentRepository.findById(request.getRecruitmentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_RECRUITMENT_NOT_FOUND));
 
@@ -133,7 +140,7 @@ public class MentoringCommandService {
             throw new BusinessException(ErrorCode.MENTORING_NOT_OPEN);
         }
 
-        // [검증] 중복 신청 여부 확인
+        // Validate duplicate application
         if (applicationRepository.existsByRecruitmentIdAndAccountIdAndRole(
                 request.getRecruitmentId(), accountId, request.getRole())) {
             throw new BusinessException(ErrorCode.MENTORING_APPLICATION_ALREADY_EXISTS);
@@ -148,7 +155,8 @@ public class MentoringCommandService {
                 .applyReason(request.getReason())
                 .build();
 
-        applicationRepository.save(application);
+        MentoringApplication savedApplication = applicationRepository.save(application);
+        notifyNewApplication(savedApplication, recruitment, account);
     }
 
     private final MentoringMatchingRepository matchingRepository;
@@ -158,6 +166,7 @@ public class MentoringCommandService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
 
         java.util.List<MentoringMatching> matchingsToSave = new java.util.ArrayList<>();
+        java.util.List<MentoringApplication> menteeApps = new java.util.ArrayList<>();
         
         for (Long menteeId : request.getMenteeApplicationIds()) {
             MentoringApplication menteeApp = applicationRepository.findById(menteeId)
@@ -178,10 +187,16 @@ public class MentoringCommandService {
 
             matchingsToSave.add(matching);
             menteeApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
+            menteeApps.add(menteeApp);
         }
 
         matchingRepository.saveAll(matchingsToSave);
         mentorApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
+
+        notifyApplicationStatus(mentorApp);
+        for (MentoringApplication menteeApp : menteeApps) {
+            notifyApplicationStatus(menteeApp);
+        }
     }
 
     private final MentoringQuestionRepository questionRepository;
@@ -194,16 +209,31 @@ public class MentoringCommandService {
 
 
         MentoringApplicationStatus newStatus = request.getStatus();
-        if (newStatus == MentoringApplicationStatus.REJECTED
-                && (request.getRejectReason() == null || request.getRejectReason().isBlank())) {
+        MentoringApplicationStatus currentStatus = application.getStatus();
+        String currentReason = normalizeReason(application.getRejectReason());
+        String nextReason = normalizeReason(request.getRejectReason());
+        boolean shouldNotify = true;
+
+        if (currentStatus == newStatus) {
+            if (newStatus != MentoringApplicationStatus.REJECTED || Objects.equals(currentReason, nextReason)) {
+                return;
+            }
+            shouldNotify = false;
+        }
+
+        if (newStatus == MentoringApplicationStatus.REJECTED && nextReason == null) {
             throw new BusinessException(ErrorCode.MENTORING_REJECT_REASON_REQUIRED);
         }
 
-        application.updateStatus(newStatus, request.getRejectReason(), adminId);
+        application.updateStatus(newStatus, nextReason, adminId);
+
+        if (shouldNotify) {
+            notifyApplicationStatus(application);
+        }
     }
 
     public void createQuestion(Long writerId, MentoringQuestionRequest request) {
-        // [검증] 질문은 참여자(멘토 또는 멘티)만 등록 가능
+        // Only participants (mentor/mentee) can create questions
         MentoringMatching matching = matchingRepository.findById(request.getMatchingId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_MATCHING_NOT_FOUND));
 
@@ -222,10 +252,13 @@ public class MentoringCommandService {
                 .build();
 
         questionRepository.save(question);
+
+        Long recipientId = resolveChatRecipient(mentorApp, menteeApp, writerId);
+        sendMentoringChatAlarm(recipientId, matching.getMatchingId(), writerId);
     }
 
     public void createAnswer(Long writerId, MentoringAnswerRequest request) {
-        // [검증] 답변은 멘토만 등록 가능
+        // Only mentors can create answers
         MentoringQuestion question = questionRepository.findById(request.getQuestionId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_QUESTION_NOT_FOUND));
 
@@ -245,5 +278,146 @@ public class MentoringCommandService {
                 .build();
 
         answerRepository.save(answer);
+        sendMentoringChatAlarm(question.getCreatedBy(), matching.getMatchingId(), writerId);
+    }
+
+    private void notifyNewApplication(MentoringApplication application, MentoringRecruitment recruitment,
+            Account applicant) {
+        java.util.List<Account> admins = accountRepository.findAllByAccountType(AccountType.ADMIN);
+        if (admins.isEmpty()) {
+            return;
+        }
+
+        String applicantName = applicant != null && applicant.getLoginId() != null
+                ? applicant.getLoginId()
+                : "User";
+        String recruitmentTitle = recruitment != null ? recruitment.getTitle() : null;
+        boolean hasRecruitment = recruitmentTitle != null && !recruitmentTitle.isBlank();
+
+        String titleKey = "mentoring.alarm.title";
+        String messageKey;
+        Object[] messageArgs;
+
+        if (application.getRole() == MentoringRole.MENTOR) {
+            if (hasRecruitment) {
+                messageKey = "mentoring.alarm.application.new.mentor";
+                messageArgs = new Object[] { applicantName, recruitmentTitle };
+            } else {
+                messageKey = "mentoring.alarm.application.new.mentor.no_recruitment";
+                messageArgs = new Object[] { applicantName };
+            }
+        } else {
+            if (hasRecruitment) {
+                messageKey = "mentoring.alarm.application.new.mentee";
+                messageArgs = new Object[] { applicantName, recruitmentTitle };
+            } else {
+                messageKey = "mentoring.alarm.application.new.mentee.no_recruitment";
+                messageArgs = new Object[] { applicantName };
+            }
+        }
+        String linkUrl = "/admin/mentoring/recruitments/" + recruitment.getRecruitmentId() + "/applications";
+
+        for (Account admin : admins) {
+            alarmCommandService.createAlarmI18n(
+                    admin.getAccountId(),
+                    AlarmType.MENTORING_NEW_APPLICATION,
+                    titleKey,
+                    messageKey,
+                    messageArgs,
+                    linkUrl,
+                    null,
+                    null);
+        }
+    }
+
+    private void notifyApplicationStatus(MentoringApplication application) {
+        Long recipientId = application.getAccountId();
+        if (recipientId == null) {
+            return;
+        }
+
+        String titleKey = "mentoring.alarm.title";
+        String messageKey;
+        Object[] messageArgs = null;
+
+        switch (application.getStatus()) {
+            case APPROVED -> messageKey = "mentoring.alarm.application.approved";
+            case REJECTED -> {
+                String reason = application.getRejectReason();
+                if (reason == null || reason.isBlank()) {
+                    messageKey = "mentoring.alarm.application.rejected";
+                } else {
+                    messageKey = "mentoring.alarm.application.rejected.reason";
+                    messageArgs = new Object[] { reason };
+                }
+            }
+            case MATCHED -> messageKey = "mentoring.alarm.application.matched";
+            case CANCELED -> messageKey = "mentoring.alarm.application.canceled";
+            case APPLIED -> messageKey = "mentoring.alarm.application.applied";
+            default -> messageKey = "mentoring.alarm.application.applied";
+        }
+
+        String linkUrl = "/mentoring/recruitments/" + application.getRecruitmentId();
+
+        alarmCommandService.createAlarmI18n(
+                recipientId,
+                AlarmType.MENTORING_APPLICATION_STATUS,
+                titleKey,
+                messageKey,
+                messageArgs,
+                linkUrl,
+                null,
+                null);
+    }
+
+    private Long resolveChatRecipient(MentoringApplication mentorApp, MentoringApplication menteeApp, Long senderId) {
+        if (senderId == null || mentorApp == null || menteeApp == null) {
+            return null;
+        }
+
+        Long mentorId = mentorApp.getAccountId();
+        Long menteeId = menteeApp.getAccountId();
+
+        if (senderId.equals(mentorId)) {
+            return menteeId;
+        }
+        if (senderId.equals(menteeId)) {
+            return mentorId;
+        }
+        return null;
+    }
+
+    private void sendMentoringChatAlarm(Long recipientId, Long matchingId, Long senderId) {
+        if (recipientId == null || senderId == null || recipientId.equals(senderId)) {
+            return;
+        }
+
+        String titleKey = "mentoring.alarm.title";
+        String messageKey = "mentoring.alarm.chat.message";
+        String linkUrl = "/mentoring/matchings/" + matchingId + "/chat";
+
+        alarmCommandService.createAlarmI18n(
+                recipientId,
+                AlarmType.MENTORING_CHAT_MESSAGE,
+                titleKey,
+                messageKey,
+                null,
+                linkUrl,
+                null,
+                null);
+    }
+
+    private String normalizeReason(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }
+
+
+
+
+
+

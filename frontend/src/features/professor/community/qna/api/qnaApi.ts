@@ -1,10 +1,11 @@
 import { getJson } from "@/lib/http";
-import { QnaListResponse, QnaDetailResponse } from "./types";
+import { QnaCategoryListResponse, QnaDetailResponse, QnaListResponse } from "./types";
 
 export type QnaListQuery = {
     page?: number;
     size?: number;
     keyword?: string;
+    categoryId?: number;
 };
 
 export async function fetchQnaList(query: QnaListQuery) {
@@ -12,6 +13,7 @@ export async function fetchQnaList(query: QnaListQuery) {
     if (query.page) sp.set("page", String(query.page));
     if (query.size) sp.set("size", String(query.size));
     if (query.keyword) sp.set("keyword", query.keyword);
+    if (typeof query.categoryId === "number") sp.set("categoryId", String(query.categoryId));
 
     const qs = sp.toString();
     const url = qs
@@ -19,6 +21,10 @@ export async function fetchQnaList(query: QnaListQuery) {
         : `/api/professor/community/qna/questions`;
 
     return getJson<QnaListResponse>(url);
+}
+
+export async function fetchQnaCategories() {
+    return getJson<QnaCategoryListResponse>(`/api/professor/community/qna/categories`);
 }
 
 export async function fetchQnaDetail(questionId: number) {

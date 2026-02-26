@@ -1,8 +1,9 @@
 "use client";
 
+import { useI18n } from "@/i18n/useI18n";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
-import styles from "./DignosisDeleteModal.module.css";
 import type { DiagnosisDeleteModalProps } from "@/features/competencies/diagnosis/api/types";
+import styles from "./DignosisDeleteModal.module.css";
 
 export default function DignosisDeleteModal({
   open,
@@ -11,30 +12,24 @@ export default function DignosisDeleteModal({
   onClose,
   loading = false,
 }: DiagnosisDeleteModalProps) {
+  const t = useI18n("competency.adminDiagnosis.list.deleteModal");
+
   return (
     <ConfirmDialog
       open={open}
-      title="진단지 삭제"
+      title={t("title")}
       danger
       loading={loading}
-      confirmText="삭제"
-      cancelText="취소"
+      confirmText={t("confirmText")}
+      cancelText={t("cancelText")}
       onConfirm={onConfirm}
       onCancel={onClose}
       description={
         <div className={styles.desc}>
           <p className={styles.main}>
-            {targetTitle ? (
-              <>
-                <b className={styles.emph}>&quot;{targetTitle}&quot;</b>
-                <br />
-                진단지를 삭제하시겠습니까?
-              </>
-            ) : (
-              <>진단지를 삭제하시겠습니까?</>
-            )}
+            {targetTitle ? t("questionWithTitle", { title: targetTitle }) : t("question")}
           </p>
-          <p className={styles.sub}>삭제된 진단지는 복구할 수 없습니다.</p>
+          <p className={styles.sub}>{t("sub")}</p>
         </div>
       }
     />

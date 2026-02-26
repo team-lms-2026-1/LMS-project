@@ -7,13 +7,17 @@ import { FaqListItemDto } from "../api/types";
 import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
-  items: FaqListItemDto[];
-  loading: boolean;
+    items: FaqListItemDto[];
+    loading: boolean;
 };
 
 export function FaqTable({ items, loading }: Props) {
-  const router = useRouter();
-  const t = useI18n("community.faqs.professor.table");
+    const router = useRouter();
+    const t = useI18n("community.faqs.professor.table");
+
+  const goDetail = (id: number) => {
+    router.push(`/professor/community/faqs/${id}`);
+  };
 
   const columns: Array<TableColumn<FaqListItemDto>> = [
     { header: t("headers.id"), align: "center", render: (r) => r.faqId },
@@ -34,7 +38,14 @@ export function FaqTable({ items, loading }: Props) {
       header: t("headers.title"),
       align: "center",
       render: (r) => (
-        <button type="button" className={styles.titleLink} onClick={() => router.push(`/professor/community/faqs/${r.faqId}`)}>
+        <button
+          type="button"
+          className={styles.titleLink}
+          onClick={(e) => {
+            e.stopPropagation();
+            goDetail(r.faqId);
+          }}
+        >
           {r.title}
         </button>
       ),
@@ -51,6 +62,8 @@ export function FaqTable({ items, loading }: Props) {
       skeletonRowCount={10}
       rowKey={(r) => r.faqId}
       emptyText={t("emptyText")}
+      rowClassName={styles.rowTall}
+      onRowClick={(r) => goDetail(r.faqId)}
     />
   );
 }

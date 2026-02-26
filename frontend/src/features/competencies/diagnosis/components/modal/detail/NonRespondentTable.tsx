@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { Table, type TableColumn } from "@/components/table";
+import { useI18n } from "@/i18n/useI18n";
 import type {
   DiagnosisNonRespondentItem,
   NonRespondentTableProps,
@@ -12,28 +13,23 @@ export function NonRespondentTable({
   loading = false,
   startIndex = 0,
 }: NonRespondentTableProps) {
+  const t = useI18n("competency.adminDiagnosis.nonRespondentModal.table");
   const columns: Array<TableColumn<DiagnosisNonRespondentItem>> = [
     {
-      header: "NO",
+      header: t("headers.no"),
       width: 70,
       align: "center",
       render: (_row, idx) => startIndex + idx + 1,
     },
     {
-      header: "학번",
+      header: t("headers.studentNumber"),
       align: "center",
       render: (row) => row.studentNumber ?? "-",
     },
     {
-      header: "이름",
+      header: t("headers.name"),
       align: "center",
       render: (row) => row.name ?? "-",
-    },
-    {
-      header: "이메일",
-      align: "center",
-      cellClassName: styles.emailCell,
-      render: (row) => row.email ?? "-",
     },
   ];
 
@@ -44,7 +40,7 @@ export function NonRespondentTable({
       loading={loading}
       skeletonRowCount={10}
       rowKey={(row, idx) => row.id ?? `${startIndex + idx}`}
-      emptyText="미실시 학생이 없습니다."
+      emptyText={t("emptyText")}
     />
   );
 }

@@ -1,0 +1,243 @@
+{
+  "common": {
+    "types": {
+      "SATISFACTION": "満足度調査",
+      "COURSE": "授業アンケート",
+      "SERVICE": "サービス利用調査",
+      "ETC": "その他"
+    },
+    "status": {
+      "DRAFT": "作成中",
+      "OPEN": "実施中",
+      "CLOSED": "終了"
+    },
+    "questionTypes": {
+      "short": {
+        "RATING": "尺度型",
+        "SINGLE_CHOICE": "単一選択",
+        "MULTIPLE_CHOICE": "複数選択",
+        "ESSAY": "記述式"
+      },
+      "long": {
+        "RATING": "尺度型 (点数)",
+        "SINGLE_CHOICE": "選択式 (単一選択)",
+        "MULTIPLE_CHOICE": "選択式 (複数選択)",
+        "ESSAY": "記述式 (自由回答)"
+      }
+    }
+  },
+  "hooks": {
+    "list": {
+      "loadFailed": "アンケート一覧の取得に失敗しました。"
+    },
+    "detail": {
+      "defaults": {
+        "minLabel": "まったくそう思わない",
+        "maxLabel": "とてもそう思う"
+      },
+      "messages": {
+        "loadFailed": "データの読み込みに失敗しました。",
+        "saveSuccess": "保存しました。",
+        "saveFailed": "保存に失敗しました。"
+      },
+      "validation": {
+        "titleRequired": "タイトルを入力してください。",
+        "questionRequired": "質問を1つ以上追加してください。",
+        "questionTextRequired": "{index}番の質問内容を入力してください。",
+        "choiceOptionRequired": "{index}番の質問に選択肢を1つ以上追加してください。",
+        "choiceOptionTextRequired": "{index}番の質問の{optionIndex}番選択肢内容を入力してください。",
+        "targetDeptRequired": "対象学科を1つ以上選択してください。",
+        "targetGradeRequired": "対象学年を1つ以上選択してください。",
+        "deptRequired": "学科を選択してください。",
+        "gradeRequired": "学年を選択してください。"
+      }
+    }
+  },
+  "admin": {
+    "list": {
+      "title": "アンケート統合管理",
+      "placeholders": {
+        "typeAll": "全タイプ",
+        "keyword": "アンケートタイトル検索"
+      },
+      "buttons": {
+        "newSurvey": "新規アンケート登録"
+      },
+      "confirmDelete": {
+        "title": "アンケート削除",
+        "message": "このアンケートを削除しますか？関連する回答データもすべて削除されます。"
+      },
+      "messages": {
+        "deleteSuccess": "削除しました。",
+        "deleteFailed": "削除に失敗しました。"
+      }
+    },
+    "table": {
+      "headers": {
+        "no": "番号",
+        "type": "タイプ",
+        "title": "タイトル",
+        "views": "閲覧数",
+        "createdAt": "作成日",
+        "period": "期間",
+        "status": "状態",
+        "manage": "管理"
+      },
+      "buttons": {
+        "edit": "修正",
+        "delete": "削除"
+      },
+      "empty": "アンケートがありません。"
+    },
+    "results": {
+      "title": "アンケート結果統計",
+      "placeholders": {
+        "typeAll": "全タイプ",
+        "keyword": "アンケートタイトル検索"
+      },
+      "table": {
+        "result": "結果",
+        "resultButton": "結果統計"
+      }
+    },
+    "detail": {
+      "titleNew": "新規アンケート登録",
+      "titleEdit": "アンケート修正",
+      "backToList": "一覧へ →",
+      "sections": {
+        "basicInfo": "基本情報",
+        "target": "対象設定",
+        "questions": "質問構成"
+      },
+      "fields": {
+        "surveyType": "アンケートタイプ",
+        "title": "アンケートタイトル",
+        "startAt": "開始日時",
+        "endAt": "終了日時"
+      },
+      "placeholders": {
+        "typeSelect": "タイプ選択",
+        "title": "アンケートタイトルを入力してください。",
+        "startDate": "開始日選択",
+        "endDate": "終了日選択"
+      },
+      "buttons": {
+        "addQuestion": "質問追加",
+        "submitNew": "アンケート登録完了",
+        "submitEdit": "アンケート修正完了"
+      }
+    },
+    "targetSelector": {
+      "targetType": {
+        "ALL": "全体対象",
+        "DEPT": "学科別",
+        "GRADE": "学年別",
+        "DEPT_GRADE": "直接指定 (学科+学年)"
+      },
+      "guides": {
+        "dept": "対象となる学科を選択してください。",
+        "deptStep1": "1. 対象となる学科を選択してください。",
+        "grade": "対象学年を選択してください。",
+        "gradeStep2": "2. 対象となる学年を選択してください。"
+      },
+      "noDeptSelected": "選択された学科がありません。",
+      "gradeLabel": "{grade}年",
+      "deptFallback": "学科 {id}"
+    },
+    "questionCard": {
+      "placeholderQuestion": "質問を入力してください",
+      "placeholders": {
+        "minLabel": "最小ラベル (例: まったくそう思わない)",
+        "maxLabel": "最大ラベル (例: とてもそう思う)",
+        "option": "選択肢 {index}",
+        "essayPreview": "記述回答入力エリア (プレビュー)"
+      },
+      "scale": {
+        "minFallback": "最小",
+        "maxFallback": "最大"
+      },
+      "buttons": {
+        "delete": "削除",
+        "addOption": "+ 選択肢追加"
+      }
+    },
+    "stats": {
+      "loading": "統計情報を読み込み中...",
+      "errorNotFound": "統計情報が見つかりません。",
+      "titleSuffix": "結果分析",
+      "backToList": "一覧へ →",
+      "meta": {
+        "createdAt": "作成日:",
+        "period": "実施期間:"
+      },
+      "cards": {
+        "totalTargets": "対象者総数",
+        "submitted": "回答完了",
+        "responseRate": "回答率"
+      },
+      "chart": {
+        "noData": "データなし",
+        "byDept": "学科別統計",
+        "byGrade": "学年別統計",
+        "deptRatio": "学科別参加率",
+        "gradeRatio": "学年別参加率"
+      },
+      "questions": {
+        "noData": "設問データが見つかりません。",
+        "sectionTitle": "設問別回答詳細",
+        "noEssay": "回答がありません。",
+        "responseCount": "回答数"
+      }
+    }
+  },
+  "student": {
+    "list": {
+      "title": "実施中アンケート",
+      "placeholders": {
+        "typeAll": "全タイプ",
+        "keyword": "アンケートタイトル検索"
+      },
+      "table": {
+        "headers": {
+          "no": "番号",
+          "type": "タイプ",
+          "title": "タイトル",
+          "deadline": "締切",
+          "action": "参加"
+        },
+        "buttons": {
+          "done": "完了",
+          "participate": "参加する"
+        },
+        "empty": "アンケートがありません。"
+      },
+      "messages": {
+        "loadFailed": "アンケート一覧の読み込みに失敗しました。"
+      }
+    },
+    "detail": {
+      "loading": "アンケート情報を読み込み中...",
+      "errorNotFound": "アンケート情報が見つかりません。",
+      "period": "期間: {start} ~ {end}",
+      "submitButton": "提出する",
+      "confirm": {
+        "title": "アンケート提出",
+        "message": "提出後は修正できません。提出しますか？"
+      },
+      "messages": {
+        "loadFailed": "アンケートを読み込めません。",
+        "requiredMissing": "必須項目にすべて回答してください。",
+        "submitSuccess": "提出しました。ありがとうございます！",
+        "submitFailed": "提出に失敗しました。"
+      }
+    },
+    "questionCard": {
+      "multiSelectable": "(複数選択可)",
+      "rating": {
+        "minFallback": "不同意",
+        "maxFallback": "同意"
+      },
+      "essayPlaceholder": "回答を入力してください。"
+    }
+  }
+}

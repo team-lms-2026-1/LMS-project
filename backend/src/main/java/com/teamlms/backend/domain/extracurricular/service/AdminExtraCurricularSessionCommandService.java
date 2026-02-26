@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.extracurricular.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.stereotype.Service;
@@ -11,15 +12,18 @@ import com.teamlms.backend.domain.extracurricular.api.dto.ExtraCurricularSession
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularOffering;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSession;
 import com.teamlms.backend.domain.extracurricular.entity.ExtraCurricularSessionVideo;
+import com.teamlms.backend.domain.extracurricular.enums.ExtraApplicationApplyStatus;
 import com.teamlms.backend.domain.extracurricular.enums.ExtraOfferingStatus;
 import com.teamlms.backend.domain.extracurricular.enums.ExtraSessionStatus;
+import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularApplicationRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularOfferingRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionCompletionRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionRepository;
 import com.teamlms.backend.domain.extracurricular.repository.ExtraCurricularSessionVideoRepository;
+import com.teamlms.backend.domain.alarm.enums.AlarmType;
+import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,6 +34,8 @@ public class AdminExtraCurricularSessionCommandService {
     private final ExtraCurricularSessionRepository sessionRepository;
     private final ExtraCurricularSessionVideoRepository videoRepository;
     private final ExtraCurricularSessionCompletionRepository completionRepository;
+    private final ExtraCurricularApplicationRepository applicationRepository;
+    private final AlarmCommandService alarmCommandService;
 
     @Transactional
     public void create(Long offeringId, ExtraCurricularSessionCreateRequest req) {
@@ -94,6 +100,8 @@ public class AdminExtraCurricularSessionCommandService {
             .videoUrl(null)
             .build();
         videoRepository.save(video);
+
+        notifySessionCreated(offering, session);
     }
 
     @Transactional
@@ -160,6 +168,7 @@ public class AdminExtraCurricularSessionCommandService {
 
         if (videoChanged) {
             completionRepository.deleteAllBySessionId(sessionId);
+            notifySessionVideoUploaded(offering, session);
         }
     }
 
@@ -191,5 +200,119 @@ public class AdminExtraCurricularSessionCommandService {
         if (targetStatus == ExtraSessionStatus.CANCELED) {
             completionRepository.deleteAllBySessionId(sessionId);
         }
+    }
+
+    private void notifySessionCreated(ExtraCurricularOffering offering, ExtraCurricularSession session) {
+        if (offering == null || session == null) {
+            return;
+        }
+
+        List<Long> studentAccountIds = applicationRepository.findStudentAccountIdsByOfferingAndApplyStatus(
+                offering.getExtraOfferingId(),
+                ExtraApplicationApplyStatus.APPLIED
+        );
+        if (studentAccountIds.isEmpty()) {
+            return;
+        }
+
+        String offeringName = normalizeName(offering.getExtraOfferingName());
+        String sessionName = normalizeName(session.getSessionName());
+
+        boolean hasOffering = offeringName != null && !offeringName.isBlank();
+        boolean hasSession = sessionName != null && !sessionName.isBlank();
+
+        String titleKey = "extra.curricular.session.alarm.created.title";
+        String messageKey;
+        Object[] messageArgs = null;
+
+        if (hasOffering && hasSession) {
+            messageKey = "extra.curricular.session.alarm.created.message";
+            messageArgs = new Object[] { offeringName, sessionName };
+        } else if (!hasOffering && hasSession) {
+            messageKey = "extra.curricular.session.alarm.created.message.no_offering";
+            messageArgs = new Object[] { sessionName };
+        } else if (hasOffering && !hasSession) {
+            messageKey = "extra.curricular.session.alarm.created.message.no_session";
+            messageArgs = new Object[] { offeringName };
+        } else {
+            messageKey = "extra.curricular.session.alarm.created.message.no_offering_session";
+        }
+        String linkUrl = "/extra-curricular/offerings/" + offering.getExtraOfferingId();
+
+        for (Long studentAccountId : studentAccountIds) {
+            if (studentAccountId == null) {
+                continue;
+            }
+
+            alarmCommandService.createAlarmI18n(
+                    studentAccountId,
+                    AlarmType.EXTRA_SESSION_CREATED,
+                    titleKey,
+                    messageKey,
+                    messageArgs,
+                    linkUrl,
+                    null,
+                    null
+            );
+        }
+    }
+
+    private void notifySessionVideoUploaded(ExtraCurricularOffering offering, ExtraCurricularSession session) {
+        if (offering == null || session == null) {
+            return;
+        }
+
+        List<Long> studentAccountIds = applicationRepository.findStudentAccountIdsByOfferingAndApplyStatus(
+                offering.getExtraOfferingId(),
+                ExtraApplicationApplyStatus.APPLIED
+        );
+        if (studentAccountIds.isEmpty()) {
+            return;
+        }
+
+        String offeringName = normalizeName(offering.getExtraOfferingName());
+        String sessionName = normalizeName(session.getSessionName());
+
+        boolean hasOffering = offeringName != null && !offeringName.isBlank();
+        boolean hasSession = sessionName != null && !sessionName.isBlank();
+
+        String titleKey = "extra.curricular.session.alarm.video.title";
+        String messageKey;
+        Object[] messageArgs = null;
+
+        if (hasOffering && hasSession) {
+            messageKey = "extra.curricular.session.alarm.video.message";
+            messageArgs = new Object[] { offeringName, sessionName };
+        } else if (!hasOffering && hasSession) {
+            messageKey = "extra.curricular.session.alarm.video.message.no_offering";
+            messageArgs = new Object[] { sessionName };
+        } else if (hasOffering && !hasSession) {
+            messageKey = "extra.curricular.session.alarm.video.message.no_session";
+            messageArgs = new Object[] { offeringName };
+        } else {
+            messageKey = "extra.curricular.session.alarm.video.message.no_offering_session";
+        }
+        String linkUrl = "/extra-curricular/offerings/" + offering.getExtraOfferingId();
+
+        for (Long studentAccountId : studentAccountIds) {
+            if (studentAccountId == null) {
+                continue;
+            }
+
+            alarmCommandService.createAlarmI18n(
+                    studentAccountId,
+                    AlarmType.EXTRA_SESSION_VIDEO_UPLOADED,
+                    titleKey,
+                    messageKey,
+                    messageArgs,
+                    linkUrl,
+                    null,
+                    null
+            );
+        }
+    }
+
+    private String normalizeName(String value) {
+        return value == null ? null : value.trim();
     }
 }

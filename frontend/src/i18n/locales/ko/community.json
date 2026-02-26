@@ -278,6 +278,7 @@
       },
       "list": {
         "title": "공지사항",
+        "categoryAll": "전체",
         "searchPlaceholder": "제목 검색"
       },
       "table": {
@@ -519,6 +520,7 @@
       },
       "list": {
         "title": "자료실",
+        "categoryAll": "전체",
         "searchPlaceholder": "제목 검색"
       },
       "table": {
@@ -734,6 +736,7 @@
       },
       "list": {
         "title": "FAQ",
+        "categoryAll": "전체",
         "searchPlaceholder": "제목 검색"
       },
       "table": {
@@ -973,6 +976,7 @@
       },
       "list": {
         "title": "Q&A",
+        "categoryAll": "전체",
         "searchPlaceholder": "제목 검색"
       },
       "table": {

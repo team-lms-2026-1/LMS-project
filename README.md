@@ -1,8 +1,12 @@
 
+## Links
+
+https://teamlms.duckdns.org
+
 ## Architecture
 
 ### Runtime Architecture
-![Runtime Architecture](assets/architecture/Runtime_Architecture.png)
+![Runtime Architecture](assets/architecture/Runtime_Architecture2.png)
 
 - Next.js를 BFF로 사용하여 API 요청을 집계하고 HttpOnly Cookie 기반 인증을 처리합니다.
 - 클라이언트는 직접 백엔드에 접근하지 않으며, 모든 `/api/*` 요청은 BFF를 통해 프록시됩니다.
@@ -47,8 +51,10 @@
 ### Infrastructure / DevOps
 | 기술 | 버전 | 채용 이유 |
 |---|---:|---|
-| AWS EC2 | - | 서비스 호스팅 |
+| AWS EC2 | - | 서비스 호스팅(단일 서버) |
+| Nginx + Let's Encrypt | - | HTTPS(SSL 종료) + Reverse Proxy |
 | AWS RDS (PostgreSQL) | - | 운영 DB |
-| AWS S3 | - | 파일 저장소 |
-| Docker (Compose 포함) | - | 로컬 개발환경/배포 실행환경 표준화 |
-| GitHub Actions | - | Backend 빌드 중심 CI 및 배포 자동화 |
+| AWS S3 | - | 파일 저장(Presigned URL) |
+| Docker | - | 컨테이너 기반 실행/배포 |
+| Docker Compose | - | 로컬 개발환경 재현 |
+| GitHub Actions | - | 배포 자동화(Backend 빌드 중심, 테스트 스킵/프론트 CI 제한) |

@@ -8,6 +8,9 @@ import extraCurricular from "./extraCurricular.json";
 import community from "./community.json";
 import studySpace from "./studySpace.json";
 import mypage from "./mypage.json";
+import survey from "./survey.json";
+import mentoring from "./mentoring.json";
+import competency from "./competency.json";
 
 const messages = {
   topbar,
@@ -19,7 +22,10 @@ const messages = {
   extraCurricular,
   community,
   studySpace,
-  mypage
+  mypage,
+  survey,
+  mentoring,
+  competency
 } as const;
 
 export default messages;

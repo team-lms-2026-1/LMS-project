@@ -63,7 +63,7 @@ jobs:
           sudo docker run -d --name frontend-server \
             --network lms-network \
             -p 3000:3000 \
-            -e NEXT_PUBLIC_API_URL=http://43.201.157.8:8080 \
+            -e NEXT_PUBLIC_API_URL=https://teamlms.duckdns.org \
             -e API_BASE_URL=http://backend-server:8080 \
             $IMAGE_ID:latest
           

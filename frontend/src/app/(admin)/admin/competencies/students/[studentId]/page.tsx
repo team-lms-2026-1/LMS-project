@@ -2,5 +2,4 @@ import StudentDetailPageClient from "@/features/competencies/scai/components/det
 
 export default function Page() {
   return <StudentDetailPageClient />;
-
 }

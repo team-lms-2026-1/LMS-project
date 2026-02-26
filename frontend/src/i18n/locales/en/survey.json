@@ -1,0 +1,243 @@
+{
+  "common": {
+    "types": {
+      "SATISFACTION": "Satisfaction Survey",
+      "COURSE": "Course Survey",
+      "SERVICE": "Service Usage Survey",
+      "ETC": "Other"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "OPEN": "Open",
+      "CLOSED": "Closed"
+    },
+    "questionTypes": {
+      "short": {
+        "RATING": "Rating",
+        "SINGLE_CHOICE": "Single Choice",
+        "MULTIPLE_CHOICE": "Multiple Choice",
+        "ESSAY": "Essay"
+      },
+      "long": {
+        "RATING": "Rating (Score)",
+        "SINGLE_CHOICE": "Multiple Choice (Single)",
+        "MULTIPLE_CHOICE": "Multiple Choice (Multiple)",
+        "ESSAY": "Essay (Text)"
+      }
+    }
+  },
+  "hooks": {
+    "list": {
+      "loadFailed": "Failed to load survey list."
+    },
+    "detail": {
+      "defaults": {
+        "minLabel": "Strongly disagree",
+        "maxLabel": "Strongly agree"
+      },
+      "messages": {
+        "loadFailed": "Failed to load data.",
+        "saveSuccess": "Saved successfully.",
+        "saveFailed": "Failed to save."
+      },
+      "validation": {
+        "titleRequired": "Please enter a title.",
+        "questionRequired": "Please add at least one question.",
+        "questionTextRequired": "Please enter the content of question {index}.",
+        "choiceOptionRequired": "Please add at least one option to question {index}.",
+        "choiceOptionTextRequired": "Please enter option {optionIndex} content for question {index}.",
+        "targetDeptRequired": "Please select at least one target department.",
+        "targetGradeRequired": "Please select at least one target grade.",
+        "deptRequired": "Please select a department.",
+        "gradeRequired": "Please select a grade."
+      }
+    }
+  },
+  "admin": {
+    "list": {
+      "title": "Survey Management",
+      "placeholders": {
+        "typeAll": "All types",
+        "keyword": "Search survey title"
+      },
+      "buttons": {
+        "newSurvey": "Create Survey"
+      },
+      "confirmDelete": {
+        "title": "Delete Survey",
+        "message": "Are you sure you want to delete this survey? All related response data will be deleted."
+      },
+      "messages": {
+        "deleteSuccess": "Deleted successfully.",
+        "deleteFailed": "Failed to delete."
+      }
+    },
+    "table": {
+      "headers": {
+        "no": "No.",
+        "type": "Type",
+        "title": "Title",
+        "views": "Views",
+        "createdAt": "Created At",
+        "period": "Period",
+        "status": "Status",
+        "manage": "Manage"
+      },
+      "buttons": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "empty": "No surveys."
+    },
+    "results": {
+      "title": "Survey Result Statistics",
+      "placeholders": {
+        "typeAll": "All types",
+        "keyword": "Search survey title"
+      },
+      "table": {
+        "result": "Result",
+        "resultButton": "Result Stats"
+      }
+    },
+    "detail": {
+      "titleNew": "Create New Survey",
+      "titleEdit": "Edit Survey",
+      "backToList": "Back to list ->",
+      "sections": {
+        "basicInfo": "Basic Information",
+        "target": "Target Settings",
+        "questions": "Question Setup"
+      },
+      "fields": {
+        "surveyType": "Survey Type",
+        "title": "Survey Title",
+        "startAt": "Start DateTime",
+        "endAt": "End DateTime"
+      },
+      "placeholders": {
+        "typeSelect": "Select type",
+        "title": "Enter survey title.",
+        "startDate": "Select start date",
+        "endDate": "Select end date"
+      },
+      "buttons": {
+        "addQuestion": "Add Question",
+        "submitNew": "Complete Survey Creation",
+        "submitEdit": "Complete Survey Update"
+      }
+    },
+    "targetSelector": {
+      "targetType": {
+        "ALL": "All Users",
+        "DEPT": "By Department",
+        "GRADE": "By Grade",
+        "DEPT_GRADE": "Custom (Dept + Grade)"
+      },
+      "guides": {
+        "dept": "Select target departments.",
+        "deptStep1": "1. Select target departments.",
+        "grade": "Select target grades.",
+        "gradeStep2": "2. Select target grades."
+      },
+      "noDeptSelected": "No department selected.",
+      "gradeLabel": "Grade {grade}",
+      "deptFallback": "Department {id}"
+    },
+    "questionCard": {
+      "placeholderQuestion": "Enter a question",
+      "placeholders": {
+        "minLabel": "Min label (e.g., strongly disagree)",
+        "maxLabel": "Max label (e.g., strongly agree)",
+        "option": "Option {index}",
+        "essayPreview": "Essay answer input area (preview)"
+      },
+      "scale": {
+        "minFallback": "Min",
+        "maxFallback": "Max"
+      },
+      "buttons": {
+        "delete": "Delete",
+        "addOption": "+ Add Option"
+      }
+    },
+    "stats": {
+      "loading": "Loading statistics...",
+      "errorNotFound": "Statistics not found.",
+      "titleSuffix": "Result Analysis",
+      "backToList": "Back to list ->",
+      "meta": {
+        "createdAt": "Created:",
+        "period": "Period:"
+      },
+      "cards": {
+        "totalTargets": "Total Targets",
+        "submitted": "Responses",
+        "responseRate": "Response Rate"
+      },
+      "chart": {
+        "noData": "No data",
+        "byDept": "By Department",
+        "byGrade": "By Grade",
+        "deptRatio": "Participation Rate by Department",
+        "gradeRatio": "Participation Rate by Grade"
+      },
+      "questions": {
+        "noData": "No question data found.",
+        "sectionTitle": "Question Response Details",
+        "noEssay": "No responses.",
+        "responseCount": "Response Count"
+      }
+    }
+  },
+  "student": {
+    "list": {
+      "title": "Open Surveys",
+      "placeholders": {
+        "typeAll": "All types",
+        "keyword": "Search survey title"
+      },
+      "table": {
+        "headers": {
+          "no": "No.",
+          "type": "Type",
+          "title": "Title",
+          "deadline": "Deadline",
+          "action": "Action"
+        },
+        "buttons": {
+          "done": "Done",
+          "participate": "Participate"
+        },
+        "empty": "No surveys."
+      },
+      "messages": {
+        "loadFailed": "Failed to load survey list."
+      }
+    },
+    "detail": {
+      "loading": "Loading survey details...",
+      "errorNotFound": "Survey not found.",
+      "period": "Period: {start} ~ {end}",
+      "submitButton": "Submit",
+      "confirm": {
+        "title": "Submit Survey",
+        "message": "You cannot edit after submission. Submit now?"
+      },
+      "messages": {
+        "loadFailed": "Failed to load survey.",
+        "requiredMissing": "Please respond to all required fields.",
+        "submitSuccess": "Submitted. Thank you!",
+        "submitFailed": "Failed to submit."
+      }
+    },
+    "questionCard": {
+      "multiSelectable": "(Multiple selection allowed)",
+      "rating": {
+        "minFallback": "Disagree",
+        "maxFallback": "Agree"
+      },
+      "essayPlaceholder": "Please enter your response."
+    }
+  }
+}
