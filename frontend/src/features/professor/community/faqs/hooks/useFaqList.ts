@@ -38,7 +38,7 @@ export function useFaqList() {
                 page,
                 size,
                 keyword: keyword || undefined,
-                categoryId,
+                categoryId: categoryId ?? undefined,
             });
 
             setItems(res.data);
