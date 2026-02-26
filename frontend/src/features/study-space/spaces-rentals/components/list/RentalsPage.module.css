@@ -84,8 +84,7 @@
 }
 
 .tableBorderWrap {
-    border: 2px solid #3b82f6;
-    /* Blue border as shown in image */
+    border: 0;
     border-radius: 6px;
     margin: 0;
     overflow: hidden;
