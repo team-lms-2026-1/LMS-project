@@ -194,7 +194,7 @@ export default function AlarmBell() {
   useEffect(() => {
     if (!open) return;
 
-    const onDocClick = (event: MouseEvent) => {
+    const onDocClick = (event: globalThis.MouseEvent) => {
       const target = event.target as Node | null;
       if (target && wrapRef.current && !wrapRef.current.contains(target)) {
         setOpen(false);
