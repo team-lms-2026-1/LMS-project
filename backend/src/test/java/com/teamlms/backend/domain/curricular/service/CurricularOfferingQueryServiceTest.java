@@ -1,7 +1,6 @@
 package com.teamlms.backend.domain.curricular.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingDetailResponse;
 import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingListItem;
-// import com.teamlms.backend.domain.curricular.api.dto.CurricularOfferingUserListItem;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingCompetencyMappingItem;
 import com.teamlms.backend.domain.curricular.api.dto.OfferingStudentListItem;
 import com.teamlms.backend.domain.curricular.repository.CurricularOfferingCompetencyMapRepository;
