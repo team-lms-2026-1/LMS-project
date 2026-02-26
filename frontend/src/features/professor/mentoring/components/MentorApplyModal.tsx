@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import styles from "./ProfessorMentoring.module.css";
-import { MentoringRecruitment } from "@/features/mentoring/api/types";
-import { applyMentoring } from "@/features/mentoring/api/mentoringApi";
+import { MentoringRecruitment } from "@/features/admin/mentoring/api/types";
+import { applyMentoring } from "@/features/admin/mentoring/api/mentoringApi";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button/Button";
 import toast from "react-hot-toast";

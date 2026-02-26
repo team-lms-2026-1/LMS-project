@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import styles from "./ProfessorMentoring.module.css";
-import { MentoringRecruitment, MentoringApplication } from "@/features/mentoring/api/types";
-import { fetchAdminApplications as fetchRecruitmentApplications } from "@/features/mentoring/api/mentoringApi";
+import { MentoringRecruitment, MentoringApplication } from "@/features/admin/mentoring/api/types";
+import { fetchAdminApplications as fetchRecruitmentApplications } from "@/features/admin/mentoring/api/mentoringApi";
 
 interface ApplicationModalProps {
     recruitment: MentoringRecruitment;

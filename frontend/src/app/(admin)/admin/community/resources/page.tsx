@@ -1,4 +1,4 @@
-import ResourcePageClient from "@/features/community/resources/components/list/ResourcePage.client";
+import ResourcePageClient from "@/features/admin/community/resources/components/list/ResourcePage.client";
 
 export default function Page() {
   return <ResourcePageClient />;

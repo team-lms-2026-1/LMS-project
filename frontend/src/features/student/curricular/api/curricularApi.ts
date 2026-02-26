@@ -1,7 +1,7 @@
 import { getJson } from "@/lib/http";
-import { SuccessResponse } from "@/features/curricular/api/types";
+import { SuccessResponse } from "@/features/admin/curricular/api/types";
 import { CurricularEnrollmentListResponse, CurricularOfferingListResponse } from "./types";
-import { CurricularDetailFormResponse, CurricularOfferingCompetencyResponse, StudentGradeDetailHeaderResponse, StudentGradeDetailListResponse } from "@/features/curricular-offering/api/types";
+import { CurricularDetailFormResponse, CurricularOfferingCompetencyResponse, StudentGradeDetailHeaderResponse, StudentGradeDetailListResponse } from "@/features/admin/curricular-offering/api/types";
 
 export type CurricularOfferingsListQuery = {
   page?: number;

@@ -1,0 +1,187 @@
+import { Page } from "@/features/admin/community/categories/api/types";
+
+export type ApiResponse<T, M = null> = {
+  data: T;
+  meta: M;
+};
+
+export type PageMeta = {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  sort: string[];
+};
+
+export type CompletionStatus = "IN_PROGRESS" | "PASSED" | "FAILED" | string;
+
+export type DayOfWeekType = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY" | string;
+
+export type EnrollmentStatus = "ENROLLED" |  "CANCELED" | string;
+
+export type OfferingStatus = "DRAFT" | "OPEN" | "ENROLLMENT_CLOSED" | "IN_PROGRESS" | "COMPLETED" | "CANCELED" | string;
+
+export type CompetencyCode = "C1" | "C2" | "C3" | "C4" | "C5" | "C6" | string;
+
+export type Grade = "A" | "B" | "C" | "D" | "E" | "F" | string;
+
+/** DTO */
+export type CurricularOfferingListItemDto = {
+  offeringId: number ;
+  offeringCode: string;
+  curricularName: string;
+  capacity: number;
+  professorName: string;
+  semesterName: string;
+  location: string;
+  credit: number;
+  status: OfferingStatus;
+}
+
+export type CurricularOfferingDetailDto = {
+  offeringId: number;
+  offeringCode: string;
+
+  curricularId: number;
+  curricularName: string;
+  credits: number;
+  description: string;
+
+  deptId: number;
+  deptName: string;
+
+  semesterId: number;
+  semesterName: string;
+
+  professorAccountId: number;
+  professorName: string;
+  email: string;
+  phone: string;
+
+  dayOfWeek: DayOfWeekType;
+  period: number;
+
+  capacity: number;
+  enrolledCount: number;
+
+  location: string;
+  status: OfferingStatus;
+}
+
+export type CurricularOfferingCompetencyDto = {
+  competencyId: number;
+  code: CompetencyCode;
+  name: string;
+  description: string;
+  weight: number | null;
+}
+
+export type CurricularOfferingStudentListItemDto = {
+  enrollmentId: number;
+  studentAccountId: number;
+  studentName: string;
+  studentNo: string;
+  gradeLevel: number;  // 학년
+  deptName: string;
+  rawScore: number;
+  grade: Grade;  //A B C D E F
+  enrollmentStatus: EnrollmentStatus;
+  completionStatus: CompletionStatus;
+}
+
+export type CurricularOfferingGradeListItemDto = {
+  studentAccountId: number;
+  studentNo: number;
+  deptName: string;
+  gradeLevel: number;
+  name: string;
+  gpa: number;
+}
+
+export type StudentGradeTrendItemDto = {
+  semesterId: number;
+  semesterName: string;           // 예: "2026-2"
+  semesterGpa: number;            // Double -> number
+  semesterEarnedCredits: number;  // Long -> number
+};
+
+export type StudentGradeDetailHeaderDto = {
+  studentAccountId: number;
+  studentName: string;
+  studentNo: string;
+
+  deptId: number;
+  deptName: string;
+  gradeLevel: number;
+
+  maxSemesterGpa: number;
+  overallGpa: number;
+  totalEarnedCredits: number;
+
+  trend: StudentGradeTrendItemDto[];
+};
+
+export type StudentGradeDetailListDto = {
+  enrollmentId: number;
+  semesterId: number;
+  semesterName: string;
+  curricularCode: string;
+  curricularName: string;
+  credits: number;
+  grade: string;
+}
+
+/** Response */
+export type CurricularOfferingListResponse = ApiResponse<CurricularOfferingListItemDto[], PageMeta>;
+export type CurricularDetailFormResponse =ApiResponse<CurricularOfferingDetailDto, null>;
+export type CurricularOfferingCompetencyResponse = ApiResponse<CurricularOfferingCompetencyDto[], null>;
+export type CurricularOfferingStudentResponse = ApiResponse<CurricularOfferingStudentListItemDto[], PageMeta>
+export type CurricularOfferingGradeListResponse = ApiResponse<CurricularOfferingGradeListItemDto[], PageMeta>;
+export type StudentGradeDetailHeaderResponse = ApiResponse<StudentGradeDetailHeaderDto>;
+export type StudentGradeDetailListResponse = ApiResponse<StudentGradeDetailListDto[], PageMeta>;
+
+/** Request */
+export type CurricularOfferingCreateRequest = {
+  offeringCode: string;
+  curricularId: number;
+  semesterId: number;
+  dayOfWeek: DayOfWeekType;
+  period: number;
+  capacity: number;
+  location: string;
+  professorAccountId: number;
+}
+
+export type CurricularOfferingDetailUpdateRequest = {
+  offeringCode: string;
+  semesterId: number;
+  dayOfWeek: DayOfWeekType;
+  period: number;
+  capacity: number;
+  location: string;
+  professorAccountId: number;
+}
+
+export type OfferingScorePatchRequest = {
+  rawScore: number;
+};
+
+// 상태변경
+export type CurricularOfferingStatusUpdateRequest = {
+  status: OfferingStatus;
+}
+
+/** Request - 역량 맵핑(단건 아이템) */
+export type CurricularOfferingCompetencyMappingItem = {
+  competencyId: number;
+  weight: number; // 1~6
+};
+
+/** Request - 역량 맵핑(일괄 수정) */
+export type CurricularOfferingCompetencyMappingBulkUpdateRequest = {
+  mappings: CurricularOfferingCompetencyMappingItem[];
+};
+
+/** 화면용 */

@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useI18n } from "@/i18n/useI18n";
-import { StudentGradeTrendItemDto } from "@/features/curricular-offering/api/types";
+import { StudentGradeTrendItemDto } from "@/features/admin/curricular-offering/api/types";
 import styles from "./GradeTrendComposedMeChart.module.css";
 
 type Props = {

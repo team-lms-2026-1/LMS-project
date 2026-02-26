@@ -1,4 +1,4 @@
-import { StudentAcademicStatus } from "@/features/authority/accounts/types";
+import { StudentAcademicStatus } from "@/features/admin/authority/accounts/types";
 
 export type ApiResponse<T, M = null> = {
     data: T;

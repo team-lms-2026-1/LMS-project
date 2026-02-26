@@ -1,5 +1,5 @@
 import { getJson } from "@/lib/http";
-import { SuccessResponse } from "@/features/curricular/api/types";
+import { SuccessResponse } from "@/features/admin/curricular/api/types";
 import {
   ExtraCurricularOfferingCompetencyResponse,
   ExtraCurricularOfferingDetailResponse,

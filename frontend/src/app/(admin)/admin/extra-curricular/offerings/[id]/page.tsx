@@ -1,4 +1,4 @@
-import { ExtraCurricularOfferingDetailPage } from "@/features/extra-curricular/offerings/components/detail/ExtraCurricularOfferingDetailPage.client";
+import { ExtraCurricularOfferingDetailPage } from "@/features/admin/extra-curricular/offerings/components/detail/ExtraCurricularOfferingDetailPage.client";
 
 
 export default function Page() {
