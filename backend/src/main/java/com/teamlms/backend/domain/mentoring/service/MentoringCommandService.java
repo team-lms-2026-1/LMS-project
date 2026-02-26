@@ -166,6 +166,7 @@ public class MentoringCommandService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENTORING_APPLICATION_NOT_FOUND));
 
         java.util.List<MentoringMatching> matchingsToSave = new java.util.ArrayList<>();
+        java.util.List<MentoringApplication> menteeApps = new java.util.ArrayList<>();
         
         for (Long menteeId : request.getMenteeApplicationIds()) {
             MentoringApplication menteeApp = applicationRepository.findById(menteeId)
@@ -186,14 +187,16 @@ public class MentoringCommandService {
 
             matchingsToSave.add(matching);
             menteeApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
+            menteeApps.add(menteeApp);
         }
 
         matchingRepository.saveAll(matchingsToSave);
         mentorApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
-        menteeApp.updateStatus(MentoringApplicationStatus.MATCHED, null, adminId);
 
         notifyApplicationStatus(mentorApp);
-        notifyApplicationStatus(menteeApp);
+        for (MentoringApplication menteeApp : menteeApps) {
+            notifyApplicationStatus(menteeApp);
+        }
     }
 
     private final MentoringQuestionRepository questionRepository;
