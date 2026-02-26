@@ -28,7 +28,7 @@ public class AdminExtraCurricularSessionController {
 
     // 1) presign 발급
     @PostMapping("/{extraOfferingId}/sessions/presign")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<ExtraSessionVideoPresignResponse> presignSessionVideoUpload(
             @PathVariable Long extraOfferingId,
             @Valid @RequestBody ExtraSessionVideoPresignRequest req) {
@@ -37,7 +37,7 @@ public class AdminExtraCurricularSessionController {
 
     // 2) 세션 생성
     @PostMapping("/{extraOfferingId}/sessions")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<SuccessResponse> createSession(
             @PathVariable Long extraOfferingId,
             @Valid @RequestBody ExtraCurricularSessionCreateRequest req) {
@@ -47,7 +47,7 @@ public class AdminExtraCurricularSessionController {
 
     // 3) 세션 수정
     @PatchMapping("/{extraOfferingId}/sessions/{sessionId}")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<SuccessResponse> updateSession(
             @PathVariable Long extraOfferingId,
             @PathVariable Long sessionId,
@@ -57,7 +57,7 @@ public class AdminExtraCurricularSessionController {
     }
 
     @PatchMapping("/{offeringId}/sessions/{sessionId}/status")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<SuccessResponse> changeSessionStatus(
             @PathVariable Long offeringId,
             @PathVariable Long sessionId,

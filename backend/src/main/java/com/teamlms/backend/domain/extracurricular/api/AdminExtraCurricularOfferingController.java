@@ -59,7 +59,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 목록
     @GetMapping
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
     public ApiResponse<List<ExtraCurricularOfferingListItem>> getList(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -83,7 +83,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 생성
     @PostMapping
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<SuccessResponse> create(
             @Valid @RequestBody ExtraCurricularOfferingCreateRequest req) {
         extraCurricularOfferingCommandService.create(req);
@@ -92,7 +92,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 수정
     @PatchMapping("/{extraOfferingId}/basic")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<SuccessResponse> patchBasic(
             @PathVariable Long extraOfferingId,
             @Valid @RequestBody ExtraCurricularOfferingPatchRequest req) {
@@ -102,7 +102,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 상태변경
     @PatchMapping("/{extraOfferingId}/status")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<SuccessResponse> changeStatus(
             @PathVariable Long extraOfferingId,
             @Validated @RequestBody ExtraOfferingStatusChangeRequest req) {
@@ -112,7 +112,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 상세 기본
     @GetMapping("/{extraOfferingId}")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
     public ApiResponse<ExtraCurricularOfferingBasicDetailResponse> getBasicDetail(
             @PathVariable Long extraOfferingId) {
         return ApiResponse.ok(extracurricularOfferingQueryService.getBasicDetail(extraOfferingId));
@@ -120,7 +120,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 세션 목록
     @GetMapping("/{extraOfferingId}/sessions")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
     public ApiResponse<List<ExtraCurricularSessionListItem>> getSessionList(
             @PathVariable Long extraOfferingId,
             @RequestParam(defaultValue = "1") int page,
@@ -144,7 +144,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 3) 세션 상세 (previewUrl 포함)
     @GetMapping("/{extraOfferingId}/sessions/{sessionId}")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
     public ApiResponse<ExtraCurricularSessionDetailResponse> getSessionDetail(
             @PathVariable Long extraOfferingId,
             @PathVariable Long sessionId) {
@@ -154,7 +154,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 상세 ( 역량 맵핑 )
     @GetMapping("/{extraOfferingId}/competency-mapping")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
     public ApiResponse<List<ExtraOfferingCompetencyMappingItem>> getMapping(
             @PathVariable Long extraOfferingId) {
         return ApiResponse.ok(extracurricularOfferingQueryService.getMapping(extraOfferingId));
@@ -162,7 +162,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 상세 ( 역량 맵핑 )
     @PatchMapping("/{extraOfferingId}/competency-mapping")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_MANAGE') or hasRole('ADMIN')")
     public ApiResponse<SuccessResponse> patchMapping(
             @PathVariable Long extraOfferingId,
             @Valid @RequestBody ExtraOfferingCompetencyMappingBulkUpdateRequest req) {
@@ -172,7 +172,7 @@ public class AdminExtraCurricularOfferingController {
 
     // 학생출석
     @GetMapping("/{extraOfferingId}/applications")
-    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ')")
+    @PreAuthorize("hasAuthority('EXTRA_CURRICULAR_READ') or hasRole('ADMIN')")
     public ApiResponse<List<AdminExtraOfferingApplicantRow>> getApplicantList(
             @PathVariable Long extraOfferingId,
             @RequestParam(defaultValue = "1") int page,
