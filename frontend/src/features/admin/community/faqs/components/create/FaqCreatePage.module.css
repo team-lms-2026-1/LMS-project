@@ -11,16 +11,19 @@
   margin-bottom: 10px;
 }
 
-.homeIcon {
-  font-size: 14px;
-  color: #6b7280;
-}
-
 .sep {
   color: #9ca3af;
 }
 
-.breadcrumb strong {
+.crumb {
+  cursor: pointer;
+}
+
+.crumb:hover {
+  text-decoration: underline;
+}
+
+.current {
   color: #111827;
   font-weight: 800;
 }

@@ -37,6 +37,7 @@ function formatBytes(bytes: number) {
 export default function NoticeCreatePageClient() {
   const router = useRouter();
   const i18n = useI18n("community.notices.admin.create");
+  const listI18n = useI18n("community.notices.admin.list");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [title, setTitle] = useState("");
@@ -47,6 +48,7 @@ export default function NoticeCreatePageClient() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
+  const [categoryTouched, setCategoryTouched] = useState(false);
   const [loadingCats, setLoadingCats] = useState(false);
 
   const [files, setFiles] = useState<File[]>([]);
@@ -98,7 +100,8 @@ export default function NoticeCreatePageClient() {
         if (!alive) return;
 
         setCategories(list);
-        if (!categoryId && list.length > 0) setCategoryId(String(list[0].categoryId));
+        setCategoryId("");
+        setCategoryTouched(false);
       } catch {
         if (!alive) return;
         setCategories([]);
@@ -279,9 +282,11 @@ export default function NoticeCreatePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.homeIcon}>⌂</span>
+        <span className={styles.crumb} onClick={() => guardNavigate(LIST_PATH)}>
+          {listI18n("title")}
+        </span>
         <span className={styles.sep}>&gt;</span>
-        <strong>{i18n("breadcrumbTitle")}</strong>
+        <span className={styles.current}>{i18n("title")}</span>
       </div>
 
       <div className={styles.card}>
@@ -308,8 +313,11 @@ export default function NoticeCreatePageClient() {
 
                 <select
                   className={styles.categorySelect}
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
+                  value={categoryTouched ? categoryId : ""}
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    setCategoryTouched(true);
+                  }}
                   disabled={saving || loadingCats}
                 >
                   <option value="">

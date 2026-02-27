@@ -37,6 +37,7 @@ function formatBytes(bytes: number) {
 export default function ResourceCreatePageClient() {
   const router = useRouter();
   const i18n = useI18n("community.resources.admin.create");
+  const listI18n = useI18n("community.resources.admin.list");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [title, setTitle] = useState("");
@@ -45,6 +46,7 @@ export default function ResourceCreatePageClient() {
   // 카테고리
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
+  const [categoryTouched, setCategoryTouched] = useState(false);
   const [loadingCats, setLoadingCats] = useState(false);
 
   // 파일 상태
@@ -73,7 +75,8 @@ export default function ResourceCreatePageClient() {
         if (!alive) return;
 
         setCategories(list);
-        if (!categoryId && list.length > 0) setCategoryId(String(list[0].categoryId));
+        setCategoryId("");
+        setCategoryTouched(false);
       } catch {
         if (!alive) return;
         setCategories([]);
@@ -262,9 +265,11 @@ export default function ResourceCreatePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.homeIcon}>&gt;</span>
+        <span className={styles.crumb} onClick={() => guardNavigate(LIST_PATH)}>
+          {listI18n("title")}
+        </span>
         <span className={styles.sep}>&gt;</span>
-        <strong>{i18n("breadcrumbTitle")}</strong>
+        <span className={styles.current}>{i18n("title")}</span>
       </div>
 
       <div className={styles.card}>
@@ -294,8 +299,11 @@ export default function ResourceCreatePageClient() {
 
                 <select
                   className={styles.categorySelect}
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
+                  value={categoryTouched ? categoryId : ""}
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    setCategoryTouched(true);
+                  }}
                   disabled={saving || loadingCats}
                 >
                   <option value="">{loadingCats ? i18n("placeholders.categoryLoading") : i18n("placeholders.category")}</option>
