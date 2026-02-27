@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -67,8 +69,8 @@ public class SurveyQueryService {
     }
 
     // 사용자 참여 가능 목록
-    public List<SurveyListResponse> getAvailableSurveys(Long userId, String keyword,
-            com.teamlms.backend.domain.survey.enums.SurveyType type) {
+    public Page<SurveyListResponse> getAvailableSurveys(Long userId, String keyword,
+            com.teamlms.backend.domain.survey.enums.SurveyType type, Pageable pageable) {
         Account user = accountRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, userId));
 
@@ -76,8 +78,7 @@ public class SurveyQueryService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        // Using custom repository method
-        return surveyRepository.findAvailableSurveysForUser(userId, keyword, type);
+        return surveyRepository.findAvailableSurveysForUser(userId, keyword, type, pageable);
     }
 
     // 상세 조회

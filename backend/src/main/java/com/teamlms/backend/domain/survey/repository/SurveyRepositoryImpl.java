@@ -81,17 +81,16 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
     }
 
     @Override
-    public List<SurveyListResponse> findAvailableSurveysForUser(Long userId, String keyword, SurveyType type) {
+    public Page<SurveyListResponse> findAvailableSurveysForUser(Long userId, String keyword, SurveyType type, Pageable pageable) {
         QSurvey s = QSurvey.survey;
         QSurveyTarget t = QSurveyTarget.surveyTarget;
         LocalDateTime now = LocalDateTime.now();
 
-        return queryFactory
+        List<SurveyListResponse> content = queryFactory
                 .select(Projections.constructor(SurveyListResponse.class,
                         s.surveyId,
                         s.type,
                         s.title,
-                        // 학생에게는 항상 OPEN으로 표시 (이미 날짜 조건으로 필터링됨)
                         s.status,
                         s.startAt,
                         s.endAt,
@@ -103,14 +102,31 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                 .join(t).on(t.surveyId.eq(s.surveyId))
                 .where(
                         t.targetAccountId.eq(userId),
-                        s.status.eq(SurveyStatus.OPEN), // DB OPEN 상태
-                        s.startAt.loe(now),              // 시작일 <= 현재
-                        s.endAt.goe(now),                // 종료일 >= 현재
+                        s.status.eq(SurveyStatus.OPEN),
+                        s.startAt.loe(now),
+                        s.endAt.goe(now),
                         titleLike(keyword),
                         typeEq(type)
                 )
                 .orderBy(s.surveyId.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(s.count())
+                .from(s)
+                .join(t).on(t.surveyId.eq(s.surveyId))
+                .where(
+                        t.targetAccountId.eq(userId),
+                        s.status.eq(SurveyStatus.OPEN),
+                        s.startAt.loe(now),
+                        s.endAt.goe(now),
+                        titleLike(keyword),
+                        typeEq(type)
+                );
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
     private BooleanExpression typeEq(SurveyType type) {

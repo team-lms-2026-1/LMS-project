@@ -100,7 +100,7 @@ export default function SurveyResultsPageClient() {
             field: "surveyId",
             width: "60px",
             align: "center",
-            render: (_, idx) => String((idx + 1) + (page - 1) * state.size),
+            render: (_, idx) => String(state.meta.totalElements - (page - 1) * state.size - idx),
         },
         {
             header: tTable("headers.type"),

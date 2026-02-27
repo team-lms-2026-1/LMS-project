@@ -18,9 +18,10 @@ public interface SurveyRepositoryCustom {
     );
 
     // returns list of surveys available for the specific user
-    List<SurveyListResponse> findAvailableSurveysForUser(
+    Page<SurveyListResponse> findAvailableSurveysForUser(
         Long userId,
         String keyword,
-        SurveyType type
+        SurveyType type,
+        Pageable pageable
     );
 }

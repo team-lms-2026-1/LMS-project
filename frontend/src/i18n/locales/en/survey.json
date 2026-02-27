@@ -41,6 +41,7 @@
         "saveFailed": "Failed to save."
       },
       "validation": {
+        "typeRequired": "Please select a survey type.",
         "titleRequired": "Please enter a title.",
         "questionRequired": "Please add at least one question.",
         "questionTextRequired": "Please enter the content of question {index}.",

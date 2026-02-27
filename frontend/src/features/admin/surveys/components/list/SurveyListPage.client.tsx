@@ -132,6 +132,7 @@ export default function SurveyListPageClient() {
                         loading={state.loading}
                         page={page}
                         size={size}
+                        totalCount={state.meta.totalElements}
                         onEditClick={handleEdit}
                         onDeleteClick={(id) => setDeleteId(id)}
                     />
