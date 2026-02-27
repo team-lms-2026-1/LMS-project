@@ -104,6 +104,28 @@
           "deleteFailed": "削除中にエラーが発生しました。",
           "editingExists": "編集中の項目があります。保存またはキャンセル後に完了してください。"
         }
+      },
+      "create": {
+        "errors": {
+          "imageOnly": "画像ファイルのみアップロードできます。",
+          "ruleRequired": "ルール内容を入力してください。",
+          "nameRequired": "スペース名を入力してください。",
+          "locationRequired": "場所を入力してください。",
+          "descriptionRequired": "説明を入力してください。",
+          "submitFailed": "登録中にエラーが発生しました。"
+        }
+      },
+      "edit": {
+        "errors": {
+          "loadFailed": "詳細の取得中にエラーが発生しました。",
+          "imageOnly": "画像ファイルのみアップロードできます。",
+          "ruleRequired": "ルール内容を入力してください。",
+          "editingExists": "ルールを編集中です。ルールを保存してから完了してください。",
+          "nameRequired": "スペース名を入力してください。",
+          "locationRequired": "場所を入力してください。",
+          "descriptionRequired": "説明を入力してください。",
+          "submitFailed": "修正中にエラーが発生しました。"
+        }
       }
     },
     "rentals": {

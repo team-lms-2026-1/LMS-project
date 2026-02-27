@@ -104,6 +104,28 @@
           "deleteFailed": "An error occurred while deleting.",
           "editingExists": "There is an item being edited. Save or cancel before completing."
         }
+      },
+      "create": {
+        "errors": {
+          "imageOnly": "Only image files can be uploaded.",
+          "ruleRequired": "Please enter a rule.",
+          "nameRequired": "Please enter a space name.",
+          "locationRequired": "Please enter a location.",
+          "descriptionRequired": "Please enter a description.",
+          "submitFailed": "An error occurred while creating."
+        }
+      },
+      "edit": {
+        "errors": {
+          "loadFailed": "An error occurred while loading details.",
+          "imageOnly": "Only image files can be uploaded.",
+          "ruleRequired": "Please enter a rule.",
+          "editingExists": "A rule is being edited. Save or cancel it before completing.",
+          "nameRequired": "Please enter a space name.",
+          "locationRequired": "Please enter a location.",
+          "descriptionRequired": "Please enter a description.",
+          "submitFailed": "An error occurred while updating."
+        }
       }
     },
     "rentals": {

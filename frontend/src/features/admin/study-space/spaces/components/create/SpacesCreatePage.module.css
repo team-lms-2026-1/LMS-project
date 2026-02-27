@@ -190,6 +190,7 @@
 
 .ruleInput {
   width: 100%;
+  max-width: 1270px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 8px 10px;

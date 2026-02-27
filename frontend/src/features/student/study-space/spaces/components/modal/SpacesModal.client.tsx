@@ -7,6 +7,7 @@ import { roomsApi } from "../../api/spacesApi";
 import type { RoomDto } from "../../api/types";
 import toast from "react-hot-toast";
 import ReserveConfirmModal from "./ReserveConfirmModal.client";
+import { DatePickerInput } from "@/features/admin/authority/semesters/components/ui/DatePickerInput";
 import { useI18n } from "@/i18n/useI18n";
 
 type Props = {
@@ -339,13 +340,12 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
 
                     {/* 3) 날짜 */}
                     <div className={styles.cellPeriod}>
-                      <input
-                        className={styles.dateInput}
-                        type="date"
+                      <DatePickerInput
                         value={date}
+                        onChange={(v) => onPickDate(room.roomId, v)}
                         min={room.operationStartDate || undefined}
                         max={room.operationEndDate || undefined}
-                        onChange={(e) => onPickDate(room.roomId, e.target.value)}
+                        className={styles.dateInput}
                       />
                     </div>
 

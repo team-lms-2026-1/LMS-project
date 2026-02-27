@@ -918,6 +918,7 @@
         },
         "placeholders": {
           "categoryLoading": "로드 중...",
+          "category": "분류를 선택하세요.",
           "uncategorized": "미분류",
           "title": "제목을 입력하세요",
           "content": "질문을 입력하세요"
@@ -930,6 +931,7 @@
         "errors": {
           "titleRequired": "제목을 입력하세요.",
           "contentRequired": "내용을 입력해주세요.",
+          "categoryRequired": "분류를 선택해주세요.",
           "submitFailed": "질문을 생성하지 못했습니다."
         }
       },

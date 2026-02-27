@@ -257,8 +257,6 @@ export default function AlarmBell() {
   const handleDeleteAll = async () => {
     if (deletingAll || items.length === 0) return;
 
-    if (!window.confirm(t("alarm.confirm.deleteAll"))) return;
-
     setError(null);
     setDeletingAll(true);
     try {

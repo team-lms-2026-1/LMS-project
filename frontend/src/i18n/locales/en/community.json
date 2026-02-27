@@ -921,6 +921,7 @@
         },
         "placeholders": {
           "categoryLoading": "Loading...",
+          "category": "Select a category.",
           "uncategorized": "Uncategorized",
           "title": "Enter a title",
           "content": "Enter your question"
@@ -933,6 +934,7 @@
         "errors": {
           "titleRequired": "Please enter a title.",
           "contentRequired": "Please enter content.",
+          "categoryRequired": "Please select a category.",
           "submitFailed": "Failed to create question."
         }
       },
