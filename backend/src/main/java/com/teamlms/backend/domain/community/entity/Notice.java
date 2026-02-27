@@ -44,6 +44,9 @@ public class Notice extends BaseEntity {
     @Column(name = "display_end_at")
     private LocalDateTime displayEndAt;
 
+    @Column(name = "alarm_sent_at")
+    private LocalDateTime alarmSentAt;
+
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
 
@@ -88,5 +91,9 @@ public class Notice extends BaseEntity {
 
     public void changeDisplayEndAt(LocalDateTime displayEndAt) {
         this.displayEndAt = displayEndAt;
+    }
+
+    public void markAlarmSentAt(LocalDateTime alarmSentAt) {
+        this.alarmSentAt = alarmSentAt;
     }
 }
