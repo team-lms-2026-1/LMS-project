@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -252,11 +253,7 @@ public class SurveyQueryService {
     private SurveyDetailResponse toSurveyDetailResponse(Survey survey, List<SurveyQuestion> questions) {
         SurveyTargetFilterDto targetFilter = null;
         if (survey.getTargetConditionMemo() != null && !survey.getTargetConditionMemo().isBlank()) {
-            try {
-                targetFilter = objectMapper.readValue(survey.getTargetConditionMemo(), SurveyTargetFilterDto.class);
-            } catch (Exception e) {
-                // Ignore parse errors
-            }
+            targetFilter = deserializeTargetFilter(survey.getTargetConditionMemo());
         }
         return SurveyDetailResponse.builder()
                 .surveyId(survey.getSurveyId())
@@ -269,6 +266,14 @@ public class SurveyQueryService {
                 .targetFilter(targetFilter)
                 .questions(questions.stream().map(this::toQuestionResponse).collect(Collectors.toList()))
                 .build();
+    }
+
+    private SurveyTargetFilterDto deserializeTargetFilter(String json) {
+        try {
+            return objectMapper.readValue(json, SurveyTargetFilterDto.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.SURVEY_TARGET_FILTER_SERIALIZE_FAILED);
+        }
     }
 
     private SurveyDetailResponse.QuestionResponseDto toQuestionResponse(SurveyQuestion question) {
