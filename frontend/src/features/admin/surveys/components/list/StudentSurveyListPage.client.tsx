@@ -14,23 +14,29 @@ import { Badge } from "@/components/badge";
 import { Dropdown } from "@/features/dropdowns/_shared/Dropdown";
 import toast from "react-hot-toast";
 import { useI18n } from "@/i18n/useI18n";
+import { PageMeta } from "../../../curricular/api/types";
+
+const DEFAULT_META: PageMeta = {
+    page: 1, size: 10, totalElements: 0, totalPages: 1,
+    hasNext: false, hasPrev: false, sort: [],
+};
 
 export default function StudentSurveyListPageClient() {
     const tList = useI18n("survey.student.list");
     const tTypes = useI18n("survey.common.types");
     const router = useRouter();
+
     const [items, setItems] = useState<SurveyListItemDto[]>([]);
     const [loading, setLoading] = useState(true);
-    const [totalPages, setTotalPages] = useState(1);
+    const [meta, setMeta] = useState<PageMeta>(DEFAULT_META);
     const [type, setType] = useState("");
     const [types, setTypes] = useState<SurveyTypeResponse[]>([]);
     const [typesLoading, setTypesLoading] = useState(false);
 
     const { page, setPage, keyword, setKeyword } = useListQuery({
         defaultPage: 1,
-        defaultSize: 10
+        defaultSize: 10,
     });
-
     const [inputKeyword, setInputKeyword] = useState(keyword || "");
 
     useEffect(() => {
@@ -49,18 +55,14 @@ export default function StudentSurveyListPageClient() {
     }, []);
 
     const typeOptions = useMemo(() => {
-        const typeLabel = (typeCode: string) => {
-            if (typeCode === "SATISFACTION") return tTypes("SATISFACTION");
-            if (typeCode === "COURSE") return tTypes("COURSE");
-            if (typeCode === "SERVICE") return tTypes("SERVICE");
-            if (typeCode === "ETC") return tTypes("ETC");
-            return typeCode;
+        const label = (code: string) => {
+            if (code === "SATISFACTION") return tTypes("SATISFACTION");
+            if (code === "COURSE") return tTypes("COURSE");
+            if (code === "SERVICE") return tTypes("SERVICE");
+            if (code === "ETC") return tTypes("ETC");
+            return code;
         };
-
-        return types.map(t => ({
-            value: t.typeCode,
-            label: typeLabel(t.typeCode)
-        }));
+        return types.map(t => ({ value: t.typeCode, label: label(t.typeCode) }));
     }, [types, tTypes]);
 
     const load = useCallback(async () => {
@@ -68,9 +70,7 @@ export default function StudentSurveyListPageClient() {
             setLoading(true);
             const res = await fetchAvailableSurveys(page, 10, keyword, type);
             setItems(res.data);
-            if (res.meta) {
-                setTotalPages(res.meta.totalPages);
-            }
+            if (res.meta) setMeta(res.meta);
         } catch (e: any) {
             console.error(e);
             toast.error(e.message || tList("messages.loadFailed"));
@@ -79,9 +79,7 @@ export default function StudentSurveyListPageClient() {
         }
     }, [page, keyword, type, tList]);
 
-    useEffect(() => {
-        load();
-    }, [load]);
+    useEffect(() => { load(); }, [load]);
 
     const handleSearch = useCallback(() => {
         setPage(1);
@@ -95,12 +93,12 @@ export default function StudentSurveyListPageClient() {
         ETC: { bg: "#f3f4f6", text: "#374151" },
     };
 
-    const typeLabel = (typeCode: string) => {
-        if (typeCode === "SATISFACTION") return tTypes("SATISFACTION");
-        if (typeCode === "COURSE") return tTypes("COURSE");
-        if (typeCode === "SERVICE") return tTypes("SERVICE");
-        if (typeCode === "ETC") return tTypes("ETC");
-        return typeCode;
+    const typeLabel = (code: string) => {
+        if (code === "SATISFACTION") return tTypes("SATISFACTION");
+        if (code === "COURSE") return tTypes("COURSE");
+        if (code === "SERVICE") return tTypes("SERVICE");
+        if (code === "ETC") return tTypes("ETC");
+        return code;
     };
 
     const columns: TableColumn<SurveyListItemDto>[] = [
@@ -109,7 +107,7 @@ export default function StudentSurveyListPageClient() {
             field: "surveyId",
             width: "60px",
             align: "center",
-            render: (_, idx) => String((idx + 1) + (page - 1) * 10),
+            render: (_, idx) => String(meta.totalElements - (page - 1) * 10 - idx),
         },
         {
             header: tList("table.headers.type"),
@@ -118,20 +116,14 @@ export default function StudentSurveyListPageClient() {
             align: "center",
             render: (row) => {
                 const colors = SURVEY_TYPE_COLORS[row.type] || SURVEY_TYPE_COLORS.ETC;
-                return (
-                    <Badge bgColor={colors.bg} textColor={colors.text}>
-                        {typeLabel(row.type)}
-                    </Badge>
-                );
+                return <Badge bgColor={colors.bg} textColor={colors.text}>{typeLabel(row.type)}</Badge>;
             }
         },
         {
             header: tList("table.headers.title"),
             field: "title",
             align: "center",
-            render: (row) => (
-                <span style={{ fontWeight: 500 }}>{row.title}</span>
-            )
+            render: (row) => <span style={{ fontWeight: 500 }}>{row.title}</span>
         },
         {
             header: tList("table.headers.deadline"),
@@ -167,10 +159,7 @@ export default function StudentSurveyListPageClient() {
                             <Dropdown
                                 value={type}
                                 options={typeOptions}
-                                onChange={(val) => {
-                                    setPage(1);
-                                    setType(val);
-                                }}
+                                onChange={(val) => { setPage(1); setType(val); }}
                                 placeholder={tList("placeholders.typeAll")}
                                 loading={typesLoading}
                                 className={styles.dropdownFit}
@@ -188,9 +177,8 @@ export default function StudentSurveyListPageClient() {
                     </div>
                 </div>
 
-
                 <div className={styles.tableWrap}>
-                    <Table
+                    <Table<SurveyListItemDto>
                         columns={columns}
                         items={items}
                         rowKey={(row) => row.surveyId}
@@ -204,7 +192,7 @@ export default function StudentSurveyListPageClient() {
                 <div className={styles.footerRow}>
                     <PaginationSimple
                         page={page}
-                        totalPages={totalPages}
+                        totalPages={meta.totalPages}
                         onChange={setPage}
                         disabled={loading}
                     />

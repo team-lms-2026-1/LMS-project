@@ -7,13 +7,16 @@ import com.teamlms.backend.domain.survey.api.dto.SurveyTypeResponse;
 import com.teamlms.backend.domain.survey.service.SurveyQueryService;
 import com.teamlms.backend.domain.survey.service.SurveyResponseService;
 import com.teamlms.backend.global.api.ApiResponse;
+import com.teamlms.backend.global.api.PageMeta;
 import com.teamlms.backend.global.api.dto.SuccessResponse;
 import com.teamlms.backend.global.security.principal.AuthUser;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -39,11 +42,17 @@ public class UserSurveyController {
     @GetMapping("/available")
     public ApiResponse<List<SurveyListResponse>> listAvailable(
             @AuthenticationPrincipal AuthUser user,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) com.teamlms.backend.domain.survey.enums.SurveyType type) {
-        
-        // Note: original endpoint was /api/v1/surveys/available
-        return ApiResponse.ok(queryService.getAvailableSurveys(user.getAccountId(), keyword, type));
+
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 100);
+        PageRequest pageable = PageRequest.of(safePage - 1, safeSize, Sort.by(Sort.Direction.DESC, "surveyId"));
+
+        Page<SurveyListResponse> result = queryService.getAvailableSurveys(user.getAccountId(), keyword, type, pageable);
+        return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 
     // 설문 상세 조회
