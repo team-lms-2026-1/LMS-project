@@ -35,6 +35,7 @@ sudo tee /etc/nginx/conf.d/lms.conf > /dev/null << EOF
 server {
     listen 80;
     server_name ${DOMAIN};
+    client_max_body_size 80M;
 
     # Certbot 인증용 경로 (SSL 발급 시 필요)
     location /.well-known/acme-challenge/ {
