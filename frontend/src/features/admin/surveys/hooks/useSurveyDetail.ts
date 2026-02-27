@@ -27,7 +27,7 @@ export function useSurveyDetail(idStr: string | undefined) {
     const [targetType, setTargetType] = useState<"ALL" | "DEPT" | "GRADE" | "DEPT_GRADE">("ALL");
     const [selectedDeptIds, setSelectedDeptIds] = useState<number[]>([]);
     const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
-    const [surveyType, setSurveyType] = useState<string>("ETC");
+    const [surveyType, setSurveyType] = useState<string>("");
     const [surveyTypes, setSurveyTypes] = useState<SurveyTypeResponse[]>([]);
 
     const createNewQuestion = useCallback((order: number): QuestionResponseDto => ({
@@ -86,7 +86,7 @@ export function useSurveyDetail(idStr: string | undefined) {
 
             setDates({ startAt: fmt(n), endAt: fmt(next) });
             setTargetType("ALL");
-            setSurveyType("ETC");
+            setSurveyType("");
         }
 
         fetchSurveyTypes().then(res => {
@@ -111,6 +111,11 @@ export function useSurveyDetail(idStr: string | undefined) {
     }, []);
 
     const submit = useCallback(async () => {
+        if (!surveyType) {
+            toast.error(t("validation.typeRequired"));
+            return;
+        }
+
         if (!title.trim()) {
             toast.error(t("validation.titleRequired"));
             return;
@@ -228,7 +233,7 @@ export function useSurveyDetail(idStr: string | undefined) {
         } finally {
             setLoading(false);
         }
-    }, [isNew, idStr, title, questions, dates, targetType, selectedDeptIds, selectedGrades, router, t]);
+    }, [isNew, idStr, title, questions, dates, surveyType, targetType, selectedDeptIds, selectedGrades, router, t]);
 
     return {
         state: {

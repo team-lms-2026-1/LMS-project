@@ -41,6 +41,7 @@
         "saveFailed": "저장에 실패했습니다."
       },
       "validation": {
+        "typeRequired": "설문 유형을 선택해주세요.",
         "titleRequired": "제목을 입력해주세요.",
         "questionRequired": "질문을 하나 이상 추가해주세요.",
         "questionTextRequired": "{index}번 질문의 내용을 입력해주세요.",

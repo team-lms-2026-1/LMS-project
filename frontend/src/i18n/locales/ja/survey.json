@@ -41,6 +41,7 @@
         "saveFailed": "保存に失敗しました。"
       },
       "validation": {
+        "typeRequired": "アンケートタイプを選択してください。",
         "titleRequired": "タイトルを入力してください。",
         "questionRequired": "質問を1つ以上追加してください。",
         "questionTextRequired": "{index}番の質問内容を入力してください。",
