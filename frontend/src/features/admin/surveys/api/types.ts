@@ -66,6 +66,7 @@ export interface SurveyDetailDto {
   status: SurveyStatus;
   startAt: string;
   endAt: string;
+  targetFilter?: TargetFilterDto;
   questions: QuestionResponseDto[];
 }
 
@@ -144,6 +145,9 @@ export interface SurveyParticipantDto {
   targetId: number;
   accountId: number;
   loginId: string;
+  name: string;
+  deptName: string;
+  gradeLevel: number | null;
   status: string;
   submittedAt: string | null;
 }

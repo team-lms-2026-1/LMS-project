@@ -14,8 +14,9 @@ import com.teamlms.backend.domain.survey.enums.*;
 import com.teamlms.backend.domain.survey.repository.*;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -36,6 +36,7 @@ public class SurveyCommandService {
     private final SurveyTargetRepository targetRepository;
     private final AccountRepository accountRepository;
     private final AlarmCommandService alarmCommandService;
+    private final ObjectMapper objectMapper;
 
     // 1. 설문 생성
     public void createAndPublishSurvey(Long accountId, SurveyCreateRequest request) {
@@ -45,6 +46,10 @@ public class SurveyCommandService {
             throw new BusinessException(ErrorCode.SURVEY_DATE_INVALID);
         }
 
+        String targetMemo = request.targetFilter() != null
+                ? serializeTargetFilter(request.targetFilter())
+                : null;
+
         Survey survey = Survey.builder()
                 .type(request.type())
                 .title(request.title())
@@ -53,6 +58,7 @@ public class SurveyCommandService {
                 .endAt(request.endAt())
                 .status(SurveyStatus.OPEN)
                 .targetGenType(request.targetFilter() != null ? request.targetFilter().genType() : SurveyTargetGenType.ALL)
+                .targetConditionMemo(targetMemo)
                 .build();
 
         Survey savedSurvey = surveyRepository.save(survey);
@@ -239,6 +245,14 @@ public class SurveyCommandService {
     private List<Account> selectByGrades(List<Integer> grades) {
         if (grades == null || grades.isEmpty()) return Collections.emptyList();
         return accountRepository.findAllByGradeLevelIn(grades);
+    }
+
+    private String serializeTargetFilter(SurveyTargetFilterDto filter) {
+        try {
+            return objectMapper.writeValueAsString(filter);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.SURVEY_TARGET_FILTER_SERIALIZE_FAILED);
+        }
     }
 
     private List<Account> selectByDeptAndGrades(List<Long> deptIds, List<Integer> grades) {

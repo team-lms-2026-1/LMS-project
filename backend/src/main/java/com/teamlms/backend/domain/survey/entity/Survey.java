@@ -50,6 +50,9 @@ public class Survey extends BaseEntity {
     @Column(name = "target_gen_type", length = 20, nullable = false)
     private SurveyTargetGenType targetGenType;
 
+    @Column(name = "target_condition_memo", length = 500)
+    private String targetConditionMemo;
+
     @Column(name = "view_count", nullable = false)
     @Builder.Default
     private Long viewCount = 0L;

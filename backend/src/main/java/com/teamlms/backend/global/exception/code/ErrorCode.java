@@ -193,6 +193,7 @@ public enum ErrorCode {
     SURVEY_OPTIONS_REQUIRED(HttpStatus.BAD_REQUEST, "SURVEY_OPTIONS_REQUIRED", "선택지 옵션을 입력해주세요.", "survey.options.required"),
     SURVEY_DATE_INVALID(HttpStatus.BAD_REQUEST, "SURVEY_DATE_INVALID", "종료일은 시작일보다 빨라야 합니다.", "survey.date.invalid"),
     SURVEY_HAS_RESPONSES(HttpStatus.CONFLICT, "SURVEY_HAS_RESPONSES", "이미 응답이 존재하여 수정할 수 없습니다.", "survey.hasResponses"),
+    SURVEY_TARGET_FILTER_SERIALIZE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SURVEY_TARGET_FILTER_SERIALIZE_FAILED", "설문 대상 조건 처리 중 오류가 발생했습니다.", "survey.targetFilter.serializeFailed"),
 
     // =========================
     // Domain: MBTI

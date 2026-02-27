@@ -27,8 +27,14 @@ public interface SurveyTargetRepository extends JpaRepository<SurveyTarget, Long
     // 상태별(제출완료) 카운트
     long countBySurveyIdAndStatus(Long surveyId, SurveyTargetStatus status);
 
+    // 특정 설문의 상태별 참여자 목록 조회 (페이징)
+    Page<SurveyTarget> findBySurveyIdAndStatus(Long surveyId, SurveyTargetStatus status, Pageable pageable);
+
     // 특정 설문의 참여자 목록 조회 (페이징)
     Page<SurveyTarget> findBySurveyId(Long surveyId, Pageable pageable);
+
+    // 전체 참여자 목록 (통계용)
+    List<SurveyTarget> findAllBySurveyId(Long surveyId);
 
     // [추가] 특정 설문의 상태별 참여자 전체 목록 (통계용 쿼리)
     List<SurveyTarget> findAllBySurveyIdAndStatus(Long surveyId, SurveyTargetStatus status);

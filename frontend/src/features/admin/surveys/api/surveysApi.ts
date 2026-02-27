@@ -46,10 +46,11 @@ export async function fetchSurveyStats(id: number) {
     return getJson<SurveyStatsResponse>(`${BASE_URL}/${id}/stats`);
 }
 
-export async function fetchSurveyParticipants(id: number, page: number, size: number) {
+export async function fetchSurveyParticipants(id: number, page: number, size: number, status?: string) {
     const params = new URLSearchParams({
         page: String(page),
         size: String(size),
+        ...(status ? { status } : {}),
     });
     return getJson<SurveyParticipantResponse>(`${BASE_URL}/${id}/participants?${params.toString()}`);
 }

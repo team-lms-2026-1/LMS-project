@@ -6,6 +6,7 @@ import { SurveyStatsDto } from "@/features/admin/surveys/api/types";
 import { StatCard } from "./StatCard";
 import { SurveyStatsChart } from "./SurveyStatsChart";
 import { SurveyQuestionStats } from "./SurveyQuestionStats";
+import { TargetListModal } from "./TargetListModal";
 import styles from "./SurveyStatsPage.client.module.css";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/i18n/useI18n";
@@ -20,6 +21,7 @@ export default function SurveyStatsPageClient({ id }: Props) {
     const [stats, setStats] = useState<SurveyStatsDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [modalStatus, setModalStatus] = useState<"ALL" | "SUBMITTED" | "PENDING" | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -67,9 +69,25 @@ export default function SurveyStatsPageClient({ id }: Props) {
                     </div>
 
                     <div className={styles.statGrid}>
-                        <StatCard label={t("cards.totalTargets")} value={stats.totalTargets} />
-                        <StatCard label={t("cards.submitted")} value={stats.submittedCount} />
-                        <StatCard label={t("cards.responseRate")} value={`${stats.responseRate}%`} highlight />
+                        <StatCard
+                            label={t("cards.totalTargets")}
+                            value={stats.totalTargets}
+                            actionLabel={t("participants.viewTargets")}
+                            onAction={() => setModalStatus("ALL")}
+                        />
+                        <StatCard
+                            label={t("cards.submitted")}
+                            value={stats.submittedCount}
+                            actionLabel={t("participants.viewSubmitters")}
+                            onAction={() => setModalStatus("SUBMITTED")}
+                        />
+                        <StatCard
+                            label={t("cards.responseRate")}
+                            value={`${stats.responseRate}%`}
+                            highlight
+                            actionLabel={t("participants.viewPending")}
+                            onAction={() => setModalStatus("PENDING")}
+                        />
                     </div>
 
                     <div className={styles.chartSection}>
@@ -81,6 +99,14 @@ export default function SurveyStatsPageClient({ id }: Props) {
                     <SurveyQuestionStats questions={stats.questions} />
                 </div>
             </div>
+
+            {modalStatus && (
+                <TargetListModal
+                    surveyId={stats.surveyId}
+                    status={modalStatus}
+                    onClose={() => setModalStatus(null)}
+                />
+            )}
         </div>
     );
 }

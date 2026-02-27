@@ -11,6 +11,9 @@ public record SurveyParticipantResponse(
         Long targetId,
         Long accountId,
         String loginId,
+        String name,
+        String deptName,
+        Integer gradeLevel,
         SurveyTargetStatus status,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         LocalDateTime submittedAt

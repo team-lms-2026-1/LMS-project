@@ -187,6 +187,22 @@
         "sectionTitle": "문항별 응답 상세",
         "noEssay": "응답이 없습니다.",
         "responseCount": "응답 수"
+      },
+      "participants": {
+        "viewTargets": "대상 보기",
+        "viewSubmitters": "응답자 보기",
+        "viewPending": "미실시자 보기",
+        "modalTitleTargets": "전체 대상자 목록",
+        "modalTitleSubmitters": "응답 완료자 목록",
+        "modalTitlePending": "미실시자 목록",
+        "closeButton": "닫기",
+        "headers": {
+          "dept": "학과",
+          "grade": "학년",
+          "name": "이름"
+        },
+        "empty": "목록이 없습니다.",
+        "errorLoad": "목록을 불러오지 못했습니다."
       }
     }
   },

@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class SurveyQueryService {
     private final StudentProfileRepository studentProfileRepository;
     private final DeptRepository deptRepository;
     private final SurveyTypeConfigRepository typeConfigRepository;
+    private final ObjectMapper objectMapper;
 
     // 관리자 목록 조회
     public Page<SurveyListResponse> getSurveyList(InternalSurveySearchRequest request, Pageable pageable) {
@@ -205,21 +208,42 @@ public class SurveyQueryService {
                 .build();
     }
 
-    public Page<SurveyParticipantResponse> getSurveyParticipants(Long surveyId, Pageable pageable) {
+    public Page<SurveyParticipantResponse> getSurveyParticipants(Long surveyId, SurveyTargetStatus status, Pageable pageable) {
         if (!surveyRepository.existsById(surveyId)) {
             throw new BusinessException(ErrorCode.SURVEY_NOT_FOUND, surveyId);
         }
-        Page<SurveyTarget> targets = targetRepository.findBySurveyId(surveyId, pageable);
+        Page<SurveyTarget> targets;
+        if (status != null) {
+            targets = targetRepository.findBySurveyIdAndStatus(surveyId, status, pageable);
+        } else {
+            targets = targetRepository.findBySurveyId(surveyId, pageable);
+        }
         List<Long> accountIds = targets.getContent().stream().map(SurveyTarget::getTargetAccountId).toList();
         List<Account> accounts = accountRepository.findAllById(accountIds);
         Map<Long, Account> accountMap = accounts.stream().collect(Collectors.toMap(Account::getAccountId, a -> a));
 
+        List<StudentProfile> profiles = studentProfileRepository.findAllById(accountIds);
+        Map<Long, StudentProfile> profileMap = profiles.stream().collect(Collectors.toMap(StudentProfile::getAccountId, p -> p));
+
+        List<Long> deptIds = profiles.stream().map(StudentProfile::getDeptId).distinct().toList();
+        List<Dept> depts = deptRepository.findAllById(deptIds);
+        Map<Long, String> deptMap = depts.stream().collect(Collectors.toMap(Dept::getDeptId, Dept::getDeptName));
+
         return targets.map(target -> {
             Account user = accountMap.get(target.getTargetAccountId());
+            StudentProfile profile = profileMap.get(target.getTargetAccountId());
+
+            String name = profile != null ? profile.getName() : "Unknown";
+            String deptName = profile != null ? deptMap.getOrDefault(profile.getDeptId(), "기타") : "-";
+            Integer gradeLevel = profile != null ? profile.getGradeLevel() : null;
+
             return SurveyParticipantResponse.builder()
                     .targetId(target.getTargetId())
                     .accountId(target.getTargetAccountId())
                     .loginId(user != null ? user.getLoginId() : "Unknown")
+                    .name(name)
+                    .deptName(deptName)
+                    .gradeLevel(gradeLevel)
                     .status(target.getStatus())
                     .submittedAt(target.getSubmittedAt())
                     .build();
@@ -227,6 +251,10 @@ public class SurveyQueryService {
     }
 
     private SurveyDetailResponse toSurveyDetailResponse(Survey survey, List<SurveyQuestion> questions) {
+        SurveyTargetFilterDto targetFilter = null;
+        if (survey.getTargetConditionMemo() != null && !survey.getTargetConditionMemo().isBlank()) {
+            targetFilter = deserializeTargetFilter(survey.getTargetConditionMemo());
+        }
         return SurveyDetailResponse.builder()
                 .surveyId(survey.getSurveyId())
                 .type(survey.getType())
@@ -235,8 +263,17 @@ public class SurveyQueryService {
                 .status(survey.getStatus())
                 .startAt(survey.getStartAt())
                 .endAt(survey.getEndAt())
+                .targetFilter(targetFilter)
                 .questions(questions.stream().map(this::toQuestionResponse).collect(Collectors.toList()))
                 .build();
+    }
+
+    private SurveyTargetFilterDto deserializeTargetFilter(String json) {
+        try {
+            return objectMapper.readValue(json, SurveyTargetFilterDto.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.SURVEY_TARGET_FILTER_SERIALIZE_FAILED);
+        }
     }
 
     private SurveyDetailResponse.QuestionResponseDto toQuestionResponse(SurveyQuestion question) {
