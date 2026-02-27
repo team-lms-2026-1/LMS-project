@@ -112,7 +112,7 @@ export default function AdminSidebar() {
   return (
     <div className={styles.sidebarInner}>
       <div className={styles.sidebarHeader}>
-        <div className={styles.sidebarTitle}>{tCommon("sidebarTitle")}</div>
+        <div className={styles.sidebarTitle}>{tCommon("sidebarTitleAdmin")}</div>
         <Link href="/admin" className={styles.headerLogoLink}>
           <img
             src="/logo.png"

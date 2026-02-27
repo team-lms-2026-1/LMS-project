@@ -5,7 +5,10 @@
       "student": "学生メインへ移動",
       "admin": "管理者メインへ移動",
       "professor": "教授メインへ移動"
-    }
+    },
+    "sidebarTitleStudent": "学生メニュー",
+    "sidebarTitleProfessor": "教授メニュー",
+    "sidebarTitleAdmin": "管理者メニュー"
   },
   "student": {
     "sections": {

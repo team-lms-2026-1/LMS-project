@@ -5,7 +5,10 @@
       "student": "Go to student main page",
       "admin": "Go to admin main page",
       "professor": "Go to professor main page"
-    }
+    },
+    "sidebarTitleStudent": "Student Menu",
+    "sidebarTitleProfessor": "Professor Menu",
+    "sidebarTitleAdmin": "Admin Menu"
   },
   "student": {
     "sections": {
