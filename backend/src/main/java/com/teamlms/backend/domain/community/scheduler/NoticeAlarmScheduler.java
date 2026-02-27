@@ -13,7 +13,7 @@ public class NoticeAlarmScheduler {
 
     private final NoticeService noticeService;
 
-    @Scheduled(fixedDelayString = "${notice.alarm.schedule.delay-ms:60000}")
+    @Scheduled(fixedDelayString = "${notice.alarm.schedule.delay-ms:43200000}")
     public void sendPendingNoticeAlarms() {
         try {
             int sentCount = noticeService.sendPendingNoticeAlarms();
