@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping 
+@RequestMapping
 public class AdminStudySpaceController {
 
     private final StudySpaceCommandService commandService;
@@ -30,12 +30,11 @@ public class AdminStudySpaceController {
     // =========================================================
 
     // 공간 생성 (이미지 포함)
-    @PostMapping(value = "/api/v1/admin/spaces",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/api/v1/admin/spaces", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('SPACE_MANAGE')")
     public ApiResponse<SuccessResponse> createSpace(
             @Valid @RequestPart("data") SpaceRequest req,
-            @RequestPart(value = "image", required = true) MultipartFile image
-    ) {
+            @RequestPart(value = "image", required = true) MultipartFile image) {
         commandService.createSpace(req, image);
         return ApiResponse.ok(new SuccessResponse());
     }
@@ -46,8 +45,7 @@ public class AdminStudySpaceController {
     public ApiResponse<SuccessResponse> updateSpace(
             @PathVariable Long spaceId,
             @Valid @RequestPart("data") SpaceRequest req,
-            @RequestPart(value = "image", required = true) MultipartFile image
-    ) {
+            @RequestPart(value = "image", required = true) MultipartFile image) {
         commandService.updateSpace(spaceId, req, image);
         return ApiResponse.ok(new SuccessResponse());
     }
@@ -59,7 +57,6 @@ public class AdminStudySpaceController {
         commandService.deleteSpace(spaceId);
         return ApiResponse.ok(new SuccessResponse());
     }
-
 
     // =========================================================
     // 2. 룸(Room) 관리
@@ -77,8 +74,7 @@ public class AdminStudySpaceController {
     @PreAuthorize("hasAuthority('SPACE_MANAGE')")
     public ApiResponse<SuccessResponse> createRoom(
             @PathVariable Long spaceId,
-            @Valid @RequestBody RoomRequest req
-    ) {
+            @Valid @RequestBody RoomRequest req) {
         commandService.createRoom(spaceId, req);
         return ApiResponse.ok(new SuccessResponse());
     }
@@ -89,8 +85,7 @@ public class AdminStudySpaceController {
     public ApiResponse<SuccessResponse> updateRoom(
             @PathVariable Long spaceId,
             @PathVariable Long roomId,
-            @Valid @RequestBody RoomRequest req
-    ) {
+            @Valid @RequestBody RoomRequest req) {
         commandService.updateRoom(roomId, req);
         return ApiResponse.ok(new SuccessResponse());
     }
@@ -100,8 +95,7 @@ public class AdminStudySpaceController {
     @PreAuthorize("hasAuthority('SPACE_MANAGE')")
     public ApiResponse<SuccessResponse> deleteRoom(
             @PathVariable Long spaceId,
-            @PathVariable Long roomId
-    ) {
+            @PathVariable Long roomId) {
         commandService.deleteRoom(roomId);
         return ApiResponse.ok(new SuccessResponse());
     }

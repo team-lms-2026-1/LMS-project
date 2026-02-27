@@ -50,8 +50,7 @@ public class SurveyQueryService {
                 request.type(),
                 request.status(),
                 request.keyword(),
-                pageable
-        );
+                pageable);
     }
 
     // 설문 유형 목록 조회
@@ -65,7 +64,8 @@ public class SurveyQueryService {
     }
 
     // 사용자 참여 가능 목록
-    public List<SurveyListResponse> getAvailableSurveys(Long userId, String keyword, com.teamlms.backend.domain.survey.enums.SurveyType type) {
+    public List<SurveyListResponse> getAvailableSurveys(Long userId, String keyword,
+            com.teamlms.backend.domain.survey.enums.SurveyType type) {
         Account user = accountRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, userId));
 
@@ -96,10 +96,10 @@ public class SurveyQueryService {
             if (!isTarget) {
                 throw new BusinessException(ErrorCode.SURVEY_NOT_TARGET);
             }
-            
+
             java.time.LocalDateTime now = java.time.LocalDateTime.now();
             if (now.isBefore(survey.getStartAt()) || now.isAfter(survey.getEndAt())) {
-                 throw new BusinessException(ErrorCode.SURVEY_NOT_OPEN);
+                throw new BusinessException(ErrorCode.SURVEY_NOT_OPEN);
             }
 
             survey.increaseViewCount();
@@ -125,10 +125,11 @@ public class SurveyQueryService {
         Map<String, Long> byDept = new HashMap<>();
 
         if (submitted > 0) {
-            List<SurveyTarget> targets = targetRepository.findAllBySurveyIdAndStatus(surveyId, SurveyTargetStatus.SUBMITTED);
+            List<SurveyTarget> targets = targetRepository.findAllBySurveyIdAndStatus(surveyId,
+                    SurveyTargetStatus.SUBMITTED);
             List<Long> accountIds = targets.stream().map(SurveyTarget::getTargetAccountId).toList();
             List<StudentProfile> profiles = studentProfileRepository.findAllById(accountIds);
-            
+
             List<Long> deptIds = profiles.stream().map(StudentProfile::getDeptId).distinct().toList();
             List<Dept> depts = deptRepository.findAllById(deptIds);
             Map<Long, String> deptMap = depts.stream().collect(Collectors.toMap(Dept::getDeptId, Dept::getDeptName));
@@ -155,14 +156,17 @@ public class SurveyQueryService {
 
             for (SurveyTarget t : submittedTargets) {
                 Map<String, Object> responses = t.getResponseJson();
-                if (responses == null) continue;
+                if (responses == null)
+                    continue;
 
                 Object answer = responses.get(String.valueOf(q.getQuestionId()));
-                if (answer == null) continue;
+                if (answer == null)
+                    continue;
 
                 if (q.getQuestionType() == com.teamlms.backend.domain.survey.enums.SurveyQuestionType.ESSAY) {
                     essayAnswers.add(answer.toString());
-                } else if (q.getQuestionType() == com.teamlms.backend.domain.survey.enums.SurveyQuestionType.MULTIPLE_CHOICE) {
+                } else if (q
+                        .getQuestionType() == com.teamlms.backend.domain.survey.enums.SurveyQuestionType.MULTIPLE_CHOICE) {
                     if (answer instanceof List) {
                         List<?> selected = (List<?>) answer;
                         for (Object opt : selected) {
@@ -221,8 +225,6 @@ public class SurveyQueryService {
                     .build();
         });
     }
-
-
 
     private SurveyDetailResponse toSurveyDetailResponse(Survey survey, List<SurveyQuestion> questions) {
         return SurveyDetailResponse.builder()
