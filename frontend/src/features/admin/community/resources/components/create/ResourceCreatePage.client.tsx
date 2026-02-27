@@ -338,14 +338,18 @@ export default function ResourceCreatePageClient() {
             <div className={styles.contentCell}>
               <div className={styles.attachWrap}>
                 <div className={styles.attachTabs}>
-                  <button type="button" className={styles.tabActive} disabled={saving}>
+                  <button
+                    type="button"
+                    className={styles.tabActive}
+                    disabled={saving}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     {i18n("buttons.myPc")}
                   </button>
                 </div>
 
                 <div className={styles.dropzone}>
                   <div className={styles.dropText}>
-                    {i18n("help.dropPrefix")}{" "}
                     <button
                       type="button"
                       className={styles.uploadLink}

@@ -921,6 +921,7 @@
         },
         "placeholders": {
           "categoryLoading": "読み込み中...",
+          "category": "カテゴリを選択してください。",
           "uncategorized": "未分類",
           "title": "タイトルを入力してください",
           "content": "質問を入力してください"
@@ -933,6 +934,7 @@
         "errors": {
           "titleRequired": "タイトルを入力してください。",
           "contentRequired": "内容を入力してください。",
+          "categoryRequired": "カテゴリを選択してください。",
           "submitFailed": "質問の作成に失敗しました。"
         }
       },

@@ -139,7 +139,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
         console.error("[RoomsModal list]", e);
         if (!alive) return;
         setRows([]);
-        alert(e?.message || t("errors.listLoadFailed"));
+        toast.error(e?.message || t("errors.listLoadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -224,7 +224,7 @@ export default function SpacesRoomModal({ open, onClose, spaceId }: Props) {
     if (!r) return;
 
     const msg = validateRow(r);
-    if (msg) return alert(msg);
+    if (msg) return toast.error(msg);
 
     try {
       setSaving(true);

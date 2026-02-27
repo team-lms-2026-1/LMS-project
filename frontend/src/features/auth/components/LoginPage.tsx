@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "@/features/auth/styles/auth.module.css";
 import { loginViaBff, logoutViaBff, scheduleAutoLogout } from "@/features/auth/lib/auth.client";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function LoginPage() {
     const validId = /^[asp][0-9]{8}$/i.test(trimmedId);
 
     if (!validId) {
-      alert("Invalid ID format. Use a|s|p + 8 digits (e.g., a12345678).");
+      toast.error("Invalid ID format. Use a|s|p + 8 digits (e.g., a12345678).");
       return;
     }
 
@@ -50,7 +51,7 @@ export default function LoginPage() {
       router.replace(resolveRedirectPath(trimmedId));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed.";
-      alert(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -93,7 +94,7 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
               <div className={styles.loginRowBetween}>
-                <div className={styles.loginHint}>ID format: a/s/p + 8 digits</div>
+                <div className={styles.loginHint}></div>
                 <Link className={styles.loginLink} href="/forgot-password">
                   Forgot password?
                 </Link>

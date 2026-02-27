@@ -47,7 +47,7 @@ export default function SpacesCreatePageClient() {
   const onPickImage = (file: File | null) => {
     if (!file) return;
     if (!isImageFile(file)) {
-      alert("이미지 파일만 업로드할 수 있습니다.");
+      toast.error("이미지 파일만 업로드할 수 있습니다.");
       return;
     }
     // ✅ 1개만: 새로 선택하면 교체
@@ -114,7 +114,7 @@ export default function SpacesCreatePageClient() {
         if (i !== idx) return r;
         const nextContent = (r.draft ?? "").trim();
         if (!nextContent) {
-          alert("룰 내용을 입력하세요.");
+          toast.error("룰 내용을 입력하세요.");
           return r;
         }
         return { ...r, content: nextContent, isEditing: false };
@@ -132,9 +132,9 @@ export default function SpacesCreatePageClient() {
   };
 
   const onSubmit = async () => {
-    if (!spaceName.trim()) return alert("공간 이름을 입력하세요.");
-    if (!location.trim()) return alert("위치를 입력하세요.");
-    if (!description.trim()) return alert("설명을 입력하세요.");
+    if (!spaceName.trim()) return toast.error("공간 이름을 입력하세요.");
+    if (!location.trim()) return toast.error("위치를 입력하세요.");
+    if (!description.trim()) return toast.error("설명을 입력하세요.");
 
     // ✅ 룰 정리(공백 제거)
     const cleanedRules = rules

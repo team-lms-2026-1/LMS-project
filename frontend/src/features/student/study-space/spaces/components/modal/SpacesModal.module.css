@@ -218,11 +218,11 @@
 
 .dateInput {
   width: 140px;
-  height: 38px;
+  height: 38px !important;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 0 10px;
-  font-size: 12px;
+  border-radius: 12px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
   outline: none;
   background: #fff;
 }

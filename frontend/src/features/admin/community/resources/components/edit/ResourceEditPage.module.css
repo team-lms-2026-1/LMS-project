@@ -233,7 +233,18 @@
   font-size: 12px;
   font-weight: 700;
   color: #111827;
-  cursor: default;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tabActive:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #cbd5e1;
+}
+
+.tabActive:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .dropzone {

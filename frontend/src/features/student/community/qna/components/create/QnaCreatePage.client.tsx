@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./QnaCreatePage.module.css";
 import type { Category, CreateQnaQuestionRequestDto } from "../../api/types";
@@ -26,36 +26,74 @@ export default function QnaCreatePageClient() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>("");
 
+  const aliveRef = useRef(true);
+  const loadingCatsRef = useRef(false);
+  const lastLoadedAtRef = useRef(0);
+
   useEffect(() => {
-    let alive = true;
-
-    (async () => {
-      setLoadingCats(true);
-      try {
-        const res = await fetchQnaCategories();
-        const list = Array.isArray(res?.data) ? res.data : [];
-        if (!alive) return;
-        setCategories(list);
-        if (!categoryId && list.length > 0) {
-          setCategoryId(String(list[0].categoryId));
-        }
-      } catch {
-        if (!alive) return;
-        setCategories([]);
-      } finally {
-        if (alive) setLoadingCats(false);
-      }
-    })();
-
+    // React strict mode can run effects twice in dev.
+    // Ensure aliveRef is true on mount.
+    aliveRef.current = true;
     return () => {
-      alive = false;
+      aliveRef.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const loadCategories = useCallback(async (opts?: { force?: boolean }) => {
+    if (loadingCatsRef.current) return;
+    const now = Date.now();
+    if (!opts?.force && now - lastLoadedAtRef.current < 5000) return;
+
+    loadingCatsRef.current = true;
+    setLoadingCats(true);
+    try {
+      const res = await fetchQnaCategories();
+      const list = Array.isArray(res?.data) ? res.data : [];
+      if (!aliveRef.current) return;
+      setCategories(list);
+      setCategoryId((prev) => {
+        const prevId = prev ?? "";
+        const hasPrev = prevId && list.some((c) => String(c.categoryId) === String(prevId));
+        if (hasPrev) return prevId;
+        return "";
+      });
+    } catch {
+      if (!aliveRef.current) return;
+      setCategories([]);
+    } finally {
+      if (aliveRef.current) {
+        setLoadingCats(false);
+      }
+      loadingCatsRef.current = false;
+      lastLoadedAtRef.current = Date.now();
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCategories({ force: true });
+  }, [loadCategories]);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      void loadCategories();
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void loadCategories();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [loadCategories]);
+
   const canSubmit = useMemo(() => {
-    return title.trim().length > 0 && content.trim().length > 0 && !saving;
-  }, [title, content, saving]);
+    return title.trim().length > 0 && content.trim().length > 0 && !!categoryId && !saving;
+  }, [title, content, categoryId, saving]);
 
   const onSubmit = async () => {
     setError("");
@@ -65,11 +103,12 @@ export default function QnaCreatePageClient() {
 
     if (!trimmedTitle) return setError(t("errors.titleRequired"));
     if (!trimmedContent) return setError(t("errors.contentRequired"));
+    if (!categoryId) return setError(t("errors.categoryRequired"));
 
     const body: CreateQnaQuestionRequestDto = {
       title: trimmedTitle,
       content: trimmedContent,
-      categoryId: categoryId ? Number(categoryId) : null,
+      categoryId: Number(categoryId),
     };
 
     setSaving(true);
@@ -107,11 +146,13 @@ export default function QnaCreatePageClient() {
             <select
               className={styles.select}
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              onChange={(e) => {
+                setCategoryId(e.target.value);
+              }}
               disabled={saving || loadingCats}
             >
               <option value="">
-                {loadingCats ? t("placeholders.categoryLoading") : t("placeholders.uncategorized")}
+                {loadingCats ? t("placeholders.categoryLoading") : t("placeholders.category")}
               </option>
               {categories.map((c) => (
                 <option key={c.categoryId} value={String(c.categoryId)}>
