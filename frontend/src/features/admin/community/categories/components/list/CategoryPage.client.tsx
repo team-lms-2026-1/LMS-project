@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import styles from "./CategoryPage.module.css";
@@ -42,6 +42,10 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
     actions.goPage(1);
     actions.setKeyword(inputKeyword);
   }, [inputKeyword, setPage, actions]);
+
+  const sortedItems = useMemo(() => {
+    return [...(state.items ?? [])].sort((a, b) => b.categoryId - a.categoryId);
+  }, [state.items]);
 
   const scopeLabel = t(`scopes.${scope}`);
   const title = t("title", { scope: scopeLabel });
@@ -89,7 +93,7 @@ export default function CategoryPageClient({ scope }: { scope: CategoryScope }) 
         <CategoryTablePage
           ref={tableRef}   
           scope={scope}
-          items={state.items}
+          items={sortedItems}
           loading={state.loading}
           onReload={actions.reload}
         />

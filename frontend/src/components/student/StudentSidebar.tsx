@@ -99,7 +99,7 @@ export default function StudentSidebar() {
   return (
     <div className={styles.sidebarInner}>
       <div className={styles.sidebarHeader}>
-        <div className={styles.sidebarTitle}>{tCommon("sidebarTitle")}</div>
+        <div className={styles.sidebarTitle}>{tCommon("sidebarTitleStudent")}</div>
         <Link href="/student/main" className={styles.headerLogoLink}>
           <img src="/logo.png" alt={tCommon("logoAlt.student")} className={styles.headerLogoImage} />
         </Link>

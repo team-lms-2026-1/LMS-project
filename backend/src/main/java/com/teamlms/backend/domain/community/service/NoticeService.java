@@ -1,6 +1,7 @@
 package com.teamlms.backend.domain.community.service;
 
 import com.teamlms.backend.domain.account.entity.Account;
+import com.teamlms.backend.domain.account.enums.AccountType;
 import com.teamlms.backend.domain.account.repository.AccountRepository;
 import com.teamlms.backend.domain.alarm.enums.AlarmType;
 import com.teamlms.backend.domain.alarm.service.AlarmCommandService;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -148,6 +150,26 @@ public class NoticeService {
         return notice.getId();
     }
 
+    @Transactional
+    public int sendPendingNoticeAlarms() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Notice> notices = noticeRepository.findPendingAlarmNotices(now);
+        if (notices.isEmpty()) {
+            return 0;
+        }
+
+        List<Account> recipients = new ArrayList<>();
+        recipients.addAll(accountRepository.findAllByAccountType(AccountType.STUDENT));
+        recipients.addAll(accountRepository.findAllByAccountType(AccountType.PROFESSOR));
+
+        for (Notice notice : notices) {
+            sendNoticeAlarmToRecipients(recipients, notice);
+            notice.markAlarmSentAt(now);
+        }
+
+        return notices.size();
+    }
+
     // 5. 삭제
     @Transactional
     public void deleteNotice(Long noticeId) {
@@ -245,8 +267,19 @@ public class NoticeService {
     }
 
     private void createNoticeAlarms(Notice notice, Long authorId) {
-        List<Account> recipients = accountRepository.findAll();
-        if (recipients.isEmpty()) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (isNoticeVisibleForAlarm(notice, now)) {
+            List<Account> recipients = new ArrayList<>();
+            recipients.addAll(accountRepository.findAllByAccountType(AccountType.STUDENT));
+            recipients.addAll(accountRepository.findAllByAccountType(AccountType.PROFESSOR));
+            sendNoticeAlarmToRecipients(recipients, notice);
+            notice.markAlarmSentAt(now);
+        }
+    }
+
+    private void sendNoticeAlarmToRecipients(List<Account> recipients, Notice notice) {
+        if (recipients == null || recipients.isEmpty()) {
             return;
         }
 
@@ -350,6 +383,16 @@ public class NoticeService {
             return false;
         }
         if (notice.getDisplayEndAt() != null && notice.getDisplayEndAt().isBefore(start)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isNoticeVisibleForAlarm(Notice notice, LocalDateTime now) {
+        if (notice.getDisplayStartAt() != null && notice.getDisplayStartAt().isAfter(now)) {
+            return false;
+        }
+        if (notice.getDisplayEndAt() != null && notice.getDisplayEndAt().isBefore(now)) {
             return false;
         }
         return true;

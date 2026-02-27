@@ -236,7 +236,32 @@ export default function SpacesModal({ open, onClose, spaceId }: Props) {
       onClose();
     } catch (e: any) {
       console.error("[ReserveModal create]", e);
-      alert(e?.message || t("errors.submitFailed"));
+      const parsed = (() => {
+        const raw = e?.message;
+        if (typeof raw === "string") {
+          try {
+            const data = JSON.parse(raw);
+            const err = data?.error;
+            if (err && (err.code || err.message)) {
+              return { code: err.code as string | undefined, message: err.message as string | undefined };
+            }
+          } catch {}
+        }
+        if (e?.error?.code || e?.error?.message) {
+          return { code: e.error.code as string | undefined, message: e.error.message as string | undefined };
+        }
+        if (e?.body?.error?.code || e?.body?.error?.message) {
+          return { code: e.body.error.code as string | undefined, message: e.body.error.message as string | undefined };
+        }
+        return { message: e?.message as string | undefined };
+      })();
+
+      if (parsed.code === "STUDY_RENTAL_NOT_TIME") {
+        toast.error(parsed.message || "해당 시간에는 예약 할 수 없습니다.");
+        return;
+      }
+
+      alert(parsed.message || t("errors.submitFailed"));
     } finally {
       setSubmittingRoomId(null);
     }

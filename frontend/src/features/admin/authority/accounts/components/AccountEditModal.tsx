@@ -429,6 +429,7 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
     if (!isValidEmail(form.email)) return false;
     if (!isValidPhone(form.phone)) return false;
     if (!isValidPassword(form.newPassword)) return false;
+    if (form.accountType === "ADMIN") return false;
 
     if (form.accountType === "STUDENT") {
       if (!form.deptId) return false;
@@ -449,25 +450,12 @@ export default function AccountEditModal({ open, accountId, onClose, onSaved }: 
 
   const onSubmit = async () => {
     if (!accountId || !canSave) return;
+    if (form.accountType === "ADMIN") return;
 
     setSaving(true);
     setError(null);
 
     try {
-      // ✅ ADMIN
-      if (form.accountType === "ADMIN") {
-        const body: any = {
-          status: form.status,
-          ...buildBaseProfile(),
-          memo: cleanStrOrNull(form.memo),
-          ...buildPasswordPart(),
-        };
-
-        await accountsApi.update(accountId, body);
-        await onSaved();
-        return;
-      }
-
       // ✅ PROFESSOR
       if (form.accountType === "PROFESSOR") {
         // ✅ profile 대신 professorProfile로 전송 (백엔드 DTO 차이 흡수)

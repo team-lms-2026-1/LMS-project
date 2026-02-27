@@ -52,6 +52,8 @@ export default function AccountTable({ rows, pendingIds, onToggleStatus, onClick
             rows.map((row) => {
               const p = pickProfile(row);
               const isPending = pendingIds.has(row.account.accountId);
+              const isAdminAccount = row.account.accountType === "ADMIN";
+              const disableMutations = isPending || isAdminAccount;
               const checked = row.account.status === "ACTIVE";
 
               return (
@@ -64,7 +66,7 @@ export default function AccountTable({ rows, pendingIds, onToggleStatus, onClick
                   <td>
                     <ToggleSwitch
                       checked={checked}
-                      disabled={isPending}
+                      disabled={disableMutations}
                       onChange={(chk) =>
                         onToggleStatus(
                           row.account.accountId,
@@ -75,12 +77,11 @@ export default function AccountTable({ rows, pendingIds, onToggleStatus, onClick
                     />
                   </td>
                   <td>
-                    {/* ✅ 공용 Button 교체 (secondary variant, small override) */}
                     <Button
                       variant="secondary"
                       className={styles.customTableBtn}
                       onClick={() => onClickEdit(row.account.accountId)}
-                      disabled={isPending}
+                      disabled={disableMutations}
                     >
                       {t("editButton")}
                     </Button>
