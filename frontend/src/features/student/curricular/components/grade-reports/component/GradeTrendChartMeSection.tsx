@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/i18n/useI18n";
-import { StudentGradeDetailHeaderDto } from "@/features/curricular-offering/api/types";
+import { StudentGradeDetailHeaderDto } from "@/features/admin/curricular-offering/api/types";
 import styles from "./GradeTrendChartMeSection.module.css";
 import { GradeTrendComposedMeChart } from "./GradeTrendComposedMeChart";
 

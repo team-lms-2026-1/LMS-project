@@ -1,4 +1,4 @@
-import AccountLogDetailPage from "@/features/systemStatus/accountLogs/components/AccountLogDetailPage";
+import AccountLogDetailPage from "@/features/admin/systemStatus/accountLogs/components/AccountLogDetailPage";
 
 type Props = { params: { accountId: string } };
 

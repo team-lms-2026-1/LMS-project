@@ -2,7 +2,7 @@
 
 import { Table, type TableColumn } from "@/components/table";
 import { useI18n } from "@/i18n/useI18n";
-import { StudentGradeDetailListDto } from "@/features/curricular-offering/api/types";
+import { StudentGradeDetailListDto } from "@/features/admin/curricular-offering/api/types";
 import styles from "./GradeDetailMeTable.module.css";
 
 type Props = {

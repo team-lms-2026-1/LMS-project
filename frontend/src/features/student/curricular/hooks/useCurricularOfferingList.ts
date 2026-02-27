@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CurricularOfferingListItemDto, PageMeta } from "../api/types";
 import { fetchCurricularDetailForm, fetchCurricularOfferingCompetency, fetchCurricularOfferingsList } from "../api/curricularApi";
-import { CurricularOfferingCompetencyDto, CurricularOfferingDetailDto } from "@/features/curricular-offering/api/types";
+import { CurricularOfferingCompetencyDto, CurricularOfferingDetailDto } from "@/features/admin/curricular-offering/api/types";
 
 const defaultMeta: PageMeta = {
   page: 1,

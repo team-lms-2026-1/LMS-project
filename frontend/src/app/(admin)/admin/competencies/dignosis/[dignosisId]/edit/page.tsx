@@ -1,4 +1,4 @@
-import DignosisEditPageClient from "@/features/competencies/diagnosis/components/modal/edit/DignosisEditPage.client";
+import DignosisEditPageClient from "@/features/admin/competencies/diagnosis/components/modal/edit/DignosisEditPage.client";
 
 type Props = {
   params: { dignosisId: string };

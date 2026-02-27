@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import styles from "../styles/studentMentoring.module.css";
-import { fetchRecruitments } from "@/features/mentoring/api/mentoringApi";
-import { MentoringRecruitment } from "@/features/mentoring/api/types";
+import { fetchRecruitments } from "@/features/admin/mentoring/api/mentoringApi";
+import { MentoringRecruitment } from "@/features/admin/mentoring/api/types";
 import toast from "react-hot-toast";
 import { Table } from "@/components/table/Table";
 import { PaginationSimple } from "@/components/pagination/PaginationSimple";
