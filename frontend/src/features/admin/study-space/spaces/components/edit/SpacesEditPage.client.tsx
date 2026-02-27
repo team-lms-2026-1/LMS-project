@@ -8,6 +8,7 @@ import { spacesApi } from "../../api/spacesApi";
 import type { SpaceDetailDto, SpaceRuleUpsertDto, UpdateSpaceDetailRequestDto } from "../../api/types";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 type Props = { spaceId: number };
 
@@ -27,6 +28,7 @@ function isImageFile(file: File) {
 
 export default function SpacesEditPageClient({ spaceId }: Props) {
   const router = useRouter();
+  const t = useI18n("studySpace.admin.spaces.edit");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -77,7 +79,7 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
         setRules(rs);
       } catch (e: any) {
         console.error("[SpacesEditPage]", e);
-        setError(e?.message || "상세 조회 중 오류가 발생했습니다.");
+        setError(e?.message || t("errors.loadFailed"));
       } finally {
         if (alive) setLoading(false);
       }
@@ -97,7 +99,7 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
   const onPickImage = (file: File | null) => {
     if (!file) return;
     if (!isImageFile(file)) {
-      alert("이미지 파일만 업로드할 수 있습니다.");
+      toast.error(t("errors.imageOnly"));
       return;
     }
     setImageFile(file);
@@ -165,7 +167,7 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
         if (i !== idx) return r;
         const nextContent = (r.draft ?? "").trim();
         if (!nextContent) {
-          alert("룰 내용을 입력하세요.");
+          toast.error(t("errors.ruleRequired"));
           return r;
         }
         return { ...r, content: nextContent, isEditing: false };
@@ -183,12 +185,12 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
 
   const onSubmit = async () => {
     if (rules.some((r) => r.isEditing)) {
-      toast.error("규칙이 수정 중입니다. 규칙을 저장후에 완료해주세요.");
+      toast.error(t("errors.editingExists"));
       return;
     }
-    if (!spaceName.trim()) return alert("공간 이름을 입력하세요.");
-    if (!location.trim()) return alert("위치를 입력하세요.");
-    if (!description.trim()) return alert("설명을 입력하세요.");
+    if (!spaceName.trim()) return toast.error(t("errors.nameRequired"));
+    if (!location.trim()) return toast.error(t("errors.locationRequired"));
+    if (!description.trim()) return toast.error(t("errors.descriptionRequired"));
 
     const cleanedRules = rules
       .map((r, i) => ({
@@ -215,7 +217,7 @@ export default function SpacesEditPageClient({ spaceId }: Props) {
       router.refresh();
     } catch (e: any) {
       console.error("[SpacesEdit submit]", e);
-      toast.error(e?.message || "수정 중 오류가 발생했습니다.");
+      toast.error(e?.message || t("errors.submitFailed"));
     } finally {
       setSaving(false);
     }

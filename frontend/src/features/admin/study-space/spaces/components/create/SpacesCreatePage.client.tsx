@@ -8,6 +8,7 @@ import { spacesApi } from "../../api/spacesApi";
 import type { CreateSpaceDetailRequestDto, SpaceRuleUpsertDto } from "../../api/types";
 import { Button } from "@/components/button";
 import toast from "react-hot-toast";
+import { useI18n } from "@/i18n/useI18n";
 
 type RuleRowState = {
   content: string;
@@ -24,6 +25,7 @@ function isImageFile(file: File) {
 
 export default function SpacesCreatePageClient() {
   const router = useRouter();
+  const t = useI18n("studySpace.admin.spaces.create");
 
   const [saving, setSaving] = useState(false);
 
@@ -47,7 +49,7 @@ export default function SpacesCreatePageClient() {
   const onPickImage = (file: File | null) => {
     if (!file) return;
     if (!isImageFile(file)) {
-      toast.error("이미지 파일만 업로드할 수 있습니다.");
+      toast.error(t("errors.imageOnly"));
       return;
     }
     // ✅ 1개만: 새로 선택하면 교체
@@ -114,7 +116,7 @@ export default function SpacesCreatePageClient() {
         if (i !== idx) return r;
         const nextContent = (r.draft ?? "").trim();
         if (!nextContent) {
-          toast.error("룰 내용을 입력하세요.");
+          toast.error(t("errors.ruleRequired"));
           return r;
         }
         return { ...r, content: nextContent, isEditing: false };
@@ -132,9 +134,9 @@ export default function SpacesCreatePageClient() {
   };
 
   const onSubmit = async () => {
-    if (!spaceName.trim()) return toast.error("공간 이름을 입력하세요.");
-    if (!location.trim()) return toast.error("위치를 입력하세요.");
-    if (!description.trim()) return toast.error("설명을 입력하세요.");
+    if (!spaceName.trim()) return toast.error(t("errors.nameRequired"));
+    if (!location.trim()) return toast.error(t("errors.locationRequired"));
+    if (!description.trim()) return toast.error(t("errors.descriptionRequired"));
 
     // ✅ 룰 정리(공백 제거)
     const cleanedRules = rules
@@ -168,7 +170,7 @@ export default function SpacesCreatePageClient() {
       router.refresh();
     } catch (e: any) {
       console.error("[SpacesCreate submit]", e);
-      toast.error(e?.message || "등록 중 오류가 발생했습니다.");
+      toast.error(e?.message || t("errors.submitFailed"));
     } finally {
       setSaving(false);
     }
