@@ -18,12 +18,14 @@ const clampText = (value: string, max: number) => Array.from(value ?? "").slice(
 export default function FaqCreatePageClient() {
   const router = useRouter();
   const t = useI18n("community.faqs.admin.create");
+  const listI18n = useI18n("community.faqs.admin.list");
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<string>("");
+  const [categoryTouched, setCategoryTouched] = useState(false);
   const [loadingCats, setLoadingCats] = useState(false);
 
   const [saving, setSaving] = useState(false);
@@ -49,7 +51,8 @@ export default function FaqCreatePageClient() {
         if (!alive) return;
 
         setCategories(list);
-        if (!categoryId && list.length > 0) setCategoryId(String(list[0].categoryId));
+        setCategoryId("");
+        setCategoryTouched(false);
       } catch {
         if (!alive) return;
         setCategories([]);
@@ -182,9 +185,11 @@ export default function FaqCreatePageClient() {
   return (
     <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <span className={styles.homeIcon}>&gt;</span>
+        <span className={styles.crumb} onClick={() => guardNavigate(LIST_PATH)}>
+          {listI18n("title")}
+        </span>
         <span className={styles.sep}>&gt;</span>
-        <strong>{t("breadcrumbTitle")}</strong>
+        <span className={styles.current}>{t("title")}</span>
       </div>
 
       <div className={styles.card}>
@@ -213,8 +218,11 @@ export default function FaqCreatePageClient() {
 
                 <select
                   className={styles.categorySelect}
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
+                  value={categoryTouched ? categoryId : ""}
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    setCategoryTouched(true);
+                  }}
                   disabled={saving || loadingCats}
                 >
                   <option value="">{loadingCats ? t("placeholders.categoryLoading") : t("placeholders.category")}</option>

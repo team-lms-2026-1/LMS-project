@@ -38,7 +38,7 @@ export default function RentalsTable({ data, loading, onApprove, onReject }: Pro
       <tbody className={styles.tbody}>
         {sorted.map((item) => (
           <tr key={item.rentalId}>
-            <td className={styles.td}>{String(item.rentalId).padStart(5, "0")}</td>
+            <td className={styles.td}>{item.rentalId}</td>
             <td className={styles.td}>{item.space.spaceName}</td>
             <td className={styles.td}>{item.room.roomName}</td>
             <td className={styles.td} style={{ fontWeight: "bold" }}>

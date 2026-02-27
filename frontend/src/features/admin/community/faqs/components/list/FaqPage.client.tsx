@@ -102,6 +102,10 @@ export default function FaqPageClient() {
     setFilters({ categoryId: nextValue || null });
   };
 
+  const sortedItems = useMemo(() => {
+    return [...state.items].sort((a, b) => (b.faqId ?? 0) - (a.faqId ?? 0));
+  }, [state.items]);
+
   return (
     <div className={styles.page}>
       <div className={styles.card}>
@@ -132,7 +136,7 @@ export default function FaqPageClient() {
 
         {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
-        <FaqsTable items={state.items} loading={state.loading} onReload={actions.reload} />
+        <FaqsTable items={sortedItems} loading={state.loading} onReload={actions.reload} />
 
         <div className={styles.footerRow}>
           <div className={styles.footerLeft}>
