@@ -20,11 +20,12 @@ interface Props {
     loading: boolean;
     page: number;
     size: number;
+    totalCount: number;
     onEditClick: (id: number) => void;
     onDeleteClick: (id: number) => void;
 }
 
-export function SurveysTable({ items, loading, page, size, onEditClick, onDeleteClick }: Props) {
+export function SurveysTable({ items, loading, page, size, totalCount, onEditClick, onDeleteClick }: Props) {
     const tTable = useI18n("survey.admin.table");
     const tTypes = useI18n("survey.common.types");
     const tStatus = useI18n("survey.common.status");
@@ -43,7 +44,7 @@ export function SurveysTable({ items, loading, page, size, onEditClick, onDelete
             field: "surveyId",
             width: "60px",
             align: "center",
-            render: (_, idx) => String((idx + 1) + (page - 1) * size),
+            render: (_, idx) => String(totalCount - (page - 1) * size - idx),
         },
         {
             header: tTable("headers.type"),
