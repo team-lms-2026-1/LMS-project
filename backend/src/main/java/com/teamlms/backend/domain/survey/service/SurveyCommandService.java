@@ -14,6 +14,7 @@ import com.teamlms.backend.domain.survey.enums.*;
 import com.teamlms.backend.domain.survey.repository.*;
 import com.teamlms.backend.global.exception.base.BusinessException;
 import com.teamlms.backend.global.exception.code.ErrorCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class SurveyCommandService {
     private final SurveyTargetRepository targetRepository;
     private final AccountRepository accountRepository;
     private final AlarmCommandService alarmCommandService;
+    private final ObjectMapper objectMapper;
 
     // 1. 설문 생성
     public void createAndPublishSurvey(Long accountId, SurveyCreateRequest request) {
@@ -43,6 +45,15 @@ public class SurveyCommandService {
 
         if (request.endAt().isBefore(request.startAt())) {
             throw new BusinessException(ErrorCode.SURVEY_DATE_INVALID);
+        }
+
+        String targetMemo = null;
+        if (request.targetFilter() != null) {
+            try {
+                targetMemo = objectMapper.writeValueAsString(request.targetFilter());
+            } catch (Exception e) {
+                log.warn("Failed to serialize targetFilter", e);
+            }
         }
 
         Survey survey = Survey.builder()
@@ -53,6 +64,7 @@ public class SurveyCommandService {
                 .endAt(request.endAt())
                 .status(SurveyStatus.OPEN)
                 .targetGenType(request.targetFilter() != null ? request.targetFilter().genType() : SurveyTargetGenType.ALL)
+                .targetConditionMemo(targetMemo)
                 .build();
 
         Survey savedSurvey = surveyRepository.save(survey);

@@ -3,6 +3,7 @@ package com.teamlms.backend.domain.survey.api;
 import com.teamlms.backend.domain.survey.api.dto.*;
 import com.teamlms.backend.domain.survey.enums.SurveyStatus;
 import com.teamlms.backend.domain.survey.enums.SurveyType;
+import com.teamlms.backend.domain.survey.enums.SurveyTargetStatus;
 import com.teamlms.backend.domain.survey.service.SurveyCommandService;
 import com.teamlms.backend.domain.survey.service.SurveyQueryService;
 import com.teamlms.backend.global.api.ApiResponse;
@@ -110,6 +111,7 @@ public class AdminSurveyController {
     public ApiResponse<List<SurveyParticipantResponse>> participants(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable Long surveyId,
+            @RequestParam(required = false) SurveyTargetStatus status,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
@@ -122,7 +124,7 @@ public class AdminSurveyController {
                 Sort.by(Sort.Direction.DESC, "targetId")
         );
 
-        Page<SurveyParticipantResponse> result = queryService.getSurveyParticipants(surveyId, pageable);
+        Page<SurveyParticipantResponse> result = queryService.getSurveyParticipants(surveyId, status, pageable);
         return ApiResponse.of(result.getContent(), PageMeta.from(result));
     }
 }

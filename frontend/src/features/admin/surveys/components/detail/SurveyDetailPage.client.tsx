@@ -111,19 +111,18 @@ export default function SurveyDetailPageClient({ id }: Props) {
                     </div>
                 </section>
 
-                {isNew && (
-                    <section className={styles.sectionCard}>
-                        <h2 className={styles.sectionTitle}>{tDetail("sections.target")}</h2>
-                        <TargetSelector
-                            targetType={targetType}
-                            setTargetType={actions.setTargetType}
-                            selectedDeptIds={selectedDeptIds}
-                            setSelectedDeptIds={actions.setSelectedDeptIds}
-                            selectedGrades={selectedGrades}
-                            setSelectedGrades={actions.setSelectedGrades}
-                        />
-                    </section>
-                )}
+                <section className={styles.sectionCard}>
+                    <h2 className={styles.sectionTitle}>{tDetail("sections.target")}</h2>
+                    <TargetSelector
+                        targetType={targetType}
+                        setTargetType={actions.setTargetType}
+                        selectedDeptIds={selectedDeptIds}
+                        setSelectedDeptIds={actions.setSelectedDeptIds}
+                        selectedGrades={selectedGrades}
+                        setSelectedGrades={actions.setSelectedGrades}
+                        disabled={!isNew}
+                    />
+                </section>
 
                 <section className={styles.sectionCard}>
                     <div className={styles.sectionHeader}>

@@ -187,6 +187,22 @@
         "sectionTitle": "設問別回答詳細",
         "noEssay": "回答がありません。",
         "responseCount": "回答数"
+      },
+      "participants": {
+        "viewTargets": "対象者を見る",
+        "viewSubmitters": "回答者を見る",
+        "viewPending": "未回答者を見る",
+        "modalTitleTargets": "全体対象者一覧",
+        "modalTitleSubmitters": "回答完了者一覧",
+        "modalTitlePending": "未回答者一覧",
+        "closeButton": "閉じる",
+        "headers": {
+          "dept": "学科",
+          "grade": "学年",
+          "name": "氏名"
+        },
+        "empty": "リストがありません。",
+        "errorLoad": "リストの読み込みに失敗しました。"
       }
     }
   },

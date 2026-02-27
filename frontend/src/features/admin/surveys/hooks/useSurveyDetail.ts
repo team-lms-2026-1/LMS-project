@@ -54,6 +54,12 @@ export function useSurveyDetail(idStr: string | undefined) {
 
             const fmt = (s: string) => s.replace(" ", "T");
             setDates({ startAt: fmt(data.startAt), endAt: fmt(data.endAt) });
+
+            if (data.targetFilter) {
+                setTargetType(data.targetFilter.genType || "ALL");
+                setSelectedDeptIds(data.targetFilter.deptIds || []);
+                setSelectedGrades(data.targetFilter.gradeLevels || []);
+            }
         } catch (e) {
             console.error(e);
             toast.error(t("messages.loadFailed"));

@@ -12,6 +12,7 @@ interface Props {
     setSelectedDeptIds: (ids: number[]) => void;
     selectedGrades: number[];
     setSelectedGrades: (grades: number[]) => void;
+    disabled?: boolean;
 }
 
 const GRADES = [1, 2, 3, 4];
@@ -22,7 +23,8 @@ export function TargetSelector({
     selectedDeptIds,
     setSelectedDeptIds,
     selectedGrades,
-    setSelectedGrades
+    setSelectedGrades,
+    disabled
 }: Props) {
     const t = useI18n("survey.admin.targetSelector");
     const { options: deptOptions } = useDeptsDropdownOptions();
@@ -58,6 +60,7 @@ export function TargetSelector({
                         name="targetType"
                         checked={targetType === "ALL"}
                         onChange={() => setTargetType("ALL")}
+                        disabled={disabled}
                     />
                     {t("targetType.ALL")}
                 </label>
@@ -67,6 +70,7 @@ export function TargetSelector({
                         name="targetType"
                         checked={targetType === "DEPT"}
                         onChange={() => setTargetType("DEPT")}
+                        disabled={disabled}
                     />
                     {t("targetType.DEPT")}
                 </label>
@@ -76,6 +80,7 @@ export function TargetSelector({
                         name="targetType"
                         checked={targetType === "GRADE"}
                         onChange={() => setTargetType("GRADE")}
+                        disabled={disabled}
                     />
                     {t("targetType.GRADE")}
                 </label>
@@ -85,6 +90,7 @@ export function TargetSelector({
                         name="targetType"
                         checked={targetType === "DEPT_GRADE"}
                         onChange={() => setTargetType("DEPT_GRADE")}
+                        disabled={disabled}
                     />
                     {t("targetType.DEPT_GRADE")}
                 </label>
@@ -96,7 +102,7 @@ export function TargetSelector({
                         {targetType === "DEPT_GRADE" ? t("guides.deptStep1") : t("guides.dept")}
                     </p>
 
-                    <div style={{ maxWidth: '300px', marginBottom: '12px' }}>
+                    <div style={{ maxWidth: '300px', marginBottom: '12px', opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? 'none' : 'auto' }}>
                         <DeptFilterDropdown
                             value=""
                             onChange={(val) => {
@@ -111,9 +117,10 @@ export function TargetSelector({
                                 key={deptId}
                                 type="button"
                                 className={`${styles.chip} ${styles.chipActive}`}
-                                onClick={() => removeDept(deptId)}
+                                onClick={() => !disabled && removeDept(deptId)}
+                                disabled={disabled}
                             >
-                                {getDeptName(deptId)} ✕
+                                {getDeptName(deptId)} {disabled ? '' : '✕'}
                             </button>
                         ))}
                         {selectedDeptIds.length === 0 && (
@@ -134,7 +141,8 @@ export function TargetSelector({
                                 key={grade}
                                 type="button"
                                 className={`${styles.chip} ${selectedGrades.includes(grade) ? styles.chipActive : ''}`}
-                                onClick={() => toggleGrade(grade)}
+                                onClick={() => !disabled && toggleGrade(grade)}
+                                disabled={disabled}
                             >
                                 {t("gradeLabel", { grade })}
                             </button>

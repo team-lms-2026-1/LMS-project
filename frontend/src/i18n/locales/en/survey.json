@@ -187,6 +187,22 @@
         "sectionTitle": "Question Response Details",
         "noEssay": "No responses.",
         "responseCount": "Response Count"
+      },
+      "participants": {
+        "viewTargets": "View Targets",
+        "viewSubmitters": "View Respondents",
+        "viewPending": "View Non-participants",
+        "modalTitleTargets": "Total Targets List",
+        "modalTitleSubmitters": "Respondents List",
+        "modalTitlePending": "Non-participants List",
+        "closeButton": "Close",
+        "headers": {
+          "dept": "Department",
+          "grade": "Grade",
+          "name": "Name"
+        },
+        "empty": "No items found.",
+        "errorLoad": "Failed to load the list."
       }
     }
   },

@@ -19,6 +19,7 @@ public record SurveyDetailResponse(
         LocalDateTime startAt,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
         LocalDateTime endAt,
+        SurveyTargetFilterDto targetFilter,
         List<QuestionResponseDto> questions
 ) {
     @Builder
