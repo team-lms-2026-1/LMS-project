@@ -12,7 +12,7 @@ import { accountsApi } from "../api/accountsApi";
 import type { AccountRowDto } from "../api/dto";
 
 import { PaginationSimple, useListQuery } from "@/components/pagination";
-import { Button } from "@/components/button/Button"; // ✅
+import { Button } from "@/components/button/Button";
 import { useI18n } from "@/i18n/useI18n";
 
 type RoleFilter = "ALL" | AccountType;
@@ -226,6 +226,8 @@ export default function AccountListPage() {
   const onToggleStatus = async (accountId: number, current: AccountStatus, next: AccountStatus) => {
     if (current === next) return;
     if (pendingIds.has(accountId)) return;
+    const target = rows.find((r) => r.account.accountId === accountId);
+    if (target?.account.accountType === "ADMIN") return;
 
     setRows((prev) =>
       prev.map((r) =>
@@ -291,6 +293,8 @@ export default function AccountListPage() {
             pendingIds={pendingIds}
             onToggleStatus={onToggleStatus}
             onClickEdit={(accountId) => {
+              const target = displayRows.find((r) => r.account.accountId === accountId);
+              if (target?.account.accountType === "ADMIN") return;
               setEditingAccountId(accountId);
               setEditOpen(true);
             }}

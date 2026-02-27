@@ -5,7 +5,10 @@
       "student": "메인 페이지로 이동",
       "admin": "관리자 메인으로 이동",
       "professor": "교수 메인으로 이동"
-    }
+    },
+    "sidebarTitleStudent": "학생 메뉴",
+    "sidebarTitleProfessor": "교수 메뉴",
+    "sidebarTitleAdmin": "관리자 메뉴"
   },
   "student": {
     "sections": {

@@ -55,7 +55,7 @@ export default function ProfessorSidebar() {
   return (
     <div className={styles.sidebarInner}>
       <div className={styles.sidebarHeader}>
-        <div className={styles.sidebarTitle}>{tCommon("sidebarTitle")}</div>
+        <div className={styles.sidebarTitle}>{tCommon("sidebarTitleProfessor")}</div>
         <Link href="/professor" className={styles.headerLogoLink}>
           <img src="/logo.png" alt={tCommon("logoAlt.professor")} className={styles.headerLogoImage} />
         </Link>
