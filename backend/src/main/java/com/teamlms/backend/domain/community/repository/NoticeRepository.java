@@ -3,6 +3,7 @@ package com.teamlms.backend.domain.community.repository;
 import com.teamlms.backend.domain.community.entity.Notice;
 import com.teamlms.backend.domain.community.entity.NoticeCategory;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,6 +31,13 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
                                     @Param("startOfDay") LocalDateTime startOfDay,
                                     @Param("endOfDay") LocalDateTime endOfDay,
                                     Pageable pageable);
+
+    // 학생/교수 수신자에 대한 미처리 알림
+    @Query("SELECT n FROM Notice n " +
+           "WHERE n.alarmSentAt IS NULL " +
+           "AND (n.displayStartAt IS NULL OR n.displayStartAt <= :now) " +
+           "AND (n.displayEndAt IS NULL OR n.displayEndAt >= :now)")
+    List<Notice> findPendingAlarmNotices(@Param("now") LocalDateTime now);
 
     // 2. 카테고리별 게시글 수 카운트 (목록 조회 시 사용)
     long countByCategory(NoticeCategory category);
