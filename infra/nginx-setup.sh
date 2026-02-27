@@ -30,7 +30,7 @@ echo "=============================="
 # 기본 conf 파일 비활성화 (포트 80 충돌 방지)
 sudo rm -f /etc/nginx/conf.d/default.conf
 
-# LMS 전용 Nginx 설정 작성
+# LMS 전용 Nginx 설정  작성
 sudo tee /etc/nginx/conf.d/lms.conf > /dev/null << EOF
 server {
     listen 80;
