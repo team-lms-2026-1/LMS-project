@@ -360,5 +360,114 @@
         "updateFailed": "状態変更に失敗しました。"
       }
     }
+  },
+  "studentOfferingDetail": {
+    "page": {
+      "loading": "読み込み中...",
+      "loadError": "エラーが発生しました。",
+      "empty": "データがありません。",
+      "title": "課外",
+      "backButton": "一覧へ"
+    },
+    "tabs": {
+      "detail": "詳細",
+      "session": "回次",
+      "competencies": "コンピテンシー"
+    },
+    "detail": {
+      "sections": {
+        "program": "課外",
+        "operation": "運営",
+        "contact": "担当者",
+        "remark": "備考"
+      },
+      "fields": {
+        "programCode": "課外コード",
+        "programName": "課外名",
+        "hostOrgName": "主管機関",
+        "offeringCode": "運営コード",
+        "rewardPoint": "ポイント",
+        "recognizedHours": "認定時間",
+        "enrolledCount": "登録人数",
+        "semester": "学期",
+        "operationStartDate": "運営開始日",
+        "operationEndDate": "運営終了日",
+        "contactName": "担当者名",
+        "contactPhone": "担当者電話",
+        "contactEmail": "担当者メール",
+        "description": "説明"
+      },
+      "buttons": {
+        "apply": "申込"
+      },
+      "messages": {
+        "missingOfferingId": "運営IDがないため申込できません。",
+        "applySuccess": "申込が完了しました。",
+        "applyFailed": "申込に失敗しました。"
+      }
+    },
+    "sessions": {
+      "headers": {
+        "sessionName": "回次名",
+        "rewardPoint": "ポイント",
+        "recognizedHours": "認定時間",
+        "startAt": "開始日時",
+        "endAt": "終了日時",
+        "status": "状態",
+        "manage": "管理"
+      },
+      "buttons": {
+        "detail": "詳細",
+        "close": "閉じる"
+      },
+      "emptyText": "回次がありません。"
+    },
+    "competencies": {
+      "labels": {
+        "hostOrgName": "主管機関",
+        "mainCompetencies": "主要コンピテンシー"
+      },
+      "titles": {
+        "mapping": "コンピテンシーマッピング",
+        "radar": "コンピテンシーマッピング レーダーチャート"
+      },
+      "messages": {
+        "loading": "読み込み中...",
+        "loadError": "照会失敗",
+        "readonly": "学生ページでは修正できません。"
+      }
+    },
+    "radar": {
+      "empty": "コンピテンシー点数を登録してください。",
+      "tooltip": "{value}点"
+    },
+    "sessionDetail": {
+      "loading": "読み込み中...",
+      "loadError": "回次情報を読み込めませんでした。",
+      "labels": {
+        "period": "期間",
+        "play": "再生",
+        "video": "動画",
+        "rewardPoint": "ポイント",
+        "recognizedHours": "認定時間",
+        "playbackDuration": "再生時間",
+        "attendance": "出席",
+        "attendanceCompleted": "完了",
+        "attendanceIncomplete": "未完了"
+      },
+      "messages": {
+        "attendanceLoading": "出席処理中...",
+        "attendanceSuccess": "出席処理完了",
+        "attendanceFailed": "出席処理に失敗しました。",
+        "clickToPlay": "クリックして再生",
+        "noPlayableVideo": "再生可能な動画がありません"
+      },
+      "dialog": {
+        "title": "出席チェック",
+        "description": "動画視聴が完了しました。出席チェックしますか？",
+        "confirmText": "出席チェック",
+        "cancelText": "取消"
+      }
+    }
   }
 }

@@ -1,8 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import styles from "@/features/student/curricular/components/detail/OfferingCompetenciesSection.module.css";
-import { OfferingCompetencyRadarChart } from "@/features/student/curricular/components/detail/components/OfferingCompetencyRadarChart";
+import { useI18n } from "@/i18n/useI18n";
+import { useLocale } from "@/hooks/useLocale";
+import {
+  getLocalizedCompetencyDescription,
+  getLocalizedCompetencyName,
+} from "@/features/admin/competencies/utils/competencyLocale";
+import styles from "./ExtraOfferingCompetenciesSection.module.css";
+import { OfferingCompetencyRadarChart } from "./components/OfferingCompetencyRadarChart";
 
 import type { ExtraCurricularOfferingDetailDto } from "../../api/types";
 import { useStudentExtraOfferingCompetencyMapping } from "../../hooks/useExtraCurricularOfferingList";
@@ -13,6 +19,8 @@ type Props = {
 };
 
 export function StudentExtraOfferingCompetenciesSection({ offeringId, data }: Props) {
+  const t = useI18n("extraCurricular.studentOfferingDetail.competencies");
+  const { locale } = useLocale();
   const { state } = useStudentExtraOfferingCompetencyMapping(offeringId);
   const { data: mappingData, loading, error } = state;
 
@@ -41,32 +49,41 @@ export function StudentExtraOfferingCompetenciesSection({ offeringId, data }: Pr
       .slice(0, 2);
   }, [mappingData]);
 
+  const getCompetencyName = (code: string, fallback: string) =>
+    getLocalizedCompetencyName(code, locale, fallback);
+
+  const getCompetencyDescription = (code: string, fallback: string) =>
+    getLocalizedCompetencyDescription(code, locale, fallback);
+
   return (
     <div className={styles.wrap}>
       <div className={styles.section}>
         <Header title={`${data.extraCurricularName} (${data.extraOfferingCode} / ${data.semesterDisplayName})`} />
         <div className={styles.body}>
-          <span>주관기관 : {data.hostContactName}</span>
+          <span>{t("labels.hostOrgName")} : {data.hostContactName}</span>
           <span>
-            주역량:{" "}
-            {mainCompetencies.length ? mainCompetencies.map((c) => c.name).join(", ") : "-"}
+            {t("labels.mainCompetencies")} :{" "}
+            {mainCompetencies.length
+              ? mainCompetencies.map((c) => getCompetencyName(c.code, c.name)).join(", ")
+              : "-"}
           </span>
         </div>
       </div>
 
       <div className={styles.mainRow}>
         <div className={`${styles.section} ${styles.leftCol}`}>
-          <Header title="역량 매핑" />
+          <Header title={t("titles.mapping")} />
           <div className={styles.body}>
-            {loading ? <div>불러오는 중..</div> : null}
-            {error ? <div>조회 실패</div> : null}
+            {loading ? <div>{t("messages.loading")}</div> : null}
+            {error ? <div>{t("messages.loadError")}</div> : null}
 
             {!loading && !error && mappingData?.length ? (
               <>
                 <ul className={styles.description}>
                   {mappingData.map((item) => (
                     <li key={item.competencyId}>
-                      <strong>{item.name}</strong> : {item.description}
+                      <strong>{getCompetencyName(item.code, item.name)}</strong> :{" "}
+                      {getCompetencyDescription(item.code, item.description)}
                     </li>
                   ))}
                 </ul>
@@ -78,7 +95,9 @@ export function StudentExtraOfferingCompetenciesSection({ offeringId, data }: Pr
                     return (
                       <div key={item.competencyId} className={styles.mappingCard}>
                         <div className={styles.mappingTop}>
-                          <div className={styles.mappingName}>{item.name}</div>
+                          <div className={styles.mappingName}>
+                            {getCompetencyName(item.code, item.name)}
+                          </div>
                         </div>
 
                         <div className={styles.scoreRow}>
@@ -93,7 +112,7 @@ export function StudentExtraOfferingCompetenciesSection({ offeringId, data }: Pr
                               ].join(" ")}
                               disabled
                               aria-disabled="true"
-                              title="학생 페이지에서는 수정할 수 없습니다."
+                              title={t("messages.readonly")}
                             >
                               {n}
                             </button>
@@ -109,7 +128,7 @@ export function StudentExtraOfferingCompetenciesSection({ offeringId, data }: Pr
         </div>
 
         <div className={`${styles.section} ${styles.rightCol}`}>
-          <Header title="역량매핑 레이더차트" />
+          <Header title={t("titles.radar")} />
           <div className={styles.body}>
             {!loading && !error && mappingData?.length ? (
               <OfferingCompetencyRadarChart items={mappingData} />

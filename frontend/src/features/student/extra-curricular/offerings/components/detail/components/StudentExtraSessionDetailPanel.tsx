@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StatusPill } from "@/components/status";
 import { ConfirmDialog } from "@/components/modal/ConfirmDialog";
+import { useI18n } from "@/i18n/useI18n";
 import toast from "react-hot-toast";
 
 import styles from "@/features/admin/extra-curricular/offerings/components/detail/components/ExtraSessionDetailPanel.module.css";
 import { markStudentExtraSessionAttendance } from "../../../api/extraCurricularApi";
 import { useStudentExtraSessionDetail } from "../../../hooks/useExtraCurricularOfferingList";
-import { extraSessionStatusLabel } from "../../../utils/extraStatusLabel";
 
 type Props = {
   offeringId: number;
@@ -23,6 +23,9 @@ export function StudentExtraSessionDetailPanel({
   isAttended,
   onAttended,
 }: Props) {
+  const t = useI18n("extraCurricular.studentOfferingDetail.sessionDetail");
+  const tSessionStatus = useI18n("extraCurricular.status.session");
+  const tAttendanceStatus = useI18n("extraCurricular.status.attended");
   const { state } = useStudentExtraSessionDetail(offeringId, sessionId);
   const { data, loading, error } = state;
 
@@ -38,9 +41,22 @@ export function StudentExtraSessionDetailPanel({
 
   const attendancePill = useMemo(() => {
     return isAttended
-      ? { status: "ACTIVE" as const, label: "출석완료" }
-      : { status: "INACTIVE" as const, label: "미출석" };
-  }, [isAttended]);
+      ? { status: "ACTIVE" as const, label: tAttendanceStatus("ATTENDED") }
+      : { status: "INACTIVE" as const, label: tAttendanceStatus("ABSENT") };
+  }, [isAttended, tAttendanceStatus]);
+
+  const sessionStatusLabel = (value: string) => {
+    switch (value) {
+      case "OPEN":
+        return tSessionStatus("OPEN");
+      case "CLOSED":
+        return tSessionStatus("CLOSED");
+      case "CANCELED":
+        return tSessionStatus("CANCELED");
+      default:
+        return value;
+    }
+  };
 
   useEffect(() => {
     setShowPlayer(false);
@@ -61,14 +77,14 @@ export function StudentExtraSessionDetailPanel({
   const handleConfirmAttendance = async () => {
     if (!data) return;
     setConfirmLoading(true);
-    const tId = toast.loading("출석 처리 중...");
+    const tId = toast.loading(t("messages.attendanceLoading"));
     try {
       await markStudentExtraSessionAttendance(offeringId, sessionId, watchedSeconds);
-      toast.success("출석 처리 완료", { id: tId });
+      toast.success(t("messages.attendanceSuccess"), { id: tId });
       setConfirmOpen(false);
       if (onAttended) await onAttended();
     } catch (e: any) {
-      const msg = e?.message || e?.error?.message || "출석 처리에 실패했습니다.";
+      const msg = e?.message || e?.error?.message || t("messages.attendanceFailed");
       toast.error(msg, { id: tId });
     } finally {
       setConfirmLoading(false);
@@ -76,11 +92,11 @@ export function StudentExtraSessionDetailPanel({
   };
 
   if (loading) {
-    return <div className={styles.msg}>불러오는 중...</div>;
+    return <div className={styles.msg}>{t("loading")}</div>;
   }
 
   if (error || !data) {
-    return <div className={`${styles.msg} ${styles.error}`}>회차 정보를 불러오지 못했습니다.</div>;
+    return <div className={`${styles.msg} ${styles.error}`}>{t("loadError")}</div>;
   }
 
   return (
@@ -89,7 +105,7 @@ export function StudentExtraSessionDetailPanel({
         <div className={styles.headLeft}>
           <div className={styles.title}>{data.sessionName}</div>
           <div className={styles.period}>
-            <span className={styles.periodLabel}>기간</span>
+            <span className={styles.periodLabel}>{t("labels.period")}</span>
             <span className={styles.periodValue}>
               {data.startAt} ~ {data.endAt}
             </span>
@@ -99,7 +115,7 @@ export function StudentExtraSessionDetailPanel({
         <div className={styles.topRight}>
           <StatusPill
             status={data.status as any}
-            label={extraSessionStatusLabel(data.status)}
+            label={sessionStatusLabel(data.status)}
           />
           <span style={{ marginLeft: 8 }}>
             <StatusPill {...attendancePill} />
@@ -116,7 +132,7 @@ export function StudentExtraSessionDetailPanel({
                 className={styles.playerCover}
                 onClick={() => canPlay && setShowPlayer(true)}
                 disabled={!canPlay}
-                aria-label="play"
+                aria-label={t("labels.play")}
               >
                 <div className={styles.coverCenter}>
                   <span className={styles.playCircle}>
@@ -124,7 +140,7 @@ export function StudentExtraSessionDetailPanel({
                   </span>
                 </div>
                 <div className={styles.coverHint}>
-                  {canPlay ? "클릭해서 재생" : "재생 가능한 영상이 없습니다"}
+                  {canPlay ? t("messages.clickToPlay") : t("messages.noPlayableVideo")}
                 </div>
               </button>
             ) : (
@@ -147,36 +163,38 @@ export function StudentExtraSessionDetailPanel({
 
       <div className={styles.bottom}>
         <div className={styles.metaTop}>
-          <span className={styles.videoLabel}>영상</span>
+          <span className={styles.videoLabel}>{t("labels.video")}</span>
           <span className={styles.videoTitle}>{data.video?.title ?? "-"}</span>
         </div>
 
         <div className={styles.metaRow}>
           <div className={styles.metaItem}>
-            <span className={styles.metaK}>포인트</span>
+            <span className={styles.metaK}>{t("labels.rewardPoint")}</span>
             <span className={styles.metaV}>{data.rewardPoint ?? 0}</span>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaK}>인정시간</span>
+            <span className={styles.metaK}>{t("labels.recognizedHours")}</span>
             <span className={styles.metaV}>{data.recognizedHours ?? 0}</span>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaK}>재생시간</span>
+            <span className={styles.metaK}>{t("labels.playbackDuration")}</span>
             <span className={styles.metaV}>{data.video?.durationSeconds ?? 0}s</span>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaK}>출석</span>
-            <span className={styles.metaV}>{isAttended ? "완료" : "미완료"}</span>
+            <span className={styles.metaK}>{t("labels.attendance")}</span>
+            <span className={styles.metaV}>
+              {isAttended ? t("labels.attendanceCompleted") : t("labels.attendanceIncomplete")}
+            </span>
           </div>
         </div>
       </div>
 
       <ConfirmDialog
         open={confirmOpen}
-        title="출석 체크"
-        description="영상 시청이 완료되었습니다. 출석체크하시겠습니까?"
-        confirmText="출석 체크"
-        cancelText="취소"
+        title={t("dialog.title")}
+        description={t("dialog.description")}
+        confirmText={t("dialog.confirmText")}
+        cancelText={t("dialog.cancelText")}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={handleConfirmAttendance}
         loading={confirmLoading}
