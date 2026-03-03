@@ -359,6 +359,60 @@
         "confirmText": "状態を変更しますか？（状態は元に戻せません）",
         "updateFailed": "状態変更に失敗しました。"
       }
+    },
+    "sessionCreateModal": {
+      "title": "回次作成",
+      "buttons": {
+        "create": "作成",
+        "cancel": "取消",
+        "pickFile": "ファイル選択",
+        "remove": "削除"
+      },
+      "sections": {
+        "watchPeriod": "視聴期間",
+        "video": "動画"
+      },
+      "fields": {
+        "sessionName": "回次名",
+        "rewardPoint": "ポイント",
+        "recognizedHours": "認定時間",
+        "durationSeconds": "再生時間(秒)",
+        "startDate": "開始日",
+        "endDate": "終了日",
+        "videoFile": "動画ファイル",
+        "videoTitle": "動画タイトル"
+      },
+      "placeholders": {
+        "sessionName": "例) 第1回",
+        "rewardPoint": "例) 10",
+        "recognizedHours": "例) 2",
+        "durationSeconds": "ファイル選択時に自動入力",
+        "startDate": "開始日を選択",
+        "endDate": "終了日を選択",
+        "videoTitle": "例) オリエンテーション案内"
+      },
+      "dropzone": {
+        "fileSelected": "ファイル選択済み",
+        "dragAndDrop": "動画をドラッグ&ドロップ",
+        "selectWithButton": "または下のボタンでファイルを選択してください。"
+      },
+      "hints": {
+        "videoTitle": "初期値はファイル名です。必要に応じて修正してください。"
+      },
+      "messages": {
+        "requiredSessionName": "回次名を入力してください。",
+        "requiredStartDate": "開始日を選択してください。",
+        "requiredEndDate": "終了日を選択してください。",
+        "invalidDateRange": "開始日は終了日より後にできません。",
+        "invalidRewardPoint": "ポイントは0以上で入力してください。",
+        "invalidRecognizedHours": "認定時間は0以上で入力してください。",
+        "requiredVideoFile": "動画ファイルをアップロードしてください。",
+        "requiredVideoTitle": "動画タイトルを入力してください。",
+        "invalidVideoDuration": "動画の長さを読み取れませんでした。ファイルを再選択してください。",
+        "fileUploadRejected": "ファイルをアップロードできません。",
+        "createSuccess": "回次が作成されました。",
+        "createFailed": "回次の作成に失敗しました。"
+      }
     }
   },
   "studentOfferingDetail": {
