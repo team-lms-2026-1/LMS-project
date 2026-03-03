@@ -4,6 +4,7 @@ import { Table, type TableColumn } from "@/components/table";
 import { Button } from "@/components/button";
 import { StatusPill } from "@/components/status";
 import { useI18n } from "@/i18n/useI18n";
+import { stripSemesterSuffix } from "@/features/admin/extra-curricular/offerings/utils/semesterDisplayName";
 import styles from "./StudentExtraEnrollmentsTable.module.css";
 import type { ExtraCurricularEnrollmentListItemDto } from "../../api/types";
 
@@ -44,7 +45,11 @@ export function StudentExtraCurricularEnrollmentsTable({
     { header: t("table.offeringCode"), align: "center", render: (row) => row.extraOfferingCode },
     { header: t("table.offeringName"), align: "center", render: (row) => row.extraOfferingName },
     { header: t("table.hostContactName"), align: "center", render: (row) => row.hostContactName },
-    { header: t("table.semesterName"), align: "center", render: (row) => row.semesterName },
+    {
+      header: t("table.semesterName"),
+      align: "center",
+      render: (row) => stripSemesterSuffix(row.semesterName),
+    },
     { header: t("table.rewardPoint"), align: "center", render: (row) => row.rewardPointDefault },
     { header: t("table.recognizedHours"), align: "center", render: (row) => row.recognizedHoursDefault },
     {
