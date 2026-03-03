@@ -413,6 +413,75 @@
         "createSuccess": "Session created successfully.",
         "createFailed": "Failed to create session."
       }
+    },
+    "sessionDetailPanel": {
+      "labels": {
+        "sessionFallback": "Session",
+        "watchPeriod": "Viewing Period",
+        "changeSessionStatus": "Change session status",
+        "status": "Status",
+        "collapse": "Collapse",
+        "play": "Play",
+        "video": "Video",
+        "pendingReplace": "Pending replacement",
+        "videoDuration": "Video Duration"
+      },
+      "fields": {
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "videoTitle": "Video Title"
+      },
+      "placeholders": {
+        "startDate": "Select start date",
+        "endDate": "Select end date"
+      },
+      "replace": {
+        "title": "Replace Video",
+        "hint": "Upload a file, then click Save to apply changes."
+      },
+      "dropzone": {
+        "uploading": "Uploading...",
+        "dragAndDropNewVideo": "Drag and drop a new video",
+        "selectWithButton": "Or select a file using the button."
+      },
+      "buttons": {
+        "pickFile": "Select File",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "edit": "Edit"
+      },
+      "messages": {
+        "editDisabledReason": "Editable only when offering status is IN_PROGRESS.",
+        "statusChangeDisabledReason": "Session status can be changed only when offering status is IN_PROGRESS.",
+        "statusChanged": "Session status has been changed.",
+        "statusChangeFailed": "Failed to change status.",
+        "requiredSessionName": "Please enter a session name.",
+        "requiredStartDate": "Please select a start date.",
+        "requiredEndDate": "Please select an end date.",
+        "invalidDateRange": "Start date cannot be later than end date.",
+        "invalidRewardPoint": "Points must be 0 or greater.",
+        "invalidRecognizedHours": "Recognized hours must be 0 or greater.",
+        "waitUpload": "Please wait until video upload is complete.",
+        "uploadSuccess": "Video upload complete. Click Save to apply.",
+        "uploadFailed": "Video upload failed.",
+        "noChanges": "No changes detected.",
+        "updateSuccess": "Session has been updated.",
+        "updateFailed": "Update failed.",
+        "loading": "Loading...",
+        "clickToPlay": "Click to play",
+        "cannotPlay": "Cannot play",
+        "pendingCanceled": "Canceled pending video replacement."
+      },
+      "cancelDialog": {
+        "title": "Cancel Session",
+        "descriptionLine1": "Change this session to CANCELED?",
+        "descriptionLine2": "Canceling may clear completion history.",
+        "confirmText": "Cancel Session",
+        "cancelText": "Close"
+      }
     }
   },
   "studentOfferingDetail": {

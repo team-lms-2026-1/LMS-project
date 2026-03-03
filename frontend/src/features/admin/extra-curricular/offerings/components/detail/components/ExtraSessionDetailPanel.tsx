@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 
 import styles from "./ExtraSessionDetailPanel.module.css"
+import { useI18n } from "@/i18n/useI18n";
 
 import { DatePickerInput } from "@/features/admin/authority/semesters/components/ui/DatePickerInput";
 import { Dropdown, type DropdownOption } from "@/features/dropdowns/_shared/Dropdown";
@@ -130,16 +131,18 @@ export function ExtraSessionDetailPanel({
   onClose,
   onReloadList,
 }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.sessionDetailPanel");
+  const tStatus = useI18n("extraCurricular.status.session");
   const { state, actions } = useExtraSessionDetail(offeringId, sessionId, true);
 
   // ✅ 수정은 offeringStatus === "IN_PROGRESS" 일 때만
   const isEditable = offeringStatus === "IN_PROGRESS";
-  const editDisabledReason = !isEditable ? "운영 상태가 IN_PROGRESS일 때만 수정할 수 있습니다." : "";
+  const editDisabledReason = !isEditable ? t("messages.editDisabledReason") : "";
 
   // ✅ 상태변경은 offeringStatus === "IN_PROGRESS" 일 때만
   const isStatusChangeable = offeringStatus === "IN_PROGRESS";
   const statusDisabledReason = !isStatusChangeable
-    ? "운영 상태가 IN_PROGRESS일 때만 세션 상태를 변경할 수 있습니다."
+    ? t("messages.statusChangeDisabledReason")
     : "";
 
   // ✅ 슬라이드 닫힘
@@ -202,11 +205,11 @@ export function ExtraSessionDetailPanel({
 
   const statusOptions: DropdownOption[] = useMemo(
     () => [
-      { value: "OPEN", label: "OPEN(진행)" },
-      { value: "CLOSED", label: "CLOSED(마감)" },
-      { value: "CANCELED", label: "CANCELED(취소)" },
+      { value: "OPEN", label: `OPEN(${tStatus("OPEN")})` },
+      { value: "CLOSED", label: `CLOSED(${tStatus("CLOSED")})` },
+      { value: "CANCELED", label: `CANCELED(${tStatus("CANCELED")})` },
     ],
-    []
+    [tStatus]
   );
 
   // ✅ 상태 변경 가능 조건 (IN_PROGRESS + 기타 충돌 방지)
@@ -236,14 +239,14 @@ export function ExtraSessionDetailPanel({
         targetStatus: target,
       });
 
-      toast.success("세션 상태가 변경되었습니다.");
+      toast.success(t("messages.statusChanged"));
       setSessionStatus(target);
 
       await actions.reload();
       await onReloadList?.();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.error?.message ?? e?.message ?? "상태 변경 실패");
+      toast.error(e?.error?.message ?? e?.message ?? t("messages.statusChangeFailed"));
       setSessionStatus((data as any).status ?? "");
     } finally {
       setChangingStatus(false);
@@ -300,13 +303,13 @@ export function ExtraSessionDetailPanel({
   };
 
   const validate = () => {
-    if (!sessionName.trim()) return "회차명을 입력하세요.";
-    if (!startDate) return "시작일을 선택하세요.";
-    if (!endDate) return "종료일을 선택하세요.";
-    if (startDate > endDate) return "시작일은 종료일보다 늦을 수 없습니다.";
-    if (rewardPoint < 0) return "포인트는 0 이상이어야 합니다.";
-    if (recognizedHours < 0) return "인정시간은 0 이상이어야 합니다.";
-    if (uploadingVideo) return "영상 업로드가 끝날 때까지 기다려 주세요.";
+    if (!sessionName.trim()) return t("messages.requiredSessionName");
+    if (!startDate) return t("messages.requiredStartDate");
+    if (!endDate) return t("messages.requiredEndDate");
+    if (startDate > endDate) return t("messages.invalidDateRange");
+    if (rewardPoint < 0) return t("messages.invalidRewardPoint");
+    if (recognizedHours < 0) return t("messages.invalidRecognizedHours");
+    if (uploadingVideo) return t("messages.waitUpload");
     return null;
   };
 
@@ -353,10 +356,10 @@ export function ExtraSessionDetailPanel({
         durationSeconds: dur,
       });
 
-      toast.success("영상 업로드 완료. 저장을 누르면 반영됩니다.");
+      toast.success(t("messages.uploadSuccess"));
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.error?.message ?? e?.message ?? "영상 업로드 실패");
+      toast.error(e?.error?.message ?? e?.message ?? t("messages.uploadFailed"));
     } finally {
       setUploadingVideo(false);
     }
@@ -392,7 +395,7 @@ export function ExtraSessionDetailPanel({
     );
 
     if (Object.keys(patchBody).length === 0) {
-      toast("변경된 내용이 없습니다.");
+      toast(t("messages.noChanges"));
       setEditing(false);
       return;
     }
@@ -401,7 +404,7 @@ export function ExtraSessionDetailPanel({
       setSaving(true);
       await updateExtraSession(offeringId, sessionId, patchBody);
 
-      toast.success("회차가 수정되었습니다.");
+      toast.success(t("messages.updateSuccess"));
       setCloseSignal((v) => v + 1);
       setEditing(false);
 
@@ -412,7 +415,7 @@ export function ExtraSessionDetailPanel({
       await onReloadList?.();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.error?.message ?? e?.message ?? "수정 실패");
+      toast.error(e?.error?.message ?? e?.message ?? t("messages.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -434,13 +437,13 @@ export function ExtraSessionDetailPanel({
                   disabled={saving}
                 />
               ) : (
-                data?.sessionName ?? "회차"
+                data?.sessionName ?? t("labels.sessionFallback")
               )}
             </div>
 
             {data && (
               <div className={styles.period}>
-                <span className={styles.periodLabel}>시청기간</span>
+                <span className={styles.periodLabel}>{t("labels.watchPeriod")}</span>
                 <span className={styles.periodValue}>
                   {formatIsoToYmdHm(data.startAt)} ~ {formatIsoToYmdHm(data.endAt)}
                 </span>
@@ -451,12 +454,12 @@ export function ExtraSessionDetailPanel({
           <div className={styles.topRight}>
             <div
               className={styles.statusSelect}
-              title={!canChangeStatus ? statusDisabledReason : "세션 상태 변경"}
+              title={!canChangeStatus ? statusDisabledReason : t("labels.changeSessionStatus")}
             >
               <Dropdown
                 value={sessionStatus}
                 options={statusOptions}
-                placeholder="상태"
+                placeholder={t("labels.status")}
                 disabled={!canChangeStatus}
                 loading={changingStatus}
                 clearable={false}
@@ -471,15 +474,15 @@ export function ExtraSessionDetailPanel({
                 setCloseSignal((v) => v + 1);
                 requestClose();
               }}
-              aria-label="접기"
-              title="접기"
+              aria-label={t("labels.collapse")}
+              title={t("labels.collapse")}
             >
               <span className={styles.arrowUp}>⌃</span>
             </button>
           </div>
         </div>
 
-        {state.loading && <div className={styles.msg}>불러오는 중...</div>}
+        {state.loading && <div className={styles.msg}>{t("messages.loading")}</div>}
         {state.error && <div className={styles.error}>{state.error}</div>}
 
         <div className={styles.playerOuter}>
@@ -491,7 +494,7 @@ export function ExtraSessionDetailPanel({
                   className={styles.playerCover}
                   onClick={() => canPlay && setShowPlayer(true)}
                   disabled={!canPlay}
-                  aria-label="재생"
+                  aria-label={t("labels.play")}
                 >
                   <div className={styles.coverCenter}>
                     <span className={styles.playCircle}>
@@ -499,7 +502,7 @@ export function ExtraSessionDetailPanel({
                     </span>
                   </div>
                   <div className={styles.coverHint}>
-                    {canPlay ? "클릭해서 재생" : "재생할 수 없습니다"}
+                    {canPlay ? t("messages.clickToPlay") : t("messages.cannotPlay")}
                   </div>
                 </button>
               ) : (
@@ -521,10 +524,10 @@ export function ExtraSessionDetailPanel({
         {data && (
           <div className={styles.bottom}>
             <div className={styles.metaTop}>
-              <span className={styles.videoLabel}>영상</span>
+              <span className={styles.videoLabel}>{t("labels.video")}</span>
               <span className={styles.videoTitle}>
                 {pendingVideo ? pendingVideo.title : (data.video?.title ?? "-")}
-                {pendingVideo ? <span className={styles.pendingBadge}>교체 대기</span> : null}
+                {pendingVideo ? <span className={styles.pendingBadge}>{t("labels.pendingReplace")}</span> : null}
               </span>
             </div>
 
@@ -532,24 +535,24 @@ export function ExtraSessionDetailPanel({
               <div className={styles.editGrid}>
                 <div className={styles.editRow2}>
                   <div className={styles.field}>
-                    <div className={styles.label}>시작일</div>
+                    <div className={styles.label}>{t("fields.startDate")}</div>
                     <DatePickerInput
                       value={startDate}
                       onChange={(v) => {
                         setStartDate(v);
                         if (endDate && v > endDate) setEndDate("");
                       }}
-                      placeholder="시작일 선택"
+                      placeholder={t("placeholders.startDate")}
                       closeSignal={closeSignal}
                     />
                   </div>
 
                   <div className={styles.field}>
-                    <div className={styles.label}>종료일</div>
+                    <div className={styles.label}>{t("fields.endDate")}</div>
                     <DatePickerInput
                       value={endDate}
                       onChange={setEndDate}
-                      placeholder="종료일 선택"
+                      placeholder={t("placeholders.endDate")}
                       min={startDate || undefined}
                       closeSignal={closeSignal}
                     />
@@ -558,7 +561,7 @@ export function ExtraSessionDetailPanel({
 
                 <div className={styles.editRow2}>
                   <label className={styles.field}>
-                    <div className={styles.label}>포인트</div>
+                    <div className={styles.label}>{t("fields.rewardPoint")}</div>
                     <input
                       className={styles.control}
                       type="number"
@@ -570,7 +573,7 @@ export function ExtraSessionDetailPanel({
                   </label>
 
                   <label className={styles.field}>
-                    <div className={styles.label}>인정시간</div>
+                    <div className={styles.label}>{t("fields.recognizedHours")}</div>
                     <input
                       className={styles.control}
                       type="number"
@@ -583,7 +586,7 @@ export function ExtraSessionDetailPanel({
                 </div>
 
                 <label className={styles.field}>
-                  <div className={styles.label}>영상 제목</div>
+                  <div className={styles.label}>{t("fields.videoTitle")}</div>
                   <input
                     className={styles.control}
                     value={videoTitle}
@@ -594,9 +597,9 @@ export function ExtraSessionDetailPanel({
 
                 <div className={styles.replaceBlock}>
                   <div className={styles.replaceHead}>
-                    <div className={styles.replaceTitle}>영상 교체</div>
+                    <div className={styles.replaceTitle}>{t("replace.title")}</div>
                     <div className={styles.replaceHint}>
-                      파일 업로드 후 <b>저장</b>을 눌러야 반영됩니다.
+                      {t("replace.hint")}
                     </div>
                   </div>
 
@@ -610,12 +613,12 @@ export function ExtraSessionDetailPanel({
                     <input {...getInputProps()} />
                     <div className={styles.dropzoneInner}>
                       <div className={styles.dropTitle}>
-                        {uploadingVideo ? "업로드 중..." : "새 영상을 드래그&드롭"}
+                        {uploadingVideo ? t("dropzone.uploading") : t("dropzone.dragAndDropNewVideo")}
                       </div>
                       <div className={styles.dropSub}>
                         {pendingVideo
                           ? `${pendingVideo.file.name} · ${pendingVideo.durationSeconds}s`
-                          : "또는 버튼으로 파일을 선택하세요."}
+                          : t("dropzone.selectWithButton")}
                       </div>
 
                       <div className={styles.dropActions}>
@@ -625,7 +628,7 @@ export function ExtraSessionDetailPanel({
                           onClick={openFileDialog}
                           disabled={uploadingVideo || saving}
                         >
-                          파일 선택
+                          {t("buttons.pickFile")}
                         </button>
 
                         {pendingVideo && (
@@ -635,11 +638,11 @@ export function ExtraSessionDetailPanel({
                             onClick={() => {
                               if (pendingVideo.localPreviewUrl) URL.revokeObjectURL(pendingVideo.localPreviewUrl);
                               setPendingVideo(null);
-                              toast("영상 교체 대기를 취소했습니다.");
+                              toast(t("messages.pendingCanceled"));
                             }}
                             disabled={uploadingVideo || saving}
                           >
-                            취소
+                            {t("buttons.cancel")}
                           </button>
                         )}
                       </div>
@@ -649,10 +652,10 @@ export function ExtraSessionDetailPanel({
 
                 <div className={styles.actions}>
                   <button className={styles.btnPrimary} onClick={handleSave} disabled={saving || uploadingVideo}>
-                    {saving ? "저장 중..." : "저장"}
+                    {saving ? t("buttons.saving") : t("buttons.save")}
                   </button>
                   <button className={styles.btnSecondary} onClick={cancelEdit} disabled={saving || uploadingVideo}>
-                    취소
+                    {t("buttons.cancel")}
                   </button>
                 </div>
               </div>
@@ -660,15 +663,15 @@ export function ExtraSessionDetailPanel({
               <>
                 <div className={styles.metaRow}>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaK}>포인트</span>
+                    <span className={styles.metaK}>{t("fields.rewardPoint")}</span>
                     <span className={styles.metaV}>{data.rewardPoint}</span>
                   </div>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaK}>인정시간</span>
+                    <span className={styles.metaK}>{t("fields.recognizedHours")}</span>
                     <span className={styles.metaV}>{data.recognizedHours}</span>
                   </div>
                   <div className={styles.metaItem}>
-                    <span className={styles.metaK}>영상길이</span>
+                    <span className={styles.metaK}>{t("labels.videoDuration")}</span>
                     <span className={styles.metaV}>{data.video?.durationSeconds ?? 0}s</span>
                   </div>
                 </div>
@@ -678,9 +681,9 @@ export function ExtraSessionDetailPanel({
                     className={`${styles.btnSecondary} ${!isEditable ? styles.btnDisabled : ""}`}
                     onClick={openEdit}
                     disabled={!data || !isEditable}
-                    title={!isEditable ? editDisabledReason : "수정"}
+                    title={!isEditable ? editDisabledReason : t("buttons.edit")}
                   >
-                    수정
+                    {t("buttons.edit")}
                   </button>
                 </div>
               </>
@@ -691,16 +694,16 @@ export function ExtraSessionDetailPanel({
         {/* ✅ CANCELED confirm */}
         <ConfirmDialog
           open={cancelConfirmOpen}
-          title="세션 취소"
+          title={t("cancelDialog.title")}
           description={
             <>
-              이 세션을 <b>CANCELED</b>로 변경할까요?
+              {t("cancelDialog.descriptionLine1")}
               <br />
-              취소 처리 시 완료 이력이 정리될 수 있습니다.
+              {t("cancelDialog.descriptionLine2")}
             </>
           }
-          confirmText="취소 처리"
-          cancelText="닫기"
+          confirmText={t("cancelDialog.confirmText")}
+          cancelText={t("cancelDialog.cancelText")}
           danger
           loading={changingStatus}
           onCancel={() => {
