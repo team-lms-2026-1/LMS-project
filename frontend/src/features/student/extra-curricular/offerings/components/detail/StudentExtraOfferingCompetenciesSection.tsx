@@ -7,6 +7,7 @@ import {
   getLocalizedCompetencyDescription,
   getLocalizedCompetencyName,
 } from "@/features/admin/competencies/utils/competencyLocale";
+import { stripSemesterSuffix } from "@/features/admin/extra-curricular/offerings/utils/semesterDisplayName";
 import styles from "./ExtraOfferingCompetenciesSection.module.css";
 import { OfferingCompetencyRadarChart } from "./components/OfferingCompetencyRadarChart";
 
@@ -54,11 +55,12 @@ export function StudentExtraOfferingCompetenciesSection({ offeringId, data }: Pr
 
   const getCompetencyDescription = (code: string, fallback: string) =>
     getLocalizedCompetencyDescription(code, locale, fallback);
+  const semesterDisplayName = stripSemesterSuffix(data.semesterDisplayName);
 
   return (
     <div className={styles.wrap}>
       <div className={styles.section}>
-        <Header title={`${data.extraCurricularName} (${data.extraOfferingCode} / ${data.semesterDisplayName})`} />
+        <Header title={`${data.extraCurricularName} (${data.extraOfferingCode} / ${semesterDisplayName})`} />
         <div className={styles.body}>
           <span>{t("labels.hostOrgName")} : {data.hostContactName}</span>
           <span>

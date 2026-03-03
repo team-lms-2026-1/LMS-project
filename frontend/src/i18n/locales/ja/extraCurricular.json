@@ -413,6 +413,75 @@
         "createSuccess": "回次が作成されました。",
         "createFailed": "回次の作成に失敗しました。"
       }
+    },
+    "sessionDetailPanel": {
+      "labels": {
+        "sessionFallback": "回次",
+        "watchPeriod": "視聴期間",
+        "changeSessionStatus": "セッション状態変更",
+        "status": "状態",
+        "collapse": "折りたたむ",
+        "play": "再生",
+        "video": "動画",
+        "pendingReplace": "差し替え待機",
+        "videoDuration": "動画長さ"
+      },
+      "fields": {
+        "startDate": "開始日",
+        "endDate": "終了日",
+        "rewardPoint": "ポイント",
+        "recognizedHours": "認定時間",
+        "videoTitle": "動画タイトル"
+      },
+      "placeholders": {
+        "startDate": "開始日を選択",
+        "endDate": "終了日を選択"
+      },
+      "replace": {
+        "title": "動画差し替え",
+        "hint": "ファイルアップロード後、保存を押すと反映されます。"
+      },
+      "dropzone": {
+        "uploading": "アップロード中...",
+        "dragAndDropNewVideo": "新しい動画をドラッグ&ドロップ",
+        "selectWithButton": "またはボタンでファイルを選択してください。"
+      },
+      "buttons": {
+        "pickFile": "ファイル選択",
+        "cancel": "取消",
+        "save": "保存",
+        "saving": "保存中...",
+        "edit": "修正"
+      },
+      "messages": {
+        "editDisabledReason": "運営状態がIN_PROGRESSのときのみ修正できます。",
+        "statusChangeDisabledReason": "運営状態がIN_PROGRESSのときのみセッション状態を変更できます。",
+        "statusChanged": "セッション状態が変更されました。",
+        "statusChangeFailed": "状態変更に失敗しました。",
+        "requiredSessionName": "回次名を入力してください。",
+        "requiredStartDate": "開始日を選択してください。",
+        "requiredEndDate": "終了日を選択してください。",
+        "invalidDateRange": "開始日は終了日より後にできません。",
+        "invalidRewardPoint": "ポイントは0以上で入力してください。",
+        "invalidRecognizedHours": "認定時間は0以上で入力してください。",
+        "waitUpload": "動画アップロードが完了するまでお待ちください。",
+        "uploadSuccess": "動画アップロード完了。保存を押すと反映されます。",
+        "uploadFailed": "動画アップロード失敗",
+        "noChanges": "変更内容がありません。",
+        "updateSuccess": "回次が修正されました。",
+        "updateFailed": "修正に失敗しました。",
+        "loading": "読み込み中...",
+        "clickToPlay": "クリックして再生",
+        "cannotPlay": "再生できません",
+        "pendingCanceled": "動画差し替え待機を取消しました。"
+      },
+      "cancelDialog": {
+        "title": "セッション取消",
+        "descriptionLine1": "このセッションをCANCELEDに変更しますか？",
+        "descriptionLine2": "取消処理時に完了履歴が整理される場合があります。",
+        "confirmText": "取消処理",
+        "cancelText": "閉じる"
+      }
     }
   },
   "studentOfferingDetail": {
