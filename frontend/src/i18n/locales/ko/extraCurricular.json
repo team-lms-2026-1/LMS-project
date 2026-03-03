@@ -359,6 +359,60 @@
         "confirmText": "상태를 변경하시겠습니까? (상태는 되돌릴 수 없습니다.)",
         "updateFailed": "상태변경에 실패했습니다."
       }
+    },
+    "sessionCreateModal": {
+      "title": "회차 생성",
+      "buttons": {
+        "create": "생성",
+        "cancel": "취소",
+        "pickFile": "파일 선택",
+        "remove": "제거"
+      },
+      "sections": {
+        "watchPeriod": "시청기간",
+        "video": "동영상"
+      },
+      "fields": {
+        "sessionName": "회차명",
+        "rewardPoint": "포인트",
+        "recognizedHours": "인정시간",
+        "durationSeconds": "재생시간(초)",
+        "startDate": "시작일",
+        "endDate": "종료일",
+        "videoFile": "동영상 파일",
+        "videoTitle": "동영상 제목"
+      },
+      "placeholders": {
+        "sessionName": "예) 1회차",
+        "rewardPoint": "예) 10",
+        "recognizedHours": "예) 2",
+        "durationSeconds": "파일 선택 시 자동 입력",
+        "startDate": "시작일 선택",
+        "endDate": "종료일 선택",
+        "videoTitle": "예) 오리엔테이션 안내"
+      },
+      "dropzone": {
+        "fileSelected": "파일 선택됨",
+        "dragAndDrop": "동영상을 드래그&드롭",
+        "selectWithButton": "또는 아래 버튼으로 파일을 선택하세요."
+      },
+      "hints": {
+        "videoTitle": "기본값은 파일명입니다. 필요하면 수정하세요."
+      },
+      "messages": {
+        "requiredSessionName": "회차명을 입력하세요.",
+        "requiredStartDate": "시작일을 선택하세요.",
+        "requiredEndDate": "종료일을 선택하세요.",
+        "invalidDateRange": "시작일은 종료일보다 늦을 수 없습니다.",
+        "invalidRewardPoint": "포인트는 0 이상이어야 합니다.",
+        "invalidRecognizedHours": "인정시간은 0 이상이어야 합니다.",
+        "requiredVideoFile": "동영상 파일을 업로드하세요.",
+        "requiredVideoTitle": "동영상 제목을 입력하세요.",
+        "invalidVideoDuration": "동영상 길이를 읽지 못했습니다. 파일을 다시 선택해 주세요.",
+        "fileUploadRejected": "파일을 업로드할 수 없습니다.",
+        "createSuccess": "회차가 생성되었습니다.",
+        "createFailed": "회차 생성에 실패했습니다."
+      }
     }
   },
   "studentOfferingDetail": {

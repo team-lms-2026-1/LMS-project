@@ -359,6 +359,60 @@
         "confirmText": "Do you want to change the status? (This action cannot be undone.)",
         "updateFailed": "Failed to change status."
       }
+    },
+    "sessionCreateModal": {
+      "title": "Create Session",
+      "buttons": {
+        "create": "Create",
+        "cancel": "Cancel",
+        "pickFile": "Select File",
+        "remove": "Remove"
+      },
+      "sections": {
+        "watchPeriod": "Viewing Period",
+        "video": "Video"
+      },
+      "fields": {
+        "sessionName": "Session Name",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "durationSeconds": "Playback Duration (sec)",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "videoFile": "Video File",
+        "videoTitle": "Video Title"
+      },
+      "placeholders": {
+        "sessionName": "e.g. Session 1",
+        "rewardPoint": "e.g. 10",
+        "recognizedHours": "e.g. 2",
+        "durationSeconds": "Auto-filled when a file is selected",
+        "startDate": "Select start date",
+        "endDate": "Select end date",
+        "videoTitle": "e.g. Orientation Guide"
+      },
+      "dropzone": {
+        "fileSelected": "File selected",
+        "dragAndDrop": "Drag and drop a video",
+        "selectWithButton": "Or select a file using the button below."
+      },
+      "hints": {
+        "videoTitle": "The default title is the file name. Edit it if needed."
+      },
+      "messages": {
+        "requiredSessionName": "Please enter a session name.",
+        "requiredStartDate": "Please select a start date.",
+        "requiredEndDate": "Please select an end date.",
+        "invalidDateRange": "Start date cannot be later than end date.",
+        "invalidRewardPoint": "Points must be 0 or greater.",
+        "invalidRecognizedHours": "Recognized hours must be 0 or greater.",
+        "requiredVideoFile": "Please upload a video file.",
+        "requiredVideoTitle": "Please enter a video title.",
+        "invalidVideoDuration": "Could not read the video duration. Please reselect the file.",
+        "fileUploadRejected": "Unable to upload file.",
+        "createSuccess": "Session created successfully.",
+        "createFailed": "Failed to create session."
+      }
     }
   },
   "studentOfferingDetail": {

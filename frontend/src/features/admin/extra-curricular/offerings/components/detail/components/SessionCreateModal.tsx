@@ -7,6 +7,7 @@ import { useDropzone } from "react-dropzone";
 import { Modal } from "@/components/modal/Modal";
 import { Button } from "@/components/button";
 import styles from "./SessionCreateModal.module.css";
+import { useI18n } from "@/i18n/useI18n";
 
 import type {
   ExtraCurricularSessionCreateRequest,
@@ -67,6 +68,7 @@ export function SessionCreateModal({
   onClose,
   onCreated,
 }: Props) {
+  const t = useI18n("extraCurricular.adminOfferingDetail.sessionCreateModal");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,18 +111,18 @@ export function SessionCreateModal({
   const endAtIso = useMemo(() => toEndIso(endDate), [endDate]);
 
   const validate = () => {
-    if (!sessionName.trim()) return "회차명을 입력하세요.";
-    if (!startDate) return "시작일을 선택하세요.";
-    if (!endDate) return "종료일을 선택하세요.";
-    if (startDate > endDate) return "시작일은 종료일보다 늦을 수 없습니다.";
+    if (!sessionName.trim()) return t("messages.requiredSessionName");
+    if (!startDate) return t("messages.requiredStartDate");
+    if (!endDate) return t("messages.requiredEndDate");
+    if (startDate > endDate) return t("messages.invalidDateRange");
 
-    if (rewardPoint < 0) return "포인트는 0 이상이어야 합니다.";
-    if (recognizedHours < 0) return "인정시간은 0 이상이어야 합니다.";
+    if (rewardPoint < 0) return t("messages.invalidRewardPoint");
+    if (recognizedHours < 0) return t("messages.invalidRecognizedHours");
 
-    if (!file) return "동영상 파일을 업로드하세요.";
-    if (!videoTitle.trim()) return "동영상 제목을 입력하세요.";
+    if (!file) return t("messages.requiredVideoFile");
+    if (!videoTitle.trim()) return t("messages.requiredVideoTitle");
     if (!durationSeconds || durationSeconds < 1)
-      return "동영상 길이를 읽지 못했습니다. 파일을 다시 선택해 주세요.";
+      return t("messages.invalidVideoDuration");
 
     return null;
   };
@@ -176,8 +178,8 @@ export function SessionCreateModal({
     if (!fileRejections?.length) return null;
     const first = fileRejections[0];
     const reason = first.errors?.[0]?.message;
-    return reason ?? "파일을 업로드할 수 없습니다.";
-  }, [fileRejections]);
+    return reason ?? t("messages.fileUploadRejected");
+  }, [fileRejections, t]);
 
   const canSubmit = useMemo(() => validate() === null && !loading, [
     sessionName,
@@ -239,7 +241,7 @@ export function SessionCreateModal({
 
       await createExtraCurricularSession(extraOfferingId, body);
 
-      toast.success("회차가 생성되었습니다.");
+      toast.success(t("messages.createSuccess"));
       await onCreated?.();
 
       // ✅ 성공 후 popover 닫기
@@ -247,8 +249,9 @@ export function SessionCreateModal({
       onClose();
     } catch (e: any) {
       console.error(e);
-      setError(e?.error?.message ?? e?.message ?? "회차 생성에 실패했습니다.");
-      toast.error("회차 생성에 실패했습니다.");
+      const fallback = t("messages.createFailed");
+      setError(e?.error?.message ?? e?.message ?? fallback);
+      toast.error(fallback);
     } finally {
       setLoading(false);
     }
@@ -257,16 +260,16 @@ export function SessionCreateModal({
   return (
     <Modal
       open={open}
-      title="회차 생성"
+      title={t("title")}
       onClose={handleClose}
       size="lg"
       footer={
         <>
           <Button onClick={handleSubmit} disabled={!canSubmit} loading={loading}>
-            생성
+            {t("buttons.create")}
           </Button>
           <Button variant="secondary" onClick={handleClose} disabled={loading}>
-            취소
+            {t("buttons.cancel")}
           </Button>
         </>
       }
@@ -275,15 +278,14 @@ export function SessionCreateModal({
       {rejectionMsg ? <div className={styles.error}>{rejectionMsg}</div> : null}
 
       <div className={styles.form}>
-        {/* 2열: 회차명 / 포인트 */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>회차명</div>
+            <div className={styles.label}>{t("fields.sessionName")}</div>
             <input
               className={styles.control}
               value={sessionName}
               onChange={(e) => setSessionName(e.target.value)}
-              placeholder="예) 1회차"
+              placeholder={t("placeholders.sessionName")}
               maxLength={100}
               autoComplete="off"
               disabled={loading}
@@ -291,7 +293,7 @@ export function SessionCreateModal({
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>포인트</div>
+            <div className={styles.label}>{t("fields.rewardPoint")}</div>
             <input
               className={styles.control}
               type="number"
@@ -299,17 +301,16 @@ export function SessionCreateModal({
               onChange={(e) =>
                 setRewardPoint(e.target.value === "" ? 0 : Number(e.target.value))
               }
-              placeholder="예) 10"
+              placeholder={t("placeholders.rewardPoint")}
               min={0}
               disabled={loading}
             />
           </label>
         </div>
 
-        {/* 2열: 인정시간 / 재생시간(자동) */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>인정시간</div>
+            <div className={styles.label}>{t("fields.recognizedHours")}</div>
             <input
               className={styles.control}
               type="number"
@@ -319,48 +320,46 @@ export function SessionCreateModal({
                   e.target.value === "" ? 0 : Number(e.target.value)
                 )
               }
-              placeholder="예) 2"
+              placeholder={t("placeholders.recognizedHours")}
               min={0}
               disabled={loading}
             />
           </label>
 
           <div className={styles.field}>
-            <div className={styles.label}>재생시간(초)</div>
+            <div className={styles.label}>{t("fields.durationSeconds")}</div>
             <input
               className={styles.control}
               value={durationSeconds ? String(durationSeconds) : ""}
               readOnly
               disabled
-              placeholder="파일 선택 시 자동 입력"
+              placeholder={t("placeholders.durationSeconds")}
             />
-
           </div>
         </div>
 
-        <div className={styles.sectionTitle}>시청기간</div>
+        <div className={styles.sectionTitle}>{t("sections.watchPeriod")}</div>
 
-        {/* ✅ DatePickerInput (SemesterCreateModal 패턴 적용) */}
         <div className={styles.grid2}>
           <label className={styles.field}>
-            <div className={styles.label}>시작일</div>
+            <div className={styles.label}>{t("fields.startDate")}</div>
             <DatePickerInput
               value={startDate}
               onChange={(v) => {
                 setStartDate(v);
                 if (endDate && v > endDate) setEndDate("");
               }}
-              placeholder="시작일 선택"
+              placeholder={t("placeholders.startDate")}
               closeSignal={closeSignal}
             />
           </label>
 
           <label className={styles.field}>
-            <div className={styles.label}>종료일</div>
+            <div className={styles.label}>{t("fields.endDate")}</div>
             <DatePickerInput
               value={endDate}
               onChange={setEndDate}
-              placeholder="종료일 선택"
+              placeholder={t("placeholders.endDate")}
               min={startDate || undefined}
               closeSignal={closeSignal}
             />
@@ -369,12 +368,11 @@ export function SessionCreateModal({
 
         <div className={styles.divider} />
 
-        <div className={styles.sectionTitle}>동영상</div>
+        <div className={styles.sectionTitle}>{t("sections.video")}</div>
 
         <div className={styles.grid2}>
-          {/* Dropzone */}
           <div className={styles.field}>
-            <div className={styles.label}>동영상 파일</div>
+            <div className={styles.label}>{t("fields.videoFile")}</div>
 
             <div
               {...getRootProps({
@@ -387,12 +385,12 @@ export function SessionCreateModal({
 
               <div className={styles.dropzoneInner}>
                 <div className={styles.dropTitle}>
-                  {file ? "파일 선택됨" : "동영상을 드래그&드롭"}
+                  {file ? t("dropzone.fileSelected") : t("dropzone.dragAndDrop")}
                 </div>
                 <div className={styles.dropSub}>
                   {file
                     ? `${file.name} · ${(file.size / (1024 * 1024)).toFixed(1)}MB`
-                    : "또는 아래 버튼으로 파일을 선택하세요."}
+                    : t("dropzone.selectWithButton")}
                 </div>
 
                 <div className={styles.dropActions}>
@@ -402,7 +400,7 @@ export function SessionCreateModal({
                     onClick={openFileDialog}
                     disabled={loading}
                   >
-                    파일 선택
+                    {t("buttons.pickFile")}
                   </button>
 
                   {file && (
@@ -412,7 +410,7 @@ export function SessionCreateModal({
                       onClick={() => onDrop([])}
                       disabled={loading}
                     >
-                      제거
+                      {t("buttons.remove")}
                     </button>
                   )}
                 </div>
@@ -420,20 +418,17 @@ export function SessionCreateModal({
             </div>
           </div>
 
-          {/* video title */}
           <label className={styles.field}>
-            <div className={styles.label}>동영상 제목</div>
+            <div className={styles.label}>{t("fields.videoTitle")}</div>
             <input
               className={styles.control}
               value={videoTitle}
               onChange={(e) => setVideoTitle(e.target.value)}
               maxLength={200}
-              placeholder="예) 오리엔테이션 안내"
+              placeholder={t("placeholders.videoTitle")}
               disabled={loading}
             />
-            <div className={styles.hint}>
-              기본값은 파일명입니다. 필요하면 수정하세요.
-            </div>
+            <div className={styles.hint}>{t("hints.videoTitle")}</div>
           </label>
         </div>
       </div>
