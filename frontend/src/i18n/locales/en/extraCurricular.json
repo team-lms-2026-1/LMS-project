@@ -360,5 +360,114 @@
         "updateFailed": "Failed to change status."
       }
     }
+  },
+  "studentOfferingDetail": {
+    "page": {
+      "loading": "Loading...",
+      "loadError": "An error occurred.",
+      "empty": "No data available.",
+      "title": "Program",
+      "backButton": "Back to list"
+    },
+    "tabs": {
+      "detail": "Detail",
+      "session": "Sessions",
+      "competencies": "Competencies"
+    },
+    "detail": {
+      "sections": {
+        "program": "Program",
+        "operation": "Operation",
+        "contact": "Contact",
+        "remark": "Remarks"
+      },
+      "fields": {
+        "programCode": "Program Code",
+        "programName": "Program Name",
+        "hostOrgName": "Host Organization",
+        "offeringCode": "Offering Code",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "enrolledCount": "Enrolled",
+        "semester": "Semester",
+        "operationStartDate": "Operation Start Date",
+        "operationEndDate": "Operation End Date",
+        "contactName": "Contact Name",
+        "contactPhone": "Contact Phone",
+        "contactEmail": "Contact Email",
+        "description": "Description"
+      },
+      "buttons": {
+        "apply": "Apply"
+      },
+      "messages": {
+        "missingOfferingId": "Cannot apply because offering ID is missing.",
+        "applySuccess": "Application completed.",
+        "applyFailed": "Failed to apply."
+      }
+    },
+    "sessions": {
+      "headers": {
+        "sessionName": "Session Name",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "startAt": "Start DateTime",
+        "endAt": "End DateTime",
+        "status": "Status",
+        "manage": "Manage"
+      },
+      "buttons": {
+        "detail": "Detail",
+        "close": "Close"
+      },
+      "emptyText": "No sessions."
+    },
+    "competencies": {
+      "labels": {
+        "hostOrgName": "Host Organization",
+        "mainCompetencies": "Primary Competencies"
+      },
+      "titles": {
+        "mapping": "Competency Mapping",
+        "radar": "Competency Mapping Radar Chart"
+      },
+      "messages": {
+        "loading": "Loading...",
+        "loadError": "Failed to load.",
+        "readonly": "This cannot be edited on the student page."
+      }
+    },
+    "radar": {
+      "empty": "Please register competency scores.",
+      "tooltip": "{value} points"
+    },
+    "sessionDetail": {
+      "loading": "Loading...",
+      "loadError": "Failed to load session information.",
+      "labels": {
+        "period": "Period",
+        "play": "Play",
+        "video": "Video",
+        "rewardPoint": "Points",
+        "recognizedHours": "Recognized Hours",
+        "playbackDuration": "Playback Duration",
+        "attendance": "Attendance",
+        "attendanceCompleted": "Completed",
+        "attendanceIncomplete": "Incomplete"
+      },
+      "messages": {
+        "attendanceLoading": "Marking attendance...",
+        "attendanceSuccess": "Attendance marked.",
+        "attendanceFailed": "Failed to mark attendance.",
+        "clickToPlay": "Click to play",
+        "noPlayableVideo": "No playable video available"
+      },
+      "dialog": {
+        "title": "Attendance Check",
+        "description": "Video viewing is complete. Do you want to check attendance?",
+        "confirmText": "Check Attendance",
+        "cancelText": "Cancel"
+      }
+    }
   }
 }

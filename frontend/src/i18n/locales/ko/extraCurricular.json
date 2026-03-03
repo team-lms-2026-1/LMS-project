@@ -360,5 +360,114 @@
         "updateFailed": "상태변경에 실패했습니다."
       }
     }
+  },
+  "studentOfferingDetail": {
+    "page": {
+      "loading": "불러오는 중...",
+      "loadError": "에러가 발생했습니다.",
+      "empty": "데이터가 없습니다.",
+      "title": "비교과",
+      "backButton": "목록"
+    },
+    "tabs": {
+      "detail": "상세",
+      "session": "회차",
+      "competencies": "역량"
+    },
+    "detail": {
+      "sections": {
+        "program": "비교과",
+        "operation": "운영",
+        "contact": "담당자",
+        "remark": "비고"
+      },
+      "fields": {
+        "programCode": "비교과코드",
+        "programName": "비교과명",
+        "hostOrgName": "주관기관",
+        "offeringCode": "운영코드",
+        "rewardPoint": "포인트",
+        "recognizedHours": "인정시간",
+        "enrolledCount": "등록인원",
+        "semester": "학기",
+        "operationStartDate": "운영 시작일",
+        "operationEndDate": "운영 종료일",
+        "contactName": "담당자명",
+        "contactPhone": "담당자 전화",
+        "contactEmail": "담당자 이메일",
+        "description": "설명"
+      },
+      "buttons": {
+        "apply": "신청"
+      },
+      "messages": {
+        "missingOfferingId": "운영 ID가 없어 신청할 수 없습니다.",
+        "applySuccess": "신청이 완료되었습니다.",
+        "applyFailed": "신청에 실패했습니다."
+      }
+    },
+    "sessions": {
+      "headers": {
+        "sessionName": "회차명",
+        "rewardPoint": "포인트",
+        "recognizedHours": "인정시간",
+        "startAt": "시작일시",
+        "endAt": "종료일시",
+        "status": "상태",
+        "manage": "관리"
+      },
+      "buttons": {
+        "detail": "상세",
+        "close": "닫기"
+      },
+      "emptyText": "회차가 없습니다."
+    },
+    "competencies": {
+      "labels": {
+        "hostOrgName": "주관기관",
+        "mainCompetencies": "주역량"
+      },
+      "titles": {
+        "mapping": "역량 매핑",
+        "radar": "역량매핑 레이더차트"
+      },
+      "messages": {
+        "loading": "불러오는 중...",
+        "loadError": "조회 실패",
+        "readonly": "학생 페이지에서는 수정할 수 없습니다."
+      }
+    },
+    "radar": {
+      "empty": "역량 점수를 등록해주세요.",
+      "tooltip": "{value}점"
+    },
+    "sessionDetail": {
+      "loading": "불러오는 중...",
+      "loadError": "회차 정보를 불러오지 못했습니다.",
+      "labels": {
+        "period": "기간",
+        "play": "재생",
+        "video": "영상",
+        "rewardPoint": "포인트",
+        "recognizedHours": "인정시간",
+        "playbackDuration": "재생시간",
+        "attendance": "출석",
+        "attendanceCompleted": "완료",
+        "attendanceIncomplete": "미완료"
+      },
+      "messages": {
+        "attendanceLoading": "출석 처리 중...",
+        "attendanceSuccess": "출석 처리 완료",
+        "attendanceFailed": "출석 처리에 실패했습니다.",
+        "clickToPlay": "클릭해서 재생",
+        "noPlayableVideo": "재생 가능한 영상이 없습니다"
+      },
+      "dialog": {
+        "title": "출석 체크",
+        "description": "영상 시청이 완료되었습니다. 출석체크하시겠습니까?",
+        "confirmText": "출석 체크",
+        "cancelText": "취소"
+      }
+    }
   }
 }

@@ -8,39 +8,34 @@ import { ExtraOfferingDetailTabBar } from "./components/ExtraOfferingDetailTabBa
 import { StudentExtraOfferingDetailSection } from "./StudentExtraOfferingDetailSection";
 import { StudentExtraOfferingCompetenciesSection } from "./StudentExtraOfferingCompetenciesSection";
 import { StudentExtraOfferingSessionSection } from "./StudentExtraOfferingSessionSection";
+import { useI18n } from "@/i18n/useI18n";
 
 export function StudentExtraCurricularOfferingDetailPage() {
   const params = useParams<{ id: string }>();
   const offeringId = Number(params.id);
   const router = useRouter();
   const [tab, setTab] = useState<"detail" | "session" | "competencies">("detail");
+  const t = useI18n("extraCurricular.studentOfferingDetail.page");
 
-  // detail 페이지의 섹션을 여기서 불러와버림
   const { state } = useExtraCurricularDetail(offeringId);
   const { data, loading, error } = state;
-  if (loading) return <div className={styles.page}>불러오는 중...</div>;
-  if (error) return <div className={styles.page}>에러가 발생했습니다.</div>;
-  if (!data) return <div className={styles.page}>데이터가 없습니다.</div>;
+  if (loading) return <div className={styles.page}>{t("loading")}</div>;
+  if (error) return <div className={styles.page}>{t("loadError")}</div>;
+  if (!data) return <div className={styles.page}>{t("empty")}</div>;
 
   return (
     <div className={styles.page}>
-      {/* 상단 바: 왼쪽 제목 / 오른쪽 목록 화살표 */}
       <div className={styles.topBar}>
-        <div className={styles.title}>비교과</div>
+        <div className={styles.title}>{t("title")}</div>
         <button className={styles.backBtn} type="button" onClick={() => router.back()}>
-          목록 →
+          {t("backButton")} →
         </button>
       </div>
 
-      {/* 제목 아래 살짝 띄우고 탭 */}
       <div className={styles.tabRow}>
-        {/* 왼쪽 */}
         <ExtraOfferingDetailTabBar value={tab} onChange={setTab} />
-        {/* 오른쪽 */}
-        {/* <ExtraOfferingStatusDropdown offeringId={offeringId} status={data.status} onChanged = {() => actions.reload?.()} /> */}
       </div>
 
-      {/* 본문 */}
       <div className={styles.body}>
         {tab === "detail" && <StudentExtraOfferingDetailSection offeringId={offeringId} data={data} />}
         {tab === "session" && <StudentExtraOfferingSessionSection offeringId={offeringId} />}
